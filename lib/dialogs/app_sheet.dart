@@ -14,6 +14,7 @@ class AppSheet extends StatefulWidget {
     this.controller,
     this.showLargeTitle = false,
     this.headerExtra,
+    this.pinned,
   });
 
   final Palette p;
@@ -24,6 +25,7 @@ class AppSheet extends StatefulWidget {
   final ScrollController? controller;
   final bool showLargeTitle;
   final Widget? headerExtra;
+  final Widget? pinned;
 
   @override
   State<AppSheet> createState() => _AppSheetState();
@@ -122,6 +124,10 @@ class _AppSheetState extends State<AppSheet> {
                 ],
               ),
               const SizedBox(height: spacing4),
+              if (widget.pinned != null) ...[
+                widget.pinned!,
+                const SizedBox(height: spacing8),
+              ],
               widget.child,
             ],
           ),

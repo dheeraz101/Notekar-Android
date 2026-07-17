@@ -19,6 +19,7 @@ class HistoryDialog extends StatefulWidget {
     required this.entries,
     required this.compactRows,
     required this.largeText,
+    required this.minimalMomentOptions,
     required this.confirmDelete,
     required this.onDelete,
     required this.onRestore,
@@ -31,6 +32,7 @@ class HistoryDialog extends StatefulWidget {
   final List<Moment> entries;
   final bool compactRows;
   final bool largeText;
+  final bool minimalMomentOptions;
   final bool confirmDelete;
   final Future<void> Function(int id) onDelete;
   final Future<void> Function(Moment entry) onRestore;
@@ -182,13 +184,132 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final items = _items;
     final hasOlderRows = _hasOlderRows;
 
-    final sheet = AppSheet(
+    return AppSheet(
       p: widget.p,
       title: 'History',
       docked: true,
       blur: widget.blur,
       controller: _scrollController,
       showLargeTitle: true,
+      pinned: Padding(
+        padding: const EdgeInsets.only(bottom: spacing8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: spacing16),
+                    child: Row(
+                      children: [
+                        for (final f in const [
+                          'all',
+                          'date',
+                          'today',
+                          'week',
+                          'in',
+                          'out',
+                          'single',
+                          'notes',
+                        ])
+                          Padding(
+                            padding: const EdgeInsets.only(right: spacing8),
+                            child: ChipButton(
+                              p: widget.p,
+                              label: f == 'single'
+                                  ? null
+                                  : f == 'date' && _selectedDateKey != null
+                                  ? compactDateLabel(_selectedDateKey!)
+                                  : f == 'date'
+                                  ? 'Select Date'
+                                  : filterLabel(f),
+                              icon: f == 'single'
+                                  ? Icons.arrow_upward_rounded
+                                  : null,
+                              semanticLabel: f == 'single' ? 'Single' : null,
+                              active: _filter == f,
+                              onTap: f == 'date'
+                                  ? (_selectedDateKey == null
+                                      ? _openDateFilter
+                                      : () => setState(() {
+                                            _filter = 'date';
+                                            _visibleCount = _pageSize;
+                                          }))
+                                  : () => setState(() {
+                                        _filter = f;
+                                        _visibleCount = _pageSize;
+                                      }),
+                              onLongPress: f == 'date' ? _openDateFilter : null,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: spacing8),
+                PressableScale(
+                  onTap: () {
+                    if (!_scrollController.hasClients) return;
+                    _scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.fastEaseInToSlowEaseOut,
+                    );
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.surface2,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: widget.p.border),
+                    ),
+                    child: Icon(
+                      Icons.keyboard_double_arrow_up_rounded,
+                      color: widget.p.text2,
+                      size: 19,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: spacing16),
+              ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOutCubic,
+              child: _selected.isEmpty
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(top: spacing8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: widget.p.accent.withValues(alpha: 0.20),
+                          ),
+                        ),
+                        child: Text(
+                          'Selected ${_selected.length} of 2 for duration',
+                          style: TextStyle(
+                            color: widget.p.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
       child: SizedBox(
         width: 430,
         height: math.min(MediaQuery.sizeOf(context).height * 0.64, 560),
@@ -199,10 +320,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing48),
                 itemCount: items.isEmpty
-                    ? 3
-                    : items.length + (hasOlderRows ? 1 : 0) + 2,
+                    ? 2
+                    : items.length + (hasOlderRows ? 1 : 0) + 1,
                 itemBuilder: (_, index) {
-                  // Index 0: Large Title
                   if (index == 0) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: spacing16),
@@ -213,96 +333,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       ),
                     );
                   }
-                  // Index 1: Filter Row
-                  if (index == 1) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: spacing16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                              child: Row(
-                                children: [
-                                  for (final f in const [
-                                    'all',
-                                    'date',
-                                    'today',
-                                    'week',
-                                    'in',
-                                    'out',
-                                    'single',
-                                    'notes',
-                                  ])
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: spacing8),
-                                      child: ChipButton(
-                                        p: widget.p,
-                                        label: f == 'single'
-                                            ? null
-                                            : f == 'date' && _selectedDateKey != null
-                                            ? compactDateLabel(_selectedDateKey!)
-                                            : f == 'date'
-                                            ? 'Select Date'
-                                            : filterLabel(f),
-                                        icon: f == 'single'
-                                            ? Icons.arrow_upward_rounded
-                                            : null,
-                                        semanticLabel: f == 'single' ? 'Single' : null,
-                                        active: _filter == f,
-                                        onTap: f == 'date'
-                                            ? (_selectedDateKey == null
-                                                ? _openDateFilter
-                                                : () => setState(() {
-                                                      _filter = 'date';
-                                                      _visibleCount = _pageSize;
-                                                    }))
-                                            : () => setState(() {
-                                                  _filter = f;
-                                                  _visibleCount = _pageSize;
-                                                }),
-                                        onLongPress: f == 'date' ? _openDateFilter : null,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: spacing8),
-                          PressableScale(
-                            onTap: () {
-                              if (!_scrollController.hasClients) return;
-                              _scrollController.animateTo(
-                                0,
-                                duration: const Duration(milliseconds: 280),
-                                curve: Curves.fastEaseInToSlowEaseOut,
-                              );
-                            },
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: widget.p.surface2,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: widget.p.border),
-                              ),
-                              child: Icon(
-                                Icons.keyboard_double_arrow_up_rounded,
-                                color: widget.p.text2,
-                                size: 19,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: spacing16),
-                        ],
-                      ),
-                    );
-                  }
 
-                  // Empty State
-                  if (items.isEmpty) {
+                  if (items.isEmpty && index == 1) {
                     return Padding(
                       padding: const EdgeInsets.only(top: spacing48),
                       child: Column(
@@ -330,39 +362,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     );
                   }
 
-                  final itemIndex = index - 2;
+                  final itemIndex = index - 1;
+                  if (itemIndex < 0 || itemIndex >= items.length) return const SizedBox.shrink();
 
-                  if (itemIndex >= items.length) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(spacing16, 4, spacing16, 8),
-                      child: PressableScale(
-                        onTap: () => setState(() {
-                          _visibleCount += _pageSize;
-                        }),
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.p.surface2,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: widget.p.border,
-                            ),
-                          ),
-                          child: Text(
-                            'Load older moments',
-                            style: TextStyle(
-                              color: widget.p.accent,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
                   final item = items[itemIndex];
                   if (item.label != null) {
                     return Padding(
@@ -496,8 +498,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
         ),
       ),
     );
-    if (!widget.largeText) return sheet;
-    return MediaQuery(data: largerTextQuery(context), child: sheet);
   }
 
   void _removeEntry(Moment entry) {
@@ -610,6 +610,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         p: widget.p,
         entry: entry,
         confirmDelete: widget.confirmDelete,
+        minimal: widget.minimalMomentOptions,
         onAddOrEditNote: () async {
           Navigator.pop(context);
 
@@ -667,6 +668,7 @@ class MomentActionsDialog extends StatefulWidget {
     required this.onAddOrEditNote,
     required this.onDeleteMoment,
     this.onDeleteNote,
+    this.minimal = false,
   });
 
   final Palette p;
@@ -675,6 +677,7 @@ class MomentActionsDialog extends StatefulWidget {
   final VoidCallback onAddOrEditNote;
   final VoidCallback? onDeleteNote;
   final VoidCallback onDeleteMoment;
+  final bool minimal;
 
   @override
   State<MomentActionsDialog> createState() => _MomentActionsDialogState();
@@ -697,6 +700,90 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
     final p = widget.p;
     final entry = widget.entry;
     final hasNote = entry.note.trim().isNotEmpty;
+
+    if (widget.minimal) {
+      return AppSheet(
+        p: p,
+        title: 'Moment Options',
+        child: SizedBox(
+          width: 430,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  SettingsStatusPill(
+                    p: p,
+                    label: entry.type.toUpperCase(),
+                    color: momentColor(p, entry.type),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '${datePretty(entry.timestamp)} at '
+                      '${timeOnly(entry.timestamp)}',
+                      style: TextStyle(color: p.text2, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+              if (hasNote) ...[
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  constraints: const BoxConstraints(maxHeight: 120),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: p.surface2,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.border),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      entry.note,
+                      style: TextStyle(color: p.text, height: 1.45),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _MinimalActionButton(
+                    p: p,
+                    icon: hasNote
+                        ? Icons.edit_note_rounded
+                        : Icons.note_add_rounded,
+                    color: p.accent,
+                    onTap: widget.onAddOrEditNote,
+                  ),
+                  if (widget.onDeleteNote != null) ...[
+                    const SizedBox(width: 20),
+                    _MinimalActionButton(
+                      p: p,
+                      icon: Icons.comments_disabled_rounded,
+                      color: p.orange,
+                      pending: _pendingAction == 'note',
+                      onTap: () => _confirmOrRun('note', widget.onDeleteNote!),
+                    ),
+                  ],
+                  const SizedBox(width: 20),
+                  _MinimalActionButton(
+                    p: p,
+                    icon: Icons.delete_outline_rounded,
+                    color: p.red,
+                    pending: _pendingAction == 'moment',
+                    onTap: () => _confirmOrRun('moment', widget.onDeleteMoment),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+    }
 
     return AppSheet(
       p: p,
@@ -782,6 +869,47 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
               onTap: () => _confirmOrRun('moment', widget.onDeleteMoment),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MinimalActionButton extends StatelessWidget {
+  const _MinimalActionButton({
+    required this.p,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+    this.pending = false,
+  });
+
+  final Palette p;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  final bool pending;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: pending ? color : color.withValues(alpha: 0.12),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: pending ? color : color.withValues(alpha: 0.28),
+            width: 2,
+          ),
+        ),
+        child: Icon(
+          pending ? Icons.check_rounded : icon,
+          color: pending ? Colors.white : color,
+          size: 26,
         ),
       ),
     );

@@ -554,7 +554,7 @@ class SettingsRow extends StatelessWidget {
   }
 }
 
-class SettingsSwitchRow extends StatelessWidget {
+class SettingsSwitchRow extends StatefulWidget {
   const SettingsSwitchRow({
     super.key,
     required this.p,
@@ -581,16 +581,30 @@ class SettingsSwitchRow extends StatelessWidget {
   final ValueChanged<String>? onDisabledTap;
 
   @override
+  State<SettingsSwitchRow> createState() => _SettingsSwitchRowState();
+}
+
+class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
+  bool _pressing = false;
+
+  @override
   Widget build(BuildContext context) {
+    final p = widget.p;
     final switchColor = p.accent;
-    return PressableScale(
+    final enabled = widget.enabled;
+    final value = widget.value;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressing = true),
+      onTapUp: (_) => setState(() => _pressing = false),
+      onTapCancel: () => setState(() => _pressing = false),
       onTap: () {
         if (!enabled) {
-          final message = disabledMessage;
-          if (message != null) onDisabledTap?.call(message);
+          final message = widget.disabledMessage;
+          if (message != null) widget.onDisabledTap?.call(message);
           return;
         }
-        onChanged(!value);
+        widget.onChanged(!value);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -608,7 +622,7 @@ class SettingsSwitchRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(9),
               ),
               child: Icon(
-                icon,
+                widget.icon,
                 color: enabled && value ? switchColor : p.text2,
                 size: 18,
               ),
@@ -619,7 +633,7 @@ class SettingsSwitchRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    widget.title,
                     style: TextStyle(
                       color: enabled ? p.text : p.text2,
                       fontWeight: FontWeight.w800,
@@ -627,7 +641,7 @@ class SettingsSwitchRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    subtitle,
+                    widget.subtitle,
                     style: TextStyle(
                       color: enabled ? p.text2 : p.text3,
                       fontSize: 12,
@@ -639,10 +653,11 @@ class SettingsSwitchRow extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             AnimatedContainer(
-              duration: const Duration(milliseconds: 140),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
               margin: const EdgeInsets.only(top: 3),
-              width: 51,
-              height: 31,
+              width: 52,
+              height: 32,
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: enabled && value ? switchColor : p.surface3,
@@ -651,25 +666,32 @@ class SettingsSwitchRow extends StatelessWidget {
                   color: enabled && value ? switchColor : p.border,
                 ),
               ),
-              child: Align(
-                alignment: enabled && value
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                child: Container(
-                  width: 27,
-                  height: 27,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
+              child: Stack(
+                children: [
+                  AnimatedAlign(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    alignment:
+                        value ? Alignment.centerRight : Alignment.centerLeft,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      width: _pressing ? 34 : 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ],

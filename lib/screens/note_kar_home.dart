@@ -77,8 +77,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _largeControls = false;
   bool _homeMenuPill = true;
   bool _homeMenuAnimations = false;
-  bool _enableTranslucency = AdaptiveEngine().supportsBlur;
+  bool _enableTranslucency = false;
   bool _extendedDuration = false;
+  bool _minimalMomentOptions = false;
   bool _startupComplete = false;
   bool _showHistoryText = true;
   bool _showLastSavedHint = true;
@@ -446,8 +447,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _largeControls = prefs.getBool('m-large-controls') ?? false;
       _homeMenuPill = prefs.getBool('m-home-menu-pill') ?? true;
       _homeMenuAnimations = prefs.getBool('m-home-menu-animations') ?? false;
-      _enableTranslucency = prefs.getBool('m-translucency') ?? true;
+      _enableTranslucency = prefs.getBool('m-translucency') ?? false;
       _extendedDuration = prefs.getBool('m-extended-duration') ?? false;
+      _minimalMomentOptions = prefs.getBool('m-minimal-moment-options') ?? false;
       _showHistoryText = prefs.getBool('m-show-history-text') ?? true;
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
       _requireLongPressNote =
@@ -477,9 +479,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         unawaited(_unlockAfterFirstPaint(prefs));
         return;
       }
-      if (prefs.getBool(_welcomeSeenKey) ?? false) {
-        unawaited(_runStartupChecks(prefs));
-      }
+      unawaited(_runStartupChecks(prefs));
     });
     startupTask.finish();
   }
@@ -904,6 +904,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _requireLongPressNote = false;
       _extendedDuration = false;
       _enableTranslucency = true;
+      _minimalMomentOptions = false;
       _privacyLockDelayMinutes = 0;
       _updateStatus = 'v$appVersion - Check for available updates';
       _lastUpdateCheckedAt = null;
@@ -957,6 +958,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-require-long-press-note',
         'm-extended-duration',
         'm-translucency',
+        'm-minimal-moment-options',
         'm-privacy-lock-delay',
         'm-update-status',
         'm-last-update-check',
@@ -1039,6 +1041,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _requireLongPressNote = false;
       _extendedDuration = false;
       _enableTranslucency = true;
+      _minimalMomentOptions = false;
       _privacyLockDelayMinutes = 0;
     });
     await _prefs?.setString('m-theme', _theme);
@@ -1068,6 +1071,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-show-last-saved-hint', _showLastSavedHint);
     await _prefs?.setBool('m-require-long-press-note', _requireLongPressNote);
     await _prefs?.setBool('m-extended-duration', _extendedDuration);
+    await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
     await _prefs?.setBool('m-translucency', _enableTranslucency);
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
     try {
@@ -1108,6 +1112,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _requireLongPressNote = snapshot['requireLongPressNote'] as bool;
       _extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
       _enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
+      _minimalMomentOptions = snapshot['minimalMomentOptions'] as bool? ?? false;
       _privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
     });
     await _prefs?.setString('m-theme', _theme);
@@ -1137,6 +1142,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-show-last-saved-hint', _showLastSavedHint);
     await _prefs?.setBool('m-require-long-press-note', _requireLongPressNote);
     await _prefs?.setBool('m-extended-duration', _extendedDuration);
+    await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
     await _prefs?.setBool('m-translucency', _enableTranslucency);
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
     _applySystemUiStyle();
@@ -1204,6 +1210,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         entries: _entries,
         compactRows: _compactHistory,
         largeText: _largeText,
+        minimalMomentOptions: _minimalMomentOptions,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
         onDelete: _deleteEntry,
         onRestore: _restoreEntry,
@@ -1256,6 +1263,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         requireLongPressNote: _requireLongPressNote,
         extendedDuration: _extendedDuration,
         enableTranslucency: _enableTranslucency,
+        minimalMomentOptions: _minimalMomentOptions,
         privacyLockDelayMinutes: _privacyLockDelayMinutes,
         updateStatus: _updateStatus,
         checkingUpdates: _checkingUpdates,
@@ -1376,6 +1384,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onRequireLongPressNote: (value) {
           setState(() => _requireLongPressNote = value);
           _prefs?.setBool('m-require-long-press-note', value);
+        },
+        onMinimalMomentOptions: (value) {
+          setState(() => _minimalMomentOptions = value);
+          _prefs?.setBool('m-minimal-moment-options', value);
         },
         onExtendedDuration: (value) {
           setState(() => _extendedDuration = value);

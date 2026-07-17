@@ -46,6 +46,7 @@ class SettingsDialog extends StatefulWidget {
     required this.showLastSavedHint,
     required this.requireLongPressNote,
     required this.extendedDuration,
+    required this.minimalMomentOptions,
     required this.enableTranslucency,
     required this.privacyLockDelayMinutes,
     required this.updateStatus,
@@ -78,6 +79,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onShowHistoryText,
     required this.onShowLastSavedHint,
     required this.onRequireLongPressNote,
+    required this.onMinimalMomentOptions,
     required this.onExtendedDuration,
     required this.onTranslucency,
     required this.onPrivacyLockDelay,
@@ -123,6 +125,7 @@ class SettingsDialog extends StatefulWidget {
   final bool showLastSavedHint;
   final bool requireLongPressNote;
   final bool extendedDuration;
+  final bool minimalMomentOptions;
   final bool enableTranslucency;
   final int privacyLockDelayMinutes;
   final String updateStatus;
@@ -156,6 +159,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<bool> onShowLastSavedHint;
   final ValueChanged<bool> onRequireLongPressNote;
   final ValueChanged<bool> onExtendedDuration;
+  final ValueChanged<bool> onMinimalMomentOptions;
   final ValueChanged<bool> onTranslucency;
   final ValueChanged<int> onPrivacyLockDelay;
   final Future<void> Function() onExportCsv;
@@ -202,6 +206,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool showLastSavedHint;
   late bool requireLongPressNote;
   late bool extendedDuration;
+  late bool minimalMomentOptions;
   late bool enableTranslucency;
   late int privacyLockDelayMinutes;
   late String updateStatus;
@@ -211,6 +216,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Timer? _exportStateTimer;
   final _settingsSearchController = TextEditingController();
   final _settingsScrollController = ScrollController();
+  final Map<String, double> _scrollOffsets = {};
   String _settingsQuery = '';
   List<
     ({
@@ -251,6 +257,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     showLastSavedHint = widget.showLastSavedHint;
     requireLongPressNote = widget.requireLongPressNote;
     extendedDuration = widget.extendedDuration;
+    minimalMomentOptions = widget.minimalMomentOptions;
     enableTranslucency = widget.enableTranslucency;
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
     updateStatus = widget.updateStatus;
@@ -291,6 +298,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     'showLastSavedHint': showLastSavedHint,
     'requireLongPressNote': requireLongPressNote,
     'extendedDuration': extendedDuration,
+    'minimalMomentOptions': minimalMomentOptions,
     'enableTranslucency': enableTranslucency,
     'privacyLockDelayMinutes': privacyLockDelayMinutes,
   };
@@ -304,14 +312,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return 'Settings';
   }
 
-  void _jumpSettingsTop() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_settingsScrollController.hasClients) return;
-      _settingsScrollController.jumpTo(0);
-    });
-  }
-
   void _openCategory(String next, {String? parent}) {
+    if (_categoryStack.isEmpty) {
+      _scrollOffsets['root'] = _settingsScrollController.offset;
+    } else {
+      _scrollOffsets[_categoryStack.last] = _settingsScrollController.offset;
+    }
+
     setState(() {
       if (parent != null && _categoryStack.lastOrNull != parent) {
         _categoryStack
@@ -322,13 +329,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _settingsQuery = '';
       _settingsSearchController.clear();
     });
-    _jumpSettingsTop();
+
+    final targetOffset = _scrollOffsets[next] ?? 0.0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_settingsScrollController.hasClients) {
+        _settingsScrollController.jumpTo(targetOffset);
+      }
+    });
   }
 
   bool _popCategory() {
     if (_categoryStack.isEmpty) return false;
-    setState(() => _categoryStack.removeLast());
-    _jumpSettingsTop();
+    final current = _categoryStack.removeLast();
+    _scrollOffsets[current] = 0; // Reset sub-page scroll on exit
+
+    setState(() {});
+
+    final targetKey = _categoryStack.isEmpty ? 'root' : _categoryStack.last;
+    final targetOffset = _scrollOffsets[targetKey] ?? 0.0;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_settingsScrollController.hasClients) {
+        _settingsScrollController.jumpTo(targetOffset);
+      }
+    });
     return true;
   }
 
@@ -442,6 +466,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         showLastSavedHint = true;
         requireLongPressNote = false;
         extendedDuration = false;
+        minimalMomentOptions = false;
         enableTranslucency = true;
         privacyLockDelayMinutes = 0;
       });
@@ -523,6 +548,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         showLastSavedHint = snapshot['showLastSavedHint'] as bool;
         requireLongPressNote = snapshot['requireLongPressNote'] as bool;
         extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
+        minimalMomentOptions = snapshot['minimalMomentOptions'] as bool? ?? false;
         enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
         privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
       });
@@ -707,7 +733,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           (
             title: 'Moments',
-            subtitle: 'History density, confirm delete, moments',
+            subtitle: 'History density, confirm delete, moments, minimal options',
             category: 'Moments',
             icon: Icons.history_rounded,
             keywords: [
@@ -717,6 +743,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'delete',
               'compact',
               'density',
+              'minimal',
+              'icons',
+              'actions',
             ],
           ),
           (
@@ -1239,9 +1268,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
         p: p,
         title: category ?? 'Settings',
         docked: true,
-        blur: widget.blur,
+        blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
         controller: _settingsScrollController,
         showLargeTitle: category == null,
+        pinned: category == null
+            ? AppSheetLargeTitle(
+                p: p,
+                title: 'Settings',
+                scrollController: _settingsScrollController,
+                extra: SettingsSearchBox(
+                  p: p,
+                  controller: _settingsSearchController,
+                  onChanged: (value) => setState(() => _settingsQuery = value),
+                  onClear: () => setState(() {
+                    _settingsQuery = '';
+                    _settingsSearchController.clear();
+                  }),
+                ),
+              )
+            : null,
         child: SizedBox(
           width: 430,
           height: math.min(MediaQuery.sizeOf(context).height * 0.68, 620),
@@ -1284,21 +1329,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                 ),
               if (category == null) ...[
-                AppSheetLargeTitle(
-                  p: p,
-                  title: 'Settings',
-                  scrollController: _settingsScrollController,
-                  extra: SettingsSearchBox(
-                    p: p,
-                    controller: _settingsSearchController,
-                    onChanged: (value) =>
-                        setState(() => _settingsQuery = value),
-                    onClear: () => setState(() {
-                      _settingsQuery = '';
-                      _settingsSearchController.clear();
-                    }),
-                  ),
-                ),
                 if (_settingsQuery.trim().isNotEmpty) ...[
                   const SizedBox(height: spacing8),
                   SettingsGroup(
@@ -1905,6 +1935,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         widget.onExtendedDuration(value);
                       },
                     ),
+                    SettingsSwitchRow(
+                      p: p,
+                      icon: Icons.auto_awesome_motion_rounded,
+                      title: 'Minimal Moment Options',
+                      subtitle:
+                          'Use a compact horizontal row of icons for actions',
+                      color: p.accent,
+                      value: minimalMomentOptions,
+                      onChanged: (value) {
+                        setState(() => minimalMomentOptions = value);
+                        widget.onMinimalMomentOptions(value);
+                      },
+                    ),
                     SettingsRow(
                       p: p,
                       icon: Icons.insights_rounded,
@@ -2009,6 +2052,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       title: 'App Lock Timing',
                       text:
                           'Immediate App Lock covers NoteKar in Recents and when the notification shade sends the app inactive.',
+                    ),
+                    GuideRow(
+                      p: p,
+                      icon: Icons.auto_awesome_motion_rounded,
+                      title: 'Minimal Moment Options',
+                      text:
+                          'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.',
                     ),
                     GuideRow(
                       p: p,

@@ -13,7 +13,7 @@ class AdaptiveEngine {
   AdaptiveEngine._internal();
 
   PerformanceTier _tier = PerformanceTier.balanced;
-  int _ramGb = 0;
+  final int _ramGb = 0;
   int _processors = 0;
   String _model = 'Unknown';
   String _osVersion = 'Unknown';

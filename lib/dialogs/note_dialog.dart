@@ -45,112 +45,130 @@ class _NoteDialogState extends State<NoteDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AppSheet(
-      p: widget.p,
-      title: widget.title,
-      blur: widget.blur,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.initialNote.isEmpty
-                ? 'Add a short detail to this moment.'
-                : 'Update the note attached to this moment.',
-            style: TextStyle(color: widget.p.text2, fontSize: 12, height: 1.35),
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return Material(
+      color: Colors.transparent,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
           ),
-          const SizedBox(height: spacing8),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            maxLength: _maxChars,
-            maxLines: 4,
-            minLines: 2,
-            style: TextStyle(color: widget.p.text),
-            decoration: InputDecoration(
-              counterText: '',
-              hintText: 'What should this moment remember?',
-              hintStyle: TextStyle(color: widget.p.text3),
-              filled: true,
-              fillColor: widget.p.surface3,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: _showWarning ? widget.p.red : widget.p.border,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: _showWarning ? widget.p.red : widget.p.border,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: _showWarning ? widget.p.red : widget.p.accent,
-                ),
-              ),
-            ),
-            onChanged: (_) => setState(() => _showWarning = false),
-            onSubmitted: (_) => _saveNote(),
-          ),
-          const SizedBox(height: spacing8),
-          Row(
-            children: [
-              Expanded(
-                child: AnimatedOpacity(
-                  opacity: _showWarning ? 1 : 0,
-                  duration: const Duration(milliseconds: 120),
-                  child: Text(
-                    'Write something to save.',
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: AppSheet(
+              p: widget.p,
+              title: widget.title,
+              blur: widget.blur,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.initialNote.isEmpty
+                        ? 'Add a short detail to this moment.'
+                        : 'Update the note attached to this moment.',
                     style: TextStyle(
-                      color: widget.p.red,
+                      color: widget.p.text2,
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      height: 1.35,
                     ),
                   ),
-                ),
-              ),
-              _CharacterCounter(
-                p: widget.p,
-                count: _controller.text.length,
-                max: _maxChars,
-              ),
-            ],
-          ),
-          const SizedBox(height: spacing12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: widget.p.accent,
+                  const SizedBox(height: spacing8),
+                  TextField(
+                    controller: _controller,
+                    autofocus: true,
+                    maxLength: _maxChars,
+                    maxLines: 4,
+                    minLines: 2,
+                    style: TextStyle(color: widget.p.text),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      hintText: 'What should this moment remember?',
+                      hintStyle: TextStyle(color: widget.p.text3),
+                      filled: true,
+                      fillColor: widget.p.surface3,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: _showWarning ? widget.p.red : widget.p.border,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: _showWarning ? widget.p.red : widget.p.border,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: _showWarning ? widget.p.red : widget.p.accent,
+                        ),
+                      ),
+                    ),
+                    onChanged: (text) {
+                      setState(() {
+                        _showWarning = false;
+                      });
+                    },
+                    onSubmitted: (_) => _saveNote(),
                   ),
-                  onPressed: () {
-                    if (widget.allowEmpty) {
-                      Navigator.pop(context, '');
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Text(widget.allowEmpty ? 'Skip' : 'Cancel'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: widget.p.accent,
-                    foregroundColor: Colors.white,
+                  const SizedBox(height: spacing4),
+                  _LinearCharacterIndicator(
+                    p: widget.p,
+                    count: _controller.text.length,
+                    max: _maxChars,
                   ),
-                  onPressed: _saveNote,
-                  child: Text(widget.saveLabel),
-                ),
+                  if (_showWarning)
+                    Padding(
+                      padding: const EdgeInsets.only(top: spacing8),
+                      child: Text(
+                        'Write something to save.',
+                        style: TextStyle(
+                          color: widget.p.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: spacing8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: widget.p.accent,
+                          ),
+                          onPressed: () {
+                            if (widget.allowEmpty) {
+                              Navigator.pop(context, '');
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Text(widget.allowEmpty ? 'Skip' : 'Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: widget.p.accent,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: _saveNote,
+                          child: Text(widget.saveLabel),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -168,8 +186,8 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 }
 
-class _CharacterCounter extends StatelessWidget {
-  const _CharacterCounter({
+class _LinearCharacterIndicator extends StatelessWidget {
+  const _LinearCharacterIndicator({
     required this.p,
     required this.count,
     required this.max,
@@ -184,27 +202,49 @@ class _CharacterCounter extends StatelessWidget {
     final remaining = max - count;
     final progress = (count / max).clamp(0.0, 1.0);
     final alert = remaining <= 20;
-    final color = alert ? p.orange : p.accent;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    final danger = remaining <= 0;
+
+    final color =
+        danger
+            ? p.red
+            : alert
+            ? p.orange
+            : p.accent.withValues(alpha: 0.8);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            value: progress,
-            strokeWidth: 2.4,
-            backgroundColor: p.surface3,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
+        Container(
+          height: 3,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: p.surface3,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progress,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: [
+                  BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 4),
+                ],
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(height: 6),
         Text(
-          alert ? '$remaining' : '$count/$max',
+          '$count / $max',
           style: TextStyle(
             color: alert ? color : p.text3,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.2,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],
