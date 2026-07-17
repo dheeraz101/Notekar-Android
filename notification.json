@@ -1,0 +1,18 @@
+﻿{
+    "enabled":  true,
+    "id":  "apk-release-1-1-0",
+    "title":  "NoteKar APK Update",
+    "body":  "NoteKar 1.1.0 is ready with remote notices, update checks, and accessibility controls.",
+    "url":  "https://github.com/dheeraz101/Notekar/releases",
+    "action":  "releases",
+    "channels":  [
+                     "stable",
+                     "beta"
+                 ],
+    "platforms":  [
+                      "pwa",
+                      "android"
+                  ],
+    "maxShows":  1,
+    "cooldownHours":  24
+}

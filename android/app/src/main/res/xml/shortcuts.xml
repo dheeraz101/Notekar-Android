@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="single_moment"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_single_short"
+        android:shortcutLongLabel="@string/shortcut_single_long">
+        <intent
+            android:action="app.notekar.notekar.ACTION_SINGLE"
+            android:targetPackage="app.notekar.notekar"
+            android:targetClass="app.notekar.notekar.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="in_moment"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_in_short"
+        android:shortcutLongLabel="@string/shortcut_in_long">
+        <intent
+            android:action="app.notekar.notekar.ACTION_IN"
+            android:targetPackage="app.notekar.notekar"
+            android:targetClass="app.notekar.notekar.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="out_moment"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_out_short"
+        android:shortcutLongLabel="@string/shortcut_out_long">
+        <intent
+            android:action="app.notekar.notekar.ACTION_OUT"
+            android:targetPackage="app.notekar.notekar"
+            android:targetClass="app.notekar.notekar.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="new_note"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_note_short"
+        android:shortcutLongLabel="@string/shortcut_note_long">
+        <intent
+            android:action="app.notekar.notekar.ACTION_NOTE"
+            android:targetPackage="app.notekar.notekar"
+            android:targetClass="app.notekar.notekar.MainActivity" />
+    </shortcut>
+</shortcuts>
