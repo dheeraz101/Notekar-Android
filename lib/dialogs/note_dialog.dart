@@ -10,7 +10,7 @@ class NoteDialog extends StatefulWidget {
     required this.p,
     this.initialNote = '',
     this.title = 'Add Note',
-    this.saveLabel = 'Save Moment',
+    this.saveLabel = 'Save',
     this.allowEmpty = true,
     this.blur = false,
   });

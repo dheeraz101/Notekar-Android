@@ -3,7 +3,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/glass.dart';
 
-class AppSheet extends StatelessWidget {
+class AppSheet extends StatefulWidget {
   const AppSheet({
     super.key,
     required this.p,
@@ -24,7 +24,56 @@ class AppSheet extends StatelessWidget {
   final bool showLargeTitle;
 
   @override
+  State<AppSheet> createState() => _AppSheetState();
+}
+
+class _AppSheetState extends State<AppSheet> {
+  double _titleOpacity = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller != null && widget.showLargeTitle) {
+      widget.controller!.addListener(_onScroll);
+    }
+  }
+
+  @override
+  void didUpdateWidget(AppSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the controller changes (e.g. returning to root settings), 
+    // swap listeners and sync opacity immediately.
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.removeListener(_onScroll);
+      if (widget.controller != null && widget.showLargeTitle) {
+        widget.controller!.addListener(_onScroll);
+        // Instant sync prevents the "ghost/flicker" effect
+        _onScroll();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    final offset = widget.controller?.hasClients == true ? widget.controller!.offset : 0.0;
+    // Small title is invisible until we scroll past the large title area (~45px)
+    // Then fades in rapidly over the next 20px.
+    final newOpacity = ((offset - 45) / 20).clamp(0.0, 1.0);
+    if (newOpacity != _titleOpacity) {
+      setState(() => _titleOpacity = newOpacity);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final p = widget.p;
+
     final content = GestureDetector(
       onVerticalDragEnd: (details) {
         if ((details.primaryVelocity ?? 0) > 650) {
@@ -33,17 +82,18 @@ class AppSheet extends StatelessWidget {
       },
       child: Glass(
         p: p,
-        blur: blur,
-        radius: docked ? 24 : 24,
-        borderRadius: docked
+        blur: widget.blur,
+        radius: widget.docked ? 24 : 24,
+        borderRadius: widget.docked
             ? const BorderRadius.vertical(top: Radius.circular(24))
             : null,
         padding: const EdgeInsets.fromLTRB(spacing16, spacing8, spacing16, spacing16),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: docked ? 720 : 460),
+          constraints: BoxConstraints(maxWidth: widget.docked ? 720 : 460),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // The Drag Handle
               Container(
                 width: 36,
                 height: 5,
@@ -53,35 +103,58 @@ class AppSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'Inter',
+
+              // Header Area (Stack for absolute horizontal centering)
+              SizedBox(
+                height: 44,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned.fill(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 50),
+                          child: Opacity(
+                            opacity: widget.showLargeTitle ? _titleOpacity : 1.0,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                widget.title,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.4,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded, size: 22),
-                    color: p.text2,
-                  ),
-                ],
+                    Positioned(
+                      right: -8, // Account for IconButton padding
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close_rounded, size: 22),
+                        color: p.text2,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: spacing8),
-              child,
+              const SizedBox(height: spacing4),
+              widget.child,
             ],
           ),
         ),
       ),
     );
 
-    if (docked) {
+    if (widget.docked) {
       return Padding(
         padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + 10),
         child: content,
@@ -114,18 +187,29 @@ class AppSheetLargeTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: spacing16),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: p.text,
-              fontSize: 34,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -1.4,
-              fontFamily: 'Inter',
-            ),
-          ),
+        AnimatedBuilder(
+          animation: scrollController ?? ScrollController(),
+          builder: (context, _) {
+            final offset = scrollController?.hasClients == true ? scrollController!.offset : 0.0;
+            // Large title fades out slightly before the small title starts appearing
+            final opacity = (1.0 - (offset / 40)).clamp(0.0, 1.0);
+            return Opacity(
+              opacity: opacity,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: spacing16),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.4,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         if (extra != null) ...[
           extra!,

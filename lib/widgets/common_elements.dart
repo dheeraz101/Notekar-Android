@@ -159,10 +159,14 @@ class SettingsPageNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(spacing8, spacing16, spacing8, spacing8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), // iOS Footer text padding aligned with cards
       child: Text(
         text,
-        style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
+        style: TextStyle(
+          color: p.text2,
+          fontSize: 13, // Standard iOS footer size
+          height: 1.35,
+        ),
       ),
     );
   }
@@ -219,5 +223,34 @@ class DiagnosticRow extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class SliverStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  SliverStickyHeaderDelegate({
+    required this.child,
+    required this.height,
+  });
+
+  final Widget child;
+  final double height;
+
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant SliverStickyHeaderDelegate oldDelegate) {
+    return oldDelegate.child != child || oldDelegate.height != height;
   }
 }

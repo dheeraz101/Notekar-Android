@@ -63,20 +63,19 @@ class _NoticePill extends StatelessWidget {
       enabled: onTap != null,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
+          color: color.withValues(alpha: 0.15), // Translucent inner text area
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: color.withValues(alpha: 0.22)),
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: onTap == null ? p.text2 : color,
+            color: color,
             fontSize: 12,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -190,156 +189,197 @@ class _HistoryDialogState extends State<HistoryDialog> {
       docked: true,
       blur: widget.blur,
       controller: _scrollController,
-      showLargeTitle: false,
+      showLargeTitle: true,
       child: SizedBox(
         width: 430,
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing64),
-                itemCount: items.isEmpty
-                    ? 2
-                    : items.length + (hasOlderRows ? 1 : 0) + 2,
-                itemBuilder: (_, index) {
-                  // Index 0: Large Title
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                      child: AppSheetLargeTitle(
-                        p: widget.p,
-                        title: 'History',
-                        scrollController: _scrollController,
+            CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
+                  sliver: SliverToBoxAdapter(
+                    child: AppSheetLargeTitle(
+                      p: widget.p,
+                      title: 'History',
+                      scrollController: _scrollController,
+                    ),
+                  ),
+                ),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: SliverStickyHeaderDelegate(
+                    height: 56.0 + (_selected.isNotEmpty ? 52.0 : 0.0),
+                    child: Container(
+                      color: widget.p.surface.withValues(
+                        alpha: widget.blur ? 0.65 : 1.0,
                       ),
-                    );
-                  }
-                  // Index 1: Filter Row
-                  if (index == 1) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: spacing16),
-                      child: Row(
+                      padding: const EdgeInsets.only(bottom: spacing8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                              child: Row(
-                                children: [
-                                  for (final f in const [
-                                    'all',
-                                    'date',
-                                    'today',
-                                    'week',
-                                    'in',
-                                    'out',
-                                    'single',
-                                    'notes',
-                                  ])
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: spacing8),
-                                      child: ChipButton(
-                                        p: widget.p,
-                                        label: f == 'single'
-                                            ? null
-                                            : f == 'date' && _selectedDateKey != null
-                                            ? compactDateLabel(_selectedDateKey!)
-                                            : f == 'date'
-                                            ? 'Select Date'
-                                            : filterLabel(f),
-                                        icon: f == 'single'
-                                            ? Icons.arrow_upward_rounded
-                                            : null,
-                                        semanticLabel: f == 'single' ? 'Single' : null,
-                                        active: _filter == f,
-                                        onTap: f == 'date'
-                                            ? (_selectedDateKey == null
-                                                ? _openDateFilter
-                                                : () => setState(() {
-                                                      _filter = 'date';
-                                                      _visibleCount = _pageSize;
-                                                    }))
-                                            : () => setState(() {
-                                                  _filter = f;
-                                                  _visibleCount = _pageSize;
-                                                }),
-                                        onLongPress: f == 'date' ? _openDateFilter : null,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: spacing16,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      for (final f in const [
+                                        'all',
+                                        'date',
+                                        'today',
+                                        'week',
+                                        'in',
+                                        'out',
+                                        'single',
+                                        'notes',
+                                      ])
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: spacing8,
+                                          ),
+                                          child: ChipButton(
+                                            p: widget.p,
+                                            label:
+                                                f == 'single'
+                                                    ? null
+                                                    : f == 'date' &&
+                                                        _selectedDateKey != null
+                                                    ? compactDateLabel(
+                                                      _selectedDateKey!,
+                                                    )
+                                                    : f == 'date'
+                                                    ? 'Select Date'
+                                                    : filterLabel(f),
+                                            icon:
+                                                f == 'single'
+                                                    ? Icons.arrow_upward_rounded
+                                                    : null,
+                                            semanticLabel:
+                                                f == 'single'
+                                                    ? 'Single'
+                                                    : null,
+                                            active: _filter == f,
+                                            onTap:
+                                                f == 'date'
+                                                    ? (_selectedDateKey == null
+                                                        ? _openDateFilter
+                                                        : () {
+                                                          setState(() {
+                                                            _filter = 'date';
+                                                            _visibleCount =
+                                                                _pageSize;
+                                                          });
+                                                          if (_scrollController.hasClients) {
+                                                            _scrollController.jumpTo(0.0);
+                                                          }
+                                                        })
+                                                    : () {
+                                                      setState(() {
+                                                        _filter = f;
+                                                        _visibleCount = _pageSize;
+                                                      });
+                                                      if (_scrollController.hasClients) {
+                                                        _scrollController.jumpTo(0.0);
+                                                      }
+                                                    },
+                                            onLongPress:
+                                                f == 'date'
+                                                    ? _openDateFilter
+                                                    : null,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: spacing8),
+                              PressableScale(
+                                onTap: () {
+                                  if (!_scrollController.hasClients) return;
+                                  _scrollController.animateTo(
+                                    0,
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeOutCubic,
+                                  );
+                                },
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface2,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: widget.p.border),
+                                  ),
+                                  child: Icon(
+                                    Icons.keyboard_double_arrow_up_rounded,
+                                    color: widget.p.text2,
+                                    size: 19,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: spacing16),
+                            ],
+                          ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 160),
+                            curve: Curves.easeOutCubic,
+                            child:
+                                _selected.isEmpty
+                                    ? const SizedBox.shrink()
+                                    : Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        spacing16,
+                                        spacing8,
+                                        spacing16,
+                                        0,
+                                      ),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: widget.p.accent.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: widget.p.accent.withValues(
+                                              alpha: 0.20,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Selected ${_selected.length} of 2 for duration',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: widget.p.accent,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                ],
-                              ),
-                            ),
                           ),
-                          const SizedBox(width: spacing8),
-                          PressableScale(
-                            onTap: () {
-                              if (!_scrollController.hasClients) return;
-                              _scrollController.animateTo(
-                                0,
-                                duration: const Duration(milliseconds: 280),
-                                curve: Curves.fastEaseInToSlowEaseOut,
-                              );
-                            },
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: widget.p.surface2,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: widget.p.border),
-                              ),
-                              child: Icon(
-                                Icons.keyboard_double_arrow_up_rounded,
-                                color: widget.p.text2,
-                                size: 19,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: spacing16),
                         ],
                       ),
-                    );
-                  }
-                  // Index 2: Selection Message (if any)
-                  if (index == 2) {
-                    return AnimatedSize(
-                      duration: const Duration(milliseconds: 160),
-                      curve: Curves.easeOutCubic,
-                      child: _selected.isEmpty
-                          ? const SizedBox.shrink()
-                          : Padding(
-                              padding: const EdgeInsets.fromLTRB(spacing16, 0, spacing16, spacing16),
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: widget.p.accent.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: widget.p.accent.withValues(alpha: 0.20),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Selected ${_selected.length} of 2 for duration',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: widget.p.accent,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                    );
-                  }
-
-                  // Empty State
-                  if (items.isEmpty && index == 3) {
-                    return Padding(
+                    ),
+                  ),
+                ),
+                if (items.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
                       padding: const EdgeInsets.only(top: spacing48),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -363,140 +403,203 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           ),
                         ],
                       ),
-                    );
-                  }
-
-                  final itemIndex = index - 3;
-                  if (itemIndex < 0 || itemIndex >= items.length) return const SizedBox.shrink();
-
-                  final item = items[itemIndex];
-                  if (item.label != null) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(spacing16, spacing8, spacing16, spacing8),
-                      child: Text(
-                        item.label!,
-                        style: TextStyle(
-                          color: widget.p.text3,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    );
-                  }
-                  final entry = item.moment!;
-                  final selected = _selected.any(
-                    (item) => item.id == entry.id,
-                  );
-                  return Padding(
-                    key: ValueKey(entry.id),
-                    padding: EdgeInsets.fromLTRB(
-                      spacing16,
-                      0,
-                      spacing16,
-                      widget.compactRows ? 3 : 8,
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: widget.p.red,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Dismissible(
-                        key: ValueKey('dismiss-${entry.id}'),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 18),
-                          color: widget.p.red,
-                          child: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.white,
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing64),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index >= items.length) {
+                          if (hasOlderRows) {
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                spacing16,
+                                4,
+                                spacing16,
+                                8,
+                              ),
+                              child: PressableScale(
+                                onTap:
+                                    () => setState(() {
+                                      _visibleCount += _pageSize;
+                                    }),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface2,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: widget.p.border),
+                                  ),
+                                  child: Text(
+                                    'Load older moments',
+                                    style: TextStyle(
+                                      color: widget.p.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          return null;
+                        }
+
+                        final item = items[index];
+                        if (item.label != null) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              spacing16,
+                              spacing8,
+                              spacing16,
+                              spacing8,
+                            ),
+                            child: Text(
+                              item.label!,
+                              style: TextStyle(
+                                color: widget.p.text3,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          );
+                        }
+                        final entry = item.moment!;
+                        final selected = _selected.any(
+                          (item) => item.id == entry.id,
+                        );
+                        return Padding(
+                          key: ValueKey(entry.id),
+                          padding: EdgeInsets.fromLTRB(
+                            spacing16,
+                            0,
+                            spacing16,
+                            widget.compactRows ? 3 : 8,
                           ),
-                        ),
-                        confirmDismiss: (_) async {
-                          _removeEntry(entry);
-                          return false;
-                        },
-                        onDismissed: (_) => _dismissEntry(entry),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? widget.p.surface3
-                                : widget.p.surface2,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: RepaintBoundary(
-                            child: MomentTile(
-                              p: widget.p,
-                              entry: entry,
-                              selected: selected,
-                              compact: widget.compactRows,
-                              onLongPress: () =>
-                                  _showMomentDetails(entry),
-                              onTap: () {
-                                setState(() {
-                                  if (selected) {
-                                    _selected.removeWhere(
-                                      (item) => item.id == entry.id,
-                                    );
-                                  } else {
-                                    if (_selected.length == 2) {
-                                      _selected.removeAt(0);
-                                    }
-                                    _selected.add(entry);
-                                  }
-                                });
-                                if (_selected.length == 2) {
-                                  widget.onDuration(
-                                    _selected[0],
-                                    _selected[1],
-                                  );
-                                  setState(() => _selected.clear());
-                                }
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: widget.p.red,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Dismissible(
+                              key: ValueKey('dismiss-${entry.id}'),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 18),
+                                color: widget.p.red,
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              confirmDismiss: (_) async {
+                                _removeEntry(entry);
+                                return false;
                               },
-                              onDelete: () => _removeEntry(entry),
+                              onDismissed: (_) => _dismissEntry(entry),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color:
+                                      selected
+                                          ? widget.p.surface3
+                                          : widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: RepaintBoundary(
+                                  child: MomentTile(
+                                    p: widget.p,
+                                    entry: entry,
+                                    selected: selected,
+                                    compact: widget.compactRows,
+                                    onLongPress: () => _showMomentDetails(entry),
+                                    onTap: () {
+                                      setState(() {
+                                        if (selected) {
+                                          _selected.removeWhere(
+                                            (item) => item.id == entry.id,
+                                          );
+                                        } else {
+                                          if (_selected.length == 2) {
+                                            _selected.removeAt(0);
+                                          }
+                                          _selected.add(entry);
+                                        }
+                                      });
+                                      if (_selected.length == 2) {
+                                        widget.onDuration(
+                                          _selected[0],
+                                          _selected[1],
+                                        );
+                                        setState(() => _selected.clear());
+                                      }
+                                    },
+                                    onDelete: () => _removeEntry(entry),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      }, childCount: items.length + (hasOlderRows ? 1 : 0)),
                     ),
-                  );
-                },
-              ),
+                  ),
+              ],
             ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 160),
-              curve: Curves.easeOutCubic,
-              child: _notice == null
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        bottom: MediaQuery.paddingOf(context).bottom + 12,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _NoticePill(
-                            p: widget.p,
-                            label: _notice!,
-                            color: _noticeUndo == null
-                                ? widget.p.red
-                                : widget.p.accent,
-                          ),
-                          if (_noticeUndo != null) ...[
-                            const SizedBox(width: 8),
-                            _NoticePill(
-                              p: widget.p,
-                              label: 'Undo',
-                              color: widget.p.accent,
-                              onTap: _noticeUndo,
+            Positioned(
+              bottom: 80, // Floating above moments
+              left: 16,
+              right: 16,
+              child: Center(
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOutCubic,
+                  child:
+                      _notice == null
+                          ? const SizedBox.shrink()
+                          : Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: widget.p.bg == Colors.black ? const Color(0xFF1C1C1E) : Colors.white, // Solid back pill
+                              borderRadius: BorderRadius.circular(999),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
                             ),
-                          ],
-                        ],
-                      ),
-                    ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _NoticePill(
+                                  p: widget.p,
+                                  label: _notice!,
+                                  color:
+                                      _noticeUndo == null
+                                          ? widget.p.red
+                                          : widget.p.accent,
+                                ),
+                                if (_noticeUndo != null) ...[
+                                  const SizedBox(width: 4),
+                                  _NoticePill(
+                                    p: widget.p,
+                                    label: 'Undo',
+                                    color: widget.p.accent,
+                                    onTap: _noticeUndo,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                ),
+              ),
             ),
           ],
         ),
@@ -507,6 +610,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   void _removeEntry(Moment entry) {
     if (widget.confirmDelete && _pendingDeleteId != entry.id) {
       setState(() => _pendingDeleteId = entry.id);
+      _showNotice('Tap delete again to confirm');
       return;
     }
     HapticFeedback.mediumImpact();
@@ -525,20 +629,22 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _showNotice('No moments to pick from');
       return;
     }
-    final latest = _selectedDateKey == null
-        ? DateTime.fromMillisecondsSinceEpoch(_entries.first.timestamp)
-        : dateFromKey(_selectedDateKey!);
+    final latest =
+        _selectedDateKey == null
+            ? DateTime.fromMillisecondsSinceEpoch(_entries.first.timestamp)
+            : dateFromKey(_selectedDateKey!);
     final picked = await showGeneralDialog<DateTime>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.42),
       barrierDismissible: true,
       barrierLabel: 'Close calendar',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => MomentCalendarDialog(
-        p: widget.p,
-        availableDateKeys: _availableDateKeys,
-        initialDate: latest,
-      ),
+      pageBuilder:
+          (_, _, _) => MomentCalendarDialog(
+            p: widget.p,
+            availableDateKeys: _availableDateKeys,
+            initialDate: latest,
+          ),
     );
     if (picked == null) return;
     setState(() {
@@ -546,6 +652,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _filter = 'date';
       _visibleCount = _pageSize;
     });
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0.0);
+    }
   }
 
   void _dismissEntry(Moment entry) {
@@ -609,55 +718,59 @@ class _HistoryDialogState extends State<HistoryDialog> {
       barrierDismissible: true,
       barrierLabel: 'Close moment actions',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => MomentActionsDialog(
-        p: widget.p,
-        entry: entry,
-        confirmDelete: widget.confirmDelete,
-        minimal: widget.minimalMomentOptions,
-        onAddOrEditNote: () async {
-          Navigator.pop(context);
+      pageBuilder:
+          (_, _, _) => MomentActionsDialog(
+            p: widget.p,
+            entry: entry,
+            confirmDelete: widget.confirmDelete,
+            minimal: widget.minimalMomentOptions,
+            onAddOrEditNote: () async {
+              Navigator.pop(context);
 
-          final note = await showGeneralDialog<String>(
-            context: context,
-            barrierColor: Colors.black.withValues(alpha: 0.42),
-            barrierDismissible: true,
-            barrierLabel: 'Close note editor',
-            transitionDuration: const Duration(milliseconds: 120),
-            pageBuilder: (_, _, _) => NoteDialog(
-              p: widget.p,
-              initialNote: entry.note,
-              title: entry.note.trim().isEmpty ? 'Add Note' : 'Edit Note',
-              saveLabel: entry.note.trim().isEmpty ? 'Add Note' : 'Save',
-              allowEmpty: false,
-            ),
-          );
+              final note = await showGeneralDialog<String>(
+                context: context,
+                barrierColor: Colors.black.withValues(alpha: 0.42),
+                barrierDismissible: true,
+                barrierLabel: 'Close note editor',
+                transitionDuration: const Duration(milliseconds: 120),
+                pageBuilder:
+                    (_, _, _) => NoteDialog(
+                      p: widget.p,
+                      initialNote: entry.note,
+                      title:
+                          entry.note.trim().isEmpty ? 'Add Note' : 'Edit Note',
+                      saveLabel: entry.note.trim().isEmpty ? 'Add Note' : 'Save',
+                      allowEmpty: false,
+                    ),
+              );
 
-          if (note == null) return;
+              if (note == null) return;
 
-          await _updateEntryNote(entry, note);
-          _showNotice(
-            entry.note.trim().isEmpty ? 'Note added' : 'Note updated',
-          );
-        },
-        onDeleteNote: entry.note.trim().isEmpty
-            ? null
-            : () async {
-                Navigator.pop(context);
-                final previous = entry.note;
-                await _updateEntryNote(entry, '');
-                _showNotice(
-                  'Note deleted',
-                  onUndo: () {
-                    unawaited(_updateEntryNote(entry, previous));
-                    _showNotice('Note restored');
-                  },
-                );
-              },
-        onDeleteMoment: () {
-          Navigator.pop(context);
-          _removeEntry(entry);
-        },
-      ),
+              await _updateEntryNote(entry, note);
+              _showNotice(
+                entry.note.trim().isEmpty ? 'Note added' : 'Note updated',
+              );
+            },
+            onDeleteNote:
+                entry.note.trim().isEmpty
+                    ? null
+                    : () async {
+                      Navigator.pop(context);
+                      final previous = entry.note;
+                      await _updateEntryNote(entry, '');
+                      _showNotice(
+                        'Note deleted',
+                        onUndo: () {
+                          unawaited(_updateEntryNote(entry, previous));
+                          _showNotice('Note restored');
+                        },
+                      );
+                    },
+            onDeleteMoment: () {
+              Navigator.pop(context);
+              _removeEntry(entry);
+            },
+          ),
     );
   }
 }
@@ -755,9 +868,10 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                 children: [
                   _MinimalActionButton(
                     p: p,
-                    icon: hasNote
-                        ? Icons.edit_note_rounded
-                        : Icons.note_add_rounded,
+                    icon:
+                        hasNote
+                            ? Icons.edit_note_rounded
+                            : Icons.note_add_rounded,
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
                   ),
@@ -838,9 +952,10 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                 Expanded(
                   child: MomentOptionPill(
                     p: p,
-                    icon: hasNote
-                        ? Icons.edit_note_rounded
-                        : Icons.note_add_rounded,
+                    icon:
+                        hasNote
+                            ? Icons.edit_note_rounded
+                            : Icons.note_add_rounded,
                     label: hasNote ? 'Edit Note' : 'Add Note',
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
@@ -852,9 +967,7 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                     child: MomentOptionPill(
                       p: p,
                       icon: Icons.comments_disabled_rounded,
-                      label: _pendingAction == 'note'
-                          ? 'Confirm'
-                          : 'Delete Note',
+                      label: _pendingAction == 'note' ? 'Confirm' : 'Delete Note',
                       color: p.orange,
                       onTap: () => _confirmOrRun('note', widget.onDeleteNote!),
                     ),

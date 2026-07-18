@@ -38,7 +38,7 @@ class _NoteSearchDialogState extends State<NoteSearchDialog> {
       p: widget.p,
       title: 'Search Notes',
       controller: _scrollController,
-      showLargeTitle: true,
+      showLargeTitle: false,
       child: SizedBox(
         width: 430,
         height: math.min(MediaQuery.sizeOf(context).height * 0.68, 590),
@@ -138,122 +138,117 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
     final rows = _visibleRows;
     final hasOlderRows = _visibleCount < _matches.length;
 
-    final content = ListView(
-      controller: widget.scrollController,
-      padding: EdgeInsets.zero,
+    return Column(
       children: [
-        AppSheetLargeTitle(
+        SearchNotesBox(
           p: widget.p,
-          title: 'Search Notes',
-          scrollController: widget.scrollController,
-          extra: SearchNotesBox(
-            p: widget.p,
-            controller: _controller,
-            onChanged: (value) => setState(() {
-              _query = value;
-              _visibleCount = _pageSize;
-            }),
-            onClear: () => setState(() {
-              _controller.clear();
-              _query = '';
-              _visibleCount = _pageSize;
-            }),
-          ),
+          controller: _controller,
+          onChanged: (value) => setState(() {
+            _query = value;
+            _visibleCount = _pageSize;
+          }),
+          onClear: () => setState(() {
+            _controller.clear();
+            _query = '';
+            _visibleCount = _pageSize;
+          }),
         ),
-        if (rows.isEmpty)
-          SizedBox(
-            height: 200,
-            child: Center(
-              child: Text(
-                _query.trim().isEmpty
-                    ? 'No notes yet.'
-                    : 'No notes match your search.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: widget.p.text2, height: 1.4),
-              ),
-            ),
-          )
-        else ...[
-          for (var index = 0; index < rows.length; index++)
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: widget.compactRows ? 5 : 9,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(13),
-                decoration: BoxDecoration(
-                  color: widget.p.surface2,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: widget.p.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        SettingsStatusPill(
-                          p: widget.p,
-                          label: rows[index].type.toUpperCase(),
-                          color: momentColor(widget.p, rows[index].type),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '${datePretty(rows[index].timestamp)} at '
-                            '${timeOnly(rows[index].timestamp)}',
-                            style: TextStyle(
-                              color: widget.p.text3,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
+        const SizedBox(height: spacing12),
+        Expanded(
+          child: rows.isEmpty
+              ? Center(
+                  child: Text(
+                    _query.trim().isEmpty
+                        ? 'No notes yet.'
+                        : 'No notes match your search.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: widget.p.text2, height: 1.4),
+                  ),
+                )
+              : ListView.builder(
+                  controller: widget.scrollController,
+                  itemCount: rows.length + (hasOlderRows ? 1 : 0),
+                  itemBuilder: (_, index) {
+                    if (index >= rows.length) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4, bottom: spacing48),
+                        child: PressableScale(
+                          onTap: () => setState(() {
+                            _visibleCount += _pageSize;
+                          }),
+                          child: Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: widget.p.surface2,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: widget.p.border),
+                            ),
+                            child: Text(
+                              'Load older notes',
+                              style: TextStyle(
+                                color: widget.p.accent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 9),
-                    Text(
-                      rows[index].note,
-                      style: TextStyle(
-                        color: widget.p.text,
-                        height: 1.4,
+                      );
+                    }
+                    final entry = rows[index];
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: widget.compactRows ? 5 : 9,
                       ),
-                    ),
-                  ],
+                      child: Container(
+                        padding: const EdgeInsets.all(13),
+                        decoration: BoxDecoration(
+                          color: widget.p.surface2,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: widget.p.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                SettingsStatusPill(
+                                  p: widget.p,
+                                  label: entry.type.toUpperCase(),
+                                  color: momentColor(widget.p, entry.type),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${datePretty(entry.timestamp)} at '
+                                    '${timeOnly(entry.timestamp)}',
+                                    style: TextStyle(
+                                      color: widget.p.text3,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 9),
+                            Text(
+                              entry.note,
+                              style: TextStyle(
+                                color: widget.p.text,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ),
-          if (hasOlderRows)
-            Padding(
-              padding: const EdgeInsets.only(top: 4, bottom: spacing48),
-              child: PressableScale(
-                onTap: () => setState(() {
-                  _visibleCount += _pageSize;
-                }),
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: widget.p.surface2,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: widget.p.border),
-                  ),
-                  child: Text(
-                    'Load older notes',
-                    style: TextStyle(
-                      color: widget.p.accent,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          const SizedBox(height: spacing48),
-        ],
+        ),
       ],
     );
-    if (widget.height == null) return content;
-    return SizedBox(height: widget.height, child: content);
   }
 }
 

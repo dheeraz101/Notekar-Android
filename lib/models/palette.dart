@@ -43,39 +43,39 @@ Palette paletteFor(
   if (theme == 'light') {
     return Palette(
       name: 'light',
-      bg: const Color(0xFFFFFFFF),
-      surface: const Color(0xFFFFFFFF),
-      surface2: const Color(0xFFF7F7F7),
-      surface3: const Color(0xFFEDEDED),
+      bg: const Color(0xFFF2F2F7), // Official iOS Inset Grouped Background
+      surface: const Color(0xFFF2F2F7),
+      surface2: const Color(0xFFFFFFFF), // Official iOS Card color
+      surface3: const Color(0xFFE5E5EA),
       border: highContrast ? const Color(0xFFB8B8B8) : const Color(0xFFE4E4E4),
-      text: const Color(0xFF0F0F0F),
-      text2: highContrast ? const Color(0xFF303030) : const Color(0xFF606060),
-      text3: highContrast ? const Color(0xFF5D5D5D) : const Color(0xFF9A9A9A),
+      text: const Color(0xFF000000),
+      text2: highContrast ? const Color(0xFF202020) : const Color(0xFF3C3C43).withValues(alpha: 0.6),
+      text3: highContrast ? const Color(0xFF5D5D5D) : const Color(0xFF3C3C43).withValues(alpha: 0.3),
       clock: const Color(0xFFE9E9E9),
       accent: accent,
-      green: const Color(0xFF25D366),
+      green: const Color(0xFF34C759),
       orange: const Color(0xFFFF9500),
-      red: const Color(0xFFFF0033),
+      red: const Color(0xFFFF3B30),
     );
   }
   final amoled = theme == 'amoled';
   return Palette(
     name: theme,
-    bg: amoled ? Colors.black : const Color(0xFF0F0F0F),
-    surface: amoled ? const Color(0xFF0C0C0C) : const Color(0xFF212121),
-    surface2: amoled ? const Color(0xFF151515) : const Color(0xFF2A2A2A),
-    surface3: amoled ? const Color(0xFF202020) : const Color(0xFF3F3F3F),
+    bg: amoled ? Colors.black : Colors.black, // Page BG is always true black on iOS dark
+    surface: amoled ? Colors.black : Colors.black,
+    surface2: amoled ? const Color(0xFF000000) : const Color(0xFF1C1C1E), // Deep gray for dark mode cards
+    surface3: amoled ? const Color(0xFF1C1C1E) : const Color(0xFF2C2C2E),
     border: amoled
         ? (highContrast ? const Color(0xFF323232) : const Color(0xFF1F1F1F))
         : (highContrast ? const Color(0xFF666666) : const Color(0xFF343434)),
-    text: const Color(0xFFF1F1F1),
-    text2: highContrast ? const Color(0xFFD8D8D8) : const Color(0xFFAAAAAA),
-    text3: highContrast ? const Color(0xFFAFAFAF) : const Color(0xFF717171),
+    text: const Color(0xFFFFFFFF),
+    text2: highContrast ? const Color(0xFFD8D8D8) : const Color(0xFFEBEBF5).withValues(alpha: 0.6),
+    text3: highContrast ? const Color(0xFFAFAFAF) : const Color(0xFFEBEBF5).withValues(alpha: 0.3),
     clock: amoled ? const Color(0xFF1F1F1F) : const Color(0xFF303030),
     accent: accent,
     green: const Color(0xFF30D158),
     orange: const Color(0xFFFF9F0A),
-    red: const Color(0xFFFF0033),
+    red: const Color(0xFFFF453A),
   );
 }
 
