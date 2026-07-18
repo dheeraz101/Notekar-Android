@@ -584,8 +584,24 @@ class SettingsSwitchRow extends StatefulWidget {
   State<SettingsSwitchRow> createState() => _SettingsSwitchRowState();
 }
 
-class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
-  bool _pressing = false;
+class _SettingsSwitchRowState extends State<SettingsSwitchRow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _stretchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _stretchController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+  }
+
+  @override
+  void dispose() {
+    _stretchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -595,9 +611,15 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
     final value = widget.value;
 
     return GestureDetector(
-      onTapDown: (_) => setState(() => _pressing = true),
-      onTapUp: (_) => setState(() => _pressing = false),
-      onTapCancel: () => setState(() => _pressing = false),
+      onTapDown: (_) {
+        _stretchController.forward();
+      },
+      onTapUp: (_) {
+        _stretchController.reverse();
+      },
+      onTapCancel: () {
+        _stretchController.reverse();
+      },
       onTap: () {
         if (!enabled) {
           final message = widget.disabledMessage;
@@ -656,7 +678,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               margin: const EdgeInsets.only(top: 3),
-              width: 52,
+              width: 60,
               height: 32,
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
@@ -673,22 +695,26 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow> {
                     curve: Curves.easeInOut,
                     alignment:
                         value ? Alignment.centerRight : Alignment.centerLeft,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      width: _pressing ? 34 : 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 3,
-                            offset: const Offset(0, 1),
+                    child: AnimatedBuilder(
+                      animation: _stretchController,
+                      builder: (context, child) {
+                        final stretch = _stretchController.value * 12;
+                        return Container(
+                          width: 32 + stretch,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ],

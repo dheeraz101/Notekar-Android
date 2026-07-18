@@ -3,7 +3,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
-class PrivacyLockOverlay extends StatelessWidget {
+class PrivacyLockOverlay extends StatefulWidget {
   const PrivacyLockOverlay({
     super.key,
     required this.p,
@@ -14,104 +14,123 @@ class PrivacyLockOverlay extends StatelessWidget {
   final VoidCallback onUnlock;
 
   @override
+  State<PrivacyLockOverlay> createState() => _PrivacyLockOverlayState();
+}
+
+class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3), // Slower, calmer pulse
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final p = widget.p;
     return Positioned.fill(
       child: Material(
         color: p.bg,
-        child: DefaultTextStyle(
-          style: TextStyle(
-            color: p.text,
-            decoration: TextDecoration.none,
-            fontFamily: 'Roboto',
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [p.bg, p.surface],
+            ),
           ),
-          child: ColoredBox(
-            color: p.bg,
-            child: SafeArea(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing32),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 330),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: p.surface2,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: p.border),
-                          ),
-                          child: Icon(
-                            Icons.lock_rounded,
-                            color: p.accent,
-                            size: 23,
-                          ),
-                        ),
-                        const SizedBox(height: spacing24),
-                        Text(
-                          'Private by default',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 21,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: spacing8),
-                        Text(
-                          'Your moments stay hidden until you unlock NoteKar.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 13,
-                            height: 1.45,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: spacing24),
-                        PressableScale(
-                          onTap: onUnlock,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: spacing16,
-                              vertical: spacing16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: p.accent,
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: selectedGlow(p.accent),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.lock_open_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: spacing8),
-                                Text(
-                                  'Unlock NoteKar',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+          child: SafeArea(
+            child: Column(
+              children: [
+                const Spacer(flex: 3),
+                // Minimal pulsing icon
+                AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: 0.4 + (_pulseController.value * 0.6),
+                      child: child,
+                    );
+                  },
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.lock_rounded,
+                      color: p.accent.withValues(alpha: 0.9),
+                      size: 40,
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: spacing32),
+                Text(
+                  'Private by default',
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.6,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: spacing12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: spacing48),
+                  child: Text(
+                    'Your moments stay hidden until you unlock NoteKar.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+                const Spacer(flex: 4),
+                // Minimalist Button (No Shadows/Glows)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: spacing32),
+                  child: PressableScale(
+                    onTap: widget.onUnlock,
+                    child: Container(
+                      width: double.infinity,
+                      height: 54,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: p.accent,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Text(
+                        'Unlock NoteKar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: spacing48),
+              ],
             ),
           ),
         ),

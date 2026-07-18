@@ -45,130 +45,114 @@ class _NoteDialogState extends State<NoteDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-
-    return Material(
-      color: Colors.transparent,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: bottomInset),
-            child: AppSheet(
-              p: widget.p,
-              title: widget.title,
-              blur: widget.blur,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.initialNote.isEmpty
-                        ? 'Add a short detail to this moment.'
-                        : 'Update the note attached to this moment.',
-                    style: TextStyle(
-                      color: widget.p.text2,
-                      fontSize: 12,
-                      height: 1.35,
-                    ),
-                  ),
-                  const SizedBox(height: spacing8),
-                  TextField(
-                    controller: _controller,
-                    autofocus: true,
-                    maxLength: _maxChars,
-                    maxLines: 4,
-                    minLines: 2,
-                    style: TextStyle(color: widget.p.text),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      hintText: 'What should this moment remember?',
-                      hintStyle: TextStyle(color: widget.p.text3),
-                      filled: true,
-                      fillColor: widget.p.surface3,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _showWarning ? widget.p.red : widget.p.border,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _showWarning ? widget.p.red : widget.p.border,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: _showWarning ? widget.p.red : widget.p.accent,
-                        ),
-                      ),
-                    ),
-                    onChanged: (text) {
-                      setState(() {
-                        _showWarning = false;
-                      });
-                    },
-                    onSubmitted: (_) => _saveNote(),
-                  ),
-                  const SizedBox(height: spacing4),
-                  _LinearCharacterIndicator(
-                    p: widget.p,
-                    count: _controller.text.length,
-                    max: _maxChars,
-                  ),
-                  if (_showWarning)
-                    Padding(
-                      padding: const EdgeInsets.only(top: spacing8),
-                      child: Text(
-                        'Write something to save.',
-                        style: TextStyle(
-                          color: widget.p.red,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: spacing8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: widget.p.accent,
-                          ),
-                          onPressed: () {
-                            if (widget.allowEmpty) {
-                              Navigator.pop(context, '');
-                            } else {
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text(widget.allowEmpty ? 'Skip' : 'Cancel'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: widget.p.accent,
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: _saveNote,
-                          child: Text(widget.saveLabel),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    return AppSheet(
+      p: widget.p,
+      title: widget.title,
+      blur: widget.blur,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.initialNote.isEmpty
+                ? 'Add a short detail to this moment.'
+                : 'Update the note attached to this moment.',
+            style: TextStyle(
+              color: widget.p.text2,
+              fontSize: 12,
+              height: 1.35,
             ),
           ),
-        ),
+          const SizedBox(height: spacing12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLength: _maxChars,
+            maxLines: 5,
+            minLines: 2,
+            style: TextStyle(color: widget.p.text),
+            decoration: InputDecoration(
+              counterText: '',
+              hintText: 'What should this moment remember?',
+              hintStyle: TextStyle(color: widget.p.text3),
+              filled: true,
+              fillColor: widget.p.surface3,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: _showWarning ? widget.p.red : widget.p.border,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: _showWarning ? widget.p.red : widget.p.border,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: _showWarning ? widget.p.red : widget.p.accent,
+                ),
+              ),
+            ),
+            onChanged: (text) {
+              setState(() {
+                _showWarning = false;
+              });
+            },
+            onSubmitted: (_) => _saveNote(),
+          ),
+          const SizedBox(height: spacing12),
+          _LinearCharacterIndicator(
+            p: widget.p,
+            count: _controller.text.length,
+            max: _maxChars,
+          ),
+          if (_showWarning)
+            Padding(
+              padding: const EdgeInsets.only(top: spacing8),
+              child: Text(
+                'Write something to save.',
+                style: TextStyle(
+                  color: widget.p.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          const SizedBox(height: spacing16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: widget.p.accent,
+                  ),
+                  onPressed: () {
+                    if (widget.allowEmpty) {
+                      Navigator.pop(context, '');
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text(widget.allowEmpty ? 'Skip' : 'Cancel'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: widget.p.accent,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: _saveNote,
+                  child: Text(widget.saveLabel),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -1,16 +1,17 @@
-# Minimal Moment Options Tasks
+# Restoration & Stability Tasks
 
-- [ ] **Phase 1: State & Plumbing**
-    - [ ] Add `_minimalMomentOptions` to `NoteKarHome`
-    - [ ] Pass `minimalMomentOptions` to `HistoryDialog`
-- [ ] **Phase 2: Settings Integration**
-    - [ ] Add toggle to `SettingsDialog` (Moments section)
-    - [ ] Update search index and keywords
-    - [ ] Add Guide entry
-- [ ] **Phase 3: Dialog UX**
-    - [ ] Update `MomentActionsDialog` constructor
-    - [ ] Implement Minimal horizontal row UI
-    - [ ] Implement Minimal "Confirm" logic for icons
-- [ ] **Phase 4: Verification**
+- [ ] **Phase 1: Header Reversion**
+    - [ ] Simplify `AppSheet` to standard Column (Fixed Title)
+    - [ ] Remove `AppSheetLargeTitle` complexity
+- [ ] **Phase 2: Note Dialog Restoration**
+    - [ ] Revert `NoteDialog` layout to stable version
+    - [ ] Restore character counter spacing
+- [ ] **Phase 3: History & Selection Polish**
+    - [ ] Fix filter chip alignment
+    - [ ] Restore stable selection message position
+- [ ] **Phase 4: Global Alignment Audit**
+    - [ ] Fix side spacing in Settings categories
+    - [ ] Standardize sheet heights and paddings
+- [ ] **Phase 5: Verification**
     - [ ] Run `flutter analyze`
-    - [ ] Manual check of minimal icon layout
+    - [ ] Verify no "ghost" titles during navigation

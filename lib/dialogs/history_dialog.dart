@@ -190,139 +190,21 @@ class _HistoryDialogState extends State<HistoryDialog> {
       docked: true,
       blur: widget.blur,
       controller: _scrollController,
-      showLargeTitle: true,
-      pinned: Padding(
-        padding: const EdgeInsets.only(bottom: spacing8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                    child: Row(
-                      children: [
-                        for (final f in const [
-                          'all',
-                          'date',
-                          'today',
-                          'week',
-                          'in',
-                          'out',
-                          'single',
-                          'notes',
-                        ])
-                          Padding(
-                            padding: const EdgeInsets.only(right: spacing8),
-                            child: ChipButton(
-                              p: widget.p,
-                              label: f == 'single'
-                                  ? null
-                                  : f == 'date' && _selectedDateKey != null
-                                  ? compactDateLabel(_selectedDateKey!)
-                                  : f == 'date'
-                                  ? 'Select Date'
-                                  : filterLabel(f),
-                              icon: f == 'single'
-                                  ? Icons.arrow_upward_rounded
-                                  : null,
-                              semanticLabel: f == 'single' ? 'Single' : null,
-                              active: _filter == f,
-                              onTap: f == 'date'
-                                  ? (_selectedDateKey == null
-                                      ? _openDateFilter
-                                      : () => setState(() {
-                                            _filter = 'date';
-                                            _visibleCount = _pageSize;
-                                          }))
-                                  : () => setState(() {
-                                        _filter = f;
-                                        _visibleCount = _pageSize;
-                                      }),
-                              onLongPress: f == 'date' ? _openDateFilter : null,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: spacing8),
-                PressableScale(
-                  onTap: () {
-                    if (!_scrollController.hasClients) return;
-                    _scrollController.animateTo(
-                      0,
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.fastEaseInToSlowEaseOut,
-                    );
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: widget.p.surface2,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: widget.p.border),
-                    ),
-                    child: Icon(
-                      Icons.keyboard_double_arrow_up_rounded,
-                      color: widget.p.text2,
-                      size: 19,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: spacing16),
-              ],
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 160),
-              curve: Curves.easeOutCubic,
-              child: _selected.isEmpty
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(top: spacing8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: widget.p.accent.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: widget.p.accent.withValues(alpha: 0.20),
-                          ),
-                        ),
-                        child: Text(
-                          'Selected ${_selected.length} of 2 for duration',
-                          style: TextStyle(
-                            color: widget.p.accent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
+      showLargeTitle: false,
       child: SizedBox(
         width: 430,
-        height: math.min(MediaQuery.sizeOf(context).height * 0.64, 560),
+        height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
         child: Column(
           children: [
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing48),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing64),
                 itemCount: items.isEmpty
                     ? 2
-                    : items.length + (hasOlderRows ? 1 : 0) + 1,
+                    : items.length + (hasOlderRows ? 1 : 0) + 2,
                 itemBuilder: (_, index) {
+                  // Index 0: Large Title
                   if (index == 0) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: spacing16),
@@ -333,8 +215,130 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       ),
                     );
                   }
+                  // Index 1: Filter Row
+                  if (index == 1) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: spacing16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: spacing16),
+                              child: Row(
+                                children: [
+                                  for (final f in const [
+                                    'all',
+                                    'date',
+                                    'today',
+                                    'week',
+                                    'in',
+                                    'out',
+                                    'single',
+                                    'notes',
+                                  ])
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: spacing8),
+                                      child: ChipButton(
+                                        p: widget.p,
+                                        label: f == 'single'
+                                            ? null
+                                            : f == 'date' && _selectedDateKey != null
+                                            ? compactDateLabel(_selectedDateKey!)
+                                            : f == 'date'
+                                            ? 'Select Date'
+                                            : filterLabel(f),
+                                        icon: f == 'single'
+                                            ? Icons.arrow_upward_rounded
+                                            : null,
+                                        semanticLabel: f == 'single' ? 'Single' : null,
+                                        active: _filter == f,
+                                        onTap: f == 'date'
+                                            ? (_selectedDateKey == null
+                                                ? _openDateFilter
+                                                : () => setState(() {
+                                                      _filter = 'date';
+                                                      _visibleCount = _pageSize;
+                                                    }))
+                                            : () => setState(() {
+                                                  _filter = f;
+                                                  _visibleCount = _pageSize;
+                                                }),
+                                        onLongPress: f == 'date' ? _openDateFilter : null,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: spacing8),
+                          PressableScale(
+                            onTap: () {
+                              if (!_scrollController.hasClients) return;
+                              _scrollController.animateTo(
+                                0,
+                                duration: const Duration(milliseconds: 280),
+                                curve: Curves.fastEaseInToSlowEaseOut,
+                              );
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: widget.p.surface2,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: widget.p.border),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_double_arrow_up_rounded,
+                                color: widget.p.text2,
+                                size: 19,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: spacing16),
+                        ],
+                      ),
+                    );
+                  }
+                  // Index 2: Selection Message (if any)
+                  if (index == 2) {
+                    return AnimatedSize(
+                      duration: const Duration(milliseconds: 160),
+                      curve: Curves.easeOutCubic,
+                      child: _selected.isEmpty
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.fromLTRB(spacing16, 0, spacing16, spacing16),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.accent.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: widget.p.accent.withValues(alpha: 0.20),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Selected ${_selected.length} of 2 for duration',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: widget.p.accent,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    );
+                  }
 
-                  if (items.isEmpty && index == 1) {
+                  // Empty State
+                  if (items.isEmpty && index == 3) {
                     return Padding(
                       padding: const EdgeInsets.only(top: spacing48),
                       child: Column(
@@ -362,13 +366,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     );
                   }
 
-                  final itemIndex = index - 1;
+                  final itemIndex = index - 3;
                   if (itemIndex < 0 || itemIndex >= items.length) return const SizedBox.shrink();
 
                   final item = items[itemIndex];
                   if (item.label != null) {
                     return Padding(
-                      padding: const EdgeInsets.fromLTRB(spacing16 + 4, 8, spacing16 + 4, 8),
+                      padding: const EdgeInsets.fromLTRB(spacing16, spacing8, spacing16, spacing8),
                       child: Text(
                         item.label!,
                         style: TextStyle(
@@ -503,7 +507,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
   void _removeEntry(Moment entry) {
     if (widget.confirmDelete && _pendingDeleteId != entry.id) {
       setState(() => _pendingDeleteId = entry.id);
-      _showNotice('Tap delete again to confirm');
       return;
     }
     HapticFeedback.mediumImpact();

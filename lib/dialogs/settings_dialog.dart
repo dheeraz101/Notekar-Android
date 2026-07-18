@@ -79,8 +79,8 @@ class SettingsDialog extends StatefulWidget {
     required this.onShowHistoryText,
     required this.onShowLastSavedHint,
     required this.onRequireLongPressNote,
-    required this.onMinimalMomentOptions,
     required this.onExtendedDuration,
+    required this.onMinimalMomentOptions,
     required this.onTranslucency,
     required this.onPrivacyLockDelay,
     required this.onExportCsv,
@@ -637,7 +637,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         >[
           (
             title: 'Display',
-            subtitle: 'Theme, clock, toolbar, labels, large controls',
+            subtitle: 'Theme, clock, toolbar, labels, large controls, blur',
             category: 'Display',
             icon: Icons.color_lens_rounded,
             keywords: [
@@ -648,7 +648,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'light',
               'amoled',
               'home',
+              'translucency',
+              'frosted',
+              'glass',
             ],
+          ),
+          (
+            title: 'Enable Translucency',
+            subtitle: 'Use frosted glass blur on Toolbar and Sheets',
+            category: 'Display',
+            icon: Icons.blur_on_rounded,
+            keywords: ['blur', 'frosted', 'glass', 'glassmorphism', 'transparency'],
           ),
           (
             title: 'Show Seconds',
@@ -733,7 +743,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           (
             title: 'Moments',
-            subtitle: 'History density, confirm delete, moments, minimal options',
+            subtitle: 'History density, confirm delete, moments, minimal actions, extended time',
             category: 'Moments',
             icon: Icons.history_rounded,
             keywords: [
@@ -746,7 +756,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'minimal',
               'icons',
               'actions',
+              'extended duration',
+              'years',
+              'months',
+              'days',
             ],
+          ),
+          (
+            title: 'Extended Duration',
+            subtitle: 'Show days, months, and years in time between moments',
+            category: 'Moments',
+            icon: Icons.timer_rounded,
+            keywords: ['time', 'duration', 'years', 'months', 'days', 'long intervals'],
+          ),
+          (
+            title: 'Minimal Moment Options',
+            subtitle: 'Use a compact horizontal row of icons for actions',
+            category: 'Moments',
+            icon: Icons.auto_awesome_motion_rounded,
+            keywords: ['minimal', 'icons', 'actions', 'compact', 'row'],
           ),
           (
             title: 'Updates',
@@ -771,7 +799,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           (
             title: 'Backup & Export',
-            subtitle: 'CSV, JSON, backup reminder, import, Android backup',
+            subtitle: 'CSV, JSON, download, restore, import, file, reminder, health',
             category: 'Backup & Export',
             icon: Icons.backup_rounded,
             keywords: [
@@ -861,6 +889,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
             keywords: ['debug', 'support', 'info', 'bug', 'copy'],
           ),
           (
+            title: 'Device Health',
+            subtitle: 'Adaptive engine and performance status',
+            category: 'Device Health',
+            icon: Icons.health_and_safety_rounded,
+            keywords: ['adaptive engine', 'performance', 'hardware', 'specs', 'optimization', 'tier'],
+          ),
+          (
             title: 'Reset All Data',
             subtitle: 'Erase every moment and note',
             category: 'Reset',
@@ -898,6 +933,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'duration',
               'time between',
               'backup',
+              'adaptive engine',
+              'minimal options',
             ],
           ),
           (
@@ -922,6 +959,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'motion',
               'app lock',
               'data missing',
+              'extended duration',
+              'translucency',
             ],
           ),
         ];
@@ -1130,7 +1169,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle:
                 'Now locks as soon as NoteKar leaves focus. Delays wait in the background.',
             value: '$privacyLockDelayMinutes',
-            blur: widget.blur,
+            blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
             values: const {'0': 'Now', '1': '1', '5': '5', '10': '10'},
             status: privacyLockDelayLabel(privacyLockDelayMinutes),
             onChanged: (value) {
@@ -1271,27 +1310,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
         blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
         controller: _settingsScrollController,
         showLargeTitle: category == null,
-        pinned: category == null
-            ? AppSheetLargeTitle(
-                p: p,
-                title: 'Settings',
-                scrollController: _settingsScrollController,
-                extra: SettingsSearchBox(
-                  p: p,
-                  controller: _settingsSearchController,
-                  onChanged: (value) => setState(() => _settingsQuery = value),
-                  onClear: () => setState(() {
-                    _settingsQuery = '';
-                    _settingsSearchController.clear();
-                  }),
-                ),
-              )
-            : null,
         child: SizedBox(
           width: 430,
-          height: math.min(MediaQuery.sizeOf(context).height * 0.68, 620),
+          height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
           child: ListView(
             controller: _settingsScrollController,
+            padding: const EdgeInsets.fromLTRB(spacing16, 0, spacing16, spacing64),
             children: [
               if (category != null)
                 Padding(
@@ -1329,6 +1353,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                 ),
               if (category == null) ...[
+                // Spacer for the pinned search bar
+                const SizedBox(height: 72),
+                AppSheetLargeTitle(
+                  p: p,
+                  title: 'Settings',
+                  scrollController: _settingsScrollController,
+                  extra: SettingsSearchBox(
+                    p: p,
+                    controller: _settingsSearchController,
+                    onChanged: (value) =>
+                        setState(() => _settingsQuery = value),
+                    onClear: () => setState(() {
+                      _settingsQuery = '';
+                      _settingsSearchController.clear();
+                    }),
+                  ),
+                ),
                 if (_settingsQuery.trim().isNotEmpty) ...[
                   const SizedBox(height: spacing8),
                   SettingsGroup(
@@ -1638,6 +1679,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           });
                         },
                       ),
+                    if (AdaptiveEngine().supportsBlur)
+                      SettingsSwitchRow(
+                        p: p,
+                        icon: Icons.blur_on_rounded,
+                        title: 'Enable Translucency',
+                        subtitle: reduceMotion
+                            ? 'Turn off Reduced Motion to enable translucency'
+                            : 'Use frosted glass blur on Toolbar and Sheets',
+                        color: p.accent,
+                        value: !reduceMotion && enableTranslucency,
+                        enabled: !reduceMotion,
+                        onDisabledTap: widget.onFeedback,
+                        onChanged: (value) {
+                          setState(() => enableTranslucency = value);
+                          widget.onTranslucency(value);
+                        },
+                      ),
                     SettingsSwitchRow(
                       p: p,
                       icon: Icons.history_rounded,
@@ -1677,7 +1735,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   subtitle:
                       'Choose the color used for buttons, highlights, and saved feedback.',
                   value: accentColor,
-                  blur: widget.blur,
+                  blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                   onChanged: (value) {
                     if (value == accentColor) return;
                     HapticFeedback.selectionClick();
@@ -1727,7 +1785,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   title: 'Startup Mode',
                   subtitle: 'Choose the mode NoteKar opens with.',
                   value: defaultMode,
-                  blur: widget.blur,
+                  blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                   values: const {'single': 'Single', 'two-way': 'Two-Way'},
                   onChanged: (value) {
                     if (value == defaultMode) return;
@@ -1787,7 +1845,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.remove_rounded,
                             enabled: (delayIndex < 0 ? 0 : delayIndex) > 0,
-                            blur: widget.blur,
+                            blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                             onTap: () {
                               final current = delayIndex < 0 ? 0 : delayIndex;
                               final next = delayValues[math.max(0, current - 1)];
@@ -1846,7 +1904,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             enabled:
                                 (delayIndex < 0 ? 0 : delayIndex) <
                                 delayValues.length - 1,
-                            blur: widget.blur,
+                            blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                             onTap: () {
                               final current = delayIndex < 0 ? 0 : delayIndex;
                               final next =
@@ -2059,6 +2117,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       title: 'Minimal Moment Options',
                       text:
                           'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.',
+                    ),
+                    GuideRow(
+                      p: p,
+                      icon: Icons.auto_awesome_rounded,
+                      title: 'Adaptive Engine',
+                      text:
+                          'Notekar automatically tunes visual effects to your device. Check stats in Settings > Advanced > Device Health.',
                     ),
                     GuideRow(
                       p: p,
@@ -2290,6 +2355,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   title: 'Backup Reminder (days)',
                   subtitle: _backupReminderSubtitle,
                   value: '$backupReminderDays',
+                  blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                   values: const {'0': 'Off', '7': '7', '14': '14', '30': '30'},
                   onChanged: (value) {
                     final days = int.tryParse(value) ?? 0;
@@ -2544,6 +2610,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   title: 'Haptic Style',
                   subtitle: 'Choose how NoteKar responds to key actions',
                   value: hapticStyle,
+                  blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                   values: const {
                     'off': 'Off',
                     'light': 'Light',
