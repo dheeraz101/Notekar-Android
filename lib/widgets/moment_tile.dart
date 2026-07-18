@@ -25,11 +25,7 @@ class MomentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = entry.type == 'out'
-        ? p.orange
-        : entry.type == 'single'
-        ? p.accent
-        : p.green;
+    final color = momentColor(p, entry.type);
     if (compact) {
       return GestureDetector(
         onTap: onTap,
@@ -46,10 +42,13 @@ class MomentTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 5,
-                height: 5,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              Padding(
+                padding: const EdgeInsets.only(left: 4), // iOS Inset look
+                child: Container(
+                  width: 8, // Prominent iOS HIG style
+                  height: 8,
+                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                ),
               ),
               const SizedBox(width: 8),
               Text(

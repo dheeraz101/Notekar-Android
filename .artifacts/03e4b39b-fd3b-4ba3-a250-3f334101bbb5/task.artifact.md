@@ -1,12 +1,10 @@
-- [x] **Phase 1: Logic & Contrast Fixing**
-    - [x] Fix backup reminder algorithm (lib/screens/note_kar_home.dart)
-    - [ ] Boost Light Mode clock contrast (lib/models/palette.dart)
-- [ ] **Phase 2: History UI Final Polish**
-    - [ ] Update notification bar to pure black for AMOLED (lib/dialogs/history_dialog.dart)
-    - [ ] Center text and make "Undo" solid in notification pills (lib/dialogs/history_dialog.dart)
-- [ ] **Phase 3: Global Grid Audit**
-    - [ ] Align description notes with card margins (lib/widgets/common_elements.dart)
-    - [ ] Standardize settings row vertical centering (lib/widgets/settings_widgets.dart)
-- [ ] **Phase 4: Verification**
-    - [ ] Run `flutter analyze`
-    - [ ] Logic/Visual audit across all themes
+- [x] **Phase 1: Dedicated Color Categorization**
+    - [x] Update `MomentTile` color logic (lib/widgets/moment_tile.dart)
+    - [x] Update `SavedPulse` labels and color (lib/widgets/feedback_widgets.dart)
+- [x] **Phase 2: Vertical Alignment Sync**
+    - [x] Update `AppSheet` bottom padding for safe area (lib/dialogs/app_sheet.dart)
+    - [x] Re-position History notification to mirror home toolbar (lib/dialogs/history_dialog.dart)
+- [x] **Phase 3: Verification**
+    - [x] Run `flutter analyze`
+    - [x] Verify "Single" moments are Blue
+    - [x] Verify History notification vertical offset

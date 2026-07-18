@@ -87,7 +87,12 @@ class _AppSheetState extends State<AppSheet> {
         borderRadius: widget.docked
             ? const BorderRadius.vertical(top: Radius.circular(24))
             : null,
-        padding: const EdgeInsets.fromLTRB(spacing16, spacing8, spacing16, spacing16),
+        padding: EdgeInsets.fromLTRB(
+          spacing16,
+          spacing8,
+          spacing16,
+          widget.docked ? MediaQuery.paddingOf(context).bottom + spacing16 : spacing16,
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: widget.docked ? 720 : 460),
           child: Column(

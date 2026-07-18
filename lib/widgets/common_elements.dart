@@ -159,7 +159,7 @@ class SettingsPageNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 12, 4, 16), // iOS footer style alignment
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 24), // Inset to match card row content
       child: Text(
         text,
         style: TextStyle(

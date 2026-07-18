@@ -1,20 +1,29 @@
-# Walkthrough - Smart Backup Reminder Logic
+# Walkthrough - Moment Categorization & Notification Alignment
 
-Implemented a more intelligent backup reminder system that respects the actual age of the user's data.
+Successfully implemented dedicated color categorization for moments and synchronized the History notification position with the home menu bar.
 
 ## Changes Made
 
-### 1. Smart Baseline Calculation
-- **The Fix:** Updated `_maybeShowBackupReminder` to calculate the "age" of unsaved data correctly even if a backup has never been created.
-- **Old Logic:** If `_lastBackupAt` was null, it would show the reminder immediately on every app launch if any moments existed.
-- **New Logic:** If `_lastBackupAt` is null, the app now uses the **timestamp of the oldest moment** as the baseline.
-- **Result:** New users or those who just imported data won't be nagged until their oldest unsaved moment actually reaches the reminder threshold (e.g., 7 days).
+### 1. Dedicated "Single" Moment Color
+- **Type Differentiation:** Removed the dependency of "Single" moments on the dynamic accent color.
+- **Categorization:** Assigned a permanent **Dedicated iOS Blue** (`#007AFF` / `#0A84FF`) to all Single moments.
+- **Consistency:** Moments are now strictly categorized across the entire app by color:
+    - **Green:** IN
+    - **Orange:** OUT
+    - **Blue:** SINGLE
+- **Feedback Sync:** Updated the `SavedPulse` logic to correctly display `'SINGLE saved'` when a non-directional moment is recorded.
+
+### 2. Vertical Alignment Synchronization
+- **Safe Area Support:** Updated the `AppSheet` component to dynamically calculate bottom padding based on the system navigation bar (`MediaQuery.paddingOf(context).bottom`).
+- **Notification Re-positioning:** Moved the History "Undo" notification bar to the bottom of the content area.
+- **Result:** The History notification now floats at the **exact same vertical position** as the home screen menu bar, creating a professional and anchored UX anchor point across screens.
 
 ## Verification Results
 
-### Logic Tests
-- **New User Verify:** Created a fresh moment with no prior backup; verified no reminder toast appeared (since the moment is only minutes old).
-- **Threshold Verify:** Confirmed that if the oldest moment is older than the user-selected days, the reminder correctly appears once per day.
+### Interaction Tests
+- **Color Audit:** Confirmed that saving a "Single" moment results in a Blue pulse and a Blue history card, regardless of the chosen Action Color.
+- **Alignment Audit:** Verified that the "Undo" pill in History perfectly mirrors the vertical offset of the home menu bar.
+- **Safe Area Verify:** Confirmed that the notification bar respects the Android navigation bar on gesture-nav and 3-button-nav devices.
 
 ### Automated Tests
 - **Flutter Analyze:** Passed (0 issues).

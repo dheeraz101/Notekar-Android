@@ -220,7 +220,7 @@ Color momentColor(Palette p, String type) {
   return switch (type) {
     'in' => p.green,
     'out' => p.orange,
-    _ => p.accent,
+    _ => p.blue, // Dedicated blue for Single moments
   };
 }
 

@@ -246,6 +246,7 @@ String _pulseLabel(String type) {
   return switch (type) {
     'in' => 'IN saved',
     'out' => 'OUT saved',
+    'single' => 'SINGLE saved',
     _ => 'Saved',
   };
 }

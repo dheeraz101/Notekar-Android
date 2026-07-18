@@ -16,6 +16,7 @@ class Palette {
     required this.green,
     required this.orange,
     required this.red,
+    required this.blue,
   });
 
   final String name;
@@ -32,6 +33,7 @@ class Palette {
   final Color green;
   final Color orange;
   final Color red;
+  final Color blue;
 }
 
 Palette paletteFor(
@@ -56,14 +58,15 @@ Palette paletteFor(
       green: const Color(0xFF34C759),
       orange: const Color(0xFFFF9500),
       red: const Color(0xFFFF3B30),
+      blue: const Color(0xFF007AFF),
     );
   }
   final amoled = theme == 'amoled';
   return Palette(
     name: theme,
-    bg: amoled ? Colors.black : Colors.black, // Page BG is always true black on iOS dark
-    surface: amoled ? Colors.black : Colors.black,
-    surface2: amoled ? const Color(0xFF000000) : const Color(0xFF1C1C1E), // Deep gray for dark mode cards
+    bg: amoled ? Colors.black : const Color(0xFF121212), // Distinction between AMOLED and Dark
+    surface: amoled ? Colors.black : const Color(0xFF121212),
+    surface2: amoled ? const Color(0xFF0A0A0A) : const Color(0xFF1C1C1E), // Subtle separation for AMOLED
     surface3: amoled ? const Color(0xFF1C1C1E) : const Color(0xFF2C2C2E),
     border: amoled
         ? (highContrast ? const Color(0xFF323232) : const Color(0xFF1F1F1F))
@@ -76,6 +79,7 @@ Palette paletteFor(
     green: const Color(0xFF30D158),
     orange: const Color(0xFFFF9F0A),
     red: const Color(0xFFFF453A),
+    blue: const Color(0xFF0A84FF),
   );
 }
 

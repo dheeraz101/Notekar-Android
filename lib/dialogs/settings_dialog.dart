@@ -1315,7 +1315,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         controller: _activeController,
         showLargeTitle: category == null,
         child: SizedBox(
-          width: 430,
+          width: 410, // Refined width for better UX
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
           child: CustomScrollView(
             controller: _activeController,
@@ -1334,7 +1334,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         decoration: BoxDecoration(
                           color: p.surface2,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: p.border),
                         ),
                         child: Row(

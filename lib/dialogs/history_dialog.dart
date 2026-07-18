@@ -561,7 +561,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ],
             ),
             Positioned(
-              bottom: 80, // Floating above moments
+              bottom: 0, // Mirrored with home toolbar via AppSheet padding
               left: 16,
               right: 16,
               child: AnimatedSwitcher(
@@ -602,7 +602,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                   ? Colors.white
                                   : widget.p.surface2,
                           borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: widget.p.border),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.2),

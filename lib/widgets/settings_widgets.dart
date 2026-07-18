@@ -42,8 +42,8 @@ class SettingsGroup extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(10), // Tighter iOS 17 radius
-            border: Border.all(color: p.border),
+            borderRadius: BorderRadius.circular(20), // Premium modern iOS radius
+            border: p.name == 'amoled' ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8) : null,
           ),
           child: Column(
             children: [
@@ -183,7 +183,7 @@ class SegmentedSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return Glass(
       p: p,
-      radius: 12,
+      radius: 20,
       blur: blur,
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -467,12 +467,8 @@ class ThemeChoice extends StatelessWidget {
       child: Container(
         height: 80,
         decoration: BoxDecoration(
-          color: p.surface2,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: active ? p.accent : p.border,
-            width: active ? 2 : 1,
-          ),
+          color: active ? p.surface3 : p.surface2,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -483,7 +479,7 @@ class ThemeChoice extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                border: Border.all(color: p.border),
+                border: Border.all(color: p.border, width: 0.5),
               ),
               child: active
                   ? Icon(Icons.check_rounded, color: p.accent, size: 18)
@@ -613,7 +609,7 @@ class ColorChoiceSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return Glass(
       p: p,
-      radius: 16,
+      radius: 20,
       blur: blur,
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -763,8 +759,7 @@ class SettingsSearchBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: p.border),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
         controller: controller,
@@ -811,8 +806,7 @@ class SettingsAboutBlock extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: p.border),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
