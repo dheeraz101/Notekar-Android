@@ -529,13 +529,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (!mounted || _backupReminderDays <= 0 || _entries.isEmpty) {
       return;
     }
+
+    final now = DateTime.now();
+    final int baselineTs;
+
     if (_lastBackupAt != null) {
-      final age = DateTime.now().difference(
-        DateTime.fromMillisecondsSinceEpoch(_lastBackupAt!),
-      );
-      if (age.inDays < _backupReminderDays) return;
+      baselineTs = _lastBackupAt!;
+    } else {
+      // If never backed up, use the timestamp of the oldest moment.
+      // This prevents annoying reminders for new users or fresh imports.
+      baselineTs = _entries.map((e) => e.timestamp).reduce(math.min);
     }
-    final today = dateKey(DateTime.now());
+
+    final age = now.difference(DateTime.fromMillisecondsSinceEpoch(baselineTs));
+    if (age.inDays < _backupReminderDays) {
+      return;
+    }
+
+    final today = dateKey(now);
     if (_prefs?.getString('m-last-backup-reminder-day') == today) return;
     _prefs?.setString('m-last-backup-reminder-day', today);
     _showToast('Backup reminder: export a fresh backup soon', warning: true);

@@ -102,7 +102,7 @@ class SettingsRow extends StatelessWidget {
             Container(
               width: 32,
               height: 32,
-              margin: const EdgeInsets.only(top: 8), // Shifted down for balance
+              margin: const EdgeInsets.only(top: 9), // Synchronized with title
               decoration: BoxDecoration(
                 color: rowColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -114,7 +114,7 @@ class SettingsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 3), // Visual sync with icon
+                  const SizedBox(height: 3), // Visual center-line sync
                   HighlightedText(
                     text: title,
                     query: highlight,
@@ -349,7 +349,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
             Container(
               width: 32,
               height: 32,
-              margin: const EdgeInsets.only(top: 8), // Sync
+              margin: const EdgeInsets.only(top: 9), // Synchronized
               decoration: BoxDecoration(
                 color: (enabled && value ? switchColor : p.text3).withValues(
                   alpha: 0.10,
@@ -367,7 +367,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 3), // Sync
+                  const SizedBox(height: 3), // Center-line sync
                   Text(
                     widget.title,
                     style: TextStyle(

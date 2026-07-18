@@ -159,12 +159,12 @@ class SettingsPageNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), // iOS Footer text padding aligned with cards
+      padding: const EdgeInsets.fromLTRB(4, 12, 4, 16), // iOS footer style alignment
       child: Text(
         text,
         style: TextStyle(
           color: p.text2,
-          fontSize: 13, // Standard iOS footer size
+          fontSize: 13,
           height: 1.35,
         ),
       ),

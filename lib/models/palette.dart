@@ -51,7 +51,7 @@ Palette paletteFor(
       text: const Color(0xFF000000),
       text2: highContrast ? const Color(0xFF202020) : const Color(0xFF3C3C43).withValues(alpha: 0.6),
       text3: highContrast ? const Color(0xFF5D5D5D) : const Color(0xFF3C3C43).withValues(alpha: 0.3),
-      clock: const Color(0xFFE9E9E9),
+      clock: highContrast ? const Color(0xFF8E8E93) : const Color(0xFFD1D1D6),
       accent: accent,
       green: const Color(0xFF34C759),
       orange: const Color(0xFFFF9500),

@@ -50,12 +50,14 @@ class _NoticePill extends StatelessWidget {
     required this.label,
     required this.color,
     this.onTap,
+    this.solid = false,
   });
 
   final Palette p;
   final String label;
   final Color color;
   final VoidCallback? onTap;
+  final bool solid;
 
   @override
   Widget build(BuildContext context) {
@@ -63,19 +65,26 @@ class _NoticePill extends StatelessWidget {
       enabled: onTap != null,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.15), // Translucent inner text area
+          color: solid ? color : color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(999),
+          border: solid
+              ? null
+              : Border.all(
+                color: color.withValues(alpha: 0.4),
+                width: 1.2,
+              ),
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
+            color: solid ? Colors.white : color,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -555,50 +564,81 @@ class _HistoryDialogState extends State<HistoryDialog> {
               bottom: 80, // Floating above moments
               left: 16,
               right: 16,
-              child: Center(
-                child: AnimatedSize(
-                  duration: const Duration(milliseconds: 160),
-                  curve: Curves.easeOutCubic,
-                  child:
-                      _notice == null
-                          ? const SizedBox.shrink()
-                          : Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: widget.p.bg == Colors.black ? const Color(0xFF1C1C1E) : Colors.white, // Solid back pill
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                reverseDuration: const Duration(milliseconds: 250),
+                switchInCurve: Curves.easeOutBack, // Professional iOS spring curve
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) {
+                  final slide = Tween<Offset>(
+                    begin: const Offset(0, 0.4),
+                    end: Offset.zero,
+                  ).animate(animation);
+                  final scale = Tween<double>(
+                    begin: 0.92,
+                    end: 1.0,
+                  ).animate(animation);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: slide,
+                      child: ScaleTransition(
+                        scale: scale,
+                        child: child,
+                      ),
+                    ),
+                  );
+                },
+                child: _notice == null
+                    ? const SizedBox.shrink()
+                    : Container(
+                        key: const ValueKey('notice-bar'),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: widget.p.name == 'amoled'
+                              ? Colors.black // Pure dark for AMOLED
+                              : widget.p.name == 'light'
+                                  ? Colors.white
+                                  : widget.p.surface2,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: widget.p.border),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 15,
+                              offset: const Offset(0, 5),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _NoticePill(
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: _NoticePill(
+                                p: widget.p,
+                                label: _notice!,
+                                color: _noticeUndo == null
+                                    ? widget.p.red
+                                    : widget.p.accent,
+                              ),
+                            ),
+                            if (_noticeUndo != null) ...[
+                              const SizedBox(width: 5),
+                              Expanded(
+                                flex: 2,
+                                child: _NoticePill(
                                   p: widget.p,
-                                  label: _notice!,
-                                  color:
-                                      _noticeUndo == null
-                                          ? widget.p.red
-                                          : widget.p.accent,
+                                  label: 'Undo',
+                                  color: widget.p.accent,
+                                  onTap: _noticeUndo,
+                                  solid: true,
                                 ),
-                                if (_noticeUndo != null) ...[
-                                  const SizedBox(width: 4),
-                                  _NoticePill(
-                                    p: widget.p,
-                                    label: 'Undo',
-                                    color: widget.p.accent,
-                                    onTap: _noticeUndo,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
               ),
             ),
           ],

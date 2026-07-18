@@ -1,67 +1,50 @@
-# iOS UI Polish & Logic Cleanup Plan
+# Global App Audit & UX Refinement Plan
 
-Refine the vertical alignment, fix title clipping in popups, redesign the history undo notification, and ensure every setting has a unique visual identity.
+Address the backup reminder logic bug, enhance history notifications for AMOLED, fix light mode clock contrast, and perform a global layout audit for professional iOS fidelity.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Unique Icons:** I am performing a full audit of the settings menu to ensure no two settings share the same icon. This involves changing several common icons (like `tune` and `backup`) to more specific variants to improve "glanceability."
+> **Backup Reminder Logic:** I am updating the logic to be more intelligent. If no backup has ever been made, the app will use the timestamp of the **oldest moment** as the baseline. This prevents reminders from appearing on every app open for new users or those who just imported data.
 >
-> **Full-Width Dividers:** Group card dividers will now touch the left side completely (removing the 64px indent). This creates a more solid, partitioned look matching the "Inset Grouped" aesthetic.
+> **AMOLED Loyalty:** In AMOLED mode, the history notification bar will now use **Pure Black (`#000000`)**. The "Undo" button will also transition from an outline to a **Solid Accent Pill** for better visibility.
+>
+> **Light Mode Accessibility:** The home clock contrast is being significantly boosted. In "High Contrast" mode, it will use an even darker slate gray to ensure perfect legibility.
 
 ## Proposed Changes
 
-### 1. Header & Title Fixes
-#### [MODIFY] [dialogs/app_sheet.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/app_sheet.dart)
-- In the `AppSheet` build method, wrap the header `Text` widget in a `FittedBox(fit: BoxFit.scaleDown)` with `maxLines: 1`.
-- This prevents long titles like "Time Between Moments" from wrapping and being cut off.
+### 1. Backup Reminder Logic Fix
+#### [MODIFY] [lib/screens/note_kar_home.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/screens/note_kar_home.dart)
+- Update `_maybeShowBackupReminder()`:
+    - If `_lastBackupAt` is `null`, calculate the age based on the `timestamp` of the **oldest moment** in `_entries`.
+    - Only show the reminder if the data is actually older than the selected reminder period.
+    - This ensures users only see the reminder when "truly the time selected."
 
-### 2. History Undo Notification Overhaul
-#### [MODIFY] [dialogs/history_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/history_dialog.dart)
-- Update `_NoticePill` to use a translucent style for the text/button.
-- Wrap it in a solid background container (pill style) that matches the width of the moment cards.
-- Position remains floating above the moments.
+### 2. Premium History Notifications (Final Polish)
+#### [MODIFY] [lib/dialogs/history_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/history_dialog.dart)
+- **Outer Bar:** Set background to `Colors.black` for AMOLED theme.
+- ** Centering:** Wrap `_NoticePill` content in a `Center` widget to ensure perfect alignment regardless of text length.
+- **Undo Button:** Switch to a solid background style (`solid: true`) to make it pop as a primary action.
 
-### 3. Settings Visual Polish
-#### [MODIFY] [widgets/settings_widgets.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/settings_widgets.dart)
-- **Dividers:** Remove `indent: 64` from `SettingsGroup` dividers.
-- **Alignment:**
-    - `SettingsRow`: Update icon margin to `top: 8` and title height to `3`.
-    - `SettingsSwitchRow`: Update icon margin to `top: 8` and title height to `3`.
-    - This provides a more balanced "middle-aligned" look that feels more native on high-DPI screens.
+### 3. Home Clock Contrast Overhaul
+#### [MODIFY] [lib/models/palette.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/models/palette.dart)
+- Update `light` theme `clock` color:
+    - Default: `0xFFC7C7CC` (Mid-gray, significantly darker than F2F2F7).
+    - High Contrast: `0xFF3C3C43` (Deep accessible gray).
 
-#### [MODIFY] [widgets/common_elements.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/common_elements.dart)
-- Update `SettingsPageNote` padding to `EdgeInsets.symmetric(horizontal: 20, vertical: 12)`. This aligns the description text exactly with the left edge of the group cards.
+### 4. Settings Grid & Spacing Audit
+#### [MODIFY] [lib/widgets/common_elements.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/common_elements.dart)
+- Refine `SettingsPageNote` padding to `EdgeInsets.fromLTRB(20, 10, 20, 24)`.
+- This aligns the text with the exact left edge of the cards and ensures there is "breathing room" at the bottom of category pages.
 
-### 4. Logic & Icon Cleanup
-#### [MODIFY] [dialogs/settings_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/settings_dialog.dart)
-- **Back Cards:** Change the arrow and label color from `p.accent` to `p.text` (or `p.text2`) for a cleaner, less "noisy" look.
-- **Icon Audit:**
-    - Personalization: `Icons.brush_rounded`
-    - Data & Backup: `Icons.storage_rounded`
-    - Backup & Export: `Icons.import_export_rounded`
-    - Backup: `Icons.cloud_upload_rounded`
-    - Updates: `Icons.update_rounded`
-    - Help & Guides: `Icons.auto_stories_rounded`
-    - Guides: `Icons.map_rounded`
-    - Capture: `Icons.add_task_rounded`
-    - Large Controls: `Icons.ads_click_rounded`
-    - History Text: `Icons.format_list_bulleted_rounded`
-    - Enable Translucency: `Icons.opacity_rounded`
-    - Toolbar Backplate: `Icons.shape_line_rounded`
-    - Advanced: `Icons.settings_suggest_rounded`
-    - Reset Settings Only: `Icons.settings_backup_restore_rounded`
-
-### 5. Changelog Padding
-#### [MODIFY] [dialogs/changelog_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/changelog_dialog.dart)
-- Add a `SizedBox(height: spacing64)` at the end of the `Column` in `ChangelogSettingsPage` to prevent the last card from touching the bottom.
+#### [MODIFY] [lib/widgets/settings_widgets.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/settings_widgets.dart)
+- **Row Sync:** Adjust icon/title margins (8px/4px) to ensure they are visually perfectly centered on all itel device DPIs.
 
 ## Verification Plan
 
 ### Manual Verification
-1. **Title Test:** Open "Time Between Moments" duration; verify title fits perfectly.
-2. **Undo Test:** Delete a moment; verify the new dual-pill style notification.
-3. **Alignment Audit:** Verify that page notes start at the same vertical line as group cards.
-4. **Icon Audit:** Browse settings and confirm every row has a unique, descriptive icon.
-5. **Dividers:** Verify dividers now reach the left edge of the card.
-6. **Changelog:** Verify the last card has plenty of breathing room at the bottom.
+1. **Reminder Logic:** Clear `m-last-backup-at` in debug; verify no reminder appears if moments are new.
+2. **AMOLED Audit:** Verify the History notification bar is pitch black.
+3. **Pill Polish:** Confirm "Undo" is solid and text is centered.
+4. **Contrast Audit:** Switch to Light theme; verify the clock is highly visible. Enable High Contrast and verify it darkens appropriately.
+5. **Layout Audit:** Verify settings descriptions align perfectly with card borders.

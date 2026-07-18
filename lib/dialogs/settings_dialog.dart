@@ -1782,7 +1782,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               if (show('App Icons'))
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing12),
+                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
                   sliver: SliverToBoxAdapter(child: _appIconsPage(p)),
                 ),
               if (show('Logging'))

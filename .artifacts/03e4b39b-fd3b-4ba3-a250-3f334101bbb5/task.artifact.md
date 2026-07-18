@@ -1,14 +1,12 @@
-- [x] **Phase 1: Layout & Alignment**
-    - [x] Fix title clipping in `AppSheet` (lib/dialogs/app_sheet.dart)
-    - [x] Align `SettingsPageNote` descriptions (lib/widgets/common_elements.dart)
-    - [x] Remove divider indent in `SettingsGroup` (lib/widgets/settings_widgets.dart)
-    - [x] Refine `SettingsRow` / `SettingsSwitchRow` vertical sync (lib/widgets/settings_widgets.dart)
-- [x] **Phase 2: History Sheet Overhaul**
-    - [x] Redesign `_NoticePill` and its container for dual-pill style (lib/dialogs/history_dialog.dart)
-- [x] **Phase 3: Settings Content Cleanup**
-    - [x] Re-color "Move back card" to match title colors (lib/dialogs/settings_dialog.dart)
-    - [x] Assign unique icons to all settings rows (lib/dialogs/settings_dialog.dart)
-    - [x] Add bottom spacing to `ChangelogSettingsPage` (lib/dialogs/changelog_dialog.dart)
-- [x] **Phase 4: Verification**
-    - [x] Run `flutter analyze`
-    - [x] Verify linear column alignment and unique iconography
+- [x] **Phase 1: Logic & Contrast Fixing**
+    - [x] Fix backup reminder algorithm (lib/screens/note_kar_home.dart)
+    - [ ] Boost Light Mode clock contrast (lib/models/palette.dart)
+- [ ] **Phase 2: History UI Final Polish**
+    - [ ] Update notification bar to pure black for AMOLED (lib/dialogs/history_dialog.dart)
+    - [ ] Center text and make "Undo" solid in notification pills (lib/dialogs/history_dialog.dart)
+- [ ] **Phase 3: Global Grid Audit**
+    - [ ] Align description notes with card margins (lib/widgets/common_elements.dart)
+    - [ ] Standardize settings row vertical centering (lib/widgets/settings_widgets.dart)
+- [ ] **Phase 4: Verification**
+    - [ ] Run `flutter analyze`
+    - [ ] Logic/Visual audit across all themes

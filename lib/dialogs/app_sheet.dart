@@ -120,6 +120,8 @@ class _AppSheetState extends State<AppSheet> {
                               fit: BoxFit.scaleDown,
                               child: Text(
                                 widget.title,
+                                maxLines: 1,
+                                softWrap: false,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: p.text,
