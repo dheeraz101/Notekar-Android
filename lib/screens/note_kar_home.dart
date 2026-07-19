@@ -1630,6 +1630,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<String> _checkForUpdates() async {
+    final started = DateTime.now();
     setState(() {
       _checkingUpdates = true;
       _updateStatus = 'Checking for updates...';
@@ -1637,6 +1638,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _showToast('Checking for updates...');
     try {
       final latest = await _fetchLatestRelease();
+
+      final elapsed = DateTime.now().difference(started);
+      if (elapsed < const Duration(seconds: 5)) {
+        await Future<void>.delayed(const Duration(seconds: 5) - elapsed);
+      }
+
       if (latest == null) {
         final status = 'Could not check updates';
         _setUpdateStatus(status);

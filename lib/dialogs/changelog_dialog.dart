@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -196,7 +195,6 @@ class _ChangelogSettingsPageState extends State<ChangelogSettingsPage> {
               }
             }),
           ),
-        const SizedBox(height: spacing64),
       ],
     );
   }
@@ -638,7 +636,6 @@ class _WhatsNewPanel extends StatelessWidget {
               ],
             ),
           ),
-        const SizedBox(height: spacing64),
       ],
     );
   }

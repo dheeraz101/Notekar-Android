@@ -29,19 +29,31 @@ class NoteDialog extends StatefulWidget {
 }
 
 class _NoteDialogState extends State<NoteDialog> {
-  static const _maxChars = 280;
   late final TextEditingController _controller;
+  final _scrollController = ScrollController();
   bool _showWarning = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
+    _controller.addListener(_scrollToBottom);
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_scrollToBottom);
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -71,8 +83,9 @@ class _NoteDialogState extends State<NoteDialog> {
             height: 160,
             child: TextField(
               controller: _controller,
+              scrollController: _scrollController,
               autofocus: true,
-              maxLength: _maxChars,
+              maxLength: maxNoteLength,
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
@@ -117,7 +130,7 @@ class _NoteDialogState extends State<NoteDialog> {
           _LinearCharacterIndicator(
             p: widget.p,
             count: _controller.text.length,
-            max: _maxChars,
+            max: maxNoteLength,
           ),
           if (_showWarning)
             Padding(

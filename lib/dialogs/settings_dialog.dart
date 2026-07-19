@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
+import 'package:notekar/dialogs/feedback_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/models/moment.dart';
@@ -678,11 +679,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   bool get _upToDate => updateStatus.toLowerCase().contains('up to date');
 
-  String get _updateTitle => _updateAvailable
-      ? 'Install Update'
-      : _upToDate
-      ? "You're Up to Date"
-      : 'Check for Update';
 
   String get _updateSubtitle {
     if (_updateAvailable) return 'Install latest builds from GitHub';
@@ -873,9 +869,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
             keywords: ['minimal', 'icons', 'actions', 'compact', 'row', 'history'],
           ),
           (
-            title: 'Updates',
-            subtitle: 'Check for update, remote notices, changelog',
-            category: 'Updates',
+            title: 'Updates & Notices',
+            subtitle: 'Software update, app notices, changelog',
+            category: 'Updates & Notices',
             icon: Icons.update_rounded,
             keywords: ['update', 'github', 'release', 'notification', 'notice', 'version', 'check'],
           ),
@@ -1500,6 +1496,234 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  void _openFeedback() {
+    showGeneralDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close feedback',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, __, ___) => FeedbackDialog(
+        p: paletteFor(
+          theme,
+          highContrast: highContrast,
+          accentName: accentColor,
+        ),
+        onOpenLink: widget.onOpenLink,
+        blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+      ),
+    );
+  }
+
+  Widget _updateCenterPage(Palette p) {
+    final availableVersion = _availableVersion;
+    final updateAvailable = _updateAvailable;
+    final upToDate = _upToDate;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: spacing24),
+        Center(
+          child: Column(
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.asset('icon-maskable-512.png', fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(height: spacing20),
+              Text(
+                'NoteKar',
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Version v$appVersion',
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: spacing48),
+        if (checkingUpdates) ...[
+          Center(
+            child: Column(
+              children: [
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: p.accent,
+                  ),
+                ),
+                const SizedBox(height: spacing16),
+                Text(
+                  'Checking for updates...',
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else if (updateAvailable) ...[
+          Container(
+            padding: const EdgeInsets.all(spacing20),
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: p.accent.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.download_rounded, color: p.accent, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Update Available',
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Version v$availableVersion is now available. This update includes new features, performance improvements, and bug fixes.',
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 14,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: spacing24),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: p.accent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            onPressed: () => widget.onOpenLink(githubReleases),
+            child: const Text(
+              'Download from GitHub',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+          ),
+        ] else if (upToDate) ...[
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: p.green.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.check_rounded, color: p.green, size: 32),
+                ),
+                const SizedBox(height: spacing16),
+                Text(
+                  'NoteKar is up to date',
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Last checked: ${widget.lastUpdateCheckedAt == null ? 'Just now' : relativeAge(widget.lastUpdateCheckedAt!)}',
+                  style: TextStyle(color: p.text3, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
+          Center(
+            child: Text(
+              'Check for the latest features and fixes.',
+              style: TextStyle(color: p.text2, fontSize: 14),
+            ),
+          ),
+        ],
+        const Spacer(),
+        if (!checkingUpdates && !updateAvailable)
+          Padding(
+            padding: const EdgeInsets.only(bottom: spacing16),
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: p.accent,
+                minimumSize: const Size.fromHeight(56),
+                side: BorderSide(color: p.accent.withValues(alpha: 0.4)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () async {
+                setState(() {
+                  checkingUpdates = true;
+                  updateStatus = 'Checking for updates...';
+                });
+                final status = await widget.onCheckUpdates();
+                if (mounted) {
+                  setState(() {
+                    updateStatus = status;
+                    checkingUpdates = false;
+                  });
+                }
+              },
+              child: const Text(
+                'Check for Update',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        SettingsPageDescription(
+          p: p,
+          text: 'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
+          bottomPadding: 0,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = paletteFor(
@@ -1630,9 +1854,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           SettingsRow(
                             p: p,
                             icon: Icons.update_rounded,
-                            title: 'Updates',
+                            title: 'Updates & Notices',
                             color: p.accent,
-                            onTap: () => _openCategory('Updates'),
+                            onTap: () => _openCategory('Updates & Notices'),
                           ),
                           SettingsRow(
                             p: p,
@@ -1660,7 +1884,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         onEmailTap: () => widget.onOpenLink(supportEmail),
                         onGitHubTap: () => widget.onOpenLink(githubRepo),
                         onCoffeeTap: () => widget.onOpenLink(coffeeLink),
-                        onIssuesTap: () => widget.onOpenLink(githubIssues),
+                        onIssuesTap: _openFeedback,
                         onVersionLongPress: () => widget.onOpenLink(officialSite),
                       ),
                       const SizedBox(height: spacing64),
@@ -2296,20 +2520,168 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing64),
                   ]),
                 ),
-              if (show('Search Notes'))
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: spacing8),
-                      NoteSearchContent(
-                        p: p,
-                        entries: entries,
-                        compactRows: compactHistory,
-                        height: math.min(MediaQuery.sizeOf(context).height * 0.56, 500),
+              if (show('Search Notes')) ...[
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: SliverStickyHeaderDelegate(
+                    height: 80,
+                    child: Container(
+                      color: p.surface.withValues(
+                        alpha: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur ? 0.65 : 1.0,
                       ),
-                    ],
+                      padding: const EdgeInsets.fromLTRB(spacing16, spacing8, spacing16, spacing12),
+                      child: SearchNotesBox(
+                        p: p,
+                        controller: _settingsSearchController,
+                        onChanged: (value) => setState(() => _settingsQuery = value),
+                        onClear: () => setState(() {
+                          _settingsSearchController.clear();
+                          _settingsQuery = '';
+                        }),
+                      ),
+                    ),
                   ),
                 ),
+                if (_settingsQuery.trim().isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                      child: Row(
+                        children: [
+                          Text(
+                            'ALL NOTES',
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${entries.where((e) => e.note.isNotEmpty).length} items',
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(spacing16, spacing4, spacing16, spacing64),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final notes = entries
+                            .where((e) => e.note.isNotEmpty)
+                            .where((e) {
+                              final q = _settingsQuery.trim().toLowerCase();
+                              if (q.isEmpty) return true;
+                              return e.note.toLowerCase().contains(q) ||
+                                     datePretty(e.timestamp).contains(q) ||
+                                     timeOnly(e.timestamp).contains(q);
+                            })
+                            .toList();
+
+                        if (index >= notes.length) return null;
+                        final entry = notes[index];
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: compactHistory ? 10 : 16),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(spacing16),
+                            decoration: BoxDecoration(
+                              color: p.surface2,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: p.border.withValues(alpha: 0.6),
+                                width: 0.8,
+                              ),
+                              boxShadow: p.name == 'amoled'
+                                  ? null
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.04),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: momentColor(p, entry.type)
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        entry.type.toUpperCase(),
+                                        style: TextStyle(
+                                          color: momentColor(p, entry.type),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
+                                        style: TextStyle(
+                                          color: p.text3,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          fontFeatures: const [
+                                            FontFeature.tabularFigures()
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  entry.note,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: 16,
+                                    height: 1.45,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: entries
+                          .where((e) => e.note.isNotEmpty)
+                          .where((e) {
+                            final q = _settingsQuery.trim().toLowerCase();
+                            if (q.isEmpty) return true;
+                            return e.note.toLowerCase().contains(q) ||
+                                   datePretty(e.timestamp).contains(q) ||
+                                   timeOnly(e.timestamp).contains(q);
+                          })
+                          .length,
+                    ),
+                  ),
+                ),
+              ],
               if (show('Guides'))
                 SliverList(
                   delegate: SliverChildListDelegate([
@@ -2370,7 +2742,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing64),
                   ]),
                 ),
-              if (show('Updates'))
+              if (show('Update Center'))
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: spacing20),
+                    child: _updateCenterPage(p),
+                  ),
+                ),
+              if (show('Updates & Notices'))
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
@@ -2383,20 +2763,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(
                           p: p,
-                          icon: checkingUpdates ? Icons.sync_rounded : _updateAvailable ? Icons.download_rounded : Icons.update_rounded,
-                          title: _updateTitle,
+                          icon: Icons.system_update_rounded,
+                          title: 'Software Update',
                           color: p.accent,
                           status: 'v$appVersion',
-                          onTap: () async {
-                            if (_updateAvailable) { widget.onOpenLink(githubReleases); return; }
-                            setState(() { checkingUpdates = true; updateStatus = 'Checking for updates...'; });
-                            final status = await widget.onCheckUpdates();
-                            if (mounted) { setState(() { updateStatus = status; checkingUpdates = false; }); }
-                          },
+                          onTap: () => _openCategory('Update Center', parent: 'Updates & Notices'),
                         ),
                         SettingsSwitchRow(p: p, icon: Icons.notifications_active_rounded, title: 'App Notices', color: p.accent, value: remoteNotices, onChanged: (value) { setState(() => remoteNotices = value); widget.onRemoteNotices(value); }),
-                        SettingsRow(p: p, icon: Icons.new_releases_rounded, title: "What's New", color: p.orange, status: 'Recent', onTap: () => _openCategory("What's New", parent: 'Updates')),
-                        SettingsRow(p: p, icon: Icons.article_rounded, title: 'Changelog', color: p.green, status: 'History', onTap: () => _openCategory('Changelog', parent: 'Updates')),
+                        SettingsRow(p: p, icon: Icons.new_releases_rounded, title: "What's New", color: p.orange, status: 'Recent', onTap: () => _openCategory("What's New", parent: 'Updates & Notices')),
+                        SettingsRow(p: p, icon: Icons.article_rounded, title: 'Changelog', color: p.green, status: 'History', onTap: () => _openCategory('Changelog', parent: 'Updates & Notices')),
                       ],
                     ),
                     SettingsPageDescription(
@@ -2533,6 +2908,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
                         SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.feedback_rounded,
+                          title: 'Feedback',
+                          color: p.green,
+                          onTap: _openFeedback,
+                        ),
                       ],
                     ),
                     SettingsPageDescription(
@@ -2661,10 +3043,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: true),
-                      SettingsPageDescription(
-                        p: p,
-                        text: 'Key highlights and features from the latest release.',
-                      ),
                     ],
                   ),
                 ),
@@ -2674,10 +3052,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: false),
-                      SettingsPageDescription(
-                        p: p,
-                        text: 'Full release history, including fixes and improvements.',
-                      ),
                     ],
                   ),
                 ),

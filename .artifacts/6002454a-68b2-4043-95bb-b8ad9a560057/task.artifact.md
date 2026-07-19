@@ -26,15 +26,19 @@
   - [x] Present for manual verification.
 
 ## Phase 2 — Function, Features & Logic
-- [ ] **Increase Note Length**
-  - [ ] Update `maxNoteLength` to 500.
-  - [ ] Update character counter UI.
-  - [ ] Verify DB and Export/Import support for longer notes.
-- [ ] **Check for Updates Logic**
-  - [ ] Implement 3s minimum loading state.
-  - [ ] Implement 1m "Up to Date" reset timer.
-- [ ] **Feedback System**
-  - [ ] Implement "Report a Bug" and "Request a Feature" logic.
+- [x] **Increase Note Length**
+  - [x] Update `maxNoteLength` to 500.
+  - [x] Update character counter UI.
+  - [x] Verify DB and Export/Import support for longer notes.
+- [/] **Software Update Center (Apple Style)**
+  - [ ] Create `UpdateCenterPage` widget with iOS-inspired layout.
+  - [ ] Implement 5s minimum check animation logic.
+  - [ ] Design "Up to date" and "Update available" dynamic states.
+  - [ ] Integrate into `SettingsDialog` navigation stack.
+  - [ ] Sync update status across main settings and detail page.
+- [x] **Feedback System**
+  - [x] Implement "Report a Bug" and "Request a Feature" logic.
+  - [x] Integrate feedback triggers in Settings and About.
 - [ ] **Verification**
   - [ ] Run `flutter analyze`.
   - [ ] Perform build test.

@@ -193,7 +193,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                 )
               : ListView.builder(
                   controller: widget.scrollController,
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.only(bottom: spacing64),
                   itemCount: rows.length + (hasOlderRows ? 1 : 0),
                   itemBuilder: (_, index) {
                     if (index >= rows.length) {

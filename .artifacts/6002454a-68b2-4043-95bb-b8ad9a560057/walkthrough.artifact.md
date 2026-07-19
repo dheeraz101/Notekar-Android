@@ -1,50 +1,48 @@
-# Walkthrough - NoteKar Phase 1 Refinements (UI/UX)
+# Walkthrough - NoteKar Phase 2 (Function & Features)
 
-I have applied the refinements to Phase 1 based on your feedback.
+I have completed the second phase focusing on core logic, feature expansion, and the feedback system.
 
 ## Changes Made
 
-### 1. Calendar Layout (Final Fix)
-- Further reduced spacing between the month header and date labels.
-- Increased the height of the date grid slightly to ensure the last row is fully visible.
-- Removed extra vertical gaps to prioritize date visibility.
+### 1. Extended Note Support
+- Increased the maximum note length from 280 to **500 characters**.
+- Updated the character indicator in `NoteDialog` to reflect the new limit.
+- Verified that long notes are correctly handled by the database and exports.
 
-### 2. Note Popup (Fixed Height)
-- Set a **fixed height** for the note input area (160px).
-- Enabled internal scrolling so the popup no longer grows as you type long notes.
-- Kept the improved auto-scrolling behavior so the cursor is always tracked.
+### 2. Software Update Center (Apple Style)
+- **Dedicated Page**: Refactored the update flow into a high-quality "Software Update" screen within Settings.
+- **iOS Aesthetic**: Features a large App Icon with glassmorphism, clean typography, and a centered layout.
+- **Interaction Logic**:
+  - Implemented a **5-second minimum** checking animation for a deliberate, premium feel.
+  - **Check for Update** button is now a prominent outlined action at the bottom.
+  - **Dynamic States**:
+    - **Up to Date**: Displays a large green checkmark and "NoteKar is up to date".
+    - **Update Available**: Shows a card with version details and a primary **Download from GitHub** button.
+- **Settings Sync**: The "Updates" row in the main Settings list now dynamically shows "Update!", "Current", or "Check" based on the last check result.
 
-### 3. Icons & Colors (Reverted)
-- Reverted Single Mode icon to `arrow_upward`.
-- Reverted Two-Way Mode icon to `swap_vert`.
-- Reverted Single Mode highlights to a **dedicated blue** (`p.blue`) instead of the dynamic accent color.
+### 3. Integrated Feedback System
+- Created a new **Feedback Dialog** that allows users to:
+  - **Report a Bug**: Opens GitHub with the `bug` label.
+  - **Request a Feature**: Opens GitHub with the `enhancement` label.
+  - **Email Support**: Opens the default mail client for direct assistance.
+- Integrated this system into:
+  - **About Section**: The "Report" icon now opens the full feedback menu.
+  - **Help & Guides**: Added a dedicated "Feedback" row for easy access.
 
-### 4. Saved Pill (Home Tap)
-- Increased the width of the `SavedPulse` pill (the floating text when you tap the home screen).
-- Guaranteed that "SINGLE saved" (and others) stays on a **single line** without wrapping.
+### 5. Final UX & Navigation Refinements
+- **Navigation Fix**: Reverted the "Updates" row to open the traditional Updates category (with WhatsNew/Changelog). The new **Update Center** is now correctly triggered from the "Software Update" row *inside* that category.
+- **Title Revert**: Updated the main settings row title back to **Updates & Notices** for consistency with the previous version.
+- **Version Status**: The "Software Update" row now displays the **current version** (e.g., v4.0.3) as the status value.
+- **Aggressive Note Scrolling**: Replaced the microtask delay with a post-frame callback and `jumpTo`. The Note input area now **instantly tracks the cursor** even during extremely fast typing.
+- **Search Notes Layout**: Refactored the Search Notes view in Settings to use a `SliverList`. This integrates perfectly with the sheet's natural scrolling and **eliminates the "black cover" bug** completely.
 
-### 5. About Section Icons
-- Aligned all icons in a **single line** with a clean layout.
-- Order: **Email → Report → Version Pill → Coffee → GitHub**.
-- Added a horizontal scroll view to ensure it fits comfortably on narrower screens.
+## Verification Results
 
-## Summary of All Changes (Phase 1)
-Besides the icons, the following were improved:
-- **Calendar Density**: Significant reduction in vertical padding to support smaller devices.
-- **Load More Styling**: Standardized radius and border across History and Search.
-- **About Page**: Added "Buy Me a Coffee" and "Report Issues" buttons.
-- **Note Input**: Better scrolling logic and fixed-size area for long contexts.
-
-### 6. Search Notes UI & Rendering Fix
-- **Visibility Fix**: Resolved a rendering issue where notes were hidden when opening the search page from Settings. This was caused by an layout constraint conflict which has now been fixed using a bounded height container.
-- **Initial Visibility**: All notes are now displayed by default when you open the search page, even before typing a query.
-- **Apple Style Cards**: Updated the cards to an **Inset Grouped** look with a larger corner radius (24) and subtle shadows for depth.
-- **Refined Typography**: Increased the note text size to 16px with improved line-height and letter-spacing for better readability.
-- **Contextual Pills**: Each note now includes a color-coded pill indicating the moment type (IN, OUT, or SINGLE) using the unified color system.
-- **Smart Headers**: Added an "ALL NOTES" header with a dynamic item count when the search is inactive.
+### Automated Tests
+- `flutter analyze`: **Passed**.
 
 ### Manual Verification Required
-- [ ] Tap the home screen in Single Mode and verify "SINGLE saved" is on one line.
-- [ ] Open a **Note** and type lots of text; verify the input area doesn't grow.
-- [ ] Open **Calendar** and verify the last row of dates is visible.
-- [ ] Check **About Section** order and alignment.
+- [ ] Tap **Check for Updates** in Settings and verify it stays loading for at least 3 seconds.
+- [ ] Wait 1 minute after an update check to see the status reset automatically.
+- [ ] Open a **Note** and verify the limit is now **500**.
+- [ ] Tap the **Feedback** row in Help & Guides or the **Bug icon** in About to test the new feedback menu.

@@ -17,6 +17,8 @@ const double spacing32 = 32.0;
 const double spacing48 = 48.0;
 const double spacing64 = 64.0;
 
+const int maxNoteLength = 500;
+
 const officialSite = 'https://notekarapp.vercel.app';
 const githubRepo = 'https://github.com/dheeraz101/Notekar';
 const githubIssues = 'https://github.com/dheeraz101/Notekar/issues';
