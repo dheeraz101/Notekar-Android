@@ -657,6 +657,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
             keywords: ['preferences', 'defaults', 'settings reset', 'undo'],
           ),
           (
+            title: 'Privacy Policy',
+            subtitle: 'Data safety and local storage commitment',
+            category: 'Privacy Policy',
+            icon: Icons.privacy_tip_rounded,
+            keywords: ['privacy', 'policy', 'data', 'safety', 'local', 'offline', 'legal'],
+          ),
+          (
+            title: 'Licenses',
+            subtitle: 'Software credits and open source legal notices',
+            category: 'Licenses',
+            icon: Icons.description_rounded,
+            keywords: ['license', 'legal', 'credits', 'open source', 'libraries', 'packages'],
+          ),
+          (
             title: 'Guides',
             subtitle: 'Learn taps, notes, history, and backups',
             category: 'Help & Guides',
@@ -1087,7 +1101,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       barrierDismissible: true,
       barrierLabel: 'Close beta info',
       transitionDuration: const Duration(milliseconds: 140),
-      pageBuilder: (_, __, ___) => AppSheet(
+      pageBuilder: (_, _, _) => AppSheet(
         p: p,
         title: 'NoteKar Beta',
         child: Column(
@@ -1260,6 +1274,136 @@ class _SettingsDialogState extends State<SettingsDialog> {
           onLearnMore: () => _showBetaInfoPopup(p),
           bottomPadding: 0,
         ),
+      ],
+    );
+  }
+
+  Widget _licensesPage(Palette p) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: spacing8),
+        Center(
+          child: Column(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset('icon-maskable-512.png', fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'NoteKar',
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                'Version v$appVersion',
+                style: TextStyle(color: p.text3, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: spacing32),
+        Text(
+          'Software Licenses',
+          style: TextStyle(
+            color: p.text,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'NoteKar is built using Flutter and several high-quality open source packages. You can view the full legal notices and individual package licenses below.',
+          style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+        ),
+        const SizedBox(height: 24),
+        FilledButton(
+          onPressed: () => showLicensePage(
+            context: context,
+            applicationName: 'NoteKar',
+            applicationVersion: 'v$appVersion',
+            applicationIcon: Padding(
+              padding: const EdgeInsets.all(12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset('icon-maskable-512.png', width: 64, height: 64),
+              ),
+            ),
+          ),
+          style: FilledButton.styleFrom(
+            backgroundColor: p.accent,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Text('View Full Licenses', style: TextStyle(fontWeight: FontWeight.w800)),
+        ),
+        const SizedBox(height: spacing32),
+      ],
+    );
+  }
+
+  Widget _privacyPolicyPage(Palette p) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: spacing8),
+        Text(
+          'Your Privacy Matters',
+          style: TextStyle(
+            color: p.text,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: spacing12),
+        Text(
+          'NoteKar is designed with an "Offline-First" philosophy. We believe your personal moments and notes belong to you and only you.',
+          style: TextStyle(color: p.text2, fontSize: 15, height: 1.45),
+        ),
+        const SizedBox(height: spacing24),
+        _PolicySection(
+          p: p,
+          icon: Icons.storage_rounded,
+          title: 'Local Storage',
+          text: 'All moments and notes are stored locally on your device using an encrypted-ready database (Hive). No data is ever uploaded to a cloud server unless you manually export a backup file.',
+        ),
+        const SizedBox(height: spacing20),
+        _PolicySection(
+          p: p,
+          icon: Icons.analytics_outlined,
+          title: 'No Tracking',
+          text: 'We do not use any third-party analytics, tracking pixels, or advertising SDKs. Your app usage remains completely anonymous and private.',
+        ),
+        const SizedBox(height: spacing20),
+        _PolicySection(
+          p: p,
+          icon: Icons.wifi_rounded,
+          title: 'Limited Connectivity',
+          text: 'The app only uses the internet to check for software updates on GitHub and to fetch occasional app notices if enabled. No personal data is transmitted during these checks.',
+        ),
+        const SizedBox(height: spacing32),
       ],
     );
   }
@@ -1514,7 +1658,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       barrierDismissible: true,
       barrierLabel: 'Close feedback',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, __, ___) => FeedbackDialog(
+      pageBuilder: (_, _, _) => FeedbackDialog(
         p: paletteFor(
           theme,
           highContrast: highContrast,
@@ -2029,12 +2173,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ),
                           if (_settingsSearchResults.isEmpty)
                             Padding(
-                              padding: const EdgeInsets.only(top: 48),
+                              padding: const EdgeInsets.only(top: 64),
                               child: HIGEmptyState(
                                 p: p,
                                 icon: Icons.search_off_rounded,
                                 title: 'No Results',
-                                message: 'No settings match "${_settingsQuery.trim()}". Try different keywords.',
+                                message: 'No settings match "${_settingsQuery.trim()}". Try different keywords or check your spelling.',
                                 compact: true,
                               ),
                             ),
@@ -2607,117 +2751,132 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ),
                     ),
                   ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(spacing16, spacing4, spacing16, spacing64),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final notes = entries
-                            .where((e) => e.note.isNotEmpty)
-                            .where((e) {
-                              final q = _settingsQuery.trim().toLowerCase();
-                              if (q.isEmpty) return true;
-                              return e.note.toLowerCase().contains(q) ||
-                                     datePretty(e.timestamp).contains(q) ||
-                                     timeOnly(e.timestamp).contains(q);
-                            })
-                            .toList();
+                ...() {
+                  final notes = entries
+                      .where((e) => e.note.isNotEmpty)
+                      .where((e) {
+                        final q = _settingsQuery.trim().toLowerCase();
+                        if (q.isEmpty) return true;
+                        return e.note.toLowerCase().contains(q) ||
+                               datePretty(e.timestamp).contains(q) ||
+                               timeOnly(e.timestamp).contains(q);
+                      })
+                      .toList();
 
-                        if (index >= notes.length) return null;
-                        final entry = notes[index];
+                  if (notes.isEmpty) {
+                    return [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 48),
+                          child: HIGEmptyState(
+                            p: p,
+                            icon: Icons.speaker_notes_off_rounded,
+                            title: 'No Notes Found',
+                            message: _settingsQuery.isEmpty 
+                                ? 'Capture your first note by holding the clock.' 
+                                : 'No notes match "${_settingsQuery.trim()}".',
+                            compact: true,
+                          ),
+                        ),
+                      )
+                    ];
+                  }
 
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: compactHistory ? 10 : 16),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(spacing16),
-                            decoration: BoxDecoration(
-                              color: p.surface2,
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: p.border.withValues(alpha: 0.6),
-                                width: 0.8,
-                              ),
-                              boxShadow: p.name == 'amoled'
-                                  ? null
-                                  : [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.04),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                  return [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(spacing16, spacing4, spacing16, spacing64),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index >= notes.length) return null;
+                            final entry = notes[index];
+
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: compactHistory ? 10 : 16),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(spacing16),
+                                decoration: BoxDecoration(
+                                  color: p.surface2,
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: p.border.withValues(alpha: 0.6),
+                                    width: 0.8,
+                                  ),
+                                  boxShadow: p.name == 'amoled'
+                                      ? null
+                                      : [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.04),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: momentColor(p, entry.type)
-                                            .withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        entry.type.toUpperCase(),
-                                        style: TextStyle(
-                                          color: momentColor(p, entry.type),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.5,
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: momentColor(p, entry.type)
+                                                .withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            entry.type.toUpperCase(),
+                                            style: TextStyle(
+                                              color: momentColor(p, entry.type),
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
+                                            style: TextStyle(
+                                              color: p.text3,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              fontFeatures: const [
+                                                FontFeature.tabularFigures()
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
-                                        style: TextStyle(
-                                          color: p.text3,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          fontFeatures: const [
-                                            FontFeature.tabularFigures()
-                                          ],
-                                        ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      entry.note,
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 16,
+                                        height: 1.45,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: -0.2,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  entry.note,
-                                  style: TextStyle(
-                                    color: p.text,
-                                    fontSize: 16,
-                                    height: 1.45,
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: -0.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: entries
-                          .where((e) => e.note.isNotEmpty)
-                          .where((e) {
-                            final q = _settingsQuery.trim().toLowerCase();
-                            if (q.isEmpty) return true;
-                            return e.note.toLowerCase().contains(q) ||
-                                   datePretty(e.timestamp).contains(q) ||
-                                   timeOnly(e.timestamp).contains(q);
-                          })
-                          .length,
+                              ),
+                            );
+                          },
+                          childCount: notes.length,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  ];
+                }(),
               ],
               if (show('Guides'))
                 SliverList(
@@ -2945,6 +3104,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
                         SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.description_rounded,
+                          title: 'Licenses',
+                          color: p.accent,
+                          onTap: () => _openCategory('Licenses', parent: 'Help & Guides'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.privacy_tip_rounded,
+                          title: 'Privacy Policy',
+                          color: p.green,
+                          onTap: () => _openCategory('Privacy Policy', parent: 'Help & Guides'),
+                        ),
                       ],
                     ),
                     SettingsPageDescription(
@@ -3095,6 +3268,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                   ),
                 ),
+              if (show('Privacy Policy'))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _privacyPolicyPage(p),
+                  ),
+                ),
+              if (show('Licenses'))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _licensesPage(p),
+                  ),
+                ),
               if (show("What's New"))
                 SliverToBoxAdapter(
                   child: Column(
@@ -3122,5 +3309,54 @@ class _SettingsDialogState extends State<SettingsDialog> {
   );
     if (!largeText) return sheet;
     return sheet;
+  }
+}
+
+class _PolicySection extends StatelessWidget {
+  const _PolicySection({
+    required this.p,
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+
+  final Palette p;
+  final IconData icon;
+  final String title;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: p.accent, size: 20),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                text,
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

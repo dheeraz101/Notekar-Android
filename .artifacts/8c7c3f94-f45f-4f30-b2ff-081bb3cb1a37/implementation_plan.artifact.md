@@ -1,41 +1,54 @@
-# Settings Cleanup & Link Audit Plan
+# Release Readiness: UX, Legal & Versioning Plan
 
-This plan aims to simplify the main settings page by removing status labels and providing an audit of all external links for final updates.
+This plan outlines the final steps to ensure Notekar is ready for public release, focusing on a seamless launch experience, legal compliance, and proper versioning.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Link Audit**: Below is the current list of external links found in the project. Please provide the updated URLs if any need changing.
-> - **Official Site**: `https://notekarapp.vercel.app`
-> - **GitHub Repo**: `https://github.com/dheeraz101/Notekar`
-> - **GitHub Issues**: `https://github.com/dheeraz101/Notekar/issues`
-> - **GitHub Releases**: `https://github.com/dheeraz101/Notekar/releases`
-> - **Buy me a Coffee**: `https://buymeacoffee.com/dheeraz101`
-> - **Support Email**: `mailto:yabp.ub8ke@aleeas.com`
-> - **Notification Feed**: `https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json`
+> **Privacy Policy Content:** I will implement a standard, offline-first Privacy Policy dialog. Since Notekar is local-only (except for update checks), the policy will emphasize that your data never leaves the device.
 
 ## Proposed Changes
 
-### 1. Main Settings Cleanup
-- **Update `SettingsDialog`**:
-    - Remove the `status` parameter from all `SettingsRow` items in the **Root Settings Group** (Personalization, Logging, Privacy, Data, etc.).
-    - This will create a cleaner, list-style look as requested.
-    - Status labels *inside* sub-categories (like theme name inside Personalization) will remain unless otherwise specified.
+### 1. UX: Splash Screen Sync (Android)
+- **Goal:** Prevent the "white/black flash" when the app starts by matching the system splash screen with the app's internal background.
+- **Action:**
+    - Create `colors.xml` in Android resources defining `#121212` (Dark background).
+    - Update `styles.xml` and `launch_background.xml` to use this color instead of pure black, ensuring a smooth transition into the Flutter UI.
 
-### 2. Link Implementation
-- Once the user provides the updated links, I will update the constants in `app_utils.dart` to reflect the production-ready URLs.
+### 2. Legal: Licenses & Privacy
+- **Open Source Licenses:**
+    - Add a new row to the **Help & Guides** settings page.
+    - Tapping this will trigger Flutter's built-in `showLicensePage`, which automatically lists all package licenses.
+- **Privacy Policy:**
+    - Create a new `PrivacyPolicyDialog` component.
+    - Add a row to **Help & Guides** to open this dialog.
+    - The policy will clearly state:
+        - Data is stored locally using Hive.
+        - No analytics or tracking.
+        - Internet is only used for GitHub update checks and optional app notices.
+
+### 3. Versioning
+- **Action:** Increment the build number in `pubspec.yaml` from `4.0.3+12` to **`4.0.3+13`**.
+- **Reason:** App stores require a unique, incremented build number for every release submission.
 
 ## Proposed Files
 
-### [Component: UI]
+### [Component: Android Native]
+#### [NEW] [colors.xml](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/android/app/src/main/res/values/colors.xml)
+#### [MODIFY] [styles.xml](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/android/app/src/main/res/values/styles.xml)
+#### [MODIFY] [launch_background.xml](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/android/app/src/main/res/drawable/launch_background.xml)
+
+### [Component: UI & Legal]
+#### [NEW] [privacy_policy_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/dialogs/privacy_policy_dialog.dart)
 #### [MODIFY] [settings_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/dialogs/settings_dialog.dart)
 
-### [Component: Utils]
-#### [MODIFY] [app_utils.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/utils/app_utils.dart)
+### [Component: Metadata]
+#### [MODIFY] [pubspec.yaml](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/pubspec.yaml)
 
 ## Verification Plan
 
 ### Manual Verification
-- Open Settings and verify the main list is clean (no status text on the right side).
-- Verify sub-categories still work as expected.
-- Verify all external links lead to the new provided URLs.
+- **Startup:** Launch the app on an Android device/emulator and verify there is no color flickering during the splash transition.
+- **Licenses:** Open Settings -> Help & Guides -> Open Source Licenses. Verify the list of packages appears correctly.
+- **Privacy:** Open Settings -> Help & Guides -> Privacy Policy. Read through the text to ensure it accurately reflects Notekar's offline nature.
+- **Version:** Check the "About" footer or diagnostics to confirm the version is `4.0.3+13`.

@@ -19,12 +19,14 @@ class Moment {
     final type = (json['type'] as String?) ?? 'single';
     // Validate type
     final validatedType = {'single', 'in', 'out'}.contains(type) ? type : 'single';
+    final timestamp = (json['timestamp'] as num).toInt();
 
     return Moment(
       id: (json['id'] as num).toInt(),
-      timestamp: (json['timestamp'] as num).toInt(),
+      timestamp: timestamp,
       type: validatedType,
-      date: (json['date'] as String?) ?? dateKey(DateTime.now()),
+      // Always derive date from timestamp for consistency
+      date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
       note: (json['note'] as String?) ?? '',
     );
   }

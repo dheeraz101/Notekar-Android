@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer' as developer;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -94,7 +95,7 @@ class AdaptiveEngine {
       if (await file.exists()) {
         final lines = await file.readAsLines();
         for (final line in lines) {
-          if (line.startsWith('MemTotal:')) {
+          if (line.startsWith('Total:') || line.startsWith('MemTotal:')) {
             // Format: MemTotal:        7765188 kB
             final match = RegExp(r'(\d+)').firstMatch(line);
             if (match != null) {
@@ -105,7 +106,12 @@ class AdaptiveEngine {
           }
         }
       }
-    } catch (_) {}
+    } on FileSystemException catch (e) {
+      // Expected on some restricted OS skins/Android 14+ configurations
+      developer.log('RAM detection restricted: ${e.message}', name: 'adaptive_engine');
+    } catch (e) {
+      developer.log('Unexpected RAM detection error: $e', name: 'adaptive_engine');
+    }
     return 0;
   }
 

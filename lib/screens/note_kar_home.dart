@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
@@ -102,6 +100,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _lastUpdateCheckedAt;
   int? _lastNoticeOpenCheckAt;
   int _lastTapTime = 0;
+  bool _isSaving = false;
   int? _lastId;
   int _nextId = 1;
   List<Moment> _entries = [];
@@ -420,6 +419,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
 
+    if (migrated.isNotEmpty) {
+      _logger.info('Merging ${migrated.length} migrated entries into active list');
+    }
+
     setState(() {
       _prefs = prefs;
       _entries = entries;
@@ -470,11 +473,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
 
     _applySystemUiStyle();
-    unawaited(_updateAndroidWidget());
+    try {
+      unawaited(_updateAndroidWidget());
+    } catch (e, stack) {
+      _logger.error('Failed to update widget on load', e, stack);
+    }
 
     if (_homeMenuAnimations) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(_restoreMotionAfterStartup(prefs));
+        try {
+          unawaited(_restoreMotionAfterStartup(prefs));
+        } catch (e, stack) {
+          _logger.warn('Failed to restore motion after startup', e, stack);
+        }
       });
     }
 
@@ -527,10 +538,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     _maybeShowBackupReminder();
-    unawaited(_handlePendingLaunchAction());
+    try {
+      unawaited(_handlePendingLaunchAction());
+    } catch (e, stack) {
+      _logger.error('Failed to handle pending launch action', e, stack);
+    }
 
     if (prefs.getBool('m-remote-notices') ?? false) {
-      unawaited(_checkRemoteNoticeOnOpen());
+      try {
+        unawaited(_checkRemoteNoticeOnOpen());
+      } catch (e, stack) {
+        _logger.warn('Failed to check remote notices on startup', e, stack);
+      }
     }
     startupTask.finish();
   }
@@ -560,18 +579,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (_prefs?.getString('m-last-backup-reminder-day') == today) return;
     _prefs?.setString('m-last-backup-reminder-day', today);
     _showToast('Backup reminder: export a fresh backup soon', warning: true);
-  }
-
-  Future<void> _initHive() async {
-    // Moved to MomentRepository and main()
-  }
-
-  Future<List<Moment>> _loadEntries(
-    Box<dynamic> entryBox,
-    SharedPreferences prefs,
-  ) async {
-    // Moved to MomentRepository
-    return [];
   }
 
   Future<void> _saveEntry(Moment entry) async {
@@ -660,30 +667,37 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _logEntry({String? note, Offset? position}) async {
+    if (_isSaving) return;
+    _isSaving = true;
+
     final now = DateTime.now();
     var type = 'single';
+    final oldInOut = _inout;
+    final oldSessionStart = _sessionStart;
+
     if (_mode == 'two-way') {
       type = _inout;
       if (_inout == 'in') {
         _sessionStart = now.millisecondsSinceEpoch;
         _inout = 'out';
-        await _saveSetting('m-ses', _sessionStart!);
       } else {
         _sessionStart = null;
         _inout = 'in';
-        await _prefs?.remove('m-ses');
       }
-      await _saveSetting('m-inout', _inout);
     }
+
     final entry = Moment(
-      id: _nextId++,
+      id: _nextId,
       timestamp: now.millisecondsSinceEpoch,
       type: type,
       date: dateKey(now),
       note: note?.trim() ?? '',
     );
+
+    // Optimistic UI Update
     setState(() {
       _entries = [entry, ..._entries];
+      _nextId++;
       _lastId = entry.id;
       _lastDeletedPreview = null;
       _lastTapTime = now.millisecondsSinceEpoch;
@@ -692,10 +706,37 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _rippleToken++;
       _savedPulseToken++;
     });
+
     NotekarHaptics.save(_hapticStyle, type);
-    unawaited(_saveEntry(entry));
-    unawaited(_updateAndroidWidget());
-    _showUndo();
+
+    try {
+      if (_mode == 'two-way') {
+        if (oldInOut == 'in') {
+          await _saveSetting('m-ses', _sessionStart!);
+        } else {
+          await _prefs?.remove('m-ses');
+        }
+        await _saveSetting('m-inout', _inout);
+      }
+      await _repository.saveMoment(entry);
+      unawaited(_updateAndroidWidget());
+      _showUndo();
+    } catch (e, stack) {
+      _logger.error('Failed to log entry', e, stack);
+      // Rollback
+      if (mounted) {
+        setState(() {
+          _entries.removeWhere((m) => m.id == entry.id);
+          _nextId--;
+          _lastId = null;
+          _inout = oldInOut;
+          _sessionStart = oldSessionStart;
+        });
+        _showToast('Storage error: Moment not saved', warning: true);
+      }
+    } finally {
+      _isSaving = false;
+    }
   }
 
   bool _isDelayBlocked() {
@@ -1557,12 +1598,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
     if (mounted) {
-      _showToast(value ? 'App notices on' : 'App notices off');
+      // Immediate visual feedback from the switch is enough.
     }
-  }
-
-  void _haptic(Future<void> Function() feedback) {
-    // Deprecated: Use NotekarHaptics instead.
   }
 
   Future<void> _checkRemoteNoticeOnOpen() async {
@@ -1603,7 +1640,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _checkingUpdates = true;
       _updateStatus = 'Checking for updates...';
     });
-    _showToast('Checking for updates...');
     try {
       final latest = await _updateService.fetchLatestVersion();
 
@@ -1615,7 +1651,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (latest == null) {
         final status = 'Could not check updates';
         _setUpdateStatus(status);
-        if (mounted) _showToast('Could not check updates', warning: true);
         return status;
       }
       if (_updateService.isUpdateAvailable(latest, appVersion)) {
@@ -1623,21 +1658,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _lastUpdateCheckedAt = DateTime.now().millisecondsSinceEpoch;
         await _prefs?.setInt('m-last-update-check', _lastUpdateCheckedAt!);
         _setUpdateStatus(status);
-        if (mounted) _showToast('Update $latest available');
         return status;
       } else if (mounted) {
         final status = 'You are up to date';
         _lastUpdateCheckedAt = DateTime.now().millisecondsSinceEpoch;
         await _prefs?.setInt('m-last-update-check', _lastUpdateCheckedAt!);
         _setUpdateStatus(status);
-        _showToast('You are up to date');
         _scheduleUpdateStatusReset();
         return status;
       }
     } catch (_) {
       final status = 'Update check failed';
       _setUpdateStatus(status);
-      if (mounted) _showToast('Update check failed', warning: true);
       return status;
     } finally {
       if (mounted) setState(() => _checkingUpdates = false);
@@ -1657,10 +1689,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (!mounted) return;
       _setUpdateStatus('v$appVersion - Check for available updates');
     });
-  }
-
-  Future<String?> _fetchLatestRelease() async {
-    return _updateService.fetchLatestVersion();
   }
 
   Future<bool> _exportFile({
@@ -1808,8 +1836,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (showToast) {
         await Future<void>.delayed(const Duration(milliseconds: 2200));
       }
-      if (mounted && showToast) _showToast('App icon changed');
-    } catch (_) {
+    } catch (e, stack) {
+      _logger.error('Failed to set app icon style', e, stack);
       if (mounted && showToast) {
         _showToast('App icon could not be changed', warning: true);
       }

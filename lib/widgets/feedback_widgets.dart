@@ -32,14 +32,14 @@ class _RippleState extends State<Ripple> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
+    return Positioned(
+      left: widget.origin.dx - 20,
+      top: widget.origin.dy - 20,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (_, _) {
           final scale = 1 + Curves.easeOutCubic.transform(_controller.value) * 2.4;
-          return Positioned(
-            left: widget.origin.dx - 20,
-            top: widget.origin.dy - 20,
+          return RepaintBoundary(
             child: Transform.scale(
               scale: scale,
               child: Opacity(
@@ -208,35 +208,38 @@ class _SavedPulseState extends State<SavedPulse>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
+    return Positioned(
+      left: widget.origin.dx - 54,
+      top: widget.origin.dy - 44, // Base position, dy offset applied inside
+      width: 108,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (_, _) {
           final dy = -18 * Curves.easeOutCubic.transform(_controller.value);
           final opacity = (1 - Curves.easeOut.transform(_controller.value)).clamp(0.0, 1.0);
           final color = momentColor(widget.p, widget.type);
-          return Positioned(
-            left: widget.origin.dx - 54,
-            top: widget.origin.dy - 44 + dy,
-            width: 108,
-            child: Opacity(
-              opacity: opacity,
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: color.withValues(alpha: 0.24)),
-                ),
-                child: Text(
-                  _pulseLabel(widget.type),
-                  maxLines: 1,
-                  softWrap: false,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
+          return Transform.translate(
+            offset: Offset(0, dy),
+            child: RepaintBoundary(
+              child: Opacity(
+                opacity: opacity,
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: color.withValues(alpha: 0.24)),
+                  ),
+                  child: Text(
+                    _pulseLabel(widget.type),
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),

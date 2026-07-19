@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notekar/models/moment.dart';
-import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/app_logger.dart';
 
 class MomentRepository {
