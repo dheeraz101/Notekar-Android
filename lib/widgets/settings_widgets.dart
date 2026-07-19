@@ -108,7 +108,7 @@ class SettingsRow extends StatelessWidget {
     return PressableScale(
       enabled: onTap != null,
       onTap: () {
-        HapticFeedback.selectionClick();
+        NotekarHaptics.selection('standard');
         onTap?.call();
       },
       child: Container(
@@ -451,36 +451,38 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                     color: enabled && value ? switchColor : p.border,
                   ),
                 ),
-                child: Stack(
-                  children: [
-                    AnimatedAlign(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      alignment:
-                          value ? Alignment.centerRight : Alignment.centerLeft,
-                      child: AnimatedBuilder(
-                        animation: _stretchController,
-                        builder: (context, child) {
-                          final stretch = _stretchController.value * 14; // Increased stretch
-                          return Container(
-                            width: 28 + stretch, // Base thumb width 28
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                child: RepaintBoundary(
+                  child: Stack(
+                    children: [
+                      AnimatedAlign(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        alignment:
+                            value ? Alignment.centerRight : Alignment.centerLeft,
+                        child: AnimatedBuilder(
+                          animation: _stretchController,
+                          builder: (context, child) {
+                            final stretch = _stretchController.value * 14; // Increased stretch
+                            return Container(
+                              width: 28 + stretch, // Base thumb width 28
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

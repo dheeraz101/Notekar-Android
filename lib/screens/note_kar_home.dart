@@ -29,7 +29,9 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NoteKarHome extends StatefulWidget {
-  const NoteKarHome({super.key});
+  const NoteKarHome({super.key, this.preloadedPrefs});
+
+  final SharedPreferences? preloadedPrefs;
 
   @override
   State<NoteKarHome> createState() => _NoteKarHomeState();
@@ -177,6 +179,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<bool> _canUseMotionSensor() async {
+    final cached = AdaptiveEngine().cachedSensorAvailable;
+    if (cached != null) return cached;
+
     final completer = Completer<bool>();
     StreamSubscription<AccelerometerEvent>? probe;
 
@@ -198,10 +203,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
             cancelOnError: true,
           );
 
-      return await completer.future.timeout(
+      final available = await completer.future.timeout(
         const Duration(seconds: 2),
         onTimeout: () => false,
       );
+
+      unawaited(_prefs?.setBool('device_sensor_available', available));
+      return available;
     } catch (_) {
       return false;
     } finally {
@@ -389,7 +397,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final startupTask = developer.TimelineTask()..start('notekar.startup.load');
 
     // 1. Prioritize SharedPreferences to identify first-run users ASAP.
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = widget.preloadedPrefs ?? await SharedPreferences.getInstance();
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
 
     if (!welcomeSeen) {
@@ -399,8 +407,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
     }
 
-    // 2. Initialize Hive and load entries in parallel/subsequently.
-    await _initHive();
+    // 2. Load entries from Hive (Hive.init is done in main).
     final entryBox = await Hive.openBox<dynamic>(_entryBoxName);
     final entries = await _loadEntries(entryBox, prefs);
     entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -556,12 +563,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _initHive() async {
-    try {
-      final dataDir = await _fileChannel.invokeMethod<String>('appDataDir');
-      Hive.init(dataDir ?? Directory.systemTemp.path);
-    } catch (_) {
-      Hive.init(Directory.systemTemp.path);
-    }
+    // Hive initialization moved to main() for parallel loading.
   }
 
   Future<List<Moment>> _loadEntries(
@@ -710,17 +712,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _rippleToken++;
       _savedPulseToken++;
     });
-    if (type == 'out') {
-      _haptic(HapticFeedback.mediumImpact);
-      Future<void>.delayed(
-        const Duration(milliseconds: 70),
-        () => _haptic(HapticFeedback.lightImpact),
-      );
-    } else if (type == 'in') {
-      _haptic(HapticFeedback.mediumImpact);
-    } else {
-      _haptic(HapticFeedback.lightImpact);
-    }
+    NotekarHaptics.save(_hapticStyle, type);
     unawaited(_saveEntry(entry));
     unawaited(_updateAndroidWidget());
     _showUndo();
@@ -753,7 +745,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _prefs?.remove('m-inout');
       _prefs?.remove('m-ses');
     }
-    _haptic(HapticFeedback.selectionClick);
+    NotekarHaptics.selection(_hapticStyle);
     _showToast(_mode == 'two-way' ? 'Two-Way Mode' : 'Single Mode');
     unawaited(_updateAndroidWidget());
   }
@@ -1193,7 +1185,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _openNote() async {
     if (_isDelayBlocked()) return;
-    _haptic(HapticFeedback.lightImpact);
+    NotekarHaptics.light(_hapticStyle);
     final note = await showGeneralDialog<String>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.42),
@@ -1588,12 +1580,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _haptic(Future<void> Function() feedback) {
-    if (_hapticStyle == 'off') return;
-    if (_hapticStyle == 'light') {
-      HapticFeedback.selectionClick();
-      return;
-    }
-    feedback();
+    // Deprecated: Use NotekarHaptics instead.
   }
 
   Future<void> _checkRemoteNoticeOnOpen() async {

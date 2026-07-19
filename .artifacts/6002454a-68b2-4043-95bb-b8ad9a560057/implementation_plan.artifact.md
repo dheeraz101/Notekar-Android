@@ -1,55 +1,42 @@
-# Implementation Plan - NoteKar Improvements (Phase 1 Refinements & Phase 2)
+# Implementation Plan - NoteKar Improvements (Phase 3)
 
-This plan outlines the refinements for Phase 1 based on user feedback and the continuation into Phase 2, including the new Update Center.
+This plan outlines the final heavy features, gestures, and external system integrations for NoteKar.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Update Center UI**: I am proposing a dedicated "Software Update" style page that mirrors the iOS Settings aesthetic. This will replace the simple row-click behavior with a more interactive experience.
+> [!CAUTION]
+> **Dependency Update**: To implement Reminders, I will need to modify `pubspec.yaml` to include `flutter_local_notifications` and `timezone`. This requires a `flutter pub get` and a fresh build on your end once I apply the changes.
+>
+> **Gesture Interaction**: The Swipe-Up gesture is designed for speed but can overlap with system navigation. I will implement a safe vertical threshold and velocity check to ensure it only triggers when intended.
 
-## Phase 1 Refinements (UI/UX) - COMPLETE
-- [x] Calendar Dialog adjustments.
-- [x] Note Popup fixed height.
-- [x] Icons & Colors revert.
-- [x] Saved Pill width fix.
-- [x] About Section icons alignment.
+## Proposed Changes
 
----
+### 1. Shake to Capture
+- **Logic**: Use the `sensors_plus` package to monitor accelerometer data.
+- **Trigger**: Detect a rapid movement sequence (shaking the phone) to immediately open the `NoteDialog`.
+- **Settings**:
+  - `Shake to Capture` (Toggle)
+  - `Sensitivity` (Low, Medium, High slider)
+- **Efficiency**: The sensor stream will only be active when the feature is enabled and the app is in the foreground.
 
-## Phase 2 — Function, Features & Logic (IN PROGRESS)
-Implement core feature logic and performance-critical updates.
+### 2. Swipe-Up Quick Menu
+- **Logic**: Integrate a vertical drag listener on the home screen tap area.
+- **UI**: A lightweight, glassmorphic action sheet that slides up.
+- **Quick Actions**:
+  - History
+  - Settings
+  - Undo Last Moment
+- **Setting**: `Swipe Up to Open` (Toggle, disabled by default).
 
-### Proposed Changes
-
-#### [Component: Logic & Features]
-
-- **[MODIFY] [app_utils.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android%20Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/utils/app_utils.dart)**
-  - Increase `maxNoteLength` to 500. [DONE]
-- **[MODIFY] [note_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android%20Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/note_dialog.dart)**
-  - Update character counter to support 500 characters. [DONE]
-- **[MODIFY] [note_kar_home.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android%20Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/screens/note_kar_home.dart)**
-  - Implement timing logic for "Check for Updates" (3s loading, 1m reset). [DONE]
-
-### [NEW] Update Center (Apple HIG Style)
-Refactor the update flow into a dedicated interactive sub-page within Settings.
-
-- **[NEW] Update Center UI**:
-  - Centered App Icon with glassmorphism.
-  - "Software Update" title and status labels.
-  - **Check for Updates Button**: A prominent primary button to trigger the check.
-  - **Animation**: A high-fidelity 5-second loading sequence (spinner/shimmer).
-  - **Dynamic Results**:
-    - **Success (Update)**: "Version x.x.x is available" with release notes summary and a "Download from GitHub" button.
-    - **Success (Current)**: "NoteKar is up to date" with a large checkmark icon.
-- **[MODIFY] [SettingsDialog]**:
-  - Update the "Updates" category row to navigate to this new interactive page.
-  - Ensure the "Updates" row status (e.g., "Check for Updates" vs "You're up to date") syncs globally.
-
----
-
-## Phase 3 — Heavy Features & Gestures
-- **Gesture Support**: Swipe Up to Open, Shake to Capture.
-- **Reminder System**: Foundational architecture and UI.
+### 3. Comprehensive Reminder System
+- **Service**: Implement `ReminderService` using `flutter_local_notifications`.
+- **Model**: Create a `Reminder` model with support for:
+  - One-time alerts.
+  - Repeating schedules (Daily, Weekly).
+- **Storage**: Persist reminders in a dedicated Hive box (`notekar_reminders_v1`).
+- **Integration**:
+  - New **Reminders** category in Settings.
+  - Interactive "Log Now" action button within the notification itself.
 
 ---
 
@@ -57,8 +44,8 @@ Refactor the update flow into a dedicated interactive sub-page within Settings.
 
 ### Automated Tests
 - `flutter analyze`
-- `flutter test`
+- Unit tests for `Reminder` serialization and scheduling logic.
 
 ### Manual Verification
-- **Update Center**: Trigger a check, verify the 5s animation, and check the "Up to date" vs "Update available" UI.
-- **Status Sync**: Verify that performing a check on the Updates page updates the subtitle in the main Settings list.
+- **Gestures**: Physically shake the device to trigger capture; swipe up to verify quick menu stability.
+- **Reminders**: Set a 1-minute alert, close the app, and verify the notification appears with the action button.

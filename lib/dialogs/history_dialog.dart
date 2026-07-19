@@ -106,11 +106,53 @@ class _HistoryDialogState extends State<HistoryDialog> {
   int? _pendingDeleteId;
   final _scrollController = ScrollController();
 
+  // Memoized lists
+  List<Moment> _filteredEntries = [];
+  List<HistoryListItem> _listItems = [];
+
   @override
   void initState() {
     super.initState();
     _entries = List<Moment>.from(widget.entries);
     _availableDateKeys = _entries.map((entry) => entry.date).toSet();
+    _rebuildMemoizedLists();
+  }
+
+  void _rebuildMemoizedLists() {
+    final today = dateKey(DateTime.now());
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+    
+    _filteredEntries = _entries.where((e) {
+      if (_filter == 'today') return e.date == today;
+      if (_filter == 'week') {
+        return DateTime.fromMillisecondsSinceEpoch(
+          e.timestamp,
+        ).isAfter(weekAgo);
+      }
+      if (_filter == 'date') return e.date == _selectedDateKey;
+      if (_filter == 'in') return e.type == 'in';
+      if (_filter == 'out') return e.type == 'out';
+      if (_filter == 'single') return e.type == 'single';
+      if (_filter == 'notes') return e.note.isNotEmpty;
+      return true;
+    }).toList();
+
+    _updateVisibleItems();
+  }
+
+  void _updateVisibleItems() {
+    final rows = _filteredEntries.take(_visibleCount).toList();
+    final items = <HistoryListItem>[];
+    String? lastLabel;
+    for (final row in rows) {
+      final label = historySectionLabel(row.timestamp);
+      if (label != lastLabel) {
+        items.add(HistoryListItem.header(label));
+        lastLabel = label;
+      }
+      items.add(HistoryListItem.moment(row));
+    }
+    _listItems = items;
   }
 
   @override
@@ -126,7 +168,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _notice = text;
       _noticeUndo = onUndo;
     });
-    _noticeTimer = Timer(const Duration(milliseconds: 1400), () {
+    _noticeTimer = Timer(const Duration(milliseconds: 2200), () {
       if (mounted) {
         setState(() {
           _notice = null;
@@ -136,42 +178,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
     });
   }
 
-  List<Moment> get _allRows {
-    final today = dateKey(DateTime.now());
-    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
-    return _entries.where((e) {
-      if (_filter == 'today') return e.date == today;
-      if (_filter == 'week') {
-        return DateTime.fromMillisecondsSinceEpoch(
-          e.timestamp,
-        ).isAfter(weekAgo);
-      }
-      if (_filter == 'date') return e.date == _selectedDateKey;
-      if (_filter == 'in') return e.type == 'in';
-      if (_filter == 'out') return e.type == 'out';
-      if (_filter == 'single') return e.type == 'single';
-      if (_filter == 'notes') return e.note.isNotEmpty;
-      return true;
-    }).toList();
-  }
-
-  List<Moment> get _rows => _allRows.take(_visibleCount).toList();
-
-  List<HistoryListItem> get _items {
-    final items = <HistoryListItem>[];
-    String? lastLabel;
-    for (final row in _rows) {
-      final label = historySectionLabel(row.timestamp);
-      if (label != lastLabel) {
-        items.add(HistoryListItem.header(label));
-        lastLabel = label;
-      }
-      items.add(HistoryListItem.moment(row));
-    }
-    return items;
-  }
-
-  bool get _hasOlderRows => _visibleCount < _allRows.length;
+  bool get _hasOlderRows => _visibleCount < _filteredEntries.length;
 
   String get _emptyMessage {
     return switch (_filter) {
@@ -189,7 +196,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final items = _items;
     final hasOlderRows = _hasOlderRows;
 
     return AppSheet(
@@ -286,6 +292,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                             _filter = 'date';
                                                             _visibleCount =
                                                                 _pageSize;
+                                                            _rebuildMemoizedLists();
                                                           });
                                                           if (_scrollController.hasClients) {
                                                             _scrollController.jumpTo(0.0);
@@ -295,6 +302,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                       setState(() {
                                                         _filter = f;
                                                         _visibleCount = _pageSize;
+                                                        _rebuildMemoizedLists();
                                                       });
                                                       if (_scrollController.hasClients) {
                                                         _scrollController.jumpTo(0.0);
@@ -386,7 +394,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     ),
                   ),
                 ),
-                if (items.isEmpty)
+                if (_listItems.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Padding(
@@ -420,7 +428,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing64),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        if (index >= items.length) {
+                        if (index >= _listItems.length) {
                           if (hasOlderRows) {
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(
@@ -433,6 +441,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 onTap:
                                     () => setState(() {
                                       _visibleCount += _pageSize;
+                                      _updateVisibleItems();
                                     }),
                                 child: Container(
                                   alignment: Alignment.center,
@@ -459,7 +468,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           return null;
                         }
 
-                        final item = items[index];
+                        final item = _listItems[index];
                         if (item.label != null) {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(
@@ -556,7 +565,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                             ),
                           ),
                         );
-                      }, childCount: items.length + (hasOlderRows ? 1 : 0)),
+                      }, childCount: _listItems.length + (hasOlderRows ? 1 : 0)),
                     ),
                   ),
               ],
@@ -653,12 +662,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _showNotice('Tap delete again to confirm');
       return;
     }
-    HapticFeedback.mediumImpact();
+    NotekarHaptics.success('standard'); // History delete is an intentional success action
     setState(() {
       _entries = _entries.where((item) => item.id != entry.id).toList();
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _selected.removeWhere((item) => item.id == entry.id);
       _pendingDeleteId = null;
+      _rebuildMemoizedLists();
     });
     _showNotice('Moment removed', onUndo: () => _restoreRemovedEntry(entry));
     unawaited(widget.onDelete(entry.id));
@@ -691,6 +701,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _selectedDateKey = dateKey(picked);
       _filter = 'date';
       _visibleCount = _pageSize;
+      _rebuildMemoizedLists();
     });
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0.0);
@@ -698,12 +709,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   void _dismissEntry(Moment entry) {
-    HapticFeedback.mediumImpact();
+    NotekarHaptics.success('standard');
     setState(() {
       _entries = _entries.where((item) => item.id != entry.id).toList();
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _selected.removeWhere((item) => item.id == entry.id);
       _pendingDeleteId = null;
+      _rebuildMemoizedLists();
     });
     _showNotice('Moment removed', onUndo: () => _restoreRemovedEntry(entry));
     unawaited(widget.onDelete(entry.id));
@@ -720,6 +732,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _notice = null;
       _noticeUndo = null;
       _pendingDeleteId = null;
+      _rebuildMemoizedLists();
     });
     unawaited(widget.onRestore(entry));
   }
@@ -744,6 +757,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       if (selectedIndex >= 0) {
         _selected[selectedIndex] = updated;
       }
+      _rebuildMemoizedLists();
     });
 
     await widget.onUpdateNote(entry.id, updated.note);

@@ -1,18 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:notekar/screens/note_kar_home.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AdaptiveEngine().initialize();
+
+  // Parallelize core initialization
+  final results = await Future.wait([
+    SharedPreferences.getInstance(),
+    AdaptiveEngine().initialize(),
+    _initHivePreload(),
+  ]);
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(const NoteKarApp());
+  runApp(NoteKarApp(prefs: results[0] as SharedPreferences));
+}
+
+Future<void> _initHivePreload() async {
+  const channel = MethodChannel('notekar/files');
+  try {
+    final dataDir = await channel.invokeMethod<String>('appDataDir');
+    Hive.init(dataDir ?? Directory.systemTemp.path);
+  } catch (_) {
+    Hive.init(Directory.systemTemp.path);
+  }
 }
 
 class NoteKarApp extends StatelessWidget {
-  const NoteKarApp({super.key});
+  const NoteKarApp({super.key, this.prefs});
+
+  final SharedPreferences? prefs;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +78,7 @@ class NoteKarApp extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: const NoteKarHome(),
+      home: NoteKarHome(preloadedPrefs: prefs),
     );
   }
 }

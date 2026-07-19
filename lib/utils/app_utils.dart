@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
 const appVersion = '4.0.3';
@@ -227,6 +228,52 @@ Color momentColor(Palette p, String type) {
     'out' => p.orange,
     _ => p.blue, // Revert to dedicated blue for Single moments
   };
+}
+
+class NotekarHaptics {
+  static void light(String style) {
+    if (style == 'off') return;
+    HapticFeedback.selectionClick();
+  }
+
+  static void selection(String style) {
+    if (style == 'off') return;
+    HapticFeedback.selectionClick();
+  }
+
+  static void success(String style) {
+    if (style == 'off') return;
+    if (style == 'light') {
+      HapticFeedback.selectionClick();
+    } else {
+      HapticFeedback.mediumImpact();
+    }
+  }
+
+  static void save(String style, String type) {
+    if (style == 'off') return;
+    if (style == 'light') {
+      HapticFeedback.selectionClick();
+      return;
+    }
+
+    if (type == 'out') {
+      HapticFeedback.mediumImpact().then((_) {
+        Future.delayed(const Duration(milliseconds: 70), () {
+          HapticFeedback.lightImpact();
+        });
+      });
+    } else if (type == 'in') {
+      HapticFeedback.mediumImpact();
+    } else {
+      HapticFeedback.lightImpact();
+    }
+  }
+
+  static void warning(String style) {
+    if (style == 'off') return;
+    HapticFeedback.vibrate();
+  }
 }
 
 MediaQueryData largerTextQuery(BuildContext context) {

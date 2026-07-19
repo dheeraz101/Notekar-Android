@@ -82,6 +82,12 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             }
         )
 
+        // Count color refinement
+        views.setTextColor(
+            R.id.widget_count,
+            android.graphics.Color.parseColor("#FF0A84FF")
+        )
+
         val lastText = if (!hasMoments || lastTimestamp <= 0L) {
             "No moments"
         } else {
@@ -98,10 +104,16 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             lastText
         )
 
-        views.setViewVisibility(
-            R.id.widget_mode,
-            if (compact) View.GONE else View.VISIBLE
-        )
+        // Visibility handling for smaller widget sizes
+        if (compact) {
+            views.setViewVisibility(R.id.widget_mode, View.GONE)
+            views.setViewVisibility(R.id.widget_last, View.GONE)
+            views.setViewVisibility(R.id.widget_clock, View.GONE)
+        } else {
+            views.setViewVisibility(R.id.widget_mode, View.VISIBLE)
+            views.setViewVisibility(R.id.widget_last, View.VISIBLE)
+            views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
+        }
 
         views.setOnClickPendingIntent(
             R.id.widget_root,

@@ -350,370 +350,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
     });
 
     _precacheIcons();
+    _rebuildSearchCache();
   }
 
-  Future<void> _loadRecentSearches() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _recentSearches = prefs.getStringList('recent_settings_searches') ?? [];
-    });
-  }
-
-  Future<void> _saveRecentSearch(String term) async {
-    final t = term.trim();
-    if (t.isEmpty) return;
-    final prefs = await SharedPreferences.getInstance();
-    final list = List<String>.from(_recentSearches)
-      ..remove(t)
-      ..insert(0, t);
-    if (list.length > 5) list.removeLast();
-    setState(() => _recentSearches = list);
-    await prefs.setStringList('recent_settings_searches', list);
-  }
-
-
-  void _precacheIcons() {
-    for (final icon in const [
-      'icon-maskable-512.png',
-      'app_icons/black.png',
-      'app_icons/blue.png',
-      'app_icons/gold.png',
-      'app_icons/green.png',
-      'app_icons/orange.png',
-      'app_icons/red.png',
-    ]) {
-      precacheImage(AssetImage(icon), context);
-    }
-  }
-
-  @override
-  void dispose() {
-    _exportStateTimer?.cancel();
-    _settingsSearchController.dispose();
-    _settingsSearchFocusNode.dispose();
-    _rootScrollController.dispose();
-    for (final controller in _subControllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  Map<String, Object> _settingsSnapshot() => {
-    'theme': theme,
-    'defaultMode': defaultMode,
-    'tapDelay': tapDelay,
-    'accentColor': accentColor,
-    'appIconStyle': appIconStyle,
-    'hapticStyle': hapticStyle,
-    'historyDensity': historyDensity,
-    'privacyLock': privacyLock,
-    'backupReminderDays': backupReminderDays,
-    'remoteNotices': remoteNotices,
-    'reduceMotion': reduceMotion,
-    'largeText': largeText,
-    'highContrast': highContrast,
-    'compactHistory': compactHistory,
-    'confirmDelete': confirmDelete,
-    'showSeconds': showSeconds,
-    'highlightSeconds': highlightSeconds,
-    'buttonLabels': buttonLabels,
-    'largeControls': largeControls,
-    'homeMenuPill': homeMenuPill,
-    'homeMenuAnimations': homeMenuAnimations,
-    'showHistoryText': showHistoryText,
-    'showLastSavedHint': showLastSavedHint,
-    'requireLongPressNote': requireLongPressNote,
-    'extendedDuration': extendedDuration,
-    'minimalMomentOptions': minimalMomentOptions,
-    'enableTranslucency': enableTranslucency,
-    'privacyLockDelayMinutes': privacyLockDelayMinutes,
-  };
-
-  String? get category => _categoryStack.isEmpty ? null : _categoryStack.last;
-
-  ScrollController get _activeController {
-    if (category == null) return _rootScrollController;
-    return _subControllers.putIfAbsent(category!, () => ScrollController());
-  }
-
-  void _openCategory(String next, {String? parent}) {
-    setState(() {
-      _prevStackLength = _categoryStack.length;
-      if (parent != null && _categoryStack.lastOrNull != parent) {
-        _categoryStack
-          ..clear()
-          ..add(parent);
-      }
-      if (_categoryStack.lastOrNull != next) _categoryStack.add(next);
-      _settingsQuery = '';
-      _settingsSearchController.clear();
-    });
-  }
-
-  bool _popCategory() {
-    if (_categoryStack.isEmpty) return false;
-    setState(() {
-      _prevStackLength = _categoryStack.length;
-      final popped = _categoryStack.removeLast();
-      if (popped == 'Search') {
-        _settingsQuery = '';
-        _settingsSearchController.clear();
-        _settingsSearchFocusNode.unfocus();
-      }
-    });
-    return true;
-  }
-
-  Future<void> _runExport(String label, Future<void> Function() action) async {
-    _exportStateTimer?.cancel();
-    HapticFeedback.selectionClick();
-    setState(() => exportState = '$label exporting...');
-    await action();
-    if (!mounted) return;
-    setState(() => exportState = '$label exported');
-    _exportStateTimer = Timer(const Duration(milliseconds: 1800), () {
-      if (mounted) setState(() => exportState = null);
-    });
-  }
-
-  Future<void> _runImport() async {
-    _exportStateTimer?.cancel();
-    HapticFeedback.selectionClick();
-    setState(() => exportState = 'Import opening...');
-    try {
-      await widget.onImportBackup();
-      if (!mounted) return;
-      setState(() => exportState = 'Import complete');
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => exportState = 'Import failed');
-    }
-    _exportStateTimer = Timer(const Duration(milliseconds: 1800), () {
-      if (mounted) setState(() => exportState = null);
-    });
-  }
-
-  Future<void> _confirmResetSettings() async {
-    final snapshot = _settingsSnapshot();
-    final yes = await showGeneralDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close reset settings',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => AppSheet(
-        p: paletteFor(
-          theme,
-          highContrast: highContrast,
-          accentName: accentColor,
-        ),
-        title: 'Reset Settings',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Restore NoteKar preferences to their defaults. Your moments, notes, backups, and exports stay untouched.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: paletteFor(
-                  theme,
-                  highContrast: highContrast,
-                  accentName: accentColor,
-                ).text2,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Reset'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-    if (yes == true) {
-      await widget.onResetSettings();
-      if (!mounted) return;
-      setState(() {
-        theme = 'dark';
-        defaultMode = 'two-way';
-        tapDelay = 0;
-        accentColor = 'blue';
-        appIconStyle = 'default';
-        hapticStyle = 'standard';
-        historyDensity = 'comfortable';
-        privacyLock = false;
-        backupReminderDays = 0;
-        remoteNotices = false;
-        reduceMotion = false;
-        largeText = false;
-        highContrast = false;
-        compactHistory = false;
-        confirmDelete = false;
-        showSeconds = true;
-        highlightSeconds = true;
-        buttonLabels = false;
-        largeControls = false;
-        homeMenuPill = true;
-        homeMenuAnimations = false;
-        showHistoryText = true;
-        showLastSavedHint = true;
-        requireLongPressNote = false;
-        extendedDuration = false;
-        minimalMomentOptions = false;
-        enableTranslucency = true;
-        privacyLockDelayMinutes = 0;
-      });
-      await _showResetSettingsUndo(snapshot);
-    }
-  }
-
-  Future<void> _showResetSettingsUndo(Map<String, Object> snapshot) async {
-    final p = paletteFor(
-      theme,
-      highContrast: highContrast,
-      accentName: accentColor,
-    );
-    final undo = await showGeneralDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.28),
-      barrierDismissible: true,
-      barrierLabel: 'Close settings reset',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => AppSheet(
-        p: p,
-        title: 'Settings Reset',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Your preferences are back to the default setup. Moments and notes were not changed.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: p.text2, height: 1.4),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Undo'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Done'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-    if (undo == true) {
-      await widget.onRestoreSettings(snapshot);
-      if (!mounted) return;
-      setState(() {
-        theme = snapshot['theme'] as String;
-        defaultMode = snapshot['defaultMode'] as String;
-        tapDelay = snapshot['tapDelay'] as int;
-        accentColor = snapshot['accentColor'] as String;
-        appIconStyle = snapshot['appIconStyle'] as String;
-        hapticStyle = snapshot['hapticStyle'] as String;
-        historyDensity = snapshot['historyDensity'] as String;
-        privacyLock = snapshot['privacyLock'] as bool;
-        backupReminderDays = snapshot['backupReminderDays'] as int;
-        remoteNotices = snapshot['remoteNotices'] as bool;
-        reduceMotion = snapshot['reduceMotion'] as bool;
-        largeText = snapshot['largeText'] as bool;
-        highContrast = snapshot['highContrast'] as bool;
-        compactHistory = snapshot['compactHistory'] as bool;
-        confirmDelete = snapshot['confirmDelete'] as bool;
-        showSeconds = snapshot['showSeconds'] as bool;
-        highlightSeconds = snapshot['highlightSeconds'] as bool;
-        buttonLabels = snapshot['buttonLabels'] as bool;
-        largeControls = snapshot['largeControls'] as bool;
-        homeMenuPill = snapshot['homeMenuPill'] as bool;
-        homeMenuAnimations = snapshot['homeMenuAnimations'] as bool;
-        showHistoryText = snapshot['showHistoryText'] as bool;
-        showLastSavedHint = snapshot['showLastSavedHint'] as bool;
-        requireLongPressNote = snapshot['requireLongPressNote'] as bool;
-        extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
-        minimalMomentOptions = snapshot['minimalMomentOptions'] as bool? ?? false;
-        enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
-        privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
-      });
-    }
-  }
-
-  String? get _availableVersion {
-    final match = RegExp(
-      r'v?(\d+(?:\.\d+){0,2}(?:\+\d+)?)',
-    ).allMatches(updateStatus).lastOrNull;
-    return match?.group(1);
-  }
-
-  bool get _updateAvailable {
-    if (!updateStatus.toLowerCase().contains('available')) return false;
-    final version = _availableVersion;
-    if (version == null) return false;
-    return isNewerVersion(version, appVersion);
-  }
-
-  bool get _upToDate => updateStatus.toLowerCase().contains('up to date');
-
-
-  String get _updateSubtitle {
-    if (_updateAvailable) return 'Install latest builds from GitHub';
-    if (checkingUpdates) return 'Checking GitHub Releases...';
-    if (_upToDate) return 'NoteKar is already on the latest build.';
-    return 'Current version v$appVersion';
-  }
-
-
-
-
-  String get _dataHealthStatus {
-    if (widget.entries.isEmpty) return 'Empty';
-    if (widget.lastBackupAt == null) return 'Backup';
-    if (backupReminderDays == 0) return 'Local';
-    final age = DateTime.now().difference(
-      DateTime.fromMillisecondsSinceEpoch(widget.lastBackupAt!),
-    );
-    return age.inDays >= backupReminderDays ? 'Due' : 'Good';
-  }
-
-  List<
-    ({
-      String title,
-      String subtitle,
-      String category,
-      IconData icon,
-      List<String> keywords,
-    })
-  >
-  get _settingsSearchResults {
-    final query = _settingsQuery.trim().toLowerCase();
-    if (query.isEmpty) return const [];
-    final rows = _settingsSearchRowsCache ??=
-        <
+  void _rebuildSearchCache() {
+    _settingsSearchRowsCache = <
           ({
             String title,
             String subtitle,
@@ -1064,6 +705,369 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ],
           ),
         ];
+  }
+
+  Future<void> _loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _recentSearches = prefs.getStringList('recent_settings_searches') ?? [];
+    });
+  }
+
+  Future<void> _saveRecentSearch(String term) async {
+    final t = term.trim();
+    if (t.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final list = List<String>.from(_recentSearches)
+      ..remove(t)
+      ..insert(0, t);
+    if (list.length > 5) list.removeLast();
+    setState(() => _recentSearches = list);
+    await prefs.setStringList('recent_settings_searches', list);
+  }
+
+
+  void _precacheIcons() {
+    for (final icon in const [
+      'icon-maskable-512.png',
+      'app_icons/black.png',
+      'app_icons/blue.png',
+      'app_icons/gold.png',
+      'app_icons/green.png',
+      'app_icons/orange.png',
+      'app_icons/red.png',
+    ]) {
+      precacheImage(AssetImage(icon), context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _exportStateTimer?.cancel();
+    _settingsSearchController.dispose();
+    _settingsSearchFocusNode.dispose();
+    _rootScrollController.dispose();
+    for (final controller in _subControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Map<String, Object> _settingsSnapshot() => {
+    'theme': theme,
+    'defaultMode': defaultMode,
+    'tapDelay': tapDelay,
+    'accentColor': accentColor,
+    'appIconStyle': appIconStyle,
+    'hapticStyle': hapticStyle,
+    'historyDensity': historyDensity,
+    'privacyLock': privacyLock,
+    'backupReminderDays': backupReminderDays,
+    'remoteNotices': remoteNotices,
+    'reduceMotion': reduceMotion,
+    'largeText': largeText,
+    'highContrast': highContrast,
+    'compactHistory': compactHistory,
+    'confirmDelete': confirmDelete,
+    'showSeconds': showSeconds,
+    'highlightSeconds': highlightSeconds,
+    'buttonLabels': buttonLabels,
+    'largeControls': largeControls,
+    'homeMenuPill': homeMenuPill,
+    'homeMenuAnimations': homeMenuAnimations,
+    'showHistoryText': showHistoryText,
+    'showLastSavedHint': showLastSavedHint,
+    'requireLongPressNote': requireLongPressNote,
+    'extendedDuration': extendedDuration,
+    'minimalMomentOptions': minimalMomentOptions,
+    'enableTranslucency': enableTranslucency,
+    'privacyLockDelayMinutes': privacyLockDelayMinutes,
+  };
+
+  String? get category => _categoryStack.isEmpty ? null : _categoryStack.last;
+
+  ScrollController get _activeController {
+    if (category == null) return _rootScrollController;
+    return _subControllers.putIfAbsent(category!, () => ScrollController());
+  }
+
+  void _openCategory(String next, {String? parent}) {
+    setState(() {
+      _prevStackLength = _categoryStack.length;
+      if (parent != null && _categoryStack.lastOrNull != parent) {
+        _categoryStack
+          ..clear()
+          ..add(parent);
+      }
+      if (_categoryStack.lastOrNull != next) _categoryStack.add(next);
+      _settingsQuery = '';
+      _settingsSearchController.clear();
+    });
+  }
+
+  bool _popCategory() {
+    if (_categoryStack.isEmpty) return false;
+    setState(() {
+      _prevStackLength = _categoryStack.length;
+      final popped = _categoryStack.removeLast();
+      if (popped == 'Search') {
+        _settingsQuery = '';
+        _settingsSearchController.clear();
+        _settingsSearchFocusNode.unfocus();
+      }
+    });
+    return true;
+  }
+
+  Future<void> _runExport(String label, Future<void> Function() action) async {
+    _exportStateTimer?.cancel();
+    NotekarHaptics.selection('standard');
+    setState(() => exportState = '$label exporting...');
+    await action();
+    if (!mounted) return;
+    setState(() => exportState = '$label exported');
+    _exportStateTimer = Timer(const Duration(milliseconds: 2200), () {
+      if (mounted) setState(() => exportState = null);
+    });
+  }
+
+  Future<void> _runImport() async {
+    _exportStateTimer?.cancel();
+    NotekarHaptics.selection('standard');
+    setState(() => exportState = 'Import opening...');
+    try {
+      await widget.onImportBackup();
+      if (!mounted) return;
+      setState(() => exportState = 'Import complete');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => exportState = 'Import failed');
+    }
+    _exportStateTimer = Timer(const Duration(milliseconds: 1800), () {
+      if (mounted) setState(() => exportState = null);
+    });
+  }
+
+  Future<void> _confirmResetSettings() async {
+    final snapshot = _settingsSnapshot();
+    final yes = await showGeneralDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close reset settings',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => AppSheet(
+        p: paletteFor(
+          theme,
+          highContrast: highContrast,
+          accentName: accentColor,
+        ),
+        title: 'Reset Settings',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Restore NoteKar preferences to their defaults. Your moments, notes, backups, and exports stay untouched.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: paletteFor(
+                  theme,
+                  highContrast: highContrast,
+                  accentName: accentColor,
+                ).text2,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Reset'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (yes == true) {
+      await widget.onResetSettings();
+      if (!mounted) return;
+      setState(() {
+        theme = 'dark';
+        defaultMode = 'two-way';
+        tapDelay = 0;
+        accentColor = 'blue';
+        appIconStyle = 'default';
+        hapticStyle = 'standard';
+        historyDensity = 'comfortable';
+        privacyLock = false;
+        backupReminderDays = 0;
+        remoteNotices = false;
+        reduceMotion = false;
+        largeText = false;
+        highContrast = false;
+        compactHistory = false;
+        confirmDelete = false;
+        showSeconds = true;
+        highlightSeconds = true;
+        buttonLabels = false;
+        largeControls = false;
+        homeMenuPill = true;
+        homeMenuAnimations = false;
+        showHistoryText = true;
+        showLastSavedHint = true;
+        requireLongPressNote = false;
+        extendedDuration = false;
+        minimalMomentOptions = false;
+        enableTranslucency = true;
+        privacyLockDelayMinutes = 0;
+      });
+      await _showResetSettingsUndo(snapshot);
+    }
+  }
+
+  Future<void> _showResetSettingsUndo(Map<String, Object> snapshot) async {
+    final p = paletteFor(
+      theme,
+      highContrast: highContrast,
+      accentName: accentColor,
+    );
+    final undo = await showGeneralDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.28),
+      barrierDismissible: true,
+      barrierLabel: 'Close settings reset',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => AppSheet(
+        p: p,
+        title: 'Settings Reset',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Your preferences are back to the default setup. Moments and notes were not changed.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Undo'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Done'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (undo == true) {
+      await widget.onRestoreSettings(snapshot);
+      if (!mounted) return;
+      setState(() {
+        theme = snapshot['theme'] as String;
+        defaultMode = snapshot['defaultMode'] as String;
+        tapDelay = snapshot['tapDelay'] as int;
+        accentColor = snapshot['accentColor'] as String;
+        appIconStyle = snapshot['appIconStyle'] as String;
+        hapticStyle = snapshot['hapticStyle'] as String;
+        historyDensity = snapshot['historyDensity'] as String;
+        privacyLock = snapshot['privacyLock'] as bool;
+        backupReminderDays = snapshot['backupReminderDays'] as int;
+        remoteNotices = snapshot['remoteNotices'] as bool;
+        reduceMotion = snapshot['reduceMotion'] as bool;
+        largeText = snapshot['largeText'] as bool;
+        highContrast = snapshot['highContrast'] as bool;
+        compactHistory = snapshot['compactHistory'] as bool;
+        confirmDelete = snapshot['confirmDelete'] as bool;
+        showSeconds = snapshot['showSeconds'] as bool;
+        highlightSeconds = snapshot['highlightSeconds'] as bool;
+        buttonLabels = snapshot['buttonLabels'] as bool;
+        largeControls = snapshot['largeControls'] as bool;
+        homeMenuPill = snapshot['homeMenuPill'] as bool;
+        homeMenuAnimations = snapshot['homeMenuAnimations'] as bool;
+        showHistoryText = snapshot['showHistoryText'] as bool;
+        showLastSavedHint = snapshot['showLastSavedHint'] as bool;
+        requireLongPressNote = snapshot['requireLongPressNote'] as bool;
+        extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
+        minimalMomentOptions = snapshot['minimalMomentOptions'] as bool? ?? false;
+        enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
+        privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
+      });
+    }
+  }
+
+  String? get _availableVersion {
+    final match = RegExp(
+      r'v?(\d+(?:\.\d+){0,2}(?:\+\d+)?)',
+    ).allMatches(updateStatus).lastOrNull;
+    return match?.group(1);
+  }
+
+  bool get _updateAvailable {
+    if (!updateStatus.toLowerCase().contains('available')) return false;
+    final version = _availableVersion;
+    if (version == null) return false;
+    return isNewerVersion(version, appVersion);
+  }
+
+  bool get _upToDate => updateStatus.toLowerCase().contains('up to date');
+
+
+  String get _updateSubtitle {
+    if (_updateAvailable) return 'Install latest builds from GitHub';
+    if (checkingUpdates) return 'Checking GitHub Releases...';
+    if (_upToDate) return 'NoteKar is already on the latest build.';
+    return 'Current version v$appVersion';
+  }
+
+
+
+
+  String get _dataHealthStatus {
+    if (widget.entries.isEmpty) return 'Empty';
+    if (widget.lastBackupAt == null) return 'Backup';
+    if (backupReminderDays == 0) return 'Local';
+    final age = DateTime.now().difference(
+      DateTime.fromMillisecondsSinceEpoch(widget.lastBackupAt!),
+    );
+    return age.inDays >= backupReminderDays ? 'Due' : 'Good';
+  }
+
+  List<
+    ({
+      String title,
+      String subtitle,
+      String category,
+      IconData icon,
+      List<String> keywords,
+    })
+  >
+  get _settingsSearchResults {
+    final query = _settingsQuery.trim().toLowerCase();
+    if (query.isEmpty) return const [];
+    final rows = _settingsSearchRowsCache ?? [];
     return rows
         .where(
           (row) =>
@@ -1415,28 +1419,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
         const SizedBox(height: spacing12),
         SizedBox(
           height: 125, // Gallery height
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: spacing16),
-            itemCount: icons.length,
-            itemBuilder: (context, index) {
-              final entry = icons.entries.elementAt(index);
-              return Padding(
-                padding: const EdgeInsets.only(right: 14),
-                child: AppIconChoice(
-                  p: p,
-                  label: entry.value.$1,
-                  asset: entry.value.$2,
-                  active: appIconStyle == entry.key,
-                  onTap: () {
-                    if (entry.key == appIconStyle) return;
-                    HapticFeedback.selectionClick();
-                    setState(() => appIconStyle = entry.key);
-                    unawaited(widget.onAppIconStyle(entry.key));
-                  },
-                ),
-              );
-            },
+          child: RepaintBoundary(
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: spacing16),
+              itemCount: icons.length,
+              itemBuilder: (context, index) {
+                final entry = icons.entries.elementAt(index);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 14),
+                  child: AppIconChoice(
+                    p: p,
+                    label: entry.value.$1,
+                    asset: entry.value.$2,
+                    active: appIconStyle == entry.key,
+                    onTap: () {
+                      if (entry.key == appIconStyle) return;
+                      NotekarHaptics.selection('standard');
+                      setState(() => appIconStyle = entry.key);
+                      unawaited(widget.onAppIconStyle(entry.key));
+                    },
+                  ),
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: spacing4), // Minimum space for iOS look
@@ -1773,11 +1779,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 child: SlideTransition(position: slide, child: child),
               );
             },
-            child: CustomScrollView(
-              key: ValueKey(category ?? 'root'),
-              controller: _activeController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
+            child: RepaintBoundary(
+              child: CustomScrollView(
+                key: ValueKey(category ?? 'root'),
+                controller: _activeController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
               if (category == null) ...[
                 SliverToBoxAdapter(
                   child: AppSheetLargeTitle(
@@ -2367,7 +2374,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 onTap: () {
                                   final current = delayIndex < 0 ? 0 : delayIndex;
                                   final next = delayValues[math.max(0, current - 1)];
-                                  HapticFeedback.selectionClick();
+                                  NotekarHaptics.selection('standard');
                                   setState(() => tapDelay = next);
                                   widget.onDelay(next);
                                 },
@@ -2384,7 +2391,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         onChanged: (value) {
                                           final next = delayValues[value.round()];
                                           if (next == tapDelay) return;
-                                          HapticFeedback.selectionClick();
+                                          NotekarHaptics.selection('standard');
                                           setState(() => tapDelay = next);
                                           widget.onDelay(next);
                                         },
@@ -2403,7 +2410,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 onTap: () {
                                   final current = delayIndex < 0 ? 0 : delayIndex;
                                   final next = delayValues[math.min(delayValues.length - 1, current + 1)];
-                                  HapticFeedback.selectionClick();
+                                  NotekarHaptics.selection('standard');
                                   setState(() => tapDelay = next);
                                   widget.onDelay(next);
                                 },
@@ -3055,7 +3062,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

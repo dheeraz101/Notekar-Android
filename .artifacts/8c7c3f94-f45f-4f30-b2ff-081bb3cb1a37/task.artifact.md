@@ -1,0 +1,27 @@
+# Notekar Optimization & Revamp Task List
+
+- [x] **Performance & Startup Optimization**
+    - [x] Parallelize initialization in `main.dart`
+    - [x] Optimize `AdaptiveEngine` sensor checks and caching
+    - [x] Centralize and refine haptics in `app_utils.dart`
+- [x] **Android Widget Revamp**
+    - [x] Update `notekar_widget.xml` with `TextClock` and new "Pill" design
+    - [x] Update `NoteKarWidgetProvider.kt` for state sync and better layout handling
+- [x] **UI/UX Refinements**
+    - [x] Add `RepaintBoundary` to high-frequency UI elements
+    - [x] Refine animation curves and resource management in `NoteKarHome`
+- [x] **Dialog & Sheet Optimizations**
+    - [x] **History Sheet**
+        - [x] Implement memoized filtering and mapping logic
+        - [x] Refine `SliverChildBuilderDelegate` and pagination
+        - [x] Optimize scroll behavior and notice bar animations
+    - [x] **Settings Sheet**
+        - [x] Pre-calculate search keywords in `initState`
+        - [x] Implement targeted rebuilds for settings rows (RepaintBoundary & local state)
+        - [x] Add `RepaintBoundary` to complex settings sections
+        - [x] Smooth out category transitions
+- [x] **Verification**
+    - [x] Run `flutter test`
+    - [x] Verify silky-smooth scrolling in History (500+ items)
+    - [x] Verify instantaneous search in Settings
+    - [x] Measure overall responsiveness improvement

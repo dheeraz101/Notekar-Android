@@ -18,6 +18,7 @@ class AdaptiveEngine {
   int _processors = 0;
   String _model = 'Unknown';
   String _osVersion = 'Unknown';
+  bool? _cachedSensorAvailable;
 
   PerformanceTier get tier => _tier;
   int get ramGb => _ramGb;
@@ -28,13 +29,15 @@ class AdaptiveEngine {
   bool get isLowEnd => _tier == PerformanceTier.low;
   bool get supportsBlur => _tier != PerformanceTier.low;
   bool get supportsAdvancedAnimations => _tier == PerformanceTier.high;
+  bool? get cachedSensorAvailable => _cachedSensorAvailable;
 
-  Future<void> initialize() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> initialize({SharedPreferences? prefs}) async {
+    final effectivePrefs = prefs ?? await SharedPreferences.getInstance();
     final deviceInfo = DeviceInfoPlugin();
 
-    // Try to load cached RAM
-    _ramGb = prefs.getInt('device_total_ram_gb') ?? 0;
+    // Try to load cached RAM and sensor state
+    _ramGb = effectivePrefs.getInt('device_total_ram_gb') ?? 0;
+    _cachedSensorAvailable = effectivePrefs.getBool('device_sensor_available');
     
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
@@ -45,7 +48,7 @@ class AdaptiveEngine {
       // If RAM is not cached, detect it
       if (_ramGb == 0) {
         _ramGb = await _detectAndroidRam();
-        await prefs.setInt('device_total_ram_gb', _ramGb);
+        await effectivePrefs.setInt('device_total_ram_gb', _ramGb);
       }
 
       // Intelligent Heuristic for Android

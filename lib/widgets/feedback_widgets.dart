@@ -32,33 +32,35 @@ class _RippleState extends State<Ripple> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (_, _) {
-        final scale = 1 + _controller.value * 2.4;
-        return Positioned(
-          left: widget.origin.dx - 20,
-          top: widget.origin.dy - 20,
-          child: Transform.scale(
-            scale: scale,
-            child: Opacity(
-              opacity: (1 - _controller.value).clamp(0.0, 0.16),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: widget.color.withValues(alpha: 0.35),
-                    width: 1.3,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (_, _) {
+          final scale = 1 + Curves.easeOutCubic.transform(_controller.value) * 2.4;
+          return Positioned(
+            left: widget.origin.dx - 20,
+            top: widget.origin.dy - 20,
+            child: Transform.scale(
+              scale: scale,
+              child: Opacity(
+                opacity: (1 - _controller.value).clamp(0.0, 0.16),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.color.withValues(alpha: 0.35),
+                      width: 1.3,
+                    ),
+                    color: widget.color.withValues(alpha: 0.05),
                   ),
-                  color: widget.color.withValues(alpha: 0.05),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -206,40 +208,42 @@ class _SavedPulseState extends State<SavedPulse>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (_, _) {
-        final dy = -18 * Curves.easeOutCubic.transform(_controller.value);
-        final opacity = (1 - _controller.value).clamp(0.0, 1.0);
-        final color = momentColor(widget.p, widget.type);
-        return Positioned(
-          left: widget.origin.dx - 54,
-          top: widget.origin.dy - 44 + dy,
-          width: 108,
-          child: Opacity(
-            opacity: opacity,
-            child: Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: color.withValues(alpha: 0.24)),
-              ),
-              child: Text(
-                _pulseLabel(widget.type),
-                maxLines: 1,
-                softWrap: false,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (_, _) {
+          final dy = -18 * Curves.easeOutCubic.transform(_controller.value);
+          final opacity = (1 - Curves.easeOut.transform(_controller.value)).clamp(0.0, 1.0);
+          final color = momentColor(widget.p, widget.type);
+          return Positioned(
+            left: widget.origin.dx - 54,
+            top: widget.origin.dy - 44 + dy,
+            width: 108,
+            child: Opacity(
+              opacity: opacity,
+              child: Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: color.withValues(alpha: 0.24)),
+                ),
+                child: Text(
+                  _pulseLabel(widget.type),
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
