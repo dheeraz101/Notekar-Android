@@ -40,7 +40,7 @@ function Update-TextFile {
 
 $pubspecPath = Join-Path $repoRoot 'pubspec.yaml'
 $localPropertiesPath = Join-Path $repoRoot 'android/local.properties'
-$mainDartPath = Join-Path $repoRoot 'lib/main.dart'
+$appUtilsPath = Join-Path $repoRoot 'lib/utils/app_utils.dart'
 
 if (-not (Test-Path -LiteralPath $pubspecPath)) {
     throw "pubspec.yaml was not found at $pubspecPath"
@@ -50,8 +50,8 @@ if (-not (Test-Path -LiteralPath $localPropertiesPath)) {
     throw "android/local.properties was not found at $localPropertiesPath"
 }
 
-if (-not (Test-Path -LiteralPath $mainDartPath)) {
-    throw "lib/main.dart was not found at $mainDartPath"
+if (-not (Test-Path -LiteralPath $appUtilsPath)) {
+    throw "lib/utils/app_utils.dart was not found at $appUtilsPath"
 }
 
 $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
@@ -77,11 +77,12 @@ Update-TextFile -Path $localPropertiesPath -Update {
     $text
 }
 
-Update-TextFile -Path $mainDartPath -Update {
+Update-TextFile -Path $appUtilsPath -Update {
     param($text)
-    $text = [regex]::Replace($text, "static const _appVersion = '[^']+';", "static const _appVersion = '$Version';")
-    $text = [regex]::Replace($text, "static const _appBuildNumber = '[^']+';", "static const _appBuildNumber = '$BuildNumber';")
-    $text = [regex]::Replace($text, "static const _appBuildDate = '[^']+';", "static const _appBuildDate = '$BuildDate';")
+    # Updated regex to match the top-level const in lib/utils/app_utils.dart
+    $text = [regex]::Replace($text, "const appVersion = '[^']+';", "const appVersion = '$Version';")
+    $text = [regex]::Replace($text, "const appBuildNumber = '[^']+';", "const appBuildNumber = '$BuildNumber';")
+    $text = [regex]::Replace($text, "const appBuildDate = '[^']+';", "const appBuildDate = '$BuildDate';")
     $text
 }
 

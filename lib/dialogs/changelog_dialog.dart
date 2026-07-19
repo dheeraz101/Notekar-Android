@@ -21,8 +21,36 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '4.0.4',
+      date: 'July 20, 2026',
+      highlights: [
+        'A complete visual overhaul with an iOS-inspired design and fluid adaptive transitions.',
+        'Hardened data security with enhanced backup resilience and diagnostic logging.',
+        'Next-generation App Widgets and a redesigned, lightning-fast Settings Search.',
+        'A centralized Update Center and integrated feedback system to build a better NoteKar.',
+        'Intelligent accessibility including global text scaling and high-contrast support.',
+      ],
+      items: [
+        'Modular Refactor: Re-architected core components for improved performance scaling.',
+        'Adaptive Engine: Refined intelligence for smoother cross-device UI transitions.',
+        'Data Layer: Implemented diagnostic logging and SHA-256 validation for backup integrity.',
+        'App Widgets: Rebuilt Android widgets with modern layouts and optimized RemoteViews.',
+        'Settings Search: Overhauled search with cached indexing and improved query matching.',
+        'Feedback System: Integrated direct support routing with diagnostic attachment support.',
+        'Layout: Standardized global padding and standardized typography across all modules.',
+        'UX Hardening: Optimized state management for History, Note Input, and Calendar flows.',
+        'Build Integrity: Final build 13 with legal compliance integration and stability patches.',
+      ],
+    ),
+    (
       version: '4.0.3',
       date: 'June 17, 2026',
+      highlights: [
+        'Backup validation before import, with safer checks for damaged JSON and oversized files.',
+        'New backup import preview with total counts and settings restoration details.',
+        'Crash-safer startup sequencing and timeline profiling markers.',
+        'Cached search and calendar lookups for smoother performance.',
+      ],
       items: [
         'Moved the app line to 4.0.3 build 12 for the backup and performance hardening release.',
         'Added backup validation before import, with safer checks for damaged JSON, invalid moments, oversized files, and unsupported data.',
@@ -38,6 +66,11 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '4.0.2',
       date: 'June 12, 2026',
+      highlights: [
+        'Optional home menu icon motion tied to Reduce Motion.',
+        'Dependency-aware Settings behavior for clearer guidance.',
+        'Refined bottom sheets and swipe-delete polish.',
+      ],
       items: [
         'Moved the app line to 4.0.2 build 11 for the polish release.',
         'Made home menu icon motion optional, disabled by default, and tied it to Reduce Motion.',
@@ -51,6 +84,10 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '4.0.1',
       date: 'June 1, 2026',
+      highlights: [
+        'Polish release with home menu icon motion options.',
+        'Dependency-aware settings and refined bottom sheets.',
+      ],
       items: [
         'Moved the app line to 4.0.1 build 11 for the polish release.',
         'Made home menu icon motion optional, disabled by default, and tied it to Reduce Motion.',
@@ -63,6 +100,12 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '4.0.0',
       date: 'June 1, 2026',
+      highlights: [
+        'Major redesign with clearer top-level Settings sections.',
+        'Real Android app icon switching support.',
+        'Improved Privacy & Security with App Lock enhancements.',
+        'Note validation and visible character counter.',
+      ],
       items: [
         'Moved the app line to 4.0.0 build 9 for the final release package.',
         'Reduced Settings to clearer top-level sections: Personalization, Logging, Privacy & Security, Data & Backup, Updates, and Advanced.',
@@ -76,6 +119,10 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '3.6.0',
       date: 'May 27, 2026',
+      highlights: [
+        'Restored compact History cards for faster scanning.',
+        'Accessibility improvements for Quick Actions.',
+      ],
       items: [
         'Moved the app line to 3.6.0 build 8 for the next release wave.',
         'Restored compact History to the denser 3.0.0-style cards for faster scanning.',
@@ -87,6 +134,12 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '3.5.0',
       date: 'May 27, 2026',
+      highlights: [
+        'Theme-aware bottom navigation surface.',
+        'Curated Action Color support (Blue, Green, Purple, etc.).',
+        'Privacy Lock using Android system credentials.',
+        'Expanded Android app shortcuts.',
+      ],
       items: [
         'Moved the app line to 3.5.0 build 7 for the next release cycle.',
         'Added a theme-aware bottom navigation surface so the home toolbar follows Light, Dark, and AMOLED themes more naturally.',
@@ -101,6 +154,12 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '3.0.0',
       date: 'May 27, 2026',
+      highlights: [
+        'Complete Settings reshuffle for better clarity.',
+        'Dedicated Reset page with Factory Reset flow.',
+        'Privacy page with local-storage and data-use transparency.',
+        'Backup import merge logic instead of replace.',
+      ],
       items: [
         'Moved the current app line to 3.0.0 build 6 with refreshed What\'s New and changelog entries.',
         'Reshuffled Settings into clearer categories: Display, Capture, Moments, Backup & Export, Updates & Notices, Privacy & Security, Accessibility, Reset, and Diagnostics.',
@@ -121,6 +180,10 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '2.5.0',
       date: 'May 27, 2026',
+      highlights: [
+        'Preparation for major release wave.',
+        'Documented planned release files and security approach.',
+      ],
       items: [
         'Prepared the 2.5.0 release notes and Android release folder structure without building APKs.',
         'Kept the app version aligned for the next release step and preserved the 2.0.0 release history.',
@@ -130,6 +193,11 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '2.0.0',
       date: 'May 26, 2026',
+      highlights: [
+        'iOS-inspired Android redesign with grouped Settings.',
+        'GitHub Releases update checks and remote notices.',
+        'Accessibility and customization options for haptics and motion.',
+      ],
       items: [
         'Introduced the iOS-inspired Android redesign with grouped Settings pages, cleaner sheets, refined toolbar controls, and calmer colors.',
         'Added GitHub Releases update checks, remote GitHub notice support, notification routing actions, What\'s New, and Changelog pages.',
@@ -141,6 +209,10 @@ class ChangelogDialog extends StatefulWidget {
     (
       version: '1.0.0',
       date: 'May 25, 2026',
+      highlights: [
+        'Native Android launch with private offline storage.',
+        'Note capture, history filters, and backup import.',
+      ],
       items: [
         'Launched the native Android rewrite with private offline moment storage.',
         'Added Single and Two-Way logging, note capture, history filters, exports, and backup import.',
@@ -211,7 +283,7 @@ class ChangelogReleaseCard extends StatelessWidget {
   });
 
   final Palette p;
-  final ({String date, List<String> items, String version}) release;
+  final ({String date, List<String> items, List<String> highlights, String version}) release;
   final bool isLatest;
   final bool expanded;
   final VoidCallback onTap;
@@ -545,7 +617,7 @@ class _WhatsNewPanel extends StatelessWidget {
   const _WhatsNewPanel({required this.p, required this.release});
 
   final Palette p;
-  final ({String date, List<String> items, String version}) release;
+  final ({String date, List<String> items, List<String> highlights, String version}) release;
 
   @override
   Widget build(BuildContext context) {
@@ -613,7 +685,7 @@ class _WhatsNewPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        for (final item in release.items)
+        for (final item in release.highlights)
           Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(13),
