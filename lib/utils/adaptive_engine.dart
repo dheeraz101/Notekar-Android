@@ -109,6 +109,14 @@ class AdaptiveEngine {
     return 0;
   }
 
+  String get healthStatus {
+    return switch (_tier) {
+      PerformanceTier.low => 'Low',
+      PerformanceTier.balanced => 'Smooth',
+      PerformanceTier.high => 'Fast',
+    };
+  }
+
   String get tierLabel {
     return switch (_tier) {
       PerformanceTier.low => 'Power Saver',

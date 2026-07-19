@@ -1,29 +1,18 @@
-# Notekar Optimization & Revamp Walkthrough
+# Settings Cleanup & Link Update Walkthrough
 
-I have successfully audited and optimized Notekar for a smoother and better experience, with a focus on startup performance, widget interactivity, and high-frequency dialog responsiveness.
+I have updated the project's external links and streamlined the main Settings page for a cleaner, more minimalist appearance.
 
-## 🚀 Performance & Startup
-- **Parallel Loading**: Refactored `main.dart` to initialize `SharedPreferences`, `Hive`, and `AdaptiveEngine` in parallel. This significantly reduces "splash-to-interactive" time.
-- **Sensor Caching**: The motion sensor check is now cached in `SharedPreferences`, avoiding hardware probing on every startup and preventing initial frame drops.
+## 🔗 Link & Email Updates
+The following production-ready details have been integrated:
+- **Buy me a Coffee**: Updated to `https://buymeacoffee.com/dheeraz`
+- **Support Email**: Updated to `yabp.support@gmail.com`
 
-## 📱 Revamped Android Widget
-The widget is now truly "live" and modern:
-- **Live Clock**: Integrated native `TextClock` for real-time time updates without app intervention.
-- **Modern "Pill" Design**: A compact, high-contrast layout that matches the app's internal aesthetic.
-- **Dynamic State**: The widget now correctly shows "Next Action" (IN vs OUT) and updates counts instantly when moments are saved or deleted.
+## 🧹 Main Settings UI Cleanup
+I have removed the dynamic status values (like "Locked", "124 Logs", "Fast") from the **main settings root list**.
+- **Cleaner Aesthetics**: The root settings now look like a professional, simplified menu.
+- **Consistent Info**: Status information remains available inside each specific sub-category (e.g., Theme name inside Personalization, or performance details inside Device Health).
 
-## 📜 Smooth History & Settings
-Significant optimizations were made to ensure large datasets (500+ items) feel silky smooth:
-- **Memoized History**: Filtering and list construction in the History sheet are now memoized. They only recalculate when data actually changes, keeping the scroll at a locked 60fps+.
-- **Instant Search**: Settings search keywords are pre-calculated on sheet open, making search filtering instantaneous as you type.
-- **Targeted Rendering**: Added `RepaintBoundary` around high-frequency and complex elements (Clock, Toolbar, App Icon Gallery, History Tiles) to isolate paint work.
-- **Improved Haptics**: Introduced `NotekarHaptics` for a unified, premium feel using native haptic patterns across the entire app.
-
-## ✨ UI/UX Polish
-- **Weighted Animations**: Refined Ripple and Pulse effects with `Curves.easeOutCubic`.
-- **Smoother Transitions**: Category switching in Settings now uses optimized slide/fade transitions that respect the device's performance tier.
-
-## 🛠️ Verification Results
-- **Tests**: All unit and widget tests passed.
-- **Responsiveness**: Verified smooth scrolling and instant search via manual inspection (emulated/profiler).
-- **Resource Safety**: Ensured proper disposal of all controllers and timers.
+## ✅ Verification Results
+- **Link Accuracy**: Confirmed the Buy me a Coffee and Support Email constants are correctly updated in `app_utils.dart`.
+- **UI Integrity**: Verified that the root settings rows no longer show trailing status text.
+- **Test Suite**: All unit and widget tests passed successfully.

@@ -244,6 +244,87 @@ class DiagnosticRow extends StatelessWidget {
   }
 }
 
+class HIGEmptyState extends StatelessWidget {
+  const HIGEmptyState({
+    super.key,
+    required this.p,
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+    this.compact = false,
+  });
+
+  final Palette p;
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: compact ? 32 : 44),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: compact ? 56 : 72,
+              color: p.text3.withValues(alpha: 0.25),
+            ),
+            SizedBox(height: compact ? 16 : 24),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: compact ? 18 : 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text3,
+                fontSize: compact ? 14 : 15,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              SizedBox(height: compact ? 20 : 28),
+              FilledButton(
+                onPressed: onAction,
+                style: FilledButton.styleFrom(
+                  backgroundColor: p.accent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: Text(
+                  actionLabel!,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class SliverStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   SliverStickyHeaderDelegate({
     required this.child,

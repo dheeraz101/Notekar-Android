@@ -994,25 +994,15 @@ class SettingsAboutBlock extends StatelessWidget {
   const SettingsAboutBlock({
     super.key,
     required this.p,
-    required this.onEmailTap,
-    required this.onGitHubTap,
-    required this.onCoffeeTap,
-    required this.onIssuesTap,
-    required this.onVersionLongPress,
   });
 
   final Palette p;
-  final VoidCallback onEmailTap;
-  final VoidCallback onGitHubTap;
-  final VoidCallback onCoffeeTap;
-  final VoidCallback onIssuesTap;
-  final VoidCallback onVersionLongPress;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
       decoration: BoxDecoration(
         color: p.surface2,
         borderRadius: BorderRadius.circular(20),
@@ -1027,176 +1017,14 @@ class SettingsAboutBlock extends StatelessWidget {
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             'Built by YABP as a small, offline-first timestamp logger for real work: quick taps, focused notes, private local storage, and exports developers can inspect.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: p.text2, fontSize: 12, height: 1.45),
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SocialCircleButton(
-                  p: p,
-                  icon: Icons.mail_rounded,
-                  onTap: onEmailTap,
-                ),
-                const SizedBox(width: 12),
-                SocialCircleButton(
-                  p: p,
-                  icon: Icons.bug_report_rounded,
-                  onTap: onIssuesTap,
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onLongPress: onVersionLongPress,
-                  child: Container(
-                    height: 38,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: p.surface3,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: p.border),
-                    ),
-                    child: Text(
-                      'v$appVersion ($appBuildNumber)',
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                SocialCircleButton(
-                  p: p,
-                  icon: Icons.coffee_rounded,
-                  color: const Color(0xFFFFDD00),
-                  onTap: onCoffeeTap,
-                ),
-                const SizedBox(width: 12),
-                SocialCircleButton(
-                  p: p,
-                  icon: Icons.code_rounded,
-                  onTap: onGitHubTap,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Build date $appBuildDate',
-            style: TextStyle(color: p.text3, fontSize: 11),
+            style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
           ),
         ],
       ),
     );
   }
-}
-
-class SocialCircleButton extends StatelessWidget {
-  const SocialCircleButton({
-    super.key,
-    required this.p,
-    required this.icon,
-    required this.onTap,
-    this.color,
-  });
-
-  final Palette p;
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: p.name == 'light' ? Colors.white : p.surface3,
-          shape: BoxShape.circle,
-          border: Border.all(color: p.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(
-                alpha: p.name == 'light' ? 0.08 : 0.22,
-              ),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: icon == Icons.code_rounded
-            ? CustomPaint(painter: GitHubMarkPainter(color: p.text))
-            : Icon(icon, color: color ?? p.accent, size: 18),
-      ),
-    );
-  }
-}
-
-class GitHubMarkPainter extends CustomPainter {
-  GitHubMarkPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.75
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round;
-    final scale = math.min(size.width, size.height) / 24;
-    canvas.save();
-    canvas.translate(
-      (size.width - 24 * scale) / 2,
-      (size.height - 24 * scale) / 2,
-    );
-    canvas.scale(scale);
-    final path =
-        Path()
-          ..moveTo(12, 2)
-          ..cubicTo(6.47, 2, 2, 6.47, 2, 12)
-          ..cubicTo(2, 16.41, 4.87, 20.17, 8.84, 21.5)
-          ..cubicTo(9.34, 21.58, 9.5, 21.27, 9.5, 21.0)
-          ..cubicTo(9.5, 20.77, 9.5, 20.14, 9.5, 19.31)
-          ..cubicTo(6.73, 19.91, 6.14, 17.97, 6.14, 17.97)
-          ..cubicTo(5.68, 16.81, 5.03, 16.5, 5.03, 16.5)
-          ..cubicTo(4.12, 15.88, 5.1, 15.9, 5.1, 15.9)
-          ..cubicTo(6.1, 15.97, 6.63, 16.93, 6.63, 16.93)
-          ..cubicTo(7.5, 18.45, 8.97, 18.01, 9.54, 17.76)
-          ..cubicTo(9.63, 17.11, 9.89, 16.67, 10.17, 16.42)
-          ..cubicTo(7.95, 16.17, 5.62, 15.31, 5.62, 11.5)
-          ..cubicTo(5.62, 10.41, 6, 9.51, 6.63, 8.8)
-          ..cubicTo(6.52, 8.55, 6.17, 7.53, 6.73, 6.15)
-          ..cubicTo(6.73, 6.15, 7.58, 5.88, 9.5, 7.17)
-          ..cubicTo(10.3, 6.92, 11.15, 6.8, 12, 6.8)
-          ..cubicTo(12.85, 6.8, 13.7, 6.92, 14.5, 7.17)
-          ..cubicTo(16.42, 5.88, 17.27, 6.15, 17.27, 6.15)
-          ..cubicTo(17.83, 7.53, 17.48, 8.55, 17.37, 8.8)
-          ..cubicTo(18, 9.51, 18.38, 10.41, 18.38, 11.5)
-          ..cubicTo(18.38, 15.32, 16.04, 16.17, 13.81, 16.42)
-          ..cubicTo(14.17, 16.72, 14.5, 17.33, 14.5, 18.26)
-          ..cubicTo(14.5, 19.6, 14.5, 20.68, 14.5, 21.0)
-          ..cubicTo(14.5, 21.27, 14.66, 21.59, 15.17, 21.5)
-          ..cubicTo(19.14, 20.16, 22, 16.42, 22, 12)
-          ..cubicTo(22, 6.47, 17.53, 2, 12, 2)
-          ..close();
-    canvas.drawPath(path, paint);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

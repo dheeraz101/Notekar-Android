@@ -180,17 +180,42 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   bool get _hasOlderRows => _visibleCount < _filteredEntries.length;
 
+  IconData get _emptyIcon {
+    return switch (_filter) {
+      'today' => Icons.today_rounded,
+      'week' => Icons.date_range_rounded,
+      'date' => Icons.event_busy_rounded,
+      'in' => Icons.login_rounded,
+      'out' => Icons.logout_rounded,
+      'single' => Icons.radio_button_checked_rounded,
+      'notes' => Icons.speaker_notes_off_rounded,
+      _ => Icons.history_toggle_off_rounded,
+    };
+  }
+
+  String get _emptyTitle {
+    return switch (_filter) {
+      'today' => 'Nothing Today',
+      'week' => 'Clean Week',
+      'date' => 'Empty Date',
+      'in' => 'No IN Moments',
+      'out' => 'No OUT Moments',
+      'single' => 'No Single Logs',
+      'notes' => 'No Notes Found',
+      _ => 'No History',
+    };
+  }
+
   String get _emptyMessage {
     return switch (_filter) {
-      'today' => 'No moments today.\nTap the screen to save your first one.',
-      'week' => 'No moments this week.\nYour recent logs will appear here.',
-      'date' => 'No moments on this date.\nChoose another day with a dot.',
-      'in' => 'No IN moments yet.\nTwo-Way mode will create them.',
-      'out' => 'No OUT moments yet.\nFinish a Two-Way pair to see one.',
-      'single' =>
-        'No Single moments yet.\nSwitch mode when you need one-shot logs.',
-      'notes' => 'No notes yet.\nLong press the screen to save a note.',
-      _ => 'No moments yet.\nTap to save a moment. Long press to add a note.',
+      'today' => 'Your moments for today will appear here as you log them.',
+      'week' => 'You haven\'t saved any moments during the last seven days.',
+      'date' => 'There are no records for this specific calendar day.',
+      'in' => 'IN moments are created when using Two-Way logging mode.',
+      'out' => 'OUT moments complete the pair in Two-Way logging mode.',
+      'single' => 'Single logs are standalone timestamps for one-shot events.',
+      'notes' => 'Moments with text notes will be listed here for quick review.',
+      _ => 'Start capturing moments by tapping the clock on the home screen.',
     };
   }
 
@@ -397,30 +422,21 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 if (_listItems.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: spacing48),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _emptyMessage,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: widget.p.text2,
-                              height: 1.45,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: widget.p.accent,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Start Logging'),
-                          ),
-                        ],
-                      ),
+                    child: HIGEmptyState(
+                      p: widget.p,
+                      icon: _emptyIcon,
+                      title: _emptyTitle,
+                      message: _emptyMessage,
+                      actionLabel: _filter == 'all' ? 'Start Logging' : 'Show All',
+                      onAction: _filter == 'all' 
+                        ? () => Navigator.pop(context)
+                        : () {
+                          setState(() {
+                            _filter = 'all';
+                            _visibleCount = _pageSize;
+                            _rebuildMemoizedLists();
+                          });
+                        },
                     ),
                   )
                 else

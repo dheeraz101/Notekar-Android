@@ -43,8 +43,10 @@ class MainActivity : FlutterActivity() {
                 }
                 "openTextFile" -> {
                     if (pendingOpenResult != null) {
-                        result.error("OPEN_BUSY", "A file picker is already open", null)
-                        return@setMethodCallHandler
+                        try {
+                            pendingOpenResult?.error("OPEN_CANCELLED", "New file picker request received", null)
+                        } catch (_: Exception) { }
+                        pendingOpenResult = null
                     }
                     pendingOpenResult = result
                     val mimeType = call.argument<String>("mimeType") ?: "application/json"
@@ -61,36 +63,47 @@ class MainActivity : FlutterActivity() {
                 }
                 "appDataDir" -> result.success(applicationContext.filesDir.absolutePath)
                 "canUsePrivacyLock" -> result.success(canUsePrivacyLock())
-                "authenticatePrivacyLock" -> authenticatePrivacyLock(result)
+                "authenticatePrivacyLock" -> {
+                    if (pendingPrivacyResult != null) {
+                        try {
+                            pendingPrivacyResult?.error("AUTH_CANCELLED", "New auth request received", null)
+                        } catch (_: Exception) { }
+                        pendingPrivacyResult = null
+                    }
+                    authenticatePrivacyLock(result)
+                }
                 "getLaunchAction" -> {
                     result.success(pendingLaunchAction)
                     pendingLaunchAction = null
                 }
                 "updateWidgetState" -> {
-                    val todayCount = call.argument<Int>("todayCount") ?: 0
-                    val mode = call.argument<String>("mode") ?: "two-way"
-                    val nextAction = call.argument<String>("nextAction") ?: "in"
-                    val lastType = call.argument<String>("lastType") ?: ""
-                    val lastTimestamp = call.argument<Number>("lastTimestamp")?.toLong() ?: 0L
-                    val hasMoments = call.argument<Boolean>("hasMoments") ?: false
+                    try {
+                        val todayCount = call.argument<Int>("todayCount") ?: 0
+                        val mode = call.argument<String>("mode") ?: "two-way"
+                        val nextAction = call.argument<String>("nextAction") ?: "in"
+                        val lastType = call.argument<String>("lastType") ?: ""
+                        val lastTimestamp = call.argument<Number>("lastTimestamp")?.toLong() ?: 0L
+                        val hasMoments = call.argument<Boolean>("hasMoments") ?: false
 
-                    val prefs = getSharedPreferences(
-                        NoteKarWidgetProvider.PREFS_NAME,
-                        Context.MODE_PRIVATE
-                    )
+                        val prefs = getSharedPreferences(
+                            NoteKarWidgetProvider.PREFS_NAME,
+                            Context.MODE_PRIVATE
+                        )
 
-                    prefs.edit()
-                        .putInt(NoteKarWidgetProvider.KEY_TODAY_COUNT, todayCount)
-                        .putString(NoteKarWidgetProvider.KEY_MODE, mode)
-                        .putString(NoteKarWidgetProvider.KEY_NEXT_ACTION, nextAction)
-                        .putString(NoteKarWidgetProvider.KEY_LAST_TYPE, lastType)
-                        .putLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, lastTimestamp)
-                        .putBoolean(NoteKarWidgetProvider.KEY_HAS_MOMENTS, hasMoments)
-                        .apply()
+                        prefs.edit()
+                            .putInt(NoteKarWidgetProvider.KEY_TODAY_COUNT, todayCount)
+                            .putString(NoteKarWidgetProvider.KEY_MODE, mode)
+                            .putString(NoteKarWidgetProvider.KEY_NEXT_ACTION, nextAction)
+                            .putString(NoteKarWidgetProvider.KEY_LAST_TYPE, lastType)
+                            .putLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, lastTimestamp)
+                            .putBoolean(NoteKarWidgetProvider.KEY_HAS_MOMENTS, hasMoments)
+                            .apply()
 
-                    NoteKarWidgetProvider.updateAllWidgets(this)
-
-                    result.success(null)
+                        NoteKarWidgetProvider.updateAllWidgets(this)
+                        result.success(null)
+                    } catch (e: Exception) {
+                        result.error("WIDGET_UPDATE_FAILED", e.message, null)
+                    }
                 }
                 "setAppIconStyle" -> {
                     val style = call.argument<String>("style") ?: "default"
@@ -122,6 +135,12 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 "requestNotificationPermission" -> {
+                    if (pendingNotificationResult != null) {
+                        try {
+                            pendingNotificationResult?.error("PERMISSION_CANCELLED", "New permission request received", null)
+                        } catch (_: Exception) { }
+                        pendingNotificationResult = null
+                    }
                     requestNotificationPermission(result)
                 }
                 "configureRemoteNotices" -> {

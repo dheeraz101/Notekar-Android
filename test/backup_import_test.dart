@@ -60,13 +60,20 @@ void main() {
     expect(result.error, 'Backup is not valid JSON');
   });
 
-  test('rejects damaged backup rows', () {
+  test('skips damaged backup rows resiliently', () {
     final result = validateNoteKarBackupContent(
-      backupJson(entries: ['bad-row']),
+      backupJson(entries: ['bad-row', {
+        'id': 2,
+        'timestamp': secondTs,
+        'type': 'in',
+        'date': '2024-06-11',
+        'note': '',
+      }]),
     );
 
-    expect(result.isValid, isFalse);
-    expect(result.error, contains('damaged moment data'));
+    expect(result.isValid, isTrue);
+    expect(result.entries, hasLength(1));
+    expect(result.entries.first.timestamp, secondTs);
   });
 
   test('dry-run summary reports new moments and duplicates', () {
@@ -93,16 +100,16 @@ void main() {
     expect(summary.settingsToRestore, 2);
   });
 
-  test('rejects unknown moment types', () {
+  test('normalizes unknown moment types resiliently', () {
     final result = validateNoteKarBackupContent(
       backupJson(
         entries: [
-          {'id': 1, 'timestamp': firstTs, 'type': 'sideways', 'note': ''},
+          {'id': 1, 'timestamp': firstTs, 'type': 'sideways', 'note': 'Unknown type moment'},
         ],
       ),
     );
 
-    expect(result.isValid, isFalse);
-    expect(result.error, contains('unknown moment type'));
+    expect(result.isValid, isTrue);
+    expect(result.entries.first.type, 'single');
   });
 }

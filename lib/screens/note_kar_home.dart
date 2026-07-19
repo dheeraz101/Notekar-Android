@@ -25,6 +25,9 @@ import 'package:notekar/utils/backup_utils.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/toolbar.dart';
+import 'package:notekar/utils/app_logger.dart';
+import 'package:notekar/utils/moment_repository.dart';
+import 'package:notekar/utils/update_service.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,14 +42,15 @@ class NoteKarHome extends StatefulWidget {
 
 class _NoteKarHomeState extends State<NoteKarHome>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  static const _storageEntries = 'notekar.entries';
-  static const _entryBoxName = 'notekar_entries_v1';
   static const _welcomeSeenKey = 'notekar.welcomeSeen';
   static const _lastSeenVersionKey = 'notekar.lastSeenVersion';
   static const _fileChannel = MethodChannel('notekar/files');
 
+  final _logger = AppLogger();
+  final _repository = MomentRepository();
+  final _updateService = UpdateService();
+
   SharedPreferences? _prefs;
-  Box<dynamic>? _entryBox;
   Timer? _undoTimer;
   Timer? _toastTimer;
 
@@ -401,16 +405,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
 
     if (!welcomeSeen) {
-      // Trigger welcome flow immediately before heavy Hive initialization.
       if (mounted) {
         unawaited(_showWelcomeIfNeeded(prefs));
       }
     }
 
-    // 2. Load entries from Hive (Hive.init is done in main).
-    final entryBox = await Hive.openBox<dynamic>(_entryBoxName);
-    final entries = await _loadEntries(entryBox, prefs);
-    entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    // 2. Initialize Repository and load entries.
+    await _repository.initialize(preloadedPrefs: prefs);
+    final migrated = await _repository.migrateLegacyData();
+    final entries = _repository.getAllMoments();
 
     if (!mounted) {
       startupTask.finish();
@@ -419,11 +422,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     setState(() {
       _prefs = prefs;
-      _entryBox = entryBox;
       _entries = entries;
-      _nextId =
-          prefs.getInt('notekar.nextId') ??
-          (entries.isEmpty ? 1 : entries.map((e) => e.id).reduce(math.max) + 1);
+      _nextId = _repository.getNextId();
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _mode = _defaultMode;
@@ -563,55 +563,35 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _initHive() async {
-    // Hive initialization moved to main() for parallel loading.
+    // Moved to MomentRepository and main()
   }
 
   Future<List<Moment>> _loadEntries(
     Box<dynamic> entryBox,
     SharedPreferences prefs,
   ) async {
-    if (entryBox.isNotEmpty) {
-      return entryBox.values
-          .whereType<Map>()
-          .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
-          .toList();
-    }
-
-    final legacyRows = prefs.getString(_storageEntries);
-    if (legacyRows == null) return <Moment>[];
-    final entries = (jsonDecode(legacyRows) as List)
-        .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
-        .toList();
-    for (final entry in entries) {
-      await entryBox.put(entry.id, entry.toJson());
-    }
-    await prefs.remove(_storageEntries);
-    return entries;
+    // Moved to MomentRepository
+    return [];
   }
 
   Future<void> _saveEntry(Moment entry) async {
-    await _entryBox?.put(entry.id, entry.toJson());
-    await _prefs?.setInt('notekar.nextId', _nextId);
+    await _repository.saveMoment(entry);
+    setState(() => _nextId = _repository.getNextId());
   }
 
   Future<void> _deleteStoredEntry(int id) async {
-    await _entryBox?.delete(id);
-    await _prefs?.setInt('notekar.nextId', _nextId);
+    await _repository.deleteMoment(id);
+    setState(() => _nextId = _repository.getNextId());
   }
 
   Future<void> _clearStoredEntries() async {
-    await _entryBox?.clear();
-    await _prefs?.setInt('notekar.nextId', _nextId);
+    await _repository.clearAll();
+    setState(() => _nextId = _repository.getNextId());
   }
 
   Future<void> _replaceStoredEntries(List<Moment> entries) async {
-    final entryBox = _entryBox;
-    if (entryBox == null) return;
-    await entryBox.clear();
-    for (final entry in entries) {
-      await entryBox.put(entry.id, entry.toJson());
-    }
-    await _prefs?.setInt('notekar.nextId', _nextId);
+    await _repository.replaceAll(entries);
+    setState(() => _nextId = _repository.getNextId());
   }
 
   Future<void> _saveSetting(String key, Object value) async {
@@ -1493,7 +1473,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     String? action;
     try {
       action = await _fileChannel.invokeMethod<String>('getLaunchAction');
-    } catch (_) {
+    } catch (e, stack) {
+      _logger.warn('Failed to get launch action', e, stack);
       return;
     }
     if (!mounted || action == null || action.trim().isEmpty) return;
@@ -1565,7 +1546,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (value) {
         await _fileChannel.invokeMethod<void>('checkRemoteNoticesNow');
       }
-    } catch (_) {
+    } catch (e, stack) {
+      _logger.error('Failed to configure remote notices', e, stack);
       if (mounted) {
         _showToast(
           value ? 'Could not turn on app notices' : 'App notices off',
@@ -1599,9 +1581,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     try {
       await _fileChannel.invokeMethod<void>('checkRemoteNoticesNow');
-    } catch (_) {
-      // Offline and network failures are expected.
-      // They must never interrupt NoteKar.
+    } catch (e, stack) {
+      _logger.warn('Failed to check remote notices on open', e, stack);
     }
   }
 
@@ -1624,7 +1605,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
     _showToast('Checking for updates...');
     try {
-      final latest = await _fetchLatestRelease();
+      final latest = await _updateService.fetchLatestVersion();
 
       final elapsed = DateTime.now().difference(started);
       if (elapsed < const Duration(seconds: 5)) {
@@ -1637,7 +1618,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         if (mounted) _showToast('Could not check updates', warning: true);
         return status;
       }
-      if (isNewerVersion(latest, appVersion)) {
+      if (_updateService.isUpdateAvailable(latest, appVersion)) {
         final status = 'Update available: v$latest';
         _lastUpdateCheckedAt = DateTime.now().millisecondsSinceEpoch;
         await _prefs?.setInt('m-last-update-check', _lastUpdateCheckedAt!);
@@ -1679,24 +1660,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<String?> _fetchLatestRelease() async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
-    try {
-      final request = await client.getUrl(
-        Uri.parse(
-          'https://api.github.com/repos/dheeraz101/Notekar/releases/latest',
-        ),
-      );
-      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
-      final response = await request.close();
-      if (response.statusCode < 200 || response.statusCode >= 300) return null;
-      final body = await response.transform(utf8.decoder).join();
-      final data = jsonDecode(body);
-      if (data is! Map) return null;
-      final tag = (data['tag_name'] as String?) ?? (data['name'] as String?);
-      return tag?.replaceFirst(RegExp(r'^[vV]'), '').trim();
-    } finally {
-      client.close(force: true);
-    }
+    return _updateService.fetchLatestVersion();
   }
 
   Future<bool> _exportFile({

@@ -15,6 +15,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
+import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -1334,6 +1335,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   String _diagnosticsText(List<Moment> entries, int todayCount, String latest) {
+    final logs = AppLogger().diagnosticLogs;
     return [
       'NoteKar diagnostics',
       'Version: v$appVersion ($appBuildNumber)',
@@ -1345,6 +1347,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
       'Last update check: ${widget.lastUpdateCheckedAt == null ? 'Not checked yet' : relativeAge(widget.lastUpdateCheckedAt!)}',
       'App notices: ${remoteNotices ? 'Enabled' : 'Disabled'}',
       'Last moment: $latest',
+      '',
+      'Internal Logs:',
+      logs.isEmpty ? 'No internal logs available' : logs,
     ].join('\n');
   }
 
@@ -1881,19 +1886,40 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: spacing16),
+                      SettingsGroup(
+                        p: p,
+                        title: 'Support & Community',
+                        children: [
+                          SettingsRow(
+                            p: p,
+                            icon: Icons.coffee_rounded,
+                            title: 'Buy me a Coffee',
+                            color: const Color(0xFFFFDD00),
+                            onTap: () => widget.onOpenLink(coffeeLink),
+                          ),
+                          SettingsRow(
+                            p: p,
+                            icon: Icons.feedback_rounded,
+                            title: 'Feedback',
+                            color: p.green,
+                            onTap: _openFeedback,
+                          ),
+                          SettingsRow(
+                            p: p,
+                            icon: Icons.code_rounded,
+                            title: 'GitHub',
+                            color: p.text,
+                            onTap: () => widget.onOpenLink(githubRepo),
+                          ),
+                        ],
+                      ),
                       SettingsPageDescription(
                         p: p,
                         text: 'Personalize and configure NoteKar to fit your workflow.',
                       ),
                       const SizedBox(height: spacing24),
-                      SettingsAboutBlock(
-                        p: p,
-                        onEmailTap: () => widget.onOpenLink(supportEmail),
-                        onGitHubTap: () => widget.onOpenLink(githubRepo),
-                        onCoffeeTap: () => widget.onOpenLink(coffeeLink),
-                        onIssuesTap: _openFeedback,
-                        onVersionLongPress: () => widget.onOpenLink(officialSite),
-                      ),
+                      SettingsAboutBlock(p: p),
                       const SizedBox(height: spacing64),
                     ],
                   ),
@@ -2002,11 +2028,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               },
                             ),
                           if (_settingsSearchResults.isEmpty)
-                            SettingsRow(
-                              p: p,
-                              icon: Icons.search_off_rounded,
-                              title: 'No Results',
-                              color: p.text2,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 48),
+                              child: HIGEmptyState(
+                                p: p,
+                                icon: Icons.search_off_rounded,
+                                title: 'No Results',
+                                message: 'No settings match "${_settingsQuery.trim()}". Try different keywords.',
+                                compact: true,
+                              ),
                             ),
                         ],
                       ),
@@ -2908,20 +2938,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsPageSubtitle(
                       p: p,
-                      text: 'Learn how to use NoteKar and find solutions for common issues.',
+                      text: 'Step-by-step guides for mastering NoteKar.',
                     ),
                     SettingsGroup(
                       p: p,
                       children: [
                         SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
                         SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.feedback_rounded,
-                          title: 'Feedback',
-                          color: p.green,
-                          onTap: _openFeedback,
-                        ),
                       ],
                     ),
                     SettingsPageDescription(
@@ -2955,10 +2978,38 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.accessibility_new_rounded, title: 'Accessibility', status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1), color: p.orange, onTap: () => _openCategory('Accessibility', parent: 'Advanced')),
-                        SettingsRow(p: p, icon: Icons.monitor_heart_rounded, title: 'Diagnostics', status: 'Info', color: p.accent, onTap: () => _openCategory('Diagnostics', parent: 'Advanced')),
-                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Device Health', status: 'Stats', color: p.accent, onTap: () => _openCategory('Device Health', parent: 'Advanced')),
-                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Reset', status: 'Tools', color: p.red, onTap: () => _openCategory('Reset', parent: 'Advanced')),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.accessibility_new_rounded,
+                          title: 'Accessibility',
+                          status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
+                          color: p.orange,
+                          onTap: () => _openCategory('Accessibility', parent: 'Advanced'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.monitor_heart_rounded,
+                          title: 'Diagnostics',
+                          status: 'v$appVersion',
+                          color: p.accent,
+                          onTap: () => _openCategory('Diagnostics', parent: 'Advanced'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.health_and_safety_rounded,
+                          title: 'Device Health',
+                          status: AdaptiveEngine().healthStatus,
+                          color: p.accent,
+                          onTap: () => _openCategory('Device Health', parent: 'Advanced'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.restart_alt_rounded,
+                          title: 'Reset',
+                          status: 'Wipe',
+                          color: p.red,
+                          onTap: () => _openCategory('Reset', parent: 'Advanced'),
+                        ),
                       ],
                     ),
                     SettingsPageDescription(

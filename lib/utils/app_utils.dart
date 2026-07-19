@@ -23,9 +23,9 @@ const int maxNoteLength = 500;
 const officialSite = 'https://notekarapp.vercel.app';
 const githubRepo = 'https://github.com/dheeraz101/Notekar';
 const githubIssues = 'https://github.com/dheeraz101/Notekar/issues';
-const coffeeLink = 'https://buymeacoffee.com/dheeraz101';
+const coffeeLink = 'https://buymeacoffee.com/dheeraz';
 const githubReleases = 'https://github.com/dheeraz101/Notekar/releases';
-const supportEmail = 'mailto:yabp.ub8ke@aleeas.com';
+const supportEmail = 'mailto:yabp.support@gmail.com';
 const notificationFeed = 'https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json';
 
 const delayValues = [0, 5, 10, 15, 20, 30, 60];

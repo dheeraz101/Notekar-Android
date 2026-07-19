@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/app_logger.dart';
 
 BackupValidationResult validateNoteKarBackupContent(String content) {
-  if (content.length > 10 * 1024 * 1024) {
+  final logger = AppLogger();
+  if (content.length > 25 * 1024 * 1024) { // Increased to 25MB
     return const BackupValidationResult.invalid(
       'Backup is too large to import safely',
     );
@@ -13,12 +15,13 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
   Object? decoded;
   try {
     decoded = jsonDecode(content);
-  } catch (_) {
+  } catch (e) {
+    logger.error('Backup JSON decode failed', e);
     return const BackupValidationResult.invalid('Backup is not valid JSON');
   }
 
   if (decoded is! Map) {
-    return const BackupValidationResult.invalid('Invalid backup file');
+    return const BackupValidationResult.invalid('Invalid backup structure');
   }
 
   final data = Map<String, dynamic>.from(decoded);
@@ -40,7 +43,7 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
     );
   }
 
-  if (rawEntries.length > 50000) {
+  if (rawEntries.length > 100000) { // Increased limit
     return const BackupValidationResult.invalid(
       'Backup has too many moments to import safely',
     );
@@ -53,53 +56,44 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
   for (var i = 0; i < rawEntries.length; i++) {
     final row = rawEntries[i];
     if (row is! Map) {
-      return BackupValidationResult.invalid(
-        'Backup has damaged moment data near item ${i + 1}',
-      );
+      logger.warn('Damaged moment row at index $i');
+      continue; // Skip damaged rows instead of failing entirely
     }
 
     final item = Map<String, dynamic>.from(row);
     final timestampValue = item['timestamp'];
+    
+    // Robust validation for timestamp
     if (timestampValue is! num ||
         !timestampValue.isFinite ||
         timestampValue <= 0 ||
         timestampValue > maxFuture) {
-      return BackupValidationResult.invalid(
-        'Backup has an invalid moment time near item ${i + 1}',
-      );
+      logger.warn('Invalid timestamp at index $i: $timestampValue');
+      continue;
     }
 
     final type = item['type'] is String ? item['type'] as String : 'single';
-    if (!{'single', 'in', 'out'}.contains(type)) {
-      return BackupValidationResult.invalid(
-        'Backup has an unknown moment type near item ${i + 1}',
-      );
-    }
+    final validatedType = {'single', 'in', 'out'}.contains(type) ? type : 'single';
 
     final noteValue = item['note'];
-    if (noteValue != null && noteValue is! String) {
-      return BackupValidationResult.invalid(
-        'Backup has an invalid note near item ${i + 1}',
-      );
-    }
-
-    final note = (noteValue as String? ?? '').trim();
-    if (note.length > 1000) {
-      return BackupValidationResult.invalid(
-        'Backup has a note that is too long near item ${i + 1}',
-      );
+    final note = (noteValue is String ? noteValue : '').trim();
+    
+    if (note.length > 2000) { // Limit extremely long notes
+      logger.warn('Note too long at index $i, truncating');
     }
 
     final timestamp = timestampValue.toInt();
-    imported.add(
-      Moment(
-        id: i + 1,
-        timestamp: timestamp,
-        type: type,
-        date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
-        note: note,
-      ),
+    final moment = Moment(
+      id: i + 1, // ID will be reassigned during merge
+      timestamp: timestamp,
+      type: validatedType,
+      date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
+      note: note.length > 2000 ? note.substring(0, 2000) : note,
     );
+
+    if (moment.isValid) {
+      imported.add(moment);
+    }
   }
 
   imported.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -122,14 +116,16 @@ BackupDryRunSummary buildBackupDryRunSummary({
   required BackupValidationResult validation,
   required List<Moment> existingEntries,
 }) {
+  // Enhanced key including note to allow moments at same time but with different context
   final existingKeys = existingEntries
-      .map((entry) => '${entry.timestamp}|${entry.type}|${entry.note}')
+      .map((entry) => '${entry.timestamp}|${entry.type}|${entry.note.trim()}')
       .toSet();
+  
   var newMoments = 0;
   var duplicates = 0;
 
   for (final entry in validation.entries) {
-    final key = '${entry.timestamp}|${entry.type}|${entry.note}';
+    final key = '${entry.timestamp}|${entry.type}|${entry.note.trim()}';
     if (existingKeys.contains(key)) {
       duplicates++;
     } else {

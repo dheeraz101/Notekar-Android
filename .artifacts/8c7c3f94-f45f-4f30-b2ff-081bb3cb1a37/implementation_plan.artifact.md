@@ -1,62 +1,41 @@
-# Notekar Core Logic & Robustness Upgrade Plan
+# Settings Cleanup & Link Audit Plan
 
-This plan aims to refactor the core business logic, data persistence, and native communication to be more resilient, maintainable, and powerful.
+This plan aims to simplify the main settings page by removing status labels and providing an audit of all external links for final updates.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Architectural Shift:** I propose moving the core moment-saving and history-filtering logic out of the `NoteKarHome` widget and into a dedicated `MomentRepository`. This will significantly reduce the complexity of the main screen and make the app more stable.
->
-> **Data Safety:** I will implement a formal "Schema Migration" strategy for Hive to ensure that future updates to the data model don't cause crashes or data loss for existing users.
+> **Link Audit**: Below is the current list of external links found in the project. Please provide the updated URLs if any need changing.
+> - **Official Site**: `https://notekarapp.vercel.app`
+> - **GitHub Repo**: `https://github.com/dheeraz101/Notekar`
+> - **GitHub Issues**: `https://github.com/dheeraz101/Notekar/issues`
+> - **GitHub Releases**: `https://github.com/dheeraz101/Notekar/releases`
+> - **Buy me a Coffee**: `https://buymeacoffee.com/dheeraz101`
+> - **Support Email**: `mailto:yabp.ub8ke@aleeas.com`
+> - **Notification Feed**: `https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json`
 
 ## Proposed Changes
 
-### 1. Robust Data Layer (`MomentRepository`)
-- **Decoupling**: Create a `MomentRepository` class to encapsulate all Hive and SharedPreferences operations.
-- **Atomic Operations**: Ensure that saving a moment and updating the "next ID" or "last saved" state happens atomically to prevent data corruption.
-- **Validation**: Add strict validation to the `Moment` model (e.g., preventing future timestamps or invalid types).
+### 1. Main Settings Cleanup
+- **Update `SettingsDialog`**:
+    - Remove the `status` parameter from all `SettingsRow` items in the **Root Settings Group** (Personalization, Logging, Privacy, Data, etc.).
+    - This will create a cleaner, list-style look as requested.
+    - Status labels *inside* sub-categories (like theme name inside Personalization) will remain unless otherwise specified.
 
-### 2. Enhanced Backup Engine
-- **Versioning**: Add a `version` field to the backup JSON to allow for future schema evolutions.
-- **Deep Validation**: Use a recursive validation approach for backup imports, providing specific error messages for corrupted rows.
-- **Safe Merging**: Improve the "duplicates skipped" logic to handle cases where moments have identical timestamps but different notes.
-
-### 3. Service-Based Logic
-- **Haptic Service**: Move haptic logic to a dedicated service that can be mocked for tests.
-- **Update Service**: Refactor the GitHub release checking logic into a reusable service with better retry-on-failure handling.
-
-### 4. Resilient Native Bridge
-- **Result Persistence**: Improve `MainActivity.kt` to handle "Result already active" errors more gracefully.
-- **Type Safety**: Use more explicit type checks for arguments passed via `MethodChannel`.
-
-### 5. Unified Error Logging
-- **AppLogger**: Implement a simple internal logger that replaces empty `catch` blocks.
-- **Diagnostic Export**: Include these internal logs in the "Copy Diagnostics" feature to help with remote debugging.
+### 2. Link Implementation
+- Once the user provides the updated links, I will update the constants in `app_utils.dart` to reflect the production-ready URLs.
 
 ## Proposed Files
 
-### [Component: Data & Models]
-#### [NEW] [moment_repository.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/utils/moment_repository.dart)
-#### [MODIFY] [moment.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/models/moment.dart)
+### [Component: UI]
+#### [MODIFY] [settings_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/dialogs/settings_dialog.dart)
 
-### [Component: Services & Utils]
-#### [MODIFY] [backup_utils.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/utils/backup_utils.dart)
+### [Component: Utils]
 #### [MODIFY] [app_utils.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/utils/app_utils.dart)
-
-### [Component: UI Integration]
-#### [MODIFY] [note_kar_home.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/screens/note_kar_home.dart)
-
-### [Component: Native]
-#### [MODIFY] [MainActivity.kt](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/android/app/src/main/kotlin/app/notekar/notekar/MainActivity.kt)
 
 ## Verification Plan
 
-### Automated Tests
-- **Repository Tests**: Unit test the `MomentRepository` for all CRUD operations and edge cases (empty data, duplicates).
-- **Migration Tests**: Verify that old data formats are correctly migrated to the new schema.
-- **Backup Tests**: Run a suite of "Damaged JSON" imports to ensure no crashes occur.
-
 ### Manual Verification
-- **Stress Test**: Rapidly tap to save 100+ moments and verify data integrity.
-- **Import/Export**: Export a full backup, reset the app, and import it back to verify 100% data recovery.
-- **Diagnostic Log**: Verify that failed update checks or network errors appear in the diagnostics text.
+- Open Settings and verify the main list is clean (no status text on the right side).
+- Verify sub-categories still work as expected.
+- Verify all external links lead to the new provided URLs.
