@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -179,6 +180,79 @@ class SettingsDialog extends StatefulWidget {
   State<SettingsDialog> createState() => _SettingsDialogState();
 }
 
+class _BetaInfoRow extends StatelessWidget {
+  const _BetaInfoRow({
+    required this.p,
+    required this.number,
+    required this.title,
+    required this.text,
+  });
+
+  final Palette p;
+  final String number;
+  final String title;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: Color(0xFF007AFF),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                fontVariations: [FontVariation('wght', 700)],
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    fontVariations: const [FontVariation('wght', 600)],
+                    letterSpacing: -0.1,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 14,
+                    height: 1.35,
+                    fontWeight: FontWeight.w400,
+                    fontVariations: const [FontVariation('wght', 400)],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SettingsDialogState extends State<SettingsDialog> {
   late String theme;
   late String defaultMode;
@@ -211,6 +285,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late String updateStatus;
   late bool checkingUpdates;
   final List<String> _categoryStack = [];
+  int _prevStackLength = 0;
   String? exportState;
   Timer? _exportStateTimer;
   final _settingsSearchController = TextEditingController();
@@ -332,6 +407,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   void _openCategory(String next, {String? parent}) {
     setState(() {
+      _prevStackLength = _categoryStack.length;
       if (parent != null && _categoryStack.lastOrNull != parent) {
         _categoryStack
           ..clear()
@@ -346,6 +422,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool _popCategory() {
     if (_categoryStack.isEmpty) return false;
     setState(() {
+      _prevStackLength = _categoryStack.length;
       _categoryStack.removeLast();
     });
     return true;
@@ -966,37 +1043,75 @@ class _SettingsDialogState extends State<SettingsDialog> {
       barrierColor: Colors.black.withValues(alpha: 0.42),
       barrierDismissible: true,
       barrierLabel: 'Close beta info',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => AppSheet(
+      transitionDuration: const Duration(milliseconds: 140),
+      pageBuilder: (_, __, ___) => AppSheet(
         p: p,
         title: 'NoteKar Beta',
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                color: Color(0xFF007AFF),
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 20),
             Text(
-              'What to expect from NoteKar Beta',
+              'Beta Stage',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                fontVariations: const [FontVariation('wght', 700)],
+                letterSpacing: -0.6,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(
-              'Beta features give you early access to the latest NoteKar improvements before they are available to everyone. While these features are functional, they may undergo rapid changes based on your feedback.',
+              'Help shape the future of NoteKar',
               textAlign: TextAlign.center,
-              style: TextStyle(color: p.text2, height: 1.45, fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Your data remains private and local, just as in the stable version. By using beta features, you help us refine the logging experience for all users.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: p.text2, height: 1.45, fontSize: 14),
+              style: TextStyle(
+                color: p.text2,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                fontVariations: const [FontVariation('wght', 500)],
+              ),
             ),
             const SizedBox(height: 24),
-            // Minimal layout - close icon is already in AppSheet
+            _BetaInfoRow(
+              p: p,
+              number: '1',
+              title: 'Early Access',
+              text: 'Explore upcoming features before they reach stable release.',
+            ),
+            _BetaInfoRow(
+              p: p,
+              number: '2',
+              title: 'Refinement',
+              text: 'Beta features are functional but undergo frequent updates.',
+            ),
+            _BetaInfoRow(
+              p: p,
+              number: '3',
+              title: 'Privacy',
+              text: 'Even in Beta, your moments remain local and private.',
+            ),
+            _BetaInfoRow(
+              p: p,
+              number: '4',
+              title: 'Feedback',
+              text: 'Help us identifying issues and polish the experience.',
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -1071,49 +1186,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           text:
               'The Adaptive Engine automatically tunes Notekar to your device hardware to keep the app snappy.',
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Icon(
-                  Icons.info_outline_rounded,
-                  color: p.text3.withValues(alpha: 0.6),
-                  size: 13,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'You are using NoteKar Beta. We value your feedback on experimental features.',
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    GestureDetector(
-                      onTap: () => _showBetaInfoPopup(p),
-                      child: Text(
-                        'Learn More',
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        SettingsBetaNote(
+          p: p,
+          text: 'The current features on this page are under Beta stage.',
+          onLearnMore: () => _showBetaInfoPopup(p),
         ),
       ],
     );
@@ -1367,6 +1443,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final today = dateKey(DateTime.now());
     final todayCount = entries.where((e) => e.date == today).length;
     final delayIndex = delayValues.indexOf(tapDelay);
+    final engine = AdaptiveEngine();
     bool show(String name) => category == name;
     final sheet = PopScope(
       canPop: _categoryStack.isEmpty,
@@ -1378,17 +1455,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
         title: category ?? 'Settings',
         onBack: category != null ? _popCategory : null,
         docked: true,
-        blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+        blur: !reduceMotion && enableTranslucency && engine.supportsBlur,
         largeText: widget.largeText,
         controller: _activeController,
         showLargeTitle: category == null,
         child: SizedBox(
-          width: 410, // Refined width for better UX
+          width: 410,
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
-          child: CustomScrollView(
-            controller: _activeController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: engine.isLowEnd ? 180 : 280),
+            reverseDuration: Duration(milliseconds: engine.isLowEnd ? 140 : 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              if (engine.isLowEnd) {
+                return FadeTransition(opacity: animation, child: child);
+              }
+              final forward = _categoryStack.length >= _prevStackLength;
+              final begin = Offset(forward ? 0.25 : -0.25, 0.0);
+              final slide = Tween<Offset>(begin: begin, end: Offset.zero).animate(animation);
+              final fade = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
+              
+              return FadeTransition(
+                opacity: fade,
+                child: SlideTransition(position: slide, child: child),
+              );
+            },
+            child: CustomScrollView(
+              key: ValueKey(category ?? 'root'),
+              controller: _activeController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
               if (category == null) ...[
                 SliverToBoxAdapter(
                   child: AppSheetLargeTitle(
@@ -1525,16 +1622,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ],
                       ),
+                      SettingsPageDescription(
+                        p: p,
+                        text: 'Personalize and configure NoteKar to fit your workflow.',
+                      ),
                       const SizedBox(height: spacing24),
                       SettingsAboutBlock(
                         p: p,
                         onEmailTap: () => widget.onOpenLink(supportEmail),
                         onGitHubTap: () => widget.onOpenLink(githubRepo),
                         onVersionLongPress: () => widget.onOpenLink(officialSite),
-                      ),
-                      SettingsPageDescription(
-                        p: p,
-                        text: 'Personalize and configure NoteKar to fit your workflow.',
                       ),
                       const SizedBox(height: spacing64),
                     ]),
@@ -1765,7 +1862,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'Manage themes, the clock, and interface behavior. Effects like Translucency and Live Icon Motion are automatically disabled when Reduced Motion is active.',
+                      text: 'Effects like Translucency and Live Icon Motion are automatically disabled when Reduced Motion is active to ensure the interface remains stable and responsive.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1807,10 +1904,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         text: 'Choose the icon that appears on your Android launcher.',
                       ),
                       _appIconsPage(p),
-                      SettingsPageDescription(
-                        p: p,
-                        text: 'App Icons change the launcher icon. Some launchers may take a few seconds to update.',
-                      ),
+                      const SizedBox(height: spacing64),
                     ],
                   ),
                 ),
@@ -1845,7 +1939,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'Logging settings control the "capture-to-history" pipeline and how saved logs are organized.',
+                      text: 'Logging settings control the "capture-to-history" pipeline and how saved moments are reviewable across devices.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1967,7 +2061,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'Fine-tune the behavior of home screen taps and holds. Tap Delay prevents accidental double-taps, while Require Note on Hold ensures contexts are always saved.',
+                      text: 'Tap Delay prevents accidental double-taps, while Require Note on Hold ensures contexts are always saved for moments captured via long-press.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -2050,7 +2144,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'Manage your history layout and review saved moments. Compact History uses denser rows for faster scanning, and Extended Duration shows years, months, and days.',
+                      text: 'Compact History uses denser rows for faster scanning, and Extended Duration shows years, months, and days in the time intervals between logs.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -2073,7 +2167,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
-                    SettingsPageDescription(
+                    SettingsPageSubtitle(
                       p: p,
                       text: 'Step-by-step guides for mastering NoteKar.',
                     ),
@@ -2103,7 +2197,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
-                    SettingsPageDescription(
+                    SettingsPageSubtitle(
                       p: p,
                       text: 'Common questions and troubleshooting steps.',
                     ),
@@ -2162,49 +2256,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'NoteKar checks GitHub for new releases. App Notices provide occasional updates about new announcements.',
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3),
-                            child: Icon(
-                              Icons.info_outline_rounded,
-                              color: p.text3.withValues(alpha: 0.6),
-                              size: 13,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Join the conversation. Report bugs or request features while using NoteKar Beta.',
-                                  style: TextStyle(
-                                    color: p.text3,
-                                    fontSize: 13,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                GestureDetector(
-                                  onTap: () => _showBetaInfoPopup(p),
-                                  child: Text(
-                                    'Learn More',
-                                    style: TextStyle(
-                                      color: p.accent,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    SettingsBetaNote(
+                      p: p,
+                      text: 'The current features on this page are under Beta stage.',
+                      onLearnMore: () => _showBetaInfoPopup(p),
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -2279,49 +2334,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Android Backup automatically includes NoteKar in your system-level backups. Planned features will provide additional protection.',
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3),
-                            child: Icon(
-                              Icons.info_outline_rounded,
-                              color: p.text3.withValues(alpha: 0.6),
-                              size: 13,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'NoteKar Beta includes early access to data protection tools.',
-                                  style: TextStyle(
-                                    color: p.text3,
-                                    fontSize: 13,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                GestureDetector(
-                                  onTap: () => _showBetaInfoPopup(p),
-                                  child: Text(
-                                    'Learn More',
-                                    style: TextStyle(
-                                      color: p.accent,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    SettingsBetaNote(
+                      p: p,
+                      text: 'The current features on this page are under Beta stage.',
+                      onLearnMore: () => _showBetaInfoPopup(p),
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -2346,49 +2362,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'NoteKar contains zero third-party tracking, analytics, or telemetry. Network access is strictly limited to update checks.',
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3),
-                            child: Icon(
-                              Icons.info_outline_rounded,
-                              color: p.text3.withValues(alpha: 0.6),
-                              size: 13,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'NoteKar Beta respects your data. Local encryption and biometric features are under active development.',
-                                  style: TextStyle(
-                                    color: p.text3,
-                                    fontSize: 13,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                GestureDetector(
-                                  onTap: () => _showBetaInfoPopup(p),
-                                  child: Text(
-                                    'Learn More',
-                                    style: TextStyle(
-                                      color: p.accent,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    SettingsBetaNote(
+                      p: p,
+                      text: 'The current features on this page are under Beta stage.',
+                      onLearnMore: () => _showBetaInfoPopup(p),
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -2558,7 +2535,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ),
       ),
-    );
+    ),
+  );
     if (!largeText) return sheet;
     return sheet;
   }

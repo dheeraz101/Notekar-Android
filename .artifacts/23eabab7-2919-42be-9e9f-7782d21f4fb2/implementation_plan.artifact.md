@@ -1,47 +1,51 @@
-# Settings HIG Refinement & Beta Info Plan
+# Settings Precision & Performance Finalization Plan
 
-This plan further refines the Settings hierarchy by reintroducing clean subtitles for sub-pages and adding a high-fidelity "Beta" information experience to the Device Health section.
+This plan addresses the perceived typography sizing, layout alignment of slider indicators, and adaptive performance for navigation transitions.
 
-## Proposed Changes
+## User Feedback Refinements
 
-### 1. Subtitle vs. Footer Logic (Apple HIG)
-- **Goal:** Differentiate between immediate context (subtitles) and explanatory details (footers).
-- **Sub-pages:** Reintroduce a clean, icon-less subtitle directly beneath the large titles for pages like Display, Logging, etc.
-- **Main Settings:** Keep the description at the bottom as a footer with the info icon, as it provides overall app context.
+### 1. Typography & "Learn More" Consistency
+- **Goal:** Ensure the "Learn More" link visually matches the 13px footer description text.
 - **Action:**
-    - [NEW] Create `SettingsPageSubtitle` widget: 15px, `text2` color, no icon, minimal padding.
-    - [MODIFY] Update `SettingsDialog` sub-pages to use this subtitle instead of (or in addition to) the footer.
+    - [MODIFY] `SettingsBetaNote` in `lib/widgets/settings_widgets.dart` to strictly inherit the 13px font size and `text3` color from the description style.
+    - Explicitly set `fontVariations: const [FontVariation('wght', 400)]` for the link to prevent it appearing "heavier" than the surrounding text.
 
-### 2. Device Health Layout Overhaul
-- **Goal:** Prioritize the Adaptive Engine status over technical diagnostic rows.
-- **Order:**
-    1. Adaptive Engine Info Card (Top).
-    2. Diagnostic Rows Group.
-    3. Page Footer Description.
-    4. Beta Info Block.
-
-### 3. Beta Information & "Learn More"
-- **Goal:** Add a professional beta disclosure with an interactive explanation.
+### 2. Compact & Summarized Beta Popup
+- **Goal:** Make the Beta info popup more professional and concise.
 - **Action:**
-    - [NEW] Add a Beta Info block using the info-icon style in the Device Health page.
-    - [Interaction:] "Learn More" link triggers a clean `AppSheet` popup.
-    - [Content:] "What to expect from NoteKar Beta" — focusing on stability, feedback, and private data handling in Apple's "human" style.
+    - [MODIFY] `_showBetaInfoPopup` in `lib/dialogs/settings_dialog.dart`.
+    - Shorten the pillar descriptions to 1-2 lines each.
+    - Reduce vertical padding in `_BetaInfoRow` for a tighter layout.
+
+### 3. Adaptive Navigation Transitions
+- **Goal:** Maintain smoothness on low-end devices by simplifying animations.
+- **Action:**
+    - [MODIFY] `SettingsDialog.build` in `lib/dialogs/settings_dialog.dart`.
+    - Use `AdaptiveEngine().isLowEnd` to determine the transition type.
+    - **Low-End:** Standard `FadeTransition` (no sliding) for 150ms.
+    - **Mid/High-End:** The existing horizontal slide + fade transition.
+
+### 4. Tap Delay Slider Alignment
+- **Goal:** Ensure tick indicators are strictly within the track bounds.
+- **Action:**
+    - [MODIFY] `SliderScale` in `lib/widgets/settings_widgets.dart`.
+    - Wrap the `Row` in a `Padding` or `Margin` that matches the `Slider` horizontal track offset (usually 24px on each side for default Sliders).
 
 ## Component-Specific Tasks
 
 ### [MODIFY] [settings_widgets.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/widgets/settings_widgets.dart)
-- [NEW] `SettingsPageSubtitle` widget.
-- Refine `SettingsPageDescription` padding for footer use.
+- Update `SettingsBetaNote` typography.
+- Fix `SliderScale` horizontal alignment.
 
 ### [MODIFY] [settings_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/dialogs/settings_dialog.dart)
-- Reorganize `_deviceHealthPage`.
-- Add `_showBetaInfoPopup` method.
-- Update sub-page builders to use `SettingsPageSubtitle`.
+- Implement adaptive transitions using `AdaptiveEngine`.
+- Summarize Beta popup copy.
+- Tighten `_BetaInfoRow` spacing.
 
 ## Verification Plan
 
 ### Manual Verification
-- **Visual Audit:** Check that subtitles appear clean and aligned under Large Titles.
-- **Order Check:** Confirm Device Health starts with the Adaptive Engine card.
-- **Beta Interaction:** Tap "Learn More" and verify the popup is clean and button-less (icon close only).
-- **HIG Consistency:** Ensure the main settings footer remains distinct from the sub-page subtitles.
+- **Sizing Check:** Compare "Learn More" size with standard footer text.
+- **Slider Test:** Verify indicators align with slider track start/end.
+- **Performance Test:** Emulate a low-end device (if possible) or check that transitions are snappy.
+- **Beta Content Pass:** Review the summarized popup copy for professional tone.

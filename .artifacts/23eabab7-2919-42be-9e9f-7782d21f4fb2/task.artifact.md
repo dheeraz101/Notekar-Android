@@ -1,16 +1,14 @@
 # Tasks
 
-- [ ] Subtitle & Footer Refinement
-    - [ ] Create `SettingsPageSubtitle` in `settings_widgets.dart` (no icon, 15px)
-    - [ ] Update `SettingsDialog` sub-pages to use subtitles beneath Large Titles
-    - [ ] Keep Main Settings description as an icon-led footer
-- [ ] Device Health Overhaul
-    - [ ] Move Adaptive Engine card to the top
-    - [ ] Group Diagnostic rows below the card
-    - [ ] Add Beta Info block with "Learn More" link
-- [ ] Beta Experience
-    - [ ] Implement `_showBetaInfoPopup` with Apple-style "What to expect" copy
-    - [ ] Ensure popup has only a cancel icon and clean layout
+- [ ] Typography & Component Alignment
+    - [ ] Match "Learn More" link style exactly to description text (13px, non-bold)
+    - [ ] Align `SliderScale` tick indicators with slider track bounds
+- [ ] Adaptive Performance
+    - [ ] Implement conditional transitions in `SettingsDialog` using `AdaptiveEngine`
+    - [ ] Set Low-End devices to simple 150ms Fade transitions
+- [ ] Compact Beta Experience
+    - [ ] Summarize Beta popup pillars to 1-2 lines each
+    - [ ] Tighten vertical padding in `_BetaInfoRow`
 - [ ] Verification
-    - [ ] Verify alignment of subtitles vs footers
-    - [ ] Test Beta Info link and popup closing
+    - [ ] Verify slider alignment on multiple screen widths
+    - [ ] Test navigation responsiveness on "Balanced" vs "Low" tiers

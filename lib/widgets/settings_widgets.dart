@@ -1,5 +1,8 @@
 import 'dart:math' as math;
+import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
@@ -105,7 +108,10 @@ class SettingsRow extends StatelessWidget {
 
     return PressableScale(
       enabled: onTap != null,
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap?.call();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
@@ -136,12 +142,14 @@ class SettingsRow extends StatelessWidget {
                     query: highlight,
                     baseStyle: TextStyle(
                       color: p.text,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
+                      fontVariations: const [FontVariation('wght', 600)],
                       fontSize: hasSubtitle ? 14 : 15,
                     ),
                     highlightStyle: TextStyle(
                       color: rowColor,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
+                      fontVariations: const [FontVariation('wght', 700)],
                       backgroundColor: rowColor.withValues(alpha: 0.12),
                     ),
                   ),
@@ -409,7 +417,8 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                     widget.title,
                     style: TextStyle(
                       color: enabled ? p.text : p.text2,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
+                      fontVariations: const [FontVariation('wght', 600)],
                       fontSize: hasSubtitle ? 14 : 15,
                     ),
                   ),
@@ -766,17 +775,20 @@ class SliderScale extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        for (final val in delayValues)
-          Container(
-            width: 2,
-            height: 4,
-            color:
-                val == activeValue ? p.accent : p.text3.withValues(alpha: 0.5),
-          ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 26), // Increased by 2px for final exact visual alignment
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          for (final val in delayValues)
+            Container(
+              width: 2,
+              height: 4,
+              color:
+                  val == activeValue ? p.accent : p.text3.withValues(alpha: 0.5),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -802,6 +814,7 @@ class SettingsPageSubtitle extends StatelessWidget {
           fontSize: 15,
           height: 1.35,
           fontWeight: FontWeight.w400,
+          fontVariations: const [FontVariation('wght', 400)],
           letterSpacing: -0.1,
         ),
       ),
@@ -827,7 +840,7 @@ class SettingsPageDescription extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 3), // Better alignment for 14px text
+            padding: const EdgeInsets.only(top: 2), // Aligned with 13px text
             child: Icon(
               Icons.info_outline_rounded,
               color: p.text3.withValues(alpha: 0.6),
@@ -843,7 +856,73 @@ class SettingsPageDescription extends StatelessWidget {
                 fontSize: 13, // Standard iOS footer size
                 height: 1.4,
                 fontWeight: FontWeight.w400,
+                fontVariations: const [FontVariation('wght', 400)],
                 letterSpacing: -0.05,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SettingsBetaNote extends StatelessWidget {
+  const SettingsBetaNote({
+    super.key,
+    required this.p,
+    required this.text,
+    required this.onLearnMore,
+  });
+
+  final Palette p;
+  final String text;
+  final VoidCallback onLearnMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: p.text3.withValues(alpha: 0.6),
+              size: 13,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                // Baseline style for the entire rich text block
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13,
+                  height: 1.4,
+                  fontWeight: FontWeight.w400,
+                  fontVariations: const [FontVariation('wght', 400)],
+                  letterSpacing: -0.05,
+                ),
+                children: [
+                  TextSpan(text: '$text '),
+                  TextSpan(
+                    text: 'Learn More',
+                    style: const TextStyle(
+                      color: Color(0xFF007AFF),
+                      // Force identical font properties to description
+                      fontSize: 13,
+                      height: 1.4,
+                      fontWeight: FontWeight.w400,
+                      fontVariations: [FontVariation('wght', 400)],
+                      decoration: TextDecoration.none,
+                    ),
+                    recognizer: TapGestureRecognizer()..onTap = onLearnMore,
+                  ),
+                ],
               ),
             ),
           ),

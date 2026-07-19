@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/screens/note_kar_home.dart';
@@ -37,6 +38,11 @@ class NoteKarApp extends StatelessWidget {
           ),
         ),
         fontFamily: 'Inter',
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontVariations: [FontVariation('wght', 400)]),
+          bodyMedium: TextStyle(fontVariations: [FontVariation('wght', 400)]),
+          titleLarge: TextStyle(fontVariations: [FontVariation('wght', 600)]),
+        ),
         splashFactory: NoSplash.splashFactory,
       ),
       builder: (context, child) {
