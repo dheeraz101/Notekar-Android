@@ -58,7 +58,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
         val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
         val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
-        val lastType = prefs.getString(KEY_LAST_TYPE, "") ?: ""
         val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, 0L)
         val hasMoments = prefs.getBoolean(KEY_HAS_MOMENTS, false)
 
@@ -66,36 +65,32 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         val minWidth = options.getInt(
             AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH
         )
-        val minHeight = options.getInt(
-            AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
-        )
 
-        val compact = minWidth < 250
-        val tall = minHeight >= 160
+        val compact = minWidth < 200
 
         views.setTextViewText(
             R.id.widget_count,
-            "$todayCount today"
+            todayCount.toString()
         )
 
         views.setTextViewText(
             R.id.widget_mode,
             if (mode == "single") {
-                "Single"
+                "SINGLE MODE"
             } else {
-                "Next: ${nextAction.uppercase()}"
+                "NEXT: ${nextAction.uppercase()}"
             }
         )
 
         val lastText = if (!hasMoments || lastTimestamp <= 0L) {
-            "No moments yet"
+            "No moments"
         } else {
             val time = SimpleDateFormat(
                 "h:mm a",
                 Locale.getDefault()
             ).format(Date(lastTimestamp))
 
-            "${lastType.uppercase()} • $time"
+            "Last: $time"
         }
 
         views.setTextViewText(
@@ -104,13 +99,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         )
 
         views.setViewVisibility(
-            R.id.widget_single,
+            R.id.widget_mode,
             if (compact) View.GONE else View.VISIBLE
-        )
-
-        views.setViewVisibility(
-            R.id.widget_history,
-            if (tall) View.VISIBLE else View.GONE
         )
 
         views.setOnClickPendingIntent(
@@ -160,16 +150,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 appWidgetId + 40,
                 MainActivity.ACTION_NOTE,
                 "note"
-            )
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widget_history,
-            launchIntent(
-                context,
-                appWidgetId + 50,
-                MainActivity.ACTION_HISTORY,
-                "history"
             )
         )
 

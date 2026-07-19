@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -289,6 +290,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String? exportState;
   Timer? _exportStateTimer;
   final _settingsSearchController = TextEditingController();
+  final _settingsSearchFocusNode = FocusNode();
+  List<String> _recentSearches = [];
+  bool _isSearchFocused = false;
 
   final _rootScrollController = ScrollController();
   final Map<String, ScrollController> _subControllers = {};
@@ -339,7 +343,41 @@ class _SettingsDialogState extends State<SettingsDialog> {
     updateStatus = widget.updateStatus;
     checkingUpdates = widget.checkingUpdates;
 
+    _loadRecentSearches();
+    _settingsSearchFocusNode.addListener(() {
+      setState(() => _isSearchFocused = _settingsSearchFocusNode.hasFocus);
+      if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
+        _openCategory('Search');
+      }
+    });
+
     _precacheIcons();
+  }
+
+  Future<void> _loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _recentSearches = prefs.getStringList('recent_settings_searches') ?? [];
+    });
+  }
+
+  Future<void> _saveRecentSearch(String term) async {
+    final t = term.trim();
+    if (t.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final list = List<String>.from(_recentSearches)
+      ..remove(t)
+      ..insert(0, t);
+    if (list.length > 5) list.removeLast();
+    setState(() => _recentSearches = list);
+    await prefs.setStringList('recent_settings_searches', list);
+  }
+
+  Future<void> _removeRecentSearch(String term) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = List<String>.from(_recentSearches)..remove(term);
+    setState(() => _recentSearches = list);
+    await prefs.setStringList('recent_settings_searches', list);
   }
 
   void _precacheIcons() {
@@ -360,6 +398,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void dispose() {
     _exportStateTimer?.cancel();
     _settingsSearchController.dispose();
+    _settingsSearchFocusNode.dispose();
     _rootScrollController.dispose();
     for (final controller in _subControllers.values) {
       controller.dispose();
@@ -423,7 +462,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
     if (_categoryStack.isEmpty) return false;
     setState(() {
       _prevStackLength = _categoryStack.length;
-      _categoryStack.removeLast();
+      final popped = _categoryStack.removeLast();
+      if (popped == 'Search') {
+        _settingsQuery = '';
+        _settingsSearchController.clear();
+        _settingsSearchFocusNode.unfocus();
+      }
     });
     return true;
   }
@@ -713,6 +757,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'translucency',
               'frosted',
               'glass',
+              'interface',
             ],
           ),
           (
@@ -720,7 +765,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle: 'Use frosted glass blur on Toolbar and Sheets',
             category: 'Display',
             icon: Icons.opacity_rounded,
-            keywords: ['blur', 'frosted', 'glass', 'glassmorphism', 'transparency'],
+            keywords: ['blur', 'frosted', 'glass', 'glassmorphism', 'transparency', 'translucency'],
           ),
           (
             title: 'Show Seconds',
@@ -748,7 +793,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle: 'Use gentle phone-tilt motion for home icons',
             category: 'Display',
             icon: Icons.motion_photos_auto_rounded,
-            keywords: ['toolbar', 'menu', 'animation', 'motion', 'icons'],
+            keywords: ['toolbar', 'menu', 'animation', 'motion', 'icons', 'tilt', 'sensor'],
           ),
           (
             title: 'Accent Color',
@@ -777,6 +822,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'olive',
               'slate',
               'brown',
+              'theming',
+              'style',
             ],
           ),
           (
@@ -784,7 +831,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle: 'Default plus black, blue, gold, green, orange, and red',
             category: 'App Icons',
             icon: Icons.apps_rounded,
-            keywords: ['icon', 'launcher', 'app icon', 'black', 'gold', 'red'],
+            keywords: ['icon', 'launcher', 'app icon', 'black', 'gold', 'red', 'custom icon'],
           ),
           (
             title: 'Capture',
@@ -801,6 +848,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'note',
               'long press',
               'hold',
+              'logging',
             ],
           ),
           (
@@ -822,6 +870,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'years',
               'months',
               'days',
+              'history',
             ],
           ),
           (
@@ -829,35 +878,35 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle: 'Show days, months, and years in time between moments',
             category: 'Moments',
             icon: Icons.timer_rounded,
-            keywords: ['time', 'duration', 'years', 'months', 'days', 'long intervals'],
+            keywords: ['time', 'duration', 'years', 'months', 'days', 'long intervals', 'history'],
           ),
           (
             title: 'Minimal Moment Options',
             subtitle: 'Use a compact horizontal row of icons for actions',
             category: 'Moments',
             icon: Icons.auto_awesome_motion_rounded,
-            keywords: ['minimal', 'icons', 'actions', 'compact', 'row'],
+            keywords: ['minimal', 'icons', 'actions', 'compact', 'row', 'history'],
           ),
           (
             title: 'Updates',
             subtitle: 'Check for update, remote notices, changelog',
             category: 'Updates',
             icon: Icons.update_rounded,
-            keywords: ['update', 'github', 'release', 'notification', 'notice'],
+            keywords: ['update', 'github', 'release', 'notification', 'notice', 'version', 'check'],
           ),
           (
             title: "What's New",
             subtitle: 'Latest release highlights',
             category: "What's New",
             icon: Icons.new_releases_rounded,
-            keywords: ['new', 'latest', 'release', 'features'],
+            keywords: ['new', 'latest', 'release', 'features', 'changelog'],
           ),
           (
             title: 'Changelog',
             subtitle: 'Release history and fixes',
             category: 'Changelog',
             icon: Icons.article_rounded,
-            keywords: ['changes', 'release notes', 'version', 'history'],
+            keywords: ['changes', 'release notes', 'version', 'history', 'log'],
           ),
           (
             title: 'Backup & Export',
@@ -873,6 +922,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'file',
               'reminder',
               'health',
+              'data',
             ],
           ),
           (
@@ -887,6 +937,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'encrypted backup',
               'google drive',
               'drive backup',
+              'cloud',
             ],
           ),
           (
@@ -910,6 +961,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'biometric',
               'password',
               'pin',
+              'local',
             ],
           ),
           (
@@ -925,6 +977,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'pin',
               'password',
               'lock timing',
+              'fingerprint',
+              'face id',
             ],
           ),
           (
@@ -941,6 +995,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'large',
               'quick action',
               'shortcut',
+              'a11y',
             ],
           ),
           (
@@ -948,35 +1003,35 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle: 'Version, storage, backup, update status',
             category: 'Diagnostics',
             icon: Icons.monitor_heart_rounded,
-            keywords: ['debug', 'support', 'info', 'bug', 'copy'],
+            keywords: ['debug', 'support', 'info', 'bug', 'copy', 'logs'],
           ),
           (
             title: 'Device Health',
             subtitle: 'Adaptive engine and performance status',
             category: 'Device Health',
             icon: Icons.health_and_safety_rounded,
-            keywords: ['adaptive engine', 'performance', 'hardware', 'specs', 'optimization', 'tier'],
+            keywords: ['adaptive engine', 'performance', 'hardware', 'specs', 'optimization', 'tier', 'ram', 'cpu', 'cores', 'low end', 'lag'],
           ),
           (
             title: 'Reset All Data',
             subtitle: 'Erase every moment and note',
             category: 'Reset',
             icon: Icons.delete_outline_rounded,
-            keywords: ['clear', 'erase', 'delete everything', 'factory reset'],
+            keywords: ['clear', 'erase', 'delete everything', 'factory reset', 'wipe'],
           ),
           (
             title: 'Factory Reset',
             subtitle: 'Erase data and settings, then show welcome',
             category: 'Reset',
             icon: Icons.restart_alt_rounded,
-            keywords: ['fresh start', 'welcome', 'reset app', 'new app'],
+            keywords: ['fresh start', 'welcome', 'reset app', 'new app', 'wipe'],
           ),
           (
             title: 'Reset Settings Only',
             subtitle: 'Restore preferences and keep moments',
             category: 'Reset',
             icon: Icons.settings_backup_restore_rounded,
-            keywords: ['preferences', 'defaults', 'settings reset'],
+            keywords: ['preferences', 'defaults', 'settings reset', 'undo'],
           ),
           (
             title: 'Guides',
@@ -997,6 +1052,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'backup',
               'adaptive engine',
               'minimal options',
+              'tutorial',
             ],
           ),
           (
@@ -1023,6 +1079,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               'data missing',
               'extended duration',
               'translucency',
+              'support',
             ],
           ),
         ];
@@ -1208,7 +1265,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         SettingsPageDescription(
           p: p,
           text:
-              'The Adaptive Engine automatically tunes Notekar to your device hardware to keep the app snappy.',
+              'The Adaptive Engine automatically tunes Notekar to your hardware (CPU, RAM, and SDK) to ensure the interface remains snappy.',
           bottomPadding: 0,
         ),
         SettingsBetaNote(
@@ -1532,6 +1589,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       child: SettingsSearchBox(
                         p: p,
                         controller: _settingsSearchController,
+                        focusNode: _settingsSearchFocusNode,
                         onChanged: (value) {
                           setState(() => _settingsQuery = value);
                           if (_activeController.hasClients) {
@@ -1553,47 +1611,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    if (_settingsQuery.trim().isNotEmpty) ...[
-                        const SizedBox(height: spacing8),
-                        SettingsGroup(
-                          p: p,
-                          children: [
-                            for (final result in _settingsSearchResults)
-                              SettingsRow(
-                                p: p,
-                                icon: result.icon,
-                                title: result.title,
-                                subtitle: result.subtitle,
-                                highlight: _settingsQuery,
-                                color: result.title == 'Reset All Data' || result.title == 'Factory Reset' ? p.red : p.accent,
-                                onTap: () {
-                                  if (result.title == 'Reset All Data') {
-                                    unawaited(_confirmResetAll(p));
-                                    return;
-                                  }
-                                  if (result.title == 'Factory Reset') {
-                                    unawaited(_confirmFactoryReset(p));
-                                    return;
-                                  }
-                                  if (result.title == 'Reset Settings Only') {
-                                    unawaited(_confirmResetSettings());
-                                    return;
-                                  }
-                                  _openCategory(result.category);
-                                },
-                              ),
-                            if (_settingsSearchResults.isEmpty)
-                              SettingsRow(
-                                p: p,
-                                icon: Icons.search_off_rounded,
-                                title: 'No Results',
-                                subtitle: 'Try theme, backup, delay, privacy, reset, or notes',
-                                color: p.text2,
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: spacing16),
-                      ],
                       SettingsGroup(
                         p: p,
                         children: [
@@ -1660,10 +1677,127 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         onVersionLongPress: () => widget.onOpenLink(officialSite),
                       ),
                       const SizedBox(height: spacing64),
-                    ]),
+                    ],
                   ),
-                ],
-                if (show('Personalization'))
+                ),
+              ],
+              if (show('Search')) ...[
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: SliverStickyHeaderDelegate(
+                    height: 64,
+                    child: Container(
+                      color: p.surface.withValues(
+                        alpha: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur ? 0.65 : 1.0,
+                      ),
+                      padding: const EdgeInsets.only(bottom: spacing8),
+                      child: SettingsSearchBox(
+                        p: p,
+                        controller: _settingsSearchController,
+                        focusNode: _settingsSearchFocusNode,
+                        onChanged: (value) {
+                          setState(() => _settingsQuery = value);
+                          if (_activeController.hasClients) {
+                            _activeController.jumpTo(0.0);
+                          }
+                        },
+                        onClear: () {
+                          setState(() {
+                            _settingsQuery = '';
+                            _settingsSearchController.clear();
+                          });
+                          if (_activeController.hasClients) {
+                            _activeController.jumpTo(0.0);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing8),
+                    if (_settingsQuery.trim().isEmpty && _recentSearches.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'RECENT SEARCHES',
+                              style: TextStyle(color: p.text3, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.2),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.remove('recent_settings_searches');
+                                setState(() => _recentSearches = []);
+                              },
+                              child: Text('Clear', style: TextStyle(color: p.accent, fontSize: 12, fontWeight: FontWeight.w600)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SettingsGroup(
+                        p: p,
+                        children: [
+                          for (final term in _recentSearches)
+                            SettingsRow(
+                              p: p,
+                              icon: Icons.history_rounded,
+                              title: term,
+                              color: p.text3,
+                              onTap: () {
+                                _settingsSearchController.text = term;
+                                setState(() => _settingsQuery = term);
+                                _saveRecentSearch(term);
+                              },
+                            ),
+                        ],
+                      ),
+                    ] else if (_settingsQuery.trim().isNotEmpty) ...[
+                      SettingsGroup(
+                        p: p,
+                        children: [
+                          for (final result in _settingsSearchResults)
+                            SettingsRow(
+                              p: p,
+                              icon: result.icon,
+                              title: result.title,
+                              highlight: _settingsQuery,
+                              color: result.title == 'Reset All Data' || result.title == 'Factory Reset' ? p.red : p.accent,
+                              onTap: () {
+                                _saveRecentSearch(result.title);
+                                if (result.title == 'Reset All Data') {
+                                  unawaited(_confirmResetAll(p));
+                                  return;
+                                }
+                                if (result.title == 'Factory Reset') {
+                                  unawaited(_confirmFactoryReset(p));
+                                  return;
+                                }
+                                if (result.title == 'Reset Settings Only') {
+                                  unawaited(_confirmResetSettings());
+                                  return;
+                                }
+                                _openCategory(result.category);
+                              },
+                            ),
+                          if (_settingsSearchResults.isEmpty)
+                            SettingsRow(
+                              p: p,
+                              icon: Icons.search_off_rounded,
+                              title: 'No Results',
+                              color: p.text2,
+                            ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              ],
+              if (show('Personalization'))
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
@@ -2206,13 +2340,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         GuideRow(p: p, icon: Icons.radio_button_checked_rounded, title: 'Single Mode', text: 'Every tap saves one standalone moment.'),
                         GuideRow(p: p, icon: Icons.note_add_rounded, title: 'Add a Note', text: 'Touch and hold the home screen to write a note before saving.'),
                         GuideRow(p: p, icon: Icons.history_rounded, title: 'Review History', text: 'Open History to review moments, use Select Date for a calendar day, or filter by Today and This Week.'),
-                        GuideRow(p: p, icon: Icons.search_rounded, title: 'Search Notes', text: 'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, time, or type.'),
+                        GuideRow(p: p, icon: Icons.search_rounded, title: 'Search Notes', text: 'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, or time.'),
                         GuideRow(p: p, icon: Icons.timer_rounded, title: 'Time Between Moments', text: 'Select one moment, then another, to calculate the time between them.'),
-                        GuideRow(p: p, icon: Icons.subject_rounded, title: 'Manage Moment Notes', text: 'Touch and hold any history moment to add, read, edit, or delete its note. Deleted notes and moments show an Undo pill.'),
-                        GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'Immediate App Lock covers NoteKar in Recents and when the notification shade sends the app inactive.'),
+                        GuideRow(p: p, icon: Icons.subject_rounded, title: 'Manage Moment Notes', text: 'Touch and hold any history moment to add, read, edit, or delete its note.'),
+                        GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'App Lock uses your biometric or PIN. Immediate lock covers NoteKar in Recents or background.'),
                         GuideRow(p: p, icon: Icons.auto_awesome_motion_rounded, title: 'Minimal Moment Options', text: 'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.'),
-                        GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your device. Check stats in Settings > Advanced > Device Health.'),
-                        GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a backup before resetting, changing phones, or testing a new build.'),
+                        GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.'),
+                        GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a JSON backup before resetting, changing phones, or testing a new build.'),
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
@@ -2236,10 +2370,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         HelpRow(p: p, question: 'NoteKar is offline', answer: 'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.'),
                         HelpRow(p: p, question: 'Backup import found no new moments', answer: 'The backup was read correctly, but its moments already exist on this device. NoteKar skips duplicates instead of adding them again.'),
                         HelpRow(p: p, question: 'Backup import failed', answer: 'Make sure you selected a NoteKar JSON backup that was not renamed, manually edited, or damaged. Try exporting a fresh backup.'),
-                        HelpRow(p: p, question: 'Live Icon Motion will not turn on', answer: 'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream.'),
-                        HelpRow(p: p, question: 'Live Icon Motion looks slow or delayed', answer: 'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance when many screens are open.'),
-                        HelpRow(p: p, question: 'App Lock will not turn on', answer: 'Add a PIN, password, pattern, fingerprint, or other supported screen lock in Android settings, then try again.'),
-                        HelpRow(p: p, question: 'App Lock appears after the notification panel', answer: 'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. The lock overlay hides your moments before you return.'),
+                        HelpRow(p: p, question: 'Live Icon Motion will not turn on', answer: 'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream or your hardware tier is set to Power Saver.'),
+                        HelpRow(p: p, question: 'Live Icon Motion looks slow or delayed', answer: 'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance automatically based on CPU and RAM stats.'),
+                        HelpRow(p: p, question: 'App Lock will not turn on', answer: 'Add a biometric or PIN/Pattern lock in Android settings, then try again. NoteKar uses your system credentials for maximum security.'),
+                        HelpRow(p: p, question: 'App Lock appears after the notification panel', answer: 'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. This ensures your moments stay hidden.'),
                         HelpRow(p: p, question: 'The app icon did not change immediately', answer: 'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.'),
                         HelpRow(p: p, question: 'A moment was saved accidentally', answer: 'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.'),
                         HelpRow(p: p, question: 'My data disappeared after clearing app storage', answer: 'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.'),

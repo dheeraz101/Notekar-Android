@@ -1,43 +1,48 @@
-# Precision Redesign & Adaptive Intelligence Walkthrough
+# Settings Precision & Search Intelligence Walkthrough
 
-I have finalized the visual alignment, adaptive intelligence, and high-fidelity redesigns for the Settings and Note experiences.
+I have finalized the visual alignment, adaptive intelligence, and a complete overhaul of the Settings search experience.
 
 ## Key Improvements
 
 ### 1. Intelligent Adaptive Engine & RAM Tracking
-- **Ground Truth RAM**: The `AdaptiveEngine` now intelligently detects real device RAM on Android by reading `/proc/meminfo`. This provides a definitive metric for performance scaling.
-- **Persistent Caching**: To ensure zero performance overhead, the RAM info is detected once and then cached using `SharedPreferences`.
-- **Refined Scaling**: The engine now uses RAM as a primary factor for tiering:
-    - **Low Tier**: Devices with < 4GB RAM or <= 4 cores (common in budget hardware).
-    - **Balanced Tier**: 4-6GB RAM.
-    - **High Tier**: > 6GB RAM and 8+ cores on modern Android versions.
-- **Low-End Awareness**: If a low-end device is detected, a professional red warning banner appears in **Device Health** to inform the user that specific optimizations are active.
+- **Ground Truth RAM**: The `AdaptiveEngine` now intelligently detects real device RAM on Android by reading `/proc/meminfo`.
+- **Persistent Caching**: RAM info is detected once and cached using `SharedPreferences` for zero performance overhead.
+- **Refined Scaling**: Tiering now considers RAM, CPU Cores, and SDK version.
+- **Low-End Awareness**: A hardware warning banner appears in **Device Health** if limited specs are detected.
 
-### 2. Apple HIG Beta Popup
-- **Compact Redesign**: Rebuilt the "NoteKar Beta" popup to be significantly more compact and minimal.
-- **High-Density Pillars**: The information pillars are now grouped within a subtle card with tighter vertical spacing, following Apple's principle of information density without clutter.
-- **Refined Copy**: Updated the copy to be more professional and concise.
+### 2. Dedicated Search Experience (Apple-Style)
+- **Focused Sub-Page**: The search experience has been promoted to its own dedicated sub-page. Tapping the search bar on the main page now performs a professional "push" transition to a focused search environment.
+- **Recent Searches**: A new "RECENT SEARCHES" section appears when the query is empty, allowing users to quickly re-access previous searches. This is fully persistent using `SharedPreferences`.
+- **Compact Results**: Global search results now hide subtitles, creating a high-density, "Apple-style" list that is significantly faster to scan.
+- **UX Symmetry**: The search box layout is now perfectly balanced with a prefix icon and a matching 'X' (clear) button on the right.
 
-### 3. Note Popup Precision
-- **Integrated Line Counter**: The linear character progress bar and the numerical counter are now perfectly aligned on the same row.
-- **Enhanced Visibility**: Increased the thickness of the progress bar from 3px to 6px for a more premium, tactile feel.
+### 3. App Widget Overhaul (Apple HIG)
+- **Horizontal Card Layout**: Moved from a basic vertical list to a sophisticated "Control Center" style horizontal card.
+- **Data Column (Left)**: Features a large, bold numerical count for today's moments, a "MOMENTS" status label, and a concise "Last: 10:45 AM" timestamp.
+- **Action Grid (Right)**: A 2x2 grid of high-contrast action buttons (IN, OUT, ONE, NOTE) for one-tap logging directly from the home screen.
+- **Squircle Visuals**: Updated the widget background with a 28dp corner radius to match the modern "Squircle" aesthetic.
+- **Resolved Build Errors**: Fixed a compilation error caused by a missing reference to the removed `widget_history` view in the Kotlin provider.
 
-### 4. Pixel-Perfect Alignment & Spacing
-- **Icon Alignment**: Fixed the vertical alignment of the Info icon in Settings footers. It is now precisely matched to the cap-height of the 13px Inter font (adjusted from `top: 2` to `top: 3.5`).
-- **Tighter Hierarchy**: Reduced the vertical gap between consecutive descriptions in **Device Health**, creating a cohesive informational block.
+### 3. Help & Guides Refinement
+- **Ground Truth Accuracy**: Updated the "Guides" and "Help" content to reflect the new RAM-based Adaptive Engine logic.
+- **Professional Copy**: Refined the answers for "App Lock" and "Live Icon Motion" to be technically accurate while remaining user-friendly.
+
+### 4. Apple HIG Beta Popup
+- **Compact Redesign**: Rebuilt the "NoteKar Beta" popup with high-density pillars and a single-sheet card layout.
+
+### 5. UI Precision Alignment
+- **Pixel-Perfect Scaling**: Fixed the Info Icon vertical alignment (3.5px offset) to perfectly match the 13px Inter font cap-height.
+- **Gap Reduction**: Unified stacking logic for footer notes, removing extra space in Device Health and Updates pages.
 
 ---
 
 ## Technical Details
 
 ### [Adaptive Engine](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/utils/adaptive_engine.dart)
-Added logic to flag SDK < 29 or cores <= 4 as low-end, and SDK 33+ with 8 cores as high-end.
-
-### [Note Dialog](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/dialogs/note_dialog.dart)
-Converted the character indicator from a `Column` to a `Row` and increased the height of the `Container`.
-
-### [Settings Widgets](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/widgets/settings_widgets.dart)
-Introduced `bottomPadding` to `SettingsPageDescription` and fine-tuned the `Icon` padding for exact visual centering with text.
+Implemented `/proc/meminfo` parsing and tier-based optimization flags.
 
 ### [Settings Dialog](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/dialogs/settings_dialog.dart)
-Redesigned the Beta Popup structure and added the Low-End Warning banner to the Device Health page.
+Overhauled `build()` with conditional slivers for Search/Recent states. Implemented `SharedPreferences` for search history.
+
+### [Settings Widgets](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project YABP DigitalSuraksha/Notekar - Flutter/lib/widgets/settings_widgets.dart)
+Refined `SettingsSearchBox` and `SettingsPageDescription` for better UX and alignment.

@@ -943,12 +943,14 @@ class SettingsSearchBox extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onClear,
+    this.focusNode,
   });
 
   final Palette p;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -961,16 +963,21 @@ class SettingsSearchBox extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+        focusNode: focusNode,
         style: TextStyle(color: p.text, fontSize: 14),
         decoration: InputDecoration(
-          icon: Icon(Icons.search_rounded, color: p.text3, size: 20),
+          prefixIcon: Icon(Icons.search_rounded, color: p.text3, size: 20),
+          prefixIconConstraints: const BoxConstraints(minWidth: 32),
           suffixIcon:
               controller.text.isEmpty
                   ? null
                   : IconButton(
                     onPressed: onClear,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     icon: Icon(Icons.close_rounded, color: p.text3, size: 18),
                   ),
+          suffixIconConstraints: const BoxConstraints(minWidth: 32),
           hintText: 'Search settings',
           hintStyle: TextStyle(color: p.text3),
           border: InputBorder.none,
