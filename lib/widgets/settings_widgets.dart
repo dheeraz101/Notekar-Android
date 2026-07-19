@@ -827,20 +827,22 @@ class SettingsPageDescription extends StatelessWidget {
     super.key,
     required this.p,
     required this.text,
+    this.bottomPadding = 16.0,
   });
 
   final Palette p;
   final String text;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 16), // Adjusted for HIG footer style
+      padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding), // Adjusted for HIG footer style
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 2), // Aligned with 13px text
+            padding: const EdgeInsets.only(top: 3.5), // Precisely aligned with 13px Inter cap-height
             child: Icon(
               Icons.info_outline_rounded,
               color: p.text3.withValues(alpha: 0.6),
@@ -854,7 +856,7 @@ class SettingsPageDescription extends StatelessWidget {
               style: TextStyle(
                 color: p.text3, // Using text3 for footer-like look
                 fontSize: 13, // Standard iOS footer size
-                height: 1.4,
+                height: 1.45, // Slightly increased for better readability
                 fontWeight: FontWeight.w400,
                 fontVariations: const [FontVariation('wght', 400)],
                 letterSpacing: -0.05,
@@ -873,21 +875,23 @@ class SettingsBetaNote extends StatelessWidget {
     required this.p,
     required this.text,
     required this.onLearnMore,
+    this.bottomPadding = 16.0,
   });
 
   final Palette p;
   final String text;
   final VoidCallback onLearnMore;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 2),
+            padding: const EdgeInsets.only(top: 3.5), // Precisely aligned with 13px Inter cap-height
             child: Icon(
               Icons.info_outline_rounded,
               color: p.text3.withValues(alpha: 0.6),
@@ -902,7 +906,7 @@ class SettingsBetaNote extends StatelessWidget {
                 style: TextStyle(
                   color: p.text3,
                   fontSize: 13,
-                  height: 1.4,
+                  height: 1.45,
                   fontWeight: FontWeight.w400,
                   fontVariations: const [FontVariation('wght', 400)],
                   letterSpacing: -0.05,
@@ -915,7 +919,7 @@ class SettingsBetaNote extends StatelessWidget {
                       color: Color(0xFF007AFF),
                       // Force identical font properties to description
                       fontSize: 13,
-                      height: 1.4,
+                      height: 1.45,
                       fontWeight: FontWeight.w400,
                       fontVariations: [FontVariation('wght', 400)],
                       decoration: TextDecoration.none,

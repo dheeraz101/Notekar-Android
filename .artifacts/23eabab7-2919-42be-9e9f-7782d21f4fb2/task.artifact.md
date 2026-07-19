@@ -1,14 +1,22 @@
 # Tasks
 
-- [ ] Typography & Component Alignment
-    - [ ] Match "Learn More" link style exactly to description text (13px, non-bold)
-    - [ ] Align `SliderScale` tick indicators with slider track bounds
-- [ ] Adaptive Performance
-    - [ ] Implement conditional transitions in `SettingsDialog` using `AdaptiveEngine`
-    - [ ] Set Low-End devices to simple 150ms Fade transitions
-- [ ] Compact Beta Experience
-    - [ ] Summarize Beta popup pillars to 1-2 lines each
-    - [ ] Tighten vertical padding in `_BetaInfoRow`
-- [ ] Verification
-    - [ ] Verify slider alignment on multiple screen widths
-    - [ ] Test navigation responsiveness on "Balanced" vs "Low" tiers
+- [x] **Adaptive Engine & Device Health**
+    - [x] Robust detection in `AdaptiveEngine`
+    - [x] Low-end warning banner in `Device Health`
+    - [x] Tighten spacing between descriptions
+    - [x] **Intelligent RAM Tracking**
+        - [x] Implement `/proc/meminfo` reading for Android
+        - [x] Persistent caching using `SharedPreferences`
+        - [x] Refine `PerformanceTier` logic using RAM factor
+        - [x] Display "System RAM" in Device Health
+- [x] **Beta Popup Redesign (Apple HIG)**
+    - [x] Compact layout and refined copy
+    - [x] Grid/List refinement for pillars
+- [x] **Note Popup Redesign**
+    - [x] Same-line layout for bar and counter
+    - [x] Increase bar height to 6px
+- [x] **UI Precision Alignment**
+    - [x] Fix Info Icon alignment in `SettingsPageDescription`
+    - [x] Final visual audit of Settings alignment
+- [x] **Bug Hunt**
+    - [x] General UI/UX and logic check

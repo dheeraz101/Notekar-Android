@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum PerformanceTier {
   low,
@@ -13,7 +14,7 @@ class AdaptiveEngine {
   AdaptiveEngine._internal();
 
   PerformanceTier _tier = PerformanceTier.balanced;
-  final int _ramGb = 0;
+  int _ramGb = 0;
   int _processors = 0;
   String _model = 'Unknown';
   String _osVersion = 'Unknown';
@@ -29,7 +30,11 @@ class AdaptiveEngine {
   bool get supportsAdvancedAnimations => _tier == PerformanceTier.high;
 
   Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
     final deviceInfo = DeviceInfoPlugin();
+
+    // Try to load cached RAM
+    _ramGb = prefs.getInt('device_total_ram_gb') ?? 0;
     
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
@@ -37,13 +42,25 @@ class AdaptiveEngine {
       _osVersion = 'Android ${androidInfo.version.release}';
       _processors = Platform.numberOfProcessors;
       
-      // On Android, we can estimate RAM (this is a heuristic)
-      // High-end usually has 8GB+, Balanced 4-6GB, Low < 4GB.
-      // Since device_info_plus doesn't give exact RAM on all Android versions easily without extra code,
-      // we'll use processors and OS version as primary indicators for now.
-      if (_processors <= 4 || androidInfo.version.sdkInt < 29) {
+      // If RAM is not cached, detect it
+      if (_ramGb == 0) {
+        _ramGb = await _detectAndroidRam();
+        await prefs.setInt('device_total_ram_gb', _ramGb);
+      }
+
+      // Intelligent Heuristic for Android
+      // We consider RAM < 4GB OR cores <= 4 as "Low"
+      // Balanced: RAM 4-6GB
+      // High: RAM > 6GB AND 8+ cores
+      final isWeakRam = _ramGb > 0 && _ramGb < 4;
+      final isWeakCPU = _processors <= 4;
+      final isStrongRam = _ramGb >= 7; // Usually 8GB devices report ~7.5GB
+      final isStrongCPU = _processors >= 8;
+      final isModernSDK = androidInfo.version.sdkInt >= 33;
+
+      if (isWeakRam || isWeakCPU || androidInfo.version.sdkInt < 29) {
         _tier = PerformanceTier.low;
-      } else if (_processors >= 8) {
+      } else if (isStrongRam && isStrongCPU && isModernSDK) {
         _tier = PerformanceTier.high;
       } else {
         _tier = PerformanceTier.balanced;
@@ -54,15 +71,39 @@ class AdaptiveEngine {
       _osVersion = 'iOS ${iosInfo.systemVersion}';
       _processors = Platform.numberOfProcessors;
       
-      // iOS is generally more optimized, but older models (like iPhone 8) might be "Balanced"
+      // iOS Heuristic (Simplified as iOS RAM is harder to get but OS is optimized)
       if (_processors <= 2) {
         _tier = PerformanceTier.low;
+        _ramGb = 2;
       } else if (_processors >= 6) {
         _tier = PerformanceTier.high;
+        _ramGb = 6;
       } else {
         _tier = PerformanceTier.balanced;
+        _ramGb = 4;
       }
     }
+  }
+
+  Future<int> _detectAndroidRam() async {
+    try {
+      final file = File('/proc/meminfo');
+      if (await file.exists()) {
+        final lines = await file.readAsLines();
+        for (final line in lines) {
+          if (line.startsWith('MemTotal:')) {
+            // Format: MemTotal:        7765188 kB
+            final match = RegExp(r'(\d+)').firstMatch(line);
+            if (match != null) {
+              final kb = int.parse(match.group(1)!);
+              // Convert to GB: (KB / 1024 / 1024) and round up/down
+              return (kb / (1024 * 1024)).round();
+            }
+          }
+        }
+      }
+    } catch (_) {}
+    return 0;
   }
 
   String get tierLabel {

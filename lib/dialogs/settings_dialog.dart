@@ -196,7 +196,7 @@ class _BetaInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1050,68 +1050,65 @@ class _SettingsDialogState extends State<SettingsDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: const Color(0xFF007AFF).withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.auto_awesome_rounded,
-                color: Color(0xFF007AFF),
-                size: 32,
-              ),
-            ),
-            const SizedBox(height: 20),
             Text(
-              'Beta Stage',
+              'Early Access & Refinement',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text,
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.w700,
                 fontVariations: const [FontVariation('wght', 700)],
-                letterSpacing: -0.6,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               'Help shape the future of NoteKar',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text2,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 fontVariations: const [FontVariation('wght', 500)],
               ),
             ),
-            const SizedBox(height: 24),
-            _BetaInfoRow(
-              p: p,
-              number: '1',
-              title: 'Early Access',
-              text: 'Explore upcoming features before they reach stable release.',
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  _BetaInfoRow(
+                    p: p,
+                    number: '1',
+                    title: 'Upcoming Features',
+                    text: 'Explore and test new functionality before the stable release.',
+                  ),
+                  _BetaInfoRow(
+                    p: p,
+                    number: '2',
+                    title: 'Active Polishing',
+                    text: 'Features are functional but undergo frequent refinements.',
+                  ),
+                  _BetaInfoRow(
+                    p: p,
+                    number: '3',
+                    title: 'Privacy First',
+                    text: 'Even in Beta, your moments remain local and private.',
+                  ),
+                  _BetaInfoRow(
+                    p: p,
+                    number: '4',
+                    title: 'Continuous Feedback',
+                    text: 'Help us identify issues and polish the experience.',
+                  ),
+                ],
+              ),
             ),
-            _BetaInfoRow(
-              p: p,
-              number: '2',
-              title: 'Refinement',
-              text: 'Beta features are functional but undergo frequent updates.',
-            ),
-            _BetaInfoRow(
-              p: p,
-              number: '3',
-              title: 'Privacy',
-              text: 'Even in Beta, your moments remain local and private.',
-            ),
-            _BetaInfoRow(
-              p: p,
-              number: '4',
-              title: 'Feedback',
-              text: 'Help us identifying issues and polish the experience.',
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -1123,6 +1120,28 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (engine.isLowEnd)
+          Container(
+            margin: const EdgeInsets.only(bottom: spacing16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: p.red.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: p.red.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: p.red, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Limited hardware detected. Performance optimizations are active.',
+                    style: TextStyle(color: p.red, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
         Container(
           padding: const EdgeInsets.all(spacing16),
           decoration: BoxDecoration(
@@ -1166,6 +1185,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
             DiagnosticRow(
               p: p,
+              label: 'System RAM',
+              value: engine.ramGb > 0 ? '${engine.ramGb} GB' : 'Unknown',
+            ),
+            DiagnosticRow(
+              p: p,
               label: 'Performance Tier',
               value: engine.tierLabel,
             ),
@@ -1185,11 +1209,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
           p: p,
           text:
               'The Adaptive Engine automatically tunes Notekar to your device hardware to keep the app snappy.',
+          bottomPadding: 0,
         ),
         SettingsBetaNote(
           p: p,
           text: 'The current features on this page are under Beta stage.',
           onLearnMore: () => _showBetaInfoPopup(p),
+          bottomPadding: 0,
         ),
       ],
     );
@@ -2255,6 +2281,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsPageDescription(
                       p: p,
                       text: 'NoteKar checks GitHub for new releases. App Notices provide occasional updates about new announcements.',
+                      bottomPadding: 0,
                     ),
                     SettingsBetaNote(
                       p: p,
@@ -2333,6 +2360,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsPageDescription(
                       p: p,
                       text: 'Android Backup automatically includes NoteKar in your system-level backups. Planned features will provide additional protection.',
+                      bottomPadding: 0,
                     ),
                     SettingsBetaNote(
                       p: p,
@@ -2361,6 +2389,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsPageDescription(
                       p: p,
                       text: 'NoteKar contains zero third-party tracking, analytics, or telemetry. Network access is strictly limited to update checks.',
+                      bottomPadding: 0,
                     ),
                     SettingsBetaNote(
                       p: p,

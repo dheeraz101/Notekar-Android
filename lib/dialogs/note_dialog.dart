@@ -198,37 +198,37 @@ class _LinearCharacterIndicator extends StatelessWidget {
             ? p.orange
             : p.accent.withValues(alpha: 0.8);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Row(
       children: [
-        Container(
-          height: 3,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: p.surface3,
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progress,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 4),
-                ],
+        Expanded(
+          child: Container(
+            height: 6,
+            decoration: BoxDecoration(
+              color: p.surface3,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 4),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(width: 12),
         Text(
           '$count / $max',
           style: TextStyle(
             color: alert ? color : p.text3,
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 0.2,
             fontFeatures: const [FontFeature.tabularFigures()],
