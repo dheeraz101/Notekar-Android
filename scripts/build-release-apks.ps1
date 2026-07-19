@@ -196,18 +196,18 @@ $fence
 
         # Try to replace ### Assets or ## Downloads
         if ($releaseText -match '(?ms)^### Assets\s+') {
-            $releaseText = [regex]::Replace($releaseText, '(?ms)^### Assets\s+.*?(?m^### |^## |\z)', $assetsSection.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^### Assets\s+.*?(?=^### |^## |\z)', $assetsSection.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
         } elseif ($releaseText -match '(?ms)^## Downloads\s+') {
-            $releaseText = [regex]::Replace($releaseText, '(?ms)^## Downloads\s+.*?(?m^## |^### |\z)', "## Assets" + [Environment]::NewLine + [Environment]::NewLine + $downloads.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^## Downloads\s+.*?(?=^## |^### |\z)', "## Assets" + [Environment]::NewLine + [Environment]::NewLine + $downloads.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
         } else {
             $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $assetsSection.TrimEnd() + [Environment]::NewLine
         }
 
         # Try to replace ### SHA256 or ## SHA256
         if ($releaseText -match '(?ms)^### SHA256\s+') {
-            $releaseText = [regex]::Replace($releaseText, '(?ms)^### SHA256\s+.*?(?m^### |^## |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^### SHA256\s+.*?(?=^### |^## |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
         } elseif ($releaseText -match '(?ms)^## SHA256\s+') {
-            $releaseText = [regex]::Replace($releaseText, '(?ms)^## SHA256\s+.*?(?m^## |^### |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^## SHA256\s+.*?(?=^## |^### |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
         } else {
             $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $shaSection.TrimEnd() + [Environment]::NewLine
         }
