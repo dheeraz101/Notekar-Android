@@ -12,12 +12,14 @@ class SettingsGroup extends StatelessWidget {
     required this.p,
     required this.children,
     this.title,
+    this.description,
     this.showDividers = true,
   });
 
   final Palette p;
   final List<Widget> children;
   final String? title;
+  final String? description;
   final bool showDividers;
 
   @override
@@ -27,14 +29,26 @@ class SettingsGroup extends StatelessWidget {
       children: [
         if (title != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 8), // Official iOS Title padding
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
             child: Text(
               title!.toUpperCase(),
               style: TextStyle(
                 color: p.text3,
                 fontSize: 13,
-                fontWeight: FontWeight.w400, // iOS titles are lighter but uppercase
+                fontWeight: FontWeight.w500,
                 letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        if (description != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text(
+              description!,
+              style: TextStyle(
+                color: p.text2,
+                fontSize: 13,
+                height: 1.4,
               ),
             ),
           ),
@@ -42,7 +56,7 @@ class SettingsGroup extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(20), // Premium modern iOS radius
+            borderRadius: BorderRadius.circular(20),
             border: p.name == 'amoled' ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8) : null,
           ),
           child: Column(
@@ -50,7 +64,7 @@ class SettingsGroup extends StatelessWidget {
               for (int i = 0; i < children.length; i++) ...[
                 children[i],
                 if (showDividers && i < children.length - 1)
-                  Divider(height: 0.5, color: p.border), // iOS dividers touch both sides in inset grouped
+                  Divider(height: 0.5, color: p.border),
               ],
             ],
           ),
@@ -66,7 +80,7 @@ class SettingsRow extends StatelessWidget {
     required this.p,
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     this.onTap,
     this.color,
     this.status,
@@ -77,7 +91,7 @@ class SettingsRow extends StatelessWidget {
   final Palette p;
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final VoidCallback? onTap;
   final Color? color;
   final String? status;
@@ -87,6 +101,7 @@ class SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rowColor = color ?? p.accent;
+    final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
 
     return PressableScale(
       enabled: onTap != null,
@@ -97,12 +112,12 @@ class SettingsRow extends StatelessWidget {
           color: active ? rowColor.withValues(alpha: 0.1) : Colors.transparent,
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: hasSubtitle ? CrossAxisAlignment.start : CrossAxisAlignment.center,
           children: [
             Container(
               width: 32,
               height: 32,
-              margin: const EdgeInsets.only(top: 9), // Synchronized with title
+              margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
               decoration: BoxDecoration(
                 color: rowColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -112,15 +127,17 @@ class SettingsRow extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 3), // Visual center-line sync
+                  if (hasSubtitle) const SizedBox(height: 3),
                   HighlightedText(
                     text: title,
                     query: highlight,
                     baseStyle: TextStyle(
                       color: p.text,
                       fontWeight: FontWeight.w800,
+                      fontSize: hasSubtitle ? 14 : 15,
                     ),
                     highlightStyle: TextStyle(
                       color: rowColor,
@@ -128,26 +145,32 @@ class SettingsRow extends StatelessWidget {
                       backgroundColor: rowColor.withValues(alpha: 0.12),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: p.text2, fontSize: 12, height: 1.3),
-                  ),
+                  if (hasSubtitle) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: p.text2, fontSize: 12, height: 1.3),
+                    ),
+                  ],
                 ],
               ),
             ),
             if (status != null) ...[
               const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: SettingsStatusPill(p: p, label: status!, color: rowColor),
+              Text(
+                status!,
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: hasSubtitle ? 14 : 15,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ],
             if (onTap != null)
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only(top: hasSubtitle ? 10 : 0),
                 child: Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
               ),
           ],
@@ -162,7 +185,7 @@ class SegmentedSetting extends StatelessWidget {
     super.key,
     required this.p,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.value,
     required this.values,
     required this.onChanged,
@@ -172,7 +195,7 @@ class SegmentedSetting extends StatelessWidget {
 
   final Palette p;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final String value;
   final Map<String, String> values;
   final ValueChanged<String> onChanged;
@@ -181,6 +204,7 @@ class SegmentedSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     return Glass(
       p: p,
       radius: 20,
@@ -194,6 +218,7 @@ class SegmentedSetting extends StatelessWidget {
             children: [
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -201,18 +226,28 @@ class SegmentedSetting extends StatelessWidget {
                       style: TextStyle(
                         color: p.text,
                         fontWeight: FontWeight.w800,
+                        fontSize: hasSubtitle ? 14 : 15,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: TextStyle(color: p.text2, fontSize: 12),
-                    ),
+                    if (hasSubtitle) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle!,
+                        style: TextStyle(color: p.text2, fontSize: 12),
+                      ),
+                    ],
                   ],
                 ),
               ),
               if (status != null)
-                SettingsStatusPill(p: p, label: status!, color: p.accent),
+                Text(
+                  status!,
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -272,7 +307,7 @@ class SettingsSwitchRow extends StatefulWidget {
     required this.p,
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.value,
     required this.onChanged,
     this.color,
@@ -284,7 +319,7 @@ class SettingsSwitchRow extends StatefulWidget {
   final Palette p;
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
   final Color? color;
@@ -321,6 +356,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
     final switchColor = widget.color ?? p.accent;
     final enabled = widget.enabled;
     final value = widget.value;
+    final hasSubtitle = widget.subtitle != null && widget.subtitle!.isNotEmpty;
 
     return GestureDetector(
       onTapDown: (_) {
@@ -344,12 +380,12 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: const BoxDecoration(color: Colors.transparent),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: hasSubtitle ? CrossAxisAlignment.start : CrossAxisAlignment.center,
           children: [
             Container(
               width: 32,
               height: 32,
-              margin: const EdgeInsets.only(top: 9), // Synchronized
+              margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
               decoration: BoxDecoration(
                 color: (enabled && value ? switchColor : p.text3).withValues(
                   alpha: 0.10,
@@ -365,37 +401,40 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
             const SizedBox(width: 12),
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 3), // Center-line sync
+                  if (hasSubtitle) const SizedBox(height: 3),
                   Text(
                     widget.title,
                     style: TextStyle(
                       color: enabled ? p.text : p.text2,
                       fontWeight: FontWeight.w800,
+                      fontSize: hasSubtitle ? 14 : 15,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    widget.subtitle,
-                    style: TextStyle(
-                      color: enabled ? p.text2 : p.text3,
-                      fontSize: 12,
-                      height: 1.3,
+                  if (hasSubtitle) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      widget.subtitle!,
+                      style: TextStyle(
+                        color: enabled ? p.text2 : p.text3,
+                        fontSize: 12,
+                        height: 1.3,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
             const SizedBox(width: 16),
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: EdgeInsets.only(top: hasSubtitle ? 4 : 0),
               child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              margin: const EdgeInsets.only(top: 3),
-              width: 60,
-              height: 32,
+              width: 58, // Increased width for larger thumb area
+              height: 32, // Slightly taller for premium feel
               padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   color: enabled && value ? switchColor : p.surface3,
@@ -414,17 +453,17 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                       child: AnimatedBuilder(
                         animation: _stretchController,
                         builder: (context, child) {
-                          final stretch = _stretchController.value * 12;
+                          final stretch = _stretchController.value * 14; // Increased stretch
                           return Container(
-                            width: 32 + stretch,
+                            width: 28 + stretch, // Base thumb width 28
                             height: 28,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(999),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
@@ -569,7 +608,7 @@ class ColorChoiceSetting extends StatelessWidget {
     super.key,
     required this.p,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.value,
     required this.onChanged,
     this.blur = false,
@@ -577,7 +616,7 @@ class ColorChoiceSetting extends StatelessWidget {
 
   final Palette p;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final String value;
   final ValueChanged<String> onChanged;
   final bool blur;
@@ -607,6 +646,7 @@ class ColorChoiceSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     return Glass(
       p: p,
       radius: 20,
@@ -623,11 +663,13 @@ class ColorChoiceSetting extends StatelessWidget {
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(color: p.text2, fontSize: 13, height: 1.3),
-          ),
+          if (hasSubtitle) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle!,
+              style: TextStyle(color: p.text2, fontSize: 13, height: 1.3),
+            ),
+          ],
           const SizedBox(height: 20),
           Center(
             child: Wrap(
@@ -735,6 +777,78 @@ class SliderScale extends StatelessWidget {
                 val == activeValue ? p.accent : p.text3.withValues(alpha: 0.5),
           ),
       ],
+    );
+  }
+}
+
+class SettingsPageSubtitle extends StatelessWidget {
+  const SettingsPageSubtitle({
+    super.key,
+    required this.p,
+    required this.text,
+  });
+
+  final Palette p;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: p.text2,
+          fontSize: 15,
+          height: 1.35,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -0.1,
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsPageDescription extends StatelessWidget {
+  const SettingsPageDescription({
+    super.key,
+    required this.p,
+    required this.text,
+  });
+
+  final Palette p;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 16), // Adjusted for HIG footer style
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 3), // Better alignment for 14px text
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: p.text3.withValues(alpha: 0.6),
+              size: 13,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: p.text3, // Using text3 for footer-like look
+                fontSize: 13, // Standard iOS footer size
+                height: 1.4,
+                fontWeight: FontWeight.w400,
+                letterSpacing: -0.05,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

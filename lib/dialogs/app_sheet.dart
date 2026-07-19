@@ -15,6 +15,7 @@ class AppSheet extends StatefulWidget {
     this.controller,
     this.showLargeTitle = false,
     this.onBack,
+    this.largeText = false,
   });
 
   final Palette p;
@@ -25,6 +26,7 @@ class AppSheet extends StatefulWidget {
   final ScrollController? controller;
   final bool showLargeTitle;
   final VoidCallback? onBack;
+  final bool largeText;
 
   @override
   State<AppSheet> createState() => _AppSheetState();
@@ -77,7 +79,7 @@ class _AppSheetState extends State<AppSheet> {
   Widget build(BuildContext context) {
     final p = widget.p;
 
-    final content = GestureDetector(
+    Widget content = GestureDetector(
       onVerticalDragEnd: (details) {
         if ((details.primaryVelocity ?? 0) > 650) {
           Navigator.maybePop(context);
@@ -171,6 +173,13 @@ class _AppSheetState extends State<AppSheet> {
         ),
       ),
     );
+
+    if (widget.largeText) {
+      content = MediaQuery(
+        data: largerTextQuery(context),
+        child: content,
+      );
+    }
 
     if (widget.docked) {
       return Padding(

@@ -358,9 +358,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       final overlay = Overlay.of(context, rootOverlay: true);
       _privacyOverlayEntry = OverlayEntry(
-        builder: (_) => PrivacyLockOverlay(
-          p: p,
-          onUnlock: () => unawaited(_unlockPrivacyLock()),
+        builder: (_) => MediaQuery(
+          data: _largeText ? largerTextQuery(context) : MediaQuery.of(context),
+          child: PrivacyLockOverlay(
+            p: p,
+            onUnlock: () => unawaited(_unlockPrivacyLock()),
+          ),
         ),
       );
       overlay.insert(_privacyOverlayEntry!);
@@ -634,6 +637,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         p: p,
         theme: _theme,
         defaultMode: _defaultMode,
+        largeText: _largeText,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
         onTheme: (value) {
           setState(() => _theme = value);
@@ -663,7 +667,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         barrierDismissible: true,
         barrierLabel: 'Close what is new',
         transitionDuration: const Duration(milliseconds: 120),
-        pageBuilder: (_, _, _) => ChangelogDialog(p: p, latestOnly: true),
+        pageBuilder: (_, _, _) => ChangelogDialog(
+          p: p,
+          latestOnly: true,
+          largeText: _largeText,
+        ),
       );
       await prefs.setString(_lastSeenVersionKey, appVersion);
     });
@@ -1192,8 +1200,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       barrierDismissible: true,
       barrierLabel: 'Close note',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) =>
-          NoteDialog(p: p, blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion),
+      pageBuilder: (_, _, _) => NoteDialog(
+        p: p,
+        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        largeText: _largeText,
+      ),
     );
     if (note != null) {
       if (_requireLongPressNote && note.trim().isEmpty) {
@@ -1442,6 +1453,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           pageBuilder: (_, _, _) => ChangelogDialog(
             p: p,
             latestOnly: latestOnly,
+            largeText: _largeText,
             blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
           ),
         ),
@@ -1464,6 +1476,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (_, _, _) => ChangelogDialog(
         p: p,
         latestOnly: true,
+        largeText: _largeText,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
       ),
     );
@@ -1478,6 +1491,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       transitionDuration: const Duration(milliseconds: 120),
       pageBuilder: (_, _, _) => ChangelogDialog(
         p: p,
+        largeText: _largeText,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
       ),
     );
@@ -2078,6 +2092,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (_, _, _) => BackupImportPreviewDialog(
         p: p,
         summary: summary,
+        largeText: _largeText,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
       ),
     );
@@ -2114,6 +2129,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (_, _, _) => AppSheet(
         p: p,
         title: 'Time Between Moments',
+        largeText: _largeText,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2233,107 +2249,103 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final lastSaved = _lastId != null;
 
-    return Scaffold(
-      backgroundColor: palette.bg,
-      resizeToAvoidBottomInset: false,
-      body: ColoredBox(
-        color: palette.bg,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                color: palette.bg,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapUp: _handleTap,
-                  onLongPress: _openNote,
-                ),
+    Widget body = ColoredBox(
+      color: palette.bg,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              color: palette.bg,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapUp: _handleTap,
+                onLongPress: _openNote,
               ),
             ),
-            IgnorePointer(
-              child: Center(
-                child: RepaintBoundary(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: spacing24,
-                      right: spacing24,
-                      bottom: 104 + bottomInset,
-                    ),
-                    child: LiveClockFace(
-                      p: palette,
-                      pulseToken: _savedPulseToken,
-                      pulseType: _lastSavedType,
-                      showSeconds: _showSeconds,
-                      highlightSeconds: _highlightSeconds,
-                    ),
+          ),
+          IgnorePointer(
+            child: Center(
+              child: RepaintBoundary(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: spacing24,
+                    right: spacing24,
+                    bottom: 104 + bottomInset,
+                  ),
+                  child: LiveClockFace(
+                    p: palette,
+                    pulseToken: _savedPulseToken,
+                    pulseType: _lastSavedType,
+                    showSeconds: _showSeconds,
+                    highlightSeconds: _highlightSeconds,
                   ),
                 ),
               ),
             ),
-            if (_lastTapPosition != null && !_reduceMotion)
-              IgnorePointer(
-                child: Stack(
-                  children: [
-                    Ripple(
-                      key: ValueKey(_rippleToken),
-                      origin: _lastTapPosition!,
-                      color: palette.accent,
-                    ),
-                    SavedPulse(
-                      key: ValueKey(_savedPulseToken),
-                      origin: _lastTapPosition!,
-                      p: palette,
-                      type: _lastSavedType,
-                    ),
-                  ],
-                ),
+          ),
+          if (_lastTapPosition != null && !_reduceMotion)
+            IgnorePointer(
+              child: Stack(
+                children: [
+                  Ripple(
+                    key: ValueKey(_rippleToken),
+                    origin: _lastTapPosition!,
+                    color: palette.accent,
+                  ),
+                  SavedPulse(
+                    key: ValueKey(_savedPulseToken),
+                    origin: _lastTapPosition!,
+                    p: palette,
+                    type: _lastSavedType,
+                  ),
+                ],
               ),
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              top: MediaQuery.paddingOf(context).top + spacing16,
-              left: spacing16,
-              right: spacing16,
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  opacity: _toastVisible ? 1 : 0,
-                  duration: Duration(milliseconds: _toastVisible ? 120 : 170),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 11,
+            ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            top: MediaQuery.paddingOf(context).top + spacing16,
+            left: spacing16,
+            right: spacing16,
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: _toastVisible ? 1 : 0,
+                duration: Duration(milliseconds: _toastVisible ? 120 : 170),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 11,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _toastWarning ? palette.red : palette.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: _toastWarning ? palette.red : palette.border,
                         ),
-                        decoration: BoxDecoration(
-                          color: _toastWarning ? palette.red : palette.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: _toastWarning ? palette.red : palette.border,
-                          ),
-                          boxShadow: palette.name == 'amoled'
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.22),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
-                        ),
-                        child: Text(
-                          _toast ?? '',
-                          textAlign: TextAlign.center,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: _toastWarning ? Colors.white : palette.text,
-                            fontWeight: FontWeight.w800,
-                            height: 1.25,
-                          ),
+                        boxShadow: palette.name == 'amoled'
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.22),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                      ),
+                      child: Text(
+                        _toast ?? '',
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: _toastWarning ? Colors.white : palette.text,
+                          fontWeight: FontWeight.w800,
+                          height: 1.25,
                         ),
                       ),
                     ),
@@ -2341,88 +2353,101 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 ),
               ),
             ),
-            if (lastSaved && _showLastSavedHint)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 102 + bottomInset,
-                child: UndoToast(
-                  p: palette,
-                  onUndo: _undoLast,
-                  token: _lastId ?? 0,
-                ),
+          ),
+          if (lastSaved && _showLastSavedHint)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 102 + bottomInset,
+              child: UndoToast(
+                p: palette,
+                onUndo: _undoLast,
+                token: _lastId ?? 0,
               ),
+            ),
+          Positioned(
+            left: spacing16,
+            right: spacing16,
+            bottom: spacing16 + bottomInset,
+            child: RepaintBoundary(
+              child: ValueListenableBuilder<Offset>(
+                valueListenable: _motion,
+                builder: (context, motion, _) {
+                  return Toolbar(
+                    p: palette,
+                    mode: _mode,
+                    onMode: _toggleMode,
+                    onHistory: _openHistory,
+                    onSettings: _openSettings,
+                    showLabels: _buttonLabels,
+                    largeControls: _largeControls,
+                    showBackgroundPill: _homeMenuPill,
+                    animateIcons: _homeMenuAnimations && !_reduceMotion,
+                    motionX: motion.dx,
+                    motionY: motion.dy,
+                    showHistoryText: _showHistoryText,
+                    blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+                  );
+                },
+              ),
+            ),
+          ),
+          if (_lastDeletedPreview != null)
             Positioned(
               left: spacing16,
               right: spacing16,
-              bottom: spacing16 + bottomInset,
-              child: RepaintBoundary(
-                child: ValueListenableBuilder<Offset>(
-                  valueListenable: _motion,
-                  builder: (context, motion, _) {
-                    return Toolbar(
-                      p: palette,
-                      mode: _mode,
-                      onMode: _toggleMode,
-                      onHistory: _openHistory,
-                      onSettings: _openSettings,
-                      showLabels: _buttonLabels,
-                      largeControls: _largeControls,
-                      showBackgroundPill: _homeMenuPill,
-                      animateIcons: _homeMenuAnimations && !_reduceMotion,
-                      motionX: motion.dx,
-                      motionY: motion.dy,
-                      showHistoryText: _showHistoryText,
-                      blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
-                    );
-                  },
-                ),
-              ),
-            ),
-            if (_lastDeletedPreview != null)
-              Positioned(
-                left: spacing16,
-                right: spacing16,
-                top: MediaQuery.paddingOf(context).top + 72,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: spacing16,
-                      vertical: spacing8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: palette.surface,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: palette.border),
-                    ),
-                    child: Text(
-                      'Deleted ${_lastDeletedPreview!.type.toUpperCase()} moment',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: palette.text2,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
+              top: MediaQuery.paddingOf(context).top + 72,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: spacing16,
+                    vertical: spacing8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: palette.surface,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: palette.border),
+                  ),
+                  child: Text(
+                    'Deleted ${_lastDeletedPreview!.type.toUpperCase()} moment',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: palette.text2,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
               ),
-            if (_factoryResetVisible)
-              FactoryResetOverlay(
-                p: palette,
-                progress: _factoryResetProgress,
-                complete: _factoryResetComplete,
-                status: _factoryResetText,
-                onStart: _finishFactoryResetOverlay,
-              ),
-            if (_privacyLock && !_privacyUnlocked)
-              PrivacyLockOverlay(
-                p: palette,
-                onUnlock: () => unawaited(_unlockPrivacyLock()),
-              ),
-          ],
-        ),
+            ),
+          if (_factoryResetVisible)
+            FactoryResetOverlay(
+              p: palette,
+              progress: _factoryResetProgress,
+              complete: _factoryResetComplete,
+              status: _factoryResetText,
+              onStart: _finishFactoryResetOverlay,
+            ),
+          if (_privacyLock && !_privacyUnlocked)
+            PrivacyLockOverlay(
+              p: palette,
+              onUnlock: () => unawaited(_unlockPrivacyLock()),
+            ),
+        ],
       ),
+    );
+
+    if (_largeText) {
+      body = MediaQuery(
+        data: largerTextQuery(context),
+        child: body,
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: palette.bg,
+      resizeToAvoidBottomInset: false,
+      body: body,
     );
   }
 }

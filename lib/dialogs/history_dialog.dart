@@ -197,6 +197,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       title: 'History',
       docked: true,
       blur: widget.blur,
+      largeText: widget.largeText,
       controller: _scrollController,
       showLargeTitle: true,
       child: SizedBox(

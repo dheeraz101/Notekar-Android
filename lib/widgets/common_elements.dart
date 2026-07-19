@@ -159,14 +159,32 @@ class SettingsPageNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: p.text3,
-          fontSize: 13,
-          height: 1.35,
-        ),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: p.text3.withValues(alpha: 0.6),
+              size: 13,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 13,
+                height: 1.4,
+                fontWeight: FontWeight.w400,
+                letterSpacing: -0.05,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

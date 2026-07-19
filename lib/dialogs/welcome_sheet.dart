@@ -13,6 +13,7 @@ class WelcomeSheet extends StatefulWidget {
     this.blur = false,
     required this.onTheme,
     required this.onDefaultMode,
+    this.largeText = false,
   });
 
   final Palette p;
@@ -21,6 +22,7 @@ class WelcomeSheet extends StatefulWidget {
   final bool blur;
   final ValueChanged<String> onTheme;
   final ValueChanged<String> onDefaultMode;
+  final bool largeText;
 
   @override
   State<WelcomeSheet> createState() => _WelcomeSheetState();
@@ -45,6 +47,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
       title: 'NoteKar',
       docked: true,
       blur: widget.blur,
+      largeText: widget.largeText,
       child: SizedBox(
         width: 410,
         height: MediaQuery.sizeOf(context).height * 0.68,

@@ -177,7 +177,7 @@ BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
   return BoxDecoration(
     color: blur ? surfaceColor.withValues(alpha: 0.65) : surfaceColor,
     borderRadius: BorderRadius.circular(999),
-    border: Border.all(color: p.border),
+    border: Border.all(color: p.border, width: p.name == 'amoled' ? 0.8 : 1.0),
     boxShadow: (p.name == 'amoled' || blur)
         ? null
         : [

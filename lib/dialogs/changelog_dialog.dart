@@ -12,11 +12,13 @@ class ChangelogDialog extends StatefulWidget {
     required this.p,
     this.latestOnly = false,
     this.blur = false,
+    this.largeText = false,
   });
 
   final Palette p;
   final bool latestOnly;
   final bool blur;
+  final bool largeText;
 
   static const releases = [
     (
@@ -362,6 +364,7 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
       p: p,
       title: widget.latestOnly ? "What's New" : 'Changelog',
       blur: widget.blur,
+      largeText: widget.largeText,
       child: SizedBox(
         width: 410,
         height: maxHeight,

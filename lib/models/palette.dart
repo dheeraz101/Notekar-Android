@@ -69,11 +69,11 @@ Palette paletteFor(
     surface2: amoled ? const Color(0xFF0A0A0A) : const Color(0xFF1C1C1E), // Subtle separation for AMOLED
     surface3: amoled ? const Color(0xFF1C1C1E) : const Color(0xFF2C2C2E),
     border: amoled
-        ? (highContrast ? const Color(0xFF323232) : const Color(0xFF1F1F1F))
-        : (highContrast ? const Color(0xFF666666) : const Color(0xFF343434)),
+        ? (highContrast ? const Color(0xFF444444) : const Color(0xFF1F1F1F))
+        : (highContrast ? const Color(0xFF777777) : const Color(0xFF343434)),
     text: const Color(0xFFFFFFFF),
-    text2: highContrast ? const Color(0xFFD8D8D8) : const Color(0xFFEBEBF5).withValues(alpha: 0.6),
-    text3: highContrast ? const Color(0xFFAFAFAF) : const Color(0xFFEBEBF5).withValues(alpha: 0.3),
+    text2: highContrast ? const Color(0xFFE5E5E5) : const Color(0xFFEBEBF5).withValues(alpha: 0.6),
+    text3: highContrast ? const Color(0xFFBDBDBD) : const Color(0xFFEBEBF5).withValues(alpha: 0.3),
     clock: amoled ? const Color(0xFF1F1F1F) : const Color(0xFF303030),
     accent: accent,
     green: const Color(0xFF30D158),

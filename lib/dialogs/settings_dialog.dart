@@ -579,17 +579,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return 'Current version v$appVersion';
   }
 
-  String get _backupAgeLine {
-    if (widget.lastBackupAt == null) return 'not created yet';
-    return relativeAge(widget.lastBackupAt!);
-  }
 
-  String get _backupReminderSubtitle {
-    if (backupReminderDays == 0) {
-      return 'No reminder. Back up whenever you choose.';
-    }
-    return 'A local reminder appears after $backupReminderDays days without a backup.';
-  }
 
   String get _privacyLockSubtitle {
     if (privacyLock) {
@@ -970,37 +960,54 @@ class _SettingsDialogState extends State<SettingsDialog> {
         .toList();
   }
 
+  Future<void> _showBetaInfoPopup(Palette p) async {
+    await showGeneralDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close beta info',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => AppSheet(
+        p: p,
+        title: 'NoteKar Beta',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'What to expect from NoteKar Beta',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Beta features give you early access to the latest NoteKar improvements before they are available to everyone. While these features are functional, they may undergo rapid changes based on your feedback.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, height: 1.45, fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Your data remains private and local, just as in the stable version. By using beta features, you help us refine the logging experience for all users.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, height: 1.45, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            // Minimal layout - close icon is already in AppSheet
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _deviceHealthPage(Palette p) {
     final engine = AdaptiveEngine();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsGroup(
-          p: p,
-          children: [
-            DiagnosticRow(
-              p: p,
-              label: 'Device Model',
-              value: engine.model,
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'Performance Tier',
-              value: engine.tierLabel,
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'Processors',
-              value: '${engine.processors} Cores',
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'OS Version',
-              value: engine.osVersion,
-            ),
-          ],
-        ),
-        const SizedBox(height: spacing16),
         Container(
           padding: const EdgeInsets.all(spacing16),
           decoration: BoxDecoration(
@@ -1033,10 +1040,80 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ],
           ),
         ),
-        SettingsPageNote(
+        const SizedBox(height: spacing16),
+        SettingsGroup(
+          p: p,
+          children: [
+            DiagnosticRow(
+              p: p,
+              label: 'Device Model',
+              value: engine.model,
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'Performance Tier',
+              value: engine.tierLabel,
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'Processors',
+              value: '${engine.processors} Cores',
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'OS Version',
+              value: engine.osVersion,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
           p: p,
           text:
-              'The Adaptive Engine automatically tunes Notekar to your device hardware. On low-power devices, expensive effects like background blur are hidden to keep the app snappy.',
+              'The Adaptive Engine automatically tunes Notekar to your device hardware to keep the app snappy.',
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  color: p.text3.withValues(alpha: 0.6),
+                  size: 13,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'You are using NoteKar Beta. We value your feedback on experimental features.',
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () => _showBetaInfoPopup(p),
+                      child: Text(
+                        'Learn More',
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -1138,7 +1215,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
               p: p,
               icon: Icons.lock_rounded,
               title: 'App Lock',
-              subtitle: _privacyLockSubtitle,
               color: p.accent,
               value: privacyLock,
               onChanged: (value) async {
@@ -1161,8 +1237,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
             key: ValueKey('privacy-delay-$privacyLockDelayMinutes-${p.name}'),
             p: p,
             title: 'When to Lock (minutes)',
-            subtitle:
-                'Now locks as soon as NoteKar leaves focus. Delays wait in the background.',
             value: '$privacyLockDelayMinutes',
             blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
             values: const {'0': 'Now', '1': '1', '5': '5', '10': '10'},
@@ -1228,7 +1302,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         const SizedBox(height: spacing4), // Minimum space for iOS look
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: spacing16),
-          child: SettingsPageNote(
+          child: SettingsPageDescription(
             p: p,
             text:
                 'App Icons change the Android launcher icon. Note: Some launchers may take a few seconds to update.',
@@ -1305,6 +1379,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBack: category != null ? _popCategory : null,
         docked: true,
         blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+        largeText: widget.largeText,
         controller: _activeController,
         showLargeTitle: category == null,
         child: SizedBox(
@@ -1403,7 +1478,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.brush_rounded,
                             title: 'Personalization',
-                            subtitle: 'Theme, toolbar, action color, and app icons',
                             color: p.accent,
                             onTap: () => _openCategory('Personalization'),
                           ),
@@ -1411,7 +1485,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.bolt_rounded,
                             title: 'Logging',
-                            subtitle: 'Capture behavior, tap delay, and history',
                             color: p.green,
                             onTap: () => _openCategory('Logging'),
                           ),
@@ -1419,7 +1492,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.verified_user_rounded,
                             title: 'Privacy & Security',
-                            subtitle: 'Local data, network use, and screen lock',
                             color: p.green,
                             onTap: () => _openCategory('Privacy & Security'),
                           ),
@@ -1427,7 +1499,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.storage_rounded,
                             title: 'Data & Backup',
-                            subtitle: 'Export, import, reminders, and data health',
                             color: p.green,
                             onTap: () => _openCategory('Data & Backup'),
                           ),
@@ -1435,7 +1506,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.update_rounded,
                             title: 'Updates',
-                            subtitle: _updateSubtitle,
                             color: p.accent,
                             onTap: () => _openCategory('Updates'),
                           ),
@@ -1443,7 +1513,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.auto_stories_rounded,
                             title: 'Help & Guides',
-                            subtitle: 'Learn logging, notes, history, and backups',
                             color: p.accent,
                             onTap: () => _openCategory('Help & Guides'),
                           ),
@@ -1451,7 +1520,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.settings_suggest_rounded,
                             title: 'Advanced',
-                            subtitle: 'Accessibility, diagnostics, and reset',
                             color: p.orange,
                             onTap: () => _openCategory('Advanced'),
                           ),
@@ -1464,6 +1532,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         onGitHubTap: () => widget.onOpenLink(githubRepo),
                         onVersionLongPress: () => widget.onOpenLink(officialSite),
                       ),
+                      SettingsPageDescription(
+                        p: p,
+                        text: 'Personalize and configure NoteKar to fit your workflow.',
+                      ),
                       const SizedBox(height: spacing64),
                     ]),
                   ),
@@ -1471,7 +1543,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 if (show('Personalization'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Customize the look and feel of NoteKar.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
@@ -1479,7 +1555,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.monitor_rounded,
                           title: 'Display',
-                          subtitle: 'Theme, clock, motion, and toolbar',
+                          status: theme[0].toUpperCase() + theme.substring(1),
                           color: p.accent,
                           onTap: () => _openCategory('Display', parent: 'Personalization'),
                         ),
@@ -1487,7 +1563,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.palette_rounded,
                           title: 'Accent Color',
-                          subtitle: 'Choose colors for buttons and highlights',
+                          status: accentColor[0].toUpperCase() + accentColor.substring(1),
                           color: p.accent,
                           onTap: () => _openCategory('Accent Color', parent: 'Personalization'),
                         ),
@@ -1495,15 +1571,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.apps_rounded,
                           title: 'App Icons',
-                          subtitle: 'Choose the Android launcher icon',
+                          status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
                           color: p.accent,
                           onTap: () => _openCategory('App Icons', parent: 'Personalization'),
                         ),
                       ],
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Personalization keeps the app feeling yours without changing saved moments.',
+                      text: 'Personalization changes the interface only and does not affect your saved moments.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1511,7 +1587,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
               if (show('Display'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Manage themes, the clock, and interface behavior.',
+                    ),
                     SettingsGroup(
                       p: p,
                       showDividers: false,
@@ -1571,7 +1651,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.more_time_rounded,
                           title: 'Show Seconds',
-                          subtitle: 'Show the seconds beside the main time',
                           color: p.accent,
                           value: showSeconds,
                           onChanged: (value) {
@@ -1583,7 +1662,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.highlight_rounded,
                           title: 'Highlight Seconds',
-                          subtitle: 'Use a softer separate color for seconds',
                           color: p.accent,
                           value: showSeconds && highlightSeconds,
                           enabled: showSeconds,
@@ -1599,7 +1677,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.label_rounded,
                           title: 'Button Labels',
-                          subtitle: 'Use compact text buttons in the toolbar',
                           color: p.green,
                           value: buttonLabels,
                           onChanged: (value) {
@@ -1611,7 +1688,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.ads_click_rounded,
                           title: 'Large Controls',
-                          subtitle: 'Increase toolbar touch targets',
                           color: p.orange,
                           value: largeControls,
                           onChanged: (value) {
@@ -1623,7 +1699,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.shape_line_rounded,
                           title: 'Toolbar Backplate',
-                          subtitle: 'Keep the floating capsule behind home controls',
                           color: p.accent,
                           value: homeMenuPill,
                           onChanged: (value) {
@@ -1636,7 +1711,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.motion_photos_auto_rounded,
                             title: 'Live Icon Motion',
-                            subtitle: buttonLabels ? 'Turn off Button Labels to see icon motion' : reduceMotion ? 'Turn off Reduced Motion to use phone-tilt motion' : 'Use gentle phone-tilt motion for home icons',
                             color: p.accent,
                             value: !reduceMotion && homeMenuAnimations,
                             enabled: !reduceMotion,
@@ -1656,7 +1730,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             p: p,
                             icon: Icons.opacity_rounded,
                             title: 'Enable Translucency',
-                            subtitle: reduceMotion ? 'Turn off Reduced Motion to enable translucency' : 'Use frosted glass blur on Toolbar and Sheets',
                             color: p.accent,
                             value: !reduceMotion && enableTranslucency,
                             enabled: !reduceMotion,
@@ -1670,7 +1743,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.format_list_bulleted_rounded,
                           title: 'History Text',
-                          subtitle: 'Show the History label in the home menu',
                           color: p.green,
                           value: showHistoryText,
                           onChanged: (value) {
@@ -1682,7 +1754,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.tips_and_updates_rounded,
                           title: 'Last Saved Hint',
-                          subtitle: 'Keep the quick undo hint after each save',
                           color: p.accent,
                           value: showLastSavedHint,
                           onChanged: (value) {
@@ -1692,9 +1763,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Display is personal. These choices change the interface only; your saved moments and notes stay exactly where they are.',
+                      text: 'Manage themes, the clock, and interface behavior. Effects like Translucency and Live Icon Motion are automatically disabled when Reduced Motion is active.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1702,11 +1773,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
               if (show('Accent Color'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Choose the color used for buttons, highlights, and save feedback.',
+                    ),
                     ColorChoiceSetting(
                       p: p,
                       title: 'Accent Color',
-                      subtitle: 'Choose the color used for buttons, highlights, and saved feedback.',
                       value: accentColor,
                       blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                       onChanged: (value) {
@@ -1716,9 +1790,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         widget.onAccentColor(value);
                       },
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Accent Color changes interface highlights only. It does not change or classify saved moments.',
+                      text: 'This color changes the app interface only and does not categorize your saved moments.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1727,15 +1801,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
+                      SettingsPageSubtitle(
+                        p: p,
+                        text: 'Choose the icon that appears on your Android launcher.',
+                      ),
                       _appIconsPage(p),
+                      SettingsPageDescription(
+                        p: p,
+                        text: 'App Icons change the launcher icon. Some launchers may take a few seconds to update.',
+                      ),
                     ],
                   ),
                 ),
               if (show('Logging'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Configure how you capture moments and review your history.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
@@ -1743,7 +1829,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.add_task_rounded,
                           title: 'Capture',
-                          subtitle: 'Startup mode, tap delay, and notes',
+                          status: defaultMode == 'single' ? 'Single' : 'Two-Way',
                           color: p.green,
                           onTap: () => _openCategory('Capture', parent: 'Logging'),
                         ),
@@ -1751,15 +1837,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.history_rounded,
                           title: 'Moments',
-                          subtitle: 'History density, delete safety, and totals',
+                          status: '${entries.length} Logs',
                           color: p.orange,
                           onTap: () => _openCategory('Moments', parent: 'Logging'),
                         ),
                       ],
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Logging controls how moments are captured and how history is reviewed.',
+                      text: 'Logging settings control the "capture-to-history" pipeline and how saved logs are organized.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1767,12 +1853,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
               if (show('Capture'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Fine-tune the behavior of home screen taps and holds.',
+                    ),
                     SegmentedSetting(
                       key: ValueKey('mode-$defaultMode-${p.name}'),
                       p: p,
                       title: 'Startup Mode',
-                      subtitle: 'Choose the mode NoteKar opens with.',
                       value: defaultMode,
                       blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
                       values: const {'single': 'Single', 'two-way': 'Two-Way'},
@@ -1795,17 +1884,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Tap Delay', style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
-                                    const SizedBox(height: 3),
-                                    Text('Set the minimum time between saved taps', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text2, fontSize: 12)),
-                                  ],
-                                ),
+                                child: Text('Tap Delay', style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15)),
                               ),
                               const SizedBox(width: 10),
-                              SettingsStatusPill(p: p, label: delayLabel(tapDelay), color: p.accent),
+                              Text(delayLabel(tapDelay), style: TextStyle(color: p.text2, fontSize: 15)),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -1874,7 +1956,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.edit_note_rounded,
                           title: 'Require Note on Hold',
-                          subtitle: 'Long press opens notes. Empty notes will not be saved.',
                           color: p.orange,
                           value: requireLongPressNote,
                           onChanged: (value) {
@@ -1884,9 +1965,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Capture controls how moments are saved. Startup mode applies next launch; tap delay and note-focused hold apply right away.',
+                      text: 'Fine-tune the behavior of home screen taps and holds. Tap Delay prevents accidental double-taps, while Require Note on Hold ensures contexts are always saved.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1894,7 +1975,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
               if (show('Moments'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Manage your history layout and review saved moments.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
@@ -1902,7 +1987,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.view_agenda_rounded,
                           title: 'Compact History',
-                          subtitle: 'Use denser rows for faster scanning and less scrolling',
                           color: p.accent,
                           value: compactHistory,
                           onChanged: (value) {
@@ -1918,7 +2002,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.delete_sweep_rounded,
                           title: 'Confirm Delete',
-                          subtitle: 'Ask before deleting a saved moment',
                           color: p.red,
                           value: confirmDelete,
                           onChanged: (value) {
@@ -1930,7 +2013,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.timer_rounded,
                           title: 'Extended Duration',
-                          subtitle: 'Show days, months, and years in time between moments',
                           color: p.accent,
                           value: extendedDuration,
                           onChanged: (value) {
@@ -1942,7 +2024,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.auto_awesome_motion_rounded,
                           title: 'Minimal Moment Options',
-                          subtitle: 'Use a compact horizontal row of icons for actions',
                           color: p.accent,
                           value: minimalMomentOptions,
                           onChanged: (value) {
@@ -1953,25 +2034,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         SettingsRow(
                           p: p,
                           icon: Icons.insights_rounded,
-                          title: 'Moments',
-                          subtitle: '${entries.length} total - $todayCount today',
+                          title: 'Review Logs',
+                          status: '$todayCount Today',
                           color: p.orange,
-                          status: '$todayCount today',
                         ),
                         SettingsRow(
                           p: p,
                           icon: Icons.search_rounded,
                           title: 'Search Notes',
-                          subtitle: 'Find saved notes by text, date, time, or type',
                           color: p.accent,
-                          status: '${entries.where((e) => e.note.isNotEmpty).length} notes',
+                          status: '${entries.where((e) => e.note.isNotEmpty).length} Notes',
                           onTap: () => _openCategory('Search Notes', parent: 'Moments'),
                         ),
                       ],
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Moments are stored locally for quick review. Compact rows help with scanning; confirmation helps avoid accidental deletes.',
+                      text: 'Manage your history layout and review saved moments. Compact History uses denser rows for faster scanning, and Extended Duration shows years, months, and days.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -1980,7 +2059,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
                       NoteSearchContent(
                         p: p,
                         entries: entries,
@@ -1993,7 +2072,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
               if (show('Guides'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Step-by-step guides for mastering NoteKar.',
+                    ),
                     SettingsGroup(
                       p: p,
                       showDividers: true,
@@ -2012,14 +2095,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a backup before resetting, changing phones, or testing a new build.'),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
+                    SettingsPageDescription(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Help'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Common questions and troubleshooting steps.',
+                    ),
                     SettingsGroup(
                       p: p,
                       showDividers: true,
@@ -2038,14 +2125,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         HelpRow(p: p, question: 'My data disappeared after clearing app storage', answer: 'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.'),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
+                    SettingsPageDescription(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Updates'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Keep NoteKar up to date with the latest features and fixes.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2053,7 +2144,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: checkingUpdates ? Icons.sync_rounded : _updateAvailable ? Icons.download_rounded : Icons.update_rounded,
                           title: _updateTitle,
-                          subtitle: _updateSubtitle,
                           color: p.accent,
                           status: 'v$appVersion',
                           onTap: () async {
@@ -2063,95 +2153,265 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             if (mounted) { setState(() { updateStatus = status; checkingUpdates = false; }); }
                           },
                         ),
-                        SettingsSwitchRow(p: p, icon: Icons.notifications_active_rounded, title: 'App Notices', subtitle: 'Allow occasional release and app notices', color: p.accent, value: remoteNotices, onChanged: (value) { setState(() => remoteNotices = value); widget.onRemoteNotices(value); }),
-                        SettingsRow(p: p, icon: Icons.new_releases_rounded, title: "What's New", subtitle: 'See highlights from the latest release', color: p.orange, status: 'New', onTap: () => _openCategory("What's New", parent: 'Updates')),
-                        SettingsRow(p: p, icon: Icons.article_rounded, title: 'Changelog', subtitle: 'Read release history and fixes', color: p.green, status: 'v$appVersion', onTap: () => _openCategory('Changelog', parent: 'Updates')),
+                        SettingsSwitchRow(p: p, icon: Icons.notifications_active_rounded, title: 'App Notices', color: p.accent, value: remoteNotices, onChanged: (value) { setState(() => remoteNotices = value); widget.onRemoteNotices(value); }),
+                        SettingsRow(p: p, icon: Icons.new_releases_rounded, title: "What's New", color: p.orange, status: 'Recent', onTap: () => _openCategory("What's New", parent: 'Updates')),
+                        SettingsRow(p: p, icon: Icons.article_rounded, title: 'Changelog', color: p.green, status: 'History', onTap: () => _openCategory('Changelog', parent: 'Updates')),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Updates and notices are optional network checks. NoteKar keeps working offline even when these checks are unavailable.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'NoteKar checks GitHub for new releases. App Notices provide occasional updates about new announcements.',
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Icon(
+                              Icons.info_outline_rounded,
+                              color: p.text3.withValues(alpha: 0.6),
+                              size: 13,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Join the conversation. Report bugs or request features while using NoteKar Beta.',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                GestureDetector(
+                                  onTap: () => _showBetaInfoPopup(p),
+                                  child: Text(
+                                    'Learn More',
+                                    style: TextStyle(
+                                      color: p.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Data & Backup'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Manage how your moments are exported, imported, and protected.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.import_export_rounded, title: 'Backup & Export', subtitle: 'CSV, JSON, import, and backup reminders', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
-                        SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Backup Status', subtitle: 'Android backup, health, and planned options', color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
+                        SettingsRow(p: p, icon: Icons.import_export_rounded, title: 'Backup & Export', status: '${entries.length} Logs', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
+                        SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Backup Status', status: _dataHealthStatus, color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Data & Backup is where you move, restore, and protect saved history.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Export backups regularly to keep your history safe when changing devices.',
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Backup & Export'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
-                    SegmentedSetting(key: ValueKey('backup-reminder-$backupReminderDays-${p.name}'), p: p, title: 'Backup Reminder (days)', subtitle: _backupReminderSubtitle, value: '$backupReminderDays', blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'0': 'Off', '7': '7', '14': '14', '30': '30'}, onChanged: (value) { final days = int.tryParse(value) ?? 0; if (days == backupReminderDays) return; HapticFeedback.selectionClick(); setState(() => backupReminderDays = days); widget.onBackupReminderDays(days); }),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Save your history as CSV or JSON files, or create a full NoteKar backup.',
+                    ),
+                    SegmentedSetting(key: ValueKey('backup-reminder-$backupReminderDays-${p.name}'), p: p, title: 'Backup Reminder', subtitle: backupReminderDays == 0 ? 'Reminders are currently off.' : 'Remind to back up every $backupReminderDays days.', value: '$backupReminderDays', blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'0': 'Off', '7': '7', '14': '14', '30': '30'}, onChanged: (value) { final days = int.tryParse(value) ?? 0; if (days == backupReminderDays) return; HapticFeedback.selectionClick(); setState(() => backupReminderDays = days); widget.onBackupReminderDays(days); }),
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.description_rounded, title: 'Export CSV', subtitle: exportState?.startsWith('CSV') == true ? exportState! : 'Save a spreadsheet-friendly copy', color: p.green, active: exportState?.startsWith('CSV') == true, onTap: () => unawaited(_runExport('CSV', widget.onExportCsv))),
-                        SettingsRow(p: p, icon: Icons.date_range_rounded, title: 'Export Last 7 Days', subtitle: 'Save only recent moments as CSV', color: p.green, onTap: () => unawaited(_runExport('Recent CSV', widget.onExportRecentCsv))),
-                        SettingsRow(p: p, icon: Icons.data_object_rounded, title: 'Export JSON', subtitle: exportState?.startsWith('JSON') == true ? exportState! : 'Save a structured developer-friendly copy', color: p.accent, active: exportState?.startsWith('JSON') == true, onTap: () => unawaited(_runExport('JSON', widget.onExportJson))),
-                        SettingsRow(p: p, icon: Icons.cloud_upload_rounded, title: 'Backup', subtitle: exportState?.startsWith('Backup') == true ? exportState! : 'Create a portable backup file', color: p.accent, active: exportState?.startsWith('Backup') == true, onTap: () => unawaited(_runExport('Backup', widget.onExportBackup))),
-                        SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Import Backup', subtitle: exportState?.startsWith('Import') == true ? exportState! : 'Merge a NoteKar backup into this device. Existing moments stay safe.', color: p.orange, active: exportState?.startsWith('Import') == true, onTap: () => unawaited(_runImport())),
+                        SettingsRow(p: p, icon: Icons.description_rounded, title: 'Export CSV', status: exportState?.startsWith('CSV') == true ? 'Done' : 'Table', color: p.green, active: exportState?.startsWith('CSV') == true, onTap: () => unawaited(_runExport('CSV', widget.onExportCsv))),
+                        SettingsRow(p: p, icon: Icons.date_range_rounded, title: 'Export Last 7 Days', status: 'Recent', color: p.green, onTap: () => unawaited(_runExport('Recent CSV', widget.onExportRecentCsv))),
+                        SettingsRow(p: p, icon: Icons.data_object_rounded, title: 'Export JSON', status: exportState?.startsWith('JSON') == true ? 'Done' : 'Dev', color: p.accent, active: exportState?.startsWith('JSON') == true, onTap: () => unawaited(_runExport('JSON', widget.onExportJson))),
+                        SettingsRow(p: p, icon: Icons.cloud_upload_rounded, title: 'Backup', status: exportState?.startsWith('Backup') == true ? 'Done' : 'Full', color: p.accent, active: exportState?.startsWith('Backup') == true, onTap: () => unawaited(_runExport('Backup', widget.onExportBackup))),
+                        SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Import Backup', status: exportState?.startsWith('Import') == true ? 'Done' : 'Restore', color: p.orange, active: exportState?.startsWith('Import') == true, onTap: () => unawaited(_runImport())),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Exports create files you control. Imports merge into your current history so existing moments are not overwritten.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'CSV is best for spreadsheets, while JSON and Backup are used for restoring history.',
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Backup Status'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Check the health and sync status of your saved moments.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Android Backup', subtitle: 'Included in device transfer and Google backup', color: p.green, status: 'On'),
-                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Data Health', subtitle: '${entries.length} moments - Backup $_backupAgeLine', color: p.green, status: _dataHealthStatus),
-                        SettingsRow(p: p, icon: Icons.lock_rounded, title: 'Encrypted Backup', subtitle: 'Password-protected backups need a proper crypto flow before release.', color: p.orange, status: 'Planned'),
-                        SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Google Drive Backup', subtitle: 'Optional Drive sync needs Google sign-in and Drive permission setup.', color: p.orange, status: 'Planned'),
+                        SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Android Backup', color: p.green, status: 'Active'),
+                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Data Health', color: p.green, status: _dataHealthStatus),
+                        SettingsRow(p: p, icon: Icons.lock_rounded, title: 'Encrypted Backup', color: p.orange, status: 'Planned'),
+                        SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Google Drive Backup', color: p.orange, status: 'Planned'),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Backup Status shows what Android can already protect and which backup options still need release-ready setup.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Android Backup automatically includes NoteKar in your system-level backups. Planned features will provide additional protection.',
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Icon(
+                              Icons.info_outline_rounded,
+                              color: p.text3.withValues(alpha: 0.6),
+                              size: 13,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'NoteKar Beta includes early access to data protection tools.',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                GestureDetector(
+                                  onTap: () => _showBetaInfoPopup(p),
+                                  child: Text(
+                                    'Learn More',
+                                    style: TextStyle(
+                                      color: p.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Privacy & Security'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'NoteKar is designed to be private and offline-first.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.analytics_outlined, title: 'No Analytics', subtitle: 'No analytics, ads, crash reporting, or telemetry SDKs.', color: p.green, status: 'None'),
-                        SettingsRow(p: p, icon: Icons.wifi_rounded, title: 'Network Use', subtitle: 'Internet is only used when you check updates or enable App Notices.', color: p.accent, status: 'Limited'),
-                        SettingsRow(p: p, icon: Icons.lock_rounded, title: 'App Lock', subtitle: 'Screen lock and lock timing', color: p.orange, onTap: () => _openCategory('App Lock', parent: 'Privacy & Security')),
+                        SettingsRow(p: p, icon: Icons.analytics_outlined, title: 'No Analytics', color: p.green, status: 'None'),
+                        SettingsRow(p: p, icon: Icons.wifi_rounded, title: 'Network Use', color: p.accent, status: 'Limited'),
+                        SettingsRow(p: p, icon: Icons.lock_rounded, title: 'App Lock', color: p.orange, status: privacyLock ? 'On' : 'Off', onTap: () => _openCategory('App Lock', parent: 'Privacy & Security')),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Privacy & Security covers what stays on-device, when the network is used, and when NoteKar asks Android to lock.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'NoteKar contains zero third-party tracking, analytics, or telemetry. Network access is strictly limited to update checks.',
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Icon(
+                              Icons.info_outline_rounded,
+                              color: p.text3.withValues(alpha: 0.6),
+                              size: 13,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'NoteKar Beta respects your data. Local encryption and biometric features are under active development.',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                GestureDetector(
+                                  onTap: () => _showBetaInfoPopup(p),
+                                  child: Text(
+                                    'Learn More',
+                                    style: TextStyle(
+                                      color: p.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Help & Guides'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Learn how to use NoteKar and find solutions for common issues.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', subtitle: 'Learn logging, notes, search, App Lock, and backups', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
-                        SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', subtitle: 'Solutions for updates, backups, App Lock, and common issues', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
+                        SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
+                        SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Guides explain how NoteKar works. Help covers common problems and practical fixes.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Guides explain core functionality like capturing, history, and backups. Help covers specific troubleshooting steps.',
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
@@ -2159,7 +2419,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
+                      SettingsPageSubtitle(
+                        p: p,
+                        text: 'Secure NoteKar using your Android screen lock.',
+                      ),
                       _appLockPage(p),
                     ],
                   ),
@@ -2167,53 +2431,71 @@ class _SettingsDialogState extends State<SettingsDialog> {
               if (show('Advanced'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Tools for accessibility, diagnostics, and app maintenance.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.accessibility_new_rounded, title: 'Accessibility', subtitle: 'Motion, touch, text, and contrast', color: p.orange, onTap: () => _openCategory('Accessibility', parent: 'Advanced')),
-                        SettingsRow(p: p, icon: Icons.monitor_heart_rounded, title: 'Diagnostics', subtitle: 'Support details and current app state', color: p.accent, onTap: () => _openCategory('Diagnostics', parent: 'Advanced')),
-                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Device Health', subtitle: 'Adaptive engine and performance status', color: p.accent, onTap: () => _openCategory('Device Health', parent: 'Advanced')),
-                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Reset', subtitle: 'Reset settings, data, or the whole app', color: p.red, onTap: () => _openCategory('Reset', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.accessibility_new_rounded, title: 'Accessibility', status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1), color: p.orange, onTap: () => _openCategory('Accessibility', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.monitor_heart_rounded, title: 'Diagnostics', status: 'Info', color: p.accent, onTap: () => _openCategory('Diagnostics', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Device Health', status: 'Stats', color: p.accent, onTap: () => _openCategory('Device Health', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Reset', status: 'Tools', color: p.red, onTap: () => _openCategory('Reset', parent: 'Advanced')),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Advanced groups support tools and reset controls away from everyday settings.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Advanced settings are intended for specific use cases. Use the Reset tools with caution.',
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Accessibility'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
-                    SegmentedSetting(key: ValueKey('haptic-style-$hapticStyle-${p.name}'), p: p, title: 'Haptic Style', subtitle: 'Choose how NoteKar responds to key actions', value: hapticStyle, blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'off': 'Off', 'light': 'Light', 'standard': 'Standard'}, onChanged: (value) { if (value == hapticStyle) return; HapticFeedback.selectionClick(); setState(() => hapticStyle = value); widget.onHapticStyle(value); }),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Adjust NoteKar to your comfort and accessibility needs.',
+                    ),
+                    SegmentedSetting(key: ValueKey('haptic-style-$hapticStyle-${p.name}'), p: p, title: 'Haptic Style', value: hapticStyle, blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'off': 'Off', 'light': 'Light', 'standard': 'Standard'}, onChanged: (value) { if (value == hapticStyle) return; HapticFeedback.selectionClick(); setState(() => hapticStyle = value); widget.onHapticStyle(value); }),
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsSwitchRow(p: p, icon: Icons.motion_photos_off_rounded, title: 'Reduced Motion', subtitle: 'Use simpler feedback and fewer animations', color: p.green, value: reduceMotion, onChanged: (value) { setState(() { reduceMotion = value; if (value) homeMenuAnimations = false; }); widget.onReduceMotion(value); }),
-                        SettingsSwitchRow(p: p, icon: Icons.format_size_rounded, title: 'Larger Text', subtitle: 'Makes easier to read while keeping the layout stable.', color: p.orange, value: largeText, onChanged: (value) { setState(() => largeText = value); widget.onLargeText(value); }),
-                        SettingsSwitchRow(p: p, icon: Icons.contrast_rounded, title: 'High Contrast', subtitle: 'Increase contrast for text and controls', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); }),
+                        SettingsSwitchRow(p: p, icon: Icons.motion_photos_off_rounded, title: 'Reduced Motion', color: p.green, value: reduceMotion, onChanged: (value) { setState(() { reduceMotion = value; if (value) homeMenuAnimations = false; }); widget.onReduceMotion(value); }),
+                        SettingsSwitchRow(p: p, icon: Icons.format_size_rounded, title: 'Larger Text', color: p.orange, value: largeText, onChanged: (value) { setState(() => largeText = value); widget.onLargeText(value); }),
+                        SettingsSwitchRow(p: p, icon: Icons.contrast_rounded, title: 'High Contrast', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); }),
                       ],
                     ),
-                    SettingsPageNote(p: p, text: 'Accessibility settings are local comfort choices. Change them anytime; your saved data is not affected.'),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Haptic Style controls vibration feedback, and Reduced Motion disables expensive animations.',
+                    ),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
               if (show('Reset'))
                 SliverList(
                   delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: spacing8),
+                    SettingsPageSubtitle(
+                      p: p,
+                      text: 'Tools to restore NoteKar to its original state.',
+                    ),
                     SettingsGroup(
                       p: p,
                       children: [
-                        SettingsRow(p: p, icon: Icons.settings_backup_restore_rounded, title: 'Reset Settings Only', subtitle: 'Restore preferences while keeping moments and notes', color: p.orange, onTap: () => unawaited(_confirmResetSettings())),
-                        SettingsRow(p: p, icon: Icons.delete_outline_rounded, title: 'Reset All Data', subtitle: 'Erase every moment and note on this device', color: p.red, onTap: () => unawaited(_confirmResetAll(p))),
-                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Factory Reset', subtitle: 'Erase data and settings, then show welcome setup', color: p.red, onTap: () => unawaited(_confirmFactoryReset(p))),
+                        SettingsRow(p: p, icon: Icons.settings_backup_restore_rounded, title: 'Reset Settings Only', color: p.orange, onTap: () => unawaited(_confirmResetSettings())),
+                        SettingsRow(p: p, icon: Icons.delete_outline_rounded, title: 'Reset All Data', color: p.red, onTap: () => unawaited(_confirmResetAll(p))),
+                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Factory Reset', color: p.red, onTap: () => unawaited(_confirmFactoryReset(p))),
                       ],
                     ),
-                    SettingsPageNote(
+                    SettingsPageDescription(
                       p: p,
-                      text: 'Reset is intentionally separate from everyday settings. Back up first before deleting moments or factory resetting the app.',
+                      text: 'Reset Settings Only keeps your history, while Reset All Data and Factory Reset will erase it.',
                     ),
                     const SizedBox(height: spacing64),
                   ]),
@@ -2222,9 +2504,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
+                      SettingsPageSubtitle(
+                        p: p,
+                        text: 'Detailed system information for support and bug reports.',
+                      ),
                       _diagnosticsPage(p, entries, todayCount),
-                      SettingsPageNote(p: p, text: 'Diagnostics are for support and bug reports. Copying them does not send anything automatically.'),
+                      SettingsPageDescription(p: p, text: 'Diagnostics help in troubleshooting. Copying them does not send any data automatically.'),
                       const SizedBox(height: spacing64),
                     ],
                   ),
@@ -2233,8 +2519,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
                       _deviceHealthPage(p),
+                      SettingsPageDescription(
+                        p: p,
+                        text: 'Technical stats about your device and the Adaptive Engine.',
+                      ),
                     ],
                   ),
                 ),
@@ -2242,8 +2532,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: true),
+                      SettingsPageDescription(
+                        p: p,
+                        text: 'Key highlights and features from the latest release.',
+                      ),
                     ],
                   ),
                 ),
@@ -2251,8 +2545,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: false),
+                      SettingsPageDescription(
+                        p: p,
+                        text: 'Full release history, including fixes and improvements.',
+                      ),
                     ],
                   ),
                 ),
@@ -2262,6 +2560,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
     );
     if (!largeText) return sheet;
-    return MediaQuery(data: largerTextQuery(context), child: sheet);
+    return sheet;
   }
 }

@@ -11,11 +11,13 @@ class BackupImportPreviewDialog extends StatelessWidget {
     required this.p,
     required this.summary,
     this.blur = false,
+    this.largeText = false,
   });
 
   final Palette p;
   final BackupDryRunSummary summary;
   final bool blur;
+  final bool largeText;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class BackupImportPreviewDialog extends StatelessWidget {
       p: p,
       title: 'Review Backup',
       blur: blur,
+      largeText: largeText,
       child: SizedBox(
         width: 410,
         child: Column(

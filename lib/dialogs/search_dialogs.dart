@@ -199,45 +199,52 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                     final entry = rows[index];
                     return Padding(
                       padding: EdgeInsets.only(
-                        bottom: widget.compactRows ? 5 : 9,
+                        bottom: widget.compactRows ? 8 : 12,
                       ),
                       child: Container(
-                        padding: const EdgeInsets.all(13),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: widget.p.surface2,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: widget.p.border),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                SettingsStatusPill(
-                                  p: widget.p,
-                                  label: entry.type.toUpperCase(),
-                                  color: momentColor(widget.p, entry.type),
+                                Text(
+                                  entry.type.toUpperCase(),
+                                  style: TextStyle(
+                                    color: momentColor(widget.p, entry.type),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    '${datePretty(entry.timestamp)} at '
-                                    '${timeOnly(entry.timestamp)}',
+                                    '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
                                     style: TextStyle(
                                       color: widget.p.text3,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.1,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 9),
+                            const SizedBox(height: 12),
                             Text(
                               entry.note,
                               style: TextStyle(
                                 color: widget.p.text,
-                                height: 1.4,
+                                fontSize: 15,
+                                height: 1.5,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],

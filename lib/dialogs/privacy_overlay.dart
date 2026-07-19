@@ -67,12 +67,13 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.05),
+                      color: p.accent.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
+                      border: Border.all(color: p.accent.withValues(alpha: 0.2)),
                     ),
                     child: Icon(
                       Icons.lock_rounded,
-                      color: p.accent.withValues(alpha: 0.9),
+                      color: p.accent,
                       size: 40,
                     ),
                   ),
@@ -96,9 +97,9 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: p.text2,
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      height: 1.4,
+                      height: 1.45,
                       fontFamily: 'Inter',
                     ),
                   ),
@@ -115,7 +116,7 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: p.accent,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Text(
                         'Unlock NoteKar',

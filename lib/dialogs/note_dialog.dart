@@ -13,6 +13,7 @@ class NoteDialog extends StatefulWidget {
     this.saveLabel = 'Save',
     this.allowEmpty = true,
     this.blur = false,
+    this.largeText = false,
   });
 
   final Palette p;
@@ -21,6 +22,7 @@ class NoteDialog extends StatefulWidget {
   final String saveLabel;
   final bool allowEmpty;
   final bool blur;
+  final bool largeText;
 
   @override
   State<NoteDialog> createState() => _NoteDialogState();
@@ -49,6 +51,7 @@ class _NoteDialogState extends State<NoteDialog> {
       p: widget.p,
       title: widget.title,
       blur: widget.blur,
+      largeText: widget.largeText,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
