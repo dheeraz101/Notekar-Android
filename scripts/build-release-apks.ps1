@@ -22,7 +22,7 @@ function Read-PubspecVersion {
     $match = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$')
 
     if (-not $match.Success) {
-        throw 'Could not read version from pubspec.yaml. Expected a line like: version: 4.0.2+11'
+        throw 'Could not read version from pubspec.yaml. Expected a line like: version: 4.0.4+13'
     }
 
     [pscustomobject]@{
@@ -167,6 +167,7 @@ function Write-GitHubRelease {
     )
 
     $fence = '```'
+    # Use ### Assets to match our Premium release notes style
     $downloads = @(
         "- Universal: ``notekar-$Version-universal.apk``"
         "- ARM64: ``notekar-$Version-arm64-v8a.apk``"
@@ -176,14 +177,14 @@ function Write-GitHubRelease {
 
     $shaBlock = $HashLines -join [Environment]::NewLine
 
-    $downloadsSection = @"
-## Downloads
+    $assetsSection = @"
+### Assets
 
 $downloads
 "@
 
     $shaSection = @"
-## SHA256
+### SHA256
 
 ${fence}text
 $shaBlock
@@ -192,36 +193,36 @@ $fence
 
     if (Test-Path -LiteralPath $Path) {
         $releaseText = Get-Content -LiteralPath $Path -Raw
-        $releaseText = [regex]::Replace(
-            $releaseText,
-            '(?ms)^## Downloads\s+.*?(?=^## |\z)',
-            $downloadsSection.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine
-        )
-        $releaseText = [regex]::Replace(
-            $releaseText,
-            '(?ms)^## SHA256\s+.*?(?=^## |\z)',
-            $shaSection.TrimEnd() + [Environment]::NewLine
-        )
 
-        if ($releaseText -notmatch '(?m)^## Downloads\s*$') {
-            $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $downloadsSection.TrimEnd() + [Environment]::NewLine
+        # Try to replace ### Assets or ## Downloads
+        if ($releaseText -match '(?ms)^### Assets\s+') {
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^### Assets\s+.*?(?m^### |^## |\z)', $assetsSection.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
+        } elseif ($releaseText -match '(?ms)^## Downloads\s+') {
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^## Downloads\s+.*?(?m^## |^### |\z)', "## Assets" + [Environment]::NewLine + [Environment]::NewLine + $downloads.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
+        } else {
+            $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $assetsSection.TrimEnd() + [Environment]::NewLine
         }
 
-        if ($releaseText -notmatch '(?m)^## SHA256\s*$') {
+        # Try to replace ### SHA256 or ## SHA256
+        if ($releaseText -match '(?ms)^### SHA256\s+') {
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^### SHA256\s+.*?(?m^### |^## |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
+        } elseif ($releaseText -match '(?ms)^## SHA256\s+') {
+            $releaseText = [regex]::Replace($releaseText, '(?ms)^## SHA256\s+.*?(?m^## |^### |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
+        } else {
             $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $shaSection.TrimEnd() + [Environment]::NewLine
         }
     } else {
         $releaseText = @"
 # NoteKar $Version
 
-$($downloadsSection.TrimEnd())
+$($assetsSection.TrimEnd())
 
 $($shaSection.TrimEnd())
 "@
     }
 
     Set-Content -LiteralPath $Path -Value ($releaseText.TrimEnd() + [Environment]::NewLine) -NoNewline
-    Write-Host "Wrote: $Path"
+    Write-Host "Updated Release Note: $Path"
 }
 
 $pubspecVersion = Read-PubspecVersion

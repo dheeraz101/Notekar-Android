@@ -19,6 +19,7 @@ I have refined the version update for NoteKar to `4.0.4 (13)` by differentiating
 
 ### Automation Scripts
 - **update-version.ps1**: Updated the PowerShell script to point to the new `lib/utils/app_utils.dart` location and use the new non-prefixed variable names (`appVersion`, etc.).
+- **build-release-apks.ps1**: Enhanced the script to support the new "Premium" release note headers (`### Assets` and `### SHA256`). It now intelligently updates existing release notes without breaking our custom formatting.
 
 ## Summary of Refinements
 - **Version**: `4.0.4`
