@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -292,7 +291,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   final _settingsSearchController = TextEditingController();
   final _settingsSearchFocusNode = FocusNode();
   List<String> _recentSearches = [];
-  bool _isSearchFocused = false;
 
   final _rootScrollController = ScrollController();
   final Map<String, ScrollController> _subControllers = {};
@@ -345,7 +343,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
     _loadRecentSearches();
     _settingsSearchFocusNode.addListener(() {
-      setState(() => _isSearchFocused = _settingsSearchFocusNode.hasFocus);
       if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
         _openCategory('Search');
       }
@@ -373,12 +370,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     await prefs.setStringList('recent_settings_searches', list);
   }
 
-  Future<void> _removeRecentSearch(String term) async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = List<String>.from(_recentSearches)..remove(term);
-    setState(() => _recentSearches = list);
-    await prefs.setStringList('recent_settings_searches', list);
-  }
 
   void _precacheIcons() {
     for (final icon in const [
@@ -702,12 +693,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
 
 
-  String get _privacyLockSubtitle {
-    if (privacyLock) {
-      return 'App Lock is on. NoteKar locks ${privacyLockDelayLabel(privacyLockDelayMinutes).toLowerCase()} after you leave.';
-    }
-    return 'Use your Android screen lock before NoteKar opens, with timing controls below.';
-  }
 
   String get _dataHealthStatus {
     if (widget.entries.isEmpty) return 'Empty';
@@ -1674,6 +1659,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         p: p,
                         onEmailTap: () => widget.onOpenLink(supportEmail),
                         onGitHubTap: () => widget.onOpenLink(githubRepo),
+                        onCoffeeTap: () => widget.onOpenLink(coffeeLink),
+                        onIssuesTap: () => widget.onOpenLink(githubIssues),
                         onVersionLongPress: () => widget.onOpenLink(officialSite),
                       ),
                       const SizedBox(height: spacing64),

@@ -74,7 +74,6 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
             Row(
               children: [
                 for (final label in const ['S', 'M', 'T', 'W', 'T', 'F', 'S'])
@@ -84,21 +83,22 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: widget.p.text3,
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             SizedBox(
-              height: rowCount * 46,
+              height: rowCount * 44,
               child: GridView.builder(
+                padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 7,
-                  mainAxisExtent: 46,
+                  mainAxisExtent: 42,
                 ),
                 itemCount: rowCount * 7,
                 itemBuilder: (_, index) {
@@ -109,7 +109,7 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                   final available = widget.availableDateKeys.contains(key);
                   final selected = key == dateKey(widget.initialDate);
                   return Padding(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.all(2),
                     child: PressableScale(
                       enabled: available,
                       onTap: available
@@ -144,10 +144,10 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: 2),
                             Container(
-                              width: 4,
-                              height: 4,
+                              width: 3,
+                              height: 3,
                               decoration: BoxDecoration(
                                 color: available
                                     ? widget.p.accent

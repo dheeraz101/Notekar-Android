@@ -67,44 +67,51 @@ class _NoteDialogState extends State<NoteDialog> {
             ),
           ),
           const SizedBox(height: spacing12),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            maxLength: _maxChars,
-            maxLines: 5,
-            minLines: 2,
-            style: TextStyle(color: widget.p.text),
-            decoration: InputDecoration(
-              counterText: '',
-              hintText: 'What should this moment remember?',
-              hintStyle: TextStyle(color: widget.p.text3),
-              filled: true,
-              fillColor: widget.p.surface3,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: _showWarning ? widget.p.red : widget.p.border,
+          SizedBox(
+            height: 160,
+            child: TextField(
+              controller: _controller,
+              autofocus: true,
+              maxLength: _maxChars,
+              maxLines: null,
+              expands: true,
+              textAlignVertical: TextAlignVertical.top,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              scrollPadding: const EdgeInsets.all(spacing64),
+              style: TextStyle(color: widget.p.text),
+              decoration: InputDecoration(
+                counterText: '',
+                hintText: 'What should this moment remember?',
+                hintStyle: TextStyle(color: widget.p.text3),
+                filled: true,
+                fillColor: widget.p.surface3,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _showWarning ? widget.p.red : widget.p.border,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _showWarning ? widget.p.red : widget.p.border,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _showWarning ? widget.p.red : widget.p.accent,
+                  ),
                 ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: _showWarning ? widget.p.red : widget.p.border,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: _showWarning ? widget.p.red : widget.p.accent,
-                ),
-              ),
+              onChanged: (text) {
+                setState(() {
+                  _showWarning = false;
+                });
+              },
+              onSubmitted: (_) => _saveNote(),
             ),
-            onChanged: (text) {
-              setState(() {
-                _showWarning = false;
-              });
-            },
-            onSubmitted: (_) => _saveNote(),
           ),
           const SizedBox(height: spacing12),
           _LinearCharacterIndicator(

@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -995,12 +994,16 @@ class SettingsAboutBlock extends StatelessWidget {
     required this.p,
     required this.onEmailTap,
     required this.onGitHubTap,
+    required this.onCoffeeTap,
+    required this.onIssuesTap,
     required this.onVersionLongPress,
   });
 
   final Palette p;
   final VoidCallback onEmailTap;
   final VoidCallback onGitHubTap;
+  final VoidCallback onCoffeeTap;
+  final VoidCallback onIssuesTap;
   final VoidCallback onVersionLongPress;
 
   @override
@@ -1028,47 +1031,63 @@ class SettingsAboutBlock extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(color: p.text2, fontSize: 12, height: 1.45),
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SocialCircleButton(
-                p: p,
-                icon: Icons.mail_rounded,
-                onTap: onEmailTap,
-              ),
-              const SizedBox(width: 14),
-              GestureDetector(
-                onLongPress: onVersionLongPress,
-                child: Container(
-                  height: 38,
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: p.surface3,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: p.border),
-                  ),
-                  child: Text(
-                    'v$appVersion ($appBuildNumber)',
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SocialCircleButton(
+                  p: p,
+                  icon: Icons.mail_rounded,
+                  onTap: onEmailTap,
+                ),
+                const SizedBox(width: 12),
+                SocialCircleButton(
+                  p: p,
+                  icon: Icons.bug_report_rounded,
+                  onTap: onIssuesTap,
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onLongPress: onVersionLongPress,
+                  child: Container(
+                    height: 38,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: p.surface3,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: p.border),
+                    ),
+                    child: Text(
+                      'v$appVersion ($appBuildNumber)',
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              SocialCircleButton(
-                p: p,
-                icon: Icons.code_rounded,
-                onTap: onGitHubTap,
-              ),
-            ],
+                const SizedBox(width: 12),
+                SocialCircleButton(
+                  p: p,
+                  icon: Icons.coffee_rounded,
+                  color: const Color(0xFFFFDD00),
+                  onTap: onCoffeeTap,
+                ),
+                const SizedBox(width: 12),
+                SocialCircleButton(
+                  p: p,
+                  icon: Icons.code_rounded,
+                  onTap: onGitHubTap,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             'Build date $appBuildDate',
             style: TextStyle(color: p.text3, fontSize: 11),
@@ -1085,11 +1104,13 @@ class SocialCircleButton extends StatelessWidget {
     required this.p,
     required this.icon,
     required this.onTap,
+    this.color,
   });
 
   final Palette p;
   final IconData icon;
   final VoidCallback onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -1114,7 +1135,7 @@ class SocialCircleButton extends StatelessWidget {
         ),
         child: icon == Icons.code_rounded
             ? CustomPaint(painter: GitHubMarkPainter(color: p.text))
-            : Icon(icon, color: p.accent, size: 18),
+            : Icon(icon, color: color ?? p.accent, size: 18),
       ),
     );
   }

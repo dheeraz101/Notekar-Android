@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 
 class LiveClockFace extends StatefulWidget {
   const LiveClockFace({
@@ -117,7 +118,7 @@ class _ClockFaceState extends State<ClockFace> {
     final hm =
         '${widget.now.hour.toString().padLeft(2, '0')}:${widget.now.minute.toString().padLeft(2, '0')}';
     final sec = '.${widget.now.second.toString().padLeft(2, '0')}';
-    final actionColor = widget.p.accent;
+    final actionColor = momentColor(widget.p, widget.pulseType);
     final clockColor = _bright
         ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)
         : widget.p.clock;

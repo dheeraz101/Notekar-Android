@@ -213,14 +213,14 @@ class _SavedPulseState extends State<SavedPulse>
         final opacity = (1 - _controller.value).clamp(0.0, 1.0);
         final color = momentColor(widget.p, widget.type);
         return Positioned(
-          left: widget.origin.dx - 42,
+          left: widget.origin.dx - 54,
           top: widget.origin.dy - 44 + dy,
-          width: 84,
+          width: 108,
           child: Opacity(
             opacity: opacity,
             child: Container(
               alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(999),
@@ -228,6 +228,8 @@ class _SavedPulseState extends State<SavedPulse>
               ),
               child: Text(
                 _pulseLabel(widget.type),
+                maxLines: 1,
+                softWrap: false,
                 style: TextStyle(
                   color: color,
                   fontSize: 11,

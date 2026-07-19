@@ -4,7 +4,6 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
-import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class NoteSearchDialog extends StatefulWidget {
@@ -138,7 +137,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
     final rows = _visibleRows;
     final hasOlderRows = _visibleCount < _matches.length;
 
-    return Column(
+    Widget content = Column(
       children: [
         SearchNotesBox(
           p: widget.p,
@@ -153,7 +152,34 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
             _visibleCount = _pageSize;
           }),
         ),
-        const SizedBox(height: spacing12),
+        const SizedBox(height: spacing8),
+        if (_query.trim().isEmpty && rows.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            child: Row(
+              children: [
+                Text(
+                  'ALL NOTES',
+                  style: TextStyle(
+                    color: widget.p.text3,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${rows.length} items',
+                  style: TextStyle(
+                    color: widget.p.text3,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: spacing4),
         Expanded(
           child: rows.isEmpty
               ? Center(
@@ -167,6 +193,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                 )
               : ListView.builder(
                   controller: widget.scrollController,
+                  padding: EdgeInsets.zero,
                   itemCount: rows.length + (hasOlderRows ? 1 : 0),
                   itemBuilder: (_, index) {
                     if (index >= rows.length) {
@@ -181,7 +208,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: widget.p.surface2,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(999),
                               border: Border.all(color: widget.p.border),
                             ),
                             child: Text(
@@ -199,39 +226,66 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                     final entry = rows[index];
                     return Padding(
                       padding: EdgeInsets.only(
-                        bottom: widget.compactRows ? 8 : 12,
+                        bottom: widget.compactRows ? 10 : 16,
+                        left: spacing16,
+                        right: spacing16,
                       ),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(spacing16),
                         decoration: BoxDecoration(
                           color: widget.p.surface2,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: widget.p.border.withValues(alpha: 0.6),
+                            width: 0.8,
+                          ),
+                          boxShadow: widget.p.name == 'amoled'
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Text(
-                                  entry.type.toUpperCase(),
-                                  style: TextStyle(
-                                    color: momentColor(widget.p, entry.type),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.5,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: momentColor(widget.p, entry.type)
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    entry.type.toUpperCase(),
+                                    style: TextStyle(
+                                      color: momentColor(widget.p, entry.type),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
                                     style: TextStyle(
                                       color: widget.p.text3,
                                       fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.1,
+                                      fontWeight: FontWeight.w700,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures()
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -242,9 +296,10 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                               entry.note,
                               style: TextStyle(
                                 color: widget.p.text,
-                                fontSize: 15,
-                                height: 1.5,
-                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                height: 1.45,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: -0.2,
                               ),
                             ),
                           ],
@@ -256,6 +311,11 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
         ),
       ],
     );
+
+    if (widget.height != null) {
+      return SizedBox(height: widget.height, child: content);
+    }
+    return content;
   }
 }
 

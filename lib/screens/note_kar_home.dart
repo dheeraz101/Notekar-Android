@@ -2291,7 +2291,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   Ripple(
                     key: ValueKey(_rippleToken),
                     origin: _lastTapPosition!,
-                    color: palette.accent,
+                    color: momentColor(palette, _lastSavedType),
                   ),
                   SavedPulse(
                     key: ValueKey(_savedPulseToken),

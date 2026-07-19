@@ -441,7 +441,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: widget.p.surface2,
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(999),
                                     border: Border.all(color: widget.p.border),
                                   ),
                                   child: Text(

@@ -19,6 +19,8 @@ const double spacing64 = 64.0;
 
 const officialSite = 'https://notekarapp.vercel.app';
 const githubRepo = 'https://github.com/dheeraz101/Notekar';
+const githubIssues = 'https://github.com/dheeraz101/Notekar/issues';
+const coffeeLink = 'https://buymeacoffee.com/dheeraz101';
 const githubReleases = 'https://github.com/dheeraz101/Notekar/releases';
 const supportEmail = 'mailto:yabp.ub8ke@aleeas.com';
 const notificationFeed = 'https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json';
@@ -221,7 +223,7 @@ Color momentColor(Palette p, String type) {
   return switch (type) {
     'in' => p.green,
     'out' => p.orange,
-    _ => p.blue, // Dedicated blue for Single moments
+    _ => p.blue, // Revert to dedicated blue for Single moments
   };
 }
 
