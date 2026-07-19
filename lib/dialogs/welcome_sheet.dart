@@ -46,7 +46,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
       docked: true,
       blur: widget.blur,
       child: SizedBox(
-        width: 430,
+        width: 410,
         height: MediaQuery.sizeOf(context).height * 0.68,
         child: ListView(
           physics: const BouncingScrollPhysics(),

@@ -1,10 +1,12 @@
-- [x] **Phase 1: Dedicated Color Categorization**
-    - [x] Update `MomentTile` color logic (lib/widgets/moment_tile.dart)
-    - [x] Update `SavedPulse` labels and color (lib/widgets/feedback_widgets.dart)
-- [x] **Phase 2: Vertical Alignment Sync**
-    - [x] Update `AppSheet` bottom padding for safe area (lib/dialogs/app_sheet.dart)
-    - [x] Re-position History notification to mirror home toolbar (lib/dialogs/history_dialog.dart)
-- [x] **Phase 3: Verification**
-    - [x] Run `flutter analyze`
-    - [x] Verify "Single" moments are Blue
-    - [x] Verify History notification vertical offset
+- [ ] **Phase 1: Header Alignment & Spacing**
+    - [ ] Align circular buttons to 0px offset (lib/dialogs/app_sheet.dart)
+    - [ ] Increase header-to-content spacing to 20px (lib/dialogs/app_sheet.dart)
+    - [ ] Update `_HeaderCircleButton` diameter to 36px (lib/dialogs/app_sheet.dart)
+- [ ] **Phase 2: Global Grid Consolidation**
+    - [ ] Remove redundant sliver padding in `SettingsDialog` categories (lib/dialogs/settings_dialog.dart)
+    - [ ] Ensure consistent 16px left/right margins for all content (lib/dialogs/settings_dialog.dart)
+- [ ] **Phase 3: Breathability & Polish**
+    - [ ] Add vertical spacers to settings sub-categories (lib/dialogs/settings_dialog.dart)
+- [ ] **Phase 4: Verification**
+    - [ ] Run `flutter analyze`
+    - [ ] Visual audit of vertical alignment and spacing

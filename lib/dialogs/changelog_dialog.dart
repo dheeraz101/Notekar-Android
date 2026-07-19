@@ -363,7 +363,7 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
       title: widget.latestOnly ? "What's New" : 'Changelog',
       blur: widget.blur,
       child: SizedBox(
-        width: 430,
+        width: 410,
         height: maxHeight,
         child: widget.latestOnly
             ? _WhatsNewPanel(p: p, release: visible.first)

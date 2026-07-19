@@ -28,7 +28,7 @@ class BackupImportPreviewDialog extends StatelessWidget {
       title: 'Review Backup',
       blur: blur,
       child: SizedBox(
-        width: 430,
+        width: 410,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

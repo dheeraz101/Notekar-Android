@@ -1,38 +1,44 @@
-# Premium Moment Categorization & Notification Alignment Plan
+# iOS Header Polish & Typography Standardization Plan
 
-Assign a dedicated permanent color to "Single" moments and synchronize the History notification position with the Home toolbar for global UX consistency.
+Complete the high-fidelity iOS Pro transformation by adding circular backgrounds to all header actions and standardizing typography across all settings pages.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Single Moment Color:** I am strictly assigning **Dedicated iOS Blue** (`#007AFF` / `#0A84FF`) to all "Single" moments. They will no longer use the dynamic accent color. This ensures clear visual categorization: Green (IN), Orange (OUT), and Blue (SINGLE).
+> **Circular Header Actions:** I am standardizing the Back and Close buttons in all sheets to use a professional 32px circular background (`p.surface3`). This provides better tap targets and a premium "System App" feel.
 >
-> **Notification Alignment:** I am moving the History "Undo" notification to match the exact vertical position of the home screen menu bar. To achieve this safely, I am updating the `AppSheet` component to correctly respect the system navigation bar (safe area).
+> **Typography Audit:** I am performing a full scan of the settings menu to ensure every page uses the `SettingsPageNote` component with a strict **16px horizontal padding**. This ensures all descriptions align perfectly with the card content above them.
 
 ## Proposed Changes
 
-### 1. Dedicated "Single" Moment Color
-#### [MODIFY] [widgets/moment_tile.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/moment_tile.dart)
-- Update the `color` logic in `build` to use `momentColor(p, entry.type)`.
-- This replaces the hardcoded `p.accent` with the dedicated `p.blue` defined in the palette.
-
-#### [MODIFY] [widgets/feedback_widgets.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/feedback_widgets.dart)
-- Update `_pulseLabel` to return `'SINGLE saved'` for non-directional moments.
-- This ensures consistency in saved feedback.
-
-### 2. History Notification Vertical Sync
+### 1. Circle Backgrounds for Header Buttons
 #### [MODIFY] [dialogs/app_sheet.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/app_sheet.dart)
-- Update `AppSheet` bottom padding to include `MediaQuery.paddingOf(context).bottom` when `docked` is true.
-- This ensures the sheet content respects the Android navigation bar.
+- Verify `_HeaderCircleButton` is used for both `onBack` and the default Close button in the `Stack`.
+- This ensures all popups (Settings, History, Calendar, etc.) have consistent circular action buttons.
 
+### 2. Standardized Page Descriptions
+#### [MODIFY] [widgets/common_elements.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/widgets/common_elements.dart)
+- Refine `SettingsPageNote` text style:
+    - Font Size: **13px**
+    - Line Height: **1.35**
+    - Color: **p.text3** (Softer gray to match iOS footer style)
+- Ensure horizontal padding remains strictly **16px**.
+
+#### [MODIFY] [dialogs/settings_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/settings_dialog.dart)
+- **Replace Raw Text:** Find the one remaining raw `Text` widget in the "Reset" sliver and replace it with `SettingsPageNote`.
+- This ensures the 16px padding is global across all 15+ settings sections.
+
+### 3. Large History Notifications (Fidelity Polish)
 #### [MODIFY] [dialogs/history_dialog.dart](file:///C:/Users/dheer/OneDrive/Documents/dv/Android Projects/Project%20YABP%20DigitalSuraksha/Notekar%20-%20Flutter/lib/dialogs/history_dialog.dart)
-- Change the `Positioned` notification `bottom` value to **0**.
-- Combined with the `AppSheet` fix, this will place the notification at exactly `16px + bottomInset` from the screen edge, mirroring the home toolbar.
+- Increase `_NoticePill` scale further:
+    - Vertical padding to **14px**.
+    - Font size to **15px** with **900 weight**.
+- This makes the Undo notification feel like a primary system event.
 
 ## Verification Plan
 
 ### Manual Verification
-1. **Color Audit:** Save a "Single" moment; verify it uses the permanent blue color and says "SINGLE saved".
-2. **History Audit:** Verify that "Single" moments in the history list are Blue, regardless of what "Action Color" is selected in personalization.
-3. **Alignment Audit:** Open History; verify the "Undo" pill floats at the same height as the home screen menu bar.
-4. **Theme Test:** Check AMOLED mode to ensure the new blue color provides enough contrast (it uses the brighter `#0A84FF`).
+1. **Circle Buttons:** Open Settings categories and Calendar; verify both top-left and top-right actions have circular backgrounds.
+2. **Alignment Audit:** Verify that "Personalization", "Logging", and "Reset" descriptions all start at the exact same 16px indent.
+3. **Typography Check:** Confirm the text color in footers is a softer gray (`p.text3`) compared to the main labels.
+4. **Notice Scale:** Delete a moment and verify the notification feels prominent and proportional to the tiles.

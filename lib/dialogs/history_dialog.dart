@@ -65,7 +65,7 @@ class _NoticePill extends StatelessWidget {
       enabled: onTap != null,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: solid ? color : color.withValues(alpha: 0.15),
@@ -83,7 +83,7 @@ class _NoticePill extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: solid ? Colors.white : color,
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -200,7 +200,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       controller: _scrollController,
       showLargeTitle: true,
       child: SizedBox(
-        width: 430,
+        width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
         child: Stack(
           children: [

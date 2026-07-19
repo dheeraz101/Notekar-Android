@@ -40,7 +40,7 @@ class _NoteSearchDialogState extends State<NoteSearchDialog> {
       controller: _scrollController,
       showLargeTitle: false,
       child: SizedBox(
-        width: 430,
+        width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.68, 590),
         child: NoteSearchContent(
           p: widget.p,
@@ -269,7 +269,7 @@ class SearchNotesBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: p.surface2,
         borderRadius: BorderRadius.circular(999),

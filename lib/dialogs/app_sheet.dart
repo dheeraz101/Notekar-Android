@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 
 class AppSheet extends StatefulWidget {
   const AppSheet({
@@ -13,6 +14,7 @@ class AppSheet extends StatefulWidget {
     this.blur = false,
     this.controller,
     this.showLargeTitle = false,
+    this.onBack,
   });
 
   final Palette p;
@@ -22,6 +24,7 @@ class AppSheet extends StatefulWidget {
   final bool blur;
   final ScrollController? controller;
   final bool showLargeTitle;
+  final VoidCallback? onBack;
 
   @override
   State<AppSheet> createState() => _AppSheetState();
@@ -115,6 +118,15 @@ class _AppSheetState extends State<AppSheet> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
+                    if (widget.onBack != null)
+                      Positioned(
+                        left: 0,
+                        child: _HeaderCircleButton(
+                          p: p,
+                          icon: Icons.chevron_left_rounded,
+                          onTap: widget.onBack!,
+                        ),
+                      ),
                     Positioned.fill(
                       child: Center(
                         child: Padding(
@@ -142,18 +154,17 @@ class _AppSheetState extends State<AppSheet> {
                       ),
                     ),
                     Positioned(
-                      right: -8, // Account for IconButton padding
-                      child: IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close_rounded, size: 22),
-                        color: p.text2,
-                        visualDensity: VisualDensity.compact,
+                      right: 0,
+                      child: _HeaderCircleButton(
+                        p: p,
+                        icon: Icons.close_rounded,
+                        onTap: () => Navigator.pop(context),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: spacing4),
+              const SizedBox(height: spacing20),
               widget.child,
             ],
           ),
@@ -171,6 +182,38 @@ class _AppSheetState extends State<AppSheet> {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(spacing16),
       child: content,
+    );
+  }
+}
+
+class _HeaderCircleButton extends StatelessWidget {
+  const _HeaderCircleButton({
+    required this.p,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final Palette p;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: p.surface3,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: p.text2,
+          size: 22,
+        ),
+      ),
     );
   }
 }

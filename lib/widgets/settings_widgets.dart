@@ -92,7 +92,7 @@ class SettingsRow extends StatelessWidget {
       enabled: onTap != null,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: active ? rowColor.withValues(alpha: 0.1) : Colors.transparent,
         ),
@@ -341,7 +341,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
         widget.onChanged(!value);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: const BoxDecoration(color: Colors.transparent),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -756,7 +756,7 @@ class SettingsSearchBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: p.surface2,
         borderRadius: BorderRadius.circular(20),
@@ -803,7 +803,7 @@ class SettingsAboutBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       decoration: BoxDecoration(
         color: p.surface2,
         borderRadius: BorderRadius.circular(20),

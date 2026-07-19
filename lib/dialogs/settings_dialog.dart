@@ -13,7 +13,6 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -325,13 +324,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   };
 
   String? get category => _categoryStack.isEmpty ? null : _categoryStack.last;
-
-  String get _backLabel {
-    if (_categoryStack.length >= 2) {
-      return _categoryStack[_categoryStack.length - 2];
-    }
-    return 'Settings';
-  }
 
   ScrollController get _activeController {
     if (category == null) return _rootScrollController;
@@ -1310,6 +1302,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       child: AppSheet(
         p: p,
         title: category ?? 'Settings',
+        onBack: category != null ? _popCategory : null,
         docked: true,
         blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
         controller: _activeController,
@@ -1321,53 +1314,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
             controller: _activeController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              if (category != null)
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(spacing16, 0, spacing16, spacing12),
-                  sliver: SliverToBoxAdapter(
-                    child: PressableScale(
-                      onTap: _popCategory,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: p.surface2,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: p.border),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.chevron_left_rounded,
-                              color: p.text, // iOS standard back
-                              size: 22,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _backLabel,
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               if (category == null) ...[
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverToBoxAdapter(
-                    child: AppSheetLargeTitle(
-                      p: p,
-                      title: 'Settings',
-                      scrollController: _activeController,
-                    ),
+                SliverToBoxAdapter(
+                  child: AppSheetLargeTitle(
+                    p: p,
+                    title: 'Settings',
+                    scrollController: _activeController,
                   ),
                 ),
                 SliverPersistentHeader(
@@ -1378,7 +1330,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       color: p.surface.withValues(
                         alpha: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur ? 0.65 : 1.0,
                       ),
-                      padding: const EdgeInsets.fromLTRB(spacing16, 0, spacing16, spacing8),
+                      padding: const EdgeInsets.only(bottom: spacing8),
                       child: SettingsSearchBox(
                         p: p,
                         controller: _settingsSearchController,
@@ -1401,11 +1353,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                   ),
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      if (_settingsQuery.trim().isNotEmpty) ...[
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    if (_settingsQuery.trim().isNotEmpty) ...[
                         const SizedBox(height: spacing8),
                         SettingsGroup(
                           p: p,
@@ -1517,794 +1467,795 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       const SizedBox(height: spacing64),
                     ]),
                   ),
-                ),
-              ],
-              if (show('Personalization'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.monitor_rounded,
-                            title: 'Display',
-                            subtitle: 'Theme, clock, motion, and toolbar',
-                            color: p.accent,
-                            onTap: () => _openCategory('Display', parent: 'Personalization'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.palette_rounded,
-                            title: 'Accent Color',
-                            subtitle: 'Choose colors for buttons and highlights',
-                            color: p.accent,
-                            onTap: () => _openCategory('Accent Color', parent: 'Personalization'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.apps_rounded,
-                            title: 'App Icons',
-                            subtitle: 'Choose the Android launcher icon',
-                            color: p.accent,
-                            onTap: () => _openCategory('App Icons', parent: 'Personalization'),
-                          ),
-                        ],
-                      ),
-                      SettingsPageNote(
-                        p: p,
-                        text: 'Personalization keeps the app feeling yours without changing saved moments.',
-                      ),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
+                ],
+                if (show('Personalization'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.monitor_rounded,
+                          title: 'Display',
+                          subtitle: 'Theme, clock, motion, and toolbar',
+                          color: p.accent,
+                          onTap: () => _openCategory('Display', parent: 'Personalization'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.palette_rounded,
+                          title: 'Accent Color',
+                          subtitle: 'Choose colors for buttons and highlights',
+                          color: p.accent,
+                          onTap: () => _openCategory('Accent Color', parent: 'Personalization'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.apps_rounded,
+                          title: 'App Icons',
+                          subtitle: 'Choose the Android launcher icon',
+                          color: p.accent,
+                          onTap: () => _openCategory('App Icons', parent: 'Personalization'),
+                        ),
+                      ],
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Personalization keeps the app feeling yours without changing saved moments.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
                 ),
               if (show('Display'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        showDividers: false,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: ThemeChoice(
-                                    p: p,
-                                    label: 'Dark',
-                                    active: theme == 'dark',
-                                    color: const Color(0xFF1C1C1E), // Deep gray circle
-                                    onTap: () {
-                                      if (theme == 'dark') return;
-                                      HapticFeedback.selectionClick();
-                                      setState(() => theme = 'dark');
-                                      widget.onTheme('dark');
-                                    },
-                                  ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      showDividers: false,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ThemeChoice(
+                                  p: p,
+                                  label: 'Dark',
+                                  active: theme == 'dark',
+                                  color: const Color(0xFF1C1C1E), // Deep gray circle
+                                  onTap: () {
+                                    if (theme == 'dark') return;
+                                    HapticFeedback.selectionClick();
+                                    setState(() => theme = 'dark');
+                                    widget.onTheme('dark');
+                                  },
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: ThemeChoice(
-                                    p: p,
-                                    label: 'Light',
-                                    active: theme == 'light',
-                                    color: const Color(0xFFF2F2F7),
-                                    onTap: () {
-                                      if (theme == 'light') return;
-                                      HapticFeedback.selectionClick();
-                                      setState(() => theme = 'light');
-                                      widget.onTheme('light');
-                                    },
-                                  ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ThemeChoice(
+                                  p: p,
+                                  label: 'Light',
+                                  active: theme == 'light',
+                                  color: const Color(0xFFF2F2F7),
+                                  onTap: () {
+                                    if (theme == 'light') return;
+                                    HapticFeedback.selectionClick();
+                                    setState(() => theme = 'light');
+                                    widget.onTheme('light');
+                                  },
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: ThemeChoice(
-                                    p: p,
-                                    label: 'AMOLED',
-                                    active: theme == 'amoled',
-                                    color: const Color(0xFF000000), // True black circle
-                                    onTap: () {
-                                      if (theme == 'amoled') return;
-                                      HapticFeedback.selectionClick();
-                                      setState(() => theme = 'amoled');
-                                      widget.onTheme('amoled');
-                                    },
-                                  ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ThemeChoice(
+                                  p: p,
+                                  label: 'AMOLED',
+                                  active: theme == 'amoled',
+                                  color: const Color(0xFF000000), // True black circle
+                                  onTap: () {
+                                    if (theme == 'amoled') return;
+                                    HapticFeedback.selectionClick();
+                                    setState(() => theme = 'amoled');
+                                    widget.onTheme('amoled');
+                                  },
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.more_time_rounded,
+                          title: 'Show Seconds',
+                          subtitle: 'Show the seconds beside the main time',
+                          color: p.accent,
+                          value: showSeconds,
+                          onChanged: (value) {
+                            setState(() => showSeconds = value);
+                            widget.onShowSeconds(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.highlight_rounded,
+                          title: 'Highlight Seconds',
+                          subtitle: 'Use a softer separate color for seconds',
+                          color: p.accent,
+                          value: showSeconds && highlightSeconds,
+                          enabled: showSeconds,
+                          disabledMessage: 'Enable Show Seconds first',
+                          onDisabledTap: widget.onFeedback,
+                          onChanged: (value) {
+                            if (!showSeconds) return;
+                            setState(() => highlightSeconds = value);
+                            widget.onHighlightSeconds(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.label_rounded,
+                          title: 'Button Labels',
+                          subtitle: 'Use compact text buttons in the toolbar',
+                          color: p.green,
+                          value: buttonLabels,
+                          onChanged: (value) {
+                            setState(() => buttonLabels = value);
+                            widget.onButtonLabels(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.ads_click_rounded,
+                          title: 'Large Controls',
+                          subtitle: 'Increase toolbar touch targets',
+                          color: p.orange,
+                          value: largeControls,
+                          onChanged: (value) {
+                            setState(() => largeControls = value);
+                            widget.onLargeControls(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.shape_line_rounded,
+                          title: 'Toolbar Backplate',
+                          subtitle: 'Keep the floating capsule behind home controls',
+                          color: p.accent,
+                          value: homeMenuPill,
+                          onChanged: (value) {
+                            setState(() => homeMenuPill = value);
+                            widget.onHomeMenuPill(value);
+                          },
+                        ),
+                        if (AdaptiveEngine().supportsAdvancedAnimations)
                           SettingsSwitchRow(
                             p: p,
-                            icon: Icons.more_time_rounded,
-                            title: 'Show Seconds',
-                            subtitle: 'Show the seconds beside the main time',
+                            icon: Icons.motion_photos_auto_rounded,
+                            title: 'Live Icon Motion',
+                            subtitle: buttonLabels ? 'Turn off Button Labels to see icon motion' : reduceMotion ? 'Turn off Reduced Motion to use phone-tilt motion' : 'Use gentle phone-tilt motion for home icons',
                             color: p.accent,
-                            value: showSeconds,
-                            onChanged: (value) {
-                              setState(() => showSeconds = value);
-                              widget.onShowSeconds(value);
+                            value: !reduceMotion && homeMenuAnimations,
+                            enabled: !reduceMotion,
+                            disabledMessage: 'Disable Reduce Motion first',
+                            onDisabledTap: widget.onFeedback,
+                            onChanged: (value) async {
+                              if (reduceMotion) return;
+                              final applied = await widget.onHomeMenuAnimations(value);
+                              if (!mounted) return;
+                              setState(() {
+                                homeMenuAnimations = applied ? value : false;
+                              });
                             },
                           ),
+                        if (AdaptiveEngine().supportsBlur)
                           SettingsSwitchRow(
                             p: p,
-                            icon: Icons.highlight_rounded,
-                            title: 'Highlight Seconds',
-                            subtitle: 'Use a softer separate color for seconds',
+                            icon: Icons.opacity_rounded,
+                            title: 'Enable Translucency',
+                            subtitle: reduceMotion ? 'Turn off Reduced Motion to enable translucency' : 'Use frosted glass blur on Toolbar and Sheets',
                             color: p.accent,
-                            value: showSeconds && highlightSeconds,
-                            enabled: showSeconds,
-                            disabledMessage: 'Enable Show Seconds first',
+                            value: !reduceMotion && enableTranslucency,
+                            enabled: !reduceMotion,
                             onDisabledTap: widget.onFeedback,
                             onChanged: (value) {
-                              if (!showSeconds) return;
-                              setState(() => highlightSeconds = value);
-                              widget.onHighlightSeconds(value);
+                              setState(() => enableTranslucency = value);
+                              widget.onTranslucency(value);
                             },
                           ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.label_rounded,
-                            title: 'Button Labels',
-                            subtitle: 'Use compact text buttons in the toolbar',
-                            color: p.green,
-                            value: buttonLabels,
-                            onChanged: (value) {
-                              setState(() => buttonLabels = value);
-                              widget.onButtonLabels(value);
-                            },
-                          ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.ads_click_rounded,
-                            title: 'Large Controls',
-                            subtitle: 'Increase toolbar touch targets',
-                            color: p.orange,
-                            value: largeControls,
-                            onChanged: (value) {
-                              setState(() => largeControls = value);
-                              widget.onLargeControls(value);
-                            },
-                          ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.shape_line_rounded,
-                            title: 'Toolbar Backplate',
-                            subtitle: 'Keep the floating capsule behind home controls',
-                            color: p.accent,
-                            value: homeMenuPill,
-                            onChanged: (value) {
-                              setState(() => homeMenuPill = value);
-                              widget.onHomeMenuPill(value);
-                            },
-                          ),
-                          if (AdaptiveEngine().supportsAdvancedAnimations)
-                            SettingsSwitchRow(
-                              p: p,
-                              icon: Icons.motion_photos_auto_rounded,
-                              title: 'Live Icon Motion',
-                              subtitle: buttonLabels ? 'Turn off Button Labels to see icon motion' : reduceMotion ? 'Turn off Reduced Motion to use phone-tilt motion' : 'Use gentle phone-tilt motion for home icons',
-                              color: p.accent,
-                              value: !reduceMotion && homeMenuAnimations,
-                              enabled: !reduceMotion,
-                              disabledMessage: 'Disable Reduce Motion first',
-                              onDisabledTap: widget.onFeedback,
-                              onChanged: (value) async {
-                                if (reduceMotion) return;
-                                final applied = await widget.onHomeMenuAnimations(value);
-                                if (!mounted) return;
-                                setState(() {
-                                  homeMenuAnimations = applied ? value : false;
-                                });
-                              },
-                            ),
-                          if (AdaptiveEngine().supportsBlur)
-                            SettingsSwitchRow(
-                              p: p,
-                              icon: Icons.opacity_rounded,
-                              title: 'Enable Translucency',
-                              subtitle: reduceMotion ? 'Turn off Reduced Motion to enable translucency' : 'Use frosted glass blur on Toolbar and Sheets',
-                              color: p.accent,
-                              value: !reduceMotion && enableTranslucency,
-                              enabled: !reduceMotion,
-                              onDisabledTap: widget.onFeedback,
-                              onChanged: (value) {
-                                setState(() => enableTranslucency = value);
-                                widget.onTranslucency(value);
-                              },
-                            ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.format_list_bulleted_rounded,
-                            title: 'History Text',
-                            subtitle: 'Show the History label in the home menu',
-                            color: p.green,
-                            value: showHistoryText,
-                            onChanged: (value) {
-                              setState(() => showHistoryText = value);
-                              widget.onShowHistoryText(value);
-                            },
-                          ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.tips_and_updates_rounded,
-                            title: 'Last Saved Hint',
-                            subtitle: 'Keep the quick undo hint after each save',
-                            color: p.accent,
-                            value: showLastSavedHint,
-                            onChanged: (value) {
-                              setState(() => showLastSavedHint = value);
-                              widget.onShowLastSavedHint(value);
-                            },
-                          ),
-                        ],
-                      ),
-                      SettingsPageNote(
-                        p: p,
-                        text: 'Display is personal. These choices change the interface only; your saved moments and notes stay exactly where they are.',
-                      ),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.format_list_bulleted_rounded,
+                          title: 'History Text',
+                          subtitle: 'Show the History label in the home menu',
+                          color: p.green,
+                          value: showHistoryText,
+                          onChanged: (value) {
+                            setState(() => showHistoryText = value);
+                            widget.onShowHistoryText(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.tips_and_updates_rounded,
+                          title: 'Last Saved Hint',
+                          subtitle: 'Keep the quick undo hint after each save',
+                          color: p.accent,
+                          value: showLastSavedHint,
+                          onChanged: (value) {
+                            setState(() => showLastSavedHint = value);
+                            widget.onShowLastSavedHint(value);
+                          },
+                        ),
+                      ],
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Display is personal. These choices change the interface only; your saved moments and notes stay exactly where they are.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
                 ),
               if (show('Accent Color'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      ColorChoiceSetting(
-                        p: p,
-                        title: 'Accent Color',
-                        subtitle: 'Choose the color used for buttons, highlights, and saved feedback.',
-                        value: accentColor,
-                        blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-                        onChanged: (value) {
-                          if (value == accentColor) return;
-                          HapticFeedback.selectionClick();
-                          setState(() => accentColor = value);
-                          widget.onAccentColor(value);
-                        },
-                      ),
-                      SettingsPageNote(
-                        p: p,
-                        text: 'Accent Color changes interface highlights only. It does not change or classify saved moments.',
-                      ),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    ColorChoiceSetting(
+                      p: p,
+                      title: 'Accent Color',
+                      subtitle: 'Choose the color used for buttons, highlights, and saved feedback.',
+                      value: accentColor,
+                      blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+                      onChanged: (value) {
+                        if (value == accentColor) return;
+                        HapticFeedback.selectionClick();
+                        setState(() => accentColor = value);
+                        widget.onAccentColor(value);
+                      },
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Accent Color changes interface highlights only. It does not change or classify saved moments.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
                 ),
               if (show('App Icons'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverToBoxAdapter(child: _appIconsPage(p)),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      _appIconsPage(p),
+                    ],
+                  ),
                 ),
               if (show('Logging'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.add_task_rounded,
-                            title: 'Capture',
-                            subtitle: 'Startup mode, tap delay, and notes',
-                            color: p.green,
-                            onTap: () => _openCategory('Capture', parent: 'Logging'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.history_rounded,
-                            title: 'Moments',
-                            subtitle: 'History density, delete safety, and totals',
-                            color: p.orange,
-                            onTap: () => _openCategory('Moments', parent: 'Logging'),
-                          ),
-                        ],
-                      ),
-                      SettingsPageNote(
-                        p: p,
-                        text: 'Logging controls how moments are captured and how history is reviewed.',
-                      ),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.add_task_rounded,
+                          title: 'Capture',
+                          subtitle: 'Startup mode, tap delay, and notes',
+                          color: p.green,
+                          onTap: () => _openCategory('Capture', parent: 'Logging'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.history_rounded,
+                          title: 'Moments',
+                          subtitle: 'History density, delete safety, and totals',
+                          color: p.orange,
+                          onTap: () => _openCategory('Moments', parent: 'Logging'),
+                        ),
+                      ],
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Logging controls how moments are captured and how history is reviewed.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
                 ),
               if (show('Capture'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SegmentedSetting(
-                        key: ValueKey('mode-$defaultMode-${p.name}'),
-                        p: p,
-                        title: 'Startup Mode',
-                        subtitle: 'Choose the mode NoteKar opens with.',
-                        value: defaultMode,
-                        blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-                        values: const {'single': 'Single', 'two-way': 'Two-Way'},
-                        onChanged: (value) {
-                          if (value == defaultMode) return;
-                          HapticFeedback.selectionClick();
-                          setState(() => defaultMode = value);
-                          widget.onDefaultMode(value);
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      Glass(
-                        p: p,
-                        radius: 12,
-                        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Tap Delay', style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
-                                      const SizedBox(height: 3),
-                                      Text('Set the minimum time between saved taps', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text2, fontSize: 12)),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                SettingsStatusPill(p: p, label: delayLabel(tapDelay), color: p.accent),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                DelayStepButton(
-                                  key: ValueKey('delay-minus-$tapDelay-${p.name}'),
-                                  p: p,
-                                  icon: Icons.remove_rounded,
-                                  enabled: (delayIndex < 0 ? 0 : delayIndex) > 0,
-                                  blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-                                  onTap: () {
-                                    final current = delayIndex < 0 ? 0 : delayIndex;
-                                    final next = delayValues[math.max(0, current - 1)];
-                                    HapticFeedback.selectionClick();
-                                    setState(() => tapDelay = next);
-                                    widget.onDelay(next);
-                                  },
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      SliderTheme(
-                                        data: SliderThemeData(activeTrackColor: p.accent, inactiveTrackColor: p.surface3, thumbColor: Colors.white, overlayColor: p.accent.withValues(alpha: 0.12), trackHeight: 5, tickMarkShape: SliderTickMarkShape.noTickMark),
-                                        child: Slider(
-                                          key: ValueKey('delay-slider-$tapDelay-${p.name}'),
-                                          min: 0, max: 6, divisions: 6,
-                                          value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
-                                          onChanged: (value) {
-                                            final next = delayValues[value.round()];
-                                            if (next == tapDelay) return;
-                                            HapticFeedback.selectionClick();
-                                            setState(() => tapDelay = next);
-                                            widget.onDelay(next);
-                                          },
-                                        ),
-                                      ),
-                                      Transform.translate(offset: const Offset(0, -4), child: SliderScale(p: p, activeValue: tapDelay)),
-                                    ],
-                                  ),
-                                ),
-                                DelayStepButton(
-                                  key: ValueKey('delay-plus-$tapDelay-${p.name}'),
-                                  p: p,
-                                  icon: Icons.add_rounded,
-                                  enabled: (delayIndex < 0 ? 0 : delayIndex) < delayValues.length - 1,
-                                  blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-                                  onTap: () {
-                                    final current = delayIndex < 0 ? 0 : delayIndex;
-                                    final next = delayValues[math.min(delayValues.length - 1, current + 1)];
-                                    HapticFeedback.selectionClick();
-                                    setState(() => tapDelay = next);
-                                    widget.onDelay(next);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SettingsGroup(
-                        p: p,
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SegmentedSetting(
+                      key: ValueKey('mode-$defaultMode-${p.name}'),
+                      p: p,
+                      title: 'Startup Mode',
+                      subtitle: 'Choose the mode NoteKar opens with.',
+                      value: defaultMode,
+                      blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+                      values: const {'single': 'Single', 'two-way': 'Two-Way'},
+                      onChanged: (value) {
+                        if (value == defaultMode) return;
+                        HapticFeedback.selectionClick();
+                        setState(() => defaultMode = value);
+                        widget.onDefaultMode(value);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    Glass(
+                      p: p,
+                      radius: 12,
+                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.edit_note_rounded,
-                            title: 'Require Note on Hold',
-                            subtitle: 'Long press opens notes. Empty notes will not be saved.',
-                            color: p.orange,
-                            value: requireLongPressNote,
-                            onChanged: (value) {
-                              setState(() => requireLongPressNote = value);
-                              widget.onRequireLongPressNote(value);
-                            },
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Tap Delay', style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
+                                    const SizedBox(height: 3),
+                                    Text('Set the minimum time between saved taps', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text2, fontSize: 12)),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              SettingsStatusPill(p: p, label: delayLabel(tapDelay), color: p.accent),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              DelayStepButton(
+                                key: ValueKey('delay-minus-$tapDelay-${p.name}'),
+                                p: p,
+                                icon: Icons.remove_rounded,
+                                enabled: (delayIndex < 0 ? 0 : delayIndex) > 0,
+                                blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+                                onTap: () {
+                                  final current = delayIndex < 0 ? 0 : delayIndex;
+                                  final next = delayValues[math.max(0, current - 1)];
+                                  HapticFeedback.selectionClick();
+                                  setState(() => tapDelay = next);
+                                  widget.onDelay(next);
+                                },
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    SliderTheme(
+                                      data: SliderThemeData(activeTrackColor: p.accent, inactiveTrackColor: p.surface3, thumbColor: Colors.white, overlayColor: p.accent.withValues(alpha: 0.12), trackHeight: 5, tickMarkShape: SliderTickMarkShape.noTickMark),
+                                      child: Slider(
+                                        key: ValueKey('delay-slider-$tapDelay-${p.name}'),
+                                        min: 0, max: 6, divisions: 6,
+                                        value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
+                                        onChanged: (value) {
+                                          final next = delayValues[value.round()];
+                                          if (next == tapDelay) return;
+                                          HapticFeedback.selectionClick();
+                                          setState(() => tapDelay = next);
+                                          widget.onDelay(next);
+                                        },
+                                      ),
+                                    ),
+                                    Transform.translate(offset: const Offset(0, -4), child: SliderScale(p: p, activeValue: tapDelay)),
+                                  ],
+                                ),
+                              ),
+                              DelayStepButton(
+                                key: ValueKey('delay-plus-$tapDelay-${p.name}'),
+                                p: p,
+                                icon: Icons.add_rounded,
+                                enabled: (delayIndex < 0 ? 0 : delayIndex) < delayValues.length - 1,
+                                blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+                                onTap: () {
+                                  final current = delayIndex < 0 ? 0 : delayIndex;
+                                  final next = delayValues[math.min(delayValues.length - 1, current + 1)];
+                                  HapticFeedback.selectionClick();
+                                  setState(() => tapDelay = next);
+                                  widget.onDelay(next);
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      SettingsPageNote(
-                        p: p,
-                        text: 'Capture controls how moments are saved. Startup mode applies next launch; tap delay and note-focused hold apply right away.',
-                      ),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
+                    ),
+                    const SizedBox(height: 10),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.edit_note_rounded,
+                          title: 'Require Note on Hold',
+                          subtitle: 'Long press opens notes. Empty notes will not be saved.',
+                          color: p.orange,
+                          value: requireLongPressNote,
+                          onChanged: (value) {
+                            setState(() => requireLongPressNote = value);
+                            widget.onRequireLongPressNote(value);
+                          },
+                        ),
+                      ],
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Capture controls how moments are saved. Startup mode applies next launch; tap delay and note-focused hold apply right away.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
                 ),
               if (show('Moments'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.view_agenda_rounded,
-                            title: 'Compact History',
-                            subtitle: 'Use denser rows for faster scanning and less scrolling',
-                            color: p.accent,
-                            value: compactHistory,
-                            onChanged: (value) {
-                              setState(() {
-                                compactHistory = value;
-                                historyDensity = value ? 'compact' : 'comfortable';
-                              });
-                              widget.onCompactHistory(value);
-                              widget.onHistoryDensity(historyDensity);
-                            },
-                          ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.delete_sweep_rounded,
-                            title: 'Confirm Delete',
-                            subtitle: 'Ask before deleting a saved moment',
-                            color: p.red,
-                            value: confirmDelete,
-                            onChanged: (value) {
-                              setState(() => confirmDelete = value);
-                              widget.onConfirmDelete(value);
-                            },
-                          ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.timer_rounded,
-                            title: 'Extended Duration',
-                            subtitle: 'Show days, months, and years in time between moments',
-                            color: p.accent,
-                            value: extendedDuration,
-                            onChanged: (value) {
-                              setState(() => extendedDuration = value);
-                              widget.onExtendedDuration(value);
-                            },
-                          ),
-                          SettingsSwitchRow(
-                            p: p,
-                            icon: Icons.auto_awesome_motion_rounded,
-                            title: 'Minimal Moment Options',
-                            subtitle: 'Use a compact horizontal row of icons for actions',
-                            color: p.accent,
-                            value: minimalMomentOptions,
-                            onChanged: (value) {
-                              setState(() => minimalMomentOptions = value);
-                              widget.onMinimalMomentOptions(value);
-                            },
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.insights_rounded,
-                            title: 'Moments',
-                            subtitle: '${entries.length} total - $todayCount today',
-                            color: p.orange,
-                            status: '$todayCount today',
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.search_rounded,
-                            title: 'Search Notes',
-                            subtitle: 'Find saved notes by text, date, time, or type',
-                            color: p.accent,
-                            status: '${entries.where((e) => e.note.isNotEmpty).length} notes',
-                            onTap: () => _openCategory('Search Notes', parent: 'Moments'),
-                          ),
-                        ],
-                      ),
-                      SettingsPageNote(
-                        p: p,
-                        text: 'Moments are stored locally for quick review. Compact rows help with scanning; confirmation helps avoid accidental deletes.',
-                      ),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.view_agenda_rounded,
+                          title: 'Compact History',
+                          subtitle: 'Use denser rows for faster scanning and less scrolling',
+                          color: p.accent,
+                          value: compactHistory,
+                          onChanged: (value) {
+                            setState(() {
+                              compactHistory = value;
+                              historyDensity = value ? 'compact' : 'comfortable';
+                            });
+                            widget.onCompactHistory(value);
+                            widget.onHistoryDensity(historyDensity);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.delete_sweep_rounded,
+                          title: 'Confirm Delete',
+                          subtitle: 'Ask before deleting a saved moment',
+                          color: p.red,
+                          value: confirmDelete,
+                          onChanged: (value) {
+                            setState(() => confirmDelete = value);
+                            widget.onConfirmDelete(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.timer_rounded,
+                          title: 'Extended Duration',
+                          subtitle: 'Show days, months, and years in time between moments',
+                          color: p.accent,
+                          value: extendedDuration,
+                          onChanged: (value) {
+                            setState(() => extendedDuration = value);
+                            widget.onExtendedDuration(value);
+                          },
+                        ),
+                        SettingsSwitchRow(
+                          p: p,
+                          icon: Icons.auto_awesome_motion_rounded,
+                          title: 'Minimal Moment Options',
+                          subtitle: 'Use a compact horizontal row of icons for actions',
+                          color: p.accent,
+                          value: minimalMomentOptions,
+                          onChanged: (value) {
+                            setState(() => minimalMomentOptions = value);
+                            widget.onMinimalMomentOptions(value);
+                          },
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.insights_rounded,
+                          title: 'Moments',
+                          subtitle: '${entries.length} total - $todayCount today',
+                          color: p.orange,
+                          status: '$todayCount today',
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.search_rounded,
+                          title: 'Search Notes',
+                          subtitle: 'Find saved notes by text, date, time, or type',
+                          color: p.accent,
+                          status: '${entries.where((e) => e.note.isNotEmpty).length} notes',
+                          onTap: () => _openCategory('Search Notes', parent: 'Moments'),
+                        ),
+                      ],
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Moments are stored locally for quick review. Compact rows help with scanning; confirmation helps avoid accidental deletes.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
                 ),
               if (show('Search Notes'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverToBoxAdapter(
-                    child: NoteSearchContent(
-                      p: p,
-                      entries: entries,
-                      compactRows: compactHistory,
-                      height: math.min(MediaQuery.sizeOf(context).height * 0.56, 500),
-                    ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      NoteSearchContent(
+                        p: p,
+                        entries: entries,
+                        compactRows: compactHistory,
+                        height: math.min(MediaQuery.sizeOf(context).height * 0.56, 500),
+                      ),
+                    ],
                   ),
                 ),
               if (show('Guides'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        showDividers: true,
-                        children: [
-                          GuideRow(p: p, icon: Icons.touch_app_rounded, title: 'Save a Moment', text: 'Tap the home screen once to save the current time.'),
-                          GuideRow(p: p, icon: Icons.compare_arrows_rounded, title: 'Two-Way Mode', text: 'First tap saves In. The next tap saves Out and completes the pair.'),
-                          GuideRow(p: p, icon: Icons.radio_button_checked_rounded, title: 'Single Mode', text: 'Every tap saves one standalone moment.'),
-                          GuideRow(p: p, icon: Icons.note_add_rounded, title: 'Add a Note', text: 'Touch and hold the home screen to write a note before saving.'),
-                          GuideRow(p: p, icon: Icons.history_rounded, title: 'Review History', text: 'Open History to review moments, use Select Date for a calendar day, or filter by Today and This Week.'),
-                          GuideRow(p: p, icon: Icons.search_rounded, title: 'Search Notes', text: 'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, time, or type.'),
-                          GuideRow(p: p, icon: Icons.timer_rounded, title: 'Time Between Moments', text: 'Select one moment, then another, to calculate the time between them.'),
-                          GuideRow(p: p, icon: Icons.subject_rounded, title: 'Manage Moment Notes', text: 'Touch and hold any history moment to add, read, edit, or delete its note. Deleted notes and moments show an Undo pill.'),
-                          GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'Immediate App Lock covers NoteKar in Recents and when the notification shade sends the app inactive.'),
-                          GuideRow(p: p, icon: Icons.auto_awesome_motion_rounded, title: 'Minimal Moment Options', text: 'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.'),
-                          GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your device. Check stats in Settings > Advanced > Device Health.'),
-                          GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a backup before resetting, changing phones, or testing a new build.'),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Help'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        showDividers: true,
-                        children: [
-                          HelpRow(p: p, question: 'Update check failed', answer: 'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.'),
-                          HelpRow(p: p, question: 'App Notices are not appearing', answer: 'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.'),
-                          HelpRow(p: p, question: 'NoteKar is offline', answer: 'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.'),
-                          HelpRow(p: p, question: 'Backup import found no new moments', answer: 'The backup was read correctly, but its moments already exist on this device. NoteKar skips duplicates instead of adding them again.'),
-                          HelpRow(p: p, question: 'Backup import failed', answer: 'Make sure you selected a NoteKar JSON backup that was not renamed, manually edited, or damaged. Try exporting a fresh backup.'),
-                          HelpRow(p: p, question: 'Live Icon Motion will not turn on', answer: 'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream.'),
-                          HelpRow(p: p, question: 'Live Icon Motion looks slow or delayed', answer: 'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance when many screens are open.'),
-                          HelpRow(p: p, question: 'App Lock will not turn on', answer: 'Add a PIN, password, pattern, fingerprint, or other supported screen lock in Android settings, then try again.'),
-                          HelpRow(p: p, question: 'App Lock appears after the notification panel', answer: 'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. The lock overlay hides your moments before you return.'),
-                          HelpRow(p: p, question: 'The app icon did not change immediately', answer: 'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.'),
-                          HelpRow(p: p, question: 'A moment was saved accidentally', answer: 'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.'),
-                          HelpRow(p: p, question: 'My data disappeared after clearing app storage', answer: 'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.'),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Updates'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(
-                            p: p,
-                            icon: checkingUpdates ? Icons.sync_rounded : _updateAvailable ? Icons.download_rounded : Icons.update_rounded,
-                            title: _updateTitle,
-                            subtitle: _updateSubtitle,
-                            color: p.accent,
-                            status: 'v$appVersion',
-                            onTap: () async {
-                              if (_updateAvailable) { widget.onOpenLink(githubReleases); return; }
-                              setState(() { checkingUpdates = true; updateStatus = 'Checking for updates...'; });
-                              final status = await widget.onCheckUpdates();
-                              if (mounted) { setState(() { updateStatus = status; checkingUpdates = false; }); }
-                            },
-                          ),
-                          SettingsSwitchRow(p: p, icon: Icons.notifications_active_rounded, title: 'App Notices', subtitle: 'Allow occasional release and app notices', color: p.accent, value: remoteNotices, onChanged: (value) { setState(() => remoteNotices = value); widget.onRemoteNotices(value); }),
-                          SettingsRow(p: p, icon: Icons.new_releases_rounded, title: "What's New", subtitle: 'See highlights from the latest release', color: p.orange, status: 'New', onTap: () => _openCategory("What's New", parent: 'Updates')),
-                          SettingsRow(p: p, icon: Icons.article_rounded, title: 'Changelog', subtitle: 'Read release history and fixes', color: p.green, status: 'v$appVersion', onTap: () => _openCategory('Changelog', parent: 'Updates')),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Updates and notices are optional network checks. NoteKar keeps working offline even when these checks are unavailable.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Data & Backup'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.import_export_rounded, title: 'Backup & Export', subtitle: 'CSV, JSON, import, and backup reminders', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
-                          SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Backup Status', subtitle: 'Android backup, health, and planned options', color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Data & Backup is where you move, restore, and protect saved history.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Backup & Export'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SegmentedSetting(key: ValueKey('backup-reminder-$backupReminderDays-${p.name}'), p: p, title: 'Backup Reminder (days)', subtitle: _backupReminderSubtitle, value: '$backupReminderDays', blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'0': 'Off', '7': '7', '14': '14', '30': '30'}, onChanged: (value) { final days = int.tryParse(value) ?? 0; if (days == backupReminderDays) return; HapticFeedback.selectionClick(); setState(() => backupReminderDays = days); widget.onBackupReminderDays(days); }),
-                      const SizedBox(height: 10),
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.description_rounded, title: 'Export CSV', subtitle: exportState?.startsWith('CSV') == true ? exportState! : 'Save a spreadsheet-friendly copy', color: p.green, active: exportState?.startsWith('CSV') == true, onTap: () => unawaited(_runExport('CSV', widget.onExportCsv))),
-                          SettingsRow(p: p, icon: Icons.date_range_rounded, title: 'Export Last 7 Days', subtitle: 'Save only recent moments as CSV', color: p.green, onTap: () => unawaited(_runExport('Recent CSV', widget.onExportRecentCsv))),
-                          SettingsRow(p: p, icon: Icons.data_object_rounded, title: 'Export JSON', subtitle: exportState?.startsWith('JSON') == true ? exportState! : 'Save a structured developer-friendly copy', color: p.accent, active: exportState?.startsWith('JSON') == true, onTap: () => unawaited(_runExport('JSON', widget.onExportJson))),
-                          SettingsRow(p: p, icon: Icons.cloud_upload_rounded, title: 'Backup', subtitle: exportState?.startsWith('Backup') == true ? exportState! : 'Create a portable backup file', color: p.accent, active: exportState?.startsWith('Backup') == true, onTap: () => unawaited(_runExport('Backup', widget.onExportBackup))),
-                          SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Import Backup', subtitle: exportState?.startsWith('Import') == true ? exportState! : 'Merge a NoteKar backup into this device. Existing moments stay safe.', color: p.orange, active: exportState?.startsWith('Import') == true, onTap: () => unawaited(_runImport())),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Exports create files you control. Imports merge into your current history so existing moments are not overwritten.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Backup Status'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Android Backup', subtitle: 'Included in device transfer and Google backup', color: p.green, status: 'On'),
-                          SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Data Health', subtitle: '${entries.length} moments - Backup $_backupAgeLine', color: p.green, status: _dataHealthStatus),
-                          SettingsRow(p: p, icon: Icons.lock_rounded, title: 'Encrypted Backup', subtitle: 'Password-protected backups need a proper crypto flow before release.', color: p.orange, status: 'Planned'),
-                          SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Google Drive Backup', subtitle: 'Optional Drive sync needs Google sign-in and Drive permission setup.', color: p.orange, status: 'Planned'),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Backup Status shows what Android can already protect and which backup options still need release-ready setup.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Privacy & Security'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.analytics_outlined, title: 'No Analytics', subtitle: 'No analytics, ads, crash reporting, or telemetry SDKs.', color: p.green, status: 'None'),
-                          SettingsRow(p: p, icon: Icons.wifi_rounded, title: 'Network Use', subtitle: 'Internet is only used when you check updates or enable App Notices.', color: p.accent, status: 'Limited'),
-                          SettingsRow(p: p, icon: Icons.lock_rounded, title: 'App Lock', subtitle: 'Screen lock and lock timing', color: p.orange, onTap: () => _openCategory('App Lock', parent: 'Privacy & Security')),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Privacy & Security covers what stays on-device, when the network is used, and when NoteKar asks Android to lock.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Help & Guides'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', subtitle: 'Learn logging, notes, search, App Lock, and backups', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
-                          SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', subtitle: 'Solutions for updates, backups, App Lock, and common issues', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Guides explain how NoteKar works. Help covers common problems and practical fixes.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('App Lock')) SliverPadding(padding: const EdgeInsets.symmetric(horizontal: spacing16), sliver: SliverToBoxAdapter(child: _appLockPage(p))),
-              if (show('Advanced'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.accessibility_new_rounded, title: 'Accessibility', subtitle: 'Motion, touch, text, and contrast', color: p.orange, onTap: () => _openCategory('Accessibility', parent: 'Advanced')),
-                          SettingsRow(p: p, icon: Icons.monitor_heart_rounded, title: 'Diagnostics', subtitle: 'Support details and current app state', color: p.accent, onTap: () => _openCategory('Diagnostics', parent: 'Advanced')),
-                          SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Device Health', subtitle: 'Adaptive engine and performance status', color: p.accent, onTap: () => _openCategory('Device Health', parent: 'Advanced')),
-                          SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Reset', subtitle: 'Reset settings, data, or the whole app', color: p.red, onTap: () => _openCategory('Reset', parent: 'Advanced')),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Advanced groups support tools and reset controls away from everyday settings.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Accessibility'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SegmentedSetting(key: ValueKey('haptic-style-$hapticStyle-${p.name}'), p: p, title: 'Haptic Style', subtitle: 'Choose how NoteKar responds to key actions', value: hapticStyle, blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'off': 'Off', 'light': 'Light', 'standard': 'Standard'}, onChanged: (value) { if (value == hapticStyle) return; HapticFeedback.selectionClick(); setState(() => hapticStyle = value); widget.onHapticStyle(value); }),
-                      const SizedBox(height: 10),
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsSwitchRow(p: p, icon: Icons.motion_photos_off_rounded, title: 'Reduced Motion', subtitle: 'Use simpler feedback and fewer animations', color: p.green, value: reduceMotion, onChanged: (value) { setState(() { reduceMotion = value; if (value) homeMenuAnimations = false; }); widget.onReduceMotion(value); }),
-                          SettingsSwitchRow(p: p, icon: Icons.format_size_rounded, title: 'Larger Text', subtitle: 'Makes easier to read while keeping the layout stable.', color: p.orange, value: largeText, onChanged: (value) { setState(() => largeText = value); widget.onLargeText(value); }),
-                          SettingsSwitchRow(p: p, icon: Icons.contrast_rounded, title: 'High Contrast', subtitle: 'Increase contrast for text and controls', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); }),
-                        ],
-                      ),
-                      SettingsPageNote(p: p, text: 'Accessibility settings are local comfort choices. Change them anytime; your saved data is not affected.'),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Reset'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        children: [
-                          SettingsRow(p: p, icon: Icons.settings_backup_restore_rounded, title: 'Reset Settings Only', subtitle: 'Restore preferences while keeping moments and notes', color: p.orange, onTap: () => unawaited(_confirmResetSettings())),
-                          SettingsRow(p: p, icon: Icons.delete_outline_rounded, title: 'Reset All Data', subtitle: 'Erase every moment and note on this device', color: p.red, onTap: () => unawaited(_confirmResetAll(p))),
-                          SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Factory Reset', subtitle: 'Erase data and settings, then show welcome setup', color: p.red, onTap: () => unawaited(_confirmFactoryReset(p))),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text('Reset is intentionally separate from everyday settings. Back up first before deleting moments or factory resetting the app.', style: TextStyle(color: p.text2, fontSize: 12, height: 1.45)),
-                      const SizedBox(height: spacing64),
-                    ]),
-                  ),
-                ),
-              if (show('Diagnostics'))
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverToBoxAdapter(
-                    child: Column(
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      showDividers: true,
                       children: [
-                        _diagnosticsPage(p, entries, todayCount),
-                        SettingsPageNote(p: p, text: 'Diagnostics are for support and bug reports. Copying them does not send anything automatically.'),
-                        const SizedBox(height: spacing64),
+                        GuideRow(p: p, icon: Icons.touch_app_rounded, title: 'Save a Moment', text: 'Tap the home screen once to save the current time.'),
+                        GuideRow(p: p, icon: Icons.compare_arrows_rounded, title: 'Two-Way Mode', text: 'First tap saves In. The next tap saves Out and completes the pair.'),
+                        GuideRow(p: p, icon: Icons.radio_button_checked_rounded, title: 'Single Mode', text: 'Every tap saves one standalone moment.'),
+                        GuideRow(p: p, icon: Icons.note_add_rounded, title: 'Add a Note', text: 'Touch and hold the home screen to write a note before saving.'),
+                        GuideRow(p: p, icon: Icons.history_rounded, title: 'Review History', text: 'Open History to review moments, use Select Date for a calendar day, or filter by Today and This Week.'),
+                        GuideRow(p: p, icon: Icons.search_rounded, title: 'Search Notes', text: 'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, time, or type.'),
+                        GuideRow(p: p, icon: Icons.timer_rounded, title: 'Time Between Moments', text: 'Select one moment, then another, to calculate the time between them.'),
+                        GuideRow(p: p, icon: Icons.subject_rounded, title: 'Manage Moment Notes', text: 'Touch and hold any history moment to add, read, edit, or delete its note. Deleted notes and moments show an Undo pill.'),
+                        GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'Immediate App Lock covers NoteKar in Recents and when the notification shade sends the app inactive.'),
+                        GuideRow(p: p, icon: Icons.auto_awesome_motion_rounded, title: 'Minimal Moment Options', text: 'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.'),
+                        GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your device. Check stats in Settings > Advanced > Device Health.'),
+                        GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a backup before resetting, changing phones, or testing a new build.'),
                       ],
                     ),
+                    SettingsPageNote(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Help'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      showDividers: true,
+                      children: [
+                        HelpRow(p: p, question: 'Update check failed', answer: 'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.'),
+                        HelpRow(p: p, question: 'App Notices are not appearing', answer: 'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.'),
+                        HelpRow(p: p, question: 'NoteKar is offline', answer: 'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.'),
+                        HelpRow(p: p, question: 'Backup import found no new moments', answer: 'The backup was read correctly, but its moments already exist on this device. NoteKar skips duplicates instead of adding them again.'),
+                        HelpRow(p: p, question: 'Backup import failed', answer: 'Make sure you selected a NoteKar JSON backup that was not renamed, manually edited, or damaged. Try exporting a fresh backup.'),
+                        HelpRow(p: p, question: 'Live Icon Motion will not turn on', answer: 'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream.'),
+                        HelpRow(p: p, question: 'Live Icon Motion looks slow or delayed', answer: 'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance when many screens are open.'),
+                        HelpRow(p: p, question: 'App Lock will not turn on', answer: 'Add a PIN, password, pattern, fingerprint, or other supported screen lock in Android settings, then try again.'),
+                        HelpRow(p: p, question: 'App Lock appears after the notification panel', answer: 'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. The lock overlay hides your moments before you return.'),
+                        HelpRow(p: p, question: 'The app icon did not change immediately', answer: 'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.'),
+                        HelpRow(p: p, question: 'A moment was saved accidentally', answer: 'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.'),
+                        HelpRow(p: p, question: 'My data disappeared after clearing app storage', answer: 'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.'),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Updates'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(
+                          p: p,
+                          icon: checkingUpdates ? Icons.sync_rounded : _updateAvailable ? Icons.download_rounded : Icons.update_rounded,
+                          title: _updateTitle,
+                          subtitle: _updateSubtitle,
+                          color: p.accent,
+                          status: 'v$appVersion',
+                          onTap: () async {
+                            if (_updateAvailable) { widget.onOpenLink(githubReleases); return; }
+                            setState(() { checkingUpdates = true; updateStatus = 'Checking for updates...'; });
+                            final status = await widget.onCheckUpdates();
+                            if (mounted) { setState(() { updateStatus = status; checkingUpdates = false; }); }
+                          },
+                        ),
+                        SettingsSwitchRow(p: p, icon: Icons.notifications_active_rounded, title: 'App Notices', subtitle: 'Allow occasional release and app notices', color: p.accent, value: remoteNotices, onChanged: (value) { setState(() => remoteNotices = value); widget.onRemoteNotices(value); }),
+                        SettingsRow(p: p, icon: Icons.new_releases_rounded, title: "What's New", subtitle: 'See highlights from the latest release', color: p.orange, status: 'New', onTap: () => _openCategory("What's New", parent: 'Updates')),
+                        SettingsRow(p: p, icon: Icons.article_rounded, title: 'Changelog', subtitle: 'Read release history and fixes', color: p.green, status: 'v$appVersion', onTap: () => _openCategory('Changelog', parent: 'Updates')),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Updates and notices are optional network checks. NoteKar keeps working offline even when these checks are unavailable.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Data & Backup'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.import_export_rounded, title: 'Backup & Export', subtitle: 'CSV, JSON, import, and backup reminders', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
+                        SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Backup Status', subtitle: 'Android backup, health, and planned options', color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Data & Backup is where you move, restore, and protect saved history.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Backup & Export'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SegmentedSetting(key: ValueKey('backup-reminder-$backupReminderDays-${p.name}'), p: p, title: 'Backup Reminder (days)', subtitle: _backupReminderSubtitle, value: '$backupReminderDays', blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'0': 'Off', '7': '7', '14': '14', '30': '30'}, onChanged: (value) { final days = int.tryParse(value) ?? 0; if (days == backupReminderDays) return; HapticFeedback.selectionClick(); setState(() => backupReminderDays = days); widget.onBackupReminderDays(days); }),
+                    const SizedBox(height: 10),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.description_rounded, title: 'Export CSV', subtitle: exportState?.startsWith('CSV') == true ? exportState! : 'Save a spreadsheet-friendly copy', color: p.green, active: exportState?.startsWith('CSV') == true, onTap: () => unawaited(_runExport('CSV', widget.onExportCsv))),
+                        SettingsRow(p: p, icon: Icons.date_range_rounded, title: 'Export Last 7 Days', subtitle: 'Save only recent moments as CSV', color: p.green, onTap: () => unawaited(_runExport('Recent CSV', widget.onExportRecentCsv))),
+                        SettingsRow(p: p, icon: Icons.data_object_rounded, title: 'Export JSON', subtitle: exportState?.startsWith('JSON') == true ? exportState! : 'Save a structured developer-friendly copy', color: p.accent, active: exportState?.startsWith('JSON') == true, onTap: () => unawaited(_runExport('JSON', widget.onExportJson))),
+                        SettingsRow(p: p, icon: Icons.cloud_upload_rounded, title: 'Backup', subtitle: exportState?.startsWith('Backup') == true ? exportState! : 'Create a portable backup file', color: p.accent, active: exportState?.startsWith('Backup') == true, onTap: () => unawaited(_runExport('Backup', widget.onExportBackup))),
+                        SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Import Backup', subtitle: exportState?.startsWith('Import') == true ? exportState! : 'Merge a NoteKar backup into this device. Existing moments stay safe.', color: p.orange, active: exportState?.startsWith('Import') == true, onTap: () => unawaited(_runImport())),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Exports create files you control. Imports merge into your current history so existing moments are not overwritten.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Backup Status'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.cloud_done_rounded, title: 'Android Backup', subtitle: 'Included in device transfer and Google backup', color: p.green, status: 'On'),
+                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Data Health', subtitle: '${entries.length} moments - Backup $_backupAgeLine', color: p.green, status: _dataHealthStatus),
+                        SettingsRow(p: p, icon: Icons.lock_rounded, title: 'Encrypted Backup', subtitle: 'Password-protected backups need a proper crypto flow before release.', color: p.orange, status: 'Planned'),
+                        SettingsRow(p: p, icon: Icons.drive_folder_upload_rounded, title: 'Google Drive Backup', subtitle: 'Optional Drive sync needs Google sign-in and Drive permission setup.', color: p.orange, status: 'Planned'),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Backup Status shows what Android can already protect and which backup options still need release-ready setup.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Privacy & Security'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.analytics_outlined, title: 'No Analytics', subtitle: 'No analytics, ads, crash reporting, or telemetry SDKs.', color: p.green, status: 'None'),
+                        SettingsRow(p: p, icon: Icons.wifi_rounded, title: 'Network Use', subtitle: 'Internet is only used when you check updates or enable App Notices.', color: p.accent, status: 'Limited'),
+                        SettingsRow(p: p, icon: Icons.lock_rounded, title: 'App Lock', subtitle: 'Screen lock and lock timing', color: p.orange, onTap: () => _openCategory('App Lock', parent: 'Privacy & Security')),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Privacy & Security covers what stays on-device, when the network is used, and when NoteKar asks Android to lock.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Help & Guides'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.map_rounded, title: 'Guides', subtitle: 'Learn logging, notes, search, App Lock, and backups', color: p.accent, onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
+                        SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', subtitle: 'Solutions for updates, backups, App Lock, and common issues', color: p.orange, onTap: () => _openCategory('Help', parent: 'Help & Guides')),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Guides explain how NoteKar works. Help covers common problems and practical fixes.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('App Lock'))
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      _appLockPage(p),
+                    ],
                   ),
                 ),
-              if (show('Device Health')) SliverPadding(padding: const EdgeInsets.symmetric(horizontal: spacing16), sliver: SliverToBoxAdapter(child: _deviceHealthPage(p))),
+              if (show('Advanced'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.accessibility_new_rounded, title: 'Accessibility', subtitle: 'Motion, touch, text, and contrast', color: p.orange, onTap: () => _openCategory('Accessibility', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.monitor_heart_rounded, title: 'Diagnostics', subtitle: 'Support details and current app state', color: p.accent, onTap: () => _openCategory('Diagnostics', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.health_and_safety_rounded, title: 'Device Health', subtitle: 'Adaptive engine and performance status', color: p.accent, onTap: () => _openCategory('Device Health', parent: 'Advanced')),
+                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Reset', subtitle: 'Reset settings, data, or the whole app', color: p.red, onTap: () => _openCategory('Reset', parent: 'Advanced')),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Advanced groups support tools and reset controls away from everyday settings.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Accessibility'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SegmentedSetting(key: ValueKey('haptic-style-$hapticStyle-${p.name}'), p: p, title: 'Haptic Style', subtitle: 'Choose how NoteKar responds to key actions', value: hapticStyle, blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur, values: const {'off': 'Off', 'light': 'Light', 'standard': 'Standard'}, onChanged: (value) { if (value == hapticStyle) return; HapticFeedback.selectionClick(); setState(() => hapticStyle = value); widget.onHapticStyle(value); }),
+                    const SizedBox(height: 10),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsSwitchRow(p: p, icon: Icons.motion_photos_off_rounded, title: 'Reduced Motion', subtitle: 'Use simpler feedback and fewer animations', color: p.green, value: reduceMotion, onChanged: (value) { setState(() { reduceMotion = value; if (value) homeMenuAnimations = false; }); widget.onReduceMotion(value); }),
+                        SettingsSwitchRow(p: p, icon: Icons.format_size_rounded, title: 'Larger Text', subtitle: 'Makes easier to read while keeping the layout stable.', color: p.orange, value: largeText, onChanged: (value) { setState(() => largeText = value); widget.onLargeText(value); }),
+                        SettingsSwitchRow(p: p, icon: Icons.contrast_rounded, title: 'High Contrast', subtitle: 'Increase contrast for text and controls', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); }),
+                      ],
+                    ),
+                    SettingsPageNote(p: p, text: 'Accessibility settings are local comfort choices. Change them anytime; your saved data is not affected.'),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Reset'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing16),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        SettingsRow(p: p, icon: Icons.settings_backup_restore_rounded, title: 'Reset Settings Only', subtitle: 'Restore preferences while keeping moments and notes', color: p.orange, onTap: () => unawaited(_confirmResetSettings())),
+                        SettingsRow(p: p, icon: Icons.delete_outline_rounded, title: 'Reset All Data', subtitle: 'Erase every moment and note on this device', color: p.red, onTap: () => unawaited(_confirmResetAll(p))),
+                        SettingsRow(p: p, icon: Icons.restart_alt_rounded, title: 'Factory Reset', subtitle: 'Erase data and settings, then show welcome setup', color: p.red, onTap: () => unawaited(_confirmFactoryReset(p))),
+                      ],
+                    ),
+                    SettingsPageNote(
+                      p: p,
+                      text: 'Reset is intentionally separate from everyday settings. Back up first before deleting moments or factory resetting the app.',
+                    ),
+                    const SizedBox(height: spacing64),
+                  ]),
+                ),
+              if (show('Diagnostics'))
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      _diagnosticsPage(p, entries, todayCount),
+                      SettingsPageNote(p: p, text: 'Diagnostics are for support and bug reports. Copying them does not send anything automatically.'),
+                      const SizedBox(height: spacing64),
+                    ],
+                  ),
+                ),
+              if (show('Device Health'))
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      _deviceHealthPage(p),
+                    ],
+                  ),
+                ),
               if (show("What's New"))
-                SliverPadding(padding: const EdgeInsets.symmetric(horizontal: spacing16), sliver: SliverToBoxAdapter(child: ChangelogSettingsPage(p: p, latestOnly: true))),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      ChangelogSettingsPage(p: p, latestOnly: true),
+                    ],
+                  ),
+                ),
               if (show('Changelog'))
-                SliverPadding(padding: const EdgeInsets.symmetric(horizontal: spacing16), sliver: SliverToBoxAdapter(child: ChangelogSettingsPage(p: p, latestOnly: false))),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: spacing16),
+                      ChangelogSettingsPage(p: p, latestOnly: false),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),

@@ -159,11 +159,11 @@ class SettingsPageNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 24), // Inset to match card row content
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Text(
         text,
         style: TextStyle(
-          color: p.text2,
+          color: p.text3,
           fontSize: 13,
           height: 1.35,
         ),

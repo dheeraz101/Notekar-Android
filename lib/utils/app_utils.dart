@@ -11,6 +11,7 @@ const double spacing4 = 4.0;
 const double spacing8 = 8.0;
 const double spacing12 = 12.0;
 const double spacing16 = 16.0;
+const double spacing20 = 20.0;
 const double spacing24 = 24.0;
 const double spacing32 = 32.0;
 const double spacing48 = 48.0;

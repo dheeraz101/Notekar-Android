@@ -41,7 +41,7 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
       p: widget.p,
       title: 'Select Date',
       child: SizedBox(
-        width: 430,
+        width: 410,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
