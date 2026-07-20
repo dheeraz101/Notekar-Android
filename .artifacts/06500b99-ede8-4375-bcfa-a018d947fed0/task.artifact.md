@@ -1,9 +1,0 @@
-- [x] Update `lib/dialogs/changelog_dialog.dart`:
-    - [x] Update Record type signatures to include `highlights`.
-    - [x] Add `highlights` to all `releases` entries.
-    - [x] Update `_WhatsNewPanel` to use `highlights`.
-- [x] Update `releases/v4.0.4/RELEASE_NOTES.md` with detailed dev-style changelog.
-- [x] Update `releases/v4.0.4/GITHUB_RELEASE.md` summary.
-- [x] Verify in-app UI logic.
-- [x] Update `scripts/update-version.ps1` to reflect refactored file paths and variable names.
-- [x] Update walkthrough.
