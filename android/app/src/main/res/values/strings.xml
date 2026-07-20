@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NoteKar</string>
+    <string name="shortcut_single_short">Single</string>
+    <string name="shortcut_single_long">Save Single Moment</string>
+    <string name="shortcut_in_short">IN</string>
+    <string name="shortcut_in_long">Save Two-Way IN Moment</string>
+    <string name="shortcut_out_short">OUT</string>
+    <string name="shortcut_out_long">Save Two-Way OUT Moment</string>
+    <string name="shortcut_note_short">Note</string>
+    <string name="shortcut_note_long">New Note</string>
+    <string name="widget_description">Save NoteKar moments quickly from the home screen.</string>
+    <string name="widget_title">NoteKar</string>
+    <string name="widget_open">Open</string>
+    <string name="widget_single">Single</string>
+    <string name="widget_in">IN</string>
+    <string name="widget_out">OUT</string>
+    <string name="widget_note">Note</string>
+</resources>

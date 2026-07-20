@@ -1,0 +1,130 @@
+# ----------------------------------------------------------------------
+# NoteKar Android (Flutter) Master .gitignore
+# Ensures ZERO sensitive keys, build outputs, or local metadata
+# are ever committed to GitHub.
+# ----------------------------------------------------------------------
+
+# 🔑 Android Signing Secrets & Passwords (CRITICAL - NEVER COMMIT)
+**/key.properties
+**/key.properties.*
+**/local.properties
+**/*.jks
+**/*.keystore
+**/*.pem
+**/*.p12
+**/*.pkcs12
+**/*.crt
+**/*.cer
+**/*.der
+**/*.key
+**/*.asc
+**/*.bks
+**/*.pfx
+**/upload-keystore.jks
+**/debug.keystore
+**/release-key.jks
+
+# Workspace Artifacts
+.artifacts/
+**/.artifacts/
+.artifacts
+.gemini/
+**/.gemini/
+
+# 🔐 API Secrets, Cloud Configs & Environment Files
+**/.env
+**/.env.*
+!.env.example
+**/*.env
+**/secrets.json
+**/credentials.json
+**/service-account*.json
+**/client_secret*.json
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+
+# 🛠️ Flutter Workspace Metadata & Dependency Files
+.metadata
+**/.metadata
+.flutter-plugins-dependencies
+**/.flutter-plugins-dependencies
+.flutter-plugins
+**/.flutter-plugins
+.packages
+**/.packages
+**/.pub-cache/
+**/.pub/
+
+# 🏗️ Build Artifacts, Cache & Generated Code
+build/
+**/build/
+**/coverage/
+.dart_tool/
+**/.dart_tool/
+.gradle/
+**/.gradle/
+.kotlin/
+**/.kotlin/
+.cxx/
+**/.cxx/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/ios/Pods/
+**/ios/.symlinks/
+
+# 📱 Local Releases, APKs, Bundles & Version Archives
+releases/
+**/releases/
+versions/
+**/versions/
+release/
+**/release/
+output/
+**/output/
+**/*.apk
+**/*.aab
+**/*.idsig
+**/*.sha1
+**/*.sha256
+
+# 💻 IDEs, Editors & Module Files
+.idea/
+**/.idea/
+*.iml
+**/*.iml
+*.ipr
+**/*.ipr
+*.iws
+**/*.iws
+.vscode/
+**/.vscode/
+.atom/
+.history
+.svn/
+
+# 📝 Personal Docs, Local Notes & Word Documents
+**/*.docx
+**/*.doc
+**/*.log
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.local
+**/*.private
+
+# 🖥️ Operating System Metadata
+.DS_Store
+**/.DS_Store
+.DS_Store?
+**/.DS_Store?
+._*
+**/._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+**/Thumbs.db
+desktop.ini
+**/desktop.ini
