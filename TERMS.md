@@ -1,4 +1,4 @@
-# Terms of Use — NoteKar Android
+# Terms of Use: NoteKar Android
 
 By using the NoteKar Android application, you agree to these Terms of Use.
 
@@ -11,8 +11,8 @@ By using the NoteKar Android application, you agree to these Terms of Use.
 ## Official Online Terms of Use
 
 For the full detailed terms of use, visit our official website page:
-👉 **[NoteKar Official Terms of Use](https://dheeraz101.github.io/Notekar/terms.html)**
+👉 **[NoteKar Official Terms of Use](https://notekarapp.vercel.app/terms.html)**
 
 ---
 
-*Contact: yabp.ub8ke@aleeas.com | Part of the YABP Initiative*
+*Contact: yabp.support@gmail.com | Part of the YABP Initiative*

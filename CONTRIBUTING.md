@@ -59,4 +59,4 @@ flutter format .
 
 ## ☕ Questions & Support
 
-Reach out via [Email](mailto:yabp.ub8ke@aleeas.com) or submit issues on GitHub.
+Reach out via [Email](mailto:yabp.support@gmail.com) or submit issues on GitHub.

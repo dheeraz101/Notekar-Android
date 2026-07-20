@@ -1,4 +1,4 @@
-# Privacy Policy — NoteKar Android
+# Privacy Policy: NoteKar Android
 
 NoteKar Android is engineered with a strict **privacy-by-design and offline-first architecture**.
 
@@ -15,8 +15,8 @@ NoteKar Android is engineered with a strict **privacy-by-design and offline-firs
 ## Official Online Privacy Policy
 
 For the full detailed privacy policy, visit our official website page:
-👉 **[NoteKar Official Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**
+👉 **[NoteKar Official Privacy Policy](https://notekarapp.vercel.app/privacy.html)**
 
 ---
 
-*Contact: yabp.ub8ke@aleeas.com | Part of the YABP Initiative*
+*Contact: yabp.support@gmail.com | Part of the YABP Initiative*

@@ -661,7 +661,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
             subtitle: 'Data safety and local storage commitment',
             category: 'Privacy Policy',
             icon: Icons.privacy_tip_rounded,
-            keywords: ['privacy', 'policy', 'data', 'safety', 'local', 'offline', 'legal'],
+            keywords: ['privacy', 'policy', 'data', 'safety', 'local', 'offline', 'legal', 'google', 'play'],
+          ),
+          (
+            title: 'Terms of Use',
+            subtitle: 'App usage rules and open source terms',
+            category: 'Terms of Use',
+            icon: Icons.gavel_rounded,
+            keywords: ['terms', 'usage', 'rules', 'conditions', 'legal', 'google', 'play'],
           ),
           (
             title: 'Licenses',
@@ -1402,6 +1409,72 @@ class _SettingsDialogState extends State<SettingsDialog> {
           icon: Icons.wifi_rounded,
           title: 'Limited Connectivity',
           text: 'The app only uses the internet to check for software updates on GitHub and to fetch occasional app notices if enabled. No personal data is transmitted during these checks.',
+        ),
+        const SizedBox(height: spacing32),
+        FilledButton.icon(
+          onPressed: () => widget.onOpenLink(privacyPolicyUrl),
+          icon: const Icon(Icons.open_in_new_rounded, size: 18),
+          label: const Text('Full Online Policy', style: TextStyle(fontWeight: FontWeight.w800)),
+          style: FilledButton.styleFrom(
+            backgroundColor: p.accent,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        const SizedBox(height: spacing32),
+      ],
+    );
+  }
+
+  Widget _termsOfUsePage(Palette p) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: spacing8),
+        Text(
+          'Terms of Use',
+          style: TextStyle(
+            color: p.text,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: spacing12),
+        Text(
+          'By using NoteKar, you agree to our terms of service and how we handle open source licenses.',
+          style: TextStyle(color: p.text2, fontSize: 15, height: 1.45),
+        ),
+        const SizedBox(height: spacing24),
+        _PolicySection(
+          p: p,
+          icon: Icons.gavel_rounded,
+          title: 'App Usage',
+          text: 'NoteKar is provided "as is" for personal use. You are responsible for your own data backups and for ensuring your use of the app complies with local laws.',
+        ),
+        const SizedBox(height: spacing20),
+        _PolicySection(
+          p: p,
+          icon: Icons.code_rounded,
+          title: 'Open Source',
+          text: 'NoteKar is open source software. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.',
+        ),
+        const SizedBox(height: spacing32),
+        FilledButton.icon(
+          onPressed: () => widget.onOpenLink(termsUrl),
+          icon: const Icon(Icons.open_in_new_rounded, size: 18),
+          label: const Text('Full Online Terms', style: TextStyle(fontWeight: FontWeight.w800)),
+          style: FilledButton.styleFrom(
+            backgroundColor: p.orange,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
         const SizedBox(height: spacing32),
       ],
@@ -3113,6 +3186,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
+                          icon: Icons.gavel_rounded,
+                          title: 'Terms of Use',
+                          color: p.orange,
+                          onTap: () => _openCategory('Terms of Use', parent: 'Help & Guides'),
+                        ),
+                        SettingsRow(
+                          p: p,
                           icon: Icons.privacy_tip_rounded,
                           title: 'Privacy Policy',
                           color: p.green,
@@ -3273,6 +3353,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: _privacyPolicyPage(p),
+                  ),
+                ),
+              if (show('Terms of Use'))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _termsOfUsePage(p),
                   ),
                 ),
               if (show('Licenses'))

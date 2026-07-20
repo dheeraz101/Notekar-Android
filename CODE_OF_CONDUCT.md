@@ -34,7 +34,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at [yabp.ub8ke@aleeas.com](mailto:yabp.ub8ke@aleeas.com). All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at [yabp.support@gmail.com](mailto:yabp.support@gmail.com). All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 

@@ -17,9 +17,9 @@
 
 NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain stored locally on your device.
 
-- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)** — Full privacy policy detailing data handling, local storage, and permissions.
-- 📜 **[Terms of Use](https://dheeraz101.github.io/Notekar/terms.html)** — Terms of service and open-source usage.
-- 🌐 **[NoteKar Web PWA](https://dheeraz101.github.io/Notekar/)** — Official Web application & legal hub.
+- 🛡️ **[Privacy Policy](https://notekarapp.vercel.app/privacy.html)**: Full privacy policy detailing data handling, local storage, and permissions.
+- 📜 **[Terms of Use](https://notekarapp.vercel.app/terms.html)**: Terms of service and open-source usage.
+- 🌐 **[NoteKar Web](https://notekarapp.vercel.app/)**: Official website & legal hub.
 
 ---
 
@@ -35,15 +35,15 @@ Your support helps keep NoteKar free, offline-first, and actively maintained.
 
 ## 🎯 Features & Highlights
 
-- **Instant Tap Logging** — Tap anywhere on the main screen to log exact timestamps instantly.
-- **Dual Operating Modes** — Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for work/study) and **Single mode** (one-shot timestamp logging).
-- **Rich Local Storage** — Fast, persistent local storage powered by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
-- **Android OS Auto-Backup Support** — Supports standard Android system auto-backup (Google Drive system backup), ensuring your data can be restored when switching Android devices.
+- **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly.
+- **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for work/study) and **Single mode** (one-shot timestamp logging).
+- **Rich Local Storage**: Fast, persistent local storage powered by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
+- **Android OS Auto-Backup Support**: Supports standard Android system auto-backup (Google Drive system backup), ensuring your data can be restored when switching Android devices.
 - **Transparent & Minimal Permissions**:
-  - `INTERNET` — Exclusively used to check for software releases (`health.json` / GitHub releases) and fetch bug fix announcements. No personal data or logs are ever transmitted.
-  - `POST_NOTIFICATIONS` — Used locally to alert you about app updates, bug notices, or timestamp reminders.
-- **Zero Backend / Zero Analytics** — No cloud databases, no user accounts, no tracking scripts, no third-party ads.
-- **Data Control & Export** — Export all timestamp entries into standard CSV or JSON formats at any time.
+  - `INTERNET`: Exclusively used to check for software releases (`health.json` / GitHub releases) and fetch bug fix announcements. No personal data or logs are ever transmitted.
+  - `POST_NOTIFICATIONS`: Used locally to alert you about app updates, bug notices, or timestamp reminders.
+- **Zero Backend / Zero Analytics**: No cloud databases, no user accounts, no tracking scripts, no third-party ads.
+- **Data Control & Export**: Export all timestamp entries into standard CSV or JSON formats at any time.
 
 ---
 

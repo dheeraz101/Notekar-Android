@@ -21,10 +21,12 @@ const double spacing64 = 64.0;
 const int maxNoteLength = 500;
 
 const officialSite = 'https://notekarapp.vercel.app';
-const githubRepo = 'https://github.com/dheeraz101/Notekar';
-const githubIssues = 'https://github.com/dheeraz101/Notekar/issues';
+const privacyPolicyUrl = 'https://notekarapp.vercel.app/privacy.html';
+const termsUrl = 'https://notekarapp.vercel.app/terms.html';
+const githubRepo = 'https://github.com/dheeraz101/Notekar-Android';
+const githubIssues = 'https://github.com/dheeraz101/Notekar-Android/issues';
 const coffeeLink = 'https://buymeacoffee.com/dheeraz';
-const githubReleases = 'https://github.com/dheeraz101/Notekar/releases';
+const githubReleases = 'https://github.com/dheeraz101/Notekar-Android/releases';
 const supportEmail = 'mailto:yabp.support@gmail.com';
 const notificationFeed = 'https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json';
 

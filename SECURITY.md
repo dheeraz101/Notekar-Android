@@ -1,4 +1,4 @@
-# Security Policy — NoteKar Android
+# Security Policy: NoteKar Android
 
 NoteKar Android prioritizes app security and user privacy. Because NoteKar Android is an **offline-first application using local Hive storage**, user logs are saved locally on the user's device.
 
@@ -20,7 +20,7 @@ We provide security updates for the following release channels:
 
 If you discover a security vulnerability or privacy risk in NoteKar Android, please **do not open a public issue on GitHub**. Report it privately to our team:
 
-- 📧 **Email:** [yabp.ub8ke@aleeas.com](mailto:yabp.ub8ke@aleeas.com)
+- 📧 **Email:** [yabp.support@gmail.com](mailto:yabp.support@gmail.com)
 
 ### Please Include:
 - Vulnerability description and potential security impact.
