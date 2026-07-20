@@ -11,7 +11,7 @@ class UpdateService {
     try {
       final request = await client.getUrl(
         Uri.parse(
-          'https://api.github.com/repos/dheeraz101/Notekar/releases/latest',
+          'https://api.github.com/repos/dheeraz101/Notekar-Android/releases/latest',
         ),
       );
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');

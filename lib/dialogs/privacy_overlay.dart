@@ -116,7 +116,7 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: p.accent,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       child: const Text(
                         'Unlock NoteKar',

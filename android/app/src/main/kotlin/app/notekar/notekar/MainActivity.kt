@@ -126,7 +126,7 @@ class MainActivity : FlutterActivity() {
                 "showUpdateNotification" -> {
                     val title = call.argument<String>("title") ?: "NoteKar update available"
                     val body = call.argument<String>("body") ?: "Tap to open the latest release."
-                    val url = call.argument<String>("url") ?: "https://github.com/dheeraz101/Notekar/releases"
+                    val url = call.argument<String>("url") ?: "https://github.com/dheeraz101/Notekar-Android/releases"
                     try {
                         showUpdateNotification(title, body, url)
                         result.success(null)

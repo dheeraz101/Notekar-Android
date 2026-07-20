@@ -14,6 +14,7 @@ class SettingsGroup extends StatelessWidget {
     this.title,
     this.description,
     this.showDividers = true,
+    this.insetDividers = false,
   });
 
   final Palette p;
@@ -21,6 +22,7 @@ class SettingsGroup extends StatelessWidget {
   final String? title;
   final String? description;
   final bool showDividers;
+  final bool insetDividers;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +58,7 @@ class SettingsGroup extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(32), // iOS 26 High-Radius style
             border: p.name == 'amoled' ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8) : null,
           ),
           child: Column(
@@ -64,7 +66,11 @@ class SettingsGroup extends StatelessWidget {
               for (int i = 0; i < children.length; i++) ...[
                 children[i],
                 if (showDividers && i < children.length - 1)
-                  Divider(height: 0.5, color: p.border),
+                  Divider(
+                    height: 0.5,
+                    color: p.border,
+                    indent: insetDividers ? 60 : 0, // Inset to align with text
+                  ),
               ],
             ],
           ),
@@ -78,7 +84,7 @@ class SettingsRow extends StatelessWidget {
   const SettingsRow({
     super.key,
     required this.p,
-    required this.icon,
+    this.icon,
     required this.title,
     this.subtitle,
     this.onTap,
@@ -86,10 +92,11 @@ class SettingsRow extends StatelessWidget {
     this.status,
     this.active = false,
     this.highlight,
+    this.trailing,
   });
 
   final Palette p;
-  final IconData icon;
+  final IconData? icon;
   final String title;
   final String? subtitle;
   final VoidCallback? onTap;
@@ -97,11 +104,13 @@ class SettingsRow extends StatelessWidget {
   final String? status;
   final bool active;
   final String? highlight;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final rowColor = color ?? p.accent;
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
+    final hasIcon = icon != null;
 
     return PressableScale(
       enabled: onTap != null,
@@ -110,24 +119,26 @@ class SettingsRow extends StatelessWidget {
         onTap?.call();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: hasIcon ? 16 : 20, vertical: 12),
         decoration: BoxDecoration(
           color: active ? rowColor.withValues(alpha: 0.1) : Colors.transparent,
         ),
         child: Row(
           crossAxisAlignment: hasSubtitle ? CrossAxisAlignment.start : CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
-              decoration: BoxDecoration(
-                color: rowColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+            if (hasIcon) ...[
+              Container(
+                width: 32,
+                height: 32,
+                margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
+                decoration: BoxDecoration(
+                  color: rowColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: rowColor, size: 16),
               ),
-              child: Icon(icon, color: rowColor, size: 16),
-            ),
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -173,7 +184,12 @@ class SettingsRow extends StatelessWidget {
                 ),
               ),
             ],
-            if (onTap != null)
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              // Center trailing widget vertically (it's already in a Row with center crossAxisAlignment if !hasSubtitle)
+              trailing!,
+            ],
+            if (onTap != null && trailing == null)
               Padding(
                 padding: EdgeInsets.only(top: hasSubtitle ? 10 : 0),
                 child: Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
@@ -212,9 +228,9 @@ class SegmentedSetting extends StatelessWidget {
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     return Glass(
       p: p,
-      radius: 20,
+      radius: 32, // iOS 26 style
       blur: blur,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -261,7 +277,7 @@ class SegmentedSetting extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: p.surface3,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: values.entries.map((e) {
@@ -274,7 +290,7 @@ class SegmentedSetting extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: active ? p.surface : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
                         boxShadow: active
                             ? [
                               BoxShadow(
@@ -310,7 +326,7 @@ class SettingsSwitchRow extends StatefulWidget {
   const SettingsSwitchRow({
     super.key,
     required this.p,
-    required this.icon,
+    this.icon,
     required this.title,
     this.subtitle,
     required this.value,
@@ -322,7 +338,7 @@ class SettingsSwitchRow extends StatefulWidget {
   });
 
   final Palette p;
-  final IconData icon;
+  final IconData? icon;
   final String title;
   final String? subtitle;
   final bool value;
@@ -362,6 +378,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
     final enabled = widget.enabled;
     final value = widget.value;
     final hasSubtitle = widget.subtitle != null && widget.subtitle!.isNotEmpty;
+    final hasIcon = widget.icon != null;
 
     return GestureDetector(
       onTapDown: (_) {
@@ -382,28 +399,30 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
         widget.onChanged(!value);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: hasIcon ? 16 : 20, vertical: 12),
         decoration: const BoxDecoration(color: Colors.transparent),
         child: Row(
           crossAxisAlignment: hasSubtitle ? CrossAxisAlignment.start : CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
-              decoration: BoxDecoration(
-                color: (enabled && value ? switchColor : p.text3).withValues(
-                  alpha: 0.10,
+            if (hasIcon) ...[
+              Container(
+                width: 32,
+                height: 32,
+                margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
+                decoration: BoxDecoration(
+                  color: (enabled && value ? switchColor : p.text3).withValues(
+                    alpha: 0.10,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                borderRadius: BorderRadius.circular(8),
+                child: Icon(
+                  widget.icon,
+                  color: enabled && value ? switchColor : p.text2,
+                  size: 16,
+                ),
               ),
-              child: Icon(
-                widget.icon,
-                color: enabled && value ? switchColor : p.text2,
-                size: 16,
-              ),
-            ),
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -437,11 +456,11 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
             Padding(
               padding: EdgeInsets.only(top: hasSubtitle ? 4 : 0),
               child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              width: 58, // Increased width for larger thumb area
-              height: 32, // Slightly taller for premium feel
-              padding: const EdgeInsets.all(2),
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                width: 62, // Refined HIG width
+                height: 32,
+                padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   color: enabled && value ? switchColor : p.surface3,
                   borderRadius: BorderRadius.circular(999),
@@ -452,6 +471,22 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                 child: RepaintBoundary(
                   child: Stack(
                     children: [
+                      // "On" Indicator (Accessibility style)
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: value ? 1.0 : 0.0,
+                        child: Align(
+                          alignment: const Alignment(-0.55, 0),
+                          child: Container(
+                            width: 1.8,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                      ),
                       AnimatedAlign(
                         duration: const Duration(milliseconds: 200),
                         curve: Curves.easeInOut,
@@ -460,9 +495,10 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                         child: AnimatedBuilder(
                           animation: _stretchController,
                           builder: (context, child) {
-                            final stretch = _stretchController.value * 14; // Increased stretch
+                            // Fluid "pill" thumb stretch animation
+                            final stretch = _stretchController.value * 10;
                             return Container(
-                              width: 28 + stretch, // Base thumb width 28
+                              width: 34 + stretch, // Refined base thumb width 34
                               height: 28,
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -470,7 +506,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.15),
-                                    blurRadius: 6,
+                                    blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
@@ -515,7 +551,7 @@ class ThemeChoice extends StatelessWidget {
         height: 80,
         decoration: BoxDecoration(
           color: active ? p.surface3 : p.surface2,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(32), // iOS 26 style
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -615,16 +651,12 @@ class ColorChoiceSetting extends StatelessWidget {
   const ColorChoiceSetting({
     super.key,
     required this.p,
-    required this.title,
-    this.subtitle,
     required this.value,
     required this.onChanged,
     this.blur = false,
   });
 
   final Palette p;
-  final String title;
-  final String? subtitle;
   final String value;
   final ValueChanged<String> onChanged;
   final bool blur;
@@ -654,79 +686,57 @@ class ColorChoiceSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     return Glass(
       p: p,
-      radius: 20,
+      radius: 32,
       blur: blur,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: p.text,
-              fontWeight: FontWeight.w900,
-              fontSize: 16,
-            ),
-          ),
-          if (hasSubtitle) ...[
-            const SizedBox(height: 4),
-            Text(
-              subtitle!,
-              style: TextStyle(color: p.text2, fontSize: 13, height: 1.3),
-            ),
-          ],
-          const SizedBox(height: 20),
-          Center(
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 12,
-              runSpacing: 12,
-              children: _choices.map((entry) {
-                final key = entry.$1;
-                final color = entry.$2;
-                final active = value == key;
-                return GestureDetector(
-                  onTap: () => onChanged(key),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    width: 54,
-                    height: 54,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: active ? color.withValues(alpha: 0.18) : p.surface2,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: active ? color : p.border,
-                        width: active ? 2.5 : 1,
-                      ),
-                      boxShadow: active
-                          ? [
-                            BoxShadow(
-                              color: color.withValues(alpha: 0.25),
-                              blurRadius: 14,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                          : null,
-                    ),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 140),
-                      width: active ? 32 : 36,
-                      height: active ? 32 : 36,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 24),
+      child: Center(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 14,
+          runSpacing: 14,
+          children: _choices.map((entry) {
+            final key = entry.$1;
+            final color = entry.$2;
+            final active = value == key;
+            return GestureDetector(
+              onTap: () => onChanged(key),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 140),
+                width: 64, // Increased to fit card
+                height: 64,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: active ? color.withValues(alpha: 0.18) : p.surface2,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: active ? color : p.border,
+                    width: active ? 2.5 : 1,
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
+                  boxShadow: active
+                      ? [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.25),
+                          blurRadius: 14,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                      : null,
+                ),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 140),
+                  width: active ? 38 : 42,
+                  height: active ? 38 : 42,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -836,26 +846,17 @@ class SettingsPageDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding), // Adjusted for HIG footer style
+      padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding), // Tight 5px gap below settings card
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 3.5), // Precisely aligned with 13px Inter cap-height
-            child: Icon(
-              Icons.info_outline_rounded,
-              color: p.text3.withValues(alpha: 0.6),
-              size: 13,
-            ),
-          ),
-          const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                color: p.text3, // Using text3 for footer-like look
-                fontSize: 13, // Standard iOS footer size
-                height: 1.45, // Slightly increased for better readability
+                color: p.text3,
+                fontSize: 13,
+                height: 1.45,
                 fontWeight: FontWeight.w400,
                 fontVariations: const [FontVariation('wght', 400)],
                 letterSpacing: -0.05,
@@ -885,7 +886,7 @@ class SettingsBetaNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding),
+      padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -957,7 +958,7 @@ class SettingsSearchBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(32), // iOS 26 High-Radius style
       ),
       child: TextField(
         controller: controller,
@@ -992,9 +993,11 @@ class SettingsAboutBlock extends StatelessWidget {
   const SettingsAboutBlock({
     super.key,
     required this.p,
+    required this.onOpenLink,
   });
 
   final Palette p;
+  final ValueChanged<String> onOpenLink;
 
   @override
   Widget build(BuildContext context) {
@@ -1003,7 +1006,7 @@ class SettingsAboutBlock extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(32),
       ),
       child: Column(
         children: [
@@ -1012,14 +1015,94 @@ class SettingsAboutBlock extends StatelessWidget {
             style: TextStyle(
               color: p.text,
               fontWeight: FontWeight.w900,
-              fontSize: 16,
+              fontSize: 18,
+              letterSpacing: -0.2,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Built by YABP as a small, offline-first timestamp logger for real work: quick taps, focused notes, private local storage, and exports developers can inspect.',
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'OPEN SOURCE',
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: p.text3.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'MIT LICENSE',
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text.rich(
+            TextSpan(
+              style: TextStyle(color: p.text2, fontSize: 14, height: 1.5),
+              children: [
+                const TextSpan(text: 'Built by '),
+                TextSpan(
+                  text: 'YABP',
+                  style: TextStyle(
+                    color: p.accent,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.underline,
+                    decorationColor: p.accent.withValues(alpha: 0.3),
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => onOpenLink(yabpSite),
+                ),
+                const TextSpan(
+                  text: ' as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.',
+                ),
+              ],
+            ),
             textAlign: TextAlign.center,
-            style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
+          ),
+          const SizedBox(height: 20),
+          Divider(color: p.border.withValues(alpha: 0.5), height: 1, indent: 40, endIndent: 40),
+          const SizedBox(height: 20),
+          Text(
+            '© 2026 NoteKar',
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Version $appVersion ($appBuildNumber)',
+            style: TextStyle(
+              color: p.text3.withValues(alpha: 0.5),
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
         ],
       ),
