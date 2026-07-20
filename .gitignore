@@ -1,116 +1,96 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+# ----------------------------------------------------------------------
+# NoteKar Android (Flutter) Comprehensive .gitignore
+# Ensures ZERO sensitive signing keys, passwords, or local paths
+# are ever committed to GitHub.
+# ----------------------------------------------------------------------
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# 🔑 Android Signing Secrets & Passwords (CRITICAL - NEVER COMMIT)
+**/key.properties
+**/key.properties.*
+**/local.properties
+**/*.jks
+**/*.keystore
+**/*.pem
+**/*.p12
+**/*.pkcs12
+**/*.crt
+**/*.cer
+**/*.der
+**/*.key
+**/*.asc
+**/*.bks
+**/*.pfx
+**/upload-keystore.jks
+**/debug.keystore
+**/release-key.jks
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Android release signing secrets
-/android/key.properties
-/android/**/*.jks
-/android/**/*.keystore
-/android/key.properties.*
-/android/**/*.pem
-/android/**/*.p12
-/android/**/*.mobileprovision
-/release/
-
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-build/
-coverage/
-
-android/.gradle/
-android/app/build/
-android/build/
-
-ios/Pods/
-ios/.symlinks/
-ios/Flutter/Flutter.framework
-ios/Flutter/Flutter.podspec
-
-*.iml
-.idea/
-.vscode/settings.json
-
-*.jks
-*.keystore
-*.pem
-*.p12
-*.cer
-*.crt
-*.key
-*.asc
-key.properties
-key.properties.*
-local.properties
-.env
-.env.*
+# 🔐 API Secrets, Cloud Configs & Environment Files
+**/.env
+**/.env.*
 !.env.example
-*.env
-secrets.json
-service-account*.json
-google-services.json
-GoogleService-Info.plist
-firebase_options.dart
+**/*.env
+**/secrets.json
+**/credentials.json
+**/service-account*.json
+**/client_secret*.json
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
 
-release/
-output/
-*.apk
-*.aab
-*.idsig
-*.sha1
-*.sha256
+# 🛠️ Build Artifacts, Cache & Generated Code
+**/build/
+**/coverage/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/.gradle/
+**/.kotlin/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/ios/Pods/
+**/ios/.symlinks/
 
-# Local notes, generated reports, and private release scratch files
-*.local
-*.private
-build-report/
-play-store/
-fastlane/report.xml
+# 📱 Compiled APKs, App Bundles & Releases
+**/release/
+**/output/
+**/releases/
+**/versions/
+**/*.apk
+**/*.aab
+**/*.idsig
+**/*.sha1
+**/*.sha256
 
-.DS_Store
-Thumbs.db
+# 💻 IDEs, Editors & Project Specs
+**/.idea/
+**/*.iml
+**/*.ipr
+**/*.iws
+**/.vscode/
+**/.atom/
+**/.history
+**/.svn/
+
+# 📝 Personal Docs, Local Notes & Word Documents
+**/*.docx
+**/*.doc
+**/*.log
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.local
+**/*.private
+
+# 🖥️ Operating System Metadata
+**/.DS_Store
+**/.DS_Store?
+**/._*
+**/.Spotlight-V100
+**/.Trashes
+**/ehthumbs.db
+**/Thumbs.db
+**/desktop.ini
