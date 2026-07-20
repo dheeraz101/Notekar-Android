@@ -1,0 +1,1 @@
+Instant tap timestamp logger: 100% offline-first, local Hive storage & private.

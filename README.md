@@ -1,8 +1,10 @@
 # NoteKar Android
 
+![NoteKar Banner](screenshot/notekar_banner.png)
+
 > **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero friction. 100% Offline-First & Privacy-Focused.
 
-![version](https://img.shields.io/badge/version-4.0.4-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen)
+![version](https://img.shields.io/badge/version-4.0.4-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen)
 
 ---
 
@@ -17,9 +19,9 @@
 
 NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain stored locally on your device.
 
-- 🛡️ **[Privacy Policy](https://notekarapp.vercel.app/privacy.html)**: Full privacy policy detailing data handling, local storage, and permissions.
-- 📜 **[Terms of Use](https://notekarapp.vercel.app/terms.html)**: Terms of service and open-source usage.
-- 🌐 **[NoteKar Web](https://notekarapp.vercel.app/)**: Official website & legal hub.
+- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**: Full privacy policy detailing data handling, local storage, and permissions.
+- 📜 **[Terms of Use](https://dheeraz101.github.io/Notekar/terms.html)**: Terms of service and open-source usage.
+- 🌐 **[NoteKar Web PWA](https://dheeraz101.github.io/Notekar/)**: Official Web application & legal hub.
 
 ---
 
@@ -47,12 +49,25 @@ Your support helps keep NoteKar free, offline-first, and actively maintained.
 
 ---
 
+## 🤖 F-Droid & Reproducible Build Compliance
+
+NoteKar Android meets all official F-Droid inclusion requirements:
+
+- **100% Open Source**: Code licensed under the OSI-approved **MIT License**.
+- **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or closed-source libraries.
+- **No Trackers**: Zero telemetry scripts or analytics frameworks.
+- **Fastlane Metadata**: Fully structured in `fastlane/metadata/android/en-US/`.
+
+---
+
 ## 📦 Project Structure
 
 ```
 Notekar - Flutter/
 ├── android/                # Android native project files & Gradle build scripts
 ├── assets/                 # App fonts (Inter) and icon resources
+├── fastlane/               # F-Droid Fastlane metadata & graphics
+│   └── metadata/android/en-US/
 ├── lib/
 │   ├── main.dart           # App entry point, Hive DB init, and theme setup
 │   ├── dialogs/            # Settings, confirmation & note dialogs
@@ -60,6 +75,8 @@ Notekar - Flutter/
 │   ├── screens/            # Home screen & history views
 │   ├── utils/              # Database wrappers & helper functions
 │   └── widgets/            # Custom UI components & interactive buttons
+├── screenshot/             # GitHub banner graphic (notekar_banner.png)
+├── CHANGELOG.md            # Version release history
 ├── CONTRIBUTING.md         # Developer contribution guidelines
 ├── CODE_OF_CONDUCT.md      # Community Code of Conduct
 ├── SECURITY.md            # Security policy & vulnerability reporting

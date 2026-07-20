@@ -1,0 +1,5 @@
+- Native Android release powered by Flutter.
+- Offline-first local database persistence via Hive.
+- Standard Android OS Auto Backup compatibility.
+- Tap delay controls and dual operating modes (Two-Way & Single).
+- CSV and JSON data export tools.

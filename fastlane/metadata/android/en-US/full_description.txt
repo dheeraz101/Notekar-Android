@@ -1,0 +1,11 @@
+NoteKar is a minimal, elegant, and 100% offline-first timestamp logger built for capturing moments in time with zero friction.
+
+Key Features:
+- Instant Tap Logging: Tap the screen once to record exact timestamps instantly.
+- Dual Operating Modes: Switch between Two-Way mode (IN/OUT session tracking for work/study) and Single mode (one-shot timestamping).
+- Rich Local Storage: Powered by local Hive database and SharedPreferences with zero cloud database dependency.
+- Android OS Auto-Backup Support: Compatible with standard Android system auto-backup (Google Drive system backup).
+- Configurable Tap Delay: Set minimum tap intervals (0s to 60s) to prevent accidental double taps.
+- Minimal Permissions: Internet access is strictly used to check for software releases and bug announcements. Notifications permission is used for reminders and update alerts.
+- Zero Trackers & Ads: 100% open source under the MIT License with zero advertising networks or commercial telemetry scripts.
+- Full Data Export & Control: Export entries anytime in standard CSV or JSON formats.
