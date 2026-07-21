@@ -395,7 +395,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing64),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         if (index >= _listItems.length) {

@@ -1677,12 +1677,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       child: SettingsSearchBox(
                         p: p,
                         controller: _settingsSearchController,
-                        focusNode: _settingsSearchFocusNode,
-                        onTap: () {
-                          if (category != 'Search') {
-                            _openCategory('Search');
-                          }
-                        },
+                        readOnly: true,
+                        onTap: () => _openCategory('Search'),
                         onChanged: (value) {
                           setState(() => _settingsQuery = value);
                           if (_activeController.hasClients) {
@@ -1863,11 +1859,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         p: p,
                         controller: _settingsSearchController,
                         focusNode: _settingsSearchFocusNode,
-                        onTap: () {
-                          if (category != 'Search') {
-                            _openCategory('Search');
-                          }
-                        },
                         onChanged: (value) {
                           setState(() => _settingsQuery = value);
                           if (_activeController.hasClients) {
@@ -2166,7 +2157,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
-                      title: 'Accent Color',
                       showDividers: false,
                       children: [
                         ColorChoiceSetting(

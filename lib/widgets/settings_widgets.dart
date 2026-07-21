@@ -976,6 +976,7 @@ class SettingsSearchBox extends StatelessWidget {
     required this.onClear,
     this.focusNode,
     this.onTap,
+    this.readOnly = false,
   });
 
   final Palette p;
@@ -984,6 +985,7 @@ class SettingsSearchBox extends StatelessWidget {
   final VoidCallback onClear;
   final FocusNode? focusNode;
   final VoidCallback? onTap;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -995,6 +997,7 @@ class SettingsSearchBox extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        readOnly: readOnly,
         onChanged: onChanged,
         focusNode: focusNode,
         onTap: onTap,
