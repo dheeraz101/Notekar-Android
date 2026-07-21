@@ -184,73 +184,7 @@ class SettingsDialog extends StatefulWidget {
   State<SettingsDialog> createState() => _SettingsDialogState();
 }
 
-class _BetaInfoRow extends StatelessWidget {
-  const _BetaInfoRow({
-    required this.p,
-    required this.number,
-    required this.title,
-    required this.text,
-  });
 
-  final Palette p;
-  final String number;
-  final String title;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: p.accent.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              number,
-              style: TextStyle(
-                color: p.accent,
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: p.text2,
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _SettingsDialogState extends State<SettingsDialog> {
   String? category;
@@ -819,74 +753,88 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _showBetaInfoPopup(Palette p) {
     showGeneralDialog<void>(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierColor: Colors.black.withValues(alpha: 0.52),
       barrierDismissible: true,
       barrierLabel: 'Close beta info',
-      transitionDuration: const Duration(milliseconds: 160),
-      pageBuilder: (_, anim1, _) => FadeTransition(
-        opacity: anim1,
-        child: AppSheet(
-          p: p,
-          title: 'NoteKar Beta',
-          blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: p.border.withValues(alpha: 0.5)),
-                ),
-                child: Column(
-                  children: [
-                    _BetaInfoRow(
-                      p: p,
-                      number: '1',
-                      title: 'Upcoming Features',
-                      text: 'Explore and test new functionality before the stable release.',
-                    ),
-                    _BetaInfoRow(
-                      p: p,
-                      number: '2',
-                      title: 'Active Polishing',
-                      text: 'Features are functional but undergo frequent refinements.',
-                    ),
-                    _BetaInfoRow(
-                      p: p,
-                      number: '3',
-                      title: 'Privacy First',
-                      text: 'Even in Beta, your moments remain local and private.',
-                    ),
-                    _BetaInfoRow(
-                      p: p,
-                      number: '4',
-                      title: 'Continuous Feedback',
-                      text: 'Help us identify issues and polish the experience.',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              SettingsPageDescription(
-                p: p,
-                text: 'Beta features allow us to refine NoteKar with your help. Thank you for testing.',
-              ),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(
-                  backgroundColor: p.accent,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+      transitionDuration: const Duration(milliseconds: 150),
+      pageBuilder: (_, anim1, _) => ScaleTransition(
+        scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 320,
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: p.border.withValues(alpha: 0.6)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.28),
+                    blurRadius: 32,
+                    offset: const Offset(0, 16),
                   ),
-                ),
-                child: const Text('Dismiss', style: TextStyle(fontWeight: FontWeight.w800)),
+                ],
               ),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.science_rounded, color: p.accent, size: 24),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'NoteKar Beta',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'You are testing upcoming features before stable release. Features are actively polished while your data remains 100% private and local.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  PressableScale(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: p.accent,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'Got It',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
