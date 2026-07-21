@@ -16,6 +16,7 @@ import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
 import 'package:notekar/utils/app_logger.dart';
+import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -2204,6 +2205,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
+                    HistoryAnalyticsCard(p: p, entries: entries),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Visual overview of your logging frequency, 7-day activity trends, and average interval between moments.',
+                    ),
+                    const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
                       children: [

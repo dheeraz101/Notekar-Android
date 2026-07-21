@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -15,8 +16,6 @@ class HistoryAnalyticsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (entries.isEmpty) return const SizedBox.shrink();
-
     final now = DateTime.now();
     final todayStr = dateKey(now);
     final yesterdayStr = dateKey(now.subtract(const Duration(days: 1)));
@@ -27,7 +26,10 @@ class HistoryAnalyticsCard extends StatelessWidget {
     final todayCount = todayEntries.length;
     final yesterdayCount = yesterdayEntries.length;
     final diff = todayCount - yesterdayCount;
-    final diffStr = diff > 0 ? '+$diff from yesterday' : (diff < 0 ? '$diff from yesterday' : 'Same as yesterday');
+
+    final diffText = diff > 0
+        ? '+$diff logs vs yesterday'
+        : (diff < 0 ? '${diff.abs()} fewer logs than yesterday' : 'Same count as yesterday');
 
     // Calculate Average Interval between consecutive moments
     int avgIntervalMinutes = 0;
@@ -36,7 +38,6 @@ class HistoryAnalyticsCard extends StatelessWidget {
       int count = 0;
       for (int i = 0; i < entries.length - 1; i++) {
         final diffMs = (entries[i].timestamp - entries[i + 1].timestamp).abs();
-        // Ignore multi-day gaps (> 24h) for realistic intra-day averages
         if (diffMs <= 24 * 60 * 60 * 1000) {
           totalDiffMs += diffMs;
           count++;
@@ -52,8 +53,23 @@ class HistoryAnalyticsCard extends StatelessWidget {
     final totalInOut = inCount + outCount;
     final inRatio = totalInOut > 0 ? inCount / totalInOut : 0.5;
 
+    // 7-day counts for iOS bar chart
+    final dayCounts = <_DayStat>[];
+    int maxDayCount = 1;
+    for (int i = 6; i >= 0; i--) {
+      final day = now.subtract(Duration(days: i));
+      final k = dateKey(day);
+      final c = entries.where((e) => e.date == k).length;
+      if (c > maxDayCount) maxDayCount = c;
+      dayCounts.add(_DayStat(
+        dayLabel: _weekdayShort(day.weekday),
+        count: c,
+        isToday: i == 0,
+      ));
+    }
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -64,49 +80,48 @@ class HistoryAnalyticsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.analytics_rounded, color: p.accent, size: 16),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Activity Summary',
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ],
-              ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
+                  color: p.accent.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
-                  diffStr,
-                  style: TextStyle(
-                    color: p.accent,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Icon(Icons.analytics_rounded, color: p.accent, size: 17),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Activity Summary',
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      diffText,
+                      style: TextStyle(
+                        color: diff > 0
+                            ? p.green
+                            : (diff < 0 ? p.orange : p.text3),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
+          // 3 Core Metrics
           Row(
             children: [
               Expanded(
@@ -136,6 +151,63 @@ class HistoryAnalyticsCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 20),
+          // iOS 7-Day Bar Chart
+          Text(
+            'LAST 7 DAYS',
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 64,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                for (final ds in dayCounts)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        ds.count > 0 ? '${ds.count}' : '',
+                        style: TextStyle(
+                          color: ds.isToday ? p.accent : p.text3,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Container(
+                        width: 18,
+                        height: math.max(6.0, (ds.count / maxDayCount) * 36.0),
+                        decoration: BoxDecoration(
+                          color: ds.isToday
+                              ? p.accent
+                              : (ds.count > 0
+                                  ? p.accent.withValues(alpha: 0.4)
+                                  : p.border.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        ds.dayLabel,
+                        style: TextStyle(
+                          color: ds.isToday ? p.accent : p.text3,
+                          fontSize: 11,
+                          fontWeight: ds.isToday ? FontWeight.w900 : FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ),
           if (totalInOut > 0) ...[
             const SizedBox(height: 16),
@@ -176,6 +248,31 @@ class HistoryAnalyticsCard extends StatelessWidget {
       ),
     );
   }
+
+  static String _weekdayShort(int w) {
+    return switch (w) {
+      DateTime.monday => 'M',
+      DateTime.tuesday => 'T',
+      DateTime.wednesday => 'W',
+      DateTime.thursday => 'T',
+      DateTime.friday => 'F',
+      DateTime.saturday => 'S',
+      DateTime.sunday => 'S',
+      _ => '',
+    };
+  }
+}
+
+class _DayStat {
+  const _DayStat({
+    required this.dayLabel,
+    required this.count,
+    required this.isToday,
+  });
+
+  final String dayLabel;
+  final int count;
+  final bool isToday;
 }
 
 class _StatMetric extends StatelessWidget {
