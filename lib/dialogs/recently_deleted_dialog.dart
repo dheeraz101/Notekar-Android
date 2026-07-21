@@ -99,7 +99,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
 
     return AppSheet(
       p: p,
-      title: 'Recently Deleted',
+      title: 'Trash Bin',
       blur: widget.blur,
       docked: true,
       onBack: () => Navigator.pop(context),
@@ -118,7 +118,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: spacing4),
                 child: AppSheetLargeTitle(
                   p: p,
-                  title: 'Recently Deleted',
+                  title: 'Trash Bin',
                   scrollController: _scrollController,
                 ),
               ),

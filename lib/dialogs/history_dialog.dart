@@ -188,7 +188,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       pageBuilder: (_, _, _) => ActionConfirmSheet(
         p: widget.p,
         title: 'Delete All Moments?',
-        message: 'Are you sure you want to delete all history moments? Deleted moments will be moved to Recently Deleted.',
+        message: 'Are you sure you want to delete all history moments? Deleted moments will be moved to Trash Bin.',
         confirmLabel: 'Delete All',
         isDestructive: true,
         icon: Icons.delete_sweep_rounded,

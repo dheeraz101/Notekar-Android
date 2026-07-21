@@ -705,11 +705,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
-        title: 'Recently Deleted',
+        title: 'Trash Bin',
         subtitle: deletedSubtitle,
-        category: 'Recently Deleted',
+        category: 'Trash Bin',
         icon: Icons.delete_outline_rounded,
-        keywords: ['trash', 'deleted', 'restore', 'remove', 'history'],
+        keywords: ['trash', 'deleted', 'restore', 'remove', 'history', 'bin'],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
@@ -2711,6 +2711,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
                     if (widget.onOpenTrash != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+                        child: Text(
+                          'RECENTLY DELETED',
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
                       Column(
                         children: [
                           Container(
@@ -2724,14 +2736,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 SettingsRow(
                                   p: p,
                                   icon: Icons.delete_outline_rounded,
-                                  title: 'Recently Deleted',
+                                  title: 'Trash Bin',
                                   status: '${_trash.length} items',
                                   color: p.orange,
-                                  onTap: () => _openCategory('Recently Deleted', parent: 'Moments'),
+                                  onTap: () => _openCategory('Trash Bin', parent: 'Moments'),
                                 ),
                                 Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(64, 12, 16, 14),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   decoration: BoxDecoration(
                                     color: p.surface3.withValues(alpha: 0.35),
                                   ),
@@ -3033,7 +3045,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'App Lock uses your biometric or PIN. Immediate lock covers NoteKar in Recents or background.'),
                         GuideRow(p: p, icon: Icons.auto_awesome_motion_rounded, title: 'Minimal Moment Options', text: 'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.'),
                         GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.'),
-                        GuideRow(p: p, icon: Icons.delete_outline_rounded, title: 'Restore Deleted Moments', text: 'Open Recently Deleted in History or Settings > Moments to view, restore, or permanently remove deleted moments.'),
+                        GuideRow(p: p, icon: Icons.delete_outline_rounded, title: 'Restore Deleted Moments', text: 'Open Trash Bin in History or Settings > Moments to view, restore, or permanently remove deleted moments.'),
                         GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a JSON backup before resetting, changing phones, or testing a new build.'),
                       ],
                     ),
@@ -3049,7 +3061,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       showDividers: true,
                       children: [
-                        HelpRow(p: p, question: 'Can I restore deleted moments?', answer: 'Yes! Deleted moments are moved to Recently Deleted (Trash Bin). You can restore individual moments or all moments anytime from History or Settings > Moments.'),
+                        HelpRow(p: p, question: 'Can I restore deleted moments?', answer: 'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.'),
                         HelpRow(p: p, question: 'Update check failed', answer: 'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.'),
                         HelpRow(p: p, question: 'App Notices are not appearing', answer: 'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.'),
                         HelpRow(p: p, question: 'NoteKar is offline', answer: 'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.'),
@@ -3579,7 +3591,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                   ),
                 ),
-              if (show('Recently Deleted')) ...[
+              if (show('Trash Bin')) ...[
                 if (_trash.isNotEmpty)
                   SliverToBoxAdapter(
                     child: Padding(

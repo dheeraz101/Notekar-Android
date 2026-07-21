@@ -36,7 +36,7 @@ class MomentsSettingsPage extends StatelessWidget {
                   SettingsRow(
                     p: p,
                     icon: Icons.delete_outline_rounded,
-                    title: 'Recently Deleted',
+                    title: 'Trash Bin',
                     status: previewText,
                     color: p.orange,
                     onTap: onOpenTrash!,
