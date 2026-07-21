@@ -332,6 +332,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    for (final path in const [
+      'icon-maskable-512.png',
+      'app_icons/black.png',
+      'app_icons/blue.png',
+      'app_icons/gold.png',
+      'app_icons/green.png',
+      'app_icons/orange.png',
+      'app_icons/red.png',
+    ]) {
+      precacheImage(AssetImage(path), context);
+    }
+  }
+
+  @override
   void dispose() {
     _settingsSearchController.dispose();
     _settingsSearchFocusNode.dispose();

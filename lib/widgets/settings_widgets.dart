@@ -623,7 +623,10 @@ class AppIconChoice extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.asset(
-                asset, // Direct asset path from map
+                asset,
+                cacheWidth: 144,
+                cacheHeight: 144,
+                filterQuality: FilterQuality.medium,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: p.surface3,
