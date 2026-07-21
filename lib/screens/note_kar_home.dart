@@ -26,6 +26,7 @@ import 'package:notekar/widgets/toolbar.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -473,6 +474,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
 
     _applySystemUiStyle();
+    _initQuickActions();
     try {
       unawaited(_updateAndroidWidget());
     } catch (e, stack) {
@@ -503,6 +505,35 @@ class _NoteKarHomeState extends State<NoteKarHome>
       unawaited(_runStartupChecks(prefs));
     });
     startupTask.finish();
+  }
+
+  void _initQuickActions() {
+    const quickActions = QuickActions();
+    quickActions.initialize((String shortcutType) {
+      if (!mounted) return;
+      if (shortcutType == 'quick_log_in' || shortcutType == 'quick_log_out') {
+        unawaited(_logEntry());
+      } else if (shortcutType == 'open_history') {
+        unawaited(_openHistory());
+      }
+    });
+    quickActions.setShortcutItems(<ShortcutItem>[
+      const ShortcutItem(
+        type: 'quick_log_in',
+        localizedTitle: 'Instant Log (IN)',
+        icon: 'ic_launcher',
+      ),
+      const ShortcutItem(
+        type: 'quick_log_out',
+        localizedTitle: 'Instant Log (OUT)',
+        icon: 'ic_launcher',
+      ),
+      const ShortcutItem(
+        type: 'open_history',
+        localizedTitle: 'Open History',
+        icon: 'ic_launcher',
+      ),
+    ]);
   }
 
   Future<void> _unlockAfterFirstPaint(SharedPreferences prefs) async {

@@ -9,6 +9,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -248,6 +249,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       title: 'History',
                       scrollController: _scrollController,
                     ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: HistoryAnalyticsCard(
+                    p: widget.p,
+                    entries: _entries,
                   ),
                 ),
                 SliverPersistentHeader(

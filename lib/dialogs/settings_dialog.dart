@@ -16,6 +16,7 @@ import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
 import 'package:notekar/utils/app_logger.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -1808,6 +1809,46 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ],
                       ),
+                      if (updateStatus.toLowerCase().contains('available') || updateStatus.toLowerCase().contains('new release')) ...[
+                        const SizedBox(height: spacing16),
+                        PressableScale(
+                          onTap: () => _openCategory('Update Center'),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: p.accent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: p.accent.withValues(alpha: 0.4), width: 1.2),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: p.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.system_update_rounded, color: Colors.white, size: 16),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    updateStatus,
+                                    style: TextStyle(
+                                      color: p.text,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right_rounded, color: p.accent, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     SettingsPageDescription(
                       p: p,
                       text: 'Personalize and configure NoteKar to fit your specific workflow.',
