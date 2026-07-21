@@ -1090,8 +1090,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ];
 
     return all.where((item) {
-      if (item.title.toLowerCase().contains(query)) return true;
-      if (item.subtitle.toLowerCase().contains(query)) return true;
+      final title = item.title.toLowerCase();
+      final titleLoc = item.title.localized(context).toLowerCase();
+      final subtitle = item.subtitle.toLowerCase();
+      final subtitleLoc = item.subtitle.localized(context).toLowerCase();
+      
+      if (title.contains(query) || titleLoc.contains(query)) return true;
+      if (subtitle.contains(query) || subtitleLoc.contains(query)) return true;
       return item.keywords.any((k) => k.contains(query));
     }).toList();
   }
@@ -2586,7 +2591,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'Select your preferred language for the application.',
+                      text: 'Select your preferred language for the application.\n\nNote: Localizations are currently in Beta. Some sections of the app may still display in English as we actively refine and verify translations.',
                     ),
                     const SizedBox(height: spacing48),
                   ]),

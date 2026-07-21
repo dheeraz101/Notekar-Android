@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class GuideRow extends StatelessWidget {
   const GuideRow({
@@ -29,12 +30,12 @@ class GuideRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  title.localized(context),
                   style: TextStyle(color: p.text, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  text,
+                  text.localized(context),
                   style: TextStyle(color: p.text2, fontSize: 13, height: 1.35),
                 ),
               ],
@@ -71,7 +72,7 @@ class HelpRow extends StatelessWidget {
         iconColor: p.accent,
         collapsedIconColor: p.text3,
         title: Text(
-          question,
+          question.localized(context),
           style: TextStyle(
             color: p.text,
             fontSize: 14,
@@ -82,7 +83,7 @@ class HelpRow extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              answer,
+              answer.localized(context),
               style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
             ),
           ),
