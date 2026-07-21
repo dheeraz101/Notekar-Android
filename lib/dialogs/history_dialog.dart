@@ -44,53 +44,7 @@ class HistoryDialog extends StatefulWidget {
   State<HistoryDialog> createState() => _HistoryDialogState();
 }
 
-class _NoticePill extends StatelessWidget {
-  const _NoticePill({
-    required this.p,
-    required this.label,
-    required this.color,
-    this.onTap,
-    this.solid = false,
-  });
 
-  final Palette p;
-  final String label;
-  final Color color;
-  final VoidCallback? onTap;
-  final bool solid;
-
-  @override
-  Widget build(BuildContext context) {
-    return PressableScale(
-      enabled: onTap != null,
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: solid ? color : color.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(999),
-          border: solid
-              ? null
-              : Border.all(
-                color: color.withValues(alpha: 0.4),
-                width: 1.2,
-              ),
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: solid ? Colors.white : color,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _HistoryDialogState extends State<HistoryDialog> {
   static const _pageSize = 100;
@@ -622,44 +576,68 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     : Container(
                         key: const ValueKey('notice-bar'),
                         width: double.infinity,
-                        padding: const EdgeInsets.all(5),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: widget.p.name == 'amoled'
-                              ? Colors.black // Pure dark for AMOLED
-                              : widget.p.name == 'light'
-                                  ? Colors.white
-                                  : widget.p.surface2,
+                              ? const Color(0xFF121212)
+                              : widget.p.surface2,
                           borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withValues(alpha: 0.18),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
                         child: Row(
                           children: [
+                            Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: (_noticeUndo == null ? widget.p.red : widget.p.accent)
+                                    .withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _noticeUndo == null ? Icons.delete_outline_rounded : Icons.info_outline_rounded,
+                                color: _noticeUndo == null ? widget.p.red : widget.p.accent,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
                             Expanded(
-                              flex: 5,
-                              child: _NoticePill(
-                                p: widget.p,
-                                label: _notice!,
-                                color: _noticeUndo == null
-                                    ? widget.p.red
-                                    : widget.p.accent,
+                              child: Text(
+                                _notice!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.p.text,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             if (_noticeUndo != null) ...[
-                              const SizedBox(width: 5),
-                              Expanded(
-                                flex: 2,
-                                child: _NoticePill(
-                                  p: widget.p,
-                                  label: 'Undo',
-                                  color: widget.p.accent,
-                                  onTap: _noticeUndo,
-                                  solid: true,
+                              const SizedBox(width: 10),
+                              PressableScale(
+                                onTap: _noticeUndo,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.accent,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: const Text(
+                                    'Undo',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],

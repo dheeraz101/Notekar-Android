@@ -269,46 +269,60 @@ class ActivityTrendsCard extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           SizedBox(
-            height: 72,
+            height: 82,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 for (final ds in dayCounts)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        ds.count > 0 ? '${ds.count}' : '',
-                        style: TextStyle(
-                          color: ds.isToday ? p.accent : p.text2,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 16,
+                          child: Center(
+                            child: Text(
+                              ds.count > 0 ? '${ds.count}' : '',
+                              style: TextStyle(
+                                color: ds.isToday ? p.accent : p.text2,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 20,
-                        height: math.max(6.0, (ds.count / maxDayCount) * 40.0),
-                        decoration: BoxDecoration(
-                          color: ds.isToday
-                              ? p.accent
-                              : (ds.count > 0
-                                  ? p.accent.withValues(alpha: 0.45)
-                                  : p.border.withValues(alpha: 0.3)),
-                          borderRadius: BorderRadius.circular(5),
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              width: 18,
+                              height: math.max(6.0, (ds.count / maxDayCount) * 40.0),
+                              decoration: BoxDecoration(
+                                color: ds.isToday
+                                    ? p.accent
+                                    : (ds.count > 0
+                                        ? p.accent.withValues(alpha: 0.45)
+                                        : p.border.withValues(alpha: 0.3)),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        ds.dayLabel,
-                        style: TextStyle(
-                          color: ds.isToday ? p.accent : p.text3,
-                          fontSize: 11,
-                          fontWeight: ds.isToday ? FontWeight.w900 : FontWeight.w600,
+                        const SizedBox(height: 6),
+                        SizedBox(
+                          height: 16,
+                          child: Center(
+                            child: Text(
+                              ds.dayLabel,
+                              style: TextStyle(
+                                color: ds.isToday ? p.accent : p.text3,
+                                fontSize: 11,
+                                fontWeight: ds.isToday ? FontWeight.w900 : FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
               ],
             ),

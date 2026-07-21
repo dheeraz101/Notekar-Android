@@ -38,10 +38,20 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: p.red.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.warning_amber_rounded, color: p.red, size: 24),
+          ),
+          const SizedBox(height: 12),
           Text(
             widget.message,
             textAlign: TextAlign.center,
-            style: TextStyle(color: p.text2, height: 1.45),
+            style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
           ),
           const SizedBox(height: spacing16),
           TextField(
@@ -57,40 +67,55 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
               filled: true,
               fillColor: p.surface2,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(color: p.border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(color: p.border),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(color: p.accent),
               ),
             ),
           ),
-          const SizedBox(height: spacing16),
+          const SizedBox(height: spacing20),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(foregroundColor: p.accent),
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: p.text,
+                      side: BorderSide(color: p.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _canReset ? p.red : p.surface3,
-                    foregroundColor: _canReset ? Colors.white : p.text3,
+                child: SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _canReset ? p.red : p.surface3,
+                      foregroundColor: _canReset ? Colors.white : p.text3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: _canReset
+                        ? () => Navigator.pop(context, true)
+                        : null,
+                    child: const Text('Reset', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
-                  onPressed: _canReset
-                      ? () => Navigator.pop(context, true)
-                      : null,
-                  child: const Text('Reset'),
                 ),
               ),
             ],

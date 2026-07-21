@@ -86,20 +86,40 @@ class BackupImportPreviewDialog extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel'),
+                  child: SizedBox(
+                    height: 52,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: p.text,
+                        side: BorderSide(color: p.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: FilledButton(
-                    onPressed:
-                        summary.newMoments == 0 &&
-                            summary.settingsToRestore == 0
-                        ? null
-                        : () => Navigator.pop(context, true),
-                    child: const Text('Import'),
+                  child: SizedBox(
+                    height: 52,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: p.accent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      onPressed:
+                          summary.newMoments == 0 &&
+                              summary.settingsToRestore == 0
+                          ? null
+                          : () => Navigator.pop(context, true),
+                      child: const Text('Import', style: TextStyle(fontWeight: FontWeight.w800)),
+                    ),
                   ),
                 ),
               ],

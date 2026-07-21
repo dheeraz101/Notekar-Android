@@ -69,7 +69,7 @@ class SettingsGroup extends StatelessWidget {
                   Divider(
                     height: 0.5,
                     color: p.border,
-                    indent: insetDividers ? 60 : 0, // Inset to align with text
+                    indent: insetDividers ? 64 : 0, // Inset to align right after squircle icon
                   ),
               ],
             ],
