@@ -551,13 +551,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (_startupChecksStarted) return;
     if (_privacyLock && !_privacyUnlocked) return;
 
-    final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-
-    // Remove artificial delay for first-run or after factory reset.
-    if (welcomeSeen) {
-      await Future<void>.delayed(const Duration(milliseconds: 260));
-    }
-
     if (!mounted) return;
     _startupChecksStarted = true;
     final startupTask = developer.TimelineTask()

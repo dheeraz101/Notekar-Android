@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <include domain="file" path="." />
+    <!-- Back up user preferences only; keep moments database 100% local -->
     <include domain="sharedpref" path="." />
+    <exclude domain="file" path="." />
 </full-backup-content>

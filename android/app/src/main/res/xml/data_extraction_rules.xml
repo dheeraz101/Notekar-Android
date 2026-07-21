@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
-        <include domain="file" path="." />
+        <!-- Back up app preferences only; keep database 100% private & local -->
         <include domain="sharedpref" path="." />
+        <exclude domain="file" path="." />
     </cloud-backup>
     <device-transfer>
+        <!-- Allow direct phone-to-phone migration during setup -->
         <include domain="file" path="." />
         <include domain="sharedpref" path="." />
     </device-transfer>

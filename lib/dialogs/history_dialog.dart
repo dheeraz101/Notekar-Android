@@ -496,16 +496,18 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(
                               spacing16,
-                              spacing8,
+                              spacing12,
                               spacing16,
-                              spacing8,
+                              6,
                             ),
                             child: Text(
-                              item.label!,
+                              item.label!.toUpperCase(),
                               style: TextStyle(
                                 color: widget.p.text3,
                                 fontSize: 11,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w800,
+                                fontVariations: const [FontVariation('wght', 800)],
+                                letterSpacing: 0.6,
                               ),
                             ),
                           );

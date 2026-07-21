@@ -2800,7 +2800,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'System-level backups automatically include NoteKar encrypted local database during Android OS auto-backup.',
+                      text: 'Android OS auto-backup preserves app preferences only. Your moments and notes stay 100% local and private to this device.',
                     ),
                     const SizedBox(height: 10),
                     SettingsGroup(
