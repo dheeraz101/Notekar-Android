@@ -41,7 +41,7 @@ Palette paletteFor(
   bool highContrast = false,
   String accentName = 'blue',
 }) {
-  final accent = accentColorFor(accentName, light: theme == 'light');
+  final accent = accentColorFor(accentName, theme: theme);
   if (theme == 'light') {
     return Palette(
       name: 'light',
@@ -55,18 +55,18 @@ Palette paletteFor(
       text3: highContrast ? const Color(0xFF5D5D5D) : const Color(0xFF3C3C43).withValues(alpha: 0.3),
       clock: highContrast ? const Color(0xFF8E8E93) : const Color(0xFFD1D1D6),
       accent: accent,
-      green: const Color(0xFF34C759),
-      orange: const Color(0xFFFF9500),
-      red: const Color(0xFFFF3B30),
+      green: const Color(0xFF248A3D),
+      orange: const Color(0xFFC46A00),
+      red: const Color(0xFFD70015),
       blue: const Color(0xFF007AFF),
     );
   }
   final amoled = theme == 'amoled';
   return Palette(
     name: theme,
-    bg: amoled ? Colors.black : const Color(0xFF121212), // Distinction between AMOLED and Dark
+    bg: amoled ? Colors.black : const Color(0xFF121212),
     surface: amoled ? Colors.black : const Color(0xFF121212),
-    surface2: amoled ? const Color(0xFF0A0A0A) : const Color(0xFF1C1C1E), // Subtle separation for AMOLED
+    surface2: amoled ? const Color(0xFF0A0A0A) : const Color(0xFF1C1C1E),
     surface3: amoled ? const Color(0xFF1C1C1E) : const Color(0xFF2C2C2E),
     border: amoled
         ? (highContrast ? const Color(0xFF444444) : const Color(0xFF1F1F1F))
@@ -76,36 +76,58 @@ Palette paletteFor(
     text3: highContrast ? const Color(0xFFBDBDBD) : const Color(0xFFEBEBF5).withValues(alpha: 0.3),
     clock: amoled ? const Color(0xFF1F1F1F) : const Color(0xFF303030),
     accent: accent,
-    green: const Color(0xFF30D158),
-    orange: const Color(0xFFFF9F0A),
-    red: const Color(0xFFFF453A),
-    blue: const Color(0xFF0A84FF),
+    green: amoled ? const Color(0xFF30D158) : const Color(0xFF34C759),
+    orange: amoled ? const Color(0xFFFF9F0A) : const Color(0xFFFF9500),
+    red: amoled ? const Color(0xFFFF453A) : const Color(0xFFFF3B30),
+    blue: amoled ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
   );
 }
 
-Color accentColorFor(String name, {required bool light}) {
+Color accentColorFor(String name, {String theme = 'dark', bool light = false}) {
+  final isLight = theme == 'light' || light;
+  final isAmoled = theme == 'amoled';
+
   return switch (name) {
-    'green' => light ? const Color(0xFF248A3D) : const Color(0xFF30D158),
-    'purple' => light ? const Color(0xFF7E57C2) : const Color(0xFFBF5AF2),
-    'pink' => light ? const Color(0xFFC1466E) : const Color(0xFFFF6B8A),
-    'orange' => light ? const Color(0xFFC46A00) : const Color(0xFFFF9F0A),
-    'graphite' => light ? const Color(0xFF5F6368) : const Color(0xFF8E8E93),
+    'green' => isLight
+        ? const Color(0xFF248A3D)
+        : (isAmoled ? const Color(0xFF30D158) : const Color(0xFF34C759)),
+    'purple' => isLight
+        ? const Color(0xFF7E57C2)
+        : (isAmoled ? const Color(0xFFBF5AF2) : const Color(0xFFAF52DE)),
+    'pink' => isLight
+        ? const Color(0xFFC1466E)
+        : (isAmoled ? const Color(0xFFFF6B8A) : const Color(0xFFFF2D55)),
+    'orange' => isLight
+        ? const Color(0xFFC46A00)
+        : (isAmoled ? const Color(0xFFFF9F0A) : const Color(0xFFFF9500)),
+    'graphite' => isLight
+        ? const Color(0xFF5F6368)
+        : (isAmoled ? const Color(0xFF98989D) : const Color(0xFF8E8E93)),
 
-    'teal' => light ? const Color(0xFF0A7C75) : const Color(0xFF40C8C0),
-    'mint' => light ? const Color(0xFF2E7D5B) : const Color(0xFF63D7A5),
-    'cyan' => light ? const Color(0xFF087EA4) : const Color(0xFF64D2FF),
-    'indigo' => light ? const Color(0xFF4F5BD5) : const Color(0xFF7D89FF),
-    'violet' => light ? const Color(0xFF6D5BD0) : const Color(0xFFA78BFA),
-    'lavender' => light ? const Color(0xFF7B68A8) : const Color(0xFFC4B5FD),
-    'rose' => light ? const Color(0xFFB43B5E) : const Color(0xFFFF8FAB),
-    'coral' => light ? const Color(0xFFB85C4A) : const Color(0xFFFF8A7A),
-    'amber' => light ? const Color(0xFFB7791F) : const Color(0xFFFFC857),
-    'sand' => light ? const Color(0xFF8A6F3D) : const Color(0xFFD6B86A),
-    'sage' => light ? const Color(0xFF5F7A61) : const Color(0xFFA3B18A),
-    'olive' => light ? const Color(0xFF6B7A2F) : const Color(0xFFB6C667),
-    'slate' => light ? const Color(0xFF52616B) : const Color(0xFF9BAAB3),
-    'brown' => light ? const Color(0xFF795548) : const Color(0xFFB08A78),
+    'teal' => isLight
+        ? const Color(0xFF0A7C75)
+        : (isAmoled ? const Color(0xFF40C8C0) : const Color(0xFF30B0C7)),
+    'mint' => isLight
+        ? const Color(0xFF2E7D5B)
+        : (isAmoled ? const Color(0xFF63D7A5) : const Color(0xFF00C7BE)),
+    'cyan' => isLight
+        ? const Color(0xFF087EA4)
+        : (isAmoled ? const Color(0xFF64D2FF) : const Color(0xFF32ADE6)),
+    'indigo' => isLight
+        ? const Color(0xFF4F5BD5)
+        : (isAmoled ? const Color(0xFF7D89FF) : const Color(0xFF5856D6)),
+    'violet' => isLight
+        ? const Color(0xFF6D5BD0)
+        : (isAmoled ? const Color(0xFFA78BFA) : const Color(0xFF8E44AD)),
+    'rose' => isLight
+        ? const Color(0xFFB43B5E)
+        : (isAmoled ? const Color(0xFFFF8FAB) : const Color(0xFFFF375F)),
+    'amber' => isLight
+        ? const Color(0xFFB7791F)
+        : (isAmoled ? const Color(0xFFFFC857) : const Color(0xFFFFCC00)),
 
-    _ => light ? const Color(0xFF007AFF) : const Color(0xFF0A84FF),
+    _ => isLight
+        ? const Color(0xFF007AFF)
+        : (isAmoled ? const Color(0xFF0A84FF) : const Color(0xFF007AFF)),
   };
 }

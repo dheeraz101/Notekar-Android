@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/calendar_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
+import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -25,6 +26,8 @@ class HistoryDialog extends StatefulWidget {
     required this.onRestore,
     required this.onUpdateNote,
     required this.onDuration,
+    this.onOpenTrash,
+    this.onClearAll,
     this.blur = false,
   });
 
@@ -38,6 +41,8 @@ class HistoryDialog extends StatefulWidget {
   final Future<void> Function(Moment entry) onRestore;
   final Future<void> Function(int id, String note) onUpdateNote;
   final void Function(Moment a, Moment b) onDuration;
+  final VoidCallback? onOpenTrash;
+  final Future<void> Function()? onClearAll;
   final bool blur;
 
   @override
@@ -173,6 +178,34 @@ class _HistoryDialogState extends State<HistoryDialog> {
     };
   }
 
+  Future<void> _confirmDeleteAll() async {
+    final confirmed = await showGeneralDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close delete all confirmation',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => ActionConfirmSheet(
+        p: widget.p,
+        title: 'Delete All Moments?',
+        message: 'Are you sure you want to delete all history moments? Deleted moments will be moved to Recently Deleted.',
+        confirmLabel: 'Delete All',
+        isDestructive: true,
+        icon: Icons.delete_sweep_rounded,
+      ),
+    );
+
+    if (confirmed == true && widget.onClearAll != null) {
+      await widget.onClearAll!();
+      if (mounted) {
+        setState(() {
+          _entries.clear();
+          _rebuildMemoizedLists();
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasOlderRows = _hasOlderRows;
@@ -186,6 +219,24 @@ class _HistoryDialogState extends State<HistoryDialog> {
       controller: _scrollController,
       showLargeTitle: true,
       removeBottomPadding: true,
+      leadingAction: widget.onClearAll != null && _entries.isNotEmpty
+          ? PressableScale(
+              onTap: _confirmDeleteAll,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: widget.p.red,
+                  size: 20,
+                ),
+              ),
+            )
+          : null,
       child: SizedBox(
         width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
@@ -350,7 +401,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                             alpha: 0.12,
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(999),
                                           border: Border.all(
                                             color: widget.p.accent.withValues(
                                               alpha: 0.20,
@@ -398,7 +449,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing48),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
                         if (index >= _listItems.length) {
                           if (hasOlderRows) {
                             return Padding(
@@ -538,7 +590,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
                             ),
                           ),
                         );
-                      }, childCount: _listItems.length + (hasOlderRows ? 1 : 0)),
+                      },
+                        childCount: _listItems.length + (hasOlderRows ? 1 : 0),
+                        addAutomaticKeepAlives: false,
+                      ),
                     ),
                   ),
               ],

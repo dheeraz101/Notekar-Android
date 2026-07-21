@@ -100,6 +100,13 @@ class SettingsDialog extends StatefulWidget {
     required this.onResetSettings,
     required this.onRestoreSettings,
     required this.onFeedback,
+    this.onOpenTrash,
+    this.lastDeletedPreview,
+    required this.trashEntries,
+    required this.onRestoreTrashMoment,
+    required this.onRestoreAllTrash,
+    required this.onDeleteTrashPermanent,
+    required this.onClearTrash,
   });
 
   final Palette p;
@@ -179,6 +186,13 @@ class SettingsDialog extends StatefulWidget {
   final Future<void> Function() onResetSettings;
   final Future<void> Function(Map<String, Object> snapshot) onRestoreSettings;
   final ValueChanged<String> onFeedback;
+  final VoidCallback? onOpenTrash;
+  final String? lastDeletedPreview;
+  final List<Moment> trashEntries;
+  final Future<void> Function(int id) onRestoreTrashMoment;
+  final Future<void> Function() onRestoreAllTrash;
+  final Future<void> Function(int id) onDeleteTrashPermanent;
+  final Future<void> Function() onClearTrash;
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -221,6 +235,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool enableTranslucency;
   late int privacyLockDelayMinutes;
 
+  late List<Moment> _trash;
+  String _trashSearchQuery = '';
+  final TextEditingController _trashSearchController = TextEditingController();
+
   String updateStatus = '';
   bool checkingUpdates = false;
 
@@ -262,6 +280,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
     minimalMomentOptions = widget.minimalMomentOptions;
     enableTranslucency = widget.enableTranslucency;
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
+
+    _trash = List.from(widget.trashEntries);
 
     updateStatus = widget.updateStatus;
     checkingUpdates = widget.checkingUpdates;
@@ -379,8 +399,45 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final query = _settingsQuery.trim().toLowerCase();
     if (query.isEmpty) return [];
 
+    final String deletedSubtitle = (widget.lastDeletedPreview != null && widget.lastDeletedPreview!.isNotEmpty)
+        ? widget.lastDeletedPreview!
+        : 'Restore or permanently remove deleted moments';
+
+    ({
+      String title,
+      String subtitle,
+      String category,
+      IconData icon,
+      List<String> keywords,
+      String kind,
+      bool? boolValue,
+      ValueChanged<bool>? onBoolChanged,
+      String? status,
+    }) item({
+      required String title,
+      required String subtitle,
+      required String category,
+      required IconData icon,
+      required List<String> keywords,
+      required String kind,
+      bool? boolValue,
+      ValueChanged<bool>? onBoolChanged,
+      String? status,
+    }) =>
+        (
+          title: title,
+          subtitle: subtitle,
+          category: category,
+          icon: icon,
+          keywords: keywords,
+          kind: kind,
+          boolValue: boolValue,
+          onBoolChanged: onBoolChanged,
+          status: status,
+        );
+
     final all = [
-      (
+      item(
         title: 'Theme',
         subtitle: 'Dark, light, or amoled mode',
         category: 'Display',
@@ -391,7 +448,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: theme[0].toUpperCase() + theme.substring(1),
       ),
-      (
+      item(
         title: 'Show Seconds',
         subtitle: 'Display seconds on the home clock',
         category: 'Display',
@@ -405,7 +462,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Highlight Seconds',
         subtitle: 'Colored seconds in two-way mode',
         category: 'Display',
@@ -419,7 +476,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Button Labels',
         subtitle: 'Show text labels under toolbar icons',
         category: 'Display',
@@ -433,7 +490,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Large Controls',
         subtitle: 'Increase touch targets for primary actions',
         category: 'Display',
@@ -447,7 +504,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Toolbar Backplate',
         subtitle: 'Show a subtle background pill for the toolbar',
         category: 'Display',
@@ -461,7 +518,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Live Icon Motion',
         subtitle: 'Physics-based icon animations on the home screen',
         category: 'Display',
@@ -469,16 +526,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
         keywords: ['motion', 'animation', 'icon', 'physics', 'live', 'effects'],
         kind: 'switch',
         boolValue: homeMenuAnimations,
-        onBoolChanged: (bool value) async {
-          final applied = await widget.onHomeMenuAnimations(value);
-          if (!mounted) return;
-          setState(() {
-            homeMenuAnimations = applied ? value : false;
+        onBoolChanged: (bool value) {
+          widget.onHomeMenuAnimations(value).then((applied) {
+            if (!mounted) return;
+            setState(() {
+              homeMenuAnimations = applied ? value : false;
+            });
           });
         },
         status: null,
       ),
-      (
+      item(
         title: 'Enable Translucency',
         subtitle: 'Glass-like blur effects on system surfaces',
         category: 'Display',
@@ -492,7 +550,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'History Text',
         subtitle: 'Show "HISTORY" label on the home button',
         category: 'Display',
@@ -506,7 +564,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Last Saved Hint',
         subtitle: 'Show time since the last moment was saved',
         category: 'Display',
@@ -520,7 +578,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Accent Color',
         subtitle: 'Choose a primary color for the interface',
         category: 'Accent Color',
@@ -531,7 +589,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: accentColor[0].toUpperCase() + accentColor.substring(1),
       ),
-      (
+      item(
         title: 'App Icons',
         subtitle: 'Change the Android launcher icon',
         category: 'App Icons',
@@ -542,7 +600,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
       ),
-      (
+      item(
         title: 'Startup Mode',
         subtitle: 'Default mode when opening the app',
         category: 'Capture',
@@ -553,7 +611,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: defaultMode == 'single' ? 'Single' : 'Two-Way',
       ),
-      (
+      item(
         title: 'Tap Delay',
         subtitle: 'Minimum time between accidental taps',
         category: 'Capture',
@@ -564,7 +622,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: delayLabel(tapDelay),
       ),
-      (
+      item(
         title: 'Require Note on Hold',
         subtitle: 'Prompt for a note when long-pressing',
         category: 'Capture',
@@ -578,7 +636,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Compact History',
         subtitle: 'Denser rows for scanning many moments',
         category: 'Moments',
@@ -596,7 +654,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Confirm Delete',
         subtitle: 'Show a prompt before deleting moments',
         category: 'Moments',
@@ -610,7 +668,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Extended Duration',
         subtitle: 'Show days, months, and years in time between moments',
         category: 'Moments',
@@ -632,7 +690,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
         title: 'Minimal Moment Options',
         subtitle: 'Use a compact horizontal row of icons for actions',
         category: 'Moments',
@@ -646,7 +704,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
-      (
+      item(
+        title: 'Recently Deleted',
+        subtitle: deletedSubtitle,
+        category: 'Recently Deleted',
+        icon: Icons.delete_outline_rounded,
+        keywords: ['trash', 'deleted', 'restore', 'remove', 'history'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: '${_trash.length} items',
+      ),
+      item(
         title: 'Updates & Notices',
         subtitle: 'Software update, app notices, changelog',
         category: 'Updates & Notices',
@@ -665,7 +734,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: 'v$appVersion',
       ),
-      (
+      item(
         title: "What's New",
         subtitle: 'Latest release highlights',
         category: "What's New",
@@ -676,7 +745,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Changelog',
         subtitle: 'Release history and fixes',
         category: 'Changelog',
@@ -687,7 +756,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Backup & Export',
         subtitle:
             'CSV, JSON, download, restore, import, file, reminder, health',
@@ -709,7 +778,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: '${entries.length} Logs',
       ),
-      (
+      item(
         title: 'Backup Status',
         subtitle: 'Android backup, health, encryption, and Drive plans',
         category: 'Backup Status',
@@ -728,7 +797,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: _dataHealthStatus,
       ),
-      (
+      item(
         title: 'Privacy & Security',
         subtitle: 'Local storage, network use, and data safety',
         category: 'Privacy & Security',
@@ -756,7 +825,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: privacyLock ? 'On' : 'Off',
       ),
-      (
+      item(
         title: 'App Lock',
         subtitle: 'Screen lock and lock timing',
         category: 'App Lock',
@@ -774,20 +843,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ],
         kind: 'switch',
         boolValue: privacyLock,
-        onBoolChanged: (bool value) async {
+        onBoolChanged: (bool value) {
           if (!value) {
-            await widget.onPrivacyLock(false);
-            if (mounted) setState(() => privacyLock = false);
+            widget.onPrivacyLock(false).then((_) {
+              if (mounted) setState(() => privacyLock = false);
+            });
             return;
           }
-          final changed = await widget.onPrivacyLock(true);
-          if (changed && mounted) {
-            setState(() => privacyLock = true);
-          }
+          widget.onPrivacyLock(true).then((changed) {
+            if (changed && mounted) {
+              setState(() => privacyLock = true);
+            }
+          });
         },
         status: null,
       ),
-      (
+      item(
         title: 'Accessibility',
         subtitle: 'Haptic style, motion, larger text, high contrast',
         category: 'Accessibility',
@@ -808,7 +879,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
       ),
-      (
+      item(
         title: 'Diagnostics',
         subtitle: 'Version, storage, backup, update status',
         category: 'Diagnostics',
@@ -819,7 +890,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: 'v$appVersion',
       ),
-      (
+      item(
         title: 'Device Health',
         subtitle: 'Adaptive engine and performance status',
         category: 'Device Health',
@@ -842,7 +913,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: AdaptiveEngine().healthStatus,
       ),
-      (
+      item(
         title: 'Reset All Data',
         subtitle: 'Erase every moment and note',
         category: 'Reset',
@@ -853,7 +924,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Factory Reset',
         subtitle: 'Erase data and settings, then show welcome',
         category: 'Reset',
@@ -864,7 +935,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Reset Settings Only',
         subtitle: 'Restore preferences and keep moments',
         category: 'Reset',
@@ -875,7 +946,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Privacy Policy',
         subtitle: 'Data safety and local storage commitment',
         category: 'Privacy Policy',
@@ -896,7 +967,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Terms of Use',
         subtitle: 'App usage rules and open source terms',
         category: 'Terms of Use',
@@ -915,7 +986,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Licenses',
         subtitle: 'Software credits and open source legal notices',
         category: 'Licenses',
@@ -933,7 +1004,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Guides',
         subtitle: 'Learn taps, notes, history, and backups',
         category: 'Help & Guides',
@@ -959,7 +1030,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: null,
       ),
-      (
+      item(
         title: 'Help',
         subtitle: 'Fix updates, backups, notices, motion, and common issues',
         category: 'Help',
@@ -2639,6 +2710,51 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
+                    if (widget.onOpenTrash != null) ...[
+                      Column(
+                        children: [
+                          Container(
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              color: p.surface2,
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: Column(
+                              children: [
+                                SettingsRow(
+                                  p: p,
+                                  icon: Icons.delete_outline_rounded,
+                                  title: 'Recently Deleted',
+                                  status: '${_trash.length} items',
+                                  color: p.orange,
+                                  onTap: () => _openCategory('Recently Deleted', parent: 'Moments'),
+                                ),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.fromLTRB(64, 12, 16, 14),
+                                  decoration: BoxDecoration(
+                                    color: p.surface3.withValues(alpha: 0.35),
+                                  ),
+                                  child: Text(
+                                    _trash.isEmpty
+                                        ? 'Restore or permanently remove deleted moments'
+                                        : '${_trash.first.date} • ${_trash.first.note.isEmpty ? 'No note' : _trash.first.note}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SettingsPageDescription(p: p, text: 'View and restore moments deleted within the last 30 days.'),
+                    ],
                     SettingsGroup(
                       p: p,
                       title: 'History Controls',
@@ -2917,6 +3033,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'App Lock uses your biometric or PIN. Immediate lock covers NoteKar in Recents or background.'),
                         GuideRow(p: p, icon: Icons.auto_awesome_motion_rounded, title: 'Minimal Moment Options', text: 'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.'),
                         GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.'),
+                        GuideRow(p: p, icon: Icons.delete_outline_rounded, title: 'Restore Deleted Moments', text: 'Open Recently Deleted in History or Settings > Moments to view, restore, or permanently remove deleted moments.'),
                         GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a JSON backup before resetting, changing phones, or testing a new build.'),
                       ],
                     ),
@@ -2932,6 +3049,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       showDividers: true,
                       children: [
+                        HelpRow(p: p, question: 'Can I restore deleted moments?', answer: 'Yes! Deleted moments are moved to Recently Deleted (Trash Bin). You can restore individual moments or all moments anytime from History or Settings > Moments.'),
                         HelpRow(p: p, question: 'Update check failed', answer: 'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.'),
                         HelpRow(p: p, question: 'App Notices are not appearing', answer: 'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.'),
                         HelpRow(p: p, question: 'NoteKar is offline', answer: 'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.'),
@@ -3461,6 +3579,185 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                   ),
                 ),
+              if (show('Recently Deleted')) ...[
+                if (_trash.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: p.text2,
+                                side: BorderSide(color: p.border),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              onPressed: () async {
+                                final confirmed = await showGeneralDialog<bool>(
+                                  context: context,
+                                  barrierColor: Colors.black.withValues(alpha: 0.42),
+                                  barrierDismissible: true,
+                                  barrierLabel: 'Close restore confirmation',
+                                  transitionDuration: const Duration(milliseconds: 120),
+                                  pageBuilder: (_, _, _) => ActionConfirmSheet(
+                                    p: p,
+                                    title: 'Restore All Moments?',
+                                    message: 'This will return all items currently in the trash to your history.',
+                                    confirmLabel: 'Restore All',
+                                    icon: Icons.restore_rounded,
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  await widget.onRestoreAllTrash();
+                                  setState(() => _trash.clear());
+                                }
+                              },
+                              icon: const Icon(Icons.restore_rounded, size: 18),
+                              label: const Text('Restore All', style: TextStyle(fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: p.text2,
+                                side: BorderSide(color: p.border),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              onPressed: () async {
+                                final confirmed = await showGeneralDialog<bool>(
+                                  context: context,
+                                  barrierColor: Colors.black.withValues(alpha: 0.42),
+                                  barrierDismissible: true,
+                                  barrierLabel: 'Close empty confirmation',
+                                  transitionDuration: const Duration(milliseconds: 120),
+                                  pageBuilder: (_, _, _) => ActionConfirmSheet(
+                                    p: p,
+                                    title: 'Empty Trash?',
+                                    message: 'Permanently delete all trash? This cannot be undone.',
+                                    confirmLabel: 'Empty',
+                                    isDestructive: true,
+                                    icon: Icons.delete_forever_rounded,
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  await widget.onClearTrash();
+                                  setState(() => _trash.clear());
+                                }
+                              },
+                              icon: const Icon(Icons.delete_forever_rounded, size: 18),
+                              label: const Text('Empty Trash', style: TextStyle(fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ...() {
+                  if (_trash.isEmpty) {
+                    return [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: HIGEmptyState(
+                          p: p,
+                          icon: Icons.delete_outline_rounded,
+                          title: 'Trash is Empty',
+                          message: 'Deleted moments will appear here for 30 days.',
+                        ),
+                      )
+                    ];
+                  }
+
+                  return [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final moment = _trash[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: p.surface2,
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(color: p.border.withValues(alpha: 0.6)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: momentColor(p, moment.type).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Icon(momentIcon(moment.type), color: momentColor(p, moment.type), size: 18),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(timeOnly(moment.timestamp), style: TextStyle(color: p.text, fontSize: 14, fontWeight: FontWeight.w800)),
+                                            const SizedBox(width: 8),
+                                            Text(moment.date, style: TextStyle(color: p.text3, fontSize: 12)),
+                                          ],
+                                        ),
+                                        if (moment.note.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(moment.note, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text2, fontSize: 13)),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.restore_rounded, color: p.text2, size: 20),
+                                    onPressed: () async {
+                                      await widget.onRestoreTrashMoment(moment.id);
+                                      setState(() => _trash.removeWhere((m) => m.id == moment.id));
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete_forever_rounded, color: p.text2, size: 20),
+                                    onPressed: () async {
+                                      final confirmed = await showGeneralDialog<bool>(
+                                        context: context,
+                                        barrierColor: Colors.black.withValues(alpha: 0.42),
+                                        barrierDismissible: true,
+                                        barrierLabel: 'Close delete confirmation',
+                                        transitionDuration: const Duration(milliseconds: 120),
+                                        pageBuilder: (_, _, _) => ActionConfirmSheet(
+                                          p: p,
+                                          title: 'Delete Permanently?',
+                                          message: 'This moment will be erased forever.',
+                                          confirmLabel: 'Delete',
+                                          isDestructive: true,
+                                          icon: Icons.delete_forever_rounded,
+                                        ),
+                                      );
+                                      if (confirmed == true) {
+                                        await widget.onDeleteTrashPermanent(moment.id);
+                                        setState(() => _trash.removeWhere((m) => m.id == moment.id));
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: _trash.length,
+                      ),
+                    ),
+                  ];
+                }(),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 48)),
+              ],
               if (show('Changelog'))
                 SliverToBoxAdapter(
                   child: Column(

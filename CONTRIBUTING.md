@@ -40,7 +40,10 @@ flutter analyze
 flutter format .
 ```
 
-### 2. Submitting Pull Requests
+### 2. Translating the App
+Want to add or improve a language translation? Check out our dedicated **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a 3-step walkthrough on working with `.arb` localization files.
+
+### 3. Submitting Pull Requests
 1. Create a feature branch:
    ```bash
    git checkout -b feature/your-feature-name

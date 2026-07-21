@@ -11,6 +11,7 @@ import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/privacy_overlay.dart';
+import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
 import 'package:notekar/dialogs/welcome_sheet.dart';
@@ -620,7 +621,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _clearStoredEntries() async {
     await _repository.clearAll();
-    setState(() => _nextId = _repository.getNextId());
+    setState(() {
+      _entries = [];
+      _nextId = _repository.getNextId();
+    });
   }
 
   Future<void> _replaceStoredEntries(List<Moment> entries) async {
@@ -865,7 +869,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _lastDeletedPreview = null;
       if (_lastId == id) _lastId = null;
     });
-    unawaited(_deleteStoredEntry(id));
+    await _deleteStoredEntry(id);
     unawaited(_updateAndroidWidget());
   }
 
@@ -1279,12 +1283,57 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onUpdateNote: _updateMomentNote,
         confirmDelete: _confirmDelete,
         onDuration: _showDuration,
+        onOpenTrash: _showRecentlyDeleted,
+        onClearAll: _clearStoredEntries,
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _showRecentlyDeleted() async {
+    final p = paletteFor(_theme, highContrast: _highContrast, accentName: _accentColor);
+    final trashEntries = _repository.getTrashMoments();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      enableDrag: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => RecentlyDeletedDialog(
+        p: p,
+        trashEntries: trashEntries,
+        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        onRestoreMoment: (id) async {
+          await _repository.restoreTrashMoment(id);
+          setState(() {
+            _entries = _repository.getAllMoments();
+          });
+        },
+        onRestoreAll: () async {
+          await _repository.restoreAllTrash();
+          setState(() {
+            _entries = _repository.getAllMoments();
+          });
+        },
+        onDeletePermanent: (id) async {
+          await _repository.permanentlyDeleteTrashMoment(id);
+        },
+        onClearTrash: () async {
+          await _repository.clearTrash();
+        },
       ),
     );
     if (mounted) setState(() {});
   }
 
   Future<void> _openSettings() async {
+    final trash = _repository.getTrashMoments();
+    final lastDeletedPreview = trash.isNotEmpty
+        ? 'Last deleted: ${timeOnly(trash.first.timestamp)}${trash.first.note.isNotEmpty ? ' - ${trash.first.note}' : ''}'
+        : 'No moments deleted';
+
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1335,6 +1384,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ? null
             : _entries.map((entry) => entry.timestamp).reduce(math.max),
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        lastDeletedPreview: lastDeletedPreview,
+        trashEntries: trash,
         onTheme: (value) {
           setState(() => _theme = value);
           _saveSetting('m-theme', value);
@@ -1502,6 +1553,25 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onResetSettings: _resetSettingsOnly,
         onRestoreSettings: _restoreSettings,
         onFeedback: _showToast,
+        onOpenTrash: _showRecentlyDeleted,
+        onRestoreTrashMoment: (id) async {
+          await _repository.restoreTrashMoment(id);
+          setState(() {
+            _entries = _repository.getAllMoments();
+          });
+        },
+        onRestoreAllTrash: () async {
+          await _repository.restoreAllTrash();
+          setState(() {
+            _entries = _repository.getAllMoments();
+          });
+        },
+        onDeleteTrashPermanent: (id) async {
+          await _repository.permanentlyDeleteTrashMoment(id);
+        },
+        onClearTrash: () async {
+          await _repository.clearTrash();
+        },
       ),
     );
   }

@@ -1,8 +1,16 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/app_logger.dart';
+
+Future<BackupValidationResult> validateNoteKarBackupContentAsync(String content) async {
+  if (content.length > 200000) {
+    return Isolate.run(() => validateNoteKarBackupContent(content));
+  }
+  return validateNoteKarBackupContent(content);
+}
 
 BackupValidationResult validateNoteKarBackupContent(String content) {
   final logger = AppLogger();

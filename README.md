@@ -4,7 +4,7 @@
 
 > **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero friction. 100% Offline-First & Privacy-Focused.
 
-![version](https://img.shields.io/badge/version-4.0.4-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen)
+![version](https://img.shields.io/badge/version-4.0.4-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange)
 
 ---
 
@@ -12,6 +12,14 @@
 > 🚀 **Official Release Hub for NoteKar**  
 > **This repository is the official home for all new NoteKar version releases, Android APK downloads, and active app development.**  
 > 📥 To download the latest stable Android APK release, visit the **[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
+
+---
+
+## 🌐 Community Translations
+
+Help make NoteKar available in your native language! We welcome translation contributions for any language.
+
+- 📖 Read the **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a simple 3-step walkthrough on creating or updating `.arb` files.
 
 ---
 

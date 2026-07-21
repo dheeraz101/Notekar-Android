@@ -226,11 +226,15 @@ List<BoxShadow> selectedGlow(Color color) {
 }
 
 Color momentColor(Palette p, String type) {
-  return switch (type) {
-    'in' => p.green,
-    'out' => p.orange,
-    _ => p.blue, // Revert to dedicated blue for Single moments
-  };
+  if (type == 'in') return p.green;
+  if (type == 'out') return p.orange;
+  return p.blue;
+}
+
+IconData momentIcon(String type) {
+  if (type == 'in') return Icons.south_west_rounded;
+  if (type == 'out') return Icons.north_east_rounded;
+  return Icons.arrow_upward_rounded;
 }
 
 class NotekarHaptics {

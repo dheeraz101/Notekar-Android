@@ -289,6 +289,23 @@ class ChangelogReleaseCard extends StatelessWidget {
   final bool expanded;
   final VoidCallback onTap;
 
+  IconData _getItemIcon(String text) {
+    final lower = text.trim().toLowerCase();
+    if (lower.startsWith('add') || lower.startsWith('added') || lower.startsWith('new') || lower.startsWith('create')) {
+      return Icons.add_circle_rounded;
+    }
+    if (lower.startsWith('delete') || lower.startsWith('deleted') || lower.startsWith('remove')) {
+      return Icons.remove_circle_rounded;
+    }
+    if (lower.startsWith('fix') || lower.startsWith('fixed') || lower.startsWith('patch') || lower.startsWith('resolve')) {
+      return Icons.star_rounded;
+    }
+    if (lower.startsWith('update') || lower.startsWith('refactor') || lower.startsWith('improve') || lower.startsWith('moved')) {
+      return Icons.published_with_changes_rounded;
+    }
+    return Icons.check_circle_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -397,7 +414,7 @@ class ChangelogReleaseCard extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Icon(
-                                  Icons.check_circle_rounded,
+                                  _getItemIcon(item),
                                   color: isLatest ? p.accent : p.text3.withValues(alpha: 0.7),
                                   size: 15,
                                 ),
@@ -635,39 +652,6 @@ class _WhatsNewPanel extends StatelessWidget {
   final Palette p;
   final ({String date, List<String> items, List<String> highlights, String version}) release;
 
-  ({IconData icon, Color color}) _getHighlightSpec(int index, String text, Palette p) {
-    final purple = accentColorFor('purple', light: p.name == 'light');
-    final lower = text.toLowerCase();
-    if (lower.contains('visual') || lower.contains('design') || lower.contains('ui') || lower.contains('overhaul')) {
-      return (icon: Icons.palette_rounded, color: p.accent);
-    }
-    if (lower.contains('security') || lower.contains('backup') || lower.contains('privacy') || lower.contains('data')) {
-      return (icon: Icons.shield_rounded, color: p.green);
-    }
-    if (lower.contains('widget') || lower.contains('search') || lower.contains('speed')) {
-      return (icon: Icons.search_rounded, color: p.orange);
-    }
-    if (lower.contains('update') || lower.contains('feedback') || lower.contains('notice')) {
-      return (icon: Icons.system_update_rounded, color: purple);
-    }
-    if (lower.contains('accessibility') || lower.contains('contrast') || lower.contains('text')) {
-      return (icon: Icons.accessibility_new_rounded, color: p.blue);
-    }
-    
-    final colors = [p.accent, p.orange, p.green, p.blue, purple];
-    final icons = [
-      Icons.auto_awesome_rounded,
-      Icons.bolt_rounded,
-      Icons.stars_rounded,
-      Icons.tune_rounded,
-      Icons.checklist_rounded,
-    ];
-    return (
-      icon: icons[index % icons.length],
-      color: colors[index % colors.length],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -748,7 +732,6 @@ class _WhatsNewPanel extends StatelessWidget {
               Builder(
                 builder: (context) {
                   final text = release.highlights[i];
-                  final spec = _getHighlightSpec(i, text, p);
                   
                   String headline = '';
                   String body = text;
@@ -772,17 +755,22 @@ class _WhatsNewPanel extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          width: 29,
-                          height: 29,
+                          width: 28,
+                          height: 28,
                           margin: const EdgeInsets.only(top: 1),
                           decoration: BoxDecoration(
-                            color: spec.color.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(7),
+                            color: p.accent.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: p.accent.withValues(alpha: 0.25)),
                           ),
-                          child: Icon(
-                            spec.icon,
-                            color: spec.color,
-                            size: 16,
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${i + 1}',
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 14),

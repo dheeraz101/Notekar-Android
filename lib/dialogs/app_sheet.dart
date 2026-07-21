@@ -15,6 +15,8 @@ class AppSheet extends StatefulWidget {
     this.controller,
     this.showLargeTitle = false,
     this.onBack,
+    this.leadingAction,
+    this.trailingAction,
     this.largeText = false,
     this.removeBottomPadding = false,
   });
@@ -27,6 +29,8 @@ class AppSheet extends StatefulWidget {
   final ScrollController? controller;
   final bool showLargeTitle;
   final VoidCallback? onBack;
+  final Widget? leadingAction;
+  final Widget? trailingAction;
   final bool largeText;
   final bool removeBottomPadding;
 
@@ -132,6 +136,11 @@ class _AppSheetState extends State<AppSheet> {
                           icon: Icons.chevron_left_rounded,
                           onTap: widget.onBack!,
                         ),
+                      )
+                    else if (widget.leadingAction != null)
+                      Positioned(
+                        left: 0,
+                        child: widget.leadingAction!,
                       ),
                     Positioned.fill(
                       child: Center(
@@ -161,10 +170,19 @@ class _AppSheetState extends State<AppSheet> {
                     ),
                     Positioned(
                       right: 0,
-                      child: _HeaderCircleButton(
-                        p: p,
-                        icon: Icons.close_rounded,
-                        onTap: () => Navigator.pop(context),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.trailingAction != null) ...[
+                            widget.trailingAction!,
+                            const SizedBox(width: 8),
+                          ],
+                          _HeaderCircleButton(
+                            p: p,
+                            icon: Icons.close_rounded,
+                            onTap: () => Navigator.pop(context),
+                          ),
+                        ],
                       ),
                     ),
                   ],

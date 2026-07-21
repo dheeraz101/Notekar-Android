@@ -295,3 +295,89 @@ class AppIconApplyingDialog extends StatelessWidget {
     );
   }
 }
+
+class ActionConfirmSheet extends StatelessWidget {
+  const ActionConfirmSheet({
+    super.key,
+    required this.p,
+    required this.title,
+    required this.message,
+    required this.confirmLabel,
+    this.isDestructive = false,
+    this.icon,
+  });
+
+  final Palette p;
+  final String title;
+  final String message;
+  final String confirmLabel;
+  final bool isDestructive;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isDestructive ? p.red : p.accent;
+    return AppSheet(
+      p: p,
+      title: title,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon ?? Icons.info_outline_rounded, color: color, size: 24),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+          ),
+          const SizedBox(height: spacing24),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: p.text,
+                      side: BorderSide(color: p.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(confirmLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

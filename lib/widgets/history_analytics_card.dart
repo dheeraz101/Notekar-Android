@@ -65,15 +65,19 @@ class ActivitySummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(10),
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.analytics_rounded, color: p.accent, size: 17),
                 ),
-                child: Icon(Icons.analytics_rounded, color: p.accent, size: 17),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -229,15 +233,19 @@ class ActivityTrendsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: p.orange.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(10),
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: p.orange.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.bar_chart_rounded, color: p.orange, size: 17),
                 ),
-                child: Icon(Icons.bar_chart_rounded, color: p.orange, size: 17),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -267,61 +275,72 @@ class ActivityTrendsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
+          // Upper Labels Region - Fixed alignment
           SizedBox(
-            height: 82,
+            height: 14,
             child: Row(
               children: [
                 for (final ds in dayCounts)
                   Expanded(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 16,
-                          child: Center(
-                            child: Text(
-                              ds.count > 0 ? '${ds.count}' : '',
-                              style: TextStyle(
-                                color: ds.isToday ? p.accent : p.text2,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
+                    child: Center(
+                      child: Text(
+                        ds.count > 0 ? '${ds.count}' : '',
+                        style: TextStyle(
+                          color: ds.isToday ? p.accent : p.text2,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
                         ),
-                        const SizedBox(height: 4),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              width: 18,
-                              height: math.max(6.0, (ds.count / maxDayCount) * 40.0),
-                              decoration: BoxDecoration(
-                                color: ds.isToday
-                                    ? p.accent
-                                    : (ds.count > 0
-                                        ? p.accent.withValues(alpha: 0.45)
-                                        : p.border.withValues(alpha: 0.3)),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                          ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          // Bars Region
+          SizedBox(
+            height: 40,
+            child: Row(
+              children: [
+                for (final ds in dayCounts)
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: 18,
+                        height: math.max(6.0, (ds.count / maxDayCount) * 40.0),
+                        decoration: BoxDecoration(
+                          color: ds.isToday
+                              ? p.accent
+                              : (ds.count > 0
+                                  ? p.accent.withValues(alpha: 0.45)
+                                  : p.border.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          height: 16,
-                          child: Center(
-                            child: Text(
-                              ds.dayLabel,
-                              style: TextStyle(
-                                color: ds.isToday ? p.accent : p.text3,
-                                fontSize: 11,
-                                fontWeight: ds.isToday ? FontWeight.w900 : FontWeight.w600,
-                              ),
-                            ),
-                          ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Fixed Bottom Baseline Day Labels Region
+          SizedBox(
+            height: 18,
+            child: Row(
+              children: [
+                for (final ds in dayCounts)
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        ds.dayLabel,
+                        style: TextStyle(
+                          color: ds.isToday ? p.accent : p.text3,
+                          fontSize: 11,
+                          fontWeight: ds.isToday ? FontWeight.w900 : FontWeight.w600,
                         ),
-                      ],
+                      ),
                     ),
                   ),
               ],

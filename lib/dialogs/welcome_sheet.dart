@@ -44,34 +44,57 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
     final p = paletteFor(theme);
     return AppSheet(
       p: p,
-      title: 'NoteKar',
+      title: "Welcome",
       docked: true,
       blur: widget.blur,
       largeText: widget.largeText,
       removeBottomPadding: true,
       child: SizedBox(
         width: 410,
-        height: MediaQuery.sizeOf(context).height * 0.68,
+        height: MediaQuery.sizeOf(context).height * 0.72,
         child: ListView(
           physics: const BouncingScrollPhysics(),
           children: [
+            const SizedBox(height: 8),
+            // iOS 26 Hero App Badge
+            Center(
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: p.accent.withValues(alpha: 0.25)),
+                ),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: p.accent,
+                  size: 32,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Welcome to NoteKar',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 6),
             Text(
               'A quiet, offline-first way to mark moments the second they happen.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: p.text,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                height: 1.25,
+                color: p.text2,
+                fontSize: 14,
+                height: 1.35,
               ),
             ),
-            const SizedBox(height: spacing8),
-            Text(
-              'No account. No clutter. Just fast logging, notes, history, and backup when you need them.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: p.text2, fontSize: 13, height: 1.35),
-            ),
-            const SizedBox(height: spacing16),
+            const SizedBox(height: 20),
             Row(
               children: [
                 for (final option in const ['dark', 'light']) ...[
@@ -93,7 +116,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
                 ],
               ],
             ),
-            const SizedBox(height: spacing24),
+            const SizedBox(height: spacing20),
             SegmentedSetting(
               p: p,
               title: 'Startup Mode',
@@ -136,15 +159,26 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: spacing16),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: p.accent,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
+            const SizedBox(height: spacing20),
+            SizedBox(
+              height: 52,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: p.accent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Start Logging',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Start Logging'),
             ),
             const SizedBox(height: spacing48),
           ],
