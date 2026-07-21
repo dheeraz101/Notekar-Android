@@ -294,7 +294,7 @@ class ChangelogReleaseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(32),
         border: Border.all(color: p.border),
       ),
       clipBehavior: Clip.antiAlias,
@@ -450,7 +450,7 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
                     margin: const EdgeInsets.only(bottom: 10),
                     decoration: BoxDecoration(
                       color: p.surface2,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(32),
                       border: Border.all(color: p.border),
                     ),
                     clipBehavior: Clip.antiAlias,
@@ -691,7 +691,7 @@ class _WhatsNewPanel extends StatelessWidget {
             padding: const EdgeInsets.all(13),
             decoration: BoxDecoration(
               color: p.surface2,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(color: p.border),
             ),
             child: Row(
