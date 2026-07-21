@@ -1729,7 +1729,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     color: p.accent,
                   ),
                 ),
-                const SizedBox(height: spacing16),
+                const SizedBox(height: 0),
                 Text(
                   'Checking for updates...',
                   style: TextStyle(
@@ -1807,7 +1807,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   child: Icon(Icons.check_rounded, color: p.green, size: 36),
                 ),
-                const SizedBox(height: spacing16),
+                const SizedBox(height: 0),
                 Text(
                   'NoteKar is up to date',
                   style: TextStyle(
@@ -2035,7 +2035,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                       SettingsGroup(
                         p: p,
                         insetDividers: true,
@@ -2068,7 +2068,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ],
                       ),
                       if (updateStatus.toLowerCase().contains('available') || updateStatus.toLowerCase().contains('new release')) ...[
-                        const SizedBox(height: spacing16),
+                        const SizedBox(height: 0),
                         PressableScale(
                           onTap: () => _openCategory('Update Center'),
                           child: Container(
@@ -2113,7 +2113,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                       const SizedBox(height: spacing24),
                       SettingsAboutBlock(p: p, onOpenLink: widget.onOpenLink),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                     ],
                   ),
                 ),
@@ -2249,7 +2249,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ],
                       ),
                     ],
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               ],
@@ -2291,7 +2291,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'These settings refine the interface aesthetic and do not modify your saved data.',
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Display'))
@@ -2434,7 +2434,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Last Saved Hint', color: p.accent, value: showLastSavedHint, onChanged: (value) { setState(() => showLastSavedHint = value); widget.onShowLastSavedHint(value); })]),
                     SettingsPageDescription(p: p, text: 'Provides visual feedback for the time elapsed since your last moment.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Accent Color'))
@@ -2459,7 +2459,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Select an accent color for buttons and fluid interface highlights.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('App Icons'))
@@ -2468,7 +2468,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       _appIconsPage(p),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                     ],
                   ),
                 ),
@@ -2511,7 +2511,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'These settings define how moments are recorded and prepared for export.',
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Capture'))
@@ -2636,7 +2636,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Forces context entry for any moment captured via the long-press gesture.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Moments'))
@@ -2722,7 +2722,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Search Notes')) ...[
@@ -2925,7 +2925,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Help'))
@@ -2951,7 +2951,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Update Center'))
@@ -3013,7 +3013,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'The current features on this page are under Beta stage.',
                       onLearnMore: () => _showBetaInfoPopup(p),
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Data & Backup'))
@@ -3032,7 +3032,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'NoteKar uses a private offline database. Use these tools to secure your history via manual exports.',
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Backup & Export'))
@@ -3076,7 +3076,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Export moments to standard CSV or JSON files for backups, external analysis, or phone transfers.',
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Backup Status'))
@@ -3117,7 +3117,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'The current features on this page are under Beta stage.',
                       onLearnMore: () => _showBetaInfoPopup(p),
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Privacy & Security'))
@@ -3162,7 +3162,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'The current features on this page are under Beta stage.',
                       onLearnMore: () => _showBetaInfoPopup(p),
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('App Lock'))
@@ -3217,7 +3217,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         text: 'Note: Selecting "Immediately" will automatically lock NoteKar as soon as you switch apps, view recent apps, or open your phone notification panel.',
                       ),
                     ],
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Help & Guides'))
@@ -3267,7 +3267,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Review open-source licenses, app usage terms, and offline-first privacy policies.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Advanced'))
@@ -3316,7 +3316,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'These tools are intended for system maintenance and troubleshooting.',
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Accessibility'))
@@ -3351,7 +3351,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: 10),
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'High Contrast', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); })]),
                     SettingsPageDescription(p: p, text: 'Enhances visibility by using pure black backgrounds and high-intensity accent colors.'),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Reset'))
@@ -3411,7 +3411,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Completely clears all saved data and resets all settings to original fresh state.',
                     ),
-                    const SizedBox(height: spacing16),
+                    const SizedBox(height: 0),
                   ]),
                 ),
               if (show('Diagnostics'))
@@ -3420,7 +3420,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       _diagnosticsPage(p, entries, todayCount),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                     ],
                   ),
                 ),
@@ -3430,7 +3430,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       _deviceHealthPage(p),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                     ],
                   ),
                 ),
@@ -3461,7 +3461,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: true),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                     ],
                   ),
                 ),
@@ -3471,7 +3471,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: false),
-                      const SizedBox(height: spacing16),
+                      const SizedBox(height: 0),
                     ],
                   ),
                 ),
