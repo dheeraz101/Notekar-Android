@@ -22,6 +22,7 @@ class FeedbackDialog extends StatelessWidget {
       p: p,
       title: 'Feedback',
       blur: blur,
+      removeBottomPadding: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

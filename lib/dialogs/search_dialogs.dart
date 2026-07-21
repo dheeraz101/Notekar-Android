@@ -38,6 +38,7 @@ class _NoteSearchDialogState extends State<NoteSearchDialog> {
       title: 'Search Notes',
       controller: _scrollController,
       showLargeTitle: false,
+      removeBottomPadding: true,
       child: SizedBox(
         width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.68, 590),
@@ -193,7 +194,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                 )
               : ListView.builder(
                   controller: widget.scrollController,
-                  padding: const EdgeInsets.only(bottom: spacing64),
+                  padding: const EdgeInsets.only(bottom: spacing16),
                   itemCount: rows.length + (hasOlderRows ? 1 : 0),
                   itemBuilder: (_, index) {
                     if (index >= rows.length) {

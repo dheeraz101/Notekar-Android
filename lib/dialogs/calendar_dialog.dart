@@ -40,6 +40,7 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
     return AppSheet(
       p: widget.p,
       title: 'Select Date',
+      removeBottomPadding: true,
       child: SizedBox(
         width: 410,
         child: Column(

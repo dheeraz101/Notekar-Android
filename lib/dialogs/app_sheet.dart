@@ -16,6 +16,7 @@ class AppSheet extends StatefulWidget {
     this.showLargeTitle = false,
     this.onBack,
     this.largeText = false,
+    this.removeBottomPadding = false,
   });
 
   final Palette p;
@@ -27,6 +28,7 @@ class AppSheet extends StatefulWidget {
   final bool showLargeTitle;
   final VoidCallback? onBack;
   final bool largeText;
+  final bool removeBottomPadding;
 
   @override
   State<AppSheet> createState() => _AppSheetState();
@@ -96,7 +98,9 @@ class _AppSheetState extends State<AppSheet> {
           spacing16,
           spacing8,
           spacing16,
-          widget.docked ? MediaQuery.paddingOf(context).bottom + spacing16 : spacing16,
+          widget.removeBottomPadding
+              ? MediaQuery.paddingOf(context).bottom
+              : (widget.docked ? MediaQuery.paddingOf(context).bottom + spacing16 : spacing16),
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: widget.docked ? 720 : 460),
