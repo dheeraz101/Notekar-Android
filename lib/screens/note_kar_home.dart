@@ -67,6 +67,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _hapticStyle = 'standard';
   String _accentColor = 'blue';
   String _appIconStyle = 'default';
+  String _csvDelimiter = ',';
   String _historyDensity = 'comfortable';
   bool _privacyLock = false;
   bool _privacyUnlocked = false;
@@ -446,6 +447,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _appIconStyle = isAppIconStyle(savedAppIconStyle)
           ? savedAppIconStyle
           : 'default';
+      _csvDelimiter = prefs.getString('m-csv-delimiter') ?? ',';
       final savedCompact = prefs.getBool('m-compact-history') ?? false;
       _historyDensity = savedCompact ? 'compact' : 'comfortable';
       _privacyLock = prefs.getBool('m-privacy-lock') ?? false;
@@ -2177,8 +2179,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   String _csvExport({DateTime? since}) {
     final exportedAt = DateTime.now().toIso8601String();
+    final d = _csvDelimiter;
     final buffer = StringBuffer(
-      'app,version,exported_at,id,timestamp,iso,date,time,type,note\n',
+      'app${d}version${d}exported_at${d}id${d}timestamp${d}iso${d}date${d}time${d}type${d}note\n',
     );
     final rows =
         _entries
@@ -2195,10 +2198,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       final iso = DateTime.fromMillisecondsSinceEpoch(
         e.timestamp,
       ).toIso8601String();
+      final escapedNote = e.note.replaceAll('"', '""');
       buffer.writeln(
-        '"NoteKar","$appVersion","$exportedAt",${e.id},${e.timestamp},'
-        '"$iso","${e.date}","${timeOnly(e.timestamp)}","${e.type}",'
-        '"${e.note.replaceAll('"', '""')}"',
+        '"NoteKar"$d"$appVersion"$d"$exportedAt"$d${e.id}$d${e.timestamp}$d'
+        '"$iso"$d"${e.date}"$d"${timeOnly(e.timestamp)}"$d"${e.type}"$d'
+        '"$escapedNote"',
       );
     }
     return buffer.toString();
