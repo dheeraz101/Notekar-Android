@@ -18,6 +18,9 @@ class MomentRepository {
   Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
     _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
     _box = await Hive.openBox<dynamic>(_entryBoxName);
+    if (_box.length > 300) {
+      unawaited(_box.compact());
+    }
     _logger.info('MomentRepository initialized with ${_box.length} entries');
   }
 
