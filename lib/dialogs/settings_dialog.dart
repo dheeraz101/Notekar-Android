@@ -2374,6 +2374,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
+                      title: 'History Controls',
+                      insetDividers: true,
                       children: [
                         SettingsSwitchRow(
                           p: p,
@@ -2405,6 +2407,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
+                      title: 'Duration Formatting',
                       children: [
                         SettingsSwitchRow(
                           p: p,
@@ -2416,6 +2419,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             widget.onExtendedDuration(value);
                           },
                         ),
+                      ],
+                    ),
+                    SettingsPageDescription(p: p, text: 'Includes years, months, and days breakdown for long time intervals between moments.'),
+                    const SizedBox(height: 10),
+                    SettingsGroup(
+                      p: p,
+                      title: 'Quick Actions',
+                      children: [
                         SettingsSwitchRow(
                           p: p,
                           title: 'Minimal Moment Options',
@@ -2428,7 +2439,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    SettingsPageDescription(p: p, text: 'Displays years, months, and days for long intervals, and enables icon-only quick actions in history.'),
+                    SettingsPageDescription(p: p, text: 'Enables streamlined icon-only quick action buttons when managing history moments.'),
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
