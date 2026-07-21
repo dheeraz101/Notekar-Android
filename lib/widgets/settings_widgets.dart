@@ -147,13 +147,13 @@ class SettingsRow extends StatelessWidget {
           children: [
             if (hasIcon) ...[
               Container(
-                width: 32,
-                height: 32,
+                width: 29,
+                height: 29,
                 decoration: BoxDecoration(
                   color: rowColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(7),
                 ),
-                child: Icon(icon, color: rowColor, size: 16),
+                child: Icon(icon, color: rowColor, size: 18),
               ),
               const SizedBox(width: 12),
             ],
