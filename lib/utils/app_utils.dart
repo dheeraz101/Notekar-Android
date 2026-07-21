@@ -5,7 +5,7 @@ import 'package:notekar/models/palette.dart';
 
 const appVersion = '4.0.4';
 const appBuildNumber = '13';
-const appBuildDate = '2026-07-20';
+const appBuildDate = '2026-07-21';
 
 // 8pt Grid Constants
 const double spacing4 = 4.0;

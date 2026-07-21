@@ -8,7 +8,10 @@ param(
     [int]$BuildNumber,
 
     [Parameter(Mandatory = $false)]
-    [switch]$SkipClean
+    [switch]$SkipClean,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$NoTreeShake
 )
 
 $ErrorActionPreference = 'Stop'
@@ -247,9 +250,14 @@ if (-not $SkipClean) {
     & $flutter clean
 }
 
+$extraFlags = @()
+if ($NoTreeShake) {
+    $extraFlags += '--no-tree-shake-icons'
+}
+
 & $flutter pub get
-& $flutter build apk --release --build-name $Version --build-number $BuildNumber
-& $flutter build apk --release --split-per-abi --build-name $Version --build-number $BuildNumber
+& $flutter build apk --release --build-name $Version --build-number $BuildNumber @extraFlags
+& $flutter build apk --release --split-per-abi --build-name $Version --build-number $BuildNumber @extraFlags
 
 $apkMap = @(
     @{ Source = 'app-arm64-v8a-release.apk'; Destination = "notekar-$Version-arm64-v8a.apk" }
