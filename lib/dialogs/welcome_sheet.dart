@@ -10,6 +10,8 @@ class WelcomeSheet extends StatefulWidget {
     required this.p,
     required this.theme,
     required this.defaultMode,
+    required this.currentLocale,
+    required this.onLocaleChanged,
     this.blur = false,
     required this.onTheme,
     required this.onDefaultMode,
@@ -19,6 +21,8 @@ class WelcomeSheet extends StatefulWidget {
   final Palette p;
   final String theme;
   final String defaultMode;
+  final String currentLocale;
+  final ValueChanged<String> onLocaleChanged;
   final bool blur;
   final ValueChanged<String> onTheme;
   final ValueChanged<String> onDefaultMode;
@@ -31,12 +35,14 @@ class WelcomeSheet extends StatefulWidget {
 class _WelcomeSheetState extends State<WelcomeSheet> {
   late String theme;
   late String defaultMode;
+  late String currentLocale;
 
   @override
   void initState() {
     super.initState();
     theme = widget.theme;
     defaultMode = widget.defaultMode;
+    currentLocale = widget.currentLocale;
   }
 
   @override
@@ -127,6 +133,24 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
               onChanged: (value) {
                 setState(() => defaultMode = value);
                 widget.onDefaultMode(value);
+              },
+            ),
+            const SizedBox(height: spacing20),
+            SegmentedSetting(
+              p: p,
+              title: 'App Language',
+              subtitle: 'Choose your preferred interface language',
+              value: currentLocale,
+              blur: widget.blur,
+              values: const {
+                'system': 'System',
+                'en': 'English',
+                'hi': 'हिन्दी',
+                'es': 'Español',
+              },
+              onChanged: (value) {
+                setState(() => currentLocale = value);
+                widget.onLocaleChanged(value);
               },
             ),
             const SizedBox(height: spacing12),

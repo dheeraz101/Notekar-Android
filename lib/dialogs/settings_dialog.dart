@@ -107,7 +107,12 @@ class SettingsDialog extends StatefulWidget {
     required this.onRestoreAllTrash,
     required this.onDeleteTrashPermanent,
     required this.onClearTrash,
+    required this.currentLocale,
+    required this.onLocaleChanged,
   });
+
+  final String currentLocale;
+  final ValueChanged<String> onLocaleChanged;
 
   final Palette p;
   final String theme;
@@ -235,9 +240,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool enableTranslucency;
   late int privacyLockDelayMinutes;
 
+  late String currentLocale;
+
   late List<Moment> _trash;
-  String _trashSearchQuery = '';
-  final TextEditingController _trashSearchController = TextEditingController();
 
   String updateStatus = '';
   bool checkingUpdates = false;
@@ -280,6 +285,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     minimalMomentOptions = widget.minimalMomentOptions;
     enableTranslucency = widget.enableTranslucency;
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
+    currentLocale = widget.currentLocale;
 
     _trash = List.from(widget.trashEntries);
 
@@ -447,6 +453,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: theme[0].toUpperCase() + theme.substring(1),
+      ),
+      item(
+        title: 'Language',
+        subtitle: 'Select application language',
+        category: 'Language',
+        icon: Icons.language_rounded,
+        keywords: ['language', 'locale', 'translate', 'english', 'hindi', 'spanish', 'espanol'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: switch (currentLocale) {
+          'en' => 'English',
+          'hi' => 'हिन्दी',
+          'es' => 'Español',
+          _ => 'System Default',
+        },
       ),
       item(
         title: 'Show Seconds',
@@ -1964,7 +1986,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBack: category != null ? _popCategory : null,
         docked: true,
         blur: !reduceMotion && enableTranslucency && engine.supportsBlur,
-        largeText: widget.largeText,
+        largeText: largeText,
         controller: category == null ? _activeController : null,
         showLargeTitle: category == null,
         removeBottomPadding: true,
@@ -2299,6 +2321,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     unawaited(_confirmResetSettings());
                                     return;
                                   }
+                                  if (result.title == 'Recently Deleted') {
+                                    if (widget.onOpenTrash != null) {
+                                      widget.onOpenTrash!();
+                                    }
+                                    return;
+                                  }
                                   _openCategory(result.category);
                                 },
                               ),
@@ -2351,6 +2379,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
                           color: p.orange,
                           onTap: () => _openCategory('App Icons', parent: 'Personalization'),
+                        ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.language_rounded,
+                          title: 'Language',
+                          status: switch (currentLocale) {
+                            'en' => 'English',
+                            'hi' => 'हिन्दी',
+                            'es' => 'Español',
+                            _ => 'System Default',
+                          },
+                          color: p.accent,
+                          onTap: () => _openCategory('Language', parent: 'Personalization'),
                         ),
                       ],
                     ),
@@ -2501,6 +2542,41 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Last Saved Hint', color: p.accent, value: showLastSavedHint, onChanged: (value) { setState(() => showLastSavedHint = value); widget.onShowLastSavedHint(value); })]),
                     SettingsPageDescription(p: p, text: 'Provides visual feedback for the time elapsed since your last moment.'),
+                    const SizedBox(height: spacing48),
+                  ]),
+                ),
+              if (show('Language'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing8),
+                    SettingsGroup(
+                      p: p,
+                      children: [
+                        for (final entry in [
+                          (code: 'system', name: 'System Default'),
+                          (code: 'en', name: 'English'),
+                          (code: 'hi', name: 'हिन्दी (Hindi)'),
+                          (code: 'es', name: 'Español (Spanish)'),
+                        ])
+                          SettingsRow(
+                            p: p,
+                            title: entry.name,
+                            trailing: currentLocale == entry.code
+                                ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                                : const SizedBox.shrink(),
+                            onTap: () {
+                              if (currentLocale == entry.code) return;
+                              HapticFeedback.selectionClick();
+                              setState(() => currentLocale = entry.code);
+                              widget.onLocaleChanged(entry.code);
+                            },
+                          ),
+                      ],
+                    ),
+                    SettingsPageDescription(
+                      p: p,
+                      text: 'Select your preferred language for the application.',
+                    ),
                     const SizedBox(height: spacing48),
                   ]),
                 ),

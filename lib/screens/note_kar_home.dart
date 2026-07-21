@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/main.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
@@ -60,6 +61,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _defaultMode = 'two-way';
   String _mode = 'two-way';
   String _inout = 'in';
+  String _locale = 'system';
   int? _sessionStart;
   int _tapDelay = 0;
   bool _remoteNotices = false;
@@ -475,6 +477,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _privacyLockDelayMinutes = prefs.getInt('m-privacy-lock-delay') ?? 0;
       _updateStatus = prefs.getString('m-update-status') ?? _updateStatus;
       _lastUpdateCheckedAt = prefs.getInt('m-last-update-check');
+      _locale = prefs.getString('m-locale') ?? 'system';
     });
 
     _applySystemUiStyle();
@@ -658,6 +661,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         theme: _theme,
         defaultMode: _defaultMode,
         largeText: _largeText,
+        currentLocale: _locale,
+        onLocaleChanged: (value) {
+          NoteKarApp.of(context)?.setLocale(value);
+          setState(() => _locale = value);
+        },
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
         onTheme: (value) {
           setState(() => _theme = value);
@@ -918,7 +926,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     await _prefs?.remove('m-inout');
     await _prefs?.remove('m-ses');
-    unawaited(_clearStoredEntries());
+    await _repository.clearAll();
+    await _repository.clearTrash();
+    setState(() => _nextId = _repository.getNextId());
     unawaited(_updateAndroidWidget());
   }
 
@@ -981,13 +991,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _factoryResetText = 'Clearing moments and notes...';
       });
     }
-    await _clearStoredEntries();
+    await _repository.clearAll();
+    await _repository.clearTrash();
     if (prefs != null) {
       var done = 0;
       for (final key in [
         'notekar.nextId',
         _welcomeSeenKey,
         _lastSeenVersionKey,
+        'm-locale',
         'm-theme',
         'm-default-mode',
         'm-mode',
@@ -1070,7 +1082,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _finishFactoryResetOverlay() async {
     final prefs = _factoryResetWelcomePrefs;
-    setState(() => _factoryResetVisible = false);
+    setState(() {
+      _locale = 'system';
+      _factoryResetVisible = false;
+    });
+    if (mounted) {
+      NoteKarApp.of(context)?.setLocale('system');
+    }
     await Future<void>.delayed(const Duration(milliseconds: 220));
     if (mounted && prefs != null) await _showWelcomeIfNeeded(prefs);
   }
@@ -1106,6 +1124,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _enableTranslucency = true;
       _minimalMomentOptions = false;
       _privacyLockDelayMinutes = 0;
+      _locale = 'system';
     });
     await _prefs?.setString('m-theme', _theme);
     await _prefs?.setString('m-default-mode', _defaultMode);
@@ -1137,6 +1156,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
     await _prefs?.setBool('m-translucency', _enableTranslucency);
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
+    await _prefs?.setString('m-locale', _locale);
+    if (mounted) {
+      NoteKarApp.of(context)?.setLocale(_locale);
+    }
     try {
       await _fileChannel.invokeMethod<void>('configureRemoteNotices', {
         'enabled': false,
@@ -1571,6 +1594,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         },
         onClearTrash: () async {
           await _repository.clearTrash();
+        },
+        currentLocale: _locale,
+        onLocaleChanged: (value) {
+          NoteKarApp.of(context)?.setLocale(value);
+          setState(() => _locale = value);
         },
       ),
     );

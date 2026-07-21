@@ -5,7 +5,6 @@ import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
-import 'package:notekar/widgets/common_elements.dart';
 
 class RecentlyDeletedDialog extends StatefulWidget {
   const RecentlyDeletedDialog({

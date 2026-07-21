@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
+import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/screens/note_kar_home.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,16 +32,42 @@ Future<void> _initHivePreload() async {
   }
 }
 
-class NoteKarApp extends StatelessWidget {
+class NoteKarApp extends StatefulWidget {
   const NoteKarApp({super.key, this.prefs});
 
   final SharedPreferences? prefs;
+
+  static NoteKarAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<NoteKarAppState>();
+
+  @override
+  State<NoteKarApp> createState() => NoteKarAppState();
+}
+
+class NoteKarAppState extends State<NoteKarApp> {
+  late String _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _locale = widget.prefs?.getString('m-locale') ?? 'system';
+  }
+
+  void setLocale(String locale) {
+    setState(() {
+      _locale = locale;
+    });
+    widget.prefs?.setString('m-locale', locale);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'NoteKar',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: _locale == 'system' ? null : Locale(_locale),
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -78,7 +105,7 @@ class NoteKarApp extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: NoteKarHome(preloadedPrefs: prefs),
+      home: NoteKarHome(preloadedPrefs: widget.prefs),
     );
   }
 }
