@@ -124,13 +124,13 @@ class SettingsRow extends StatelessWidget {
           color: active ? rowColor.withValues(alpha: 0.1) : Colors.transparent,
         ),
         child: Row(
-          crossAxisAlignment: hasSubtitle ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          // Always center so trailing tick/chevron is always vertically centered
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (hasIcon) ...[
               Container(
                 width: 32,
                 height: 32,
-                margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
                 decoration: BoxDecoration(
                   color: rowColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -144,7 +144,6 @@ class SettingsRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (hasSubtitle) const SizedBox(height: 3),
                   HighlightedText(
                     text: title,
                     query: highlight,
@@ -186,14 +185,11 @@ class SettingsRow extends StatelessWidget {
             ],
             if (trailing != null) ...[
               const SizedBox(width: 8),
-              // Center trailing widget vertically (it's already in a Row with center crossAxisAlignment if !hasSubtitle)
+              // Trailing is always vertically centered because Row uses CrossAxisAlignment.center
               trailing!,
             ],
             if (onTap != null && trailing == null)
-              Padding(
-                padding: EdgeInsets.only(top: hasSubtitle ? 10 : 0),
-                child: Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
-              ),
+              Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
           ],
         ),
       ),
