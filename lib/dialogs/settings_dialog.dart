@@ -1954,6 +1954,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
+                      insetDividers: true,
                       children: [
                         SettingsRow(
                           p: p,
@@ -2694,6 +2695,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'Release Notes & History',
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.auto_awesome_rounded, title: "What's New", color: p.orange, status: 'Recent', onTap: () => _openCategory("What's New", parent: 'Updates & Notices')),
                         SettingsRow(p: p, icon: Icons.history_edu_rounded, title: 'Changelog', color: p.green, status: 'History', onTap: () => _openCategory('Changelog', parent: 'Updates & Notices')),
@@ -2715,6 +2717,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.archive_outlined, title: 'Backup & Export', status: '${entries.length} Logs', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
                         SettingsRow(p: p, icon: Icons.health_and_safety_outlined, title: 'Backup Status', status: _dataHealthStatus, color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
@@ -2755,6 +2758,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.table_chart_outlined, title: 'Export CSV', status: 'Table', color: p.green, onTap: () => unawaited(_runExport('CSV', widget.onExportCsv))),
                         SettingsRow(p: p, icon: Icons.date_range_outlined, title: 'Export Last 7 Days', status: 'Recent', color: p.green, onTap: () => unawaited(_runExport('Recent CSV', widget.onExportRecentCsv))),
@@ -2777,6 +2781,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'Active Protection',
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.android_rounded, title: 'Android Backup', color: p.green, status: 'Active'),
                         SettingsRow(p: p, icon: Icons.favorite_outline_rounded, title: 'Data Health', color: p.green, status: _dataHealthStatus),
@@ -2790,6 +2795,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'Cloud & Sync (Planned)',
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.lock_outlined, title: 'Encrypted Backup', color: p.orange, status: 'Planned'),
                         SettingsRow(p: p, icon: Icons.cloud_outlined, title: 'Google Drive Backup', color: p.orange, status: 'Planned'),
@@ -2816,6 +2822,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'Data & Privacy',
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.analytics_outlined, title: 'No Analytics', color: p.green, status: 'None'),
                         SettingsRow(p: p, icon: Icons.wifi_off_rounded, title: 'Network Use', color: p.accent, status: 'Limited'),
@@ -2915,6 +2922,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'Documentation',
+                      insetDividers: true,
                       children: [
                         SettingsRow(p: p, icon: Icons.auto_stories_rounded, title: 'Guides', color: p.accent, status: 'Tutorials', onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
                         SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', color: p.orange, status: 'FAQ', onTap: () => _openCategory('Help', parent: 'Help & Guides')),
@@ -2925,6 +2933,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'Legal & Compliance',
+                      insetDividers: true,
                       children: [
                         SettingsRow(
                           p: p,
@@ -2962,6 +2971,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
+                      insetDividers: true,
                       children: [
                         SettingsRow(
                           p: p,
