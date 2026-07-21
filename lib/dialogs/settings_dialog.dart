@@ -265,6 +265,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
     checkingUpdates = widget.checkingUpdates;
 
     _loadRecentSearches();
+
+    _settingsSearchFocusNode.addListener(() {
+      if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
+        _openCategory('Search');
+      }
+    });
   }
 
   @override
@@ -316,6 +322,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _popCategory() {
+    if (category == 'Search') {
+      setState(() {
+        _settingsQuery = '';
+        _settingsSearchController.clear();
+      });
+      _settingsSearchFocusNode.unfocus();
+    }
     if (_categoryStack.isEmpty) {
       if (category == null) {
         Navigator.pop(context);
@@ -1309,6 +1322,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         const SizedBox(height: spacing4),
         SettingsPageDescription(
           p: p,
+          showIcon: true,
           text: 'App Icons change the Android launcher icon. Note: Some launchers may take a few seconds to update.',
         ),
       ],
@@ -1601,7 +1615,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final engine = AdaptiveEngine();
     bool show(String name) => category == name;
     final sheet = PopScope(
-      canPop: category == null,
+      canPop: category == null && _categoryStack.isEmpty,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _popCategory();
       },
@@ -1637,8 +1651,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
               );
             },
             child: RepaintBoundary(
+              key: ValueKey('container-${category ?? 'root'}'),
               child: CustomScrollView(
-                key: ValueKey(category ?? 'root'),
+                key: ValueKey('scroll-${category ?? 'root'}'),
                 controller: category == null ? _activeController : null,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
@@ -1663,6 +1678,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         p: p,
                         controller: _settingsSearchController,
                         focusNode: _settingsSearchFocusNode,
+                        onTap: () {
+                          if (category != 'Search') {
+                            _openCategory('Search');
+                          }
+                        },
                         onChanged: (value) {
                           setState(() => _settingsQuery = value);
                           if (_activeController.hasClients) {
@@ -1843,6 +1863,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         p: p,
                         controller: _settingsSearchController,
                         focusNode: _settingsSearchFocusNode,
+                        onTap: () {
+                          if (category != 'Search') {
+                            _openCategory('Search');
+                          }
+                        },
                         onChanged: (value) {
                           setState(() => _settingsQuery = value);
                           if (_activeController.hasClients) {
@@ -1961,7 +1986,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(
                           p: p,
-                          icon: Icons.dark_mode_outlined,
                           title: 'Display',
                           status: theme[0].toUpperCase() + theme.substring(1),
                           color: p.accent,
@@ -1969,7 +1993,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
-                          icon: Icons.color_lens_outlined,
                           title: 'Accent Color',
                           status: accentColor[0].toUpperCase() + accentColor.substring(1),
                           color: p.accent,
@@ -1977,7 +2000,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
-                          icon: Icons.apps_rounded,
                           title: 'App Icons',
                           status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
                           color: p.orange,
@@ -2085,7 +2107,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    SettingsPageDescription(p: p, text: 'Displays current seconds on the home clock and adds optional color highlighting for two-way mode.'),
+                    SettingsPageDescription(p: p, text: 'Configure the home screen clock and visual feedback.'),
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
@@ -2112,7 +2134,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    SettingsPageDescription(p: p, text: 'Displays text labels below toolbar icons and on the home record button.'),
+                    SettingsPageDescription(p: p, text: 'Show descriptive text labels on the primary navigation and action buttons.'),
                     const SizedBox(height: 10),
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Large Controls', color: p.orange, value: largeControls, onChanged: (value) { setState(() => largeControls = value); widget.onLargeControls(value); })]),
                     SettingsPageDescription(p: p, text: 'Increases the size of interactive elements for easier tapping.'),
@@ -2141,6 +2163,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
+                      title: 'Accent Color',
                       showDividers: false,
                       children: [
                         ColorChoiceSetting(
@@ -2156,7 +2179,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    SettingsPageDescription(p: p, text: 'Choose a primary accent color for buttons, active indicators, and fluid interface highlights across NoteKar.'),
+                    SettingsPageDescription(p: p, text: 'Select an accent color for buttons and fluid interface highlights.'),
                     const SizedBox(height: spacing64),
                   ]),
                 ),
@@ -2189,7 +2212,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(
                           p: p,
-                          icon: Icons.touch_app_rounded,
                           title: 'Capture',
                           status: defaultMode == 'single' ? 'Single' : 'Two-Way',
                           color: p.green,
@@ -2197,7 +2219,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
-                          icon: Icons.history_rounded,
                           title: 'Moments',
                           status: '${entries.length} Logs',
                           color: p.orange,
