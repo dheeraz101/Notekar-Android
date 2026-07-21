@@ -1986,6 +1986,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(
                           p: p,
+                          icon: Icons.dark_mode_outlined,
                           title: 'Display',
                           status: theme[0].toUpperCase() + theme.substring(1),
                           color: p.accent,
@@ -1993,6 +1994,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
+                          icon: Icons.color_lens_outlined,
                           title: 'Accent Color',
                           status: accentColor[0].toUpperCase() + accentColor.substring(1),
                           color: p.accent,
@@ -2000,6 +2002,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
+                          icon: Icons.apps_rounded,
                           title: 'App Icons',
                           status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
                           color: p.orange,
@@ -2212,6 +2215,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       children: [
                         SettingsRow(
                           p: p,
+                          icon: Icons.touch_app_rounded,
                           title: 'Capture',
                           status: defaultMode == 'single' ? 'Single' : 'Two-Way',
                           color: p.green,
@@ -2219,6 +2223,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         SettingsRow(
                           p: p,
+                          icon: Icons.history_rounded,
                           title: 'Moments',
                           status: '${entries.length} Logs',
                           color: p.orange,
