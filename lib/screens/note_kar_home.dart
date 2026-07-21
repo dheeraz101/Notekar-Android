@@ -416,7 +416,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     if (!welcomeSeen) {
       if (mounted) {
-        unawaited(_showWelcomeIfNeeded(prefs));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _showWelcomeIfNeeded(prefs);
+          }
+        });
       }
     }
 
@@ -1071,20 +1075,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
       } catch (_) {}
     }
     final elapsed = DateTime.now().difference(started);
-    if (elapsed < const Duration(seconds: 5)) {
+    if (elapsed < const Duration(milliseconds: 2200)) {
       if (mounted) {
         setState(() {
           _factoryResetProgress = 0.94;
           _factoryResetText = 'Finishing reset...';
         });
       }
-      await Future<void>.delayed(const Duration(seconds: 5) - elapsed);
+      await Future<void>.delayed(const Duration(milliseconds: 2200) - elapsed);
     }
     if (mounted) {
       setState(() {
-        _factoryResetProgress = 1;
+        _factoryResetProgress = 1.0;
         _factoryResetComplete = true;
-        _factoryResetText = 'NoteKar is ready for a fresh start.';
+        _factoryResetText = 'Restore complete';
       });
     }
     unawaited(_updateAndroidWidget());

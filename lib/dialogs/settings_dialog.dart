@@ -1825,7 +1825,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   height: 32,
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    color: p.accent,
+                    color: p.text3,
                   ),
                 ),
                 const SizedBox(height: spacing48),
@@ -1851,12 +1851,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.download_rounded, color: p.accent, size: 20),
+                        Icon(Icons.download_rounded, color: p.text, size: 20),
                         const SizedBox(width: 10),
                         Text(
                           'Update Available',
                           style: TextStyle(
-                            color: p.accent,
+                            color: p.text,
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                           ),
@@ -1880,8 +1880,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           const SizedBox(height: spacing24),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: p.accent,
-              foregroundColor: Colors.white,
+              backgroundColor: p.surface3,
+              foregroundColor: p.text,
               minimumSize: const Size.fromHeight(56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
@@ -1937,9 +1937,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
             padding: const EdgeInsets.only(bottom: spacing16),
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: p.accent,
+                foregroundColor: p.text,
                 minimumSize: const Size.fromHeight(56),
-                side: BorderSide(color: p.accent.withValues(alpha: 0.4)),
+                side: BorderSide(color: p.border),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
@@ -3184,7 +3184,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           p: p,
                           icon: Icons.system_update_outlined,
                           title: 'Software Update',
-                          color: p.accent,
+                          color: p.text2,
                           status: 'v$appVersion',
                           onTap: () => _openCategory('Update Center', parent: 'Updates & Notices'),
                         ),

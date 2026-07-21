@@ -126,7 +126,7 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
   }
 }
 
-class FactoryResetOverlay extends StatelessWidget {
+class FactoryResetOverlay extends StatefulWidget {
   const FactoryResetOverlay({
     super.key,
     required this.p,
@@ -143,85 +143,74 @@ class FactoryResetOverlay extends StatelessWidget {
   final VoidCallback onStart;
 
   @override
+  State<FactoryResetOverlay> createState() => _FactoryResetOverlayState();
+}
+
+class _FactoryResetOverlayState extends State<FactoryResetOverlay> {
+  bool _triggered = false;
+
+  @override
+  void didUpdateWidget(FactoryResetOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.complete && !_triggered) {
+      _triggered = true;
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          widget.onStart();
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: ColoredBox(
-        color: p.bg,
+      child: Container(
+        color: const Color(0xFF000000), // Pure black screen matching iOS reboot
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: spacing32, vertical: spacing32),
-            child: Column(
-              children: [
-                const Spacer(),
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: complete
-                        ? p.green.withValues(alpha: 0.14)
-                        : p.accent.withValues(alpha: 0.14),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    complete ? Icons.check_rounded : Icons.restart_alt_rounded,
-                    color: complete ? p.green : p.accent,
-                    size: 34,
-                  ),
-                ),
-                const SizedBox(height: spacing24),
-                Text(
-                  complete ? 'Ready to Start' : 'Resetting NoteKar',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w900,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: spacing8),
-                Text(
-                  status,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: p.text2, fontSize: 14, height: 1.4),
-                ),
-                const SizedBox(height: spacing24),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    minHeight: 7,
-                    value: progress.clamp(0, 1),
-                    backgroundColor: p.surface3,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      complete ? p.green : p.accent,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 3),
+              // Apple/iOS style minimalist icon
+              const Icon(
+                Icons.auto_awesome_rounded,
+                color: Colors.white,
+                size: 56,
+              ),
+              const Spacer(flex: 2),
+              // Thin iOS progress bar
+              SizedBox(
+                width: 200,
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: SizedBox(
+                        height: 3,
+                        child: LinearProgressIndicator(
+                          value: widget.progress.clamp(0, 1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.15),
+                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: spacing8),
-                Text(
-                  '${(progress.clamp(0, 1) * 100).round()}%',
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 12,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                const Spacer(),
-                AnimatedOpacity(
-                  opacity: complete ? 1 : 0,
-                  duration: const Duration(milliseconds: 180),
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: p.accent,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(56),
+                    const SizedBox(height: 16),
+                    // Minimal system status text
+                    Text(
+                      widget.status,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.1,
+                      ),
                     ),
-                    onPressed: complete ? onStart : null,
-                    child: const Text('Start'),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const Spacer(flex: 3),
+            ],
           ),
         ),
       ),
