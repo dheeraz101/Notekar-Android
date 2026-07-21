@@ -1,0 +1,231 @@
+name: Build & Release APK
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TRIGGER: Only fires when code is pushed to the `release` branch.
+# Replicates scripts/build-release-apks.ps1 exactly:
+#   → 4 signed APKs (universal, arm64-v8a, armeabi-v7a, x86_64)
+#   → sha256.txt checksum file
+#   → versions/v{version}/version.json manifest
+#   → GitHub Release with all 4 APKs + sha256.txt attached
+# ─────────────────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches:
+      - release
+
+concurrency:
+  group: release-build
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    name: Build 4 Signed APKs & Publish Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Read version from pubspec.yaml ────────────────────────────────
+      - name: Extract version from pubspec.yaml
+        id: version
+        run: |
+          FULL=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' \r')
+          VER=$(echo "$FULL" | cut -d'+' -f1)
+          BUILD=$(echo "$FULL" | cut -d'+' -f2)
+          echo "version=$VER"       >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD" >> $GITHUB_OUTPUT
+          echo "tag=v$VER"          >> $GITHUB_OUTPUT
+          echo "📦 Version: $VER+$BUILD"
+
+      # ── 3. Environment ───────────────────────────────────────────────────
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # ── 4. Signing setup ─────────────────────────────────────────────────
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "✅ Keystore decoded"
+
+      - name: Write key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=keystore.jks
+          EOF
+          echo "✅ key.properties written"
+
+      # ── 5. Build — Universal APK ─────────────────────────────────────────
+      - name: Build universal release APK
+        run: |
+          flutter build apk --release \
+            --build-name ${{ steps.version.outputs.version }} \
+            --build-number ${{ steps.version.outputs.build_number }}
+          echo "✅ Universal APK built"
+
+      # ── 6. Build — Split-per-ABI APKs (arm64, armeabi-v7a, x86_64) ──────
+      - name: Build split-per-ABI release APKs
+        run: |
+          flutter build apk --release --split-per-abi \
+            --build-name ${{ steps.version.outputs.version }} \
+            --build-number ${{ steps.version.outputs.build_number }}
+          echo "✅ Split APKs built"
+
+      # ── 7. Rename all 4 APKs with version + arch ─────────────────────────
+      - name: Rename APKs
+        run: |
+          APK_DIR=build/app/outputs/flutter-apk
+          VER=${{ steps.version.outputs.version }}
+
+          mv "$APK_DIR/app-release.apk"          "$APK_DIR/notekar-${VER}-universal.apk"
+          mv "$APK_DIR/app-arm64-v8a-release.apk"    "$APK_DIR/notekar-${VER}-arm64-v8a.apk"
+          mv "$APK_DIR/app-armeabi-v7a-release.apk"  "$APK_DIR/notekar-${VER}-armeabi-v7a.apk"
+          mv "$APK_DIR/app-x86_64-release.apk"       "$APK_DIR/notekar-${VER}-x86_64.apk"
+
+          echo "✅ Renamed APKs:"
+          ls -lh "$APK_DIR"/notekar-*.apk
+
+      # ── 8. Generate SHA256 checksums ─────────────────────────────────────
+      - name: Generate SHA256 checksums
+        run: |
+          APK_DIR=build/app/outputs/flutter-apk
+          VER=${{ steps.version.outputs.version }}
+
+          cd "$APK_DIR"
+          sha256sum notekar-${VER}-arm64-v8a.apk \
+                    notekar-${VER}-armeabi-v7a.apk \
+                    notekar-${VER}-universal.apk \
+                    notekar-${VER}-x86_64.apk \
+            > sha256.txt
+
+          echo "✅ SHA256 checksums:"
+          cat sha256.txt
+
+      # ── 9. Generate version.json manifest ────────────────────────────────
+      - name: Generate version.json
+        run: |
+          APK_DIR=build/app/outputs/flutter-apk
+          VER=${{ steps.version.outputs.version }}
+          BUILD=${{ steps.version.outputs.build_number }}
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          APKS=()
+          for ARCH in arm64-v8a armeabi-v7a universal x86_64; do
+            FILE="notekar-${VER}-${ARCH}.apk"
+            SHA=$(sha256sum "$APK_DIR/$FILE" | awk '{print $1}')
+            BYTES=$(stat -c%s "$APK_DIR/$FILE")
+            APKS+=("{\"file\":\"$FILE\",\"sha256\":\"$SHA\",\"bytes\":$BYTES}")
+          done
+
+          APKS_JSON=$(printf '%s,' "${APKS[@]}" | sed 's/,$//')
+
+          cat > "$APK_DIR/version.json" <<EOF
+          {
+            "version": "$VER",
+            "buildNumber": $BUILD,
+            "generatedAt": "$NOW",
+            "apks": [$APKS_JSON]
+          }
+          EOF
+
+          echo "✅ version.json:"
+          cat "$APK_DIR/version.json"
+
+      # ── 10. Upload all artifacts ──────────────────────────────────────────
+      - name: Upload APKs + checksums as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: notekar-${{ steps.version.outputs.version }}-release
+          path: |
+            build/app/outputs/flutter-apk/notekar-*.apk
+            build/app/outputs/flutter-apk/sha256.txt
+            build/app/outputs/flutter-apk/version.json
+          retention-days: 90
+
+      # ── 11. Prepare release notes body ───────────────────────────────────
+      - name: Prepare release notes
+        run: |
+          VER=${{ steps.version.outputs.version }}
+          NOTES_FILE="releases/v${VER}/RELEASE_NOTES.md"
+
+          if [ -f "$NOTES_FILE" ]; then
+            echo "✅ Using $NOTES_FILE as release body"
+            cp "$NOTES_FILE" /tmp/release_notes.md
+          else
+            echo "⚠️  $NOTES_FILE not found — using fallback template"
+            cat > /tmp/release_notes.md <<EOF
+          ## 📦 Notekar ${{ steps.version.outputs.tag }}
+
+          Signed release — built automatically from the \`release\` branch.
+          EOF
+          fi
+
+          # Always append the APK install guide + verify block at the bottom
+          cat >> /tmp/release_notes.md <<'EOF'
+
+          ---
+
+          ### Assets
+
+          | APK | Use when |
+          |-----|----------|
+          | `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
+          | `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
+          | `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
+          | `notekar-VERSION-x86_64.apk` | x86_64 emulators / devices |
+
+          ### Verifying
+
+          Download `sha256.txt` alongside any APK and run:
+          ```
+          sha256sum --check sha256.txt
+          ```
+          EOF
+
+          # Swap VERSION placeholder with actual version
+          sed -i "s/VERSION/${{ steps.version.outputs.version }}/g" /tmp/release_notes.md
+
+          echo "📋 Release notes preview:"
+          cat /tmp/release_notes.md
+
+      # ── 12. Create GitHub Release with all files ──────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Notekar ${{ steps.version.outputs.tag }}"
+          make_latest: true
+          body_path: /tmp/release_notes.md
+          files: |
+            build/app/outputs/flutter-apk/notekar-*.apk
+            build/app/outputs/flutter-apk/sha256.txt
+            build/app/outputs/flutter-apk/version.json
+
+      # ── 13. Clean up keystore (security) ─────────────────────────────────
+      - name: Remove keystore files
+        if: always()
+        run: |
+          rm -f android/app/keystore.jks android/key.properties
+          echo "🔒 Keystore cleaned up"
