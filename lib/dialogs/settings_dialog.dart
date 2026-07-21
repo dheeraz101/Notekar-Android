@@ -2205,14 +2205,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
-                    HistoryAnalyticsCard(p: p, entries: entries),
+                    ActivitySummaryCard(p: p, entries: entries),
+                    const SizedBox(height: 6),
+                    ActivityTrendsCard(p: p, entries: entries),
                     SettingsPageDescription(
                       p: p,
                       text: 'Visual overview of your logging frequency, 7-day activity trends, and average interval between moments.',
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     SettingsGroup(
                       p: p,
+                      title: 'Logging Controls',
+                      insetDividers: true,
                       children: [
                         SettingsRow(
                           p: p,
