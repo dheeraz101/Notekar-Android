@@ -854,20 +854,33 @@ class SettingsPageDescription extends StatelessWidget {
     super.key,
     required this.p,
     required this.text,
+    this.showIcon = false,
     this.bottomPadding = 16.0,
   });
 
   final Palette p;
   final String text;
+  final bool showIcon;
   final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding), // Tight 5px gap below settings card
+      padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (showIcon) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 3.5),
+              child: Icon(
+                Icons.info_outline_rounded,
+                color: p.text3.withValues(alpha: 0.6),
+                size: 13,
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
           Expanded(
             child: Text(
               text,
@@ -962,6 +975,7 @@ class SettingsSearchBox extends StatelessWidget {
     required this.onChanged,
     required this.onClear,
     this.focusNode,
+    this.onTap,
   });
 
   final Palette p;
@@ -969,6 +983,7 @@ class SettingsSearchBox extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
   final FocusNode? focusNode;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -982,6 +997,7 @@ class SettingsSearchBox extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         focusNode: focusNode,
+        onTap: onTap,
         style: TextStyle(color: p.text, fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.search_rounded, color: p.text3, size: 20),
