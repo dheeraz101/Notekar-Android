@@ -19,6 +19,7 @@ import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -1992,7 +1993,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       },
       child: AppSheet(
         p: p,
-        title: category ?? 'Settings',
+        title: (category ?? 'Settings').localized(context),
         onBack: category != null ? _popCategory : null,
         docked: true,
         blur: !reduceMotion && enableTranslucency && engine.supportsBlur,
@@ -2178,9 +2179,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: p.accent.withValues(alpha: 0.15),
+                              color: p.surface3,
                               borderRadius: BorderRadius.circular(999),
-                              border: Border.all(color: p.accent.withValues(alpha: 0.4), width: 1.2),
+                              border: Border.all(color: p.border, width: 1.0),
                             ),
                             child: Row(
                               children: [
@@ -2188,10 +2189,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   width: 30,
                                   height: 30,
                                   decoration: BoxDecoration(
-                                    color: p.accent,
+                                    color: p.surface2,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.system_update_rounded, color: Colors.white, size: 16),
+                                  child: Icon(Icons.system_update_rounded, color: p.text, size: 16),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -2204,7 +2205,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     ),
                                   ),
                                 ),
-                                Icon(Icons.chevron_right_rounded, color: p.accent, size: 20),
+                                Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
                               ],
                             ),
                           ),

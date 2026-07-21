@@ -5,6 +5,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class SettingsGroup extends StatelessWidget {
   const SettingsGroup({
@@ -33,7 +34,7 @@ class SettingsGroup extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
             child: Text(
-              title!.toUpperCase(),
+              title!.localized(context).toUpperCase(),
               style: TextStyle(
                 color: p.text3,
                 fontSize: 13,
@@ -163,7 +164,7 @@ class SettingsRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   HighlightedText(
-                    text: title,
+                    text: title.localized(context),
                     query: highlight,
                     baseStyle: TextStyle(
                       color: p.text,
@@ -445,7 +446,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                 children: [
                   if (hasSubtitle) const SizedBox(height: 3),
                   Text(
-                    widget.title,
+                    widget.title.localized(context),
                     style: TextStyle(
                       color: enabled ? p.text : p.text2,
                       fontWeight: FontWeight.w600,

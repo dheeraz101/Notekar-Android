@@ -10,6 +10,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -212,7 +213,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
     return AppSheet(
       p: widget.p,
-      title: 'History',
+      title: 'History'.localized(context),
       docked: true,
       blur: widget.blur,
       largeText: widget.largeText,
@@ -251,7 +252,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   sliver: SliverToBoxAdapter(
                     child: AppSheetLargeTitle(
                       p: widget.p,
-                      title: 'History',
+                      title: 'History'.localized(context),
                       scrollController: _scrollController,
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class WelcomeSheet extends StatefulWidget {
   const WelcomeSheet({
@@ -50,7 +51,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
     final p = paletteFor(theme);
     return AppSheet(
       p: p,
-      title: "Welcome",
+      title: "Welcome".localized(context),
       docked: true,
       blur: widget.blur,
       largeText: widget.largeText,
@@ -81,7 +82,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Welcome to NoteKar',
+              'Welcome to NoteKar'.localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text,
@@ -92,7 +93,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
             ),
             const SizedBox(height: 6),
             Text(
-              'A quiet, offline-first way to mark moments the second they happen.',
+              'A quiet, offline-first way to mark moments the second they happen.'.localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text2,
@@ -195,9 +196,9 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
                   ),
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Start Logging',
-                  style: TextStyle(
+                child: Text(
+                  'Start Logging'.localized(context),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
