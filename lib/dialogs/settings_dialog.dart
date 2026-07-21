@@ -1256,15 +1256,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ],
         ),
         const SizedBox(height: 20),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: p.accent,
-            minimumSize: const Size.fromHeight(56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-          onPressed: () {
+        PressableScale(
+          onTap: () {
             Clipboard.setData(
               ClipboardData(
                 text: _diagnosticsText(entries, todayCount, latest),
@@ -1272,7 +1265,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
             );
             widget.onFeedback('Diagnostics copied');
           },
-          child: const Text('Copy Diagnostics', style: TextStyle(fontWeight: FontWeight.w800)),
+          child: Container(
+            width: double.infinity,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: p.accent,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.content_copy_rounded, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'Copy Diagnostics',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 10),
         SettingsPageDescription(p: p, text: 'Diagnostics help in troubleshooting. Copying them does not send any data automatically.'),
@@ -2375,7 +2392,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SettingsGroup(
                       p: p,
                       title: 'History Controls',
-                      insetDividers: true,
                       children: [
                         SettingsSwitchRow(
                           p: p,
@@ -2407,7 +2423,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
-                      title: 'Duration Formatting',
                       children: [
                         SettingsSwitchRow(
                           p: p,
@@ -2425,7 +2440,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: 10),
                     SettingsGroup(
                       p: p,
-                      title: 'Quick Actions',
                       children: [
                         SettingsSwitchRow(
                           p: p,
