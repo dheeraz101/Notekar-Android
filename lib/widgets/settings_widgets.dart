@@ -93,6 +93,7 @@ class SettingsRow extends StatelessWidget {
     this.active = false,
     this.highlight,
     this.trailing,
+    this.rowKind = 'nav', // 'nav' | 'link' | 'popup'
   });
 
   final Palette p;
@@ -105,12 +106,29 @@ class SettingsRow extends StatelessWidget {
   final bool active;
   final String? highlight;
   final Widget? trailing;
+  /// 'nav'   → chevron_right (default internal navigation)
+  /// 'link'  → open_in_new  (opens an external URL)
+  /// 'popup' → info_outline  (opens an inline popup/dialog)
+  final String rowKind;
 
   @override
   Widget build(BuildContext context) {
     final rowColor = color ?? p.accent;
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     final hasIcon = icon != null;
+
+    // Trailing indicator icon chosen by rowKind
+    Widget? trailingIndicator;
+    if (onTap != null && trailing == null) {
+      switch (rowKind) {
+        case 'link':
+          trailingIndicator = Icon(Icons.open_in_new_rounded, color: p.text3, size: 16);
+        case 'popup':
+          trailingIndicator = Icon(Icons.info_outline_rounded, color: p.text3, size: 18);
+        default:
+          trailingIndicator = Icon(Icons.chevron_right_rounded, color: p.text3, size: 20);
+      }
+    }
 
     return PressableScale(
       enabled: onTap != null,
@@ -185,11 +203,12 @@ class SettingsRow extends StatelessWidget {
             ],
             if (trailing != null) ...[
               const SizedBox(width: 8),
-              // Trailing is always vertically centered because Row uses CrossAxisAlignment.center
               trailing!,
             ],
-            if (onTap != null && trailing == null)
-              Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+            if (trailingIndicator != null) ...[
+              const SizedBox(width: 6),
+              trailingIndicator,
+            ],
           ],
         ),
       ),

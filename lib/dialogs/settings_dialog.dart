@@ -1757,6 +1757,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             icon: Icons.coffee_rounded,
                             title: 'Buy me a Coffee',
                             color: const Color(0xFFFFDD00),
+                            rowKind: 'link',
                             onTap: () => widget.onOpenLink(coffeeLink),
                           ),
                           SettingsRow(
@@ -1764,6 +1765,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             icon: Icons.feedback_rounded,
                             title: 'Feedback',
                             color: p.green,
+                            rowKind: 'popup',
                             onTap: _openFeedback,
                           ),
                           SettingsRow(
@@ -1771,6 +1773,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             icon: Icons.code_rounded,
                             title: 'GitHub',
                             color: p.text,
+                            rowKind: 'link',
                             onTap: () => widget.onOpenLink(githubRepo),
                           ),
                         ],
