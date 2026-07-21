@@ -148,19 +148,23 @@ class _AppSheetState extends State<AppSheet> {
                           padding: const EdgeInsets.symmetric(horizontal: 50),
                           child: Opacity(
                             opacity: widget.showLargeTitle ? _titleOpacity : 1.0,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                widget.title,
-                                maxLines: 1,
-                                softWrap: false,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.4,
-                                  fontFamily: 'Inter',
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 180),
+                              child: FittedBox(
+                                key: ValueKey<String>(widget.title),
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  widget.title,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.4,
+                                    fontFamily: 'Inter',
+                                  ),
                                 ),
                               ),
                             ),

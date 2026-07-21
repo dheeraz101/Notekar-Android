@@ -56,7 +56,7 @@ class SettingsDialog extends StatefulWidget {
     required this.updateStatus,
     required this.checkingUpdates,
     required this.lastUpdateCheckedAt,
-    required this.entries,
+    required this.entriesNotifier,
     required this.lastSavedAt,
     this.blur = false,
     required this.onTheme,
@@ -102,7 +102,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onFeedback,
     this.onOpenTrash,
     this.lastDeletedPreview,
-    required this.trashEntries,
+    required this.trashEntriesNotifier,
     required this.onRestoreTrashMoment,
     required this.onRestoreAllTrash,
     required this.onDeleteTrashPermanent,
@@ -147,7 +147,7 @@ class SettingsDialog extends StatefulWidget {
   final String updateStatus;
   final bool checkingUpdates;
   final int? lastUpdateCheckedAt;
-  final List<Moment> entries;
+  final ValueNotifier<List<Moment>> entriesNotifier;
   final int? lastSavedAt;
   final bool blur;
   final ValueChanged<String> onTheme;
@@ -193,7 +193,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<String> onFeedback;
   final VoidCallback? onOpenTrash;
   final String? lastDeletedPreview;
-  final List<Moment> trashEntries;
+  final ValueNotifier<List<Moment>> trashEntriesNotifier;
   final Future<void> Function(int id) onRestoreTrashMoment;
   final Future<void> Function() onRestoreAllTrash;
   final Future<void> Function(int id) onDeleteTrashPermanent;
@@ -242,7 +242,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   late String currentLocale;
 
-  late List<Moment> _trash;
+  List<Moment> get entries => widget.entriesNotifier.value;
+  List<Moment> get _trash => widget.trashEntriesNotifier.value;
 
   String updateStatus = '';
   bool checkingUpdates = false;
@@ -251,8 +252,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   final FocusNode _settingsSearchFocusNode = FocusNode();
   String _settingsQuery = '';
   List<String> _recentSearches = [];
-
-  List<Moment> get entries => widget.entries;
 
   @override
   void initState() {
@@ -287,7 +286,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
     currentLocale = widget.currentLocale;
 
-    _trash = List.from(widget.trashEntries);
+    widget.entriesNotifier.addListener(_onEntriesChanged);
+    widget.trashEntriesNotifier.addListener(_onEntriesChanged);
 
     updateStatus = widget.updateStatus;
     checkingUpdates = widget.checkingUpdates;
@@ -299,6 +299,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
         _openCategory('Search');
       }
     });
+  }
+
+  @override
+  void dispose() {
+    widget.entriesNotifier.removeListener(_onEntriesChanged);
+    widget.trashEntriesNotifier.removeListener(_onEntriesChanged);
+    _activeController.dispose();
+    _settingsSearchController.dispose();
+    _settingsSearchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onEntriesChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -317,13 +333,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
-  @override
-  void dispose() {
-    _settingsSearchController.dispose();
-    _settingsSearchFocusNode.dispose();
-    _activeController.dispose();
-    super.dispose();
-  }
+
 
   Future<void> _loadRecentSearches() async {
     final prefs = await SharedPreferences.getInstance();
@@ -383,7 +393,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String get _availableVersion => updateStatus.split(' ').last;
 
   String get _dataHealthStatus {
-    final entries = widget.entries;
+    final entries = this.entries;
     if (entries.isEmpty) return 'No data';
     final now = DateTime.now().millisecondsSinceEpoch;
     final last = widget.lastSavedAt ?? 0;
@@ -1969,7 +1979,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       highContrast: highContrast,
       accentName: accentColor,
     );
-    final entries = widget.entries;
+    final entries = this.entries;
     final today = dateKey(DateTime.now());
     final todayCount = entries.where((e) => e.date == today).length;
     final delayIndex = delayValues.indexOf(tapDelay);
@@ -1994,8 +2004,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           width: 410,
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
           child: AnimatedSwitcher(
-            duration: Duration(milliseconds: engine.isLowEnd ? 180 : 280),
-            reverseDuration: Duration(milliseconds: engine.isLowEnd ? 140 : 220),
+            duration: Duration(milliseconds: engine.isLowEnd ? 120 : 180),
+            reverseDuration: Duration(milliseconds: engine.isLowEnd ? 100 : 140),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             transitionBuilder: (Widget child, Animation<double> animation) {
@@ -3699,7 +3709,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 );
                                 if (confirmed == true) {
                                   await widget.onRestoreAllTrash();
-                                  setState(() => _trash.clear());
                                 }
                               },
                               icon: const Icon(Icons.restore_rounded, size: 18),
@@ -3733,7 +3742,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 );
                                 if (confirmed == true) {
                                   await widget.onClearTrash();
-                                  setState(() => _trash.clear());
                                 }
                               },
                               icon: const Icon(Icons.delete_forever_rounded, size: 18),
@@ -3807,7 +3815,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     icon: Icon(Icons.restore_rounded, color: p.text2, size: 20),
                                     onPressed: () async {
                                       await widget.onRestoreTrashMoment(moment.id);
-                                      setState(() => _trash.removeWhere((m) => m.id == moment.id));
                                     },
                                   ),
                                   IconButton(
@@ -3830,7 +3837,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       );
                                       if (confirmed == true) {
                                         await widget.onDeleteTrashPermanent(moment.id);
-                                        setState(() => _trash.removeWhere((m) => m.id == moment.id));
                                       }
                                     },
                                   ),

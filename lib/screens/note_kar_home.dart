@@ -109,7 +109,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _isSaving = false;
   int? _lastId;
   int _nextId = 1;
-  List<Moment> _entries = [];
+  final ValueNotifier<List<Moment>> _entriesNotifier = ValueNotifier([]);
+  List<Moment> get _entries => _entriesNotifier.value;
+  set _entries(List<Moment> val) {
+    _entriesNotifier.value = val;
+  }
+  final ValueNotifier<List<Moment>> _trashNotifier = ValueNotifier([]);
   String? _toast;
   bool _toastVisible = false;
   bool _toastWarning = false;
@@ -432,6 +437,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() {
       _prefs = prefs;
       _entries = entries;
+      _trashNotifier.value = _repository.getTrashMoments();
       _nextId = _repository.getNextId();
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
@@ -619,11 +625,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _deleteStoredEntry(int id) async {
     await _repository.deleteMoment(id);
+    _trashNotifier.value = _repository.getTrashMoments();
     setState(() => _nextId = _repository.getNextId());
   }
 
   Future<void> _clearStoredEntries() async {
     await _repository.clearAll();
+    _trashNotifier.value = _repository.getTrashMoments();
     setState(() {
       _entries = [];
       _nextId = _repository.getNextId();
@@ -928,6 +936,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.remove('m-ses');
     await _repository.clearAll();
     await _repository.clearTrash();
+    _trashNotifier.value = [];
     setState(() => _nextId = _repository.getNextId());
     unawaited(_updateAndroidWidget());
   }
@@ -993,6 +1002,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
     await _repository.clearAll();
     await _repository.clearTrash();
+    _trashNotifier.value = [];
     if (prefs != null) {
       var done = 0;
       for (final key in [
@@ -1353,6 +1363,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _openSettings() async {
     final trash = _repository.getTrashMoments();
+    _trashNotifier.value = trash;
     final lastDeletedPreview = trash.isNotEmpty
         ? 'Last deleted: ${timeOnly(trash.first.timestamp)}${trash.first.note.isNotEmpty ? ' - ${trash.first.note}' : ''}'
         : 'No moments deleted';
@@ -1402,13 +1413,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         updateStatus: _updateStatus,
         checkingUpdates: _checkingUpdates,
         lastUpdateCheckedAt: _lastUpdateCheckedAt,
-        entries: _entries,
+        entriesNotifier: _entriesNotifier,
         lastSavedAt: _entries.isEmpty
             ? null
             : _entries.map((entry) => entry.timestamp).reduce(math.max),
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
         lastDeletedPreview: lastDeletedPreview,
-        trashEntries: trash,
+        trashEntriesNotifier: _trashNotifier,
         onTheme: (value) {
           setState(() => _theme = value);
           _saveSetting('m-theme', value);
