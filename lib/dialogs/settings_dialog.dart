@@ -229,6 +229,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _settingsQuery = '';
   List<String> _recentSearches = [];
 
+  List<Moment> get entries => widget.entries;
+
   @override
   void initState() {
     super.initState();
@@ -366,7 +368,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return 'Action required';
   }
 
-  List<({String title, String subtitle, String category, IconData icon, List<String> keywords})> get _settingsSearchResults {
+  List<({
+    String title,
+    String subtitle,
+    String category,
+    IconData icon,
+    List<String> keywords,
+    String kind,
+    bool? boolValue,
+    ValueChanged<bool>? onBoolChanged,
+    String? status,
+  })> get _settingsSearchResults {
     final query = _settingsQuery.trim().toLowerCase();
     if (query.isEmpty) return [];
 
@@ -377,6 +389,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.brightness_6_rounded,
         keywords: ['theme', 'dark', 'light', 'amoled', 'appearance', 'mode'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: theme[0].toUpperCase() + theme.substring(1),
       ),
       (
         title: 'Show Seconds',
@@ -384,6 +400,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.timer_rounded,
         keywords: ['seconds', 'clock', 'time', 'display'],
+        kind: 'switch',
+        boolValue: showSeconds,
+        onBoolChanged: (bool value) {
+          setState(() => showSeconds = value);
+          widget.onShowSeconds(value);
+        },
+        status: null,
       ),
       (
         title: 'Highlight Seconds',
@@ -391,6 +414,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.auto_awesome_rounded,
         keywords: ['seconds', 'highlight', 'color', 'clock'],
+        kind: 'switch',
+        boolValue: highlightSeconds,
+        onBoolChanged: (bool value) {
+          setState(() => highlightSeconds = value);
+          widget.onHighlightSeconds(value);
+        },
+        status: null,
       ),
       (
         title: 'Button Labels',
@@ -398,6 +428,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.label_rounded,
         keywords: ['labels', 'text', 'icons', 'toolbar', 'names'],
+        kind: 'switch',
+        boolValue: buttonLabels,
+        onBoolChanged: (bool value) {
+          setState(() => buttonLabels = value);
+          widget.onButtonLabels(value);
+        },
+        status: null,
       ),
       (
         title: 'Large Controls',
@@ -405,6 +442,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.ads_click_rounded,
         keywords: ['large', 'size', 'buttons', 'controls', 'touch'],
+        kind: 'switch',
+        boolValue: largeControls,
+        onBoolChanged: (bool value) {
+          setState(() => largeControls = value);
+          widget.onLargeControls(value);
+        },
+        status: null,
       ),
       (
         title: 'Toolbar Backplate',
@@ -412,6 +456,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.shape_line_rounded,
         keywords: ['toolbar', 'backplate', 'pill', 'background', 'style'],
+        kind: 'switch',
+        boolValue: homeMenuPill,
+        onBoolChanged: (bool value) {
+          setState(() => homeMenuPill = value);
+          widget.onHomeMenuPill(value);
+        },
+        status: null,
       ),
       (
         title: 'Live Icon Motion',
@@ -419,6 +470,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.motion_photos_auto_rounded,
         keywords: ['motion', 'animation', 'icon', 'physics', 'live', 'effects'],
+        kind: 'switch',
+        boolValue: homeMenuAnimations,
+        onBoolChanged: (bool value) async {
+          final applied = await widget.onHomeMenuAnimations(value);
+          if (!mounted) return;
+          setState(() {
+            homeMenuAnimations = applied ? value : false;
+          });
+        },
+        status: null,
       ),
       (
         title: 'Enable Translucency',
@@ -426,6 +487,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.opacity_rounded,
         keywords: ['blur', 'glass', 'transparency', 'translucent', 'effects'],
+        kind: 'switch',
+        boolValue: enableTranslucency,
+        onBoolChanged: (bool value) {
+          setState(() => enableTranslucency = value);
+          widget.onTranslucency(value);
+        },
+        status: null,
       ),
       (
         title: 'History Text',
@@ -433,6 +501,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.format_list_bulleted_rounded,
         keywords: ['history', 'text', 'label', 'home'],
+        kind: 'switch',
+        boolValue: showHistoryText,
+        onBoolChanged: (bool value) {
+          setState(() => showHistoryText = value);
+          widget.onShowHistoryText(value);
+        },
+        status: null,
       ),
       (
         title: 'Last Saved Hint',
@@ -440,6 +515,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Display',
         icon: Icons.tips_and_updates_rounded,
         keywords: ['hint', 'last saved', 'time', 'feedback'],
+        kind: 'switch',
+        boolValue: showLastSavedHint,
+        onBoolChanged: (bool value) {
+          setState(() => showLastSavedHint = value);
+          widget.onShowLastSavedHint(value);
+        },
+        status: null,
       ),
       (
         title: 'Accent Color',
@@ -447,6 +529,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Accent Color',
         icon: Icons.palette_rounded,
         keywords: ['accent', 'color', 'theme', 'tint', 'highlights'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: accentColor[0].toUpperCase() + accentColor.substring(1),
       ),
       (
         title: 'App Icons',
@@ -454,6 +540,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'App Icons',
         icon: Icons.apps_rounded,
         keywords: ['icon', 'launcher', 'home screen', 'app icon'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
       ),
       (
         title: 'Startup Mode',
@@ -461,6 +551,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Capture',
         icon: Icons.bolt_rounded,
         keywords: ['startup', 'mode', 'default', 'capture', 'two-way', 'single'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: defaultMode == 'single' ? 'Single' : 'Two-Way',
       ),
       (
         title: 'Tap Delay',
@@ -468,6 +562,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Capture',
         icon: Icons.slow_motion_video_rounded,
         keywords: ['delay', 'tap', 'cooldown', 'accident', 'speed'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: delayLabel(tapDelay),
       ),
       (
         title: 'Require Note on Hold',
@@ -475,6 +573,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Capture',
         icon: Icons.edit_note_rounded,
         keywords: ['note', 'hold', 'long press', 'require', 'context'],
+        kind: 'switch',
+        boolValue: requireLongPressNote,
+        onBoolChanged: (bool value) {
+          setState(() => requireLongPressNote = value);
+          widget.onRequireLongPressNote(value);
+        },
+        status: null,
       ),
       (
         title: 'Compact History',
@@ -482,6 +587,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Moments',
         icon: Icons.view_agenda_rounded,
         keywords: ['compact', 'history', 'density', 'list', 'rows'],
+        kind: 'switch',
+        boolValue: compactHistory,
+        onBoolChanged: (bool value) {
+          setState(() {
+            compactHistory = value;
+            historyDensity = value ? 'compact' : 'comfortable';
+          });
+          widget.onCompactHistory(value);
+          widget.onHistoryDensity(historyDensity);
+        },
+        status: null,
       ),
       (
         title: 'Confirm Delete',
@@ -489,13 +605,35 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Moments',
         icon: Icons.delete_sweep_rounded,
         keywords: ['delete', 'confirm', 'safety', 'prompt', 'remove'],
+        kind: 'switch',
+        boolValue: confirmDelete,
+        onBoolChanged: (bool value) {
+          setState(() => confirmDelete = value);
+          widget.onConfirmDelete(value);
+        },
+        status: null,
       ),
       (
         title: 'Extended Duration',
         subtitle: 'Show days, months, and years in time between moments',
         category: 'Moments',
         icon: Icons.timer_rounded,
-        keywords: ['time', 'duration', 'years', 'months', 'days', 'long intervals', 'history'],
+        keywords: [
+          'time',
+          'duration',
+          'years',
+          'months',
+          'days',
+          'long intervals',
+          'history',
+        ],
+        kind: 'switch',
+        boolValue: extendedDuration,
+        onBoolChanged: (bool value) {
+          setState(() => extendedDuration = value);
+          widget.onExtendedDuration(value);
+        },
+        status: null,
       ),
       (
         title: 'Minimal Moment Options',
@@ -503,13 +641,32 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Moments',
         icon: Icons.auto_awesome_motion_rounded,
         keywords: ['minimal', 'icons', 'actions', 'compact', 'row', 'history'],
+        kind: 'switch',
+        boolValue: minimalMomentOptions,
+        onBoolChanged: (bool value) {
+          setState(() => minimalMomentOptions = value);
+          widget.onMinimalMomentOptions(value);
+        },
+        status: null,
       ),
       (
         title: 'Updates & Notices',
         subtitle: 'Software update, app notices, changelog',
         category: 'Updates & Notices',
         icon: Icons.update_rounded,
-        keywords: ['update', 'github', 'release', 'notification', 'notice', 'version', 'check'],
+        keywords: [
+          'update',
+          'github',
+          'release',
+          'notification',
+          'notice',
+          'version',
+          'check',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'v$appVersion',
       ),
       (
         title: "What's New",
@@ -517,6 +674,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: "What's New",
         icon: Icons.new_releases_rounded,
         keywords: ['new', 'latest', 'release', 'features', 'changelog'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Changelog',
@@ -524,10 +685,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Changelog',
         icon: Icons.article_rounded,
         keywords: ['changes', 'release notes', 'version', 'history', 'log'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Backup & Export',
-        subtitle: 'CSV, JSON, download, restore, import, file, reminder, health',
+        subtitle:
+            'CSV, JSON, download, restore, import, file, reminder, health',
         category: 'Backup & Export',
         icon: Icons.import_export_rounded,
         keywords: [
@@ -541,6 +707,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'health',
           'data',
         ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: '${entries.length} Logs',
       ),
       (
         title: 'Backup Status',
@@ -556,6 +726,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'drive backup',
           'cloud',
         ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: _dataHealthStatus,
       ),
       (
         title: 'Privacy & Security',
@@ -580,6 +754,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'pin',
           'local',
         ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: privacyLock ? 'On' : 'Off',
       ),
       (
         title: 'App Lock',
@@ -597,6 +775,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'fingerprint',
           'face id',
         ],
+        kind: 'switch',
+        boolValue: privacyLock,
+        onBoolChanged: (bool value) async {
+          if (!value) {
+            await widget.onPrivacyLock(false);
+            if (mounted) setState(() => privacyLock = false);
+            return;
+          }
+          final changed = await widget.onPrivacyLock(true);
+          if (changed && mounted) {
+            setState(() => privacyLock = true);
+          }
+        },
+        status: null,
       ),
       (
         title: 'Accessibility',
@@ -614,6 +806,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'shortcut',
           'a11y',
         ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
       ),
       (
         title: 'Diagnostics',
@@ -621,13 +817,33 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Diagnostics',
         icon: Icons.monitor_heart_rounded,
         keywords: ['debug', 'support', 'info', 'bug', 'copy', 'logs'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'v$appVersion',
       ),
       (
         title: 'Device Health',
         subtitle: 'Adaptive engine and performance status',
         category: 'Device Health',
         icon: Icons.health_and_safety_rounded,
-        keywords: ['adaptive engine', 'performance', 'hardware', 'specs', 'optimization', 'tier', 'ram', 'cpu', 'cores', 'low end', 'lag'],
+        keywords: [
+          'adaptive engine',
+          'performance',
+          'hardware',
+          'specs',
+          'optimization',
+          'tier',
+          'ram',
+          'cpu',
+          'cores',
+          'low end',
+          'lag',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: AdaptiveEngine().healthStatus,
       ),
       (
         title: 'Reset All Data',
@@ -635,6 +851,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Reset',
         icon: Icons.delete_outline_rounded,
         keywords: ['clear', 'erase', 'delete everything', 'factory reset', 'wipe'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Factory Reset',
@@ -642,6 +862,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Reset',
         icon: Icons.restart_alt_rounded,
         keywords: ['fresh start', 'welcome', 'reset app', 'new app', 'wipe'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Reset Settings Only',
@@ -649,27 +873,68 @@ class _SettingsDialogState extends State<SettingsDialog> {
         category: 'Reset',
         icon: Icons.settings_backup_restore_rounded,
         keywords: ['preferences', 'defaults', 'settings reset', 'undo'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Privacy Policy',
         subtitle: 'Data safety and local storage commitment',
         category: 'Privacy Policy',
         icon: Icons.privacy_tip_rounded,
-        keywords: ['privacy', 'policy', 'data', 'safety', 'local', 'offline', 'legal', 'google', 'play'],
+        keywords: [
+          'privacy',
+          'policy',
+          'data',
+          'safety',
+          'local',
+          'offline',
+          'legal',
+          'google',
+          'play',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Terms of Use',
         subtitle: 'App usage rules and open source terms',
         category: 'Terms of Use',
         icon: Icons.gavel_rounded,
-        keywords: ['terms', 'usage', 'rules', 'conditions', 'legal', 'google', 'play'],
+        keywords: [
+          'terms',
+          'usage',
+          'rules',
+          'conditions',
+          'legal',
+          'google',
+          'play',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Licenses',
         subtitle: 'Software credits and open source legal notices',
         category: 'Licenses',
         icon: Icons.description_rounded,
-        keywords: ['license', 'legal', 'credits', 'open source', 'libraries', 'packages'],
+        keywords: [
+          'license',
+          'legal',
+          'credits',
+          'open source',
+          'libraries',
+          'packages',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Guides',
@@ -692,11 +957,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'minimal options',
           'tutorial',
         ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
       (
         title: 'Help',
-        subtitle:
-            'Fix updates, backups, notices, motion, and common issues',
+        subtitle: 'Fix updates, backups, notices, motion, and common issues',
         category: 'Help',
         icon: Icons.help_outline_rounded,
         keywords: [
@@ -713,6 +981,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'notice',
           'sensor',
         ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
       ),
     ];
 
@@ -1628,6 +1900,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         largeText: widget.largeText,
         controller: category == null ? _activeController : null,
         showLargeTitle: category == null,
+        removeBottomPadding: true,
         child: SizedBox(
           width: 410,
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
@@ -1844,7 +2117,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                       const SizedBox(height: spacing24),
                       SettingsAboutBlock(p: p, onOpenLink: widget.onOpenLink),
-                      const SizedBox(height: spacing64),
+                      const SizedBox(height: spacing16),
                     ],
                   ),
                 ),
@@ -1935,29 +2208,42 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         insetDividers: true,
                         children: [
                           for (final result in _settingsSearchResults)
-                            SettingsRow(
-                              p: p,
-                              icon: result.icon,
-                              title: result.title,
-                              highlight: _settingsQuery,
-                              color: result.title == 'Reset All Data' || result.title == 'Factory Reset' ? p.red : p.accent,
-                              onTap: () {
-                                _saveRecentSearch(result.title);
-                                if (result.title == 'Reset All Data') {
-                                  unawaited(_confirmResetAll(p));
-                                  return;
-                                }
-                                if (result.title == 'Factory Reset') {
-                                  unawaited(_confirmFactoryReset(p));
-                                  return;
-                                }
-                                if (result.title == 'Reset Settings Only') {
-                                  unawaited(_confirmResetSettings());
-                                  return;
-                                }
-                                _openCategory(result.category);
-                              },
-                            ),
+                            if (result.kind == 'switch')
+                              SettingsSwitchRow(
+                                p: p,
+                                icon: result.icon,
+                                title: result.title,
+                                subtitle: result.subtitle,
+                                value: result.boolValue!,
+                                onChanged: result.onBoolChanged!,
+                                color: result.title == 'Confirm Delete' ? p.red : p.accent,
+                              )
+                            else
+                              SettingsRow(
+                                p: p,
+                                icon: result.icon,
+                                title: result.title,
+                                subtitle: result.subtitle,
+                                status: result.status,
+                                highlight: _settingsQuery,
+                                color: result.title == 'Reset All Data' || result.title == 'Factory Reset' ? p.red : p.accent,
+                                onTap: () {
+                                  _saveRecentSearch(result.title);
+                                  if (result.title == 'Reset All Data') {
+                                    unawaited(_confirmResetAll(p));
+                                    return;
+                                  }
+                                  if (result.title == 'Factory Reset') {
+                                    unawaited(_confirmFactoryReset(p));
+                                    return;
+                                  }
+                                  if (result.title == 'Reset Settings Only') {
+                                    unawaited(_confirmResetSettings());
+                                    return;
+                                  }
+                                  _openCategory(result.category);
+                                },
+                              ),
                           if (_settingsSearchResults.isEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 64),
@@ -1972,7 +2258,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ],
                       ),
                     ],
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               ],
@@ -2014,7 +2300,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'These settings refine the interface aesthetic and do not modify your saved data.',
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Display'))
@@ -2157,7 +2443,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ],
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Last Saved Hint', color: p.accent, value: showLastSavedHint, onChanged: (value) { setState(() => showLastSavedHint = value); widget.onShowLastSavedHint(value); })]),
                     SettingsPageDescription(p: p, text: 'Provides visual feedback for the time elapsed since your last moment.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Accent Color'))
@@ -2166,7 +2452,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing8),
                     SettingsGroup(
                       p: p,
-                      title: 'Accent Color',
                       showDividers: false,
                       children: [
                         ColorChoiceSetting(
@@ -2183,7 +2468,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Select an accent color for buttons and fluid interface highlights.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('App Icons'))
@@ -2192,7 +2477,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       _appIconsPage(p),
-                      const SizedBox(height: spacing64),
+                      const SizedBox(height: spacing16),
                     ],
                   ),
                 ),
@@ -2235,7 +2520,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'These settings define how moments are recorded and prepared for export.',
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Capture'))
@@ -2360,7 +2645,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Forces context entry for any moment captured via the long-press gesture.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Moments'))
@@ -2446,7 +2731,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Search Notes')) ...[
@@ -2533,7 +2818,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
                   return [
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(spacing16, spacing4, spacing16, spacing64),
+                      padding: const EdgeInsets.fromLTRB(spacing16, spacing4, spacing16, spacing16),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -2649,7 +2934,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Help'))
@@ -2675,7 +2960,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Update Center'))
@@ -2737,7 +3022,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'The current features on this page are under Beta stage.',
                       onLearnMore: () => _showBetaInfoPopup(p),
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Data & Backup'))
@@ -2756,7 +3041,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'NoteKar uses a private offline database. Use these tools to secure your history via manual exports.',
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Backup & Export'))
@@ -2800,7 +3085,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Export moments to standard CSV or JSON files for backups, external analysis, or phone transfers.',
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Backup Status'))
@@ -2841,7 +3126,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'The current features on this page are under Beta stage.',
                       onLearnMore: () => _showBetaInfoPopup(p),
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Privacy & Security'))
@@ -2886,7 +3171,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'The current features on this page are under Beta stage.',
                       onLearnMore: () => _showBetaInfoPopup(p),
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('App Lock'))
@@ -2941,7 +3226,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         text: 'Note: Selecting "Immediately" will automatically lock NoteKar as soon as you switch apps, view recent apps, or open your phone notification panel.',
                       ),
                     ],
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Help & Guides'))
@@ -2991,7 +3276,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Review open-source licenses, app usage terms, and offline-first privacy policies.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Advanced'))
@@ -3040,7 +3325,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'These tools are intended for system maintenance and troubleshooting.',
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Accessibility'))
@@ -3075,7 +3360,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: 10),
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'High Contrast', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); })]),
                     SettingsPageDescription(p: p, text: 'Enhances visibility by using pure black backgrounds and high-intensity accent colors.'),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Reset'))
@@ -3135,7 +3420,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Completely clears all saved data and resets all settings to original fresh state.',
                     ),
-                    const SizedBox(height: spacing64),
+                    const SizedBox(height: spacing16),
                   ]),
                 ),
               if (show('Diagnostics'))
@@ -3144,7 +3429,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       _diagnosticsPage(p, entries, todayCount),
-                      const SizedBox(height: spacing64),
+                      const SizedBox(height: spacing16),
                     ],
                   ),
                 ),
@@ -3154,7 +3439,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       _deviceHealthPage(p),
-                      const SizedBox(height: spacing64),
+                      const SizedBox(height: spacing16),
                     ],
                   ),
                 ),
@@ -3185,7 +3470,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: true),
-                      const SizedBox(height: spacing64),
+                      const SizedBox(height: spacing16),
                     ],
                   ),
                 ),
@@ -3195,7 +3480,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     children: [
                       const SizedBox(height: spacing8),
                       ChangelogSettingsPage(p: p, latestOnly: false),
-                      const SizedBox(height: spacing64),
+                      const SizedBox(height: spacing16),
                     ],
                   ),
                 ),

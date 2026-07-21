@@ -185,6 +185,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       largeText: widget.largeText,
       controller: _scrollController,
       showLargeTitle: true,
+      removeBottomPadding: true,
       child: SizedBox(
         width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
@@ -395,7 +396,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing64),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing16),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         if (index >= _listItems.length) {
@@ -543,7 +544,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ],
             ),
             Positioned(
-              bottom: 0, // Mirrored with home toolbar via AppSheet padding
+              bottom: spacing12, // Elevated to avoid touching the navigation area
               left: 16,
               right: 16,
               child: AnimatedSwitcher(
