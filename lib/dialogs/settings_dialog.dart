@@ -2591,7 +2591,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(
                       p: p,
-                      text: 'Select your preferred language for the application.\n\nNote: Localizations are currently in Beta. Some sections of the app may still display in English as we actively refine and verify translations.',
+                      text: 'Select your preferred language for the application.'.localized(context),
+                    ),
+                    SettingsBetaNote(
+                      p: p,
+                      text: 'The current features on this page are under Beta stage.'.localized(context),
+                      onLearnMore: () => _showBetaInfoPopup(p),
                     ),
                     const SizedBox(height: spacing48),
                   ]),

@@ -197,6 +197,11 @@ extension LocalizedString on String {
         'hi' => 'एप्लिकेशन के लिए अपनी पसंदीदा भाषा चुनें।',
         _ => 'Select your preferred language for the application.',
       },
+      'the current features on this page are under beta stage.' => switch (l10n.localeName) {
+        'es' => 'Las funciones actuales de esta página están en fase Beta.',
+        'hi' => 'इस पृष्ठ की वर्तमान विशेषताएं बीटा चरण में हैं।',
+        _ => 'The current features on this page are under Beta stage.',
+      },
       _ => this,
     };
   }
