@@ -98,6 +98,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _appIconChangeInFlight = false;
   bool _startupChecksStarted = false;
   String _updateStatus = 'v$appVersion - Check for available updates';
+  DateTime? _lastBackPressTime;
   bool _checkingUpdates = false;
   int? _lastUpdateCheckedAt;
   int? _lastNoticeOpenCheckAt;
@@ -2458,10 +2459,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
       );
     }
 
-    return Scaffold(
-      backgroundColor: palette.bg,
-      resizeToAvoidBottomInset: false,
-      body: body,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final now = DateTime.now();
+        if (_lastBackPressTime == null ||
+            now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+          _lastBackPressTime = now;
+          _showToast('Press back again to exit');
+          return;
+        }
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        backgroundColor: palette.bg,
+        resizeToAvoidBottomInset: false,
+        body: body,
+      ),
     );
   }
 }

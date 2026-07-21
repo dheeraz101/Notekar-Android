@@ -319,7 +319,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _prevStackLength = _categoryStack.length;
       if (category != null) _categoryStack.add(category!);
       category = name;
-      _activeController.jumpTo(0.0);
     });
   }
 
@@ -338,14 +337,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
         setState(() {
           _prevStackLength = 0;
           category = null;
-          _activeController.jumpTo(0.0);
         });
       }
     } else {
       setState(() {
         _prevStackLength = _categoryStack.length + 1;
         category = _categoryStack.removeLast();
-        _activeController.jumpTo(0.0);
       });
     }
   }
@@ -1213,7 +1210,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             DiagnosticRow(p: p, label: 'Live Animations', value: engine.supportsAdvancedAnimations ? 'High Performance' : 'Optimized'),
           ],
         ),
-        const SizedBox(height: 10),
+        
         SettingsPageDescription(
           p: p,
           text: 'Technical stats about your device and the Adaptive Engine.',
@@ -1524,7 +1521,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        
         SettingsPageDescription(p: p, text: 'Diagnostics help in troubleshooting. Copying them does not send any data automatically.'),
       ],
     );
@@ -1591,7 +1588,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
           ),
         ),
-        const SizedBox(height: spacing4),
         SettingsPageDescription(
           p: p,
           showIcon: true,
@@ -2357,7 +2353,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Select a theme that best suits your environment.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2388,7 +2384,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Configure the home screen clock and visual feedback.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2415,22 +2411,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Show descriptive text labels on the primary navigation and action buttons.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Large Controls', color: p.orange, value: largeControls, onChanged: (value) { setState(() => largeControls = value); widget.onLargeControls(value); })]),
                     SettingsPageDescription(p: p, text: 'Increases the size of interactive elements for easier tapping.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Toolbar Backplate', color: p.accent, value: homeMenuPill, onChanged: (value) { setState(() => homeMenuPill = value); widget.onHomeMenuPill(value); })]),
                     SettingsPageDescription(p: p, text: 'Adds a subtle glass-like container behind the home toolbar.'),
-                    const SizedBox(height: 10),
+                    
                     if (AdaptiveEngine().supportsAdvancedAnimations) ...[
                       SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Live Icon Motion', color: p.accent, value: !reduceMotion && homeMenuAnimations, enabled: !reduceMotion, disabledMessage: 'Disable Reduce Motion first', onDisabledTap: widget.onFeedback, onChanged: (value) async { if (reduceMotion) return; final applied = await widget.onHomeMenuAnimations(value); if (!mounted) return; setState(() { homeMenuAnimations = applied ? value : false; }); })]),
                       SettingsPageDescription(p: p, text: 'Enables fluid physics for toolbar icons. Automatically scales based on CPU and RAM performance.'),
-                      const SizedBox(height: 10),
+                      
                     ],
                     if (AdaptiveEngine().supportsBlur) ...[
                       SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Enable Translucency', color: p.accent, value: !reduceMotion && enableTranslucency, enabled: !reduceMotion, onDisabledTap: widget.onFeedback, onChanged: (value) { setState(() => enableTranslucency = value); widget.onTranslucency(value); })]),
                       SettingsPageDescription(p: p, text: 'Applies real-time Gaussian blur to system surfaces. Requires a high-performance GPU tier.'),
-                      const SizedBox(height: 10),
+                      
                     ],
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Last Saved Hint', color: p.accent, value: showLastSavedHint, onChanged: (value) { setState(() => showLastSavedHint = value); widget.onShowLastSavedHint(value); })]),
                     SettingsPageDescription(p: p, text: 'Provides visual feedback for the time elapsed since your last moment.'),
@@ -2547,7 +2543,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Defines the primary logging mode active when the app launches.'),
-                    const SizedBox(height: 10),
+                    
                     Glass(
                       p: p,
                       radius: 32,
@@ -2619,7 +2615,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Tap Delay prevents accidental rapid-fire logging by setting a cooldown between captured moments.',
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2674,7 +2670,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Controls log spacing density and requires a safety confirmation before deleting history moments.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2691,7 +2687,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Includes years, months, and days breakdown for long time intervals between moments.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2708,7 +2704,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Enables streamlined icon-only quick action buttons when managing history moments.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2979,7 +2975,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Keep NoteKar up to date with the latest features and security patches.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -2996,7 +2992,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Checks for official announcement notices and bug fix announcements.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       title: 'Release Notes & History',
@@ -3007,7 +3003,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'View release highlights, version logs, and bug fix summaries for NoteKar.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsBetaNote(
                       p: p,
                       text: 'The current features on this page are under Beta stage.',
@@ -3060,7 +3056,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: backupReminderDays == 0 ? 'Reminders are currently disabled. Set an interval to be reminded to safeguard your data.' : 'NoteKar will prompt for a backup every $backupReminderDays days.',
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       insetDividers: true,
@@ -3096,7 +3092,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Android OS auto-backup preserves app preferences only. Your moments and notes stay 100% local and private to this device.',
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       title: 'Cloud & Sync (Planned)',
@@ -3111,7 +3107,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'Planned cloud features will provide direct cloud synchronization across your personal devices.',
                       bottomPadding: 0,
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsBetaNote(
                       p: p,
                       text: 'The current features on this page are under Beta stage.',
@@ -3137,7 +3133,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'NoteKar contains zero third-party telemetry. Network access is restricted strictly to update checks and announcement fetching.',
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -3156,7 +3152,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       text: 'Protect your saved history using device biometric authentication or system PIN.',
                       bottomPadding: 0,
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsBetaNote(
                       p: p,
                       text: 'The current features on this page are under Beta stage.',
@@ -3193,7 +3189,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                     SettingsPageDescription(p: p, text: 'Requires biometric or system PIN authentication to open NoteKar.'),
                     if (privacyLock) ...[
-                      const SizedBox(height: 10),
+                      
                       SettingsGroup(
                         p: p,
                         title: 'When to Lock',
@@ -3234,7 +3230,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Explore interactive tutorials for tap logging, duration calculations, and troubleshooting.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       title: 'Legal & Compliance',
@@ -3342,13 +3338,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Configure the intensity of vibration feedback during taps and saves.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Reduced Motion', color: p.green, value: reduceMotion, onChanged: (value) { setState(() { reduceMotion = value; if (value) homeMenuAnimations = false; }); widget.onReduceMotion(value); })]),
                     SettingsPageDescription(p: p, text: 'Disables fluid physics and parallax effects to improve performance and stability.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Larger Text', color: p.orange, value: largeText, onChanged: (value) { setState(() => largeText = value); widget.onLargeText(value); })]),
                     SettingsPageDescription(p: p, text: 'Increases the global font scale for improved legibility across all interfaces.'),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'High Contrast', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); })]),
                     SettingsPageDescription(p: p, text: 'Enhances visibility by using pure black backgrounds and high-intensity accent colors.'),
                     const SizedBox(height: spacing48),
@@ -3375,7 +3371,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Restores all settings options to their factory defaults. Your saved moments and notes are kept intact.',
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [
@@ -3393,7 +3389,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       text: 'Permanently deletes all saved timestamps and notes from this device. Preferences remain unchanged.',
                     ),
-                    const SizedBox(height: 10),
+                    
                     SettingsGroup(
                       p: p,
                       children: [

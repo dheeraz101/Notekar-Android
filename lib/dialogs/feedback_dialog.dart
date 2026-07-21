@@ -53,7 +53,6 @@ class FeedbackDialog extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: spacing12),
           SettingsPageDescription(
             p: p,
             text: 'Feedback helps NoteKar grow. You can also send an email for direct support.',

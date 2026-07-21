@@ -54,7 +54,7 @@ class ActivitySummaryCard extends StatelessWidget {
     final inRatio = totalInOut > 0 ? inCount / totalInOut : 0.5;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(top: 8, bottom: 0),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -218,7 +218,7 @@ class ActivityTrendsCard extends StatelessWidget {
         : 'No moments captured over the last 7 days';
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(top: 8, bottom: 0),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.surface2,
