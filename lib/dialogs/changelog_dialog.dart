@@ -4,6 +4,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 class ChangelogDialog extends StatefulWidget {
   const ChangelogDialog({
@@ -303,27 +304,27 @@ class ChangelogReleaseCard extends StatelessWidget {
           PressableScale(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
                   Container(
-                    width: 34,
-                    height: 34,
+                    width: 29,
+                    height: 29,
                     decoration: BoxDecoration(
                       color: isLatest
-                          ? p.accent.withValues(alpha: 0.12)
+                          ? p.accent.withValues(alpha: 0.14)
                           : p.surface3,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     child: Icon(
                       isLatest
                           ? Icons.auto_awesome_rounded
                           : Icons.article_rounded,
                       color: isLatest ? p.accent : p.text2,
-                      size: 18,
+                      size: 16,
                     ),
                   ),
-                  const SizedBox(width: 11),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,8 +337,9 @@ class ChangelogReleaseCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: p.text,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w700,
                                   fontSize: 15,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
                             ),
@@ -345,7 +347,7 @@ class ChangelogReleaseCard extends StatelessWidget {
                               const SizedBox(width: 8),
                               SettingsStatusPill(
                                 p: p,
-                                label: 'New',
+                                label: 'LATEST',
                                 color: p.accent,
                               ),
                             ],
@@ -357,7 +359,7 @@ class ChangelogReleaseCard extends StatelessWidget {
                           style: TextStyle(
                             color: p.text3,
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -365,8 +367,13 @@ class ChangelogReleaseCard extends StatelessWidget {
                   ),
                   AnimatedRotation(
                     turns: expanded ? 0.25 : 0,
-                    duration: const Duration(milliseconds: 160),
-                    child: Icon(Icons.chevron_right_rounded, color: p.text3),
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: p.text3.withValues(alpha: 0.7),
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -374,39 +381,47 @@ class ChangelogReleaseCard extends StatelessWidget {
           ),
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-              child: Column(
-                children: [
-                  Divider(color: p.border, height: 1),
-                  const SizedBox(height: 10),
-                  for (final item in release.items)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 9),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.check_circle_rounded,
-                            color: p.accent,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 9),
-                          Expanded(
-                            child: Text(
-                              item,
-                              style: TextStyle(
-                                color: p.text2,
-                                fontSize: 13,
-                                height: 1.35,
+            secondChild: Column(
+              children: [
+                Divider(color: p.border, height: 1, indent: 16, endIndent: 16),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Column(
+                    children: [
+                      for (final item in release.items)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.check_circle_rounded,
+                                  color: isLatest ? p.accent : p.text3.withValues(alpha: 0.7),
+                                  size: 15,
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  item,
+                                  style: TextStyle(
+                                    color: p.text2,
+                                    fontSize: 13,
+                                    height: 1.4,
+                                    fontWeight: FontWeight.w400,
+                                    letterSpacing: -0.1,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             crossFadeState: expanded
                 ? CrossFadeState.showSecond
@@ -620,6 +635,39 @@ class _WhatsNewPanel extends StatelessWidget {
   final Palette p;
   final ({String date, List<String> items, List<String> highlights, String version}) release;
 
+  ({IconData icon, Color color}) _getHighlightSpec(int index, String text, Palette p) {
+    final purple = accentColorFor('purple', light: p.name == 'light');
+    final lower = text.toLowerCase();
+    if (lower.contains('visual') || lower.contains('design') || lower.contains('ui') || lower.contains('overhaul')) {
+      return (icon: Icons.palette_rounded, color: p.accent);
+    }
+    if (lower.contains('security') || lower.contains('backup') || lower.contains('privacy') || lower.contains('data')) {
+      return (icon: Icons.shield_rounded, color: p.green);
+    }
+    if (lower.contains('widget') || lower.contains('search') || lower.contains('speed')) {
+      return (icon: Icons.search_rounded, color: p.orange);
+    }
+    if (lower.contains('update') || lower.contains('feedback') || lower.contains('notice')) {
+      return (icon: Icons.system_update_rounded, color: purple);
+    }
+    if (lower.contains('accessibility') || lower.contains('contrast') || lower.contains('text')) {
+      return (icon: Icons.accessibility_new_rounded, color: p.blue);
+    }
+    
+    final colors = [p.accent, p.orange, p.green, p.blue, purple];
+    final icons = [
+      Icons.auto_awesome_rounded,
+      Icons.bolt_rounded,
+      Icons.stars_rounded,
+      Icons.tune_rounded,
+      Icons.checklist_rounded,
+    ];
+    return (
+      icon: icons[index % icons.length],
+      color: colors[index % colors.length],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -627,57 +675,62 @@ class _WhatsNewPanel extends StatelessWidget {
       primary: false,
       physics: const BouncingScrollPhysics(),
       children: [
+        // iOS 26 Hero Header Card
         Container(
-          padding: const EdgeInsets.fromLTRB(14, 8, 14, 16),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: p.border)),
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: p.border),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: p.accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   Icons.auto_awesome_rounded,
                   color: p.accent,
-                  size: 25,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "What's New",
+                      "What's New in NoteKar",
                       style: TextStyle(
-                        color: p.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
+                        color: p.text,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      'NoteKar ${release.version}',
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Latest Android changes, fixes, and polish for this build.',
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
+                    Row(
+                      children: [
+                        SettingsStatusPill(
+                          p: p,
+                          label: 'v${release.version}',
+                          color: p.accent,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          release.date,
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -685,30 +738,91 @@ class _WhatsNewPanel extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        for (final item in release.highlights)
-          Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(13),
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: p.border),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.check_circle_rounded, color: p.accent, size: 18),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        
+        // iOS 26 Feature Cards List
+        SettingsGroup(
+          p: p,
+          insetDividers: true,
+          children: [
+            for (var i = 0; i < release.highlights.length; i++) ...[
+              Builder(
+                builder: (context) {
+                  final text = release.highlights[i];
+                  final spec = _getHighlightSpec(i, text, p);
+                  
+                  String headline = '';
+                  String body = text;
+                  if (text.contains(' with ')) {
+                    final parts = text.split(' with ');
+                    headline = parts.first;
+                    body = 'With ${parts.sublist(1).join(' with ')}';
+                  } else if (text.contains(' including ')) {
+                    final parts = text.split(' including ');
+                    headline = parts.first;
+                    body = 'Including ${parts.sublist(1).join(' including ')}';
+                  } else if (text.contains(' and ')) {
+                    final parts = text.split(' and ');
+                    headline = parts.first;
+                    body = 'And ${parts.sublist(1).join(' and ')}';
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 29,
+                          height: 29,
+                          margin: const EdgeInsets.only(top: 1),
+                          decoration: BoxDecoration(
+                            color: spec.color.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Icon(
+                            spec.icon,
+                            color: spec.color,
+                            size: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (headline.isNotEmpty) ...[
+                                Text(
+                                  headline,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: -0.1,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                              ],
+                              Text(
+                                body,
+                                style: TextStyle(
+                                  color: headline.isNotEmpty ? p.text2 : p.text,
+                                  fontSize: 13,
+                                  height: 1.35,
+                                  fontWeight: headline.isNotEmpty ? FontWeight.w400 : FontWeight.w500,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }
