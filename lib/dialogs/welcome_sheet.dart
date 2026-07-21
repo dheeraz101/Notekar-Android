@@ -48,6 +48,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
       docked: true,
       blur: widget.blur,
       largeText: widget.largeText,
+      removeBottomPadding: true,
       child: SizedBox(
         width: 410,
         height: MediaQuery.sizeOf(context).height * 0.68,
@@ -145,6 +146,7 @@ class _WelcomeSheetState extends State<WelcomeSheet> {
               onPressed: () => Navigator.pop(context),
               child: const Text('Start Logging'),
             ),
+            const SizedBox(height: spacing48),
           ],
         ),
       ),
