@@ -273,6 +273,75 @@ class _ChangelogSettingsPageState extends State<ChangelogSettingsPage> {
   }
 }
 
+class _ChangelogItemRow extends StatelessWidget {
+  const _ChangelogItemRow({
+    required this.p,
+    required this.text,
+    required this.isLatest,
+  });
+
+  final Palette p;
+  final String text;
+  final bool isLatest;
+
+  ({IconData icon, Color color}) _getItemStyle() {
+    final lower = text.trim().toLowerCase();
+    if (lower.startsWith('add') || lower.startsWith('added') || lower.startsWith('new') || lower.startsWith('create')) {
+      return (icon: Icons.add_rounded, color: p.green);
+    }
+    if (lower.startsWith('delete') || lower.startsWith('deleted') || lower.startsWith('remove')) {
+      return (icon: Icons.remove_rounded, color: p.red);
+    }
+    if (lower.startsWith('fix') || lower.startsWith('fixed') || lower.startsWith('patch') || lower.startsWith('resolve')) {
+      return (icon: Icons.auto_awesome_rounded, color: p.orange);
+    }
+    if (lower.startsWith('update') || lower.startsWith('refactor') || lower.startsWith('improve') || lower.startsWith('moved')) {
+      return (icon: Icons.published_with_changes_rounded, color: p.accent);
+    }
+    return (icon: Icons.check_rounded, color: p.accent);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final style = _getItemStyle();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            margin: const EdgeInsets.only(top: 2),
+            decoration: BoxDecoration(
+              color: style.color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              style.icon,
+              color: style.color,
+              size: 11,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: p.text2,
+                fontSize: 13,
+                height: 1.4,
+                fontWeight: FontWeight.w400,
+                letterSpacing: -0.1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ChangelogReleaseCard extends StatelessWidget {
   const ChangelogReleaseCard({
     super.key,
@@ -288,23 +357,6 @@ class ChangelogReleaseCard extends StatelessWidget {
   final bool isLatest;
   final bool expanded;
   final VoidCallback onTap;
-
-  IconData _getItemIcon(String text) {
-    final lower = text.trim().toLowerCase();
-    if (lower.startsWith('add') || lower.startsWith('added') || lower.startsWith('new') || lower.startsWith('create')) {
-      return Icons.add_circle_rounded;
-    }
-    if (lower.startsWith('delete') || lower.startsWith('deleted') || lower.startsWith('remove')) {
-      return Icons.remove_circle_rounded;
-    }
-    if (lower.startsWith('fix') || lower.startsWith('fixed') || lower.startsWith('patch') || lower.startsWith('resolve')) {
-      return Icons.star_rounded;
-    }
-    if (lower.startsWith('update') || lower.startsWith('refactor') || lower.startsWith('improve') || lower.startsWith('moved')) {
-      return Icons.published_with_changes_rounded;
-    }
-    return Icons.check_circle_rounded;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -406,34 +458,10 @@ class ChangelogReleaseCard extends StatelessWidget {
                   child: Column(
                     children: [
                       for (final item in release.items)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Icon(
-                                  _getItemIcon(item),
-                                  color: isLatest ? p.accent : p.text3.withValues(alpha: 0.7),
-                                  size: 15,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  item,
-                                  style: TextStyle(
-                                    color: p.text2,
-                                    fontSize: 13,
-                                    height: 1.4,
-                                    fontWeight: FontWeight.w400,
-                                    letterSpacing: -0.1,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        _ChangelogItemRow(
+                          p: p,
+                          text: item,
+                          isLatest: isLatest,
                         ),
                     ],
                   ),
@@ -451,6 +479,7 @@ class ChangelogReleaseCard extends StatelessWidget {
     );
   }
 }
+
 
 class _ChangelogDialogState extends State<ChangelogDialog> {
   final Set<int> _expanded = {};
@@ -602,30 +631,10 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
                                 Divider(color: p.border, height: 1),
                                 const SizedBox(height: 10),
                                 for (final item in release.items)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 9),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle_rounded,
-                                          color: p.accent,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 9),
-                                        Expanded(
-                                          child: Text(
-                                            item,
-                                            style: TextStyle(
-                                              color: p.text2,
-                                              fontSize: 13,
-                                              height: 1.35,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  _ChangelogItemRow(
+                                    p: p,
+                                    text: item,
+                                    isLatest: index == 0,
                                   ),
                               ],
                             ),
