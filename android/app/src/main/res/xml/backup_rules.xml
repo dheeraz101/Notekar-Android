@@ -2,5 +2,4 @@
 <full-backup-content>
     <!-- Back up user preferences only; keep moments database 100% local -->
     <include domain="sharedpref" path="." />
-    <exclude domain="file" path="." />
 </full-backup-content>

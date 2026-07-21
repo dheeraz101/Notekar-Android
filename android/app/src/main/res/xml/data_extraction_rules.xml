@@ -3,7 +3,6 @@
     <cloud-backup>
         <!-- Back up app preferences only; keep database 100% private & local -->
         <include domain="sharedpref" path="." />
-        <exclude domain="file" path="." />
     </cloud-backup>
     <device-transfer>
         <!-- Allow direct phone-to-phone migration during setup -->
