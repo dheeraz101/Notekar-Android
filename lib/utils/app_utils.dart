@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
-const appVersion = '4.0.4';
-const appBuildNumber = '13';
-const appBuildDate = '2026-07-21';
+const appVersion = '4.0.5';
+const appBuildNumber = '14';
+const appBuildDate = '2026-07-22';
 
 // 8pt Grid Constants
 const double spacing4 = 4.0;

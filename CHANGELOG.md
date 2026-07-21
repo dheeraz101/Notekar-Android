@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [4.0.5] - 2026-07-22 (versionCode 14)
+
+### Added
+- Dedicated Language settings page supporting English, Hindi, and Spanish localization options.
+- Onboarding welcome sheet language selector for quick initial language selection.
+- Recently Deleted moments view (Trash Bin) with individual restore, restore all, and empty trash controls.
+- 30-day auto-purge policy banner for Recently Deleted moments.
+- Standard SettingsBetaNote card and Beta disclaimer popup on the Language settings page.
+
+### Fixed
+- Optimum contrast-adjusted accent colors dynamically matching selected Light/Dark/AMOLED themes.
+- Snappy category transitions (180ms) and synchronized header title fades.
+- Hardened Factory Reset and Clear Data logic covering preferences, active/trash databases, and locales.
+- Minimal neutral-colored Check for Updates card matching the overall app style.
+- Localized settings search results indexing and matching for Spanish and Hindi keywords.
+- Localized Guides and Help FAQ items to match the user's selected interface language.
+
+---
+
 ## [4.0.4] - 2026-07-20 (versionCode 13)
 
 ### Added

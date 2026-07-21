@@ -22,6 +22,29 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '4.0.5',
+      date: 'July 22, 2026',
+      highlights: [
+        'Dedicated Language selector supporting English, Hindi, and Spanish with full l10n support.',
+        'Recently Deleted (Trash Bin) view with individual restore and 30-day auto-purge policy.',
+        'Optimum contrast-adjusted accent colors dynamically matching Light/Dark/AMOLED themes.',
+        'Hardened Factory Reset & Clear Data logic covering trash moments and locale preferences.',
+        'Ultra-premium iOS 26 style snappy category transitions with synchronized header cross-fades.',
+      ],
+      items: [
+        'Added: Dedicated Language selection settings page for English, Hindi, and Spanish translation support.',
+        'Added: Onboarding welcome sheet language selector for smooth initial setup.',
+        'Added: Recently Deleted trash bin section with individual restore, empty trash, and restore all actions.',
+        'Added: 30-day auto-purge policy banner for trash bin contents.',
+        'Fixed: Dynamic contrast-adjusted accent colors for Light, Dark, and AMOLED themes.',
+        'Fixed: Snappy navigation transitions (180ms) with synchronized header title cross-fades.',
+        'Fixed: Hardened Factory Reset to purge preferences, active/trash databases, and reset active locales.',
+        'Fixed: Redesigned Check for Updates card to be minimal, neutral-colored, and match the iOS 26 style.',
+        'Fixed: Localized settings search results indexing and matching for Spanish and Hindi keywords.',
+        'Fixed: Localized Guides and Help FAQ items to match the user\'s selected interface language.',
+      ],
+    ),
+    (
       version: '4.0.4',
       date: 'July 20, 2026',
       highlights: [

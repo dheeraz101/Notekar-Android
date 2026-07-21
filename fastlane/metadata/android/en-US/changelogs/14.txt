@@ -1,0 +1,6 @@
+- Dedicated Language selector supporting English, Hindi, and Spanish.
+- Recently Deleted moments view (Trash Bin) with 30-day auto-purge.
+- Contrast-adjusted accent colors for Light, Dark, and AMOLED themes.
+- Hardened Factory Reset and Data Clear logic covering trash database.
+- Snappy category transitions and synchronized header title fades.
+- Minimal neutral-colored Check for Updates card matching app design.
