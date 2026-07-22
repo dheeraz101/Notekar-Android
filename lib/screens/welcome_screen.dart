@@ -98,18 +98,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
         children: [
           const SizedBox(height: 16),
           // iOS 26 Hero App Badge
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: p.accent.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: p.accent.withValues(alpha: 0.25)),
-            ),
-            child: Icon(
-              Icons.auto_awesome_rounded,
-              color: p.accent,
-              size: 36,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              'icon-maskable-512.png',
+              width: 72,
+              height: 72,
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(height: 24),
@@ -458,7 +453,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       minimumSize: Size.zero,
@@ -578,7 +573,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                         backgroundColor: p.accent,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(999),
                         ),
                       ),
                       onPressed: () {

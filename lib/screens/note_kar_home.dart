@@ -124,6 +124,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _factoryResetComplete = false;
   double _factoryResetProgress = 0;
   String _factoryResetText = 'Preparing NoteKar...';
+  String _factoryResetSubText = '';
+  IconData _factoryResetIcon = Icons.settings_suggest_rounded;
   SharedPreferences? _factoryResetWelcomePrefs;
   Moment? _lastDeletedPreview;
   Offset? _lastTapPosition;
@@ -191,7 +193,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
 
-    await _showWhatsNewIfNeeded(prefs);
+    // Do not show whatsnew popup automatically anymore.
+    await prefs.setString(_lastSeenVersionKey, appVersion);
   }
 
   Future<bool> _canUseMotionSensor() async {
@@ -415,8 +418,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     // 1. Prioritize SharedPreferences to identify first-run users ASAP.
     final prefs = widget.preloadedPrefs ?? await SharedPreferences.getInstance();
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
+    final remindersWalkthroughSeen = prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
 
-    if (!welcomeSeen) {
+    if (!welcomeSeen || !remindersWalkthroughSeen) {
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -990,12 +994,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _factoryReset() async {
     final prefs = _prefs;
-    final started = DateTime.now();
     setState(() {
       _factoryResetVisible = true;
       _factoryResetComplete = false;
-      _factoryResetProgress = 0.08;
-      _factoryResetText = 'Preparing a fresh start...';
+      _factoryResetProgress = 0.0;
+      _factoryResetText = 'Preparing Factory Reset...';
+      _factoryResetSubText = 'Initializing secure wipe sequence...';
+      _factoryResetIcon = Icons.settings_suggest_rounded;
       _factoryResetWelcomePrefs = prefs;
       _entries = [];
       _lastId = null;
@@ -1040,18 +1045,32 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _nextId = 1;
     });
     _applySystemUiStyle();
-    await Future<void>.delayed(const Duration(milliseconds: 180));
-    if (mounted) {
-      setState(() {
-        _factoryResetProgress = 0.22;
-        _factoryResetText = 'Clearing moments and notes...';
-      });
-    }
+    
+    // Stage 1: Prep (1s)
+    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    if (!mounted) return;
+    setState(() {
+      _factoryResetProgress = 0.20;
+      _factoryResetText = 'Deleting Database Records...';
+      _factoryResetSubText = 'Securely clearing moments, notes, and trash data...';
+      _factoryResetIcon = Icons.delete_sweep_rounded;
+    });
+
+    // Stage 2: Clear DB (1.2s)
     await _repository.clearAll();
     await _repository.clearTrash();
     _trashNotifier.value = [];
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (!mounted) return;
+    setState(() {
+      _factoryResetProgress = 0.55;
+      _factoryResetText = 'Purging Shared Preferences...';
+      _factoryResetSubText = 'Resetting personalization settings and secure keys...';
+      _factoryResetIcon = Icons.lock_reset_rounded;
+    });
+
+    // Stage 3: Wipe Prefs (1.2s)
     if (prefs != null) {
-      var done = 0;
       for (final key in [
         'notekar.nextId',
         _welcomeSeenKey,
@@ -1098,44 +1117,43 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'notekar.autoStartCardDismissed',
       ]) {
         await prefs.remove(key);
-        done++;
-        if (mounted && done % 4 == 0) {
-          setState(() {
-            _factoryResetProgress = math.min(0.82, 0.22 + (done / 24) * 0.55);
-            _factoryResetText = 'Restoring default settings...';
-          });
-        }
       }
-      try {
-        if (mounted) {
-          setState(() {
-            _factoryResetProgress = 0.86;
-            _factoryResetText = 'Turning off remote notices...';
-          });
-        }
-        await _fileChannel.invokeMethod<void>('configureRemoteNotices', {
-          'enabled': false,
-          'feedUrl': notificationFeed,
-        });
-      } catch (_) {}
     }
-    final elapsed = DateTime.now().difference(started);
-    if (elapsed < const Duration(milliseconds: 2200)) {
-      if (mounted) {
-        setState(() {
-          _factoryResetProgress = 0.94;
-          _factoryResetText = 'Finishing reset...';
-        });
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 2200) - elapsed);
-    }
-    if (mounted) {
-      setState(() {
-        _factoryResetProgress = 1.0;
-        _factoryResetComplete = true;
-        _factoryResetText = 'Restore complete';
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (!mounted) return;
+    setState(() {
+      _factoryResetProgress = 0.85;
+      _factoryResetText = 'Cancelling Scheduled Alarms...';
+      _factoryResetSubText = 'De-registering background broadcast receivers...';
+      _factoryResetIcon = Icons.alarm_off_rounded;
+    });
+
+    // Stage 4: Wiping background alarms & notices (1.0s)
+    try {
+      await _fileChannel.invokeMethod<void>('configureRemoteNotices', {
+        'enabled': false,
+        'feedUrl': notificationFeed,
       });
-    }
+    } catch (_) {}
+    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    if (!mounted) return;
+    setState(() {
+      _factoryResetProgress = 0.96;
+      _factoryResetText = 'Finalizing System Recovery...';
+      _factoryResetSubText = 'Wipe completed. Setting up system for a clean launch...';
+      _factoryResetIcon = Icons.published_with_changes_rounded;
+    });
+
+    // Stage 5: Done (0.6s)
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    setState(() {
+      _factoryResetProgress = 1.0;
+      _factoryResetComplete = true;
+      _factoryResetText = 'Restore complete';
+      _factoryResetSubText = 'Click Start to begin new setup';
+      _factoryResetIcon = Icons.check_circle_rounded;
+    });
     unawaited(_updateAndroidWidget());
   }
 
@@ -2608,6 +2626,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
               progress: _factoryResetProgress,
               complete: _factoryResetComplete,
               status: _factoryResetText,
+              subStatus: _factoryResetSubText,
+              icon: _factoryResetIcon,
               onStart: _finishFactoryResetOverlay,
             ),
           if (_privacyLock && !_privacyUnlocked)
