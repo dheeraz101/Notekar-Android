@@ -261,6 +261,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _weeklyReminderBody = 'Time to log a moment!';
   String _monthlyReminderBody = 'Time to log a moment!';
   bool _hasExactAlarmPermission = true;
+  bool _ignoresBatteryOptimizations = true;
 
   static const _fileChannel = MethodChannel('notekar/files');
   final _logger = AppLogger();
@@ -300,7 +301,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
     });
     try {
       final granted = await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ?? true;
-      if (mounted) setState(() => _hasExactAlarmPermission = granted);
+      final ignores = await _fileChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ?? true;
+      if (mounted) {
+        setState(() {
+          _hasExactAlarmPermission = granted;
+          _ignoresBatteryOptimizations = ignores;
+        });
+      }
     } catch (_) {}
   }
 
@@ -634,8 +641,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         textTheme: CupertinoTextThemeData(
                           dateTimePickerTextStyle: TextStyle(
                             color: p.text,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -678,6 +685,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ),
                     ],
                   ),
+                  SizedBox(height: math.max(16.0, MediaQuery.of(context).padding.bottom)),
                 ],
               ),
             ),
@@ -3473,6 +3481,55 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: Text('Grant Permission'.localized(context)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (!_ignoresBatteryOptimizations)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Glass(
+                          p: p,
+                          radius: 20,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.battery_alert_rounded, color: p.orange, size: 24),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Battery Optimization Active'.localized(context),
+                                      style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Aggressive battery cleaners on low-end devices can kill NoteKar in the background. Disable battery optimization to guarantee reminders fire 100% of the time.'.localized(context),
+                                style: TextStyle(color: p.text2, fontSize: 13),
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  HapticFeedback.selectionClick();
+                                  final success = await _fileChannel.invokeMethod<bool>('requestIgnoreBatteryOptimizations') ?? false;
+                                  if (success) {
+                                    final ignores = await _fileChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ?? true;
+                                    setState(() => _ignoresBatteryOptimizations = ignores);
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: p.orange,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text('Disable Battery Optimization'.localized(context)),
                               ),
                             ],
                           ),

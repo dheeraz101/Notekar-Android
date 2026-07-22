@@ -126,6 +126,7 @@ class ReminderReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
                 putExtra(EXTRA_TYPE, type)
+                addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
