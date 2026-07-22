@@ -2,6 +2,7 @@ package app.notekar.notekar
 
 import android.Manifest
 import android.content.ContentValues
+import android.app.AlarmManager
 import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -145,8 +146,8 @@ class MainActivity : FlutterActivity() {
                 }
                 "canScheduleExactAlarms" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val alarmManager = getSystemService(AlarmManager::class.java)
-                        result.success(alarmManager?.canScheduleExactAlarms() == true)
+                        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        result.success(alarmManager.canScheduleExactAlarms())
                     } else {
                         result.success(true)
                     }
