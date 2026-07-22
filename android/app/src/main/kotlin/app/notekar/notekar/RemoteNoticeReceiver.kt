@@ -111,32 +111,83 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
             }
             try {
                 if (connection.responseCode !in 200..299) return
-                val body = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                val data = JSONObject(body)
-                if (data.optBoolean("enabled", true).not()) return
-                if (!isAllowedForStable(data)) return
-                if (!isInsideSchedule(data)) return
-                if (!isVersionInRange(context, data)) return
+                val bodyText = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                
+                // Parse either list of notices or single notice object
+                val notices = try {
+                    org.json.JSONArray(bodyText)
+                } catch (_: Exception) {
+                    org.json.JSONArray().apply {
+                        put(JSONObject(bodyText))
+                    }
+                }
+
+                val now = System.currentTimeMillis()
+                var candidateNotice: JSONObject? = null
+                var candidatePriorityValue = -1 // low = 0, normal = 1, high = 2
+
+                for (i in 0 until notices.length()) {
+                    val data = notices.optJSONObject(i) ?: continue
+                    if (data.optBoolean("enabled", true).not()) continue
+                    if (!isAllowedForStable(data)) continue
+                    if (!isInsideSchedule(data)) continue
+                    if (!isVersionInRange(context, data)) continue
+
+                    val id = data.optString("id", "")
+                    if (id.isBlank()) continue
+
+                    // Dismissed permanently check
+                    val countKey = KEY_PREFIX_COUNT + id
+                    val shownCount = prefs.getInt(countKey, 0)
+                    if (shownCount >= 9999) continue
+
+                    val maxShows = data.optInt("maxShows", 1).coerceAtLeast(1)
+                    if (shownCount >= maxShows) continue
+
+                    val priority = data.optString("priority", "normal").trim().lowercase()
+                    val isHighPriority = priority == "high"
+
+                    // Cooldown check (bypassed if high priority)
+                    if (!isHighPriority) {
+                        val cooldownMs = data.optLong("cooldownHours", 24L).coerceAtLeast(0L) * 60L * 60L * 1000L
+                        val lastShownKey = KEY_PREFIX_LAST_SHOWN + id
+                        val lastShownAt = prefs.getLong(lastShownKey, 0L)
+                        if (lastShownAt > 0L && now - lastShownAt < cooldownMs) continue
+                        if (id == prefs.getString(KEY_LAST_ID, "") && maxShows <= 1) continue
+                    }
+
+                    val priorityValue = when (priority) {
+                        "high" -> 2
+                        "normal" -> 1
+                        "low" -> 0
+                        else -> 1
+                    }
+
+                    // Choose candidate: highest priority takes precedence
+                    if (priorityValue > candidatePriorityValue) {
+                        candidateNotice = data
+                        candidatePriorityValue = priorityValue
+                    }
+                }
+
+                val data = candidateNotice ?: return
                 val title = getLocalizedField(data, "title", "NoteKar notice")
                 val message = getLocalizedField(data, "body", getLocalizedField(data, "message", "Open NoteKar to see the latest notice."))
-                val id = data.optString("id", "$title|$message")
-                val maxShows = data.optInt("maxShows", 1).coerceAtLeast(1)
-                val cooldownMs = data.optLong("cooldownHours", 24L).coerceAtLeast(0L) * 60L * 60L * 1000L
+                val id = data.optString("id", "")
+
                 val countKey = KEY_PREFIX_COUNT + id
                 val lastShownKey = KEY_PREFIX_LAST_SHOWN + id
                 val shownCount = prefs.getInt(countKey, 0)
-                val lastShownAt = prefs.getLong(lastShownKey, 0L)
-                val now = System.currentTimeMillis()
-                if (shownCount >= maxShows) return
-                if (lastShownAt > 0L && now - lastShownAt < cooldownMs) return
-                if (id == prefs.getString(KEY_LAST_ID, "") && maxShows <= 1) return
+
                 prefs.edit()
                     .putString(KEY_LAST_ID, id)
                     .putInt(countKey, shownCount + 1)
                     .putLong(lastShownKey, now)
                     .apply()
+
                 showNotification(
                     context,
+                    id,
                     title,
                     message,
                     data.optString("url", ""),
@@ -149,6 +200,7 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
         private fun showNotification(
             context: Context,
+            noticeId: String,
             title: String,
             body: String,
             url: String,
@@ -182,6 +234,20 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
                 openIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+
+            // Build Dismiss Action Button Intent
+            val dismissIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                this.action = NotificationActionReceiver.ACTION_DISMISS
+                putExtra(NotificationActionReceiver.EXTRA_NOTICE_ID, noticeId)
+                putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, NOTIFICATION_ID)
+            }
+            val dismissPending = PendingIntent.getBroadcast(
+                context,
+                1,
+                dismissIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notekar)
                 .setContentTitle(title)
@@ -189,6 +255,11 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(openApp)
                 .setAutoCancel(true)
+                .addAction(
+                    android.R.drawable.ic_menu_close_clear_cancel,
+                    "Dismiss",
+                    dismissPending
+                )
                 .build()
             notificationManager.notify(NOTIFICATION_ID, notification)
         }
