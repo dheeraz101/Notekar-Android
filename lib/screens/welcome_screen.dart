@@ -295,6 +295,198 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
     );
   }
 
+  Widget _buildRepoMovePage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 16),
+          // Repository Migration Badge
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: p.accent.withValues(alpha: 0.25)),
+            ),
+            child: Icon(
+              Icons.source_rounded,
+              color: p.accent,
+              size: 36,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Official Repository Moved'.localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'We have officially migrated our codebase to a new home. All future releases, updates, and issues will be managed here:'.localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text2,
+              fontSize: 14,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // New Repo Card
+          Glass(
+            p: p,
+            radius: 20,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.link_rounded, color: p.text3, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'github.com/dheeraz101/Notekar-Android',
+                      style: TextStyle(
+                        color: p.text,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14.5,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                        label: Text('Open Link'.localized(context)),
+                        onPressed: () async {
+                          HapticFeedback.selectionClick();
+                          try {
+                            await _fileChannel.invokeMethod<void>('openUrl', {
+                              'url': 'https://github.com/dheeraz101/Notekar-Android'
+                            });
+                          } catch (_) {}
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: p.accent,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.copy_rounded, size: 16),
+                        label: Text('Copy Repo'.localized(context)),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          Clipboard.setData(
+                            const ClipboardData(text: 'https://github.com/dheeraz101/Notekar-Android'),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Repository link copied to clipboard'.localized(context)),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: p.text2,
+                          side: BorderSide(color: p.border),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Benefits List
+          _buildMigrationBenefitRow(
+            p: p,
+            icon: Icons.system_update_alt_rounded,
+            title: 'Smaller, Optimized APKs'.localized(context),
+            text: 'Access split-per-ABI optimized binaries and Google Play AppBundles directly from the release page.'.localized(context),
+          ),
+          const SizedBox(height: 16),
+          _buildMigrationBenefitRow(
+            p: p,
+            icon: Icons.bug_report_rounded,
+            title: 'Active Issue Tracking'.localized(context),
+            text: 'Submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.'.localized(context),
+          ),
+          const SizedBox(height: 16),
+          _buildMigrationBenefitRow(
+            p: p,
+            icon: Icons.security_rounded,
+            title: 'Automated Security Scans'.localized(context),
+            text: 'All builds now undergo automated CodeQL scans and VirusTotal checks to ensure verification and safety.'.localized(context),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMigrationBenefitRow({
+    required Palette p,
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: p.surface3,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: p.accent, size: 18),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 14.5),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                text,
+                style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.35),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildRemindersPage(Palette p) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -532,6 +724,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                 children: widget.pages.map((key) {
                   if (key == 'welcome') return _buildWelcomePage(p);
                   if (key == 'features') return _buildFeaturesPage(p);
+                  if (key == 'repo-move') return _buildRepoMovePage(p);
                   if (key == 'reminders') return _buildRemindersPage(p);
                   return const SizedBox.shrink();
                 }).toList(),

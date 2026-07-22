@@ -200,9 +200,12 @@ jobs:
 
       # ── 11. Prepare release notes body ───────────────────────────────────
       - name: Prepare release notes
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
         run: |
           VER=${{ steps.version.outputs.version }}
           NOTES_FILE="releases/v${VER}/RELEASE_NOTES.md"
+          APK_DIR="build/app/outputs/flutter-apk"
 
           if [ -f "$NOTES_FILE" ]; then
             echo "✅ Using $NOTES_FILE as release body"
@@ -216,31 +219,74 @@ jobs:
           EOF
           fi
 
+          # Calculate universal APK hash and dynamic VirusTotal URL
+          UNIVERSAL_APK="$APK_DIR/notekar-${VER}-universal.apk"
+          UNIVERSAL_SHA=$(sha256sum "$UNIVERSAL_APK" | awk '{print $1}')
+          VT_URL="https://www.virustotal.com/gui/file/${UNIVERSAL_SHA}"
+
+          if [ -n "$VIRUSTOTAL_API_KEY" ]; then
+            echo "🛡️ Uploading $UNIVERSAL_APK to VirusTotal..."
+            VT_RESPONSE=$(curl --request POST \
+              --url https://www.virustotal.com/api/v3/files \
+              --header "x-apikey: $VIRUSTOTAL_API_KEY" \
+              --form "file=@$UNIVERSAL_APK" \
+              --write-out "%{http_code}" \
+              --silent --output /tmp/vt_upload.json)
+            
+            if [ "$VT_RESPONSE" -eq 200 ]; then
+              echo "✅ Successfully uploaded to VirusTotal."
+              # Dynamically replace the placeholder VirusTotal link with the new active report link
+              sed -i "s|https://www.virustotal.com/gui/file/[0-9a-f]*|$VT_URL|g" /tmp/release_notes.md
+            else
+              echo "❌ VirusTotal upload failed (HTTP $VT_RESPONSE). Response:"
+              cat /tmp/vt_upload.json
+            fi
+          else
+            echo "⚠️ VIRUSTOTAL_API_KEY secret is not configured — skipping upload"
+          fi
+
           # Always append the APK install guide + verify block at the bottom
           cat >> /tmp/release_notes.md <<'EOF'
 
-          ---
+---
 
-          ### Assets
+### Assets
 
-          | File | Use when |
-          |------|----------|
-          | `notekar-VERSION-release.aab` | Play Store App Bundle (for developer publishing) |
-          | `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
-          | `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
-          | `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
-          | `notekar-VERSION-x86_64.apk` | x86_64 emulators / devices |
+| File | Use when |
+|------|----------|
+| `notekar-VERSION-release.aab` | Play Store App Bundle (for developer publishing) |
+| `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
+| `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
+| `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
+| `notekar-VERSION-x86_64.apk` | x86_64 emulators / devices |
 
-          ### Verifying
+### Verifying
 
-          Download `sha256.txt` alongside any APK/AAB and run:
-          ```
-          sha256sum --check sha256.txt
-          ```
-          EOF
+Download `sha256.txt` alongside any APK/AAB and run:
+```bash
+sha256sum --check sha256.txt
+```
+EOF
 
           # Swap VERSION placeholder with actual version
           sed -i "s/VERSION/${{ steps.version.outputs.version }}/g" /tmp/release_notes.md
+
+          # Append dynamic SHA256 checksums of the actual artifacts
+          echo "" >> /tmp/release_notes.md
+          echo "### SHA256 Checksums" >> /tmp/release_notes.md
+          echo "\`\`\`text" >> /tmp/release_notes.md
+          cat "$APK_DIR/sha256.txt" >> /tmp/release_notes.md
+          echo "\`\`\`" >> /tmp/release_notes.md
+
+          # Append support options
+          echo "" >> /tmp/release_notes.md
+          echo "---" >> /tmp/release_notes.md
+          echo "" >> /tmp/release_notes.md
+          echo "## ☕ Support the Project" >> /tmp/release_notes.md
+          echo "" >> /tmp/release_notes.md
+          echo "If you like NoteKar and want to support future updates:" >> /tmp/release_notes.md
+          echo "" >> /tmp/release_notes.md
+          echo "[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/dheeraz)" >> /tmp/release_notes.md
 
           echo "📋 Release notes preview:"
           cat /tmp/release_notes.md

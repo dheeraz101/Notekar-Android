@@ -692,7 +692,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _defaultMode = value);
               _saveSetting('m-default-mode', value);
             },
-            pages: const ['welcome', 'features', 'reminders'],
+            pages: const ['welcome', 'features', 'repo-move', 'reminders'],
           ),
         ),
       );
@@ -720,7 +720,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _defaultMode = value);
               _saveSetting('m-default-mode', value);
             },
-            pages: const ['reminders'],
+            pages: const ['repo-move', 'reminders'],
           ),
         ),
       );
