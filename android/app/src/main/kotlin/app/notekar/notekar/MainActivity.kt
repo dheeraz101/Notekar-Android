@@ -31,6 +31,13 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         pendingLaunchAction = actionFromIntent(intent)
+
+        try {
+            ReminderReceiver.rescheduleAll(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to reschedule reminders on launch", e)
+        }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "notekar/files").setMethodCallHandler { call, result ->
             when (call.method) {
                 "saveTextFile" -> {
@@ -204,6 +211,9 @@ class MainActivity : FlutterActivity() {
                             result.success(false)
                         }
                     }
+                }
+                "openAutoStartSettings" -> {
+                    result.success(openAutoStartSettings())
                 }
                 "configureRemoteNotices" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: false
@@ -502,6 +512,49 @@ class MainActivity : FlutterActivity() {
     private fun canPostNotifications(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun openAutoStartSettings(): Boolean {
+        val manufacturer = Build.MANUFACTURER.lowercase()
+        val intents = listOf(
+            // Xiaomi
+            Intent().setComponent(ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
+            // Oppo
+            Intent().setComponent(ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
+            Intent().setComponent(ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
+            Intent().setComponent(ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startupapp.StartupAppListActivity")),
+            // Vivo
+            Intent().setComponent(ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
+            Intent().setComponent(ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
+            Intent().setComponent(ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
+            // Huawei
+            Intent().setComponent(ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
+            Intent().setComponent(ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")),
+            // OnePlus
+            Intent().setComponent(ComponentName("com.oneplus.security", "com.oneplus.security.chainlaunch.AppBootLaunchActivity")),
+            // Asus
+            Intent().setComponent(ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.entry.FunctionActivity"))
+        )
+
+        for (intent in intents) {
+            try {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                return true
+            } catch (_: Exception) {}
+        }
+
+        // Fallback: open App Info settings
+        try {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:${packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+            return true
+        } catch (_: Exception) {
+            return false
+        }
     }
 
     companion object {

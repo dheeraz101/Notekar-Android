@@ -16,7 +16,10 @@ class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null) return
         val action = intent.action
-        if (action == Intent.ACTION_BOOT_COMPLETED) {
+        if (action == Intent.ACTION_BOOT_COMPLETED ||
+            action == Intent.ACTION_MY_PACKAGE_REPLACED ||
+            action == "android.intent.action.QUICKBOOT_POWERON" ||
+            action == "com.htc.intent.action.QUICKBOOT_POWERON") {
             rescheduleAll(context)
             return
         }
@@ -45,6 +48,7 @@ class ReminderReceiver : BroadcastReceiver() {
         const val PREFS_NAME = "notekar_reminders_prefs"
         const val CHANNEL_ID = "notekar_reminders"
         const val NOTIFICATION_ID_BASE = 4000
+        const val ACTION_TRIGGER = "app.notekar.notekar.TRIGGER_REMINDER"
 
         const val EXTRA_ID = "reminder_id"
         const val EXTRA_TITLE = "reminder_title"
@@ -90,8 +94,10 @@ class ReminderReceiver : BroadcastReceiver() {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().remove(id).apply()
 
-            val alarmManager = context.getSystemService(AlarmManager::class.java)
-            val intent = Intent(context, ReminderReceiver::class.java)
+            val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
+            val intent = Intent(context, ReminderReceiver::class.java).apply {
+                action = ACTION_TRIGGER
+            }
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 id.hashCode(),
@@ -101,7 +107,7 @@ class ReminderReceiver : BroadcastReceiver() {
             alarmManager.cancel(pendingIntent)
         }
 
-        private fun rescheduleAll(context: Context) {
+        fun rescheduleAll(context: Context) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val keys = prefs.all.keys
             for (key in keys) {
@@ -122,11 +128,13 @@ class ReminderReceiver : BroadcastReceiver() {
 
             val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
             val intent = Intent(context, ReminderReceiver::class.java).apply {
+                action = ACTION_TRIGGER
                 putExtra(EXTRA_ID, id)
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
                 putExtra(EXTRA_TYPE, type)
                 addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
@@ -197,33 +205,50 @@ class ReminderReceiver : BroadcastReceiver() {
             }
 
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
+                val showIntent = Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
-            } catch (e: SecurityException) {
-                // Fallback to inexact alarm which doesn't require SCHEDULE_EXACT_ALARM permission
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.set(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
+                val showPendingIntent = PendingIntent.getActivity(
+                    context,
+                    id.hashCode(),
+                    showIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.setAlarmClock(
+                    AlarmManager.AlarmClockInfo(calendar.timeInMillis, showPendingIntent),
+                    pendingIntent
+                )
+            } catch (e: Exception) {
+                android.util.Log.w("ReminderReceiver", "Failed to schedule alarm clock, falling back", e)
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.setExact(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    }
+                } catch (e2: SecurityException) {
+                    android.util.Log.w("ReminderReceiver", "SecurityException scheduling exact alarm fallback")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.set(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    }
                 }
             }
         }

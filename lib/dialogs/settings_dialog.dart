@@ -248,6 +248,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   String? _editingReminderType;
   final TextEditingController _reminderMessageController = TextEditingController();
+  final FocusNode _reminderMessageFocusNode = FocusNode();
 
   // Reminders Settings
   bool _dailyReminderEnabled = false;
@@ -408,128 +409,118 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final currentValue = type == 'daily' ? _dailyReminderBody : (type == 'weekly' ? _weeklyReminderBody : _monthlyReminderBody);
     recents.removeWhere((item) => item.trim().isEmpty || item == currentValue);
 
-    return SingleChildScrollView(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              'Current Message'.localized(context).toUpperCase(),
-              style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: p.border.withValues(alpha: 0.5)),
-            ),
-            child: Text(
-              currentValue.trim().isEmpty 
-                  ? 'No message set (will show default reminder)'.localized(context) 
-                  : currentValue,
-              style: TextStyle(
-                color: currentValue.trim().isEmpty ? p.text3 : p.text,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                fontStyle: currentValue.trim().isEmpty ? FontStyle.italic : FontStyle.normal,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (recents.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                'Recent Messages'.localized(context).toUpperCase(),
-                style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SettingsGroup(
-              p: p,
-              insetDividers: true,
-              children: [
-                for (final item in recents.take(5))
-                  SettingsRow(
-                    p: p,
-                    icon: Icons.history_rounded,
-                    title: item,
-                    color: p.text3,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      _reminderMessageController.text = item;
-                    },
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      'Reminder Message'.localized(context).toUpperCase(),
+                      style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                    ),
                   ),
-              ],
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _reminderMessageController,
+                    focusNode: _reminderMessageFocusNode,
+                    maxLines: 1,
+                    maxLength: 60,
+                    style: TextStyle(color: p.text, fontSize: 15, fontWeight: FontWeight.w500),
+                    decoration: InputDecoration(
+                      hintText: 'Enter reminder message...'.localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      counterText: '',
+                      filled: true,
+                      fillColor: p.surface2,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.edit_rounded, color: p.text3, size: 20),
+                        onPressed: () {
+                          _reminderMessageFocusNode.requestFocus();
+                        },
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: p.accent, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: p.border.withValues(alpha: 0.5)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (recents.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        'Recent Messages'.localized(context).toUpperCase(),
+                        style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SettingsGroup(
+                      p: p,
+                      insetDividers: true,
+                      children: [
+                        for (final item in recents.take(5))
+                          SettingsRow(
+                            p: p,
+                            icon: Icons.history_rounded,
+                            title: item,
+                            color: p.text3,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              _reminderMessageController.text = item;
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
-          ],
+          ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              'Edit Message'.localized(context).toUpperCase(),
-              style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _reminderMessageController,
-            maxLines: 1,
-            maxLength: 60,
-            style: TextStyle(color: p.text, fontSize: 15, fontWeight: FontWeight.w500),
-            decoration: InputDecoration(
-              hintText: 'Enter reminder message...'.localized(context),
-              hintStyle: TextStyle(color: p.text3),
-              counterText: '',
-              filled: true,
-              fillColor: p.surface2,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: p.accent, width: 1.5),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: p.border.withValues(alpha: 0.5)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          FilledButton(
-            onPressed: () async {
-              final newText = _reminderMessageController.text.trim();
-              if (newText != currentValue) {
-                if (currentValue.trim().isNotEmpty && currentValue != 'Time to log a moment!') {
-                  recents.insert(0, currentValue);
-                  final uniqueRecents = recents.toSet().toList();
-                  await _prefs?.setStringList(recentsKey, uniqueRecents.take(5).toList());
+            padding: const EdgeInsets.only(bottom: 16, top: 16),
+            child: FilledButton(
+              onPressed: () async {
+                final newText = _reminderMessageController.text.trim();
+                if (newText != currentValue) {
+                  if (currentValue.trim().isNotEmpty && currentValue != 'Time to log a moment!') {
+                    recents.insert(0, currentValue);
+                    final uniqueRecents = recents.toSet().toList();
+                    await _prefs?.setStringList(recentsKey, uniqueRecents.take(5).toList());
+                  }
+                  
+                  setState(() {
+                    if (type == 'daily') _dailyReminderBody = newText;
+                    if (type == 'weekly') _weeklyReminderBody = newText;
+                    if (type == 'monthly') _monthlyReminderBody = newText;
+                  });
+                  await _prefs?.setString(prefKey, newText);
+                  await _syncReminder(type);
                 }
-                
-                setState(() {
-                  if (type == 'daily') _dailyReminderBody = newText;
-                  if (type == 'weekly') _weeklyReminderBody = newText;
-                  if (type == 'monthly') _monthlyReminderBody = newText;
-                });
-                await _prefs?.setString(prefKey, newText);
-                await _syncReminder(type);
-              }
-              _popCategory();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: p.accent,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                _popCategory();
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: p.accent,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(56),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: Text('Save'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
             ),
-            child: Text('Save'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
           ),
-          const SizedBox(height: 48),
         ],
       ),
     );
@@ -706,6 +697,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _settingsSearchController.dispose();
     _settingsSearchFocusNode.dispose();
     _reminderMessageController.dispose();
+    _reminderMessageFocusNode.dispose();
     super.dispose();
   }
 
@@ -2578,11 +2570,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
             },
             child: RepaintBoundary(
               key: ValueKey('container-${category ?? 'root'}'),
-              child: CustomScrollView(
-                key: ValueKey('scroll-${category ?? 'root'}'),
-                controller: category == null ? _activeController : null,
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
+              child: category == 'Reminder Message'
+                  ? _reminderMessagePage(p)
+                  : CustomScrollView(
+                      key: ValueKey('scroll-${category ?? 'root'}'),
+                      controller: category == null ? _activeController : null,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
               if (category == null) ...[
                 SliverToBoxAdapter(
                   child: AppSheetLargeTitle(
@@ -3483,6 +3477,50 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ),
                       ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Glass(
+                        p: p,
+                        radius: 20,
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.autorenew_rounded, color: p.orange, size: 24),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Auto-Start & Background Activity'.localized(context),
+                                    style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'On devices like Xiaomi, Samsung, Oppo, Vivo, or Huawei, the OS restricts background alarms when swiped away from recents. Grant "Auto-Start" or allow "Background Activity" to ensure reminders trigger.'.localized(context),
+                              style: TextStyle(color: p.text2, fontSize: 13),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () async {
+                                HapticFeedback.selectionClick();
+                                await _fileChannel.invokeMethod('openAutoStartSettings');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: p.orange,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Text('Configure Settings'.localized(context)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     
                     // Daily reminder group
                     SettingsGroup(
@@ -3496,6 +3534,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           value: _dailyReminderEnabled,
                           onChanged: (value) async {
                             HapticFeedback.selectionClick();
+                            if (value) {
+                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
+                              if (!context.mounted) return;
+                              if (!granted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
+                                );
+                                return;
+                              }
+                            }
                             setState(() => _dailyReminderEnabled = value);
                             await _prefs?.setBool('reminder_daily_enabled', value);
                             await _syncReminder('daily');
@@ -3545,6 +3593,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           value: _inactivityReminderEnabled,
                           onChanged: (value) async {
                             HapticFeedback.selectionClick();
+                            if (value) {
+                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
+                              if (!context.mounted) return;
+                              if (!granted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
+                                );
+                                return;
+                              }
+                            }
                             setState(() => _inactivityReminderEnabled = value);
                             await _prefs?.setBool('reminder_inactivity_enabled', value);
                             await _syncReminder('inactivity');
@@ -3602,6 +3660,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           value: _weeklyReminderEnabled,
                           onChanged: (value) async {
                             HapticFeedback.selectionClick();
+                            if (value) {
+                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
+                              if (!context.mounted) return;
+                              if (!granted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
+                                );
+                                return;
+                              }
+                            }
                             setState(() => _weeklyReminderEnabled = value);
                             await _prefs?.setBool('reminder_weekly_enabled', value);
                             await _syncReminder('weekly');
@@ -3731,6 +3799,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           value: _monthlyReminderEnabled,
                           onChanged: (value) async {
                             HapticFeedback.selectionClick();
+                            if (value) {
+                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
+                              if (!context.mounted) return;
+                              if (!granted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
+                                );
+                                return;
+                              }
+                            }
                             setState(() => _monthlyReminderEnabled = value);
                             await _prefs?.setBool('reminder_monthly_enabled', value);
                             await _syncReminder('monthly');
@@ -3803,13 +3881,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing48),
                   ]),
                 ),
-              if (show('Reminder Message'))
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _reminderMessagePage(p),
-                  ),
-                ),
+
               if (show('Moments'))
                 SliverList(
                   delegate: SliverChildListDelegate([

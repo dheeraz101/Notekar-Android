@@ -19,7 +19,11 @@ import java.net.URL
 
 class RemoteNoticeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+        val action = intent?.action
+        if (action == Intent.ACTION_BOOT_COMPLETED ||
+            action == Intent.ACTION_MY_PACKAGE_REPLACED ||
+            action == "android.intent.action.QUICKBOOT_POWERON" ||
+            action == "com.htc.intent.action.QUICKBOOT_POWERON") {
             val prefs = prefs(context)
             if (prefs.getBoolean(KEY_ENABLED, false)) {
                 schedule(context)
@@ -86,6 +90,8 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
         private fun pendingIntent(context: Context): PendingIntent {
             val intent = Intent(context, RemoteNoticeReceiver::class.java).apply {
                 action = ACTION_CHECK
+                addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             }
             return PendingIntent.getBroadcast(
                 context,
