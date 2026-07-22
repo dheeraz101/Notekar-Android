@@ -1,0 +1,6 @@
+- Reliable Background Reminders: Reminders now use Android's native alarm system for more reliable offline notifications, even if the app is closed.
+- New Onboarding Experience: Added a full-screen setup guide to help configure permissions and preferences.
+- Update Setup for Existing Users: Users updating to 4.0.6 will see a quick setup for the new Reminders feature and exact alarm permission.
+- Improved Reminder Message Editor: New Apple-inspired message editor with recent message history for faster reuse.
+- Safer Factory Reset: Factory Reset now shows a clear step-by-step process before permanently deleting data.
+- Auto-Start Support: Added shortcuts to Auto-Start settings for supported devices like Xiaomi, Oppo, Vivo, Samsung, and Huawei.

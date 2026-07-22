@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [4.0.6] - 2026-07-22 (versionCode 15)
+
+### Added
+- Reliable Background Reminders using Android's native alarm system for offline notifications.
+- New full-screen Onboarding setup guide for permissions and preferences.
+- Quick setup flow for existing users to configure Reminders and exact alarm permissions.
+- Improved Apple-inspired Reminder Message Editor with history support.
+- Enhanced Factory Reset with a clear step-by-step safety process.
+- Auto-Start settings shortcuts for Xiaomi, Oppo, Vivo, Samsung, and Huawei devices.
+
 ## [4.0.5] - 2026-07-22 (versionCode 14)
 
 ### Added
