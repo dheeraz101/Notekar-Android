@@ -15,7 +15,7 @@ import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
-import 'package:notekar/dialogs/welcome_sheet.dart';
+import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -663,42 +663,65 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
-    if (prefs.getBool(_welcomeSeenKey) ?? false) return;
-    if (!mounted) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      enableDrag: true,
-      isScrollControlled: true,
-      useSafeArea: true,
-      sheetAnimationStyle: const AnimationStyle(
-        duration: Duration(milliseconds: 170),
-        reverseDuration: Duration(milliseconds: 130),
-      ),
-      builder: (_) => WelcomeSheet(
-        p: p,
-        theme: _theme,
-        defaultMode: _defaultMode,
-        largeText: _largeText,
-        currentLocale: _locale,
-        onLocaleChanged: (value) {
-          NoteKarApp.of(context)?.setLocale(value);
-          setState(() => _locale = value);
-        },
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
-        onTheme: (value) {
-          setState(() => _theme = value);
-          _saveSetting('m-theme', value);
-          _applySystemUiStyle();
-        },
-        onDefaultMode: (value) {
-          setState(() => _defaultMode = value);
-          _saveSetting('m-default-mode', value);
-        },
-      ),
-    );
-    await prefs.setBool(_welcomeSeenKey, true);
+    final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
+    final remindersWalkthroughSeen = prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
+
+    if (!welcomeSeen) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => WelcomeScreen(
+            p: p,
+            theme: _theme,
+            defaultMode: _defaultMode,
+            currentLocale: _locale,
+            onLocaleChanged: (value) {
+              NoteKarApp.of(context)?.setLocale(value);
+              setState(() => _locale = value);
+            },
+            onTheme: (value) {
+              setState(() => _theme = value);
+              _saveSetting('m-theme', value);
+              _applySystemUiStyle();
+            },
+            onDefaultMode: (value) {
+              setState(() => _defaultMode = value);
+              _saveSetting('m-default-mode', value);
+            },
+            pages: const ['welcome', 'features', 'reminders'],
+          ),
+        ),
+      );
+      await prefs.setBool(_welcomeSeenKey, true);
+      await prefs.setBool('notekar.remindersWalkthroughSeen', true);
+    } else if (!remindersWalkthroughSeen) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => WelcomeScreen(
+            p: p,
+            theme: _theme,
+            defaultMode: _defaultMode,
+            currentLocale: _locale,
+            onLocaleChanged: (value) {
+              NoteKarApp.of(context)?.setLocale(value);
+              setState(() => _locale = value);
+            },
+            onTheme: (value) {
+              setState(() => _theme = value);
+              _saveSetting('m-theme', value);
+              _applySystemUiStyle();
+            },
+            onDefaultMode: (value) {
+              setState(() => _defaultMode = value);
+              _saveSetting('m-default-mode', value);
+            },
+            pages: const ['reminders'],
+          ),
+        ),
+      );
+      await prefs.setBool('notekar.remindersWalkthroughSeen', true);
+    }
   }
 
   Future<void> _showWhatsNewIfNeeded(SharedPreferences prefs) async {
@@ -1071,6 +1094,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-privacy-lock-delay',
         'm-update-status',
         'm-last-update-check',
+        'notekar.remindersWalkthroughSeen',
+        'notekar.autoStartCardDismissed',
       ]) {
         await prefs.remove(key);
         done++;

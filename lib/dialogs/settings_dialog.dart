@@ -249,6 +249,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String? _editingReminderType;
   final TextEditingController _reminderMessageController = TextEditingController();
   final FocusNode _reminderMessageFocusNode = FocusNode();
+  bool _autoStartCardDismissed = false;
 
   // Reminders Settings
   bool _dailyReminderEnabled = false;
@@ -275,6 +276,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
+      _autoStartCardDismissed = _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _dailyReminderEnabled = _prefs?.getBool('reminder_daily_enabled') ?? false;
       _dailyReminderTime = TimeOfDay(
         hour: _prefs?.getInt('reminder_daily_hour') ?? 21,
@@ -3477,50 +3479,58 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ),
                       ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Glass(
-                        p: p,
-                        radius: 20,
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.autorenew_rounded, color: p.orange, size: 24),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Auto-Start & Background Activity'.localized(context),
-                                    style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                    if (!_autoStartCardDismissed)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Glass(
+                          p: p,
+                          radius: 20,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.autorenew_rounded, color: p.orange, size: 24),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Auto-Start & Background Activity'.localized(context),
+                                      style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'On devices like Xiaomi, Samsung, Oppo, Vivo, or Huawei, the OS restricts background alarms when swiped away from recents. Grant "Auto-Start" or allow "Background Activity" to ensure reminders trigger.'.localized(context),
-                              style: TextStyle(color: p.text2, fontSize: 13),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () async {
-                                HapticFeedback.selectionClick();
-                                await _fileChannel.invokeMethod('openAutoStartSettings');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: p.orange,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  IconButton(
+                                    icon: Icon(Icons.close_rounded, color: p.text3, size: 20),
+                                    onPressed: () async {
+                                      setState(() => _autoStartCardDismissed = true);
+                                      await _prefs?.setBool('notekar.autoStartCardDismissed', true);
+                                    },
+                                  ),
+                                ],
                               ),
-                              child: Text('Configure Settings'.localized(context)),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                'On devices like Xiaomi, Samsung, Oppo, Vivo, or Huawei, the OS restricts background alarms when swiped away from recents. Grant "Auto-Start" or allow "Background Activity" to ensure reminders trigger.'.localized(context),
+                                style: TextStyle(color: p.text2, fontSize: 13),
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  HapticFeedback.selectionClick();
+                                  await _fileChannel.invokeMethod('openAutoStartSettings');
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: p.orange,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text('Configure Settings'.localized(context)),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                     
                     // Daily reminder group
                     SettingsGroup(

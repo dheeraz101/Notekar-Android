@@ -23,6 +23,23 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '4.0.6',
+      date: 'July 22, 2026',
+      highlights: [
+        'Repository has been officially moved to the new home at dheeraz101/Notekar-Android.',
+        'Added a new interactive full-screen Welcome & Onboarding experience.',
+        'Swiping pages including a dedicated page for configuring Reminders.',
+        'Added Auto-Start helper settings to prevent notifications being killed on MIUI/ColorOS/etc.',
+      ],
+      items: [
+        'Notice: The official repository has been moved to GitHub (dheeraz101/Notekar-Android).',
+        'Added: Full-screen Welcome and Onboarding experience with swipeable pages.',
+        'Added: Guided setup for exact alarms, notification permissions, and Auto-Start during onboarding.',
+        'Added: Post-update announcement screen to introduce new features like Reminders.',
+        'Improved: Background reminder reliability and wake lock support for exact alarms.',
+      ],
+    ),
+    (
       version: '4.0.5',
       date: 'July 22, 2026',
       highlights: [

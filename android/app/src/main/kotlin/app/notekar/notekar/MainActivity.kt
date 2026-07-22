@@ -144,6 +144,9 @@ class MainActivity : FlutterActivity() {
                         result.error("NOTIFICATION_FAILED", error.message, null)
                     }
                 }
+                "canPostNotifications" -> {
+                    result.success(canPostNotifications())
+                }
                 "requestNotificationPermission" -> {
                     if (pendingNotificationResult != null) {
                         try {
