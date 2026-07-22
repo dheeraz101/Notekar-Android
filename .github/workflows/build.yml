@@ -28,7 +28,7 @@ jobs:
     steps:
       # ── 1. Checkout ──────────────────────────────────────────────────────
       - name: Checkout release branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -45,21 +45,34 @@ jobs:
           echo "📦 Version: $VER+$BUILD"
 
       # ── 3. Environment ───────────────────────────────────────────────────
-      - name: Set up Java 17
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.4'
           channel: stable
           cache: true
 
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Verify Flutter environment
+        run: flutter doctor -v
+
+      - name: Show pub dependencies tree
+        run: flutter pub deps
 
       # ── 4. Signing setup ─────────────────────────────────────────────────
       - name: Decode keystore
@@ -93,19 +106,29 @@ jobs:
             --build-number ${{ steps.version.outputs.build_number }}
           echo "✅ Split APKs built"
 
-      # ── 7. Rename all 4 APKs with version + arch ─────────────────────────
-      - name: Rename APKs
+      # ── 6b. Build — AppBundle (Play Store) ────────────────────────────────
+      - name: Build release AppBundle
+        run: |
+          flutter build appbundle --release \
+            --build-name ${{ steps.version.outputs.version }} \
+            --build-number ${{ steps.version.outputs.build_number }}
+          echo "✅ AppBundle built"
+
+      # ── 7. Rename all APKs & AppBundle with version + arch ────────────────
+      - name: Rename APKs and AppBundle
         run: |
           APK_DIR=build/app/outputs/flutter-apk
+          BUNDLE_DIR=build/app/outputs/bundle/release
           VER=${{ steps.version.outputs.version }}
 
           mv "$APK_DIR/app-release.apk"          "$APK_DIR/notekar-${VER}-universal.apk"
           mv "$APK_DIR/app-arm64-v8a-release.apk"    "$APK_DIR/notekar-${VER}-arm64-v8a.apk"
           mv "$APK_DIR/app-armeabi-v7a-release.apk"  "$APK_DIR/notekar-${VER}-armeabi-v7a.apk"
           mv "$APK_DIR/app-x86_64-release.apk"       "$APK_DIR/notekar-${VER}-x86_64.apk"
+          mv "$BUNDLE_DIR/app-release.aab"       "$APK_DIR/notekar-${VER}-release.aab"
 
-          echo "✅ Renamed APKs:"
-          ls -lh "$APK_DIR"/notekar-*.apk
+          echo "✅ Renamed APKs & AppBundle:"
+          ls -lh "$APK_DIR"/notekar-*.apk "$APK_DIR"/notekar-*.aab
 
       # ── 8. Generate SHA256 checksums ─────────────────────────────────────
       - name: Generate SHA256 checksums
@@ -118,6 +141,7 @@ jobs:
                     notekar-${VER}-armeabi-v7a.apk \
                     notekar-${VER}-universal.apk \
                     notekar-${VER}-x86_64.apk \
+                    notekar-${VER}-release.aab \
             > sha256.txt
 
           echo "✅ SHA256 checksums:"
@@ -141,12 +165,21 @@ jobs:
 
           APKS_JSON=$(printf '%s,' "${APKS[@]}" | sed 's/,$//')
 
+          AAB_FILE="notekar-${VER}-release.aab"
+          AAB_SHA=$(sha256sum "$APK_DIR/$AAB_FILE" | awk '{print $1}')
+          AAB_BYTES=$(stat -c%s "$APK_DIR/$AAB_FILE")
+
           cat > "$APK_DIR/version.json" <<EOF
           {
             "version": "$VER",
             "buildNumber": $BUILD,
             "generatedAt": "$NOW",
-            "apks": [$APKS_JSON]
+            "apks": [$APKS_JSON],
+            "bundle": {
+              "file": "$AAB_FILE",
+              "sha256": "$AAB_SHA",
+              "bytes": $AAB_BYTES
+            }
           }
           EOF
 
@@ -160,6 +193,7 @@ jobs:
           name: notekar-${{ steps.version.outputs.version }}-release
           path: |
             build/app/outputs/flutter-apk/notekar-*.apk
+            build/app/outputs/flutter-apk/notekar-*.aab
             build/app/outputs/flutter-apk/sha256.txt
             build/app/outputs/flutter-apk/version.json
           retention-days: 90
@@ -189,8 +223,9 @@ jobs:
 
           ### Assets
 
-          | APK | Use when |
-          |-----|----------|
+          | File | Use when |
+          |------|----------|
+          | `notekar-VERSION-release.aab` | Play Store App Bundle (for developer publishing) |
           | `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
           | `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
           | `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
@@ -198,7 +233,7 @@ jobs:
 
           ### Verifying
 
-          Download `sha256.txt` alongside any APK and run:
+          Download `sha256.txt` alongside any APK/AAB and run:
           ```
           sha256sum --check sha256.txt
           ```
@@ -220,6 +255,7 @@ jobs:
           body_path: /tmp/release_notes.md
           files: |
             build/app/outputs/flutter-apk/notekar-*.apk
+            build/app/outputs/flutter-apk/notekar-*.aab
             build/app/outputs/flutter-apk/sha256.txt
             build/app/outputs/flutter-apk/version.json
 

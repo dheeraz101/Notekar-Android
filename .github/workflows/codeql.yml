@@ -1,49 +1,80 @@
-name: CodeQL Security Analysis
+name: "CodeQL Advanced"
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - Main
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - Main
+
   schedule:
-    # Runs at 06:00 UTC every Monday
-    - cron: '0 6 * * 1'
+    - cron: "32 19 * * 5"
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+  packages: read
 
 jobs:
   analyze:
-    name: CodeQL — Dart
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - actions
+          - java-kotlin
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      ####################################################
+      # Flutter setup (only needed for Java/Kotlin build)
+      ####################################################
+      - name: Set up Java
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
 
       - name: Set up Flutter
+        if: matrix.language == 'java-kotlin'
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.4'
           channel: stable
-          cache: true
 
-      - name: Install dependencies
+      - name: Install Flutter dependencies
+        if: matrix.language == 'java-kotlin'
         run: flutter pub get
 
+      ####################################################
+      # Initialize CodeQL
+      ####################################################
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
-          languages: java-kotlin
-          # Dart is analyzed via flutter analyze; this covers
-          # any native Android/Kotlin code in android/ directory
+          languages: ${{ matrix.language }}
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      ####################################################
+      # Build Flutter project
+      ####################################################
+      - name: Build Android project
+        if: matrix.language == 'java-kotlin'
+        run: flutter build apk --debug
 
+      ####################################################
+      # Analyze
+      ####################################################
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
-          category: '/language:java-kotlin'
+          category: "/language:${{ matrix.language }}"
