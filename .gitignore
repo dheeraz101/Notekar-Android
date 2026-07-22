@@ -75,19 +75,33 @@ build/
 **/ios/.symlinks/
 
 # 📱 Local Releases, APKs, Bundles & Version Archives
-releases/
-**/releases/
-versions/
-**/versions/
+# We ignore the parent folders but allow specific version sub-folders
+releases/*
+!releases/v4.0.5/
+!releases/v4.0.6/
+versions/*
+!versions/v4.0.5/
+!versions/v4.0.6/
+
 release/
 **/release/
 output/
 **/output/
+
+# 🚀 Global Binary & Checksum Block (CRITICAL: No Binaries in Git)
 **/*.apk
 **/*.aab
 **/*.idsig
 **/*.sha1
 **/*.sha256
+**/sha256.txt
+**/version.json
+
+# 🚀 Un-ignore Release Documentation (MD files ONLY)
+!releases/v4.0.5/*.md
+!releases/v4.0.6/*.md
+!versions/v4.0.5/*.md
+!versions/v4.0.6/*.md
 
 # 💻 IDEs, Editors & Module Files
 .idea/
