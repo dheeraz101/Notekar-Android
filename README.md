@@ -4,7 +4,7 @@
 
 > **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero friction. 100% Offline-First & Privacy-Focused.
 
-![version](https://img.shields.io/badge/version-4.0.6-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange)
+![version](https://img.shields.io/badge/version-4.0.6-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
 
 ---
 
@@ -12,6 +12,67 @@
 > 🚀 **Official Release Hub for NoteKar**  
 > **This repository is the official home for all new NoteKar version releases, Android APK downloads, and active app development.**  
 > 📥 To download the latest stable Android APK release, visit the **[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
+
+---
+
+## 📖 Table of Contents
+- [📸 Screenshots / UI Preview](#-screenshots--ui-preview)
+- [🎯 Features & Highlights](#-features--highlights)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🌐 Community Translations](#-community-translations)
+- [🔒 Privacy & Legal Policy](#-privacy--legal-policy)
+- [☕ Support](#-support)
+- [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
+- [📦 Project Structure](#-project-structure)
+- [🛠️ Building & Running Locally](#️-building--running-locally)
+- [🔑 Building Release APKs & Keystore Setup](#-building-release-apks--keystore-setup)
+- [📄 License & Attribution](#-license--attribution)
+
+---
+
+## 📸 Screenshots / UI Preview
+
+Designed for speed, simplicity, and privacy. Every screen is optimized for quick timestamp logging with minimal interaction.
+
+| Welcome | Premium | Permissions | Home | History |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="175"> |
+| *Quick onboarding and setup.* | *Premium features at a glance.* | *Configure permissions for reminders.* | *Log timestamps with a single tap.* | *Browse and manage saved entries.* |
+
+| Settings | Privacy | Help | Statistics | Reminders |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="175"> |
+| *Customize app preferences.* | *Privacy, security, and diagnostics.* | *Guides, FAQs, and legal information.* | *View activity insights and trends.* | *Schedule daily and inactivity reminders.* |
+
+---
+
+## 🎯 Features & Highlights
+
+- **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly.
+- **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for work/study) and **Single mode** (one-shot timestamp logging).
+- **Rich Local Storage**: Fast, persistent local storage powered by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
+- **Android OS Auto-Backup Support**: Supports standard Android system auto-backup (Google Drive system backup), ensuring your data can be restored when switching Android devices.
+- **Transparent & Minimal Permissions**:
+  - `INTERNET`: Exclusively used to check for software releases and fetch bug fix announcements.
+  - `POST_NOTIFICATIONS`: Used locally for update alerts and timestamp reminders.
+- **Zero Backend / Zero Analytics**: No cloud databases, no user accounts, no tracking scripts, no third-party ads.
+- **Data Control & Export**: Export all timestamp entries into standard CSV or JSON formats at any time.
+
+---
+
+## 🛠️ Tech Stack
+
+NoteKar is built using modern, performance-oriented technologies:
+
+| Component | Technology |
+| :--- | :--- |
+| **Language** | [Dart](https://dart.dev/) |
+| **Framework** | [Flutter](https://flutter.dev/) (SDK 3.12.0+) |
+| **Local Database** | [Hive](https://pub.dev/packages/hive) (NoSQL, lightning-fast key-value store) |
+| **State Management** | [Provider](https://pub.dev/packages/provider) |
+| **Architecture** | Clean Architecture |
+| **UI & Design** | Custom Apple-inspired design system with AMOLED dark mode support. |
+| **Platform Support** | Android 5.0 (API 21+) and above |
 
 ---
 
@@ -41,29 +102,6 @@ If NoteKar helps you, you can support the project here:
 [![Buy Me A Chai](https://buymeachai.ezee.li/assets/images/buymeachai-button.png)](https://buymeachai.ezee.li/dheeraz)
 
 Your support helps keep NoteKar free, offline-first, and actively maintained.
-
----
-
-## 📸 Screenshots / UI Preview
-
-| | | | | |
-| :---: | :---: | :---: | :---: | :---: |
-| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="160"> |
-| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="160"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="160"> |
-
----
-
-## 🎯 Features & Highlights
-
-- **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly.
-- **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for work/study) and **Single mode** (one-shot timestamp logging).
-- **Rich Local Storage**: Fast, persistent local storage powered by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
-- **Android OS Auto-Backup Support**: Supports standard Android system auto-backup (Google Drive system backup), ensuring your data can be restored when switching Android devices.
-- **Transparent & Minimal Permissions**:
-  - `INTERNET`: Exclusively used to check for software releases (`health.json` / GitHub releases) and fetch bug fix announcements. No personal data or logs are ever transmitted.
-  - `POST_NOTIFICATIONS`: Used locally to alert you about app updates, bug notices, or timestamp reminders.
-- **Zero Backend / Zero Analytics**: No cloud databases, no user accounts, no tracking scripts, no third-party ads.
-- **Data Control & Export**: Export all timestamp entries into standard CSV or JSON formats at any time.
 
 ---
 
