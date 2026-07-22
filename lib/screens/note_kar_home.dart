@@ -499,9 +499,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
       final savedInfo = prefs.getString('m-latest-update-info');
       if (savedInfo != null) {
         try {
-          _latestUpdateInfo = AppUpdateInfo.fromJson(
+          final info = AppUpdateInfo.fromJson(
             jsonDecode(savedInfo) as Map<String, dynamic>,
           );
+          if (_updateService.isUpdateAvailable(info.version, appVersion)) {
+            _latestUpdateInfo = info;
+          } else {
+            prefs.remove('m-latest-update-info');
+            _updateStatus = 'v$appVersion - Check for available updates';
+            prefs.setString('m-update-status', _updateStatus);
+          }
         } catch (_) {}
       }
       _locale = prefs.getString('m-locale') ?? 'system';

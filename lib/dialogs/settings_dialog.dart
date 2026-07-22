@@ -2543,56 +2543,56 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.download_rounded, color: p.text, size: 20),
+                        Icon(Icons.download_rounded, color: p.accent, size: 22),
                         const SizedBox(width: 10),
                         Text(
                           'Update Available',
                           style: TextStyle(
                             color: p.text,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: updateInfo?.isSecurity == true
-                                ? p.red.withValues(alpha: 0.15)
-                                : (updateInfo?.isImportant == true
-                                      ? p.orange.withValues(alpha: 0.15)
-                                      : p.green.withValues(alpha: 0.15)),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            updateInfo?.type ?? 'Regular Update',
-                            style: TextStyle(
-                              color: updateInfo?.isSecurity == true
-                                  ? p.red
-                                  : (updateInfo?.isImportant == true
-                                        ? p.orange
-                                        : p.green),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: updateInfo?.isSecurity == true
+                            ? p.red.withValues(alpha: 0.12)
+                            : (updateInfo?.isImportant == true
+                                  ? p.orange.withValues(alpha: 0.12)
+                                  : p.green.withValues(alpha: 0.12)),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        updateInfo?.type ?? 'Regular Update',
+                        style: TextStyle(
+                          color: updateInfo?.isSecurity == true
+                              ? p.red
+                              : (updateInfo?.isImportant == true
+                                    ? p.orange
+                                    : p.green),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
-                      'Version $cleanVersion is now available. This update includes new features, performance improvements, and bug fixes.',
+                      'Version $cleanVersion',
                       style: TextStyle(
                         color: p.text,
-                        fontSize: 14,
-                        height: 1.45,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     if (updateInfo?.date != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 2),
                       Text(
                         'Released on ${formatDate(updateInfo!.date!)}',
                         style: TextStyle(
@@ -2602,6 +2602,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ),
                     ],
+                    const SizedBox(height: 12),
+                    Text(
+                      'This update includes new features, performance improvements, and bug fixes.',
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 13.5,
+                        height: 1.45,
+                      ),
+                    ),
                     if (updateInfo?.body != null &&
                         updateInfo!.body.isNotEmpty) ...[
                       const SizedBox(height: 16),
@@ -5534,9 +5543,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     icon: Icons.system_update_outlined,
                                     title: 'Software Update',
                                     color: p.text2,
-                                    status: _updateAvailable
-                                        ? 'v$appVersion (Update Available)'
-                                        : 'v$appVersion',
+                                    status: null,
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
