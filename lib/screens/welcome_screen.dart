@@ -312,10 +312,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: p.accent.withValues(alpha: 0.25)),
             ),
-            child: Icon(
-              Icons.source_rounded,
-              color: p.accent,
+            alignment: Alignment.center,
+            child: GithubIcon(
               size: 36,
+              color: p.accent,
             ),
           ),
           const SizedBox(height: 24),
@@ -351,15 +351,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.link_rounded, color: p.text3, size: 20),
+                    GithubIcon(size: 20, color: p.text3),
                     const SizedBox(width: 8),
-                    Text(
-                      'github.com/dheeraz101/Notekar-Android',
-                      style: TextStyle(
-                        color: p.text,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14.5,
-                        letterSpacing: -0.2,
+                    Expanded(
+                      child: Text(
+                        'github.com/dheeraz101/Notekar-Android',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: p.text,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.5,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                     ),
                   ],
@@ -391,7 +395,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                     Expanded(
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.copy_rounded, size: 16),
-                        label: Text('Copy Repo'.localized(context)),
+                        label: Text('Copy'.localized(context)),
                         onPressed: () {
                           HapticFeedback.selectionClick();
                           Clipboard.setData(

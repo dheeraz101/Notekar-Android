@@ -2718,7 +2718,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                           SettingsRow(
                             p: p,
-                            icon: Icons.code_rounded,
+                            customIcon: GithubIcon(size: 16, color: p.text),
                             title: 'GitHub',
                             color: p.text,
                             rowKind: 'link',
@@ -4483,11 +4483,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      padding: const EdgeInsets.only(bottom: 16),
                       child: Glass(
                         p: p,
-                        radius: 20,
-                        padding: const EdgeInsets.all(16),
+                        radius: 32,
+                        padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -4528,7 +4528,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               children: [
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    height: 52,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    alignment: Alignment.centerLeft,
                                     decoration: BoxDecoration(
                                       color: p.surface3.withValues(alpha: 0.4),
                                       borderRadius: BorderRadius.circular(14),
@@ -4541,6 +4543,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'Ratio'.localized(context),
@@ -4561,7 +4564,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    height: 52,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    alignment: Alignment.centerLeft,
                                     decoration: BoxDecoration(
                                       color: p.surface3.withValues(alpha: 0.4),
                                       borderRadius: BorderRadius.circular(14),
@@ -4574,6 +4579,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'Status'.localized(context),
@@ -4598,7 +4604,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               children: [
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    height: 52,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    alignment: Alignment.centerLeft,
                                     decoration: BoxDecoration(
                                       color: p.surface3.withValues(alpha: 0.4),
                                       borderRadius: BorderRadius.circular(14),
@@ -4611,6 +4619,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'Last Scan'.localized(context),
@@ -4631,7 +4640,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    height: 52,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    alignment: Alignment.centerLeft,
                                     decoration: BoxDecoration(
                                       color: p.surface3.withValues(alpha: 0.4),
                                       borderRadius: BorderRadius.circular(14),
@@ -4644,6 +4655,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 'Signature'.localized(context),
@@ -4669,47 +4681,78 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
                             ),
                             const SizedBox(height: 16),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
+                            Row(
                               children: [
-                                ElevatedButton.icon(
-                                  icon: const Icon(Icons.security_rounded, size: 14),
-                                  label: Text('VT Report'.localized(context)),
-                                  onPressed: () async {
-                                    try {
-                                      await _fileChannel.invokeMethod<void>('openUrl', {
-                                        'url': 'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe'
-                                      });
-                                    } catch (_) {}
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: p.green.withValues(alpha: 0.15),
-                                    foregroundColor: p.green,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      try {
+                                        await _fileChannel.invokeMethod<void>('openUrl', {
+                                          'url': 'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe'
+                                        });
+                                      } catch (_) {}
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: p.green.withValues(alpha: 0.15),
+                                      foregroundColor: p.green,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.security_rounded, size: 14),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            'VT Report'.localized(context),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                OutlinedButton.icon(
-                                  icon: const Icon(Icons.fingerprint_rounded, size: 14),
-                                  label: Text('SHA-256 Hashes'.localized(context)),
-                                  onPressed: () async {
-                                    try {
-                                      await _fileChannel.invokeMethod<void>('openUrl', {
-                                        'url': 'https://github.com/dheeraz101/Notekar-Android/releases/latest'
-                                      });
-                                    } catch (_) {}
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: p.text2,
-                                    side: BorderSide(color: p.border),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () async {
+                                      try {
+                                        await _fileChannel.invokeMethod<void>('openUrl', {
+                                          'url': 'https://github.com/dheeraz101/Notekar-Android/releases/latest'
+                                        });
+                                      } catch (_) {}
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: p.text2,
+                                      side: BorderSide(color: p.border),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.fingerprint_rounded, size: 14),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            'SHA-256 Hashes'.localized(context),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
