@@ -143,6 +143,40 @@ class MainActivity : FlutterActivity() {
                     }
                     requestNotificationPermission(result)
                 }
+                "canScheduleExactAlarms" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val alarmManager = getSystemService(AlarmManager::class.java)
+                        result.success(alarmManager?.canScheduleExactAlarms() == true)
+                    } else {
+                        result.success(true)
+                    }
+                }
+                "requestExactAlarmPermission" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        try {
+                            val intent = Intent().apply {
+                                action = android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                data = Uri.parse("package:${packageName}")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            try {
+                                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.parse("package:${packageName}")
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                startActivity(intent)
+                                result.success(true)
+                            } catch (_: Exception) {
+                                result.success(false)
+                            }
+                        }
+                    } else {
+                        result.success(true)
+                    }
+                }
                 "configureRemoteNotices" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: false
                     val feedUrl = call.argument<String>("feedUrl") ?: ""

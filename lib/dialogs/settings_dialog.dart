@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -259,6 +260,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _dailyReminderBody = 'Time to log a moment!';
   String _weeklyReminderBody = 'Time to log a moment!';
   String _monthlyReminderBody = 'Time to log a moment!';
+  bool _hasExactAlarmPermission = true;
 
   static const _fileChannel = MethodChannel('notekar/files');
   final _logger = AppLogger();
@@ -296,6 +298,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
       );
       _monthlyReminderBody = _prefs?.getString('reminder_monthly_body') ?? 'Time to log a moment!';
     });
+    try {
+      final granted = await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ?? true;
+      if (mounted) setState(() => _hasExactAlarmPermission = granted);
+    } catch (_) {}
   }
 
   String _getRemindersStatus() {
@@ -396,6 +402,106 @@ class _SettingsDialogState extends State<SettingsDialog> {
               child: Text('okay'.localized(context)),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Future<TimeOfDay?> _showIOSTimePicker(BuildContext context, TimeOfDay initialTime) async {
+    final p = paletteFor(theme);
+    TimeOfDay selectedTime = initialTime;
+    
+    return showModalBottomSheet<TimeOfDay>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: p.surface.withValues(alpha: 0.85),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: p.accent.withValues(alpha: 0.2), width: 1.5),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Glass(
+              p: p,
+              radius: 32,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: p.text3.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Select Time'.localized(context),
+                    style: TextStyle(color: p.text, fontSize: 18, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 200,
+                    child: CupertinoTheme(
+                      data: CupertinoThemeData(
+                        textTheme: CupertinoTextThemeData(
+                          dateTimePickerTextStyle: TextStyle(
+                            color: p.text,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      child: CupertinoDatePicker(
+                        mode: CupertinoDatePickerMode.time,
+                        initialDateTime: DateTime(2026, 1, 1, initialTime.hour, initialTime.minute),
+                        onDateTimeChanged: (DateTime dateTime) {
+                          selectedTime = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+                          HapticFeedback.selectionClick();
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context, null),
+                          style: TextButton.styleFrom(
+                            foregroundColor: p.text2,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text('cancel'.localized(context), style: const TextStyle(fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, selectedTime),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: p.accent,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: Text('okay'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -3143,6 +3249,55 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: spacing8),
+                    if (!_hasExactAlarmPermission)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Glass(
+                          p: p,
+                          radius: 20,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.warning_amber_rounded, color: p.orange, size: 24),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Alarms Permission Required'.localized(context),
+                                      style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'To trigger reminders precisely when the app is closed, NoteKar requires the "Alarms & Reminders" permission.'.localized(context),
+                                style: TextStyle(color: p.text2, fontSize: 13),
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  HapticFeedback.selectionClick();
+                                  final success = await _fileChannel.invokeMethod<bool>('requestExactAlarmPermission') ?? false;
+                                  if (success) {
+                                    final granted = await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ?? true;
+                                    setState(() => _hasExactAlarmPermission = granted);
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: p.orange,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text('Grant Permission'.localized(context)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     
                     // Daily reminder group
                     SettingsGroup(
@@ -3169,9 +3324,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             color: p.accent,
                             onTap: () async {
                               HapticFeedback.selectionClick();
-                              final time = await showTimePicker(
-                                context: context,
-                                initialTime: _dailyReminderTime,
+                              final time = await _showIOSTimePicker(
+                                context,
+                                _dailyReminderTime,
                               );
                               if (time != null) {
                                 setState(() => _dailyReminderTime = time);
@@ -3363,9 +3518,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             color: p.green,
                             onTap: () async {
                               HapticFeedback.selectionClick();
-                              final time = await showTimePicker(
-                                context: context,
-                                initialTime: _weeklyReminderTime,
+                              final time = await _showIOSTimePicker(
+                                context,
+                                _weeklyReminderTime,
                               );
                               if (time != null) {
                                 setState(() => _weeklyReminderTime = time);
@@ -3452,9 +3607,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             color: p.red,
                             onTap: () async {
                               HapticFeedback.selectionClick();
-                              final time = await showTimePicker(
-                                context: context,
-                                initialTime: _monthlyReminderTime,
+                              final time = await _showIOSTimePicker(
+                                context,
+                                _monthlyReminderTime,
                               );
                               if (time != null) {
                                 setState(() => _monthlyReminderTime = time);
