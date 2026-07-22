@@ -17,6 +17,8 @@ import android.provider.Settings
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
+import androidx.core.content.FileProvider
+import java.io.File
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
@@ -217,6 +219,23 @@ class MainActivity : FlutterActivity() {
                 }
                 "openAutoStartSettings" -> {
                     result.success(openAutoStartSettings())
+                }
+                "appCacheDir" -> {
+                    result.success(applicationContext.cacheDir.absolutePath)
+                }
+                "canInstallPackages" -> {
+                    result.success(canInstallPackages())
+                }
+                "openInstallPermissionSettings" -> {
+                    result.success(openInstallPermissionSettings())
+                }
+                "installApk" -> {
+                    val filePath = call.argument<String>("filePath") ?: ""
+                    result.success(installApk(filePath))
+                }
+                "getFileSha256" -> {
+                    val filePath = call.argument<String>("filePath") ?: ""
+                    result.success(getFileSha256(filePath))
                 }
                 "configureRemoteNotices" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: false
@@ -561,6 +580,73 @@ class MainActivity : FlutterActivity() {
             return true
         } catch (_: Exception) {
             return false
+        }
+    }
+
+    private fun canInstallPackages(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    private fun openInstallPermissionSettings(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                    data = Uri.parse("package:${packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        } else {
+            true
+        }
+    }
+
+    private fun installApk(filePath: String): Boolean {
+        val file = File(filePath)
+        if (!file.exists()) return false
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            val apkUri = FileProvider.getUriForFile(
+                applicationContext,
+                "${packageName}.fileprovider",
+                file
+            )
+            setDataAndType(apkUri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        return try {
+            startActivity(intent)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun getFileSha256(filePath: String): String? {
+        val file = File(filePath)
+        if (!file.exists()) return null
+        return try {
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val buffer = ByteArray(8192)
+                var bytesRead = input.read(buffer)
+                while (bytesRead != -1) {
+                    digest.update(buffer, 0, bytesRead)
+                    bytesRead = input.read(buffer)
+                }
+            }
+            digest.digest().joinToString("") { "%02x".format(it) }
+        } catch (e: Exception) {
+            null
         }
     }
 

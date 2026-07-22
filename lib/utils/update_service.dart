@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 
@@ -21,36 +22,37 @@ class AppUpdateInfo {
   });
 
   Map<String, dynamic> toJson() => {
-    'version': version,
-    'body': body,
-    'date': date?.toIso8601String(),
-    'isSecurity': isSecurity,
-    'isImportant': isImportant,
-    'type': type,
-  };
+        'version': version,
+        'body': body,
+        'date': date?.toIso8601String(),
+        'isSecurity': isSecurity,
+        'isImportant': isImportant,
+        'type': type,
+      };
 
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) => AppUpdateInfo(
-    version: json['version'] as String,
-    body: json['body'] as String? ?? '',
-    date: json['date'] != null
-        ? DateTime.tryParse(json['date'] as String)
-        : null,
-    isSecurity: json['isSecurity'] as bool? ?? false,
-    isImportant: json['isImportant'] as bool? ?? false,
-    type: json['type'] as String? ?? 'Regular Update',
-  );
+        version: json['version'] as String,
+        body: json['body'] as String? ?? '',
+        date: json['date'] != null
+            ? DateTime.tryParse(json['date'] as String)
+            : null,
+        isSecurity: json['isSecurity'] as bool? ?? false,
+        isImportant: json['isImportant'] as bool? ?? false,
+        type: json['type'] as String? ?? 'Regular Update',
+      );
 }
 
 class UpdateService {
   final _logger = AppLogger();
+  static const _channel = MethodChannel('notekar/files');
 
-  Future<AppUpdateInfo?> fetchLatestVersion() async {
+  Future<AppUpdateInfo?> fetchLatestVersion({bool trackBeta = false}) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10);
     try {
       final request = await client.getUrl(
         Uri.parse(
-          'https://api.github.com/repos/dheeraz101/Notekar-Android/releases/latest',
+          'https://api.github.com/repos/dheeraz101/Notekar-Android/releases?per_page=10',
         ),
       );
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
@@ -63,27 +65,44 @@ class UpdateService {
 
       final bodyText = await response.transform(utf8.decoder).join();
       final data = jsonDecode(bodyText);
-      if (data is! Map) return null;
+      if (data is! List || data.isEmpty) return null;
 
-      final tag = (data['tag_name'] as String?) ?? (data['name'] as String?);
+      Map? targetRelease;
+      for (final item in data) {
+        if (item is! Map) continue;
+        final isPrerelease = item['prerelease'] as bool? ?? false;
+        if (trackBeta) {
+          targetRelease = item;
+          break;
+        } else {
+          if (!isPrerelease) {
+            targetRelease = item;
+            break;
+          }
+        }
+      }
+
+      if (targetRelease == null) return null;
+
+      final tag = (targetRelease['tag_name'] as String?) ??
+          (targetRelease['name'] as String?);
       final version = tag?.replaceFirst(RegExp(r'^[vV]'), '').trim();
       if (version == null) return null;
 
-      final body = (data['body'] as String?) ?? '';
-      final publishedAtStr = data['published_at'] as String?;
+      final body = (targetRelease['body'] as String?) ?? '';
+      final publishedAtStr = targetRelease['published_at'] as String?;
       final date = publishedAtStr != null
           ? DateTime.tryParse(publishedAtStr)
           : null;
 
       final lowerBody = body.toLowerCase();
-      final lowerName = ((data['name'] as String?) ?? '').toLowerCase();
+      final lowerName =
+          ((targetRelease['name'] as String?) ?? '').toLowerCase();
 
-      final isSecurity =
-          lowerBody.contains('security') ||
+      final isSecurity = lowerBody.contains('security') ||
           lowerBody.contains('cve') ||
           lowerName.contains('security');
-      final isImportant =
-          isSecurity ||
+      final isImportant = isSecurity ||
           lowerBody.contains('critical') ||
           lowerBody.contains('important') ||
           lowerName.contains('critical') ||
@@ -93,7 +112,9 @@ class UpdateService {
           ? 'Security Update'
           : (isImportant ? 'Critical Update' : 'Regular Update');
 
-      _logger.info('Latest version fetched: $version ($type)');
+      _logger.info(
+        'Latest version fetched (${trackBeta ? "Beta" : "Stable"}): $version ($type)',
+      );
       return AppUpdateInfo(
         version: version,
         body: body,
@@ -107,6 +128,183 @@ class UpdateService {
       return null;
     } finally {
       client.close(force: true);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> fetchRecentCommits() async {
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 10);
+    try {
+      final request = await client.getUrl(
+        Uri.parse(
+          'https://api.github.com/repos/dheeraz101/Notekar-Android/commits?per_page=10',
+        ),
+      );
+      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+
+      final response = await request.close();
+      if (response.statusCode != 200) {
+        _logger.warn('Failed to fetch commits: ${response.statusCode}');
+        return null;
+      }
+
+      final bodyText = await response.transform(utf8.decoder).join();
+      final data = jsonDecode(bodyText);
+      if (data is! List) return null;
+
+      final List<Map<String, dynamic>> commits = [];
+      for (final item in data) {
+        if (item is! Map) continue;
+        final commit = item['commit'] as Map?;
+        if (commit == null) continue;
+        final message = commit['message'] as String? ?? '';
+        final author = commit['author'] as Map?;
+        final dateStr = author?['date'] as String?;
+        final authorName = author?['name'] as String? ?? 'Anonymous';
+        final sha = item['sha'] as String? ?? '';
+
+        commits.add({
+          'sha': sha,
+          'message': message,
+          'author': authorName,
+          'date': dateStr != null ? DateTime.tryParse(dateStr) : null,
+        });
+      }
+      return commits;
+    } catch (e, stack) {
+      _logger.error('Failed to fetch commits', e, stack);
+      return null;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<String?> downloadApk(
+    String version,
+    void Function(double progress) onProgress,
+  ) async {
+    final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
+    if (cacheDir == null) return null;
+
+    final url =
+        'https://github.com/dheeraz101/Notekar-Android/releases/download/v$version/notekar-$version-universal.apk';
+    final savePath = '$cacheDir/notekar-$version-universal.apk';
+
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 15);
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+
+      final response = await request.close();
+      if (response.statusCode != 200) {
+        _logger.warn('Download APK failed: HTTP ${response.statusCode}');
+        return null;
+      }
+
+      final contentLength = response.contentLength;
+      if (contentLength <= 0) {
+        _logger.warn('Download APK failed: Invalid content length');
+        return null;
+      }
+
+      final file = File(savePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+
+      final sink = file.openWrite();
+      var downloadedBytes = 0;
+
+      await for (final chunk in response) {
+        sink.add(chunk);
+        downloadedBytes += chunk.length;
+        final progress = downloadedBytes / contentLength;
+        onProgress(progress);
+      }
+      await sink.close();
+      _logger.info('APK downloaded successfully to: $savePath');
+      return savePath;
+    } catch (e, stack) {
+      _logger.error('Failed to download APK file', e, stack);
+      return null;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<bool> verifyApkHash(String version, String apkFilePath) async {
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 10);
+    try {
+      final url =
+          'https://github.com/dheeraz101/Notekar-Android/releases/download/v$version/sha256.txt';
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+
+      final response = await request.close();
+      if (response.statusCode != 200) return false;
+
+      final manifestText = await response.transform(utf8.decoder).join();
+      final localHash = await _channel.invokeMethod<String>(
+        'getFileSha256',
+        {'filePath': apkFilePath},
+      );
+      if (localHash == null || localHash.isEmpty) return false;
+
+      // Extract hash of universal apk from manifest text
+      final lines = manifestText.split('\n');
+      for (final line in lines) {
+        final trimmed = line.trim();
+        if (trimmed.isEmpty) continue;
+        final parts = trimmed.split(RegExp(r'\s+'));
+        if (parts.length >= 2) {
+          final hash = parts[0].trim().toLowerCase();
+          final filename = parts[1].trim();
+          if (filename.contains('universal') && hash == localHash.toLowerCase()) {
+            _logger.info('Checksum matches target: $hash');
+            return true;
+          }
+        }
+      }
+      _logger.warn('Checksum mismatch: Local $localHash');
+      return false;
+    } catch (e, stack) {
+      _logger.error('Failed to verify APK hash', e, stack);
+      return false;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<String?> getCachedApkPath(String version) async {
+    try {
+      final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
+      if (cacheDir == null) return null;
+      final file = File('$cacheDir/notekar-$version-universal.apk');
+      if (await file.exists()) {
+        return file.path;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<void> clearCachedBuilds() async {
+    try {
+      final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
+      if (cacheDir == null) return;
+      final dir = Directory(cacheDir);
+      if (await dir.exists()) {
+        final files = dir.listSync();
+        for (final entity in files) {
+          if (entity is File && entity.path.endsWith('.apk')) {
+            await entity.delete();
+            _logger.info('Deleted cached APK: ${entity.path}');
+          }
+        }
+      }
+    } catch (e, stack) {
+      _logger.error('Failed to clear cached builds', e, stack);
     }
   }
 

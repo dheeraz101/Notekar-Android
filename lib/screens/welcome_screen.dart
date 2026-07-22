@@ -42,6 +42,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   bool _notificationGranted = false;
   bool _batteryExempt = false;
+  bool _installGranted = false;
 
   static const _fileChannel = MethodChannel('notekar/files');
 
@@ -81,10 +82,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             'isIgnoringBatteryOptimizations',
           ) ??
           false;
+      final bool installGranted =
+          await _fileChannel.invokeMethod<bool>('canInstallPackages') ??
+          false;
       if (mounted) {
         setState(() {
           _notificationGranted = notificationGranted;
           _batteryExempt = batteryExempt;
+          _installGranted = installGranted;
         });
       }
     } catch (_) {}
@@ -525,6 +530,89 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
+  Widget _buildUpdatesPermissionPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 16),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: p.accent.withValues(alpha: 0.25)),
+            ),
+            child: Icon(
+              Icons.install_mobile_rounded,
+              color: p.accent,
+              size: 36,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'In-App OTA Updates'.localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'To download and install software updates directly within NoteKar, please configure the following security settings:'
+                .localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+          ),
+          const SizedBox(height: 28),
+
+          // Setup Card 1: Notification Permission
+          _buildPermissionSetupCard(
+            p: p,
+            icon: Icons.notifications_active_rounded,
+            title: 'Push Alerts & Notices'.localized(context),
+            subtitle: 'Notifies you immediately when new releases are compiled.'.localized(context),
+            isConfigured: _notificationGranted,
+            buttonText: 'Grant Permission'.localized(context),
+            onAction: () async {
+              HapticFeedback.selectionClick();
+              final granted =
+                  await _fileChannel.invokeMethod<bool>(
+                    'requestNotificationPermission',
+                  ) ??
+                  false;
+              if (granted) _checkPermissions();
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Setup Card 2: Install Unknown Apps
+          _buildPermissionSetupCard(
+            p: p,
+            icon: Icons.settings_system_daydream_rounded,
+            title: 'Allow App Installation'.localized(context),
+            subtitle:
+                'Required by Android to launch the system package archive installer for downloaded APKs.'
+                    .localized(context),
+            isConfigured: _installGranted,
+            buttonText: 'Configure Settings'.localized(context),
+            onAction: () async {
+              HapticFeedback.selectionClick();
+              await _fileChannel.invokeMethod('openInstallPermissionSettings');
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRemindersPage(Palette p) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -782,6 +870,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   if (key == 'welcome') return _buildWelcomePage(p);
                   if (key == 'features') return _buildFeaturesPage(p);
                   if (key == 'repo-move') return _buildRepoMovePage(p);
+                  if (key == 'updates-permission') return _buildUpdatesPermissionPage(p);
                   if (key == 'reminders') return _buildRemindersPage(p);
                   return const SizedBox.shrink();
                 }).toList(),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,6 +23,7 @@ import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:notekar/dialogs/update_permission_sheet.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -273,9 +275,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   SharedPreferences? _prefs;
 
+  bool _betaTrack = false;
+
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
+      _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _dailyReminderEnabled =
@@ -702,7 +707,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(999),
                             ),
                           ),
                           child: Text(
@@ -803,6 +808,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant SettingsDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.updateStatus != oldWidget.updateStatus ||
+        widget.updateInfo != oldWidget.updateInfo ||
+        widget.checkingUpdates != oldWidget.checkingUpdates) {
+      setState(() {
+        updateStatus = widget.updateStatus;
+        updateInfo = widget.updateInfo;
+        checkingUpdates = widget.checkingUpdates;
+      });
+    }
+  }
+
+  Future<void> _saveTrackPreference(bool beta) async {
+    setState(() {
+      _betaTrack = beta;
+    });
+    if (_prefs != null) {
+      await _prefs!.setBool('m-update-track-beta', beta);
+    }
+    widget.onCheckUpdates();
+  }
+
   void _onEntriesChanged() {
     if (mounted) {
       setState(() {});
@@ -882,8 +911,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   bool get _updateAvailable => updateStatus.contains('Update available');
-  bool get _upToDate => updateStatus.contains('Up to date');
-  String get _availableVersion => updateStatus.split(' ').last;
 
   String get _dataHealthStatus {
     final entries = this.entries;
@@ -2430,319 +2457,66 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
     );
   }
-
   Widget _updateCenterPage(Palette p) {
-    final availableVersion = _availableVersion;
-    final cleanVersion = availableVersion.startsWith('v')
-        ? availableVersion
-        : 'v$availableVersion';
-    final updateAvailable = _updateAvailable;
-    final upToDate = _upToDate;
-
-    String formatDate(DateTime dt) {
-      final months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: spacing24),
-        Center(
-          child: Column(
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: Image.asset(
-                    'icon-maskable-512.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: spacing20),
-              Text(
-                'NoteKar',
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Version v$appVersion',
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: spacing48),
-        if (checkingUpdates) ...[
-          Center(
-            child: Column(
-              children: [
-                SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: p.text3,
-                  ),
-                ),
-                const SizedBox(height: spacing48),
-                Text(
-                  'Checking for updates...',
-                  style: TextStyle(
-                    color: p.text2,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ] else if (updateAvailable) ...[
+    return UpdateCenterView(
+      p: p,
+      appVersion: appVersion,
+      enableTranslucency: enableTranslucency,
+      reduceMotion: reduceMotion,
+      onOpenLink: widget.onOpenLink,
+      prefs: _prefs,
+      onCheckUpdates: widget.onCheckUpdates,
+      updateInfo: updateInfo,
+      checkingUpdates: checkingUpdates,
+      updateStatus: updateStatus,
+    );
+  }
+  Widget _buildChoosePage(Palette p) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: spacing20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           SettingsGroup(
             p: p,
+            insetDividers: true,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(spacing20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.download_rounded, color: p.accent, size: 22),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Update Available',
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: updateInfo?.isSecurity == true
-                            ? p.red.withValues(alpha: 0.12)
-                            : (updateInfo?.isImportant == true
-                                  ? p.orange.withValues(alpha: 0.12)
-                                  : p.green.withValues(alpha: 0.12)),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        updateInfo?.type ?? 'Regular Update',
-                        style: TextStyle(
-                          color: updateInfo?.isSecurity == true
-                              ? p.red
-                              : (updateInfo?.isImportant == true
-                                    ? p.orange
-                                    : p.green),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Version $cleanVersion',
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (updateInfo?.date != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Released on ${formatDate(updateInfo!.date!)}',
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    Text(
-                      'This update includes new features, performance improvements, and bug fixes.',
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 13.5,
-                        height: 1.45,
-                      ),
-                    ),
-                    if (updateInfo?.body != null &&
-                        updateInfo!.body.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        "What's New:",
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        constraints: const BoxConstraints(maxHeight: 140),
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(spacing12),
-                        decoration: BoxDecoration(
-                          color: p.surface2,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: p.border),
-                        ),
-                        child: SingleChildScrollView(
-                          child: Text(
-                            updateInfo!.body,
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 12,
-                              height: 1.45,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+              SettingsRow(
+                p: p,
+                icon: Icons.check_circle_outline_rounded,
+                title: 'Stable Build',
+                subtitle: 'Recommended for standard users.'.localized(context),
+                trailing: !_betaTrack
+                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    : const SizedBox.shrink(),
+                onTap: () => _saveTrackPreference(false),
+              ),
+              SettingsRow(
+                p: p,
+                icon: Icons.track_changes_rounded,
+                title: 'Beta Build',
+                subtitle: 'Early access to active development features.'.localized(context),
+                trailing: _betaTrack
+                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    : const SizedBox.shrink(),
+                onTap: () => _saveTrackPreference(true),
               ),
             ],
           ),
-          const SizedBox(height: spacing24),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: p.surface3,
-              foregroundColor: p.text,
-              minimumSize: const Size.fromHeight(56),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-            onPressed: () => widget.onOpenLink(githubReleases),
-            child: const Text(
-              'Download from GitHub',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-            ),
+          const SizedBox(height: spacing12),
+          SettingsPageDescription(
+            p: p,
+            text: 'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'.localized(context),
           ),
-        ] else if (upToDate) ...[
-          Center(
-            child: Column(
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: p.green.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.check_rounded, color: p.green, size: 36),
-                ),
-                const SizedBox(height: spacing48),
-                Text(
-                  'NoteKar is up to date',
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Last checked: ${widget.lastUpdateCheckedAt == null ? 'Just now' : relativeAge(widget.lastUpdateCheckedAt!)}',
-                  style: TextStyle(color: p.text3, fontSize: 13),
-                ),
-              ],
-            ),
+          const SizedBox(height: spacing20),
+          SettingsBetaNote(
+            p: p,
+            text: 'The features on this track are under active beta testing.'.localized(context),
+            onLearnMore: () => _showBetaInfoPopup(p),
           ),
-        ] else ...[
-          Center(
-            child: Text(
-              'Check for the latest features and fixes.',
-              style: TextStyle(color: p.text2, fontSize: 14),
-            ),
-          ),
+          const SizedBox(height: spacing48),
         ],
-        const Spacer(),
-        if (!checkingUpdates && !updateAvailable)
-          Padding(
-            padding: const EdgeInsets.only(bottom: spacing16),
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: p.text,
-                minimumSize: const Size.fromHeight(56),
-                side: BorderSide(color: p.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              onPressed: () async {
-                setState(() {
-                  checkingUpdates = true;
-                  updateStatus = 'Checking for updates...';
-                });
-                final result = await widget.onCheckUpdates();
-                if (mounted) {
-                  setState(() {
-                    updateStatus = result.status;
-                    updateInfo = result.info;
-                    checkingUpdates = false;
-                  });
-                }
-              },
-              child: const Text(
-                'Check for Update',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-              ),
-            ),
-          ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
-          bottomPadding: spacing48,
-        ),
-      ],
+      ),
     );
   }
 
@@ -4058,7 +3832,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(999),
                                             ),
                                           ),
                                           child: Text(
@@ -4149,7 +3923,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(999),
                                             ),
                                           ),
                                           child: Text(
@@ -4239,7 +4013,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(999),
                                             ),
                                           ),
                                           child: Text(
@@ -5522,13 +5296,33 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ]),
                           ),
                         if (show('Update Center'))
-                          SliverFillRemaining(
-                            hasScrollBody: false,
+                          SliverToBoxAdapter(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: spacing20,
                               ),
                               child: _updateCenterPage(p),
+                            ),
+                          ),
+                        if (show('Build Choose'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              _buildChoosePage(p),
+                            ]),
+                          ),
+                        if (show('Commits'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                CommitsSettingsPage(
+                                  p: p,
+                                  enableTranslucency: enableTranslucency,
+                                  reduceMotion: reduceMotion,
+                                ),
+                                const SizedBox(height: spacing48),
+                              ],
                             ),
                           ),
                         if (show('Updates & Notices'))
@@ -5537,6 +5331,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               const SizedBox(height: spacing8),
                               SettingsGroup(
                                 p: p,
+                                insetDividers: true,
                                 children: [
                                   SettingsRow(
                                     p: p,
@@ -5549,38 +5344,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       children: [
                                         if (checkingUpdates)
                                           const SizedBox(
-                                            width: 10,
-                                            height: 10,
+                                            width: 12,
+                                            height: 12,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
                                               color: Colors.grey,
                                             ),
                                           )
-                                        else if (_updateAvailable)
-                                          () {
-                                            final date = updateInfo?.date;
-                                            final isVeryOld =
-                                                date != null &&
-                                                DateTime.now()
-                                                        .difference(date)
-                                                        .inDays >
-                                                    7;
-                                            final isUrgent =
-                                                isVeryOld ||
-                                                (updateInfo?.isImportant ??
-                                                    false);
-                                            return Container(
-                                              width: 8,
-                                              height: 8,
-                                              decoration: BoxDecoration(
-                                                color: isUrgent
-                                                    ? p.red
-                                                    : p.orange,
-                                                shape: BoxShape.circle,
-                                              ),
-                                            );
-                                          }()
-                                        else if (_upToDate)
+                                        else if (updateInfo != null)
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              color: (updateInfo!.isSecurity == true || updateInfo!.isImportant == true)
+                                                  ? p.red
+                                                  : p.orange,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          )
+                                        else
                                           Container(
                                             width: 8,
                                             height: 8,
@@ -5602,14 +5384,24 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       parent: 'Updates & Notices',
                                     ),
                                   ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.track_changes_rounded,
+                                    title: 'Build Channel',
+                                    color: p.accent,
+                                    status: _betaTrack ? 'Beta'.localized(context) : 'Stable'.localized(context),
+                                    onTap: () => _openCategory(
+                                      'Build Choose',
+                                      parent: 'Updates & Notices',
+                                    ),
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Keep NoteKar up to date with the latest features and security patches.',
+                                    'Keep NoteKar up to date with the latest features and security patches.'.localized(context),
                               ),
-
                               SettingsGroup(
                                 p: p,
                                 children: [
@@ -5628,9 +5420,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Checks for official announcement notices and bug fix announcements.',
+                                    'Checks for official announcement notices and bug fix announcements.'.localized(context),
                               ),
-
                               SettingsGroup(
                                 p: p,
                                 title: 'Release Notes & History',
@@ -5641,7 +5432,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     icon: Icons.auto_awesome_rounded,
                                     title: "What's New",
                                     color: p.orange,
-                                    status: 'Recent',
+                                    status: 'Recent'.localized(context),
                                     onTap: () => _openCategory(
                                       "What's New",
                                       parent: 'Updates & Notices',
@@ -5652,9 +5443,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     icon: Icons.history_edu_rounded,
                                     title: 'Changelog',
                                     color: p.green,
-                                    status: 'History',
+                                    status: 'History'.localized(context),
                                     onTap: () => _openCategory(
                                       'Changelog',
+                                      parent: 'Updates & Notices',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.history_rounded,
+                                    title: 'Commits',
+                                    color: p.accent,
+                                    status: 'Activity'.localized(context),
+                                    onTap: () => _openCategory(
+                                      'Commits',
                                       parent: 'Updates & Notices',
                                     ),
                                   ),
@@ -6869,12 +6671,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         if (show('Device Health'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _deviceHealthPage(p),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: spacing8),
+                                  _deviceHealthPage(p),
+                                  const SizedBox(height: spacing48),
+                                ],
+                              ),
                             ),
                           ),
                         if (show('Privacy Policy'))
@@ -6906,12 +6713,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         if (show("What's New"))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                ChangelogSettingsPage(p: p, latestOnly: true),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: spacing8),
+                                  ChangelogSettingsPage(p: p, latestOnly: true),
+                                  const SizedBox(height: spacing48),
+                                ],
+                              ),
                             ),
                           ),
                         if (show('Trash Bin')) ...[
@@ -7207,12 +7019,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ],
                         if (show('Changelog'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                ChangelogSettingsPage(p: p, latestOnly: false),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: spacing8),
+                                  ChangelogSettingsPage(p: p, latestOnly: false),
+                                  const SizedBox(height: spacing48),
+                                ],
+                              ),
                             ),
                           ),
                       ],
@@ -7227,6 +7044,548 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 }
 
+class UpdateCenterView extends StatefulWidget {
+  const UpdateCenterView({
+    super.key,
+    required this.p,
+    required this.appVersion,
+    required this.enableTranslucency,
+    required this.reduceMotion,
+    required this.onOpenLink,
+    this.prefs,
+    required this.onCheckUpdates,
+    this.updateInfo,
+    required this.checkingUpdates,
+    required this.updateStatus,
+  });
+
+  final Palette p;
+  final String appVersion;
+  final bool enableTranslucency;
+  final bool reduceMotion;
+  final void Function(String url) onOpenLink;
+  final SharedPreferences? prefs;
+  final VoidCallback onCheckUpdates;
+  final AppUpdateInfo? updateInfo;
+  final bool checkingUpdates;
+  final String updateStatus;
+
+  @override
+  State<UpdateCenterView> createState() => _UpdateCenterViewState();
+}
+
+class _UpdateCenterViewState extends State<UpdateCenterView> {
+  final _updateService = UpdateService();
+
+  // Download & verification state
+  double _downloadProgress = 0.0;
+  bool _downloading = false;
+  String? _downloadedApkPath;
+  String _verificationStatus = 'idle'; // idle, verifying, verified, failed
+
+  // Cache state
+  double _cacheSizeMb = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkCache();
+  }
+
+  @override
+  void didUpdateWidget(covariant UpdateCenterView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.updateInfo != oldWidget.updateInfo ||
+        widget.checkingUpdates != oldWidget.checkingUpdates ||
+        widget.updateStatus != oldWidget.updateStatus) {
+      _checkCache();
+    }
+  }
+
+  Future<void> _checkCache() async {
+    if (widget.updateInfo == null) return;
+    try {
+      final path = await _updateService.getCachedApkPath(widget.updateInfo!.version);
+      if (path != null) {
+        final file = File(path);
+        if (await file.exists()) {
+          final len = await file.length();
+          if (mounted) {
+            setState(() {
+              _downloadedApkPath = path;
+              _cacheSizeMb = len / (1024 * 1024);
+              _verificationStatus = 'verified';
+            });
+          }
+          return;
+        }
+      }
+      final channel = const MethodChannel('notekar/files');
+      final cacheDir = await channel.invokeMethod<String>('appCacheDir');
+      if (cacheDir != null) {
+        final dir = Directory(cacheDir);
+        double size = 0.0;
+        if (await dir.exists()) {
+          final files = dir.listSync();
+          for (final entity in files) {
+            if (entity is File && entity.path.endsWith('.apk')) {
+              size += await entity.length();
+            }
+          }
+        }
+        if (mounted) {
+          setState(() {
+            _downloadedApkPath = null;
+            _cacheSizeMb = size / (1024 * 1024);
+            _verificationStatus = 'idle';
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _startDownload() async {
+    if (widget.updateInfo == null) return;
+    setState(() {
+      _downloading = true;
+      _downloadProgress = 0.0;
+      _verificationStatus = 'idle';
+    });
+
+    try {
+      final path = await _updateService.downloadApk(widget.updateInfo!.version, (progress) {
+        if (mounted) {
+          setState(() {
+            _downloadProgress = progress;
+          });
+        }
+      });
+
+      if (path == null) {
+        if (mounted) {
+          setState(() {
+            _downloading = false;
+            _verificationStatus = 'failed';
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Download failed'.localized(context))),
+          );
+        }
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _downloading = false;
+          _downloadedApkPath = path;
+          _verificationStatus = 'verifying';
+        });
+      }
+
+      final ok = await _updateService.verifyApkHash(widget.updateInfo!.version, path);
+      if (mounted) {
+        setState(() {
+          _verificationStatus = ok ? 'verified' : 'failed';
+        });
+        if (!ok) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Integrity check failed: checksum mismatch'.localized(context))),
+          );
+        }
+      }
+      _checkCache();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _downloading = false;
+          _verificationStatus = 'failed';
+        });
+      }
+    }
+  }
+
+  Future<void> _installApk() async {
+    if (_downloadedApkPath == null) return;
+    final channel = const MethodChannel('notekar/files');
+
+    final canInstall = await channel.invokeMethod<bool>('canInstallPackages') ?? false;
+    if (!canInstall) {
+      if (!mounted) return;
+      await showGeneralDialog<void>(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.42),
+        barrierDismissible: true,
+        barrierLabel: 'Close permissions setup',
+        transitionDuration: const Duration(milliseconds: 120),
+        pageBuilder: (_, _, _) => UpdatePermissionSheet(
+          p: widget.p,
+          blur: !widget.reduceMotion && widget.enableTranslucency && AdaptiveEngine().supportsBlur,
+        ),
+      );
+      final canInstallNow = await channel.invokeMethod<bool>('canInstallPackages') ?? false;
+      if (!canInstallNow) return;
+    }
+
+    final success = await channel.invokeMethod<bool>(
+      'installApk',
+      {'filePath': _downloadedApkPath},
+    );
+    if (success == false && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Installation failed to start'.localized(context))),
+      );
+    }
+  }
+
+  Future<void> _clearCache() async {
+    HapticFeedback.mediumImpact();
+    await _updateService.clearCachedBuilds();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Build cache cleared'.localized(context))),
+      );
+      setState(() {
+        _downloadedApkPath = null;
+        _verificationStatus = 'idle';
+        _cacheSizeMb = 0.0;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: spacing24),
+        
+        // Header Logo & Version info
+        Center(
+          child: Column(
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: Image.asset(
+                    'icon-maskable-512.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: spacing20),
+              Text(
+                'NoteKar',
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Version v${widget.appVersion}',
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: spacing24),
+
+        // Main Download & Install Card
+        _buildDownloadInstallCard(p),
+        const SizedBox(height: spacing16),
+
+        // Cache cleaner card
+        _buildCacheCard(p),
+        const SizedBox(height: spacing24),
+
+        SettingsPageDescription(
+          p: p,
+          text: 'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
+          bottomPadding: spacing48,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDownloadInstallCard(Palette p) {
+    final blurEnabled = !widget.reduceMotion && widget.enableTranslucency && AdaptiveEngine().supportsBlur;
+    final availableVersion = widget.updateInfo?.version ?? '';
+    final cleanVersion = availableVersion.startsWith('v') ? availableVersion : 'v$availableVersion';
+
+    if (widget.checkingUpdates) {
+      return Glass(
+        p: p,
+        radius: 24,
+        blur: blurEnabled,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Checking for updates...'.localized(context),
+              style: TextStyle(color: p.text2, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (widget.updateInfo == null) {
+      return Glass(
+        p: p,
+        radius: 24,
+        blur: blurEnabled,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Icon(Icons.check_circle_outline_rounded, color: p.green, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'You are up to date'.localized(context),
+              style: TextStyle(color: p.text, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Currently on version v${widget.appVersion}'.localized(context),
+              style: TextStyle(color: p.text3, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: p.surface3,
+                foregroundColor: p.text,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+              ),
+              onPressed: widget.onCheckUpdates,
+              child: Text('Check for updates'.localized(context)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Glass(
+      p: p,
+      radius: 24,
+      blur: blurEnabled,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.download_rounded, color: p.accent, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'Update Available'.localized(context),
+                style: TextStyle(color: p.text, fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: widget.updateInfo!.isSecurity == true
+                  ? p.red.withValues(alpha: 0.12)
+                  : (widget.updateInfo!.isImportant == true
+                      ? p.orange.withValues(alpha: 0.12)
+                      : p.green.withValues(alpha: 0.12)),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              widget.updateInfo!.type,
+              style: TextStyle(
+                color: widget.updateInfo!.isSecurity == true
+                    ? p.red
+                    : (widget.updateInfo!.isImportant == true ? p.orange : p.green),
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Version $cleanVersion',
+            style: TextStyle(color: p.text, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'This update includes new features, performance improvements, and bug fixes.'.localized(context),
+            style: TextStyle(color: p.text2, fontSize: 13.5, height: 1.45),
+          ),
+          if (widget.updateInfo!.body.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              "What's New:".localized(context),
+              style: TextStyle(color: p.text, fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 120),
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: p.border),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  widget.updateInfo!.body,
+                  style: TextStyle(color: p.text2, fontSize: 12, height: 1.45),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+
+          if (_downloading) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Downloading update...'.localized(context),
+                      style: TextStyle(color: p.text2, fontSize: 13),
+                    ),
+                    Text(
+                      '${(_downloadProgress * 100).toInt()}%',
+                      style: TextStyle(color: p.accent, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: _downloadProgress,
+                    backgroundColor: p.border,
+                    color: p.accent,
+                    minHeight: 8,
+                  ),
+                ),
+              ],
+            ),
+          ] else if (_downloadedApkPath != null && _verificationStatus == 'verified') ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.verified_user_rounded, color: p.green, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Package verified & ready'.localized(context),
+                      style: TextStyle(color: p.green, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: p.green,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                  ),
+                  onPressed: _installApk,
+                  child: Text('Install Now'.localized(context), style: const TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ] else if (_verificationStatus == 'verifying') ...[
+            Row(
+              children: [
+                SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: p.accent)),
+                const SizedBox(width: 8),
+                Text('Verifying integrity checksum...'.localized(context), style: TextStyle(color: p.text2, fontSize: 13)),
+              ],
+            ),
+          ] else ...[
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: p.accent,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+              ),
+              onPressed: _startDownload,
+              child: Text(
+                _verificationStatus == 'failed'
+                    ? 'Retry Download'.localized(context)
+                    : 'Download & Install'.localized(context),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCacheCard(Palette p) {
+    if (_cacheSizeMb <= 0.0) return const SizedBox.shrink();
+    final blurEnabled = !widget.reduceMotion && widget.enableTranslucency && AdaptiveEngine().supportsBlur;
+
+    return Glass(
+      p: p,
+      radius: 24,
+      blur: blurEnabled,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Icon(Icons.cleaning_services_rounded, color: p.orange, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Build Cache Size'.localized(context),
+                  style: TextStyle(color: p.text, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'.localized(context),
+                  style: TextStyle(color: p.text3, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: p.red),
+            onPressed: _clearCache,
+            child: Text('Delete Cache'.localized(context)),
+          ),
+        ],
+      ),
+    );
+  }
+}
 class _PolicySection extends StatelessWidget {
   const _PolicySection({
     required this.p,
@@ -7277,6 +7636,266 @@ class _PolicySection extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CommitsSettingsPage extends StatefulWidget {
+  const CommitsSettingsPage({
+    super.key,
+    required this.p,
+    required this.enableTranslucency,
+    required this.reduceMotion,
+  });
+
+  final Palette p;
+  final bool enableTranslucency;
+  final bool reduceMotion;
+
+  @override
+  State<CommitsSettingsPage> createState() => _CommitsSettingsPageState();
+}
+
+class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
+  final _updateService = UpdateService();
+  List<Map<String, dynamic>>? _commits;
+  bool _loadingCommits = false;
+  String? _commitsError;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCommits();
+  }
+
+  Future<void> _fetchCommits() async {
+    setState(() {
+      _loadingCommits = true;
+      _commitsError = null;
+    });
+    try {
+      final list = await _updateService.fetchRecentCommits();
+      if (mounted) {
+        setState(() {
+          _commits = list;
+          _loadingCommits = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _commitsError = 'Failed to load repository activity'.localized(context);
+          _loadingCommits = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+
+    if (_loadingCommits) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: const CupertinoActivityIndicator(radius: 14),
+        ),
+      );
+    }
+    if (_commitsError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Column(
+            children: [
+              Icon(Icons.error_outline_rounded, color: p.red, size: 36),
+              const SizedBox(height: 12),
+              Text(_commitsError!, style: TextStyle(color: p.red, fontSize: 13.5)),
+              const SizedBox(height: 16),
+              PressableScale(
+                onTap: _fetchCommits,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: p.accent,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.refresh_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Retry'.localized(context),
+                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_commits == null || _commits!.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Text('No recent activity found'.localized(context), style: TextStyle(color: p.text3, fontSize: 13.5)),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: spacing20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: PressableScale(
+              onTap: _fetchCommits,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                decoration: BoxDecoration(
+                  color: p.accent,
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: p.accent.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.refresh_rounded, color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Refresh Activity'.localized(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _commits!.length,
+            itemBuilder: (context, index) {
+              final commit = _commits![index];
+              final sha = commit['sha'] as String;
+              final shortSha = sha.length > 7 ? sha.substring(0, 7) : sha;
+              final msg = commit['message'] as String;
+              final author = commit['author'] as String;
+              final date = commit['date'] as DateTime?;
+
+              String timeAgo = '';
+              if (date != null) {
+                final diff = DateTime.now().difference(date);
+                if (diff.inDays > 0) {
+                  timeAgo = '${diff.inDays}d ago';
+                } else if (diff.inHours > 0) {
+                  timeAgo = '${diff.inHours}h ago';
+                } else {
+                  timeAgo = '${diff.inMinutes}m ago';
+                }
+              }
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                decoration: BoxDecoration(
+                  color: p.surface,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: p.border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: p.accent.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.commit_rounded, color: p.accent, size: 16),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                author,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: p.surface3,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  shortSha,
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 9.5,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                timeAgo,
+                                style: TextStyle(
+                                  color: p.text3,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            msg,
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 12.5,
+                              height: 1.35,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

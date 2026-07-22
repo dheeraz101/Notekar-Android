@@ -705,7 +705,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _defaultMode = value);
               _saveSetting('m-default-mode', value);
             },
-            pages: const ['welcome', 'features', 'repo-move', 'reminders'],
+            pages: const [
+              'welcome',
+              'features',
+              'repo-move',
+              'updates-permission',
+              'reminders',
+            ],
           ),
         ),
       );
@@ -1866,7 +1872,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _updateStatus = 'Checking for updates...';
     });
     try {
-      final latest = await _updateService.fetchLatestVersion();
+      final trackBeta = _prefs?.getBool('m-update-track-beta') ?? false;
+      final latest = await _updateService.fetchLatestVersion(trackBeta: trackBeta);
 
       final elapsed = DateTime.now().difference(started);
       if (elapsed < const Duration(seconds: 5)) {
