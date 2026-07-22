@@ -222,6 +222,56 @@ extension LocalizedString on String {
         'hi' => 'इस पृष्ठ की वर्तमान विशेषताएं बीटा चरण में हैं।',
         _ => 'The current features on this page are under Beta stage.',
       },
+      'reminders' => switch (l10n.localeName) {
+        'es' => 'Recordatorios',
+        'hi' => 'अनुस्मारक',
+        _ => 'Reminders',
+      },
+      'logging reminder' => switch (l10n.localeName) {
+        'es' => 'Recordatorio de registro',
+        'hi' => 'लॉगिंग अनुस्मारक',
+        _ => 'Logging Reminder',
+      },
+      'time to log a moment!' => switch (l10n.localeName) {
+        'es' => '¡Hora de registrar un momento!',
+        'hi' => 'क्षण लॉग करने का समय!',
+        _ => 'Time to log a moment!',
+      },
+      'daily reminder' => switch (l10n.localeName) {
+        'es' => 'Recordatorio diario',
+        'hi' => 'दैनिक अनुस्मारक',
+        _ => 'Daily Reminder',
+      },
+      'inactivity reminder' => switch (l10n.localeName) {
+        'es' => 'Recordatorio de inactividad',
+        'hi' => 'निष्क्रियता अनुस्मारक',
+        _ => 'Inactivity Reminder',
+      },
+      'weekly reminder' => switch (l10n.localeName) {
+        'es' => 'Recordatorio semanal',
+        'hi' => 'साप्ताहिक अनुस्मारक',
+        _ => 'Weekly Reminder',
+      },
+      'monthly reminder' => switch (l10n.localeName) {
+        'es' => 'Recordatorio mensual',
+        'hi' => 'मासिक अनुस्मारक',
+        _ => 'Monthly Reminder',
+      },
+      'remind if inactive for' => switch (l10n.localeName) {
+        'es' => 'Recordar si está inactivo por',
+        'hi' => 'निष्क्रिय होने पर याद दिलाएं',
+        _ => 'Remind if inactive for',
+      },
+      'days of week' => switch (l10n.localeName) {
+        'es' => 'Días de la semana',
+        'hi' => 'सप्ताह के दिन',
+        _ => 'Days of week',
+      },
+      'day of month' => switch (l10n.localeName) {
+        'es' => 'Día del mes',
+        'hi' => 'महीने का दिन',
+        _ => 'Day of month',
+      },
       _ => this,
     };
   }

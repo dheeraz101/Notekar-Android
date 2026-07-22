@@ -150,8 +150,37 @@ class MainActivity : FlutterActivity() {
                     RemoteNoticeReceiver.configure(applicationContext, enabled, feedUrl, checkOnlyOnOpen)
                     result.success(null)
                 }
-                "checkRemoteNoticesNow" -> {
-                    RemoteNoticeReceiver.checkNow(applicationContext)
+                "scheduleReminder" -> {
+                    val id = call.argument<String>("id") ?: ""
+                    val type = call.argument<String>("type") ?: "daily"
+                    val hour = call.argument<Int>("hour") ?: 0
+                    val minute = call.argument<Int>("minute") ?: 0
+                    val daysOfWeek = call.argument<List<Int>>("daysOfWeek")
+                    val dayOfMonth = call.argument<Int>("dayOfMonth")
+                    val intervalMinutes = call.argument<Int>("intervalMinutes")
+                    val title = call.argument<String>("title") ?: "NoteKar Reminder"
+                    val body = call.argument<String>("body") ?: "Time to log a moment!"
+                    if (id.isNotBlank()) {
+                        ReminderReceiver.schedule(
+                            applicationContext,
+                            id,
+                            type,
+                            hour,
+                            minute,
+                            daysOfWeek,
+                            dayOfMonth,
+                            intervalMinutes,
+                            title,
+                            body
+                        )
+                    }
+                    result.success(null)
+                }
+                "cancelReminder" -> {
+                    val id = call.argument<String>("id") ?: ""
+                    if (id.isNotBlank()) {
+                        ReminderReceiver.cancel(applicationContext, id)
+                    }
                     result.success(null)
                 }
                 else -> result.notImplemented()

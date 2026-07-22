@@ -730,6 +730,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _isSaving = true;
 
     final now = DateTime.now();
+    final reminderTitle = 'logging reminder'.localized(context);
+    final reminderBody = 'time to log a moment!'.localized(context);
     var type = 'single';
     final oldInOut = _inout;
     final oldSessionStart = _sessionStart;
@@ -778,6 +780,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
         await _saveSetting('m-inout', _inout);
       }
       await _repository.saveMoment(entry);
+      if (_prefs?.getBool('reminder_inactivity_enabled') ?? false) {
+        final intervalMinutes = _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
+        unawaited(_fileChannel.invokeMethod('scheduleReminder', {
+          'id': 'reminder_inactivity',
+          'type': 'inactivity',
+          'intervalMinutes': intervalMinutes,
+          'title': reminderTitle,
+          'body': reminderBody,
+        }));
+      }
       unawaited(_updateAndroidWidget());
       _showUndo();
     } catch (e, stack) {

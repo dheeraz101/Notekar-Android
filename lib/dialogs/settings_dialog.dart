@@ -243,8 +243,124 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool minimalMomentOptions;
   late bool enableTranslucency;
   late int privacyLockDelayMinutes;
-
   late String currentLocale;
+
+  // Reminders Settings
+  bool _dailyReminderEnabled = false;
+  TimeOfDay _dailyReminderTime = const TimeOfDay(hour: 21, minute: 0);
+  bool _inactivityReminderEnabled = false;
+  int _inactivityIntervalMins = 240;
+  bool _weeklyReminderEnabled = false;
+  List<int> _weeklyReminderDays = [1];
+  TimeOfDay _weeklyReminderTime = const TimeOfDay(hour: 21, minute: 0);
+  bool _monthlyReminderEnabled = false;
+  int _monthlyReminderDay = 1;
+  TimeOfDay _monthlyReminderTime = const TimeOfDay(hour: 21, minute: 0);
+
+  static const _fileChannel = MethodChannel('notekar/files');
+  final _logger = AppLogger();
+
+  SharedPreferences? _prefs;
+
+  Future<void> _loadRemindersSettings() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _dailyReminderEnabled = _prefs?.getBool('reminder_daily_enabled') ?? false;
+      _dailyReminderTime = TimeOfDay(
+        hour: _prefs?.getInt('reminder_daily_hour') ?? 21,
+        minute: _prefs?.getInt('reminder_daily_minute') ?? 0,
+      );
+      
+      _inactivityReminderEnabled = _prefs?.getBool('reminder_inactivity_enabled') ?? false;
+      _inactivityIntervalMins = _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
+      
+      _weeklyReminderEnabled = _prefs?.getBool('reminder_weekly_enabled') ?? false;
+      _weeklyReminderDays = (_prefs?.getStringList('reminder_weekly_days') ?? ['1'])
+          .map((e) => int.parse(e))
+          .toList();
+      _weeklyReminderTime = TimeOfDay(
+        hour: _prefs?.getInt('reminder_weekly_hour') ?? 21,
+        minute: _prefs?.getInt('reminder_weekly_minute') ?? 0,
+      );
+      
+      _monthlyReminderEnabled = _prefs?.getBool('reminder_monthly_enabled') ?? false;
+      _monthlyReminderDay = _prefs?.getInt('reminder_monthly_day') ?? 1;
+      _monthlyReminderTime = TimeOfDay(
+        hour: _prefs?.getInt('reminder_monthly_hour') ?? 21,
+        minute: _prefs?.getInt('reminder_monthly_minute') ?? 0,
+      );
+    });
+  }
+
+  String _getRemindersStatus() {
+    final active = _dailyReminderEnabled ||
+        _inactivityReminderEnabled ||
+        _weeklyReminderEnabled ||
+        _monthlyReminderEnabled;
+    return active ? 'Active'.localized(context) : 'Inactive'.localized(context);
+  }
+
+  Future<void> _syncReminder(String id) async {
+    if (_prefs == null) return;
+    try {
+      if (id == 'daily') {
+        if (_dailyReminderEnabled) {
+          await _fileChannel.invokeMethod('scheduleReminder', {
+            'id': 'reminder_daily',
+            'type': 'daily',
+            'hour': _dailyReminderTime.hour,
+            'minute': _dailyReminderTime.minute,
+            'title': 'logging reminder'.localized(context),
+            'body': 'time to log a moment!'.localized(context),
+          });
+        } else {
+          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_daily'});
+        }
+      } else if (id == 'inactivity') {
+        if (_inactivityReminderEnabled) {
+          await _fileChannel.invokeMethod('scheduleReminder', {
+            'id': 'reminder_inactivity',
+            'type': 'inactivity',
+            'intervalMinutes': _inactivityIntervalMins,
+            'title': 'logging reminder'.localized(context),
+            'body': 'time to log a moment!'.localized(context),
+          });
+        } else {
+          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_inactivity'});
+        }
+      } else if (id == 'weekly') {
+        if (_weeklyReminderEnabled) {
+          await _fileChannel.invokeMethod('scheduleReminder', {
+            'id': 'reminder_weekly',
+            'type': 'weekly',
+            'hour': _weeklyReminderTime.hour,
+            'minute': _weeklyReminderTime.minute,
+            'daysOfWeek': _weeklyReminderDays,
+            'title': 'logging reminder'.localized(context),
+            'body': 'time to log a moment!'.localized(context),
+          });
+        } else {
+          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_weekly'});
+        }
+      } else if (id == 'monthly') {
+        if (_monthlyReminderEnabled) {
+          await _fileChannel.invokeMethod('scheduleReminder', {
+            'id': 'reminder_monthly',
+            'type': 'monthly',
+            'hour': _monthlyReminderTime.hour,
+            'minute': _monthlyReminderTime.minute,
+            'dayOfMonth': _monthlyReminderDay,
+            'title': 'logging reminder'.localized(context),
+            'body': 'time to log a moment!'.localized(context),
+          });
+        } else {
+          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_monthly'});
+        }
+      }
+    } catch (e, stack) {
+      _logger.error('Failed to sync reminder: $id', e, stack);
+    }
+  }
 
   List<Moment> get entries => widget.entriesNotifier.value;
   List<Moment> get _trash => widget.trashEntriesNotifier.value;
@@ -299,6 +415,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     checkingUpdates = widget.checkingUpdates;
 
     _loadRecentSearches();
+    _loadRemindersSettings();
 
     _settingsSearchFocusNode.addListener(() {
       if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
@@ -2770,6 +2887,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           color: p.orange,
                           onTap: () => _openCategory('Moments', parent: 'Logging'),
                         ),
+                        SettingsRow(
+                          p: p,
+                          icon: Icons.notifications_active_outlined,
+                          title: 'Reminders',
+                          status: _getRemindersStatus(),
+                          color: p.accent,
+                          onTap: () => _openCategory('Reminders', parent: 'Logging'),
+                        ),
                       ],
                     ),
                     SettingsPageDescription(
@@ -2901,6 +3026,308 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Forces context entry for any moment captured via the long-press gesture.'),
+                    const SizedBox(height: spacing48),
+                  ]),
+                ),
+              if (show('Reminders'))
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: spacing8),
+                    
+                    // Daily reminder group
+                    SettingsGroup(
+                      p: p,
+                      title: 'daily reminder'.localized(context).toUpperCase(),
+                      children: [
+                        SettingsSwitchRow(
+                          p: p,
+                          title: 'daily reminder'.localized(context),
+                          color: p.accent,
+                          value: _dailyReminderEnabled,
+                          onChanged: (value) async {
+                            HapticFeedback.selectionClick();
+                            setState(() => _dailyReminderEnabled = value);
+                            await _prefs?.setBool('reminder_daily_enabled', value);
+                            await _syncReminder('daily');
+                          },
+                        ),
+                        if (_dailyReminderEnabled)
+                          SettingsRow(
+                            p: p,
+                            title: 'Time'.localized(context),
+                            status: _dailyReminderTime.format(context),
+                            color: p.accent,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: _dailyReminderTime,
+                              );
+                              if (time != null) {
+                                setState(() => _dailyReminderTime = time);
+                                await _prefs?.setInt('reminder_daily_hour', time.hour);
+                                await _prefs?.setInt('reminder_daily_minute', time.minute);
+                                await _syncReminder('daily');
+                              }
+                            },
+                          ),
+                      ],
+                    ),
+                    SettingsPageDescription(p: p, text: 'Triggers a daily logging reminder alert at your chosen time.'.localized(context)),
+
+                    // Inactivity reminder group
+                    SettingsGroup(
+                      p: p,
+                      title: 'inactivity reminder'.localized(context).toUpperCase(),
+                      children: [
+                        SettingsSwitchRow(
+                          p: p,
+                          title: 'inactivity reminder'.localized(context),
+                          color: p.orange,
+                          value: _inactivityReminderEnabled,
+                          onChanged: (value) async {
+                            HapticFeedback.selectionClick();
+                            setState(() => _inactivityReminderEnabled = value);
+                            await _prefs?.setBool('reminder_inactivity_enabled', value);
+                            await _syncReminder('inactivity');
+                          },
+                        ),
+                        if (_inactivityReminderEnabled)
+                          SettingsRow(
+                            p: p,
+                            title: 'remind if inactive for'.localized(context),
+                            status: '${_inactivityIntervalMins ~/ 60} ${_inactivityIntervalMins == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
+                            color: p.orange,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final selected = await showDialog<int>(
+                                context: context,
+                                builder: (context) {
+                                  return SimpleDialog(
+                                    title: Text('remind if inactive for'.localized(context)),
+                                    children: [
+                                      for (final interval in [60, 120, 240, 480, 720, 1440])
+                                        SimpleDialogOption(
+                                          onPressed: () => Navigator.pop(context, interval),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                            child: Text(
+                                              '${interval ~/ 60} ${interval == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
+                                              style: TextStyle(color: p.text, fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              );
+                              if (selected != null) {
+                                setState(() => _inactivityIntervalMins = selected);
+                                await _prefs?.setInt('reminder_inactivity_interval_mins', selected);
+                                await _syncReminder('inactivity');
+                              }
+                            },
+                          ),
+                      ],
+                    ),
+                    SettingsPageDescription(p: p, text: 'Reschedules a timer on every moment you record. Alerts you if you haven\'t logged anything in the selected interval.'.localized(context)),
+
+                    // Weekly reminder group
+                    SettingsGroup(
+                      p: p,
+                      title: 'weekly reminder'.localized(context).toUpperCase(),
+                      children: [
+                        SettingsSwitchRow(
+                          p: p,
+                          title: 'weekly reminder'.localized(context),
+                          color: p.green,
+                          value: _weeklyReminderEnabled,
+                          onChanged: (value) async {
+                            HapticFeedback.selectionClick();
+                            setState(() => _weeklyReminderEnabled = value);
+                            await _prefs?.setBool('reminder_weekly_enabled', value);
+                            await _syncReminder('weekly');
+                          },
+                        ),
+                        if (_weeklyReminderEnabled) ...[
+                          SettingsRow(
+                            p: p,
+                            title: 'days of week'.localized(context),
+                            status: _weeklyReminderDays.map((d) {
+                              return switch (d) {
+                                1 => 'Sun'.localized(context),
+                                2 => 'Mon'.localized(context),
+                                3 => 'Tue'.localized(context),
+                                4 => 'Wed'.localized(context),
+                                5 => 'Thu'.localized(context),
+                                6 => 'Fri'.localized(context),
+                                7 => 'Sat'.localized(context),
+                                _ => '',
+                              };
+                            }).join(', '),
+                            color: p.green,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final days = [1, 2, 3, 4, 5, 6, 7];
+                              final selectedDays = List<int>.from(_weeklyReminderDays);
+                              final updated = await showDialog<List<int>>(
+                                context: context,
+                                builder: (context) {
+                                  return StatefulBuilder(
+                                    builder: (context, setDialogState) {
+                                      return AlertDialog(
+                                        title: Text('days of week'.localized(context)),
+                                        content: SingleChildScrollView(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: days.map((day) {
+                                              final name = switch (day) {
+                                                1 => 'Sunday'.localized(context),
+                                                2 => 'Monday'.localized(context),
+                                                3 => 'Tuesday'.localized(context),
+                                                4 => 'Wednesday'.localized(context),
+                                                5 => 'Thursday'.localized(context),
+                                                6 => 'Friday'.localized(context),
+                                                7 => 'Saturday'.localized(context),
+                                                _ => '',
+                                              };
+                                              final contains = selectedDays.contains(day);
+                                              return CheckboxListTile(
+                                                title: Text(name, style: TextStyle(color: p.text)),
+                                                value: contains,
+                                                activeColor: p.accent,
+                                                onChanged: (val) {
+                                                  setDialogState(() {
+                                                    if (val == true) {
+                                                      selectedDays.add(day);
+                                                    } else {
+                                                      selectedDays.remove(day);
+                                                    }
+                                                  });
+                                                },
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, selectedDays),
+                                            child: Text('okay'.localized(context)),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                              if (updated != null) {
+                                setState(() => _weeklyReminderDays = updated..sort());
+                                await _prefs?.setStringList(
+                                  'reminder_weekly_days',
+                                  updated.map((e) => e.toString()).toList(),
+                                );
+                                await _syncReminder('weekly');
+                              }
+                            },
+                          ),
+                          SettingsRow(
+                            p: p,
+                            title: 'Time'.localized(context),
+                            status: _weeklyReminderTime.format(context),
+                            color: p.green,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: _weeklyReminderTime,
+                              );
+                              if (time != null) {
+                                setState(() => _weeklyReminderTime = time);
+                                await _prefs?.setInt('reminder_weekly_hour', time.hour);
+                                await _prefs?.setInt('reminder_weekly_minute', time.minute);
+                                await _syncReminder('weekly');
+                              }
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                    SettingsPageDescription(p: p, text: 'Triggers reminders on specific days of the week.'.localized(context)),
+
+                    // Monthly reminder group
+                    SettingsGroup(
+                      p: p,
+                      title: 'monthly reminder'.localized(context).toUpperCase(),
+                      children: [
+                        SettingsSwitchRow(
+                          p: p,
+                          title: 'monthly reminder'.localized(context),
+                          color: p.red,
+                          value: _monthlyReminderEnabled,
+                          onChanged: (value) async {
+                            HapticFeedback.selectionClick();
+                            setState(() => _monthlyReminderEnabled = value);
+                            await _prefs?.setBool('reminder_monthly_enabled', value);
+                            await _syncReminder('monthly');
+                          },
+                        ),
+                        if (_monthlyReminderEnabled) ...[
+                          SettingsRow(
+                            p: p,
+                            title: 'day of month'.localized(context),
+                            status: '$_monthlyReminderDay',
+                            color: p.red,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final selected = await showDialog<int>(
+                                context: context,
+                                builder: (context) {
+                                  return SimpleDialog(
+                                    title: Text('day of month'.localized(context)),
+                                    children: [
+                                      for (int day = 1; day <= 28; day++)
+                                        SimpleDialogOption(
+                                          onPressed: () => Navigator.pop(context, day),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                            child: Text('$day', style: TextStyle(color: p.text, fontSize: 16)),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              );
+                              if (selected != null) {
+                                setState(() => _monthlyReminderDay = selected);
+                                await _prefs?.setInt('reminder_monthly_day', selected);
+                                await _syncReminder('monthly');
+                              }
+                            },
+                          ),
+                          SettingsRow(
+                            p: p,
+                            title: 'Time'.localized(context),
+                            status: _monthlyReminderTime.format(context),
+                            color: p.red,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: _monthlyReminderTime,
+                              );
+                              if (time != null) {
+                                setState(() => _monthlyReminderTime = time);
+                                await _prefs?.setInt('reminder_monthly_hour', time.hour);
+                                await _prefs?.setInt('reminder_monthly_minute', time.minute);
+                                await _syncReminder('monthly');
+                              }
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                    SettingsPageDescription(p: p, text: 'Triggers a monthly reminder on a chosen calendar day.'.localized(context)),
+
                     const SizedBox(height: spacing48),
                   ]),
                 ),

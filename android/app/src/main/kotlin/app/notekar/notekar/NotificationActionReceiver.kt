@@ -17,12 +17,14 @@ class NotificationActionReceiver : BroadcastReceiver() {
         manager.cancel(notificationId)
 
         if (action == ACTION_DISMISS) {
-            // Mark as dismissed permanently in preferences by setting count to 9999
-            val prefs = context.getSharedPreferences("notekar_remote_notices", Context.MODE_PRIVATE)
-            val countKey = "remote_notice_count_$noticeId"
-            prefs.edit()
-                .putInt(countKey, 9999)
-                .apply()
+            // Only mark as dismissed permanently if it's not a user-configured reminder
+            if (!noticeId.startsWith("reminder_")) {
+                val prefs = context.getSharedPreferences("notekar_remote_notices", Context.MODE_PRIVATE)
+                val countKey = "remote_notice_count_$noticeId"
+                prefs.edit()
+                    .putInt(countKey, 9999)
+                    .apply()
+            }
         }
     }
 
