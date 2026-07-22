@@ -23,4 +23,4 @@ jobs:
           fail-on-severity: high
           comment-summary-in-pr: always
           deny-licenses: GPL-2.0, GPL-3.0, LGPL-2.0, LGPL-2.1, LGPL-3.0
-          allow-ghsas: []
+          allow-ghsas: ""
