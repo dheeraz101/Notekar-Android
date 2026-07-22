@@ -734,27 +734,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
-  Future<void> _showWhatsNewIfNeeded(SharedPreferences prefs) async {
-    if (prefs.getString(_lastSeenVersionKey) == appVersion) return;
-    if (!(prefs.getBool(_welcomeSeenKey) ?? false)) {
-      await prefs.setString(_lastSeenVersionKey, appVersion);
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      await showGeneralDialog<void>(
-        context: context,
-        barrierColor: Colors.black.withValues(alpha: 0.42),
-        barrierDismissible: true,
-        barrierLabel: 'Close what is new',
-        transitionDuration: const Duration(milliseconds: 120),
-        pageBuilder: (_, _, _) =>
-            ChangelogDialog(p: p, latestOnly: true, largeText: _largeText),
-      );
-      await prefs.setString(_lastSeenVersionKey, appVersion);
-    });
-  }
-
   Future<void> _logEntry({String? note, Offset? position}) async {
     if (_isSaving) return;
     _isSaving = true;

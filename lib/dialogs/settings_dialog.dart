@@ -3886,8 +3886,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                     final next =
                                                         delayValues[value
                                                             .round()];
-                                                    if (next == tapDelay)
+                                                    if (next == tapDelay) {
                                                       return;
+                                                    }
                                                     NotekarHaptics.selection(
                                                       'standard',
                                                     );
@@ -6459,8 +6460,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     onChanged: (value) async {
                                       if (!value) {
                                         await widget.onPrivacyLock(false);
-                                        if (mounted)
+                                        if (mounted) {
                                           setState(() => privacyLock = false);
+                                        }
                                         return;
                                       }
                                       final changed = await widget
@@ -6503,8 +6505,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         onTap: () {
                                           final minutes = int.parse(entry.key);
                                           if (minutes ==
-                                              privacyLockDelayMinutes)
+                                              privacyLockDelayMinutes) {
                                             return;
+                                          }
                                           setState(
                                             () => privacyLockDelayMinutes =
                                                 minutes,

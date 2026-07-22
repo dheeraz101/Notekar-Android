@@ -38,8 +38,9 @@ class Moment {
     if (timestamp <= 0) return false;
     // Prevent future timestamps (allow 5 min drift)
     if (timestamp >
-        DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch)
+        DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch) {
       return false;
+    }
     return true;
   }
 
