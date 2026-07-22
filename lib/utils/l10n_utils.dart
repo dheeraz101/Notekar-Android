@@ -526,6 +526,136 @@ extension LocalizedString on String {
         'hi' => 'अनुस्मारक संदेश दर्ज करें...',
         _ => 'Enter reminder message...',
       },
+      'official repository moved' => switch (l10n.localeName) {
+        'es' => 'Repositorio oficial movido',
+        'hi' => 'आधिकारिक रिपॉजिटरी बदली',
+        _ => 'Official Repository Moved',
+      },
+      'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:' => switch (l10n.localeName) {
+        'es' => 'Hemos migrado oficialmente nuestro código base a un nuevo hogar. Todos los lanzamientos, actualizaciones y problemas futuros se gestionarán aquí:',
+        'hi' => 'हमने आधिकारिक तौर पर अपने कोडबेस को एक नए घर में स्थानांतरित कर दिया है। सभी भविष्य के रिलीज, अपडेट और मुद्दे यहां प्रबंधित किए जाएंगे:',
+        _ => 'We have officially migrated our codebase to a new home. All future releases, updates, and issues will be managed here:',
+      },
+      'smaller, optimized apks' => switch (l10n.localeName) {
+        'es' => 'APKs más pequeñas y optimizadas',
+        'hi' => 'छोटे, अनुकूलित एपीके',
+        _ => 'Smaller, Optimized APKs',
+      },
+      'access split-per-abi optimized binaries and google play appbundles directly from the release page.' => switch (l10n.localeName) {
+        'es' => 'Acceda a binarios optimizados por ABI y Google Play AppBundles directamente desde la página de lanzamiento.',
+        'hi' => 'रिलीज़ पेज से सीधे स्प्लिट-प्रति-एबीआई अनुकूलित बायनेरिज़ और गूगल प्ले ऐपबंडल प्राप्त करें।',
+        _ => 'Access split-per-ABI optimized binaries and Google Play AppBundles directly from the release page.',
+      },
+      'active issue tracking' => switch (l10n.localeName) {
+        'es' => 'Seguimiento de problemas activo',
+        'hi' => 'सक्रिय समस्या ट्रैकिंग',
+        _ => 'Active Issue Tracking',
+      },
+      'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.' => switch (l10n.localeName) {
+        'es' => 'Envíe informes de errores, solicitudes de funciones y siga los cambios de código directamente en el nuevo rastreador de problemas.',
+        'hi' => 'सीधे नए रिपॉजिटरी इशू ट्रैकर में बग रिपोर्ट, फीचर अनुरोध सबमिट करें और कोड परिवर्तनों का पालन करें।',
+        _ => 'Submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.',
+      },
+      'automated security scans' => switch (l10n.localeName) {
+        'es' => 'Escaneos de seguridad automáticos',
+        'hi' => 'स्वचालित सुरक्षा स्कैन',
+        _ => 'Automated Security Scans',
+      },
+      'all builds now undergo automated codeql scans and virustotal checks to ensure verification and safety.' => switch (l10n.localeName) {
+        'es' => 'Todas las compilaciones ahora se someten a escaneos automáticos de CodeQL y comprobaciones de VirusTotal para garantizar la verificación y la seguridad.',
+        'hi' => 'सत्यापन और सुरक्षा सुनिश्चित करने के लिए सभी निर्माण अब स्वचालित CodeQL स्कैन और VirusTotal जांच से गुजरते हैं।',
+        _ => 'All builds now undergo automated CodeQL scans and VirusTotal checks to ensure verification and safety.',
+      },
+      'virustotal safety scan' => switch (l10n.localeName) {
+        'es' => 'Escaneo de seguridad de VirusTotal',
+        'hi' => 'VirusTotal सुरक्षा स्कैन',
+        _ => 'VirusTotal Safety Scan',
+      },
+      'verified clean of malicious activity' => switch (l10n.localeName) {
+        'es' => 'Verificado limpio de actividad maliciosa',
+        'hi' => 'दुर्भावनापूर्ण गतिविधि से मुक्त सत्यापित',
+        _ => 'Verified clean of malicious activity',
+      },
+      'ratio' => switch (l10n.localeName) {
+        'es' => 'Proporción',
+        'hi' => 'अनुपात',
+        _ => 'Ratio',
+      },
+      '0 / 68 clean' => switch (l10n.localeName) {
+        'es' => '0 / 68 limpio',
+        'hi' => '0 / 68 स्वच्छ',
+        _ => '0 / 68 clean',
+      },
+      'status' => switch (l10n.localeName) {
+        'es' => 'Estado',
+        'hi' => 'स्थिति',
+        _ => 'Status',
+      },
+      'undetected' => switch (l10n.localeName) {
+        'es' => 'No detectado',
+        'hi' => 'अपरिचित (सुरक्षित)',
+        _ => 'Undetected',
+      },
+      'last scan' => switch (l10n.localeName) {
+        'es' => 'Último escaneo',
+        'hi' => 'अंतिम स्कैन',
+        _ => 'Last Scan',
+      },
+      'july 2026' => switch (l10n.localeName) {
+        'es' => 'Julio de 2026',
+        'hi' => 'जुलाई २०२६',
+        _ => 'July 2026',
+      },
+      'signature' => switch (l10n.localeName) {
+        'es' => 'Firma',
+        'hi' => 'हस्ताक्षर',
+        _ => 'Signature',
+      },
+      'developer key' => switch (l10n.localeName) {
+        'es' => 'Clave del desarrollador',
+        'hi' => 'डेवलपर कुंजी',
+        _ => 'Developer Key',
+      },
+      'notekar builds undergo automated codeql scanner compilation and local virustotal scans. binaries are signed with our official certificate to ensure absolute integrity.' => switch (l10n.localeName) {
+        'es' => 'Las compilaciones de NoteKar se someten a compilación automatizada del escáner CodeQL y escaneos locales de VirusTotal. Los binarios están firmados con nuestro certificado oficial para garantizar una integridad absoluta.',
+        'hi' => 'NoteKar का प्रत्येक संकलन स्वचालित CodeQL स्कैनर संकलन और स्थानीय VirusTotal स्कैन से गुजरता है। पूर्ण अखंडता सुनिश्चित करने के लिए बाइनरी को हमारे आधिकारिक प्रमाणपत्र के साथ हस्ताक्षरित किया गया है।',
+        _ => 'NoteKar builds undergo automated CodeQL scanner compilation and local VirusTotal scans. Binaries are signed with our official certificate to ensure absolute integrity.',
+      },
+      'vt report' => switch (l10n.localeName) {
+        'es' => 'Informe de VT',
+        'hi' => 'VT रिपोर्ट',
+        _ => 'VT Report',
+      },
+      'sha-256 hashes' => switch (l10n.localeName) {
+        'es' => 'Hashes SHA-256',
+        'hi' => 'SHA-256 हैश',
+        _ => 'SHA-256 Hashes',
+      },
+      'is notekar safe to use?' => switch (l10n.localeName) {
+        'es' => '¿Es seguro usar NoteKar?',
+        'hi' => 'क्या NoteKar उपयोग करने के लिए सुरक्षित है?',
+        _ => 'Is NoteKar safe to use?',
+      },
+      'absolutely. notekar is open-source and offline-first. to guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via virustotal. you can inspect the live scan report under privacy & security.' => switch (l10n.localeName) {
+        'es' => 'Absolutamente. NoteKar es de código abierto y local primero. Para garantizar la máxima confianza y seguridad, cada versión compilada se carga automáticamente y se verifica limpia por más de 60 motores de seguridad a través de VirusTotal. Puede inspeccionar el informe de escaneo en vivo en Privacidad y seguridad.',
+        'hi' => 'बिल्कुल। NoteKar ओपन-सोर्स और ऑफलाइन-फर्स्ट है। अधिकतम विश्वास और सुरक्षा की गारंटी के लिए, प्रत्येक संकलित रिलीज़ को स्वचालित रूप से अपलोड किया जाता है और VirusTotal के माध्यम से 60+ सुरक्षा इंजनों द्वारा स्वच्छ सत्यापित किया जाता है। आप गोपनीयता और सुरक्षा के तहत लाइव स्कैन रिपोर्ट का निरीक्षण कर सकते हैं।',
+        _ => 'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Privacy & Security.',
+      },
+      'open link' => switch (l10n.localeName) {
+        'es' => 'Abrir enlace',
+        'hi' => 'लिंक खोलें',
+        _ => 'Open Link',
+      },
+      'copy' => switch (l10n.localeName) {
+        'es' => 'Copiar',
+        'hi' => 'कॉपी',
+        _ => 'Copy',
+      },
+      'repository link copied to clipboard' => switch (l10n.localeName) {
+        'es' => 'Enlace del repositorio copiado al portapapeles',
+        'hi' => 'रिपॉजिटरी लिंक क्लिपबोर्ड पर कॉपी किया गया',
+        _ => 'Repository link copied to clipboard',
+      },
       _ => this,
     };
   }

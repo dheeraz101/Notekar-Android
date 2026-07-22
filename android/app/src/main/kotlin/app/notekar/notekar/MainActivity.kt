@@ -225,6 +225,10 @@ class MainActivity : FlutterActivity() {
                     RemoteNoticeReceiver.configure(applicationContext, enabled, feedUrl, checkOnlyOnOpen)
                     result.success(null)
                 }
+                "checkRemoteNoticesNow" -> {
+                    RemoteNoticeReceiver.checkNow(applicationContext)
+                    result.success(null)
+                }
                 "scheduleReminder" -> {
                     val id = call.argument<String>("id") ?: ""
                     val type = call.argument<String>("type") ?: "daily"
