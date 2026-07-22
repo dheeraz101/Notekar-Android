@@ -28,6 +28,7 @@ import 'package:notekar/widgets/toolbar.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -101,6 +102,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _appIconChangeInFlight = false;
   bool _startupChecksStarted = false;
   String _updateStatus = 'v$appVersion - Check for available updates';
+  AppUpdateInfo? _latestUpdateInfo;
   DateTime? _lastBackPressTime;
   bool _checkingUpdates = false;
   int? _lastUpdateCheckedAt;
@@ -487,6 +489,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _privacyLockDelayMinutes = prefs.getInt('m-privacy-lock-delay') ?? 0;
       _updateStatus = prefs.getString('m-update-status') ?? _updateStatus;
       _lastUpdateCheckedAt = prefs.getInt('m-last-update-check');
+      final savedInfo = prefs.getString('m-latest-update-info');
+      if (savedInfo != null) {
+        try {
+          _latestUpdateInfo = AppUpdateInfo.fromJson(jsonDecode(savedInfo) as Map<String, dynamic>);
+        } catch (_) {}
+      }
       _locale = prefs.getString('m-locale') ?? 'system';
     });
 
@@ -1415,6 +1423,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         minimalMomentOptions: _minimalMomentOptions,
         privacyLockDelayMinutes: _privacyLockDelayMinutes,
         updateStatus: _updateStatus,
+        updateInfo: _latestUpdateInfo,
         checkingUpdates: _checkingUpdates,
         lastUpdateCheckedAt: _lastUpdateCheckedAt,
         entriesNotifier: _entriesNotifier,
@@ -1774,7 +1783,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
-  Future<String> _checkForUpdates() async {
+  Future<({String status, AppUpdateInfo? info})> _checkForUpdates() async {
     final started = DateTime.now();
     setState(() {
       _checkingUpdates = true;
@@ -1791,30 +1800,38 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (latest == null) {
         final status = 'Could not check updates';
         _setUpdateStatus(status);
-        return status;
+        return (status: status, info: null);
       }
-      if (_updateService.isUpdateAvailable(latest, appVersion)) {
-        final status = 'Update available: v$latest';
+      if (_updateService.isUpdateAvailable(latest.version, appVersion)) {
+        final status = 'Update available: v${latest.version}';
         _lastUpdateCheckedAt = DateTime.now().millisecondsSinceEpoch;
         await _prefs?.setInt('m-last-update-check', _lastUpdateCheckedAt!);
+        setState(() {
+          _latestUpdateInfo = latest;
+        });
+        await _prefs?.setString('m-latest-update-info', jsonEncode(latest.toJson()));
         _setUpdateStatus(status);
-        return status;
+        return (status: status, info: latest);
       } else if (mounted) {
         final status = 'You are up to date';
         _lastUpdateCheckedAt = DateTime.now().millisecondsSinceEpoch;
         await _prefs?.setInt('m-last-update-check', _lastUpdateCheckedAt!);
+        setState(() {
+          _latestUpdateInfo = null;
+        });
+        await _prefs?.remove('m-latest-update-info');
         _setUpdateStatus(status);
         _scheduleUpdateStatusReset();
-        return status;
+        return (status: status, info: null);
       }
     } catch (_) {
       final status = 'Update check failed';
       _setUpdateStatus(status);
-      return status;
+      return (status: status, info: null);
     } finally {
       if (mounted) setState(() => _checkingUpdates = false);
     }
-    return _updateStatus;
+    return (status: _updateStatus, info: _latestUpdateInfo);
   }
 
   void _setUpdateStatus(String value) {
@@ -2254,7 +2271,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       transitionDuration: const Duration(milliseconds: 120),
       pageBuilder: (_, _, _) => AppSheet(
         p: p,
-        title: 'Time Between Moments',
+        title: 'Time Between Moments'.localized(context),
         largeText: _largeText,
         blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
         child: Column(
@@ -2276,7 +2293,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Okay'),
+              child: Text('Okay'.localized(context)),
             ),
           ],
         ),
@@ -2537,7 +2554,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     border: Border.all(color: palette.border),
                   ),
                   child: Text(
-                    'Deleted ${_lastDeletedPreview!.type.toUpperCase()} moment',
+                    'deleted ${_lastDeletedPreview!.type} moment'.localized(context),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: palette.text2,

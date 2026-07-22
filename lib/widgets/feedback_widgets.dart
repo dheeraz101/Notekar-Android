@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/l10n/app_localizations.dart';
 
 class Ripple extends StatefulWidget {
   const Ripple({super.key, required this.origin, required this.color});
@@ -146,14 +148,14 @@ class _UndoToastState extends State<UndoToast>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Moment saved',
+                      'Moment saved'.localized(context),
                       style: TextStyle(color: widget.p.text),
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: widget.onUndo,
                       child: Text(
-                        'Undo',
+                        'Undo'.localized(context),
                         style: TextStyle(
                           color: widget.p.accent,
                           fontWeight: FontWeight.w800,
@@ -232,7 +234,7 @@ class _SavedPulseState extends State<SavedPulse>
                     border: Border.all(color: color.withValues(alpha: 0.24)),
                   ),
                   child: Text(
-                    _pulseLabel(widget.type),
+                    _pulseLabel(widget.type, context),
                     maxLines: 1,
                     softWrap: false,
                     style: TextStyle(
@@ -251,11 +253,15 @@ class _SavedPulseState extends State<SavedPulse>
   }
 }
 
-String _pulseLabel(String type) {
+String _pulseLabel(String type, BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+  final isEs = l10n?.localeName == 'es';
+  final isHi = l10n?.localeName == 'hi';
+
   return switch (type) {
-    'in' => 'IN saved',
-    'out' => 'OUT saved',
-    'single' => 'SINGLE saved',
-    _ => 'Saved',
+    'in' => isEs ? 'IN guardado' : (isHi ? 'IN सहेजा गया' : 'IN saved'),
+    'out' => isEs ? 'OUT guardado' : (isHi ? 'OUT सहेजा गया' : 'OUT saved'),
+    'single' => isEs ? 'SINGLE guardado' : (isHi ? 'SINGLE सहेजा गया' : 'SINGLE saved'),
+    _ => isEs ? 'Guardado' : (isHi ? 'सहेजा गया' : 'Saved'),
   };
 }

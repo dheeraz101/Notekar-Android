@@ -20,6 +20,7 @@ import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/update_service.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -55,6 +56,7 @@ class SettingsDialog extends StatefulWidget {
     required this.enableTranslucency,
     required this.privacyLockDelayMinutes,
     required this.updateStatus,
+    this.updateInfo,
     required this.checkingUpdates,
     required this.lastUpdateCheckedAt,
     required this.entriesNotifier,
@@ -146,6 +148,7 @@ class SettingsDialog extends StatefulWidget {
   final bool enableTranslucency;
   final int privacyLockDelayMinutes;
   final String updateStatus;
+  final AppUpdateInfo? updateInfo;
   final bool checkingUpdates;
   final int? lastUpdateCheckedAt;
   final ValueNotifier<List<Moment>> entriesNotifier;
@@ -184,7 +187,7 @@ class SettingsDialog extends StatefulWidget {
   final Future<void> Function() onExportJson;
   final Future<void> Function() onExportBackup;
   final Future<void> Function() onImportBackup;
-  final Future<String> Function() onCheckUpdates;
+  final Future<({String status, AppUpdateInfo? info})> Function() onCheckUpdates;
   final ValueChanged<String> onOpenLink;
   final ValueChanged<bool> onShowChangelog;
   final Future<void> Function() onReset;
@@ -247,6 +250,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   List<Moment> get _trash => widget.trashEntriesNotifier.value;
 
   String updateStatus = '';
+  AppUpdateInfo? updateInfo;
   bool checkingUpdates = false;
 
   final TextEditingController _settingsSearchController = TextEditingController();
@@ -291,6 +295,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     widget.trashEntriesNotifier.addListener(_onEntriesChanged);
 
     updateStatus = widget.updateStatus;
+    updateInfo = widget.updateInfo;
     checkingUpdates = widget.checkingUpdates;
 
     _loadRecentSearches();
@@ -1771,8 +1776,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   Widget _updateCenterPage(Palette p) {
     final availableVersion = _availableVersion;
+    final cleanVersion = availableVersion.startsWith('v') ? availableVersion : 'v$availableVersion';
     final updateAvailable = _updateAvailable;
     final upToDate = _upToDate;
+
+    String formatDate(DateTime dt) {
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1867,17 +1878,84 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: updateInfo?.isSecurity == true
+                                ? p.red.withValues(alpha: 0.15)
+                                : (updateInfo?.isImportant == true
+                                    ? p.orange.withValues(alpha: 0.15)
+                                    : p.green.withValues(alpha: 0.15)),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            updateInfo?.type ?? 'Regular Update',
+                            style: TextStyle(
+                              color: updateInfo?.isSecurity == true
+                                  ? p.red
+                                  : (updateInfo?.isImportant == true
+                                      ? p.orange
+                                      : p.green),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
-                      'Version v$availableVersion is now available. This update includes new features, performance improvements, and bug fixes.',
+                      'Version $cleanVersion is now available. This update includes new features, performance improvements, and bug fixes.',
                       style: TextStyle(
                         color: p.text,
                         fontSize: 14,
                         height: 1.45,
                       ),
                     ),
+                    if (updateInfo?.date != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Released on ${formatDate(updateInfo!.date!)}',
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                    if (updateInfo?.body != null && updateInfo!.body.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        "What's New:",
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 140),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(spacing12),
+                        decoration: BoxDecoration(
+                          color: p.surface2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: p.border),
+                        ),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            updateInfo!.body,
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 12,
+                              height: 1.45,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1907,8 +1985,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: p.green.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
+                     color: p.green.withValues(alpha: 0.12),
+                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.check_rounded, color: p.green, size: 36),
                 ),
@@ -1955,10 +2033,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   checkingUpdates = true;
                   updateStatus = 'Checking for updates...';
                 });
-                final status = await widget.onCheckUpdates();
+                final result = await widget.onCheckUpdates();
                 if (mounted) {
                   setState(() {
-                    updateStatus = status;
+                    updateStatus = result.status;
+                    updateInfo = result.info;
                     checkingUpdates = false;
                   });
                 }
@@ -2176,7 +2255,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ],
                       ),
-                      if (updateStatus.toLowerCase().contains('available') || updateStatus.toLowerCase().contains('new release')) ...[
+                      if (_updateAvailable) ...[
                         const SizedBox(height: spacing16),
                         PressableScale(
                           onTap: () => _openCategory('Update Center'),
@@ -2201,15 +2280,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: Text(
-                                    updateStatus,
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          updateStatus,
+                                          style: TextStyle(
+                                            color: p.text,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      () {
+                                        final date = updateInfo?.date;
+                                        final isVeryOld = date != null && 
+                                            DateTime.now().difference(date).inDays > 7;
+                                        final isUrgent = isVeryOld || (updateInfo?.isImportant ?? false);
+                                        return Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: isUrgent ? p.red : p.orange,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        );
+                                      }(),
+                                    ],
                                   ),
                                 ),
+                                const SizedBox(width: 8),
                                 Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
                               ],
                             ),
@@ -3196,7 +3297,42 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           icon: Icons.system_update_outlined,
                           title: 'Software Update',
                           color: p.text2,
-                          status: 'v$appVersion',
+                          status: _updateAvailable ? 'v$appVersion (Update Available)' : 'v$appVersion',
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (checkingUpdates)
+                                const SizedBox(
+                                  width: 10,
+                                  height: 10,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+                                )
+                              else if (_updateAvailable) () {
+                                final date = updateInfo?.date;
+                                final isVeryOld = date != null && 
+                                    DateTime.now().difference(date).inDays > 7;
+                                final isUrgent = isVeryOld || (updateInfo?.isImportant ?? false);
+                                return Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: isUrgent ? p.red : p.orange,
+                                    shape: BoxShape.circle,
+                                  ),
+                                );
+                              }() else if (_upToDate)
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: p.green,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              const SizedBox(width: spacing8),
+                              Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                            ],
+                          ),
                           onTap: () => _openCategory('Update Center', parent: 'Updates & Notices'),
                         ),
                       ],

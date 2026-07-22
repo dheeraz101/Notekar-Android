@@ -56,13 +56,33 @@ Open your new file and change the values on the right side of each line to your 
 
 ---
 
+## ⚡ Dynamic Translation Engine (`lib/utils/l10n_utils.dart`)
+
+For text elements that cannot easily be moved into ARB files (like onboarding pages, dynamic FAQ lists, settings guides, and toast overlays), NoteKar uses a **Dynamic Translation Engine** located in [`lib/utils/l10n_utils.dart`](lib/utils/l10n_utils.dart).
+
+Any string can call `.localized(context)` to automatically check the user's active locale and match it to a translation.
+
+### How to add dynamic translations:
+1. Open [`lib/utils/l10n_utils.dart`](lib/utils/l10n_utils.dart).
+2. Locate the `switch (key.toLowerCase())` block.
+3. Add your English string key in lowercase, and specify translations for Hindi (`hi`) and Spanish (`es`):
+```dart
+      'your english text' => switch (l10n.localeName) {
+        'es' => 'Su texto en español',
+        'hi' => 'आपका हिंदी पाठ',
+        _ => 'Your English text',
+      },
+```
+
+---
+
 ### Step 3: Test and Submit
 
 1. (Optional) Run `flutter gen-l10n` to verify your translation generates cleanly.
-2. Commit your new `.arb` file:
+2. Commit your updated `.arb` and `.dart` files:
    ```bash
-   git add lib/l10n/app_es.arb
-   git commit -m "i18n: add Spanish translation (es)"
+   git add lib/l10n/app_es.arb lib/utils/l10n_utils.dart
+   git commit -m "i18n: add Spanish translations and dynamic labels (es)"
    ```
 3. Open a **Pull Request** on GitHub!
 

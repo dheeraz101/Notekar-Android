@@ -31,6 +31,26 @@ extension LocalizedString on String {
       'save' => l10n.save,
       'confirm' => l10n.confirm,
       'delete' => l10n.delete,
+      'okay' => switch (l10n.localeName) {
+        'es' => 'De acuerdo',
+        'hi' => 'ठीक है',
+        _ => 'Okay',
+      },
+      'deleted in moment' => switch (l10n.localeName) {
+        'es' => 'Momento IN eliminado',
+        'hi' => 'हटाया गया IN क्षण',
+        _ => 'Deleted IN moment',
+      },
+      'deleted out moment' => switch (l10n.localeName) {
+        'es' => 'Momento OUT eliminado',
+        'hi' => 'हटाया गया OUT क्षण',
+        _ => 'Deleted OUT moment',
+      },
+      'deleted single moment' => switch (l10n.localeName) {
+        'es' => 'Momento SINGLE eliminado',
+        'hi' => 'हटाया गया SINGLE क्षण',
+        _ => 'Deleted SINGLE moment',
+      },
       
       // Onboarding & Welcome Sheet Translations
       'welcome' => switch (l10n.localeName) {
