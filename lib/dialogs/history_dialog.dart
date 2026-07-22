@@ -50,8 +50,6 @@ class HistoryDialog extends StatefulWidget {
   State<HistoryDialog> createState() => _HistoryDialogState();
 }
 
-
-
 class _HistoryDialogState extends State<HistoryDialog> {
   static const _pageSize = 100;
   String _filter = 'all';
@@ -81,7 +79,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   void _rebuildMemoizedLists() {
     final today = dateKey(DateTime.now());
     final weekAgo = DateTime.now().subtract(const Duration(days: 7));
-    
+
     _filteredEntries = _entries.where((e) {
       if (_filter == 'today') return e.date == today;
       if (_filter == 'week') {
@@ -174,7 +172,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'in' => 'IN moments are created when using Two-Way logging mode.',
       'out' => 'OUT moments complete the pair in Two-Way logging mode.',
       'single' => 'Single logs are standalone timestamps for one-shot events.',
-      'notes' => 'Moments with text notes will be listed here for quick review.',
+      'notes' =>
+        'Moments with text notes will be listed here for quick review.',
       _ => 'Start capturing moments by tapping the clock on the home screen.',
     };
   }
@@ -189,7 +188,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       pageBuilder: (_, _, _) => ActionConfirmSheet(
         p: widget.p,
         title: 'Delete All Moments?',
-        message: 'Are you sure you want to delete all history moments? Deleted moments will be moved to Trash Bin.',
+        message:
+            'Are you sure you want to delete all history moments? Deleted moments will be moved to Trash Bin.',
         confirmLabel: 'Delete All',
         isDestructive: true,
         icon: Icons.delete_sweep_rounded,
@@ -295,55 +295,55 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           ),
                                           child: ChipButton(
                                             p: widget.p,
-                                            label:
-                                                f == 'single'
-                                                    ? null
-                                                    : f == 'date' &&
-                                                        _selectedDateKey != null
-                                                    ? compactDateLabel(
-                                                      _selectedDateKey!,
-                                                    )
-                                                    : f == 'date'
-                                                    ? 'Select Date'
-                                                    : filterLabel(f),
-                                            icon:
-                                                f == 'single'
-                                                    ? Icons.arrow_upward_rounded
-                                                    : null,
-                                            semanticLabel:
-                                                f == 'single'
-                                                    ? 'Single'
-                                                    : null,
+                                            label: f == 'single'
+                                                ? null
+                                                : f == 'date' &&
+                                                      _selectedDateKey != null
+                                                ? compactDateLabel(
+                                                    _selectedDateKey!,
+                                                  )
+                                                : f == 'date'
+                                                ? 'Select Date'
+                                                : filterLabel(f),
+                                            icon: f == 'single'
+                                                ? Icons.arrow_upward_rounded
+                                                : null,
+                                            semanticLabel: f == 'single'
+                                                ? 'Single'
+                                                : null,
                                             active: _filter == f,
-                                            onTap:
-                                                f == 'date'
-                                                    ? (_selectedDateKey == null
-                                                        ? _openDateFilter
-                                                        : () {
+                                            onTap: f == 'date'
+                                                ? (_selectedDateKey == null
+                                                      ? _openDateFilter
+                                                      : () {
                                                           setState(() {
                                                             _filter = 'date';
                                                             _visibleCount =
                                                                 _pageSize;
                                                             _rebuildMemoizedLists();
                                                           });
-                                                          if (_scrollController.hasClients) {
-                                                            _scrollController.jumpTo(0.0);
+                                                          if (_scrollController
+                                                              .hasClients) {
+                                                            _scrollController
+                                                                .jumpTo(0.0);
                                                           }
                                                         })
-                                                    : () {
-                                                      setState(() {
-                                                        _filter = f;
-                                                        _visibleCount = _pageSize;
-                                                        _rebuildMemoizedLists();
-                                                      });
-                                                      if (_scrollController.hasClients) {
-                                                        _scrollController.jumpTo(0.0);
-                                                      }
-                                                    },
-                                            onLongPress:
-                                                f == 'date'
-                                                    ? _openDateFilter
-                                                    : null,
+                                                : () {
+                                                    setState(() {
+                                                      _filter = f;
+                                                      _visibleCount = _pageSize;
+                                                      _rebuildMemoizedLists();
+                                                    });
+                                                    if (_scrollController
+                                                        .hasClients) {
+                                                      _scrollController.jumpTo(
+                                                        0.0,
+                                                      );
+                                                    }
+                                                  },
+                                            onLongPress: f == 'date'
+                                                ? _openDateFilter
+                                                : null,
                                           ),
                                         ),
                                     ],
@@ -382,44 +382,44 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           AnimatedSize(
                             duration: const Duration(milliseconds: 160),
                             curve: Curves.easeOutCubic,
-                            child:
-                                _selected.isEmpty
-                                    ? const SizedBox.shrink()
-                                    : Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        spacing16,
-                                        spacing8,
-                                        spacing16,
-                                        0,
+                            child: _selected.isEmpty
+                                ? const SizedBox.shrink()
+                                : Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      spacing16,
+                                      spacing8,
+                                      spacing16,
+                                      0,
+                                    ),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
                                       ),
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 8,
+                                      decoration: BoxDecoration(
+                                        color: widget.p.accent.withValues(
+                                          alpha: 0.12,
                                         ),
-                                        decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        border: Border.all(
                                           color: widget.p.accent.withValues(
-                                            alpha: 0.12,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(999),
-                                          border: Border.all(
-                                            color: widget.p.accent.withValues(
-                                              alpha: 0.20,
-                                            ),
+                                            alpha: 0.20,
                                           ),
                                         ),
-                                        child: Text(
-                                          'Selected ${_selected.length} of 2 for duration',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: widget.p.accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                      ),
+                                      child: Text(
+                                        'Selected ${_selected.length} of 2 for duration',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: widget.p.accent,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800,
                                         ),
                                       ),
                                     ),
+                                  ),
                           ),
                         ],
                       ),
@@ -434,16 +434,18 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       icon: _emptyIcon,
                       title: _emptyTitle,
                       message: _emptyMessage,
-                      actionLabel: _filter == 'all' ? 'Start Logging' : 'Show All',
-                      onAction: _filter == 'all' 
-                        ? () => Navigator.pop(context)
-                        : () {
-                          setState(() {
-                            _filter = 'all';
-                            _visibleCount = _pageSize;
-                            _rebuildMemoizedLists();
-                          });
-                        },
+                      actionLabel: _filter == 'all'
+                          ? 'Start Logging'
+                          : 'Show All',
+                      onAction: _filter == 'all'
+                          ? () => Navigator.pop(context)
+                          : () {
+                              setState(() {
+                                _filter = 'all';
+                                _visibleCount = _pageSize;
+                                _rebuildMemoizedLists();
+                              });
+                            },
                     ),
                   )
                 else
@@ -452,146 +454,149 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                        if (index >= _listItems.length) {
-                          if (hasOlderRows) {
+                          if (index >= _listItems.length) {
+                            if (hasOlderRows) {
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  spacing16,
+                                  4,
+                                  spacing16,
+                                  8,
+                                ),
+                                child: PressableScale(
+                                  onTap: () => setState(() {
+                                    _visibleCount += _pageSize;
+                                    _updateVisibleItems();
+                                  }),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: widget.p.surface2,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: widget.p.border,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Load older moments',
+                                      style: TextStyle(
+                                        color: widget.p.accent,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            return null;
+                          }
+
+                          final item = _listItems[index];
+                          if (item.label != null) {
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(
                                 spacing16,
-                                4,
+                                spacing12,
                                 spacing16,
-                                8,
+                                6,
                               ),
-                              child: PressableScale(
-                                onTap:
-                                    () => setState(() {
-                                      _visibleCount += _pageSize;
-                                      _updateVisibleItems();
-                                    }),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: widget.p.surface2,
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(color: widget.p.border),
-                                  ),
-                                  child: Text(
-                                    'Load older moments',
-                                    style: TextStyle(
-                                      color: widget.p.accent,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
+                              child: Text(
+                                item.label!.toUpperCase(),
+                                style: TextStyle(
+                                  color: widget.p.text3,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  fontVariations: const [
+                                    FontVariation('wght', 800),
+                                  ],
+                                  letterSpacing: 0.6,
                                 ),
                               ),
                             );
                           }
-                          return null;
-                        }
-
-                        final item = _listItems[index];
-                        if (item.label != null) {
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              spacing16,
-                              spacing12,
-                              spacing16,
-                              6,
-                            ),
-                            child: Text(
-                              item.label!.toUpperCase(),
-                              style: TextStyle(
-                                color: widget.p.text3,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                fontVariations: const [FontVariation('wght', 800)],
-                                letterSpacing: 0.6,
-                              ),
-                            ),
+                          final entry = item.moment!;
+                          final selected = _selected.any(
+                            (item) => item.id == entry.id,
                           );
-                        }
-                        final entry = item.moment!;
-                        final selected = _selected.any(
-                          (item) => item.id == entry.id,
-                        );
-                        return Padding(
-                          key: ValueKey(entry.id),
-                          padding: EdgeInsets.fromLTRB(
-                            spacing16,
-                            0,
-                            spacing16,
-                            widget.compactRows ? 3 : 8,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: widget.p.red,
-                              borderRadius: BorderRadius.circular(999),
+                          return Padding(
+                            key: ValueKey(entry.id),
+                            padding: EdgeInsets.fromLTRB(
+                              spacing16,
+                              0,
+                              spacing16,
+                              widget.compactRows ? 3 : 8,
                             ),
-                            clipBehavior: Clip.antiAlias,
-                            child: Dismissible(
-                              key: ValueKey('dismiss-${entry.id}'),
-                              direction: DismissDirection.endToStart,
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 18),
+                            child: Container(
+                              decoration: BoxDecoration(
                                 color: widget.p.red,
-                                child: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: Colors.white,
-                                ),
+                                borderRadius: BorderRadius.circular(999),
                               ),
-                              confirmDismiss: (_) async {
-                                _removeEntry(entry);
-                                return false;
-                              },
-                              onDismissed: (_) => _dismissEntry(entry),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color:
-                                      selected
-                                          ? widget.p.surface3
-                                          : widget.p.surface2,
-                                  borderRadius: BorderRadius.circular(999),
+                              clipBehavior: Clip.antiAlias,
+                              child: Dismissible(
+                                key: ValueKey('dismiss-${entry.id}'),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.only(right: 18),
+                                  color: widget.p.red,
+                                  child: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                                child: RepaintBoundary(
-                                  child: MomentTile(
-                                    p: widget.p,
-                                    entry: entry,
-                                    selected: selected,
-                                    compact: widget.compactRows,
-                                    onLongPress: () => _showMomentDetails(entry),
-                                    onTap: () {
-                                      setState(() {
-                                        if (selected) {
-                                          _selected.removeWhere(
-                                            (item) => item.id == entry.id,
-                                          );
-                                        } else {
-                                          if (_selected.length == 2) {
-                                            _selected.removeAt(0);
+                                confirmDismiss: (_) async {
+                                  _removeEntry(entry);
+                                  return false;
+                                },
+                                onDismissed: (_) => _dismissEntry(entry),
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? widget.p.surface3
+                                        : widget.p.surface2,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: RepaintBoundary(
+                                    child: MomentTile(
+                                      p: widget.p,
+                                      entry: entry,
+                                      selected: selected,
+                                      compact: widget.compactRows,
+                                      onLongPress: () =>
+                                          _showMomentDetails(entry),
+                                      onTap: () {
+                                        setState(() {
+                                          if (selected) {
+                                            _selected.removeWhere(
+                                              (item) => item.id == entry.id,
+                                            );
+                                          } else {
+                                            if (_selected.length == 2) {
+                                              _selected.removeAt(0);
+                                            }
+                                            _selected.add(entry);
                                           }
-                                          _selected.add(entry);
+                                        });
+                                        if (_selected.length == 2) {
+                                          widget.onDuration(
+                                            _selected[0],
+                                            _selected[1],
+                                          );
+                                          setState(() => _selected.clear());
                                         }
-                                      });
-                                      if (_selected.length == 2) {
-                                        widget.onDuration(
-                                          _selected[0],
-                                          _selected[1],
-                                        );
-                                        setState(() => _selected.clear());
-                                      }
-                                    },
-                                    onDelete: () => _removeEntry(entry),
+                                      },
+                                      onDelete: () => _removeEntry(entry),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
                         childCount: _listItems.length + (hasOlderRows ? 1 : 0),
                         addAutomaticKeepAlives: false,
                       ),
@@ -600,13 +605,15 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ],
             ),
             Positioned(
-              bottom: spacing12, // Elevated to avoid touching the navigation area
+              bottom:
+                  spacing12, // Elevated to avoid touching the navigation area
               left: 16,
               right: 16,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 reverseDuration: const Duration(milliseconds: 250),
-                switchInCurve: Curves.easeOutBack, // Professional iOS spring curve
+                switchInCurve:
+                    Curves.easeOutBack, // Professional iOS spring curve
                 switchOutCurve: Curves.easeIn,
                 transitionBuilder: (child, animation) {
                   final slide = Tween<Offset>(
@@ -621,10 +628,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     opacity: animation,
                     child: SlideTransition(
                       position: slide,
-                      child: ScaleTransition(
-                        scale: scale,
-                        child: child,
-                      ),
+                      child: ScaleTransition(scale: scale, child: child),
                     ),
                   );
                 },
@@ -633,13 +637,18 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     : Container(
                         key: const ValueKey('notice-bar'),
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: widget.p.name == 'amoled'
                               ? const Color(0xFF121212)
                               : widget.p.surface2,
                           borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+                          border: Border.all(
+                            color: widget.p.border.withValues(alpha: 0.6),
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.18),
@@ -654,13 +663,20 @@ class _HistoryDialogState extends State<HistoryDialog> {
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
-                                color: (_noticeUndo == null ? widget.p.red : widget.p.accent)
-                                    .withValues(alpha: 0.16),
+                                color:
+                                    (_noticeUndo == null
+                                            ? widget.p.red
+                                            : widget.p.accent)
+                                        .withValues(alpha: 0.16),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                _noticeUndo == null ? Icons.delete_outline_rounded : Icons.info_outline_rounded,
-                                color: _noticeUndo == null ? widget.p.red : widget.p.accent,
+                                _noticeUndo == null
+                                    ? Icons.delete_outline_rounded
+                                    : Icons.info_outline_rounded,
+                                color: _noticeUndo == null
+                                    ? widget.p.red
+                                    : widget.p.accent,
                                 size: 16,
                               ),
                             ),
@@ -682,7 +698,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
                               PressableScale(
                                 onTap: _noticeUndo,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 7,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: widget.p.accent,
                                     borderRadius: BorderRadius.circular(999),
@@ -715,7 +734,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _showNotice('Tap delete again to confirm');
       return;
     }
-    NotekarHaptics.success('standard'); // History delete is an intentional success action
+    NotekarHaptics.success(
+      'standard',
+    ); // History delete is an intentional success action
     setState(() {
       _entries = _entries.where((item) => item.id != entry.id).toList();
       _availableDateKeys = _entries.map((item) => item.date).toSet();
@@ -732,22 +753,20 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _showNotice('No moments to pick from');
       return;
     }
-    final latest =
-        _selectedDateKey == null
-            ? DateTime.fromMillisecondsSinceEpoch(_entries.first.timestamp)
-            : dateFromKey(_selectedDateKey!);
+    final latest = _selectedDateKey == null
+        ? DateTime.fromMillisecondsSinceEpoch(_entries.first.timestamp)
+        : dateFromKey(_selectedDateKey!);
     final picked = await showGeneralDialog<DateTime>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.42),
       barrierDismissible: true,
       barrierLabel: 'Close calendar',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder:
-          (_, _, _) => MomentCalendarDialog(
-            p: widget.p,
-            availableDateKeys: _availableDateKeys,
-            initialDate: latest,
-          ),
+      pageBuilder: (_, _, _) => MomentCalendarDialog(
+        p: widget.p,
+        availableDateKeys: _availableDateKeys,
+        initialDate: latest,
+      ),
     );
     if (picked == null) return;
     setState(() {
@@ -825,59 +844,55 @@ class _HistoryDialogState extends State<HistoryDialog> {
       barrierDismissible: true,
       barrierLabel: 'Close moment actions',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder:
-          (_, _, _) => MomentActionsDialog(
-            p: widget.p,
-            entry: entry,
-            confirmDelete: widget.confirmDelete,
-            minimal: widget.minimalMomentOptions,
-            onAddOrEditNote: () async {
-              Navigator.pop(context);
+      pageBuilder: (_, _, _) => MomentActionsDialog(
+        p: widget.p,
+        entry: entry,
+        confirmDelete: widget.confirmDelete,
+        minimal: widget.minimalMomentOptions,
+        onAddOrEditNote: () async {
+          Navigator.pop(context);
 
-              final note = await showGeneralDialog<String>(
-                context: context,
-                barrierColor: Colors.black.withValues(alpha: 0.42),
-                barrierDismissible: true,
-                barrierLabel: 'Close note editor',
-                transitionDuration: const Duration(milliseconds: 120),
-                pageBuilder:
-                    (_, _, _) => NoteDialog(
-                      p: widget.p,
-                      initialNote: entry.note,
-                      title:
-                          entry.note.trim().isEmpty ? 'Add Note' : 'Edit Note',
-                      saveLabel: entry.note.trim().isEmpty ? 'Add Note' : 'Save',
-                      allowEmpty: false,
-                    ),
-              );
+          final note = await showGeneralDialog<String>(
+            context: context,
+            barrierColor: Colors.black.withValues(alpha: 0.42),
+            barrierDismissible: true,
+            barrierLabel: 'Close note editor',
+            transitionDuration: const Duration(milliseconds: 120),
+            pageBuilder: (_, _, _) => NoteDialog(
+              p: widget.p,
+              initialNote: entry.note,
+              title: entry.note.trim().isEmpty ? 'Add Note' : 'Edit Note',
+              saveLabel: entry.note.trim().isEmpty ? 'Add Note' : 'Save',
+              allowEmpty: false,
+            ),
+          );
 
-              if (note == null) return;
+          if (note == null) return;
 
-              await _updateEntryNote(entry, note);
-              _showNotice(
-                entry.note.trim().isEmpty ? 'Note added' : 'Note updated',
-              );
-            },
-            onDeleteNote:
-                entry.note.trim().isEmpty
-                    ? null
-                    : () async {
-                      Navigator.pop(context);
-                      final previous = entry.note;
-                      await _updateEntryNote(entry, '');
-                      _showNotice(
-                        'Note deleted',
-                        onUndo: () {
-                          unawaited(_updateEntryNote(entry, previous));
-                          _showNotice('Note restored');
-                        },
-                      );
-                    },
-            onDeleteMoment: () {
-              Navigator.pop(context);
-              _removeEntry(entry);
-            },
-          ),
+          await _updateEntryNote(entry, note);
+          _showNotice(
+            entry.note.trim().isEmpty ? 'Note added' : 'Note updated',
+          );
+        },
+        onDeleteNote: entry.note.trim().isEmpty
+            ? null
+            : () async {
+                Navigator.pop(context);
+                final previous = entry.note;
+                await _updateEntryNote(entry, '');
+                _showNotice(
+                  'Note deleted',
+                  onUndo: () {
+                    unawaited(_updateEntryNote(entry, previous));
+                    _showNotice('Note restored');
+                  },
+                );
+              },
+        onDeleteMoment: () {
+          Navigator.pop(context);
+          _removeEntry(entry);
+        },
+      ),
     );
   }
 }
@@ -975,10 +990,9 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                 children: [
                   _MinimalActionButton(
                     p: p,
-                    icon:
-                        hasNote
-                            ? Icons.edit_note_rounded
-                            : Icons.note_add_rounded,
+                    icon: hasNote
+                        ? Icons.edit_note_rounded
+                        : Icons.note_add_rounded,
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
                   ),
@@ -1059,10 +1073,9 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                 Expanded(
                   child: MomentOptionPill(
                     p: p,
-                    icon:
-                        hasNote
-                            ? Icons.edit_note_rounded
-                            : Icons.note_add_rounded,
+                    icon: hasNote
+                        ? Icons.edit_note_rounded
+                        : Icons.note_add_rounded,
                     label: hasNote ? 'Edit Note' : 'Add Note',
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
@@ -1074,7 +1087,9 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                     child: MomentOptionPill(
                       p: p,
                       icon: Icons.comments_disabled_rounded,
-                      label: _pendingAction == 'note' ? 'Confirm' : 'Delete Note',
+                      label: _pendingAction == 'note'
+                          ? 'Confirm'
+                          : 'Delete Note',
                       color: p.orange,
                       onTap: () => _confirmOrRun('note', widget.onDeleteNote!),
                     ),

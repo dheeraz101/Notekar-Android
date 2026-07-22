@@ -164,7 +164,9 @@ class Toolbar extends StatelessWidget {
     return Center(
       child: showBackgroundPill
           ? DecoratedBox(
-              decoration: _bottomNavDecoration(p, blur), child: iconRow)
+              decoration: _bottomNavDecoration(p, blur),
+              child: iconRow,
+            )
           : iconRow,
     );
   }
@@ -182,8 +184,9 @@ BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
         ? null
         : [
             BoxShadow(
-              color:
-                  Colors.black.withValues(alpha: p.name == 'light' ? 0.08 : 0.20),
+              color: Colors.black.withValues(
+                alpha: p.name == 'light' ? 0.08 : 0.20,
+              ),
               blurRadius: 14,
               offset: const Offset(0, 6),
             ),

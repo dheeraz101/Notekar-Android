@@ -29,7 +29,8 @@ const githubIssues = 'https://github.com/dheeraz101/Notekar-Android/issues';
 const coffeeLink = 'https://buymeacoffee.com/dheeraz';
 const githubReleases = 'https://github.com/dheeraz101/Notekar-Android/releases';
 const supportEmail = 'mailto:yabp.support@gmail.com';
-const notificationFeed = 'https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json';
+const notificationFeed =
+    'https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json';
 
 const delayValues = [0, 5, 10, 15, 20, 30, 60];
 const accentOptions = [

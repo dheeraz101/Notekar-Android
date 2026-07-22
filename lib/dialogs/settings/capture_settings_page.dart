@@ -35,7 +35,8 @@ class CaptureSettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Prompt for a note when long-pressing primary capture buttons.',
+              text:
+                  'Prompt for a note when long-pressing primary capture buttons.',
             ),
             const SizedBox(height: 48),
           ],

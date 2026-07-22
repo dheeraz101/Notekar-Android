@@ -335,16 +335,27 @@ class _ChangelogItemRow extends StatelessWidget {
 
   ({IconData icon, Color color}) _getItemStyle() {
     final lower = text.trim().toLowerCase();
-    if (lower.startsWith('add') || lower.startsWith('added') || lower.startsWith('new') || lower.startsWith('create')) {
+    if (lower.startsWith('add') ||
+        lower.startsWith('added') ||
+        lower.startsWith('new') ||
+        lower.startsWith('create')) {
       return (icon: Icons.add_rounded, color: p.green);
     }
-    if (lower.startsWith('delete') || lower.startsWith('deleted') || lower.startsWith('remove')) {
+    if (lower.startsWith('delete') ||
+        lower.startsWith('deleted') ||
+        lower.startsWith('remove')) {
       return (icon: Icons.remove_rounded, color: p.red);
     }
-    if (lower.startsWith('fix') || lower.startsWith('fixed') || lower.startsWith('patch') || lower.startsWith('resolve')) {
+    if (lower.startsWith('fix') ||
+        lower.startsWith('fixed') ||
+        lower.startsWith('patch') ||
+        lower.startsWith('resolve')) {
       return (icon: Icons.auto_awesome_rounded, color: p.orange);
     }
-    if (lower.startsWith('update') || lower.startsWith('refactor') || lower.startsWith('improve') || lower.startsWith('moved')) {
+    if (lower.startsWith('update') ||
+        lower.startsWith('refactor') ||
+        lower.startsWith('improve') ||
+        lower.startsWith('moved')) {
       return (icon: Icons.published_with_changes_rounded, color: p.accent);
     }
     return (icon: Icons.check_rounded, color: p.accent);
@@ -366,11 +377,7 @@ class _ChangelogItemRow extends StatelessWidget {
               color: style.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              style.icon,
-              color: style.color,
-              size: 11,
-            ),
+            child: Icon(style.icon, color: style.color, size: 11),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -402,7 +409,13 @@ class ChangelogReleaseCard extends StatelessWidget {
   });
 
   final Palette p;
-  final ({String date, List<String> items, List<String> highlights, String version}) release;
+  final ({
+    String date,
+    List<String> items,
+    List<String> highlights,
+    String version,
+  })
+  release;
   final bool isLatest;
   final bool expanded;
   final VoidCallback onTap;
@@ -507,11 +520,7 @@ class ChangelogReleaseCard extends StatelessWidget {
                   child: Column(
                     children: [
                       for (final item in release.items)
-                        _ChangelogItemRow(
-                          p: p,
-                          text: item,
-                          isLatest: isLatest,
-                        ),
+                        _ChangelogItemRow(p: p, text: item, isLatest: isLatest),
                     ],
                   ),
                 ),
@@ -528,7 +537,6 @@ class ChangelogReleaseCard extends StatelessWidget {
     );
   }
 }
-
 
 class _ChangelogDialogState extends State<ChangelogDialog> {
   final Set<int> _expanded = {};
@@ -708,7 +716,13 @@ class _WhatsNewPanel extends StatelessWidget {
   const _WhatsNewPanel({required this.p, required this.release});
 
   final Palette p;
-  final ({String date, List<String> items, List<String> highlights, String version}) release;
+  final ({
+    String date,
+    List<String> items,
+    List<String> highlights,
+    String version,
+  })
+  release;
 
   @override
   Widget build(BuildContext context) {
@@ -780,7 +794,7 @@ class _WhatsNewPanel extends StatelessWidget {
             ],
           ),
         ),
-        
+
         // iOS 26 Feature Cards List
         SettingsGroup(
           p: p,
@@ -790,7 +804,7 @@ class _WhatsNewPanel extends StatelessWidget {
               Builder(
                 builder: (context) {
                   final text = release.highlights[i];
-                  
+
                   String headline = '';
                   String body = text;
                   if (text.contains(' with ')) {
@@ -808,7 +822,10 @@ class _WhatsNewPanel extends StatelessWidget {
                   }
 
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 13,
+                    ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -819,7 +836,9 @@ class _WhatsNewPanel extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: p.accent.withValues(alpha: 0.14),
                             shape: BoxShape.circle,
-                            border: Border.all(color: p.accent.withValues(alpha: 0.25)),
+                            border: Border.all(
+                              color: p.accent.withValues(alpha: 0.25),
+                            ),
                           ),
                           alignment: Alignment.center,
                           child: Text(
@@ -854,7 +873,9 @@ class _WhatsNewPanel extends StatelessWidget {
                                   color: headline.isNotEmpty ? p.text2 : p.text,
                                   fontSize: 13,
                                   height: 1.35,
-                                  fontWeight: headline.isNotEmpty ? FontWeight.w400 : FontWeight.w500,
+                                  fontWeight: headline.isNotEmpty
+                                      ? FontWeight.w400
+                                      : FontWeight.w500,
                                   letterSpacing: -0.1,
                                 ),
                               ),

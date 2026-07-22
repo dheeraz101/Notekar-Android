@@ -21,7 +21,9 @@ class ActivitySummaryCard extends StatelessWidget {
     final yesterdayStr = dateKey(now.subtract(const Duration(days: 1)));
 
     final todayEntries = entries.where((e) => e.date == todayStr).toList();
-    final yesterdayEntries = entries.where((e) => e.date == yesterdayStr).toList();
+    final yesterdayEntries = entries
+        .where((e) => e.date == yesterdayStr)
+        .toList();
 
     final todayCount = todayEntries.length;
     final yesterdayCount = yesterdayEntries.length;
@@ -29,7 +31,9 @@ class ActivitySummaryCard extends StatelessWidget {
 
     final diffText = diff > 0
         ? '+$diff logs vs yesterday'
-        : (diff < 0 ? '${diff.abs()} fewer logs than yesterday' : 'Same count as yesterday');
+        : (diff < 0
+              ? '${diff.abs()} fewer logs than yesterday'
+              : 'Same count as yesterday');
 
     // Calculate Average Interval between consecutive moments
     int avgIntervalMinutes = 0;
@@ -76,7 +80,11 @@ class ActivitySummaryCard extends StatelessWidget {
                     color: p.accent.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(Icons.analytics_rounded, color: p.accent, size: 17),
+                  child: Icon(
+                    Icons.analytics_rounded,
+                    color: p.accent,
+                    size: 17,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -120,16 +128,26 @@ class ActivitySummaryCard extends StatelessWidget {
                   sub: 'moments',
                 ),
               ),
-              Container(width: 1, height: 32, color: p.border.withValues(alpha: 0.4)),
+              Container(
+                width: 1,
+                height: 32,
+                color: p.border.withValues(alpha: 0.4),
+              ),
               Expanded(
                 child: _StatMetric(
                   p: p,
                   label: 'Avg Interval',
-                  value: avgIntervalMinutes > 0 ? '${avgIntervalMinutes}m' : '--',
+                  value: avgIntervalMinutes > 0
+                      ? '${avgIntervalMinutes}m'
+                      : '--',
                   sub: 'between taps',
                 ),
               ),
-              Container(width: 1, height: 32, color: p.border.withValues(alpha: 0.4)),
+              Container(
+                width: 1,
+                height: 32,
+                color: p.border.withValues(alpha: 0.4),
+              ),
               Expanded(
                 child: _StatMetric(
                   p: p,
@@ -166,11 +184,19 @@ class ActivitySummaryCard extends StatelessWidget {
               children: [
                 Text(
                   'IN ($inCount)',
-                  style: TextStyle(color: p.accent, fontSize: 10, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
                   'OUT ($outCount)',
-                  style: TextStyle(color: p.green, fontSize: 10, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: p.green,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -182,11 +208,7 @@ class ActivitySummaryCard extends StatelessWidget {
 }
 
 class ActivityTrendsCard extends StatelessWidget {
-  const ActivityTrendsCard({
-    super.key,
-    required this.p,
-    required this.entries,
-  });
+  const ActivityTrendsCard({super.key, required this.p, required this.entries});
 
   final Palette p;
   final List<Moment> entries;
@@ -210,11 +232,13 @@ class ActivityTrendsCard extends StatelessWidget {
         peakCount = c;
         peakDayName = _weekdayFull(day.weekday);
       }
-      dayCounts.add(_DayStat(
-        dayLabel: _weekdayShort(day.weekday),
-        count: c,
-        isToday: i == 0,
-      ));
+      dayCounts.add(
+        _DayStat(
+          dayLabel: _weekdayShort(day.weekday),
+          count: c,
+          isToday: i == 0,
+        ),
+      );
     }
 
     final subtitleText = peakCount > 0
@@ -244,7 +268,11 @@ class ActivityTrendsCard extends StatelessWidget {
                     color: p.orange.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(Icons.bar_chart_rounded, color: p.orange, size: 17),
+                  child: Icon(
+                    Icons.bar_chart_rounded,
+                    color: p.orange,
+                    size: 17,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -314,8 +342,8 @@ class ActivityTrendsCard extends StatelessWidget {
                           color: ds.isToday
                               ? p.accent
                               : (ds.count > 0
-                                  ? p.accent.withValues(alpha: 0.45)
-                                  : p.border.withValues(alpha: 0.3)),
+                                    ? p.accent.withValues(alpha: 0.45)
+                                    : p.border.withValues(alpha: 0.3)),
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
@@ -338,7 +366,9 @@ class ActivityTrendsCard extends StatelessWidget {
                         style: TextStyle(
                           color: ds.isToday ? p.accent : p.text3,
                           fontSize: 11,
-                          fontWeight: ds.isToday ? FontWeight.w900 : FontWeight.w600,
+                          fontWeight: ds.isToday
+                              ? FontWeight.w900
+                              : FontWeight.w600,
                         ),
                       ),
                     ),
@@ -409,7 +439,11 @@ class _StatMetric extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: p.text3,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
@@ -421,10 +455,7 @@ class _StatMetric extends StatelessWidget {
             letterSpacing: -0.4,
           ),
         ),
-        Text(
-          sub,
-          style: TextStyle(color: p.text2, fontSize: 10),
-        ),
+        Text(sub, style: TextStyle(color: p.text2, fontSize: 10)),
       ],
     );
   }

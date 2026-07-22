@@ -188,7 +188,8 @@ class SettingsDialog extends StatefulWidget {
   final Future<void> Function() onExportJson;
   final Future<void> Function() onExportBackup;
   final Future<void> Function() onImportBackup;
-  final Future<({String status, AppUpdateInfo? info})> Function() onCheckUpdates;
+  final Future<({String status, AppUpdateInfo? info})> Function()
+  onCheckUpdates;
   final ValueChanged<String> onOpenLink;
   final ValueChanged<bool> onShowChangelog;
   final Future<void> Function() onReset;
@@ -207,8 +208,6 @@ class SettingsDialog extends StatefulWidget {
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
 }
-
-
 
 class _SettingsDialogState extends State<SettingsDialog> {
   String? category;
@@ -247,7 +246,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late String currentLocale;
 
   String? _editingReminderType;
-  final TextEditingController _reminderMessageController = TextEditingController();
+  final TextEditingController _reminderMessageController =
+      TextEditingController();
   final FocusNode _reminderMessageFocusNode = FocusNode();
   bool _autoStartCardDismissed = false;
 
@@ -276,38 +276,54 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
-      _autoStartCardDismissed = _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
-      _dailyReminderEnabled = _prefs?.getBool('reminder_daily_enabled') ?? false;
+      _autoStartCardDismissed =
+          _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
+      _dailyReminderEnabled =
+          _prefs?.getBool('reminder_daily_enabled') ?? false;
       _dailyReminderTime = TimeOfDay(
         hour: _prefs?.getInt('reminder_daily_hour') ?? 21,
         minute: _prefs?.getInt('reminder_daily_minute') ?? 0,
       );
-      _dailyReminderBody = _prefs?.getString('reminder_daily_body') ?? 'Time to log a moment!';
-      
-      _inactivityReminderEnabled = _prefs?.getBool('reminder_inactivity_enabled') ?? false;
-      _inactivityIntervalMins = _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
-      
-      _weeklyReminderEnabled = _prefs?.getBool('reminder_weekly_enabled') ?? false;
-      _weeklyReminderDays = (_prefs?.getStringList('reminder_weekly_days') ?? ['1'])
-          .map((e) => int.parse(e))
-          .toList();
+      _dailyReminderBody =
+          _prefs?.getString('reminder_daily_body') ?? 'Time to log a moment!';
+
+      _inactivityReminderEnabled =
+          _prefs?.getBool('reminder_inactivity_enabled') ?? false;
+      _inactivityIntervalMins =
+          _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
+
+      _weeklyReminderEnabled =
+          _prefs?.getBool('reminder_weekly_enabled') ?? false;
+      _weeklyReminderDays =
+          (_prefs?.getStringList('reminder_weekly_days') ?? ['1'])
+              .map((e) => int.parse(e))
+              .toList();
       _weeklyReminderTime = TimeOfDay(
         hour: _prefs?.getInt('reminder_weekly_hour') ?? 21,
         minute: _prefs?.getInt('reminder_weekly_minute') ?? 0,
       );
-      _weeklyReminderBody = _prefs?.getString('reminder_weekly_body') ?? 'Time to log a moment!';
-      
-      _monthlyReminderEnabled = _prefs?.getBool('reminder_monthly_enabled') ?? false;
+      _weeklyReminderBody =
+          _prefs?.getString('reminder_weekly_body') ?? 'Time to log a moment!';
+
+      _monthlyReminderEnabled =
+          _prefs?.getBool('reminder_monthly_enabled') ?? false;
       _monthlyReminderDay = _prefs?.getInt('reminder_monthly_day') ?? 1;
       _monthlyReminderTime = TimeOfDay(
         hour: _prefs?.getInt('reminder_monthly_hour') ?? 21,
         minute: _prefs?.getInt('reminder_monthly_minute') ?? 0,
       );
-      _monthlyReminderBody = _prefs?.getString('reminder_monthly_body') ?? 'Time to log a moment!';
+      _monthlyReminderBody =
+          _prefs?.getString('reminder_monthly_body') ?? 'Time to log a moment!';
     });
     try {
-      final granted = await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ?? true;
-      final ignores = await _fileChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ?? true;
+      final granted =
+          await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ??
+          true;
+      final ignores =
+          await _fileChannel.invokeMethod<bool>(
+            'isIgnoringBatteryOptimizations',
+          ) ??
+          true;
       if (mounted) {
         setState(() {
           _hasExactAlarmPermission = granted;
@@ -318,7 +334,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   String _getRemindersStatus() {
-    final active = _dailyReminderEnabled ||
+    final active =
+        _dailyReminderEnabled ||
         _inactivityReminderEnabled ||
         _weeklyReminderEnabled ||
         _monthlyReminderEnabled;
@@ -336,10 +353,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'hour': _dailyReminderTime.hour,
             'minute': _dailyReminderTime.minute,
             'title': 'logging reminder'.localized(context),
-            'body': _dailyReminderBody == 'Time to log a moment!' ? _dailyReminderBody.localized(context) : _dailyReminderBody,
+            'body': _dailyReminderBody == 'Time to log a moment!'
+                ? _dailyReminderBody.localized(context)
+                : _dailyReminderBody,
           });
         } else {
-          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_daily'});
+          await _fileChannel.invokeMethod('cancelReminder', {
+            'id': 'reminder_daily',
+          });
         }
       } else if (id == 'inactivity') {
         if (_inactivityReminderEnabled) {
@@ -351,7 +372,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'body': 'time to log a moment!'.localized(context),
           });
         } else {
-          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_inactivity'});
+          await _fileChannel.invokeMethod('cancelReminder', {
+            'id': 'reminder_inactivity',
+          });
         }
       } else if (id == 'weekly') {
         if (_weeklyReminderEnabled) {
@@ -362,10 +385,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'minute': _weeklyReminderTime.minute,
             'daysOfWeek': _weeklyReminderDays,
             'title': 'logging reminder'.localized(context),
-            'body': _weeklyReminderBody == 'Time to log a moment!' ? _weeklyReminderBody.localized(context) : _weeklyReminderBody,
+            'body': _weeklyReminderBody == 'Time to log a moment!'
+                ? _weeklyReminderBody.localized(context)
+                : _weeklyReminderBody,
           });
         } else {
-          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_weekly'});
+          await _fileChannel.invokeMethod('cancelReminder', {
+            'id': 'reminder_weekly',
+          });
         }
       } else if (id == 'monthly') {
         if (_monthlyReminderEnabled) {
@@ -376,10 +403,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'minute': _monthlyReminderTime.minute,
             'dayOfMonth': _monthlyReminderDay,
             'title': 'logging reminder'.localized(context),
-            'body': _monthlyReminderBody == 'Time to log a moment!' ? _monthlyReminderBody.localized(context) : _monthlyReminderBody,
+            'body': _monthlyReminderBody == 'Time to log a moment!'
+                ? _monthlyReminderBody.localized(context)
+                : _monthlyReminderBody,
           });
         } else {
-          await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_monthly'});
+          await _fileChannel.invokeMethod('cancelReminder', {
+            'id': 'reminder_monthly',
+          });
         }
       }
     } catch (e, stack) {
@@ -401,14 +432,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   Widget _reminderMessagePage(Palette p) {
     if (_editingReminderType == null) return const SizedBox.shrink();
-    
+
     final type = _editingReminderType!;
-    
-    final prefKey = type == 'daily' ? 'reminder_daily_body' : (type == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body');
+
+    final prefKey = type == 'daily'
+        ? 'reminder_daily_body'
+        : (type == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body');
     final recentsKey = '${prefKey}_recents';
     final recents = _prefs?.getStringList(recentsKey) ?? <String>[];
-    
-    final currentValue = type == 'daily' ? _dailyReminderBody : (type == 'weekly' ? _weeklyReminderBody : _monthlyReminderBody);
+
+    final currentValue = type == 'daily'
+        ? _dailyReminderBody
+        : (type == 'weekly' ? _weeklyReminderBody : _monthlyReminderBody);
     recents.removeWhere((item) => item.trim().isEmpty || item == currentValue);
 
     return Padding(
@@ -426,7 +461,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Text(
                       'Reminder Message'.localized(context).toUpperCase(),
-                      style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -435,16 +475,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     focusNode: _reminderMessageFocusNode,
                     maxLines: 1,
                     maxLength: 60,
-                    style: TextStyle(color: p.text, fontSize: 15, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Enter reminder message...'.localized(context),
                       hintStyle: TextStyle(color: p.text3),
                       counterText: '',
                       filled: true,
                       fillColor: p.surface2,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.edit_rounded, color: p.text3, size: 20),
+                        icon: Icon(
+                          Icons.edit_rounded,
+                          color: p.text3,
+                          size: 20,
+                        ),
                         onPressed: () {
                           _reminderMessageFocusNode.requestFocus();
                         },
@@ -455,7 +506,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: p.border.withValues(alpha: 0.5)),
+                        borderSide: BorderSide(
+                          color: p.border.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                   ),
@@ -465,7 +518,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
                         'Recent Messages'.localized(context).toUpperCase(),
-                        style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -498,12 +556,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
               onPressed: () async {
                 final newText = _reminderMessageController.text.trim();
                 if (newText != currentValue) {
-                  if (currentValue.trim().isNotEmpty && currentValue != 'Time to log a moment!') {
+                  if (currentValue.trim().isNotEmpty &&
+                      currentValue != 'Time to log a moment!') {
                     recents.insert(0, currentValue);
                     final uniqueRecents = recents.toSet().toList();
-                    await _prefs?.setStringList(recentsKey, uniqueRecents.take(5).toList());
+                    await _prefs?.setStringList(
+                      recentsKey,
+                      uniqueRecents.take(5).toList(),
+                    );
                   }
-                  
+
                   setState(() {
                     if (type == 'daily') _dailyReminderBody = newText;
                     if (type == 'weekly') _weeklyReminderBody = newText;
@@ -518,9 +580,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 backgroundColor: p.accent,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text('Save'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
+              child: Text(
+                'Save'.localized(context),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
             ),
           ),
         ],
@@ -528,10 +595,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
-  Future<TimeOfDay?> _showIOSTimePicker(BuildContext context, TimeOfDay initialTime) async {
+  Future<TimeOfDay?> _showIOSTimePicker(
+    BuildContext context,
+    TimeOfDay initialTime,
+  ) async {
     final p = paletteFor(theme);
     TimeOfDay selectedTime = initialTime;
-    
+
     return showModalBottomSheet<TimeOfDay>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -541,7 +611,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           decoration: BoxDecoration(
             color: p.surface.withValues(alpha: 0.85),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border.all(color: p.accent.withValues(alpha: 0.2), width: 1.5),
+            border: Border.all(
+              color: p.accent.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
           ),
           child: ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -565,7 +638,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   const SizedBox(height: 20),
                   Text(
                     'Select Time'.localized(context),
-                    style: TextStyle(color: p.text, fontSize: 18, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -582,9 +659,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ),
                       child: CupertinoDatePicker(
                         mode: CupertinoDatePickerMode.time,
-                        initialDateTime: DateTime(2026, 1, 1, initialTime.hour, initialTime.minute),
+                        initialDateTime: DateTime(
+                          2026,
+                          1,
+                          1,
+                          initialTime.hour,
+                          initialTime.minute,
+                        ),
                         onDateTimeChanged: (DateTime dateTime) {
-                          selectedTime = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+                          selectedTime = TimeOfDay(
+                            hour: dateTime.hour,
+                            minute: dateTime.minute,
+                          );
                           HapticFeedback.selectionClick();
                         },
                       ),
@@ -600,7 +686,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             foregroundColor: p.text2,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: Text('cancel'.localized(context), style: const TextStyle(fontWeight: FontWeight.w700)),
+                          child: Text(
+                            'cancel'.localized(context),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -612,14 +701,24 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             foregroundColor: Colors.white,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                          child: Text('okay'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
+                          child: Text(
+                            'okay'.localized(context),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: math.max(16.0, MediaQuery.of(context).padding.bottom)),
+                  SizedBox(
+                    height: math.max(
+                      16.0,
+                      MediaQuery.of(context).padding.bottom,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -636,7 +735,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   AppUpdateInfo? updateInfo;
   bool checkingUpdates = false;
 
-  final TextEditingController _settingsSearchController = TextEditingController();
+  final TextEditingController _settingsSearchController =
+      TextEditingController();
   final FocusNode _settingsSearchFocusNode = FocusNode();
   String _settingsQuery = '';
   List<String> _recentSearches = [];
@@ -725,8 +825,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
-
-
   Future<void> _loadRecentSearches() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -737,7 +835,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Future<void> _saveRecentSearch(String term) async {
     if (term.trim().isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
-    final updated = [term, ..._recentSearches.where((t) => t != term)].take(5).toList();
+    final updated = [
+      term,
+      ..._recentSearches.where((t) => t != term),
+    ].take(5).toList();
     await prefs.setStringList('recent_settings_searches', updated);
     setState(() => _recentSearches = updated);
   }
@@ -793,21 +894,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return 'Action required';
   }
 
-  List<({
-    String title,
-    String subtitle,
-    String category,
-    IconData icon,
-    List<String> keywords,
-    String kind,
-    bool? boolValue,
-    ValueChanged<bool>? onBoolChanged,
-    String? status,
-  })> get _settingsSearchResults {
+  List<
+    ({
+      String title,
+      String subtitle,
+      String category,
+      IconData icon,
+      List<String> keywords,
+      String kind,
+      bool? boolValue,
+      ValueChanged<bool>? onBoolChanged,
+      String? status,
+    })
+  >
+  get _settingsSearchResults {
     final query = _settingsQuery.trim().toLowerCase();
     if (query.isEmpty) return [];
 
-    final String deletedSubtitle = (widget.lastDeletedPreview != null && widget.lastDeletedPreview!.isNotEmpty)
+    final String deletedSubtitle =
+        (widget.lastDeletedPreview != null &&
+            widget.lastDeletedPreview!.isNotEmpty)
         ? widget.lastDeletedPreview!
         : 'Restore or permanently remove deleted moments';
 
@@ -821,7 +927,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       bool? boolValue,
       ValueChanged<bool>? onBoolChanged,
       String? status,
-    }) item({
+    })
+    item({
       required String title,
       required String subtitle,
       required String category,
@@ -831,18 +938,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
       bool? boolValue,
       ValueChanged<bool>? onBoolChanged,
       String? status,
-    }) =>
-        (
-          title: title,
-          subtitle: subtitle,
-          category: category,
-          icon: icon,
-          keywords: keywords,
-          kind: kind,
-          boolValue: boolValue,
-          onBoolChanged: onBoolChanged,
-          status: status,
-        );
+    }) => (
+      title: title,
+      subtitle: subtitle,
+      category: category,
+      icon: icon,
+      keywords: keywords,
+      kind: kind,
+      boolValue: boolValue,
+      onBoolChanged: onBoolChanged,
+      status: status,
+    );
 
     final all = [
       item(
@@ -861,7 +967,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
         subtitle: 'Select application language',
         category: 'Language',
         icon: Icons.language_rounded,
-        keywords: ['language', 'locale', 'translate', 'english', 'hindi', 'spanish', 'espanol'],
+        keywords: [
+          'language',
+          'locale',
+          'translate',
+          'english',
+          'hindi',
+          'spanish',
+          'espanol',
+        ],
         kind: 'selector',
         boolValue: null,
         onBoolChanged: null,
@@ -1029,7 +1143,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
         subtitle: 'Default mode when opening the app',
         category: 'Capture',
         icon: Icons.bolt_rounded,
-        keywords: ['startup', 'mode', 'default', 'capture', 'two-way', 'single'],
+        keywords: [
+          'startup',
+          'mode',
+          'default',
+          'capture',
+          'two-way',
+          'single',
+        ],
         kind: 'selector',
         boolValue: null,
         onBoolChanged: null,
@@ -1348,7 +1469,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
         subtitle: 'Erase every moment and note',
         category: 'Reset',
         icon: Icons.delete_outline_rounded,
-        keywords: ['clear', 'erase', 'delete everything', 'factory reset', 'wipe'],
+        keywords: [
+          'clear',
+          'erase',
+          'delete everything',
+          'factory reset',
+          'wipe',
+        ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
@@ -1486,10 +1613,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
       item(
         title: 'Reminders',
-        subtitle: 'Daily, inactivity, weekly, and monthly notification reminders',
+        subtitle:
+            'Daily, inactivity, weekly, and monthly notification reminders',
         category: 'Reminders',
         icon: Icons.notifications_active_outlined,
-        keywords: ['reminders', 'notifications', 'daily', 'weekly', 'monthly', 'inactivity', 'alerts', 'log'],
+        keywords: [
+          'reminders',
+          'notifications',
+          'daily',
+          'weekly',
+          'monthly',
+          'inactivity',
+          'alerts',
+          'log',
+        ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
@@ -1562,7 +1699,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       final titleLoc = item.title.localized(context).toLowerCase();
       final subtitle = item.subtitle.toLowerCase();
       final subtitleLoc = item.subtitle.localized(context).toLowerCase();
-      
+
       if (title.contains(query) || titleLoc.contains(query)) return true;
       if (subtitle.contains(query) || subtitleLoc.contains(query)) return true;
       return item.keywords.any((k) => k.contains(query));
@@ -1646,7 +1783,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       color: p.accent.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.science_rounded, color: p.accent, size: 24),
+                    child: Icon(
+                      Icons.science_rounded,
+                      color: p.accent,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Text(
@@ -1732,7 +1873,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       const SizedBox(height: 3),
                       Text(
                         'NoteKar has automatically scaled back live animations and blur effects to preserve battery and maintain maximum responsiveness on your device hardware.',
-                        style: TextStyle(color: p.text2, fontSize: 12, height: 1.35),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 12,
+                          height: 1.35,
+                        ),
                       ),
                     ],
                   ),
@@ -1780,14 +1925,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
           p: p,
           title: 'Hardware Diagnostics',
           children: [
-            DiagnosticRow(p: p, label: 'Performance Tier', value: engine.tier.name.toUpperCase()),
-            DiagnosticRow(p: p, label: 'RAM Capacity', value: '${engine.ramGb} GB'),
-            DiagnosticRow(p: p, label: 'CPU Cores', value: '${engine.processors} Cores'),
-            DiagnosticRow(p: p, label: 'System Blur', value: engine.supportsBlur ? 'Supported' : 'Hardware Limited'),
-            DiagnosticRow(p: p, label: 'Live Animations', value: engine.supportsAdvancedAnimations ? 'High Performance' : 'Optimized'),
+            DiagnosticRow(
+              p: p,
+              label: 'Performance Tier',
+              value: engine.tier.name.toUpperCase(),
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'RAM Capacity',
+              value: '${engine.ramGb} GB',
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'CPU Cores',
+              value: '${engine.processors} Cores',
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'System Blur',
+              value: engine.supportsBlur ? 'Supported' : 'Hardware Limited',
+            ),
+            DiagnosticRow(
+              p: p,
+              label: 'Live Animations',
+              value: engine.supportsAdvancedAnimations
+                  ? 'High Performance'
+                  : 'Optimized',
+            ),
           ],
         ),
-        
+
         SettingsPageDescription(
           p: p,
           text: 'Technical stats about your device and the Adaptive Engine.',
@@ -1819,7 +1986,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
-                  child: Image.asset('icon-maskable-512.png', fit: BoxFit.cover),
+                  child: Image.asset(
+                    'icon-maskable-512.png',
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -1858,7 +2028,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   const SizedBox(height: 8),
                   Text(
                     'NoteKar is built using Flutter and several high-quality open source packages. You can view the full legal notices and individual package licenses below.',
-                    style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 14,
+                      height: 1.45,
+                    ),
                   ),
                 ],
               ),
@@ -1875,7 +2049,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
               padding: const EdgeInsets.all(12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset('icon-maskable-512.png', width: 64, height: 64),
+                child: Image.asset(
+                  'icon-maskable-512.png',
+                  width: 64,
+                  height: 64,
+                ),
               ),
             ),
           ),
@@ -1887,7 +2065,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          child: const Text('View Full Licenses', style: TextStyle(fontWeight: FontWeight.w800)),
+          child: const Text(
+            'View Full Licenses',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
         ),
         const SizedBox(height: spacing32),
       ],
@@ -1921,19 +2102,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
               p: p,
               icon: Icons.storage_rounded,
               title: 'Local Storage',
-              text: 'All moments and notes are stored locally on your device using an encrypted-ready database (Hive). No data is ever uploaded to a cloud server unless you manually export a backup file.',
+              text:
+                  'All moments and notes are stored locally on your device using an encrypted-ready database (Hive). No data is ever uploaded to a cloud server unless you manually export a backup file.',
             ),
             _PolicySection(
               p: p,
               icon: Icons.analytics_outlined,
               title: 'No Tracking',
-              text: 'We do not use any third-party analytics, tracking pixels, or advertising SDKs. Your app usage remains completely anonymous and private.',
+              text:
+                  'We do not use any third-party analytics, tracking pixels, or advertising SDKs. Your app usage remains completely anonymous and private.',
             ),
             _PolicySection(
               p: p,
               icon: Icons.wifi_rounded,
               title: 'Limited Connectivity',
-              text: 'The app only uses the internet to check for software updates on GitHub and to fetch occasional app notices if enabled. No personal data is transmitted during these checks.',
+              text:
+                  'The app only uses the internet to check for software updates on GitHub and to fetch occasional app notices if enabled. No personal data is transmitted during these checks.',
             ),
           ],
         ),
@@ -1941,7 +2125,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         FilledButton.icon(
           onPressed: () => widget.onOpenLink(privacyPolicyUrl),
           icon: const Icon(Icons.open_in_new_rounded, size: 18),
-          label: const Text('Full Online Policy', style: TextStyle(fontWeight: FontWeight.w800)),
+          label: const Text(
+            'Full Online Policy',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
           style: FilledButton.styleFrom(
             backgroundColor: p.accent,
             foregroundColor: Colors.white,
@@ -1983,13 +2170,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
               p: p,
               icon: Icons.gavel_rounded,
               title: 'App Usage',
-              text: 'NoteKar is provided "as is" for personal use. You are responsible for your own data backups and for ensuring your use of the app complies with local laws.',
+              text:
+                  'NoteKar is provided "as is" for personal use. You are responsible for your own data backups and for ensuring your use of the app complies with local laws.',
             ),
             _PolicySection(
               p: p,
               icon: Icons.code_rounded,
               title: 'Open Source',
-              text: 'NoteKar is open source software. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.',
+              text:
+                  'NoteKar is open source software. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.',
             ),
           ],
         ),
@@ -1997,7 +2186,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         FilledButton.icon(
           onPressed: () => widget.onOpenLink(termsUrl),
           icon: const Icon(Icons.open_in_new_rounded, size: 18),
-          label: const Text('Full Online Terms', style: TextStyle(fontWeight: FontWeight.w800)),
+          label: const Text(
+            'Full Online Terms',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
           style: FilledButton.styleFrom(
             backgroundColor: p.orange,
             foregroundColor: Colors.white,
@@ -2015,9 +2207,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Widget _diagnosticsPage(Palette p, List<Moment> entries, int todayCount) {
     final latest = entries.isEmpty
         ? 'No moments yet'
-        : relativeAge(
-            entries.map((entry) => entry.timestamp).reduce(math.max),
-          );
+        : relativeAge(entries.map((entry) => entry.timestamp).reduce(math.max));
     final lastChecked = widget.lastUpdateCheckedAt == null
         ? 'Not checked yet'
         : relativeAge(widget.lastUpdateCheckedAt!);
@@ -2032,11 +2222,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               label: 'App Version',
               value: 'v$appVersion ($appBuildNumber)',
             ),
-            DiagnosticRow(
-              p: p,
-              label: 'Build Date',
-              value: appBuildDate,
-            ),
+            DiagnosticRow(p: p, label: 'Build Date', value: appBuildDate),
             DiagnosticRow(
               p: p,
               label: 'Moments',
@@ -2098,8 +2284,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
           ),
         ),
-        
-        SettingsPageDescription(p: p, text: 'Diagnostics help in troubleshooting. Copying them does not send any data automatically.'),
+
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Diagnostics help in troubleshooting. Copying them does not send any data automatically.',
+        ),
       ],
     );
   }
@@ -2168,7 +2358,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
         SettingsPageDescription(
           p: p,
           showIcon: true,
-          text: 'App Icons change the Android launcher icon. Note: Some launchers may take a few seconds to update.',
+          text:
+              'App Icons change the Android launcher icon. Note: Some launchers may take a few seconds to update.',
         ),
       ],
     );
@@ -2232,19 +2423,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
           accentName: accentColor,
         ),
         onOpenLink: widget.onOpenLink,
-        blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
+        blur:
+            !reduceMotion &&
+            enableTranslucency &&
+            AdaptiveEngine().supportsBlur,
       ),
     );
   }
 
   Widget _updateCenterPage(Palette p) {
     final availableVersion = _availableVersion;
-    final cleanVersion = availableVersion.startsWith('v') ? availableVersion : 'v$availableVersion';
+    final cleanVersion = availableVersion.startsWith('v')
+        ? availableVersion
+        : 'v$availableVersion';
     final updateAvailable = _updateAvailable;
     final upToDate = _upToDate;
 
     String formatDate(DateTime dt) {
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
     }
 
@@ -2270,7 +2479,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
-                  child: Image.asset('icon-maskable-512.png', fit: BoxFit.cover),
+                  child: Image.asset(
+                    'icon-maskable-512.png',
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: spacing20),
@@ -2343,13 +2555,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: updateInfo?.isSecurity == true
                                 ? p.red.withValues(alpha: 0.15)
                                 : (updateInfo?.isImportant == true
-                                    ? p.orange.withValues(alpha: 0.15)
-                                    : p.green.withValues(alpha: 0.15)),
+                                      ? p.orange.withValues(alpha: 0.15)
+                                      : p.green.withValues(alpha: 0.15)),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
@@ -2358,8 +2573,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               color: updateInfo?.isSecurity == true
                                   ? p.red
                                   : (updateInfo?.isImportant == true
-                                      ? p.orange
-                                      : p.green),
+                                        ? p.orange
+                                        : p.green),
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                             ),
@@ -2387,7 +2602,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ),
                     ],
-                    if (updateInfo?.body != null && updateInfo!.body.isNotEmpty) ...[
+                    if (updateInfo?.body != null &&
+                        updateInfo!.body.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Text(
                         "What's New:",
@@ -2448,8 +2664,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                     color: p.green.withValues(alpha: 0.12),
-                     shape: BoxShape.circle,
+                    color: p.green.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.check_rounded, color: p.green, size: 36),
                 ),
@@ -2513,7 +2729,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         SettingsPageDescription(
           p: p,
-          text: 'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
+          text:
+              'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
           bottomPadding: spacing48,
         ),
       ],
@@ -2540,12 +2757,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
       },
       child: AppSheet(
         p: p,
-        title: category == 'Reminder Message' 
-            ? (_editingReminderType == 'daily' 
-                ? 'Daily Reminder Message'.localized(context) 
-                : (_editingReminderType == 'weekly' 
-                    ? 'Weekly Reminder Message'.localized(context) 
-                    : 'Monthly Reminder Message'.localized(context)))
+        title: category == 'Reminder Message'
+            ? (_editingReminderType == 'daily'
+                  ? 'Daily Reminder Message'.localized(context)
+                  : (_editingReminderType == 'weekly'
+                        ? 'Weekly Reminder Message'.localized(context)
+                        : 'Monthly Reminder Message'.localized(context)))
             : (category ?? 'Settings').localized(context),
         onBack: category != null ? _popCategory : null,
         docked: true,
@@ -2559,7 +2776,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
           child: AnimatedSwitcher(
             duration: Duration(milliseconds: engine.isLowEnd ? 120 : 180),
-            reverseDuration: Duration(milliseconds: engine.isLowEnd ? 100 : 140),
+            reverseDuration: Duration(
+              milliseconds: engine.isLowEnd ? 100 : 140,
+            ),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             transitionBuilder: (Widget child, Animation<double> animation) {
@@ -2568,9 +2787,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
               }
               final forward = _categoryStack.length >= _prevStackLength;
               final begin = Offset(forward ? 0.25 : -0.25, 0.0);
-              final slide = Tween<Offset>(begin: begin, end: Offset.zero).animate(animation);
-              final fade = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-              
+              final slide = Tween<Offset>(
+                begin: begin,
+                end: Offset.zero,
+              ).animate(animation);
+              final fade = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              );
+
               return FadeTransition(
                 opacity: fade,
                 child: SlideTransition(position: slide, child: child),
@@ -2585,2715 +2810,4408 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       controller: category == null ? _activeController : null,
                       physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
-              if (category == null) ...[
-                SliverToBoxAdapter(
-                  child: AppSheetLargeTitle(
-                    p: p,
-                    title: 'Settings',
-                    scrollController: _activeController,
-                  ),
-                ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SliverStickyHeaderDelegate(
-                    height: 64,
-                    child: Container(
-                      color: p.surface.withValues(
-                        alpha: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur ? 0.65 : 1.0,
-                      ),
-                      padding: const EdgeInsets.only(bottom: spacing8),
-                      child: SettingsSearchBox(
-                        p: p,
-                        controller: _settingsSearchController,
-                        readOnly: true,
-                        onTap: () => _openCategory('Search'),
-                        onChanged: (value) {
-                          setState(() => _settingsQuery = value);
-                          if (_activeController.hasClients) {
-                            _activeController.jumpTo(0.0);
-                          }
-                        },
-                        onClear: () {
-                          setState(() {
-                            _settingsQuery = '';
-                            _settingsSearchController.clear();
-                          });
-                          if (_activeController.hasClients) {
-                            _activeController.jumpTo(0.0);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                      SettingsGroup(
-                        p: p,
-                        insetDividers: true,
-                        children: [
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.brush_rounded,
-                            title: 'Personalization',
-                            status: theme[0].toUpperCase() + theme.substring(1),
-                            color: p.accent,
-                            onTap: () => _openCategory('Personalization'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.bolt_rounded,
-                            title: 'Logging',
-                            status: defaultMode == 'single' ? 'Single' : 'Two-Way',
-                            color: p.green,
-                            onTap: () => _openCategory('Logging'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.verified_user_rounded,
-                            title: 'Privacy & Security',
-                            status: privacyLock ? 'On' : 'Off',
-                            color: p.green,
-                            onTap: () => _openCategory('Privacy & Security'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.storage_rounded,
-                            title: 'Data & Backup'.localized(context),
-                            status: '${entries.length} ${'Logs'.localized(context)}',
-                            color: p.green,
-                            onTap: () => _openCategory('Data & Backup'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.update_rounded,
-                            title: 'Updates & Notices',
-                            status: 'v$appVersion',
-                            color: p.accent,
-                            onTap: () => _openCategory('Updates & Notices'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.auto_stories_rounded,
-                            title: 'Help & Guides',
-                            status: 'Docs',
-                            color: p.accent,
-                            onTap: () => _openCategory('Help & Guides'),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.settings_suggest_rounded,
-                            title: 'Advanced',
-                            status: 'Tools',
-                            color: p.orange,
-                            onTap: () => _openCategory('Advanced'),
-                          ),
-                        ],
-                      ),
-                      SettingsPageDescription(
-                        p: p,
-                        text: 'Personalize and configure NoteKar to fit your specific workflow.',
-                      ),
-                      const SizedBox(height: spacing16),
-                      SettingsGroup(
-                        p: p,
-                        insetDividers: true,
-                        title: 'Support & Community',
-                        children: [
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.coffee_rounded,
-                            title: 'Buy me a Coffee',
-                            color: const Color(0xFFFFDD00),
-                            rowKind: 'link',
-                            onTap: () => widget.onOpenLink(coffeeLink),
-                          ),
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.feedback_rounded,
-                            title: 'Feedback',
-                            color: p.green,
-                            rowKind: 'popup',
-                            onTap: _openFeedback,
-                          ),
-                          SettingsRow(
-                            p: p,
-                            customIcon: GithubIcon(size: 16, color: p.text),
-                            title: 'GitHub',
-                            color: p.text,
-                            rowKind: 'link',
-                            onTap: () => widget.onOpenLink(githubRepo),
-                          ),
-                        ],
-                      ),
-                      if (_updateAvailable) ...[
-                        const SizedBox(height: spacing16),
-                        PressableScale(
-                          onTap: () => _openCategory('Update Center'),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: p.surface3,
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(color: p.border, width: 1.0),
+                        if (category == null) ...[
+                          SliverToBoxAdapter(
+                            child: AppSheetLargeTitle(
+                              p: p,
+                              title: 'Settings',
+                              scrollController: _activeController,
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 30,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                    color: p.surface2,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.system_update_rounded, color: p.text, size: 16),
+                          ),
+                          SliverPersistentHeader(
+                            pinned: true,
+                            delegate: SliverStickyHeaderDelegate(
+                              height: 64,
+                              child: Container(
+                                color: p.surface.withValues(
+                                  alpha:
+                                      !reduceMotion &&
+                                          enableTranslucency &&
+                                          AdaptiveEngine().supportsBlur
+                                      ? 0.65
+                                      : 1.0,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          updateStatus,
-                                          style: TextStyle(
-                                            color: p.text,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
+                                padding: const EdgeInsets.only(
+                                  bottom: spacing8,
+                                ),
+                                child: SettingsSearchBox(
+                                  p: p,
+                                  controller: _settingsSearchController,
+                                  readOnly: true,
+                                  onTap: () => _openCategory('Search'),
+                                  onChanged: (value) {
+                                    setState(() => _settingsQuery = value);
+                                    if (_activeController.hasClients) {
+                                      _activeController.jumpTo(0.0);
+                                    }
+                                  },
+                                  onClear: () {
+                                    setState(() {
+                                      _settingsQuery = '';
+                                      _settingsSearchController.clear();
+                                    });
+                                    if (_activeController.hasClients) {
+                                      _activeController.jumpTo(0.0);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.brush_rounded,
+                                    title: 'Personalization',
+                                    status:
+                                        theme[0].toUpperCase() +
+                                        theme.substring(1),
+                                    color: p.accent,
+                                    onTap: () =>
+                                        _openCategory('Personalization'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.bolt_rounded,
+                                    title: 'Logging',
+                                    status: defaultMode == 'single'
+                                        ? 'Single'
+                                        : 'Two-Way',
+                                    color: p.green,
+                                    onTap: () => _openCategory('Logging'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.verified_user_rounded,
+                                    title: 'Privacy & Security',
+                                    status: privacyLock ? 'On' : 'Off',
+                                    color: p.green,
+                                    onTap: () =>
+                                        _openCategory('Privacy & Security'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.storage_rounded,
+                                    title: 'Data & Backup'.localized(context),
+                                    status:
+                                        '${entries.length} ${'Logs'.localized(context)}',
+                                    color: p.green,
+                                    onTap: () => _openCategory('Data & Backup'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.update_rounded,
+                                    title: 'Updates & Notices',
+                                    status: 'v$appVersion',
+                                    color: p.accent,
+                                    onTap: () =>
+                                        _openCategory('Updates & Notices'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.auto_stories_rounded,
+                                    title: 'Help & Guides',
+                                    status: 'Docs',
+                                    color: p.accent,
+                                    onTap: () => _openCategory('Help & Guides'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.settings_suggest_rounded,
+                                    title: 'Advanced',
+                                    status: 'Tools',
+                                    color: p.orange,
+                                    onTap: () => _openCategory('Advanced'),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Personalize and configure NoteKar to fit your specific workflow.',
+                              ),
+                              const SizedBox(height: spacing16),
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                title: 'Support & Community',
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.coffee_rounded,
+                                    title: 'Buy me a Coffee',
+                                    color: const Color(0xFFFFDD00),
+                                    rowKind: 'link',
+                                    onTap: () => widget.onOpenLink(coffeeLink),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.feedback_rounded,
+                                    title: 'Feedback',
+                                    color: p.green,
+                                    rowKind: 'popup',
+                                    onTap: _openFeedback,
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    customIcon: GithubIcon(
+                                      size: 16,
+                                      color: p.text,
+                                    ),
+                                    title: 'GitHub',
+                                    color: p.text,
+                                    rowKind: 'link',
+                                    onTap: () => widget.onOpenLink(githubRepo),
+                                  ),
+                                ],
+                              ),
+                              if (_updateAvailable) ...[
+                                const SizedBox(height: spacing16),
+                                PressableScale(
+                                  onTap: () => _openCategory('Update Center'),
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: p.surface3,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: p.border,
+                                        width: 1.0,
                                       ),
-                                      const SizedBox(width: 8),
-                                      () {
-                                        final date = updateInfo?.date;
-                                        final isVeryOld = date != null && 
-                                            DateTime.now().difference(date).inDays > 7;
-                                        final isUrgent = isVeryOld || (updateInfo?.isImportant ?? false);
-                                        return Container(
-                                          width: 8,
-                                          height: 8,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 30,
+                                          height: 30,
                                           decoration: BoxDecoration(
-                                            color: isUrgent ? p.red : p.orange,
+                                            color: p.surface2,
                                             shape: BoxShape.circle,
                                           ),
-                                        );
-                                      }(),
+                                          child: Icon(
+                                            Icons.system_update_rounded,
+                                            color: p.text,
+                                            size: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  updateStatus,
+                                                  style: TextStyle(
+                                                    color: p.text,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              () {
+                                                final date = updateInfo?.date;
+                                                final isVeryOld =
+                                                    date != null &&
+                                                    DateTime.now()
+                                                            .difference(date)
+                                                            .inDays >
+                                                        7;
+                                                final isUrgent =
+                                                    isVeryOld ||
+                                                    (updateInfo?.isImportant ??
+                                                        false);
+                                                return Container(
+                                                  width: 8,
+                                                  height: 8,
+                                                  decoration: BoxDecoration(
+                                                    color: isUrgent
+                                                        ? p.red
+                                                        : p.orange,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                );
+                                              }(),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.chevron_right_rounded,
+                                          color: p.text3,
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: spacing24),
+                              SettingsAboutBlock(
+                                p: p,
+                                onOpenLink: widget.onOpenLink,
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        ],
+                        if (show('Search')) ...[
+                          SliverPersistentHeader(
+                            pinned: true,
+                            delegate: SliverStickyHeaderDelegate(
+                              height: 64,
+                              child: Container(
+                                color: p.surface.withValues(
+                                  alpha:
+                                      !reduceMotion &&
+                                          enableTranslucency &&
+                                          AdaptiveEngine().supportsBlur
+                                      ? 0.65
+                                      : 1.0,
+                                ),
+                                padding: const EdgeInsets.only(
+                                  bottom: spacing8,
+                                ),
+                                child: SettingsSearchBox(
+                                  p: p,
+                                  controller: _settingsSearchController,
+                                  focusNode: _settingsSearchFocusNode,
+                                  onChanged: (value) {
+                                    setState(() => _settingsQuery = value);
+                                    if (_activeController.hasClients) {
+                                      _activeController.jumpTo(0.0);
+                                    }
+                                  },
+                                  onClear: () {
+                                    setState(() {
+                                      _settingsQuery = '';
+                                      _settingsSearchController.clear();
+                                    });
+                                    if (_activeController.hasClients) {
+                                      _activeController.jumpTo(0.0);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              if (_settingsQuery.trim().isEmpty &&
+                                  _recentSearches.isNotEmpty) ...[
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    8,
+                                    20,
+                                    12,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'RECENT SEARCHES',
+                                        style: TextStyle(
+                                          color: p.text3,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.2,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          final prefs =
+                                              await SharedPreferences.getInstance();
+                                          await prefs.remove(
+                                            'recent_settings_searches',
+                                          );
+                                          setState(() => _recentSearches = []);
+                                        },
+                                        child: Text(
+                                          'Clear',
+                                          style: TextStyle(
+                                            color: p.accent,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: spacing24),
-                      SettingsAboutBlock(p: p, onOpenLink: widget.onOpenLink),
-                      const SizedBox(height: spacing48),
-                    ],
-                  ),
-                ),
-              ],
-              if (show('Search')) ...[
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SliverStickyHeaderDelegate(
-                    height: 64,
-                    child: Container(
-                      color: p.surface.withValues(
-                        alpha: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur ? 0.65 : 1.0,
-                      ),
-                      padding: const EdgeInsets.only(bottom: spacing8),
-                      child: SettingsSearchBox(
-                        p: p,
-                        controller: _settingsSearchController,
-                        focusNode: _settingsSearchFocusNode,
-                        onChanged: (value) {
-                          setState(() => _settingsQuery = value);
-                          if (_activeController.hasClients) {
-                            _activeController.jumpTo(0.0);
-                          }
-                        },
-                        onClear: () {
-                          setState(() {
-                            _settingsQuery = '';
-                            _settingsSearchController.clear();
-                          });
-                          if (_activeController.hasClients) {
-                            _activeController.jumpTo(0.0);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    if (_settingsQuery.trim().isEmpty && _recentSearches.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'RECENT SEARCHES',
-                              style: TextStyle(color: p.text3, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.2),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                final prefs = await SharedPreferences.getInstance();
-                                await prefs.remove('recent_settings_searches');
-                                setState(() => _recentSearches = []);
-                              },
-                              child: Text('Clear', style: TextStyle(color: p.accent, fontSize: 12, fontWeight: FontWeight.w600)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SettingsGroup(
-                        p: p,
-                        insetDividers: true,
-                        children: [
-                          for (final term in _recentSearches)
-                            SettingsRow(
-                              p: p,
-                              icon: Icons.history_rounded,
-                              title: term,
-                              color: p.text3,
-                              onTap: () {
-                                _settingsSearchController.text = term;
-                                setState(() => _settingsQuery = term);
-                                _saveRecentSearch(term);
-                              },
-                            ),
-                        ],
-                      ),
-                    ] else if (_settingsQuery.trim().isNotEmpty) ...[
-                      SettingsGroup(
-                        p: p,
-                        insetDividers: true,
-                        children: [
-                          for (final result in _settingsSearchResults)
-                            if (result.kind == 'switch')
-                              SettingsSwitchRow(
-                                p: p,
-                                icon: result.icon,
-                                title: result.title,
-                                subtitle: result.subtitle,
-                                value: result.boolValue!,
-                                onChanged: result.onBoolChanged!,
-                                color: result.title == 'Confirm Delete' ? p.red : p.accent,
-                              )
-                            else
-                              SettingsRow(
-                                p: p,
-                                icon: result.icon,
-                                title: result.title,
-                                subtitle: result.subtitle,
-                                status: result.status,
-                                highlight: _settingsQuery,
-                                color: result.title == 'Reset All Data' || result.title == 'Factory Reset' ? p.red : p.accent,
-                                onTap: () {
-                                  _saveRecentSearch(result.title);
-                                  if (result.title == 'Reset All Data') {
-                                    unawaited(_confirmResetAll(p));
-                                    return;
-                                  }
-                                  if (result.title == 'Factory Reset') {
-                                    unawaited(_confirmFactoryReset(p));
-                                    return;
-                                  }
-                                  if (result.title == 'Reset Settings Only') {
-                                    unawaited(_confirmResetSettings());
-                                    return;
-                                  }
-                                  if (result.title == 'Recently Deleted') {
-                                    if (widget.onOpenTrash != null) {
-                                      widget.onOpenTrash!();
-                                    }
-                                    return;
-                                  }
-                                  _openCategory(result.category);
-                                },
-                              ),
-                          if (_settingsSearchResults.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 64),
-                              child: HIGEmptyState(
-                                p: p,
-                                icon: Icons.search_off_rounded,
-                                title: 'No Results',
-                                message: 'No settings match "${_settingsQuery.trim()}". Try different keywords or check your spelling.',
-                                compact: true,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              ],
-              if (show('Personalization'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.dark_mode_outlined,
-                          title: 'Display',
-                          status: theme[0].toUpperCase() + theme.substring(1),
-                          color: p.accent,
-                          onTap: () => _openCategory('Display', parent: 'Personalization'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.color_lens_outlined,
-                          title: 'Accent Color',
-                          status: accentColor[0].toUpperCase() + accentColor.substring(1),
-                          color: p.accent,
-                          onTap: () => _openCategory('Accent Color', parent: 'Personalization'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.apps_rounded,
-                          title: 'App Icons',
-                          status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
-                          color: p.orange,
-                          onTap: () => _openCategory('App Icons', parent: 'Personalization'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.language_rounded,
-                          title: 'Language',
-                          status: switch (currentLocale) {
-                            'en' => 'English',
-                            'hi' => 'हिन्दी',
-                            'es' => 'Español',
-                            _ => 'System Default',
-                          },
-                          color: p.accent,
-                          onTap: () => _openCategory('Language', parent: 'Personalization'),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'These settings refine the interface aesthetic and do not modify your saved data.',
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Display'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Theme',
-                      showDividers: false,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: ThemeChoice(
+                                SettingsGroup(
                                   p: p,
-                                  label: 'Dark',
-                                  active: theme == 'dark',
-                                  color: const Color(0xFF1C1C1E),
-                                  onTap: () {
-                                    if (theme == 'dark') return;
-                                    HapticFeedback.selectionClick();
-                                    setState(() => theme = 'dark');
-                                    widget.onTheme('dark');
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ThemeChoice(
-                                  p: p,
-                                  label: 'Light',
-                                  active: theme == 'light',
-                                  color: const Color(0xFFF2F2F7),
-                                  onTap: () {
-                                    if (theme == 'light') return;
-                                    HapticFeedback.selectionClick();
-                                    setState(() => theme = 'light');
-                                    widget.onTheme('light');
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ThemeChoice(
-                                  p: p,
-                                  label: 'AMOLED',
-                                  active: theme == 'amoled',
-                                  color: const Color(0xFF000000),
-                                  onTap: () {
-                                    if (theme == 'amoled') return;
-                                    HapticFeedback.selectionClick();
-                                    setState(() => theme = 'amoled');
-                                    widget.onTheme('amoled');
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Select a theme that best suits your environment.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Show Seconds',
-                          color: p.accent,
-                          value: showSeconds,
-                          onChanged: (value) {
-                            setState(() => showSeconds = value);
-                            widget.onShowSeconds(value);
-                          },
-                        ),
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Highlight Seconds',
-                          color: p.accent,
-                          value: showSeconds && highlightSeconds,
-                          enabled: showSeconds,
-                          disabledMessage: 'Enable Show Seconds first',
-                          onDisabledTap: widget.onFeedback,
-                          onChanged: (value) {
-                            if (!showSeconds) return;
-                            setState(() => highlightSeconds = value);
-                            widget.onHighlightSeconds(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Configure the home screen clock and visual feedback.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Button Labels',
-                          color: p.green,
-                          value: buttonLabels,
-                          onChanged: (value) {
-                            setState(() => buttonLabels = value);
-                            widget.onButtonLabels(value);
-                          },
-                        ),
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'History Text',
-                          color: p.green,
-                          value: showHistoryText,
-                          onChanged: (value) {
-                            setState(() => showHistoryText = value);
-                            widget.onShowHistoryText(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Show descriptive text labels on the primary navigation and action buttons.'),
-                    
-                    SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Large Controls', color: p.orange, value: largeControls, onChanged: (value) { setState(() => largeControls = value); widget.onLargeControls(value); })]),
-                    SettingsPageDescription(p: p, text: 'Increases the size of interactive elements for easier tapping.'),
-                    
-                    SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Toolbar Backplate', color: p.accent, value: homeMenuPill, onChanged: (value) { setState(() => homeMenuPill = value); widget.onHomeMenuPill(value); })]),
-                    SettingsPageDescription(p: p, text: 'Adds a subtle glass-like container behind the home toolbar.'),
-                    
-                    if (AdaptiveEngine().supportsAdvancedAnimations) ...[
-                      SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Live Icon Motion', color: p.accent, value: !reduceMotion && homeMenuAnimations, enabled: !reduceMotion, disabledMessage: 'Disable Reduce Motion first', onDisabledTap: widget.onFeedback, onChanged: (value) async { if (reduceMotion) return; final applied = await widget.onHomeMenuAnimations(value); if (!mounted) return; setState(() { homeMenuAnimations = applied ? value : false; }); })]),
-                      SettingsPageDescription(p: p, text: 'Enables fluid physics for toolbar icons. Automatically scales based on CPU and RAM performance.'),
-                      
-                    ],
-                    if (AdaptiveEngine().supportsBlur) ...[
-                      SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Enable Translucency', color: p.accent, value: !reduceMotion && enableTranslucency, enabled: !reduceMotion, onDisabledTap: widget.onFeedback, onChanged: (value) { setState(() => enableTranslucency = value); widget.onTranslucency(value); })]),
-                      SettingsPageDescription(p: p, text: 'Applies real-time Gaussian blur to system surfaces. Requires a high-performance GPU tier.'),
-                      
-                    ],
-                    SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Last Saved Hint', color: p.accent, value: showLastSavedHint, onChanged: (value) { setState(() => showLastSavedHint = value); widget.onShowLastSavedHint(value); })]),
-                    SettingsPageDescription(p: p, text: 'Provides visual feedback for the time elapsed since your last moment.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Language'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        for (final entry in [
-                          (code: 'system', name: 'System Default'),
-                          (code: 'en', name: 'English'),
-                          (code: 'hi', name: 'हिन्दी (Hindi)'),
-                          (code: 'es', name: 'Español (Spanish)'),
-                        ])
-                          SettingsRow(
-                            p: p,
-                            title: entry.name,
-                            trailing: currentLocale == entry.code
-                                ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                                : const SizedBox.shrink(),
-                            onTap: () {
-                              if (currentLocale == entry.code) return;
-                              HapticFeedback.selectionClick();
-                              setState(() => currentLocale = entry.code);
-                              widget.onLocaleChanged(entry.code);
-                            },
-                          ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Select your preferred language for the application.'.localized(context),
-                    ),
-                    SettingsBetaNote(
-                      p: p,
-                      text: 'The current features on this page are under Beta stage.'.localized(context),
-                      onLearnMore: () => _showBetaInfoPopup(p),
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Accent Color'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      showDividers: false,
-                      children: [
-                        ColorChoiceSetting(
-                          p: p,
-                          value: accentColor,
-                          blur: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
-                          onChanged: (value) {
-                            if (value == accentColor) return;
-                            HapticFeedback.selectionClick();
-                            setState(() => accentColor = value);
-                            widget.onAccentColor(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Select an accent color for buttons and fluid interface highlights.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('App Icons'))
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: spacing8),
-                      _appIconsPage(p),
-                      const SizedBox(height: spacing48),
-                    ],
-                  ),
-                ),
-              if (show('Logging'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    ActivitySummaryCard(p: p, entries: entries),
-                    const SizedBox(height: 6),
-                    ActivityTrendsCard(p: p, entries: entries),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Visual overview of your logging frequency, 7-day activity trends, and average interval between moments.',
-                    ),
-                    const SizedBox(height: 12),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Logging Controls',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.touch_app_rounded,
-                          title: 'Capture',
-                          status: defaultMode == 'single' ? 'Single' : 'Two-Way',
-                          color: p.green,
-                          onTap: () => _openCategory('Capture', parent: 'Logging'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.history_rounded,
-                          title: 'Moments'.localized(context),
-                          status: '${entries.length} ${'Logs'.localized(context)}',
-                          color: p.orange,
-                          onTap: () => _openCategory('Moments', parent: 'Logging'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.notifications_active_outlined,
-                          title: 'Reminders',
-                          status: _getRemindersStatus(),
-                          color: p.accent,
-                          onTap: () => _openCategory('Reminders', parent: 'Logging'),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'These settings define how moments are recorded and prepared for export.',
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Capture'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Startup Mode',
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          title: 'Single',
-                          subtitle: 'Every tap records a standalone moment.',
-                          trailing: defaultMode == 'single' ? Icon(Icons.check_rounded, color: p.accent, size: 20) : const SizedBox.shrink(),
-                          onTap: () {
-                            if (defaultMode == 'single') return;
-                            setState(() => defaultMode = 'single');
-                            widget.onDefaultMode('single');
-                          },
-                        ),
-                        SettingsRow(
-                          p: p,
-                          title: 'Two-Way',
-                          subtitle: 'Sessions are recorded as IN and OUT pairs.',
-                          trailing: defaultMode == 'two-way' ? Icon(Icons.check_rounded, color: p.accent, size: 20) : const SizedBox.shrink(),
-                          onTap: () {
-                            if (defaultMode == 'two-way') return;
-                            setState(() => defaultMode = 'two-way');
-                            widget.onDefaultMode('two-way');
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Defines the primary logging mode active when the app launches.'),
-                    
-                    Glass(
-                      p: p,
-                      radius: 32,
-                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Tap Delay', style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15)),
-                              Text(delayLabel(tapDelay), style: TextStyle(color: p.text2, fontSize: 15)),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              DelayStepButton(
-                                p: p,
-                                icon: Icons.remove_rounded,
-                                enabled: (delayIndex < 0 ? 0 : delayIndex) > 0,
-                                onTap: () {
-                                  final current = delayIndex < 0 ? 0 : delayIndex;
-                                  final next = delayValues[math.max(0, current - 1)];
-                                  NotekarHaptics.selection('standard');
-                                  setState(() => tapDelay = next);
-                                  widget.onDelay(next);
-                                },
-                              ),
-                              Expanded(
-                                child: Column(
+                                  insetDividers: true,
                                   children: [
-                                    SliderTheme(
-                                      data: SliderThemeData(activeTrackColor: p.accent, inactiveTrackColor: p.surface3, thumbColor: Colors.white, overlayColor: p.accent.withValues(alpha: 0.12), trackHeight: 5, tickMarkShape: SliderTickMarkShape.noTickMark),
-                                      child: Slider(
-                                        min: 0, max: 6, divisions: 6,
-                                        value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
-                                        onChanged: (value) {
-                                          final next = delayValues[value.round()];
-                                          if (next == tapDelay) return;
-                                          NotekarHaptics.selection('standard');
-                                          setState(() => tapDelay = next);
-                                          widget.onDelay(next);
+                                    for (final term in _recentSearches)
+                                      SettingsRow(
+                                        p: p,
+                                        icon: Icons.history_rounded,
+                                        title: term,
+                                        color: p.text3,
+                                        onTap: () {
+                                          _settingsSearchController.text = term;
+                                          setState(() => _settingsQuery = term);
+                                          _saveRecentSearch(term);
                                         },
                                       ),
-                                    ),
-                                    Transform.translate(offset: const Offset(0, -4), child: SliderScale(p: p, activeValue: tapDelay)),
                                   ],
                                 ),
-                              ),
-                              DelayStepButton(
-                                p: p,
-                                icon: Icons.add_rounded,
-                                enabled: (delayIndex < 0 ? 0 : delayIndex) < delayValues.length - 1,
-                                onTap: () {
-                                  final current = delayIndex < 0 ? 0 : delayIndex;
-                                  final next = delayValues[math.min(delayValues.length - 1, current + 1)];
-                                  NotekarHaptics.selection('standard');
-                                  setState(() => tapDelay = next);
-                                  widget.onDelay(next);
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Tap Delay prevents accidental rapid-fire logging by setting a cooldown between captured moments.',
-                    ),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Require Note on Hold',
-                          color: p.orange,
-                          value: requireLongPressNote,
-                          onChanged: (value) {
-                            setState(() => requireLongPressNote = value);
-                            widget.onRequireLongPressNote(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Forces context entry for any moment captured via the long-press gesture.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Reminders'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    if (!_hasExactAlarmPermission)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: Glass(
-                          p: p,
-                          radius: 20,
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.warning_amber_rounded, color: p.orange, size: 24),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      'Alarms Permission Required'.localized(context),
-                                      style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'To trigger reminders precisely when the app is closed, NoteKar requires the "Alarms & Reminders" permission.'.localized(context),
-                                style: TextStyle(color: p.text2, fontSize: 13),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  HapticFeedback.selectionClick();
-                                  final success = await _fileChannel.invokeMethod<bool>('requestExactAlarmPermission') ?? false;
-                                  if (success) {
-                                    final granted = await _fileChannel.invokeMethod<bool>('canScheduleExactAlarms') ?? true;
-                                    setState(() => _hasExactAlarmPermission = granted);
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: p.orange,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('Grant Permission'.localized(context)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    if (!_ignoresBatteryOptimizations)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: Glass(
-                          p: p,
-                          radius: 20,
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.battery_alert_rounded, color: p.orange, size: 24),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      'Battery Optimization Active'.localized(context),
-                                      style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Aggressive battery cleaners on low-end devices can kill NoteKar in the background. Disable battery optimization to guarantee reminders fire 100% of the time.'.localized(context),
-                                style: TextStyle(color: p.text2, fontSize: 13),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  HapticFeedback.selectionClick();
-                                  final success = await _fileChannel.invokeMethod<bool>('requestIgnoreBatteryOptimizations') ?? false;
-                                  if (success) {
-                                    final ignores = await _fileChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ?? true;
-                                    setState(() => _ignoresBatteryOptimizations = ignores);
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: p.orange,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('Disable Battery Optimization'.localized(context)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    if (!_autoStartCardDismissed)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Glass(
-                          p: p,
-                          radius: 20,
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.autorenew_rounded, color: p.orange, size: 24),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      'Auto-Start & Background Activity'.localized(context),
-                                      style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.close_rounded, color: p.text3, size: 20),
-                                    onPressed: () async {
-                                      setState(() => _autoStartCardDismissed = true);
-                                      await _prefs?.setBool('notekar.autoStartCardDismissed', true);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'On devices like Xiaomi, Samsung, Oppo, Vivo, or Huawei, the OS restricts background alarms when swiped away from recents. Grant "Auto-Start" or allow "Background Activity" to ensure reminders trigger.'.localized(context),
-                                style: TextStyle(color: p.text2, fontSize: 13),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  HapticFeedback.selectionClick();
-                                  await _fileChannel.invokeMethod('openAutoStartSettings');
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: p.orange,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('Configure Settings'.localized(context)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    
-                    // Daily reminder group
-                    SettingsGroup(
-                      p: p,
-                      title: 'daily reminder'.localized(context).toUpperCase(),
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'daily reminder'.localized(context),
-                          color: p.accent,
-                          value: _dailyReminderEnabled,
-                          onChanged: (value) async {
-                            HapticFeedback.selectionClick();
-                            if (value) {
-                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
-                              if (!context.mounted) return;
-                              if (!granted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
-                                );
-                                return;
-                              }
-                            }
-                            setState(() => _dailyReminderEnabled = value);
-                            await _prefs?.setBool('reminder_daily_enabled', value);
-                            await _syncReminder('daily');
-                          },
-                        ),
-                        if (_dailyReminderEnabled) ...[
-                          SettingsRow(
-                            p: p,
-                            title: 'Time'.localized(context),
-                            status: _dailyReminderTime.format(context),
-                            color: p.accent,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final time = await _showIOSTimePicker(
-                                context,
-                                _dailyReminderTime,
-                              );
-                              if (time != null) {
-                                setState(() => _dailyReminderTime = time);
-                                await _prefs?.setInt('reminder_daily_hour', time.hour);
-                                await _prefs?.setInt('reminder_daily_minute', time.minute);
-                                await _syncReminder('daily');
-                              }
-                            },
-                          ),
-                          SettingsRow(
-                            p: p,
-                            title: 'Message'.localized(context),
-                            status: _dailyReminderBody.trim().isEmpty ? 'Empty'.localized(context) : 'Set'.localized(context),
-                            color: p.accent,
-                            onTap: () => _openReminderMessageEditor('daily'),
-                          ),
-                        ],
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Triggers a daily logging reminder alert at your chosen time.'.localized(context)),
-
-                    // Inactivity reminder group
-                    SettingsGroup(
-                      p: p,
-                      title: 'inactivity reminder'.localized(context).toUpperCase(),
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'inactivity reminder'.localized(context),
-                          color: p.orange,
-                          value: _inactivityReminderEnabled,
-                          onChanged: (value) async {
-                            HapticFeedback.selectionClick();
-                            if (value) {
-                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
-                              if (!context.mounted) return;
-                              if (!granted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
-                                );
-                                return;
-                              }
-                            }
-                            setState(() => _inactivityReminderEnabled = value);
-                            await _prefs?.setBool('reminder_inactivity_enabled', value);
-                            await _syncReminder('inactivity');
-                          },
-                        ),
-                        if (_inactivityReminderEnabled)
-                          SettingsRow(
-                            p: p,
-                            title: 'remind if inactive for'.localized(context),
-                            status: '${_inactivityIntervalMins ~/ 60} ${_inactivityIntervalMins == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
-                            color: p.orange,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final selected = await showDialog<int>(
-                                context: context,
-                                builder: (context) {
-                                  return SimpleDialog(
-                                    title: Text('remind if inactive for'.localized(context)),
-                                    children: [
-                                      for (final interval in [60, 120, 240, 480, 720, 1440])
-                                        SimpleDialogOption(
-                                          onPressed: () => Navigator.pop(context, interval),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                            child: Text(
-                                              '${interval ~/ 60} ${interval == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
-                                              style: TextStyle(color: p.text, fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
-                              );
-                              if (selected != null) {
-                                setState(() => _inactivityIntervalMins = selected);
-                                await _prefs?.setInt('reminder_inactivity_interval_mins', selected);
-                                await _syncReminder('inactivity');
-                              }
-                            },
-                          ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Reschedules a timer on every moment you record. Alerts you if you haven\'t logged anything in the selected interval.'.localized(context)),
-
-                    // Weekly reminder group
-                    SettingsGroup(
-                      p: p,
-                      title: 'weekly reminder'.localized(context).toUpperCase(),
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'weekly reminder'.localized(context),
-                          color: p.green,
-                          value: _weeklyReminderEnabled,
-                          onChanged: (value) async {
-                            HapticFeedback.selectionClick();
-                            if (value) {
-                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
-                              if (!context.mounted) return;
-                              if (!granted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
-                                );
-                                return;
-                              }
-                            }
-                            setState(() => _weeklyReminderEnabled = value);
-                            await _prefs?.setBool('reminder_weekly_enabled', value);
-                            await _syncReminder('weekly');
-                          },
-                        ),
-                        if (_weeklyReminderEnabled) ...[
-                          SettingsRow(
-                            p: p,
-                            title: 'days of week'.localized(context),
-                            status: _weeklyReminderDays.map((d) {
-                              return switch (d) {
-                                1 => 'Sun'.localized(context),
-                                2 => 'Mon'.localized(context),
-                                3 => 'Tue'.localized(context),
-                                4 => 'Wed'.localized(context),
-                                5 => 'Thu'.localized(context),
-                                6 => 'Fri'.localized(context),
-                                7 => 'Sat'.localized(context),
-                                _ => '',
-                              };
-                            }).join(', '),
-                            color: p.green,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final days = [1, 2, 3, 4, 5, 6, 7];
-                              final selectedDays = List<int>.from(_weeklyReminderDays);
-                              final updated = await showDialog<List<int>>(
-                                context: context,
-                                builder: (context) {
-                                  return StatefulBuilder(
-                                    builder: (context, setDialogState) {
-                                      return AlertDialog(
-                                        title: Text('days of week'.localized(context)),
-                                        content: SingleChildScrollView(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: days.map((day) {
-                                              final name = switch (day) {
-                                                1 => 'Sunday'.localized(context),
-                                                2 => 'Monday'.localized(context),
-                                                3 => 'Tuesday'.localized(context),
-                                                4 => 'Wednesday'.localized(context),
-                                                5 => 'Thursday'.localized(context),
-                                                6 => 'Friday'.localized(context),
-                                                7 => 'Saturday'.localized(context),
-                                                _ => '',
-                                              };
-                                              final contains = selectedDays.contains(day);
-                                              return CheckboxListTile(
-                                                title: Text(name, style: TextStyle(color: p.text)),
-                                                value: contains,
-                                                activeColor: p.accent,
-                                                onChanged: (val) {
-                                                  setDialogState(() {
-                                                    if (val == true) {
-                                                      selectedDays.add(day);
-                                                    } else {
-                                                      selectedDays.remove(day);
-                                                    }
-                                                  });
-                                                },
+                              ] else if (_settingsQuery.trim().isNotEmpty) ...[
+                                SettingsGroup(
+                                  p: p,
+                                  insetDividers: true,
+                                  children: [
+                                    for (final result in _settingsSearchResults)
+                                      if (result.kind == 'switch')
+                                        SettingsSwitchRow(
+                                          p: p,
+                                          icon: result.icon,
+                                          title: result.title,
+                                          subtitle: result.subtitle,
+                                          value: result.boolValue!,
+                                          onChanged: result.onBoolChanged!,
+                                          color:
+                                              result.title == 'Confirm Delete'
+                                              ? p.red
+                                              : p.accent,
+                                        )
+                                      else
+                                        SettingsRow(
+                                          p: p,
+                                          icon: result.icon,
+                                          title: result.title,
+                                          subtitle: result.subtitle,
+                                          status: result.status,
+                                          highlight: _settingsQuery,
+                                          color:
+                                              result.title ==
+                                                      'Reset All Data' ||
+                                                  result.title ==
+                                                      'Factory Reset'
+                                              ? p.red
+                                              : p.accent,
+                                          onTap: () {
+                                            _saveRecentSearch(result.title);
+                                            if (result.title ==
+                                                'Reset All Data') {
+                                              unawaited(_confirmResetAll(p));
+                                              return;
+                                            }
+                                            if (result.title ==
+                                                'Factory Reset') {
+                                              unawaited(
+                                                _confirmFactoryReset(p),
                                               );
-                                            }).toList(),
-                                          ),
+                                              return;
+                                            }
+                                            if (result.title ==
+                                                'Reset Settings Only') {
+                                              unawaited(
+                                                _confirmResetSettings(),
+                                              );
+                                              return;
+                                            }
+                                            if (result.title ==
+                                                'Recently Deleted') {
+                                              if (widget.onOpenTrash != null) {
+                                                widget.onOpenTrash!();
+                                              }
+                                              return;
+                                            }
+                                            _openCategory(result.category);
+                                          },
                                         ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, selectedDays),
-                                            child: Text('okay'.localized(context)),
-                                          ),
-                                        ],
-                                      );
+                                    if (_settingsSearchResults.isEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 64),
+                                        child: HIGEmptyState(
+                                          p: p,
+                                          icon: Icons.search_off_rounded,
+                                          title: 'No Results',
+                                          message:
+                                              'No settings match "${_settingsQuery.trim()}". Try different keywords or check your spelling.',
+                                          compact: true,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        ],
+                        if (show('Personalization'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.dark_mode_outlined,
+                                    title: 'Display',
+                                    status:
+                                        theme[0].toUpperCase() +
+                                        theme.substring(1),
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Display',
+                                      parent: 'Personalization',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.color_lens_outlined,
+                                    title: 'Accent Color',
+                                    status:
+                                        accentColor[0].toUpperCase() +
+                                        accentColor.substring(1),
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Accent Color',
+                                      parent: 'Personalization',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.apps_rounded,
+                                    title: 'App Icons',
+                                    status:
+                                        appIconStyle[0].toUpperCase() +
+                                        appIconStyle.substring(1),
+                                    color: p.orange,
+                                    onTap: () => _openCategory(
+                                      'App Icons',
+                                      parent: 'Personalization',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.language_rounded,
+                                    title: 'Language',
+                                    status: switch (currentLocale) {
+                                      'en' => 'English',
+                                      'hi' => 'हिन्दी',
+                                      'es' => 'Español',
+                                      _ => 'System Default',
                                     },
-                                  );
-                                },
-                              );
-                              if (updated != null) {
-                                setState(() => _weeklyReminderDays = updated..sort());
-                                await _prefs?.setStringList(
-                                  'reminder_weekly_days',
-                                  updated.map((e) => e.toString()).toList(),
-                                );
-                                await _syncReminder('weekly');
-                              }
-                            },
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Language',
+                                      parent: 'Personalization',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'These settings refine the interface aesthetic and do not modify your saved data.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
                           ),
-                          SettingsRow(
-                            p: p,
-                            title: 'Time'.localized(context),
-                            status: _weeklyReminderTime.format(context),
-                            color: p.green,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final time = await _showIOSTimePicker(
-                                context,
-                                _weeklyReminderTime,
-                              );
-                              if (time != null) {
-                                setState(() => _weeklyReminderTime = time);
-                                await _prefs?.setInt('reminder_weekly_hour', time.hour);
-                                await _prefs?.setInt('reminder_weekly_minute', time.minute);
-                                await _syncReminder('weekly');
-                              }
-                            },
-                          ),
-                          SettingsRow(
-                            p: p,
-                            title: 'Message'.localized(context),
-                            status: _weeklyReminderBody.trim().isEmpty ? 'Empty'.localized(context) : 'Set'.localized(context),
-                            color: p.green,
-                            onTap: () => _openReminderMessageEditor('weekly'),
-                          ),
-                        ],
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Triggers reminders on specific days of the week.'.localized(context)),
-
-                    // Monthly reminder group
-                    SettingsGroup(
-                      p: p,
-                      title: 'monthly reminder'.localized(context).toUpperCase(),
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'monthly reminder'.localized(context),
-                          color: p.red,
-                          value: _monthlyReminderEnabled,
-                          onChanged: (value) async {
-                            HapticFeedback.selectionClick();
-                            if (value) {
-                              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? true;
-                              if (!context.mounted) return;
-                              if (!granted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Notification permission needed'.localized(context))),
-                                );
-                                return;
-                              }
-                            }
-                            setState(() => _monthlyReminderEnabled = value);
-                            await _prefs?.setBool('reminder_monthly_enabled', value);
-                            await _syncReminder('monthly');
-                          },
-                        ),
-                        if (_monthlyReminderEnabled) ...[
-                          SettingsRow(
-                            p: p,
-                            title: 'day of month'.localized(context),
-                            status: '$_monthlyReminderDay',
-                            color: p.red,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final selected = await showDialog<int>(
-                                context: context,
-                                builder: (context) {
-                                  return SimpleDialog(
-                                    title: Text('day of month'.localized(context)),
-                                    children: [
-                                      for (int day = 1; day <= 28; day++)
-                                        SimpleDialogOption(
-                                          onPressed: () => Navigator.pop(context, day),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 6.0),
-                                            child: Text('$day', style: TextStyle(color: p.text, fontSize: 16)),
+                        if (show('Display'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Theme',
+                                showDividers: false,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: ThemeChoice(
+                                            p: p,
+                                            label: 'Dark',
+                                            active: theme == 'dark',
+                                            color: const Color(0xFF1C1C1E),
+                                            onTap: () {
+                                              if (theme == 'dark') return;
+                                              HapticFeedback.selectionClick();
+                                              setState(() => theme = 'dark');
+                                              widget.onTheme('dark');
+                                            },
                                           ),
                                         ),
-                                    ],
-                                  );
-                                },
-                              );
-                              if (selected != null) {
-                                setState(() => _monthlyReminderDay = selected);
-                                await _prefs?.setInt('reminder_monthly_day', selected);
-                                await _syncReminder('monthly');
-                              }
-                            },
-                          ),
-                          SettingsRow(
-                            p: p,
-                            title: 'Time'.localized(context),
-                            status: _monthlyReminderTime.format(context),
-                            color: p.red,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final time = await _showIOSTimePicker(
-                                context,
-                                _monthlyReminderTime,
-                              );
-                              if (time != null) {
-                                setState(() => _monthlyReminderTime = time);
-                                await _prefs?.setInt('reminder_monthly_hour', time.hour);
-                                await _prefs?.setInt('reminder_monthly_minute', time.minute);
-                                await _syncReminder('monthly');
-                              }
-                            },
-                          ),
-                          SettingsRow(
-                            p: p,
-                            title: 'Message'.localized(context),
-                            status: _monthlyReminderBody.trim().isEmpty ? 'Empty'.localized(context) : 'Set'.localized(context),
-                            color: p.red,
-                            onTap: () => _openReminderMessageEditor('monthly'),
-                          ),
-                        ],
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Triggers a monthly reminder on a chosen calendar day.'.localized(context)),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: ThemeChoice(
+                                            p: p,
+                                            label: 'Light',
+                                            active: theme == 'light',
+                                            color: const Color(0xFFF2F2F7),
+                                            onTap: () {
+                                              if (theme == 'light') return;
+                                              HapticFeedback.selectionClick();
+                                              setState(() => theme = 'light');
+                                              widget.onTheme('light');
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: ThemeChoice(
+                                            p: p,
+                                            label: 'AMOLED',
+                                            active: theme == 'amoled',
+                                            color: const Color(0xFF000000),
+                                            onTap: () {
+                                              if (theme == 'amoled') return;
+                                              HapticFeedback.selectionClick();
+                                              setState(() => theme = 'amoled');
+                                              widget.onTheme('amoled');
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Select a theme that best suits your environment.',
+                              ),
 
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Show Seconds',
+                                    color: p.accent,
+                                    value: showSeconds,
+                                    onChanged: (value) {
+                                      setState(() => showSeconds = value);
+                                      widget.onShowSeconds(value);
+                                    },
+                                  ),
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Highlight Seconds',
+                                    color: p.accent,
+                                    value: showSeconds && highlightSeconds,
+                                    enabled: showSeconds,
+                                    disabledMessage:
+                                        'Enable Show Seconds first',
+                                    onDisabledTap: widget.onFeedback,
+                                    onChanged: (value) {
+                                      if (!showSeconds) return;
+                                      setState(() => highlightSeconds = value);
+                                      widget.onHighlightSeconds(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Configure the home screen clock and visual feedback.',
+                              ),
 
-              if (show('Moments'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    if (widget.onOpenTrash != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
-                        child: Text(
-                          'RECENTLY DELETED'.localized(context),
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.2,
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Button Labels',
+                                    color: p.green,
+                                    value: buttonLabels,
+                                    onChanged: (value) {
+                                      setState(() => buttonLabels = value);
+                                      widget.onButtonLabels(value);
+                                    },
+                                  ),
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'History Text',
+                                    color: p.green,
+                                    value: showHistoryText,
+                                    onChanged: (value) {
+                                      setState(() => showHistoryText = value);
+                                      widget.onShowHistoryText(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Show descriptive text labels on the primary navigation and action buttons.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Large Controls',
+                                    color: p.orange,
+                                    value: largeControls,
+                                    onChanged: (value) {
+                                      setState(() => largeControls = value);
+                                      widget.onLargeControls(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Increases the size of interactive elements for easier tapping.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Toolbar Backplate',
+                                    color: p.accent,
+                                    value: homeMenuPill,
+                                    onChanged: (value) {
+                                      setState(() => homeMenuPill = value);
+                                      widget.onHomeMenuPill(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Adds a subtle glass-like container behind the home toolbar.',
+                              ),
+
+                              if (AdaptiveEngine()
+                                  .supportsAdvancedAnimations) ...[
+                                SettingsGroup(
+                                  p: p,
+                                  children: [
+                                    SettingsSwitchRow(
+                                      p: p,
+                                      title: 'Live Icon Motion',
+                                      color: p.accent,
+                                      value:
+                                          !reduceMotion && homeMenuAnimations,
+                                      enabled: !reduceMotion,
+                                      disabledMessage:
+                                          'Disable Reduce Motion first',
+                                      onDisabledTap: widget.onFeedback,
+                                      onChanged: (value) async {
+                                        if (reduceMotion) return;
+                                        final applied = await widget
+                                            .onHomeMenuAnimations(value);
+                                        if (!mounted) return;
+                                        setState(() {
+                                          homeMenuAnimations = applied
+                                              ? value
+                                              : false;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'Enables fluid physics for toolbar icons. Automatically scales based on CPU and RAM performance.',
+                                ),
+                              ],
+                              if (AdaptiveEngine().supportsBlur) ...[
+                                SettingsGroup(
+                                  p: p,
+                                  children: [
+                                    SettingsSwitchRow(
+                                      p: p,
+                                      title: 'Enable Translucency',
+                                      color: p.accent,
+                                      value:
+                                          !reduceMotion && enableTranslucency,
+                                      enabled: !reduceMotion,
+                                      onDisabledTap: widget.onFeedback,
+                                      onChanged: (value) {
+                                        setState(
+                                          () => enableTranslucency = value,
+                                        );
+                                        widget.onTranslucency(value);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'Applies real-time Gaussian blur to system surfaces. Requires a high-performance GPU tier.',
+                                ),
+                              ],
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Last Saved Hint',
+                                    color: p.accent,
+                                    value: showLastSavedHint,
+                                    onChanged: (value) {
+                                      setState(() => showLastSavedHint = value);
+                                      widget.onShowLastSavedHint(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Provides visual feedback for the time elapsed since your last moment.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
                           ),
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Container(
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
-                              color: p.surface2,
-                              borderRadius: BorderRadius.circular(32),
-                            ),
+                        if (show('Language'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  for (final entry in [
+                                    (code: 'system', name: 'System Default'),
+                                    (code: 'en', name: 'English'),
+                                    (code: 'hi', name: 'हिन्दी (Hindi)'),
+                                    (code: 'es', name: 'Español (Spanish)'),
+                                  ])
+                                    SettingsRow(
+                                      p: p,
+                                      title: entry.name,
+                                      trailing: currentLocale == entry.code
+                                          ? Icon(
+                                              Icons.check_rounded,
+                                              color: p.accent,
+                                              size: 20,
+                                            )
+                                          : const SizedBox.shrink(),
+                                      onTap: () {
+                                        if (currentLocale == entry.code) return;
+                                        HapticFeedback.selectionClick();
+                                        setState(
+                                          () => currentLocale = entry.code,
+                                        );
+                                        widget.onLocaleChanged(entry.code);
+                                      },
+                                    ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Select your preferred language for the application.'
+                                        .localized(context),
+                              ),
+                              SettingsBetaNote(
+                                p: p,
+                                text:
+                                    'The current features on this page are under Beta stage.'
+                                        .localized(context),
+                                onLearnMore: () => _showBetaInfoPopup(p),
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Accent Color'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                showDividers: false,
+                                children: [
+                                  ColorChoiceSetting(
+                                    p: p,
+                                    value: accentColor,
+                                    blur:
+                                        !reduceMotion &&
+                                        enableTranslucency &&
+                                        AdaptiveEngine().supportsBlur,
+                                    onChanged: (value) {
+                                      if (value == accentColor) return;
+                                      HapticFeedback.selectionClick();
+                                      setState(() => accentColor = value);
+                                      widget.onAccentColor(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Select an accent color for buttons and fluid interface highlights.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('App Icons'))
+                          SliverToBoxAdapter(
                             child: Column(
                               children: [
-                                SettingsRow(
-                                  p: p,
-                                  icon: Icons.delete_outline_rounded,
-                                  title: 'Trash Bin'.localized(context),
-                                  status: '${_trash.length} ${(_trash.length == 1 ? "item" : "items").localized(context)}',
-                                  color: p.orange,
-                                  onTap: () => _openCategory('Trash Bin', parent: 'Moments'),
-                                ),
-                                Divider(height: 0.5, color: p.border),
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: p.surface3.withValues(alpha: 0.35),
-                                  ),
-                                  child: Text(
-                                    _trash.isEmpty
-                                        ? 'Restore or permanently remove deleted moments'.localized(context)
-                                        : '${_trash.first.date} • ${_trash.first.note.isEmpty ? 'No note'.localized(context) : _trash.first.note}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
+                                const SizedBox(height: spacing8),
+                                _appIconsPage(p),
+                                const SizedBox(height: spacing48),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                      SettingsPageDescription(p: p, text: 'View and restore moments deleted within the last 30 days.'),
-                    ],
-                    SettingsGroup(
-                      p: p,
-                      title: 'History Controls',
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Compact History',
-                          color: p.accent,
-                          value: compactHistory,
-                          onChanged: (value) {
-                            setState(() {
-                              compactHistory = value;
-                              historyDensity = value ? 'compact' : 'comfortable';
-                            });
-                            widget.onCompactHistory(value);
-                            widget.onHistoryDensity(historyDensity);
-                          },
-                        ),
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Confirm Delete',
-                          color: p.red,
-                          value: confirmDelete,
-                          onChanged: (value) {
-                            setState(() => confirmDelete = value);
-                            widget.onConfirmDelete(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Controls log spacing density and requires a safety confirmation before deleting history moments.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Extended Duration',
-                          color: p.accent,
-                          value: extendedDuration,
-                          onChanged: (value) {
-                            setState(() => extendedDuration = value);
-                            widget.onExtendedDuration(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Includes years, months, and days breakdown for long time intervals between moments.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'Minimal Moment Options',
-                          color: p.accent,
-                          value: minimalMomentOptions,
-                          onChanged: (value) {
-                            setState(() => minimalMomentOptions = value);
-                            widget.onMinimalMomentOptions(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Enables streamlined icon-only quick action buttons when managing history moments.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.search_rounded,
-                          title: 'Search Notes'.localized(context),
-                          color: p.accent,
-                          status: '${entries.where((e) => e.note.isNotEmpty).length} ${'Notes'.localized(context)}',
-                          onTap: () => _openCategory('Search Notes', parent: 'Moments'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Search Notes')) ...[
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SliverStickyHeaderDelegate(
-                    height: 80,
-                    child: Container(
-                      color: p.surface.withValues(
-                        alpha: !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur ? 0.65 : 1.0,
-                      ),
-                      padding: const EdgeInsets.fromLTRB(spacing16, spacing8, spacing16, spacing12),
-                      child: SearchNotesBox(
-                        p: p,
-                        controller: _settingsSearchController,
-                        onChanged: (value) => setState(() => _settingsQuery = value),
-                        onClear: () => setState(() {
-                          _settingsSearchController.clear();
-                          _settingsQuery = '';
-                        }),
-                      ),
-                    ),
-                  ),
-                ),
-                if (_settingsQuery.trim().isEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            'ALL NOTES',
-                            style: TextStyle(
-                              color: p.text3,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${entries.where((e) => e.note.isNotEmpty).length} items',
-                            style: TextStyle(
-                              color: p.text3,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ...() {
-                  final notes = entries
-                      .where((e) => e.note.isNotEmpty)
-                      .where((e) {
-                        final q = _settingsQuery.trim().toLowerCase();
-                        if (q.isEmpty) return true;
-                        return e.note.toLowerCase().contains(q) ||
-                               datePretty(e.timestamp).contains(q) ||
-                               timeOnly(e.timestamp).contains(q);
-                      })
-                      .toList();
-
-                  if (notes.isEmpty) {
-                    return [
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 48),
-                          child: HIGEmptyState(
-                            p: p,
-                            icon: Icons.speaker_notes_off_rounded,
-                            title: 'No Notes Found',
-                            message: _settingsQuery.isEmpty 
-                                ? 'Capture your first note by holding the clock.' 
-                                : 'No notes match "${_settingsQuery.trim()}".',
-                            compact: true,
-                          ),
-                        ),
-                      )
-                    ];
-                  }
-
-                  return [
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(spacing16, spacing4, spacing16, spacing16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (index >= notes.length) return null;
-                            final entry = notes[index];
-
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: compactHistory ? 10 : 16),
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(spacing16),
-                                decoration: BoxDecoration(
-                                  color: p.surface2,
-                                  borderRadius: BorderRadius.circular(32),
-                                  border: Border.all(
-                                    color: p.border.withValues(alpha: 0.6),
-                                    width: 0.8,
+                        if (show('Logging'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              ActivitySummaryCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
+                              ActivityTrendsCard(p: p, entries: entries),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Visual overview of your logging frequency, 7-day activity trends, and average interval between moments.',
+                              ),
+                              const SizedBox(height: 12),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Logging Controls',
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.touch_app_rounded,
+                                    title: 'Capture',
+                                    status: defaultMode == 'single'
+                                        ? 'Single'
+                                        : 'Two-Way',
+                                    color: p.green,
+                                    onTap: () => _openCategory(
+                                      'Capture',
+                                      parent: 'Logging',
+                                    ),
                                   ),
-                                  boxShadow: p.name == 'amoled'
-                                      ? null
-                                      : [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.04),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.history_rounded,
+                                    title: 'Moments'.localized(context),
+                                    status:
+                                        '${entries.length} ${'Logs'.localized(context)}',
+                                    color: p.orange,
+                                    onTap: () => _openCategory(
+                                      'Moments',
+                                      parent: 'Logging',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.notifications_active_outlined,
+                                    title: 'Reminders',
+                                    status: _getRemindersStatus(),
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Reminders',
+                                      parent: 'Logging',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'These settings define how moments are recorded and prepared for export.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Capture'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Startup Mode',
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    title: 'Single',
+                                    subtitle:
+                                        'Every tap records a standalone moment.',
+                                    trailing: defaultMode == 'single'
+                                        ? Icon(
+                                            Icons.check_rounded,
+                                            color: p.accent,
+                                            size: 20,
+                                          )
+                                        : const SizedBox.shrink(),
+                                    onTap: () {
+                                      if (defaultMode == 'single') return;
+                                      setState(() => defaultMode = 'single');
+                                      widget.onDefaultMode('single');
+                                    },
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    title: 'Two-Way',
+                                    subtitle:
+                                        'Sessions are recorded as IN and OUT pairs.',
+                                    trailing: defaultMode == 'two-way'
+                                        ? Icon(
+                                            Icons.check_rounded,
+                                            color: p.accent,
+                                            size: 20,
+                                          )
+                                        : const SizedBox.shrink(),
+                                    onTap: () {
+                                      if (defaultMode == 'two-way') return;
+                                      setState(() => defaultMode = 'two-way');
+                                      widget.onDefaultMode('two-way');
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Defines the primary logging mode active when the app launches.',
+                              ),
+
+                              Glass(
+                                p: p,
+                                radius: 32,
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  18,
+                                  16,
+                                  14,
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: momentColor(p, entry.type)
-                                                .withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Text(
-                                            entry.type.toUpperCase(),
-                                            style: TextStyle(
-                                              color: momentColor(p, entry.type),
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 0.5,
-                                            ),
+                                        Text(
+                                          'Tap Delay',
+                                          style: TextStyle(
+                                            color: p.text,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 15,
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
-                                            style: TextStyle(
-                                              color: p.text3,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                              fontFeatures: const [
-                                                FontFeature.tabularFigures()
-                                              ],
-                                            ),
+                                        Text(
+                                          delayLabel(tapDelay),
+                                          style: TextStyle(
+                                            color: p.text2,
+                                            fontSize: 15,
                                           ),
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        DelayStepButton(
+                                          p: p,
+                                          icon: Icons.remove_rounded,
+                                          enabled:
+                                              (delayIndex < 0
+                                                  ? 0
+                                                  : delayIndex) >
+                                              0,
+                                          onTap: () {
+                                            final current = delayIndex < 0
+                                                ? 0
+                                                : delayIndex;
+                                            final next =
+                                                delayValues[math.max(
+                                                  0,
+                                                  current - 1,
+                                                )];
+                                            NotekarHaptics.selection(
+                                              'standard',
+                                            );
+                                            setState(() => tapDelay = next);
+                                            widget.onDelay(next);
+                                          },
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            children: [
+                                              SliderTheme(
+                                                data: SliderThemeData(
+                                                  activeTrackColor: p.accent,
+                                                  inactiveTrackColor:
+                                                      p.surface3,
+                                                  thumbColor: Colors.white,
+                                                  overlayColor: p.accent
+                                                      .withValues(alpha: 0.12),
+                                                  trackHeight: 5,
+                                                  tickMarkShape:
+                                                      SliderTickMarkShape
+                                                          .noTickMark,
+                                                ),
+                                                child: Slider(
+                                                  min: 0,
+                                                  max: 6,
+                                                  divisions: 6,
+                                                  value:
+                                                      (delayIndex < 0
+                                                              ? 0
+                                                              : delayIndex)
+                                                          .toDouble(),
+                                                  onChanged: (value) {
+                                                    final next =
+                                                        delayValues[value
+                                                            .round()];
+                                                    if (next == tapDelay)
+                                                      return;
+                                                    NotekarHaptics.selection(
+                                                      'standard',
+                                                    );
+                                                    setState(
+                                                      () => tapDelay = next,
+                                                    );
+                                                    widget.onDelay(next);
+                                                  },
+                                                ),
+                                              ),
+                                              Transform.translate(
+                                                offset: const Offset(0, -4),
+                                                child: SliderScale(
+                                                  p: p,
+                                                  activeValue: tapDelay,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        DelayStepButton(
+                                          p: p,
+                                          icon: Icons.add_rounded,
+                                          enabled:
+                                              (delayIndex < 0
+                                                  ? 0
+                                                  : delayIndex) <
+                                              delayValues.length - 1,
+                                          onTap: () {
+                                            final current = delayIndex < 0
+                                                ? 0
+                                                : delayIndex;
+                                            final next =
+                                                delayValues[math.min(
+                                                  delayValues.length - 1,
+                                                  current + 1,
+                                                )];
+                                            NotekarHaptics.selection(
+                                              'standard',
+                                            );
+                                            setState(() => tapDelay = next);
+                                            widget.onDelay(next);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Tap Delay prevents accidental rapid-fire logging by setting a cooldown between captured moments.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Require Note on Hold',
+                                    color: p.orange,
+                                    value: requireLongPressNote,
+                                    onChanged: (value) {
+                                      setState(
+                                        () => requireLongPressNote = value,
+                                      );
+                                      widget.onRequireLongPressNote(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Forces context entry for any moment captured via the long-press gesture.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Reminders'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              if (!_hasExactAlarmPermission)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    8,
+                                    16,
+                                    16,
+                                  ),
+                                  child: Glass(
+                                    p: p,
+                                    radius: 20,
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.warning_amber_rounded,
+                                              color: p.orange,
+                                              size: 24,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                'Alarms Permission Required'
+                                                    .localized(context),
+                                                style: TextStyle(
+                                                  color: p.text,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'To trigger reminders precisely when the app is closed, NoteKar requires the "Alarms & Reminders" permission.'
+                                              .localized(context),
+                                          style: TextStyle(
+                                            color: p.text2,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ElevatedButton(
+                                          onPressed: () async {
+                                            HapticFeedback.selectionClick();
+                                            final success =
+                                                await _fileChannel.invokeMethod<
+                                                  bool
+                                                >(
+                                                  'requestExactAlarmPermission',
+                                                ) ??
+                                                false;
+                                            if (success) {
+                                              final granted =
+                                                  await _fileChannel
+                                                      .invokeMethod<bool>(
+                                                        'canScheduleExactAlarms',
+                                                      ) ??
+                                                  true;
+                                              setState(
+                                                () => _hasExactAlarmPermission =
+                                                    granted,
+                                              );
+                                            }
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.orange,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Grant Permission'.localized(
+                                              context,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              if (!_ignoresBatteryOptimizations)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    8,
+                                    16,
+                                    16,
+                                  ),
+                                  child: Glass(
+                                    p: p,
+                                    radius: 20,
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.battery_alert_rounded,
+                                              color: p.orange,
+                                              size: 24,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                'Battery Optimization Active'
+                                                    .localized(context),
+                                                style: TextStyle(
+                                                  color: p.text,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Aggressive battery cleaners on low-end devices can kill NoteKar in the background. Disable battery optimization to guarantee reminders fire 100% of the time.'
+                                              .localized(context),
+                                          style: TextStyle(
+                                            color: p.text2,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ElevatedButton(
+                                          onPressed: () async {
+                                            HapticFeedback.selectionClick();
+                                            final success =
+                                                await _fileChannel.invokeMethod<
+                                                  bool
+                                                >(
+                                                  'requestIgnoreBatteryOptimizations',
+                                                ) ??
+                                                false;
+                                            if (success) {
+                                              final ignores =
+                                                  await _fileChannel.invokeMethod<
+                                                    bool
+                                                  >(
+                                                    'isIgnoringBatteryOptimizations',
+                                                  ) ??
+                                                  true;
+                                              setState(
+                                                () =>
+                                                    _ignoresBatteryOptimizations =
+                                                        ignores,
+                                              );
+                                            }
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.orange,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Disable Battery Optimization'
+                                                .localized(context),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              if (!_autoStartCardDismissed)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    0,
+                                    16,
+                                    16,
+                                  ),
+                                  child: Glass(
+                                    p: p,
+                                    radius: 20,
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.autorenew_rounded,
+                                              color: p.orange,
+                                              size: 24,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                'Auto-Start & Background Activity'
+                                                    .localized(context),
+                                                style: TextStyle(
+                                                  color: p.text,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(
+                                                Icons.close_rounded,
+                                                color: p.text3,
+                                                size: 20,
+                                              ),
+                                              onPressed: () async {
+                                                setState(
+                                                  () =>
+                                                      _autoStartCardDismissed =
+                                                          true,
+                                                );
+                                                await _prefs?.setBool(
+                                                  'notekar.autoStartCardDismissed',
+                                                  true,
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'On devices like Xiaomi, Samsung, Oppo, Vivo, or Huawei, the OS restricts background alarms when swiped away from recents. Grant "Auto-Start" or allow "Background Activity" to ensure reminders trigger.'
+                                              .localized(context),
+                                          style: TextStyle(
+                                            color: p.text2,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ElevatedButton(
+                                          onPressed: () async {
+                                            HapticFeedback.selectionClick();
+                                            await _fileChannel.invokeMethod(
+                                              'openAutoStartSettings',
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.orange,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Configure Settings'.localized(
+                                              context,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                              // Daily reminder group
+                              SettingsGroup(
+                                p: p,
+                                title: 'daily reminder'
+                                    .localized(context)
+                                    .toUpperCase(),
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'daily reminder'.localized(context),
+                                    color: p.accent,
+                                    value: _dailyReminderEnabled,
+                                    onChanged: (value) async {
+                                      HapticFeedback.selectionClick();
+                                      if (value) {
+                                        final granted =
+                                            await _fileChannel.invokeMethod<
+                                              bool
+                                            >(
+                                              'requestNotificationPermission',
+                                            ) ??
+                                            true;
+                                        if (!context.mounted) return;
+                                        if (!granted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Notification permission needed'
+                                                    .localized(context),
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                      }
+                                      setState(
+                                        () => _dailyReminderEnabled = value,
+                                      );
+                                      await _prefs?.setBool(
+                                        'reminder_daily_enabled',
+                                        value,
+                                      );
+                                      await _syncReminder('daily');
+                                    },
+                                  ),
+                                  if (_dailyReminderEnabled) ...[
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Time'.localized(context),
+                                      status: _dailyReminderTime.format(
+                                        context,
+                                      ),
+                                      color: p.accent,
+                                      onTap: () async {
+                                        HapticFeedback.selectionClick();
+                                        final time = await _showIOSTimePicker(
+                                          context,
+                                          _dailyReminderTime,
+                                        );
+                                        if (time != null) {
+                                          setState(
+                                            () => _dailyReminderTime = time,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_daily_hour',
+                                            time.hour,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_daily_minute',
+                                            time.minute,
+                                          );
+                                          await _syncReminder('daily');
+                                        }
+                                      },
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Message'.localized(context),
+                                      status: _dailyReminderBody.trim().isEmpty
+                                          ? 'Empty'.localized(context)
+                                          : 'Set'.localized(context),
+                                      color: p.accent,
+                                      onTap: () =>
+                                          _openReminderMessageEditor('daily'),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Triggers a daily logging reminder alert at your chosen time.'
+                                        .localized(context),
+                              ),
+
+                              // Inactivity reminder group
+                              SettingsGroup(
+                                p: p,
+                                title: 'inactivity reminder'
+                                    .localized(context)
+                                    .toUpperCase(),
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'inactivity reminder'.localized(
+                                      context,
+                                    ),
+                                    color: p.orange,
+                                    value: _inactivityReminderEnabled,
+                                    onChanged: (value) async {
+                                      HapticFeedback.selectionClick();
+                                      if (value) {
+                                        final granted =
+                                            await _fileChannel.invokeMethod<
+                                              bool
+                                            >(
+                                              'requestNotificationPermission',
+                                            ) ??
+                                            true;
+                                        if (!context.mounted) return;
+                                        if (!granted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Notification permission needed'
+                                                    .localized(context),
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                      }
+                                      setState(
+                                        () =>
+                                            _inactivityReminderEnabled = value,
+                                      );
+                                      await _prefs?.setBool(
+                                        'reminder_inactivity_enabled',
+                                        value,
+                                      );
+                                      await _syncReminder('inactivity');
+                                    },
+                                  ),
+                                  if (_inactivityReminderEnabled)
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'remind if inactive for'.localized(
+                                        context,
+                                      ),
+                                      status:
+                                          '${_inactivityIntervalMins ~/ 60} ${_inactivityIntervalMins == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
+                                      color: p.orange,
+                                      onTap: () async {
+                                        HapticFeedback.selectionClick();
+                                        final selected = await showDialog<int>(
+                                          context: context,
+                                          builder: (context) {
+                                            return SimpleDialog(
+                                              title: Text(
+                                                'remind if inactive for'
+                                                    .localized(context),
+                                              ),
+                                              children: [
+                                                for (final interval in [
+                                                  60,
+                                                  120,
+                                                  240,
+                                                  480,
+                                                  720,
+                                                  1440,
+                                                ])
+                                                  SimpleDialogOption(
+                                                    onPressed: () =>
+                                                        Navigator.pop(
+                                                          context,
+                                                          interval,
+                                                        ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            vertical: 8.0,
+                                                          ),
+                                                      child: Text(
+                                                        '${interval ~/ 60} ${interval == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
+                                                        style: TextStyle(
+                                                          color: p.text,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                        if (selected != null) {
+                                          setState(
+                                            () => _inactivityIntervalMins =
+                                                selected,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_inactivity_interval_mins',
+                                            selected,
+                                          );
+                                          await _syncReminder('inactivity');
+                                        }
+                                      },
+                                    ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Reschedules a timer on every moment you record. Alerts you if you haven\'t logged anything in the selected interval.'
+                                        .localized(context),
+                              ),
+
+                              // Weekly reminder group
+                              SettingsGroup(
+                                p: p,
+                                title: 'weekly reminder'
+                                    .localized(context)
+                                    .toUpperCase(),
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'weekly reminder'.localized(context),
+                                    color: p.green,
+                                    value: _weeklyReminderEnabled,
+                                    onChanged: (value) async {
+                                      HapticFeedback.selectionClick();
+                                      if (value) {
+                                        final granted =
+                                            await _fileChannel.invokeMethod<
+                                              bool
+                                            >(
+                                              'requestNotificationPermission',
+                                            ) ??
+                                            true;
+                                        if (!context.mounted) return;
+                                        if (!granted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Notification permission needed'
+                                                    .localized(context),
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                      }
+                                      setState(
+                                        () => _weeklyReminderEnabled = value,
+                                      );
+                                      await _prefs?.setBool(
+                                        'reminder_weekly_enabled',
+                                        value,
+                                      );
+                                      await _syncReminder('weekly');
+                                    },
+                                  ),
+                                  if (_weeklyReminderEnabled) ...[
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'days of week'.localized(context),
+                                      status: _weeklyReminderDays
+                                          .map((d) {
+                                            return switch (d) {
+                                              1 => 'Sun'.localized(context),
+                                              2 => 'Mon'.localized(context),
+                                              3 => 'Tue'.localized(context),
+                                              4 => 'Wed'.localized(context),
+                                              5 => 'Thu'.localized(context),
+                                              6 => 'Fri'.localized(context),
+                                              7 => 'Sat'.localized(context),
+                                              _ => '',
+                                            };
+                                          })
+                                          .join(', '),
+                                      color: p.green,
+                                      onTap: () async {
+                                        HapticFeedback.selectionClick();
+                                        final days = [1, 2, 3, 4, 5, 6, 7];
+                                        final selectedDays = List<int>.from(
+                                          _weeklyReminderDays,
+                                        );
+                                        final updated = await showDialog<List<int>>(
+                                          context: context,
+                                          builder: (context) {
+                                            return StatefulBuilder(
+                                              builder: (context, setDialogState) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                    'days of week'.localized(
+                                                      context,
+                                                    ),
+                                                  ),
+                                                  content: SingleChildScrollView(
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: days.map((day) {
+                                                        final name =
+                                                            switch (day) {
+                                                              1 =>
+                                                                'Sunday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              2 =>
+                                                                'Monday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              3 =>
+                                                                'Tuesday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              4 =>
+                                                                'Wednesday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              5 =>
+                                                                'Thursday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              6 =>
+                                                                'Friday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              7 =>
+                                                                'Saturday'
+                                                                    .localized(
+                                                                      context,
+                                                                    ),
+                                                              _ => '',
+                                                            };
+                                                        final contains =
+                                                            selectedDays
+                                                                .contains(day);
+                                                        return CheckboxListTile(
+                                                          title: Text(
+                                                            name,
+                                                            style: TextStyle(
+                                                              color: p.text,
+                                                            ),
+                                                          ),
+                                                          value: contains,
+                                                          activeColor: p.accent,
+                                                          onChanged: (val) {
+                                                            setDialogState(() {
+                                                              if (val == true) {
+                                                                selectedDays
+                                                                    .add(day);
+                                                              } else {
+                                                                selectedDays
+                                                                    .remove(
+                                                                      day,
+                                                                    );
+                                                              }
+                                                            });
+                                                          },
+                                                        );
+                                                      }).toList(),
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                            selectedDays,
+                                                          ),
+                                                      child: Text(
+                                                        'okay'.localized(
+                                                          context,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
+                                        );
+                                        if (updated != null) {
+                                          setState(
+                                            () =>
+                                                _weeklyReminderDays = updated
+                                                  ..sort(),
+                                          );
+                                          await _prefs?.setStringList(
+                                            'reminder_weekly_days',
+                                            updated
+                                                .map((e) => e.toString())
+                                                .toList(),
+                                          );
+                                          await _syncReminder('weekly');
+                                        }
+                                      },
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Time'.localized(context),
+                                      status: _weeklyReminderTime.format(
+                                        context,
+                                      ),
+                                      color: p.green,
+                                      onTap: () async {
+                                        HapticFeedback.selectionClick();
+                                        final time = await _showIOSTimePicker(
+                                          context,
+                                          _weeklyReminderTime,
+                                        );
+                                        if (time != null) {
+                                          setState(
+                                            () => _weeklyReminderTime = time,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_weekly_hour',
+                                            time.hour,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_weekly_minute',
+                                            time.minute,
+                                          );
+                                          await _syncReminder('weekly');
+                                        }
+                                      },
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Message'.localized(context),
+                                      status: _weeklyReminderBody.trim().isEmpty
+                                          ? 'Empty'.localized(context)
+                                          : 'Set'.localized(context),
+                                      color: p.green,
+                                      onTap: () =>
+                                          _openReminderMessageEditor('weekly'),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Triggers reminders on specific days of the week.'
+                                        .localized(context),
+                              ),
+
+                              // Monthly reminder group
+                              SettingsGroup(
+                                p: p,
+                                title: 'monthly reminder'
+                                    .localized(context)
+                                    .toUpperCase(),
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'monthly reminder'.localized(
+                                      context,
+                                    ),
+                                    color: p.red,
+                                    value: _monthlyReminderEnabled,
+                                    onChanged: (value) async {
+                                      HapticFeedback.selectionClick();
+                                      if (value) {
+                                        final granted =
+                                            await _fileChannel.invokeMethod<
+                                              bool
+                                            >(
+                                              'requestNotificationPermission',
+                                            ) ??
+                                            true;
+                                        if (!context.mounted) return;
+                                        if (!granted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Notification permission needed'
+                                                    .localized(context),
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                      }
+                                      setState(
+                                        () => _monthlyReminderEnabled = value,
+                                      );
+                                      await _prefs?.setBool(
+                                        'reminder_monthly_enabled',
+                                        value,
+                                      );
+                                      await _syncReminder('monthly');
+                                    },
+                                  ),
+                                  if (_monthlyReminderEnabled) ...[
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'day of month'.localized(context),
+                                      status: '$_monthlyReminderDay',
+                                      color: p.red,
+                                      onTap: () async {
+                                        HapticFeedback.selectionClick();
+                                        final selected = await showDialog<int>(
+                                          context: context,
+                                          builder: (context) {
+                                            return SimpleDialog(
+                                              title: Text(
+                                                'day of month'.localized(
+                                                  context,
+                                                ),
+                                              ),
+                                              children: [
+                                                for (
+                                                  int day = 1;
+                                                  day <= 28;
+                                                  day++
+                                                )
+                                                  SimpleDialogOption(
+                                                    onPressed: () =>
+                                                        Navigator.pop(
+                                                          context,
+                                                          day,
+                                                        ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            vertical: 6.0,
+                                                          ),
+                                                      child: Text(
+                                                        '$day',
+                                                        style: TextStyle(
+                                                          color: p.text,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                        if (selected != null) {
+                                          setState(
+                                            () =>
+                                                _monthlyReminderDay = selected,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_monthly_day',
+                                            selected,
+                                          );
+                                          await _syncReminder('monthly');
+                                        }
+                                      },
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Time'.localized(context),
+                                      status: _monthlyReminderTime.format(
+                                        context,
+                                      ),
+                                      color: p.red,
+                                      onTap: () async {
+                                        HapticFeedback.selectionClick();
+                                        final time = await _showIOSTimePicker(
+                                          context,
+                                          _monthlyReminderTime,
+                                        );
+                                        if (time != null) {
+                                          setState(
+                                            () => _monthlyReminderTime = time,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_monthly_hour',
+                                            time.hour,
+                                          );
+                                          await _prefs?.setInt(
+                                            'reminder_monthly_minute',
+                                            time.minute,
+                                          );
+                                          await _syncReminder('monthly');
+                                        }
+                                      },
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Message'.localized(context),
+                                      status:
+                                          _monthlyReminderBody.trim().isEmpty
+                                          ? 'Empty'.localized(context)
+                                          : 'Set'.localized(context),
+                                      color: p.red,
+                                      onTap: () =>
+                                          _openReminderMessageEditor('monthly'),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Triggers a monthly reminder on a chosen calendar day.'
+                                        .localized(context),
+                              ),
+
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+
+                        if (show('Moments'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              if (widget.onOpenTrash != null) ...[
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    16,
+                                    16,
+                                    8,
+                                  ),
+                                  child: Text(
+                                    'RECENTLY DELETED'.localized(context),
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  children: [
+                                    Container(
+                                      clipBehavior: Clip.antiAlias,
+                                      decoration: BoxDecoration(
+                                        color: p.surface2,
+                                        borderRadius: BorderRadius.circular(32),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          SettingsRow(
+                                            p: p,
+                                            icon: Icons.delete_outline_rounded,
+                                            title: 'Trash Bin'.localized(
+                                              context,
+                                            ),
+                                            status:
+                                                '${_trash.length} ${(_trash.length == 1 ? "item" : "items").localized(context)}',
+                                            color: p.orange,
+                                            onTap: () => _openCategory(
+                                              'Trash Bin',
+                                              parent: 'Moments',
+                                            ),
+                                          ),
+                                          Divider(height: 0.5, color: p.border),
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 12,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: p.surface3.withValues(
+                                                alpha: 0.35,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              _trash.isEmpty
+                                                  ? 'Restore or permanently remove deleted moments'
+                                                        .localized(context)
+                                                  : '${_trash.first.date} • ${_trash.first.note.isEmpty ? 'No note'.localized(context) : _trash.first.note}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: p.text3,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'View and restore moments deleted within the last 30 days.',
+                                ),
+                              ],
+                              SettingsGroup(
+                                p: p,
+                                title: 'History Controls',
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Compact History',
+                                    color: p.accent,
+                                    value: compactHistory,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        compactHistory = value;
+                                        historyDensity = value
+                                            ? 'compact'
+                                            : 'comfortable';
+                                      });
+                                      widget.onCompactHistory(value);
+                                      widget.onHistoryDensity(historyDensity);
+                                    },
+                                  ),
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Confirm Delete',
+                                    color: p.red,
+                                    value: confirmDelete,
+                                    onChanged: (value) {
+                                      setState(() => confirmDelete = value);
+                                      widget.onConfirmDelete(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Controls log spacing density and requires a safety confirmation before deleting history moments.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Extended Duration',
+                                    color: p.accent,
+                                    value: extendedDuration,
+                                    onChanged: (value) {
+                                      setState(() => extendedDuration = value);
+                                      widget.onExtendedDuration(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Includes years, months, and days breakdown for long time intervals between moments.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Minimal Moment Options',
+                                    color: p.accent,
+                                    value: minimalMomentOptions,
+                                    onChanged: (value) {
+                                      setState(
+                                        () => minimalMomentOptions = value,
+                                      );
+                                      widget.onMinimalMomentOptions(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Enables streamlined icon-only quick action buttons when managing history moments.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.search_rounded,
+                                    title: 'Search Notes'.localized(context),
+                                    color: p.accent,
+                                    status:
+                                        '${entries.where((e) => e.note.isNotEmpty).length} ${'Notes'.localized(context)}',
+                                    onTap: () => _openCategory(
+                                      'Search Notes',
+                                      parent: 'Moments',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Search Notes')) ...[
+                          SliverPersistentHeader(
+                            pinned: true,
+                            delegate: SliverStickyHeaderDelegate(
+                              height: 80,
+                              child: Container(
+                                color: p.surface.withValues(
+                                  alpha:
+                                      !reduceMotion &&
+                                          enableTranslucency &&
+                                          AdaptiveEngine().supportsBlur
+                                      ? 0.65
+                                      : 1.0,
+                                ),
+                                padding: const EdgeInsets.fromLTRB(
+                                  spacing16,
+                                  spacing8,
+                                  spacing16,
+                                  spacing12,
+                                ),
+                                child: SearchNotesBox(
+                                  p: p,
+                                  controller: _settingsSearchController,
+                                  onChanged: (value) =>
+                                      setState(() => _settingsQuery = value),
+                                  onClear: () => setState(() {
+                                    _settingsSearchController.clear();
+                                    _settingsQuery = '';
+                                  }),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_settingsQuery.trim().isEmpty)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  0,
+                                  20,
+                                  8,
+                                ),
+                                child: Row(
+                                  children: [
                                     Text(
-                                      entry.note,
+                                      'ALL NOTES',
                                       style: TextStyle(
-                                        color: p.text,
-                                        fontSize: 16,
-                                        height: 1.45,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: -0.2,
+                                        color: p.text3,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      '${entries.where((e) => e.note.isNotEmpty).length} items',
+                                      style: TextStyle(
+                                        color: p.text3,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            );
-                          },
-                          childCount: notes.length,
-                        ),
-                      ),
-                    ),
-                  ];
-                }(),
-              ],
-              if (show('Guides'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      showDividers: true,
-                      children: [
-                        GuideRow(p: p, icon: Icons.touch_app_rounded, title: 'Save a Moment', text: 'Tap the home screen once to save the current time.'),
-                        GuideRow(p: p, icon: Icons.compare_arrows_rounded, title: 'Two-Way Mode', text: 'First tap saves In. The next tap saves Out and completes the pair.'),
-                        GuideRow(p: p, icon: Icons.radio_button_checked_rounded, title: 'Single Mode', text: 'Every tap saves one standalone moment.'),
-                        GuideRow(p: p, icon: Icons.note_add_rounded, title: 'Add a Note', text: 'Touch and hold the home screen to write a note before saving.'),
-                        GuideRow(p: p, icon: Icons.history_rounded, title: 'Review History', text: 'Open History to review moments, use Select Date for a calendar day, or filter by Today and This Week.'),
-                        GuideRow(p: p, icon: Icons.search_rounded, title: 'Search Notes', text: 'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, or time.'),
-                        GuideRow(p: p, icon: Icons.timer_rounded, title: 'Time Between Moments', text: 'Select one moment, then another, to calculate the time between them.'),
-                        GuideRow(p: p, icon: Icons.subject_rounded, title: 'Manage Moment Notes', text: 'Touch and hold any history moment to add, read, edit, or delete its note.'),
-                        GuideRow(p: p, icon: Icons.lock_rounded, title: 'App Lock Timing', text: 'App Lock uses your biometric or PIN. Immediate lock covers NoteKar in Recents or background.'),
-                        GuideRow(p: p, icon: Icons.auto_awesome_motion_rounded, title: 'Minimal Moment Options', text: 'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.'),
-                        GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.'),
-                        GuideRow(p: p, icon: Icons.delete_outline_rounded, title: 'Restore Deleted Moments', text: 'Open Trash Bin in History or Settings > Moments to view, restore, or permanently remove deleted moments.'),
-                        GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a JSON backup before resetting, changing phones, or testing a new build.'),
-                        GuideRow(p: p, icon: Icons.notifications_active_outlined, title: 'Logging Reminders', text: 'Configure daily, weekly, monthly, or inactivity-based notifications under Settings > Logging > Reminders. Custom messages let you personalize alerts.'),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Help'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      showDividers: true,
-                      children: [
-                        HelpRow(p: p, question: 'Can I restore deleted moments?', answer: 'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.'),
-                        HelpRow(p: p, question: 'Update check failed', answer: 'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.'),
-                        HelpRow(p: p, question: 'App Notices are not appearing', answer: 'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.'),
-                        HelpRow(p: p, question: 'NoteKar is offline', answer: 'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.'),
-                        HelpRow(p: p, question: 'Backup import found no new moments', answer: 'The backup was read correctly, but its moments already exist on this device. NoteKar skips duplicates instead of adding them again.'),
-                        HelpRow(p: p, question: 'Backup import failed', answer: 'Make sure you selected a NoteKar JSON backup that was not renamed, manually edited, or damaged. Try exporting a fresh backup.'),
-                        HelpRow(p: p, question: 'Live Icon Motion will not turn on', answer: 'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream or your hardware tier is set to Power Saver.'),
-                        HelpRow(p: p, question: 'Live Icon Motion looks slow or delayed', answer: 'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance automatically based on CPU and RAM stats.'),
-                        HelpRow(p: p, question: 'App Lock will not turn on', answer: 'Add a biometric or PIN/Pattern lock in Android settings, then try again. NoteKar uses your system credentials for maximum security.'),
-                        HelpRow(p: p, question: 'App Lock appears after the notification panel', answer: 'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. This ensures your moments stay hidden.'),
-                        HelpRow(p: p, question: 'The app icon did not change immediately', answer: 'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.'),
-                        HelpRow(p: p, question: 'A moment was saved accidentally', answer: 'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.'),
-                        HelpRow(p: p, question: 'My data disappeared after clearing app storage', answer: 'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.'),
-                        HelpRow(p: p, question: 'Will reminders work when the app is closed?', answer: 'Yes! NoteKar registers reminders directly with Android\'s system AlarmManager. The OS will launch our background notification receiver and show the alert even if the app is closed or force-killed.'),
-                        HelpRow(p: p, question: 'Why am I not receiving reminders?', answer: 'Make sure Android notification permissions are allowed for NoteKar. On some devices, OEM power-saving modes or background execution restrictions may block or delay scheduled alarms. Consider disabling battery optimization for NoteKar.'),
-                        HelpRow(p: p, question: 'Is NoteKar safe to use?', answer: 'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Privacy & Security.'),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Update Center'))
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: spacing20),
-                    child: _updateCenterPage(p),
-                  ),
-                ),              if (show('Updates & Notices'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.system_update_outlined,
-                          title: 'Software Update',
-                          color: p.text2,
-                          status: _updateAvailable ? 'v$appVersion (Update Available)' : 'v$appVersion',
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (checkingUpdates)
-                                const SizedBox(
-                                  width: 10,
-                                  height: 10,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
-                                )
-                              else if (_updateAvailable) () {
-                                final date = updateInfo?.date;
-                                final isVeryOld = date != null && 
-                                    DateTime.now().difference(date).inDays > 7;
-                                final isUrgent = isVeryOld || (updateInfo?.isImportant ?? false);
-                                return Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: isUrgent ? p.red : p.orange,
-                                    shape: BoxShape.circle,
-                                  ),
-                                );
-                              }() else if (_upToDate)
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: p.green,
-                                    shape: BoxShape.circle,
+                            ),
+                          ...() {
+                            final notes = entries
+                                .where((e) => e.note.isNotEmpty)
+                                .where((e) {
+                                  final q = _settingsQuery.trim().toLowerCase();
+                                  if (q.isEmpty) return true;
+                                  return e.note.toLowerCase().contains(q) ||
+                                      datePretty(e.timestamp).contains(q) ||
+                                      timeOnly(e.timestamp).contains(q);
+                                })
+                                .toList();
+
+                            if (notes.isEmpty) {
+                              return [
+                                SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 48),
+                                    child: HIGEmptyState(
+                                      p: p,
+                                      icon: Icons.speaker_notes_off_rounded,
+                                      title: 'No Notes Found',
+                                      message: _settingsQuery.isEmpty
+                                          ? 'Capture your first note by holding the clock.'
+                                          : 'No notes match "${_settingsQuery.trim()}".',
+                                      compact: true,
+                                    ),
                                   ),
                                 ),
-                              const SizedBox(width: spacing8),
-                              Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
-                            ],
-                          ),
-                          onTap: () => _openCategory('Update Center', parent: 'Updates & Notices'),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Keep NoteKar up to date with the latest features and security patches.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'App Notices',
-                          color: p.accent,
-                          value: remoteNotices,
-                          onChanged: (value) {
-                            setState(() => remoteNotices = value);
-                            widget.onRemoteNotices(value);
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Checks for official announcement notices and bug fix announcements.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      title: 'Release Notes & History',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.auto_awesome_rounded, title: "What's New", color: p.orange, status: 'Recent', onTap: () => _openCategory("What's New", parent: 'Updates & Notices')),
-                        SettingsRow(p: p, icon: Icons.history_edu_rounded, title: 'Changelog', color: p.green, status: 'History', onTap: () => _openCategory('Changelog', parent: 'Updates & Notices')),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'View release highlights, version logs, and bug fix summaries for NoteKar.'),
-                    
-                    SettingsBetaNote(
-                      p: p,
-                      text: 'The current features on this page are under Beta stage.',
-                      onLearnMore: () => _showBetaInfoPopup(p),
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Data & Backup'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.archive_outlined, title: 'Backup & Export'.localized(context), status: '${entries.length} ${'Logs'.localized(context)}', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
-                        SettingsRow(p: p, icon: Icons.health_and_safety_outlined, title: 'Backup Status'.localized(context), status: _dataHealthStatus, color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'NoteKar uses a private offline database. Use these tools to secure your history via manual exports.',
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Backup & Export'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Backup Schedule',
-                      children: [
-                        for (final days in [0, 7, 14, 30])
-                          SettingsRow(
-                            p: p,
-                            title: days == 0 ? 'Disabled' : 'Every $days Days',
-                            trailing: backupReminderDays == days ? Icon(Icons.check_rounded, color: p.accent, size: 20) : const SizedBox.shrink(),
-                            onTap: () {
-                              if (backupReminderDays == days) return;
-                              setState(() => backupReminderDays = days);
-                              widget.onBackupReminderDays(days);
-                            },
-                          ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: backupReminderDays == 0 ? 'Reminders are currently disabled. Set an interval to be reminded to safeguard your data.' : 'NoteKar will prompt for a backup every $backupReminderDays days.',
-                    ),
-                    
-                    SettingsGroup(
-                      p: p,
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.table_chart_outlined, title: 'Export CSV', status: 'Table', color: p.green, rowKind: 'link', onTap: () => unawaited(_runExport('CSV', widget.onExportCsv))),
-                        SettingsRow(p: p, icon: Icons.date_range_outlined, title: 'Export Last 7 Days', status: 'Recent', color: p.green, rowKind: 'link', onTap: () => unawaited(_runExport('Recent CSV', widget.onExportRecentCsv))),
-                        SettingsRow(p: p, icon: Icons.code_rounded, title: 'Export JSON', status: 'Dev', color: p.accent, rowKind: 'link', onTap: () => unawaited(_runExport('JSON', widget.onExportJson))),
-                        SettingsRow(p: p, icon: Icons.archive_outlined, title: 'Export Backup', status: 'Full', color: p.accent, rowKind: 'link', onTap: () => unawaited(_runExport('Backup', widget.onExportBackup))),
-                        SettingsRow(p: p, icon: Icons.unarchive_outlined, title: 'Import Backup', status: 'Restore', color: p.orange, rowKind: 'link', onTap: () => unawaited(_runImport())),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Export moments to standard CSV or JSON files for backups, external analysis, or phone transfers.',
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Backup Status'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Active Protection',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.android_rounded, title: 'Android Backup', color: p.green, status: 'Active'),
-                        SettingsRow(p: p, icon: Icons.favorite_outline_rounded, title: 'Data Health', color: p.green, status: _dataHealthStatus),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Android OS auto-backup preserves app preferences only. Your moments and notes stay 100% local and private to this device.',
-                    ),
-                    
-                    SettingsGroup(
-                      p: p,
-                      title: 'Cloud & Sync (Planned)',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.lock_outlined, title: 'Encrypted Backup', color: p.orange, status: 'Planned'),
-                        SettingsRow(p: p, icon: Icons.cloud_outlined, title: 'Google Drive Backup', color: p.orange, status: 'Planned'),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Planned cloud features will provide direct cloud synchronization across your personal devices.',
-                      bottomPadding: 0,
-                    ),
-                    
-                    SettingsBetaNote(
-                      p: p,
-                      text: 'The current features on this page are under Beta stage.',
-                      onLearnMore: () => _showBetaInfoPopup(p),
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Privacy & Security'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Glass(
-                        p: p,
-                        radius: 32,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: p.green.withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.verified_user_rounded, color: p.green, size: 22),
+                              ];
+                            }
+
+                            return [
+                              SliverPadding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  spacing16,
+                                  spacing4,
+                                  spacing16,
+                                  spacing16,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'VirusTotal Safety Scan'.localized(context),
-                                        style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                                sliver: SliverList(
+                                  delegate: SliverChildBuilderDelegate((
+                                    context,
+                                    index,
+                                  ) {
+                                    if (index >= notes.length) return null;
+                                    final entry = notes[index];
+
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: compactHistory ? 10 : 16,
                                       ),
-                                      const SizedBox(height: 2),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(
+                                          spacing16,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: p.surface2,
+                                          borderRadius: BorderRadius.circular(
+                                            32,
+                                          ),
+                                          border: Border.all(
+                                            color: p.border.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                            width: 0.8,
+                                          ),
+                                          boxShadow: p.name == 'amoled'
+                                              ? null
+                                              : [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withValues(
+                                                          alpha: 0.04,
+                                                        ),
+                                                    blurRadius: 10,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: momentColor(
+                                                      p,
+                                                      entry.type,
+                                                    ).withValues(alpha: 0.12),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    entry.type.toUpperCase(),
+                                                    style: TextStyle(
+                                                      color: momentColor(
+                                                        p,
+                                                        entry.type,
+                                                      ),
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      letterSpacing: 0.5,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Text(
+                                                    '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
+                                                    style: TextStyle(
+                                                      color: p.text3,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontFeatures: const [
+                                                        FontFeature.tabularFigures(),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              entry.note,
+                                              style: TextStyle(
+                                                color: p.text,
+                                                fontSize: 16,
+                                                height: 1.45,
+                                                fontWeight: FontWeight.w500,
+                                                letterSpacing: -0.2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }, childCount: notes.length),
+                                ),
+                              ),
+                            ];
+                          }(),
+                        ],
+                        if (show('Guides'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                showDividers: true,
+                                children: [
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.touch_app_rounded,
+                                    title: 'Save a Moment',
+                                    text:
+                                        'Tap the home screen once to save the current time.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.compare_arrows_rounded,
+                                    title: 'Two-Way Mode',
+                                    text:
+                                        'First tap saves In. The next tap saves Out and completes the pair.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.radio_button_checked_rounded,
+                                    title: 'Single Mode',
+                                    text:
+                                        'Every tap saves one standalone moment.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.note_add_rounded,
+                                    title: 'Add a Note',
+                                    text:
+                                        'Touch and hold the home screen to write a note before saving.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.history_rounded,
+                                    title: 'Review History',
+                                    text:
+                                        'Open History to review moments, use Select Date for a calendar day, or filter by Today and This Week.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.search_rounded,
+                                    title: 'Search Notes',
+                                    text:
+                                        'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, or time.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.timer_rounded,
+                                    title: 'Time Between Moments',
+                                    text:
+                                        'Select one moment, then another, to calculate the time between them.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.subject_rounded,
+                                    title: 'Manage Moment Notes',
+                                    text:
+                                        'Touch and hold any history moment to add, read, edit, or delete its note.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.lock_rounded,
+                                    title: 'App Lock Timing',
+                                    text:
+                                        'App Lock uses your biometric or PIN. Immediate lock covers NoteKar in Recents or background.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.auto_awesome_motion_rounded,
+                                    title: 'Minimal Moment Options',
+                                    text:
+                                        'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.auto_awesome_rounded,
+                                    title: 'Adaptive Engine',
+                                    text:
+                                        'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.delete_outline_rounded,
+                                    title: 'Restore Deleted Moments',
+                                    text:
+                                        'Open Trash Bin in History or Settings > Moments to view, restore, or permanently remove deleted moments.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.backup_rounded,
+                                    title: 'Back Up Data',
+                                    text:
+                                        'Export a JSON backup before resetting, changing phones, or testing a new build.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.notifications_active_outlined,
+                                    title: 'Logging Reminders',
+                                    text:
+                                        'Configure daily, weekly, monthly, or inactivity-based notifications under Settings > Logging > Reminders. Custom messages let you personalize alerts.',
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'NoteKar stores moments privately on this device. Backups are files you control.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Help'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                showDividers: true,
+                                children: [
+                                  HelpRow(
+                                    p: p,
+                                    question: 'Can I restore deleted moments?',
+                                    answer:
+                                        'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'Update check failed',
+                                    answer:
+                                        'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'App Notices are not appearing',
+                                    answer:
+                                        'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'NoteKar is offline',
+                                    answer:
+                                        'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Backup import found no new moments',
+                                    answer:
+                                        'The backup was read correctly, but its moments already exist on this device. NoteKar skips duplicates instead of adding them again.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'Backup import failed',
+                                    answer:
+                                        'Make sure you selected a NoteKar JSON backup that was not renamed, manually edited, or damaged. Try exporting a fresh backup.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Live Icon Motion will not turn on',
+                                    answer:
+                                        'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream or your hardware tier is set to Power Saver.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Live Icon Motion looks slow or delayed',
+                                    answer:
+                                        'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance automatically based on CPU and RAM stats.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'App Lock will not turn on',
+                                    answer:
+                                        'Add a biometric or PIN/Pattern lock in Android settings, then try again. NoteKar uses your system credentials for maximum security.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'App Lock appears after the notification panel',
+                                    answer:
+                                        'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. This ensures your moments stay hidden.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'The app icon did not change immediately',
+                                    answer:
+                                        'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'A moment was saved accidentally',
+                                    answer:
+                                        'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'My data disappeared after clearing app storage',
+                                    answer:
+                                        'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Will reminders work when the app is closed?',
+                                    answer:
+                                        'Yes! NoteKar registers reminders directly with Android\'s system AlarmManager. The OS will launch our background notification receiver and show the alert even if the app is closed or force-killed.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Why am I not receiving reminders?',
+                                    answer:
+                                        'Make sure Android notification permissions are allowed for NoteKar. On some devices, OEM power-saving modes or background execution restrictions may block or delay scheduled alarms. Consider disabling battery optimization for NoteKar.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'Is NoteKar safe to use?',
+                                    answer:
+                                        'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Privacy & Security.',
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Update Center'))
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: spacing20,
+                              ),
+                              child: _updateCenterPage(p),
+                            ),
+                          ),
+                        if (show('Updates & Notices'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.system_update_outlined,
+                                    title: 'Software Update',
+                                    color: p.text2,
+                                    status: _updateAvailable
+                                        ? 'v$appVersion (Update Available)'
+                                        : 'v$appVersion',
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (checkingUpdates)
+                                          const SizedBox(
+                                            width: 10,
+                                            height: 10,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.grey,
+                                            ),
+                                          )
+                                        else if (_updateAvailable)
+                                          () {
+                                            final date = updateInfo?.date;
+                                            final isVeryOld =
+                                                date != null &&
+                                                DateTime.now()
+                                                        .difference(date)
+                                                        .inDays >
+                                                    7;
+                                            final isUrgent =
+                                                isVeryOld ||
+                                                (updateInfo?.isImportant ??
+                                                    false);
+                                            return Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: BoxDecoration(
+                                                color: isUrgent
+                                                    ? p.red
+                                                    : p.orange,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            );
+                                          }()
+                                        else if (_upToDate)
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              color: p.green,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        const SizedBox(width: spacing8),
+                                        Icon(
+                                          Icons.chevron_right_rounded,
+                                          color: p.text3,
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () => _openCategory(
+                                      'Update Center',
+                                      parent: 'Updates & Notices',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Keep NoteKar up to date with the latest features and security patches.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'App Notices',
+                                    color: p.accent,
+                                    value: remoteNotices,
+                                    onChanged: (value) {
+                                      setState(() => remoteNotices = value);
+                                      widget.onRemoteNotices(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Checks for official announcement notices and bug fix announcements.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                title: 'Release Notes & History',
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.auto_awesome_rounded,
+                                    title: "What's New",
+                                    color: p.orange,
+                                    status: 'Recent',
+                                    onTap: () => _openCategory(
+                                      "What's New",
+                                      parent: 'Updates & Notices',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.history_edu_rounded,
+                                    title: 'Changelog',
+                                    color: p.green,
+                                    status: 'History',
+                                    onTap: () => _openCategory(
+                                      'Changelog',
+                                      parent: 'Updates & Notices',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'View release highlights, version logs, and bug fix summaries for NoteKar.',
+                              ),
+
+                              SettingsBetaNote(
+                                p: p,
+                                text:
+                                    'The current features on this page are under Beta stage.',
+                                onLearnMore: () => _showBetaInfoPopup(p),
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Data & Backup'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.archive_outlined,
+                                    title: 'Backup & Export'.localized(context),
+                                    status:
+                                        '${entries.length} ${'Logs'.localized(context)}',
+                                    color: p.green,
+                                    onTap: () => _openCategory(
+                                      'Backup & Export',
+                                      parent: 'Data & Backup',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.health_and_safety_outlined,
+                                    title: 'Backup Status'.localized(context),
+                                    status: _dataHealthStatus,
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Backup Status',
+                                      parent: 'Data & Backup',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'NoteKar uses a private offline database. Use these tools to secure your history via manual exports.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Backup & Export'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Backup Schedule',
+                                children: [
+                                  for (final days in [0, 7, 14, 30])
+                                    SettingsRow(
+                                      p: p,
+                                      title: days == 0
+                                          ? 'Disabled'
+                                          : 'Every $days Days',
+                                      trailing: backupReminderDays == days
+                                          ? Icon(
+                                              Icons.check_rounded,
+                                              color: p.accent,
+                                              size: 20,
+                                            )
+                                          : const SizedBox.shrink(),
+                                      onTap: () {
+                                        if (backupReminderDays == days) return;
+                                        setState(
+                                          () => backupReminderDays = days,
+                                        );
+                                        widget.onBackupReminderDays(days);
+                                      },
+                                    ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text: backupReminderDays == 0
+                                    ? 'Reminders are currently disabled. Set an interval to be reminded to safeguard your data.'
+                                    : 'NoteKar will prompt for a backup every $backupReminderDays days.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.table_chart_outlined,
+                                    title: 'Export CSV',
+                                    status: 'Table',
+                                    color: p.green,
+                                    rowKind: 'link',
+                                    onTap: () => unawaited(
+                                      _runExport('CSV', widget.onExportCsv),
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.date_range_outlined,
+                                    title: 'Export Last 7 Days',
+                                    status: 'Recent',
+                                    color: p.green,
+                                    rowKind: 'link',
+                                    onTap: () => unawaited(
+                                      _runExport(
+                                        'Recent CSV',
+                                        widget.onExportRecentCsv,
+                                      ),
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.code_rounded,
+                                    title: 'Export JSON',
+                                    status: 'Dev',
+                                    color: p.accent,
+                                    rowKind: 'link',
+                                    onTap: () => unawaited(
+                                      _runExport('JSON', widget.onExportJson),
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.archive_outlined,
+                                    title: 'Export Backup',
+                                    status: 'Full',
+                                    color: p.accent,
+                                    rowKind: 'link',
+                                    onTap: () => unawaited(
+                                      _runExport(
+                                        'Backup',
+                                        widget.onExportBackup,
+                                      ),
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.unarchive_outlined,
+                                    title: 'Import Backup',
+                                    status: 'Restore',
+                                    color: p.orange,
+                                    rowKind: 'link',
+                                    onTap: () => unawaited(_runImport()),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Export moments to standard CSV or JSON files for backups, external analysis, or phone transfers.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Backup Status'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Active Protection',
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.android_rounded,
+                                    title: 'Android Backup',
+                                    color: p.green,
+                                    status: 'Active',
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.favorite_outline_rounded,
+                                    title: 'Data Health',
+                                    color: p.green,
+                                    status: _dataHealthStatus,
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Android OS auto-backup preserves app preferences only. Your moments and notes stay 100% local and private to this device.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                title: 'Cloud & Sync (Planned)',
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.lock_outlined,
+                                    title: 'Encrypted Backup',
+                                    color: p.orange,
+                                    status: 'Planned',
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.cloud_outlined,
+                                    title: 'Google Drive Backup',
+                                    color: p.orange,
+                                    status: 'Planned',
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Planned cloud features will provide direct cloud synchronization across your personal devices.',
+                                bottomPadding: 0,
+                              ),
+
+                              SettingsBetaNote(
+                                p: p,
+                                text:
+                                    'The current features on this page are under Beta stage.',
+                                onLearnMore: () => _showBetaInfoPopup(p),
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Privacy & Security'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Glass(
+                                  p: p,
+                                  radius: 32,
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color: p.green.withValues(
+                                                alpha: 0.12,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.verified_user_rounded,
+                                              color: p.green,
+                                              size: 22,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'VirusTotal Safety Scan'
+                                                      .localized(context),
+                                                  style: TextStyle(
+                                                    color: p.text,
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 15,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Verified clean of malicious activity'
+                                                      .localized(context),
+                                                  style: TextStyle(
+                                                    color: p.text3,
+                                                    fontSize: 11.5,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      // 2x2 Metric Table
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              height: 52,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                  ),
+                                              alignment: Alignment.centerLeft,
+                                              decoration: BoxDecoration(
+                                                color: p.surface3.withValues(
+                                                  alpha: 0.4,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                border: Border.all(
+                                                  color: p.border.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons
+                                                        .check_circle_outline_rounded,
+                                                    color: p.green,
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          'Ratio'.localized(
+                                                            context,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color: p.text3,
+                                                            fontSize: 9.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 2,
+                                                        ),
+                                                        Text(
+                                                          '0 / 68 clean'
+                                                              .localized(
+                                                                context,
+                                                              ),
+                                                          style: TextStyle(
+                                                            color: p.text,
+                                                            fontSize: 11.5,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Container(
+                                              height: 52,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                  ),
+                                              alignment: Alignment.centerLeft,
+                                              decoration: BoxDecoration(
+                                                color: p.surface3.withValues(
+                                                  alpha: 0.4,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                border: Border.all(
+                                                  color: p.border.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.shield_outlined,
+                                                    color: p.green,
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          'Status'.localized(
+                                                            context,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color: p.text3,
+                                                            fontSize: 9.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 2,
+                                                        ),
+                                                        Text(
+                                                          'Undetected'
+                                                              .localized(
+                                                                context,
+                                                              ),
+                                                          style: TextStyle(
+                                                            color: p.green,
+                                                            fontSize: 11.5,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              height: 52,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                  ),
+                                              alignment: Alignment.centerLeft,
+                                              decoration: BoxDecoration(
+                                                color: p.surface3.withValues(
+                                                  alpha: 0.4,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                border: Border.all(
+                                                  color: p.border.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons
+                                                        .calendar_today_rounded,
+                                                    color: p.text3,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          'Last Scan'.localized(
+                                                            context,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color: p.text3,
+                                                            fontSize: 9.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 2,
+                                                        ),
+                                                        Text(
+                                                          'July 2026'.localized(
+                                                            context,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color: p.text,
+                                                            fontSize: 11.5,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Container(
+                                              height: 52,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                  ),
+                                              alignment: Alignment.centerLeft,
+                                              decoration: BoxDecoration(
+                                                color: p.surface3.withValues(
+                                                  alpha: 0.4,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                border: Border.all(
+                                                  color: p.border.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.lock_outline_rounded,
+                                                    color: p.text3,
+                                                    size: 15,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          'Signature'.localized(
+                                                            context,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color: p.text3,
+                                                            fontSize: 9.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 2,
+                                                        ),
+                                                        Text(
+                                                          'Developer Key'
+                                                              .localized(
+                                                                context,
+                                                              ),
+                                                          style: TextStyle(
+                                                            color: p.text,
+                                                            fontSize: 11.5,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
                                       Text(
-                                        'Verified clean of malicious activity'.localized(context),
-                                        style: TextStyle(color: p.text3, fontSize: 11.5),
+                                        'NoteKar builds undergo automated CodeQL scanner compilation and local VirusTotal scans. Binaries are signed with our official certificate to ensure absolute integrity.'
+                                            .localized(context),
+                                        style: TextStyle(
+                                          color: p.text2,
+                                          fontSize: 13,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  await _fileChannel.invokeMethod<
+                                                    void
+                                                  >('openUrl', {
+                                                    'url':
+                                                        'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe',
+                                                  });
+                                                } catch (_) {}
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: p.green
+                                                    .withValues(alpha: 0.15),
+                                                foregroundColor: p.green,
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        999,
+                                                      ),
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                minimumSize: Size.zero,
+                                                tapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.security_rounded,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'VT Report'.localized(
+                                                        context,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      softWrap: false,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  await _fileChannel.invokeMethod<
+                                                    void
+                                                  >('openUrl', {
+                                                    'url':
+                                                        'https://github.com/dheeraz101/Notekar-Android/releases/latest',
+                                                  });
+                                                } catch (_) {}
+                                              },
+                                              style: OutlinedButton.styleFrom(
+                                                foregroundColor: p.text2,
+                                                side: BorderSide(
+                                                  color: p.border,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        999,
+                                                      ),
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                minimumSize: Size.zero,
+                                                tapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.fingerprint_rounded,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'SHA-256 Hashes'
+                                                          .localized(context),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      softWrap: false,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // 2x2 Metric Table
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: 52,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                      color: p.surface3.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.check_circle_outline_rounded, color: p.green, size: 16),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Ratio'.localized(context),
-                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                '0 / 68 clean'.localized(context),
-                                                style: TextStyle(color: p.text, fontSize: 11.5, fontWeight: FontWeight.w700),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Container(
-                                    height: 52,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                      color: p.surface3.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.shield_outlined, color: p.green, size: 16),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Status'.localized(context),
-                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                'Undetected'.localized(context),
-                                                style: TextStyle(color: p.green, fontSize: 11.5, fontWeight: FontWeight.w700),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: 52,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                      color: p.surface3.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.calendar_today_rounded, color: p.text3, size: 14),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Last Scan'.localized(context),
-                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                'July 2026'.localized(context),
-                                                style: TextStyle(color: p.text, fontSize: 11.5, fontWeight: FontWeight.w700),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Container(
-                                    height: 52,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                      color: p.surface3.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.lock_outline_rounded, color: p.text3, size: 15),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Signature'.localized(context),
-                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                'Developer Key'.localized(context),
-                                                style: TextStyle(color: p.text, fontSize: 11.5, fontWeight: FontWeight.w700),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'NoteKar builds undergo automated CodeQL scanner compilation and local VirusTotal scans. Binaries are signed with our official certificate to ensure absolute integrity.'.localized(context),
-                              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      try {
-                                        await _fileChannel.invokeMethod<void>('openUrl', {
-                                          'url': 'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe'
-                                        });
-                                      } catch (_) {}
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: p.green.withValues(alpha: 0.15),
-                                      foregroundColor: p.green,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.security_rounded, size: 14),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            'VT Report'.localized(context),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            softWrap: false,
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () async {
-                                      try {
-                                        await _fileChannel.invokeMethod<void>('openUrl', {
-                                          'url': 'https://github.com/dheeraz101/Notekar-Android/releases/latest'
-                                        });
-                                      } catch (_) {}
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: p.text2,
-                                      side: BorderSide(color: p.border),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.fingerprint_rounded, size: 14),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            'SHA-256 Hashes'.localized(context),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            softWrap: false,
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Data & Privacy',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.analytics_outlined, title: 'No Analytics', color: p.green, status: 'None'),
-                        SettingsRow(p: p, icon: Icons.wifi_off_rounded, title: 'Network Use', color: p.accent, status: 'Limited'),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'NoteKar contains zero third-party telemetry. Network access is restricted strictly to update checks and announcement fetching.',
-                    ),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.lock_outlined,
-                          title: 'App Lock',
-                          color: p.orange,
-                          status: privacyLock ? 'On' : 'Off',
-                          onTap: () => _openCategory('App Lock', parent: 'Privacy & Security'),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Protect your saved history using device biometric authentication or system PIN.',
-                      bottomPadding: 0,
-                    ),
-                    
-                    SettingsBetaNote(
-                      p: p,
-                      text: 'The current features on this page are under Beta stage.',
-                      onLearnMore: () => _showBetaInfoPopup(p),
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('App Lock'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsSwitchRow(
-                          p: p,
-                          title: 'App Lock',
-                          color: p.accent,
-                          value: privacyLock,
-                          onChanged: (value) async {
-                            if (!value) {
-                              await widget.onPrivacyLock(false);
-                              if (mounted) setState(() => privacyLock = false);
-                              return;
-                            }
-                            final changed = await widget.onPrivacyLock(true);
-                            if (changed && mounted) {
-                              setState(() => privacyLock = true);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Requires biometric or system PIN authentication to open NoteKar.'),
-                    if (privacyLock) ...[
-                      
-                      SettingsGroup(
-                        p: p,
-                        title: 'When to Lock',
-                        children: [
-                          for (final entry in const {'0': 'Immediately', '1': 'After 1 Minute', '5': 'After 5 Minutes', '10': 'After 10 Minutes'}.entries)
-                            SettingsRow(
-                              p: p,
-                              title: entry.value,
-                              trailing: privacyLockDelayMinutes == int.parse(entry.key) ? Icon(Icons.check_rounded, color: p.accent, size: 20) : const SizedBox.shrink(),
-                              onTap: () {
-                                final minutes = int.parse(entry.key);
-                                if (minutes == privacyLockDelayMinutes) return;
-                                setState(() => privacyLockDelayMinutes = minutes);
-                                widget.onPrivacyLockDelay(minutes);
-                              },
-                            ),
-                        ],
-                      ),
-                      SettingsPageDescription(
-                        p: p,
-                        text: 'Note: Selecting "Immediately" will automatically lock NoteKar as soon as you switch apps, view recent apps, or open your phone notification panel.',
-                      ),
-                    ],
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Help & Guides'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Documentation',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(p: p, icon: Icons.auto_stories_rounded, title: 'Guides', color: p.accent, status: 'Tutorials', onTap: () => _openCategory('Guides', parent: 'Help & Guides')),
-                        SettingsRow(p: p, icon: Icons.help_outline_rounded, title: 'Help', color: p.orange, status: 'FAQ', onTap: () => _openCategory('Help', parent: 'Help & Guides')),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Explore interactive tutorials for tap logging, duration calculations, and troubleshooting.'),
-                    
-                    SettingsGroup(
-                      p: p,
-                      title: 'Legal & Compliance',
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.description_outlined,
-                          title: 'Licenses',
-                          color: p.accent,
-                          status: 'Open Source',
-                          onTap: () => _openCategory('Licenses', parent: 'Help & Guides'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.article_outlined,
-                          title: 'Terms of Use',
-                          color: p.orange,
-                          status: 'MIT',
-                          onTap: () => _openCategory('Terms of Use', parent: 'Help & Guides'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.security_rounded,
-                          title: 'Privacy Policy',
-                          color: p.green,
-                          status: 'Offline-First',
-                          onTap: () => _openCategory('Privacy Policy', parent: 'Help & Guides'),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Review open-source licenses, app usage terms, and offline-first privacy policies.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Advanced'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      insetDividers: true,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.accessibility_new_rounded,
-                          title: 'Accessibility',
-                          status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
-                          color: p.orange,
-                          onTap: () => _openCategory('Accessibility', parent: 'Advanced'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.bug_report_outlined,
-                          title: 'Diagnostics',
-                          status: 'v$appVersion',
-                          color: p.accent,
-                          onTap: () => _openCategory('Diagnostics', parent: 'Advanced'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.memory_rounded,
-                          title: 'Device Health',
-                          status: AdaptiveEngine().healthStatus,
-                          color: p.accent,
-                          onTap: () => _openCategory('Device Health', parent: 'Advanced'),
-                        ),
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.restart_alt_rounded,
-                          title: 'Reset',
-                          status: 'Wipe',
-                          color: p.red,
-                          onTap: () => _openCategory('Reset', parent: 'Advanced'),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'These tools are intended for system maintenance and troubleshooting.',
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Accessibility'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      title: 'Haptic Style',
-                      children: [
-                        for (final style in ['off', 'light', 'standard'])
-                          SettingsRow(
-                            p: p,
-                            title: style[0].toUpperCase() + style.substring(1),
-                            trailing: hapticStyle == style ? Icon(Icons.check_rounded, color: p.accent, size: 20) : const SizedBox.shrink(),
-                            onTap: () {
-                              if (hapticStyle == style) return;
-                              HapticFeedback.selectionClick();
-                              setState(() => hapticStyle = style);
-                              widget.onHapticStyle(style);
-                            },
-                          ),
-                      ],
-                    ),
-                    SettingsPageDescription(p: p, text: 'Configure the intensity of vibration feedback during taps and saves.'),
-                    
-                    SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Reduced Motion', color: p.green, value: reduceMotion, onChanged: (value) { setState(() { reduceMotion = value; if (value) homeMenuAnimations = false; }); widget.onReduceMotion(value); })]),
-                    SettingsPageDescription(p: p, text: 'Disables fluid physics and parallax effects to improve performance and stability.'),
-                    
-                    SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'Larger Text', color: p.orange, value: largeText, onChanged: (value) { setState(() => largeText = value); widget.onLargeText(value); })]),
-                    SettingsPageDescription(p: p, text: 'Increases the global font scale for improved legibility across all interfaces.'),
-                    
-                    SettingsGroup(p: p, children: [SettingsSwitchRow(p: p, title: 'High Contrast', color: p.green, value: highContrast, onChanged: (value) { setState(() => highContrast = value); widget.onHighContrast(value); })]),
-                    SettingsPageDescription(p: p, text: 'Enhances visibility by using pure black backgrounds and high-intensity accent colors.'),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Reset'))
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: spacing8),
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.restore_rounded,
-                          title: 'Reset Settings Only',
-                          color: p.orange,
-                          rowKind: 'popup',
-                          onTap: () => unawaited(_confirmResetSettings()),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Restores all settings options to their factory defaults. Your saved moments and notes are kept intact.',
-                    ),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.delete_forever_rounded,
-                          title: 'Reset All Data',
-                          color: p.red,
-                          rowKind: 'popup',
-                          onTap: () => unawaited(_confirmResetAll(p)),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Permanently deletes all saved timestamps and notes from this device. Preferences remain unchanged.',
-                    ),
-                    
-                    SettingsGroup(
-                      p: p,
-                      children: [
-                        SettingsRow(
-                          p: p,
-                          icon: Icons.restart_alt_rounded,
-                          title: 'Factory Reset',
-                          color: p.red,
-                          rowKind: 'popup',
-                          onTap: () => unawaited(_confirmFactoryReset(p)),
-                        ),
-                      ],
-                    ),
-                    SettingsPageDescription(
-                      p: p,
-                      text: 'Completely clears all saved data and resets all settings to original fresh state.',
-                    ),
-                    const SizedBox(height: spacing48),
-                  ]),
-                ),
-              if (show('Diagnostics'))
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: spacing8),
-                      _diagnosticsPage(p, entries, todayCount),
-                      const SizedBox(height: spacing48),
-                    ],
-                  ),
-                ),
-              if (show('Device Health'))
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: spacing8),
-                      _deviceHealthPage(p),
-                      const SizedBox(height: spacing48),
-                    ],
-                  ),
-                ),
-              if (show('Privacy Policy'))
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _privacyPolicyPage(p),
-                  ),
-                ),
-              if (show('Terms of Use'))
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _termsOfUsePage(p),
-                  ),
-                ),
-              if (show('Licenses'))
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _licensesPage(p),
-                  ),
-                ),
-              if (show("What's New"))
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: spacing8),
-                      ChangelogSettingsPage(p: p, latestOnly: true),
-                      const SizedBox(height: spacing48),
-                    ],
-                  ),
-                ),
-              if (show('Trash Bin')) ...[
-                if (_trash.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: p.text2,
-                                side: BorderSide(color: p.border),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              onPressed: () async {
-                                final confirmed = await showGeneralDialog<bool>(
-                                  context: context,
-                                  barrierColor: Colors.black.withValues(alpha: 0.42),
-                                  barrierDismissible: true,
-                                  barrierLabel: 'Close restore confirmation',
-                                  transitionDuration: const Duration(milliseconds: 120),
-                                  pageBuilder: (_, _, _) => ActionConfirmSheet(
-                                    p: p,
-                                    title: 'Restore All Moments?',
-                                    message: 'This will return all items currently in the trash to your history.',
-                                    confirmLabel: 'Restore All',
-                                    icon: Icons.restore_rounded,
-                                  ),
-                                );
-                                if (confirmed == true) {
-                                  await widget.onRestoreAllTrash();
-                                }
-                              },
-                              icon: const Icon(Icons.restore_rounded, size: 18),
-                              label: const Text('Restore All', style: TextStyle(fontWeight: FontWeight.w700)),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: p.text2,
-                                side: BorderSide(color: p.border),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                              onPressed: () async {
-                                final confirmed = await showGeneralDialog<bool>(
-                                  context: context,
-                                  barrierColor: Colors.black.withValues(alpha: 0.42),
-                                  barrierDismissible: true,
-                                  barrierLabel: 'Close empty confirmation',
-                                  transitionDuration: const Duration(milliseconds: 120),
-                                  pageBuilder: (_, _, _) => ActionConfirmSheet(
-                                    p: p,
-                                    title: 'Empty Trash?',
-                                    message: 'Permanently delete all trash? This cannot be undone.',
-                                    confirmLabel: 'Empty',
-                                    isDestructive: true,
-                                    icon: Icons.delete_forever_rounded,
-                                  ),
-                                );
-                                if (confirmed == true) {
-                                  await widget.onClearTrash();
-                                }
-                              },
-                              icon: const Icon(Icons.delete_forever_rounded, size: 18),
-                              label: const Text('Empty Trash', style: TextStyle(fontWeight: FontWeight.w700)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ...() {
-                  if (_trash.isEmpty) {
-                    return [
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: HIGEmptyState(
-                          p: p,
-                          icon: Icons.delete_outline_rounded,
-                          title: 'Trash is Empty',
-                          message: 'Deleted moments will appear here for 30 days.',
-                        ),
-                      )
-                    ];
-                  }
-
-                  return [
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final moment = _trash[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: p.surface2,
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(color: p.border.withValues(alpha: 0.6)),
-                              ),
-                              child: Row(
+                              SettingsGroup(
+                                p: p,
+                                title: 'Data & Privacy',
+                                insetDividers: true,
                                 children: [
-                                  Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: momentColor(p, moment.type).withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(999),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.analytics_outlined,
+                                    title: 'No Analytics',
+                                    color: p.green,
+                                    status: 'None',
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.wifi_off_rounded,
+                                    title: 'Network Use',
+                                    color: p.accent,
+                                    status: 'Limited',
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'NoteKar contains zero third-party telemetry. Network access is restricted strictly to update checks and announcement fetching.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.lock_outlined,
+                                    title: 'App Lock',
+                                    color: p.orange,
+                                    status: privacyLock ? 'On' : 'Off',
+                                    onTap: () => _openCategory(
+                                      'App Lock',
+                                      parent: 'Privacy & Security',
                                     ),
-                                    child: Icon(momentIcon(moment.type), color: momentColor(p, moment.type), size: 18),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(timeOnly(moment.timestamp), style: TextStyle(color: p.text, fontSize: 14, fontWeight: FontWeight.w800)),
-                                            const SizedBox(width: 8),
-                                            Text(moment.date, style: TextStyle(color: p.text3, fontSize: 12)),
-                                          ],
-                                        ),
-                                        if (moment.note.isNotEmpty) ...[
-                                          const SizedBox(height: 2),
-                                          Text(moment.note, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text2, fontSize: 13)),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.restore_rounded, color: p.text2, size: 20),
-                                    onPressed: () async {
-                                      await widget.onRestoreTrashMoment(moment.id);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete_forever_rounded, color: p.text2, size: 20),
-                                    onPressed: () async {
-                                      final confirmed = await showGeneralDialog<bool>(
-                                        context: context,
-                                        barrierColor: Colors.black.withValues(alpha: 0.42),
-                                        barrierDismissible: true,
-                                        barrierLabel: 'Close delete confirmation',
-                                        transitionDuration: const Duration(milliseconds: 120),
-                                        pageBuilder: (_, _, _) => ActionConfirmSheet(
-                                          p: p,
-                                          title: 'Delete Permanently?',
-                                          message: 'This moment will be erased forever.',
-                                          confirmLabel: 'Delete',
-                                          isDestructive: true,
-                                          icon: Icons.delete_forever_rounded,
-                                        ),
-                                      );
-                                      if (confirmed == true) {
-                                        await widget.onDeleteTrashPermanent(moment.id);
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Protect your saved history using device biometric authentication or system PIN.',
+                                bottomPadding: 0,
+                              ),
+
+                              SettingsBetaNote(
+                                p: p,
+                                text:
+                                    'The current features on this page are under Beta stage.',
+                                onLearnMore: () => _showBetaInfoPopup(p),
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('App Lock'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'App Lock',
+                                    color: p.accent,
+                                    value: privacyLock,
+                                    onChanged: (value) async {
+                                      if (!value) {
+                                        await widget.onPrivacyLock(false);
+                                        if (mounted)
+                                          setState(() => privacyLock = false);
+                                        return;
+                                      }
+                                      final changed = await widget
+                                          .onPrivacyLock(true);
+                                      if (changed && mounted) {
+                                        setState(() => privacyLock = true);
                                       }
                                     },
                                   ),
                                 ],
                               ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Requires biometric or system PIN authentication to open NoteKar.',
+                              ),
+                              if (privacyLock) ...[
+                                SettingsGroup(
+                                  p: p,
+                                  title: 'When to Lock',
+                                  children: [
+                                    for (final entry in const {
+                                      '0': 'Immediately',
+                                      '1': 'After 1 Minute',
+                                      '5': 'After 5 Minutes',
+                                      '10': 'After 10 Minutes',
+                                    }.entries)
+                                      SettingsRow(
+                                        p: p,
+                                        title: entry.value,
+                                        trailing:
+                                            privacyLockDelayMinutes ==
+                                                int.parse(entry.key)
+                                            ? Icon(
+                                                Icons.check_rounded,
+                                                color: p.accent,
+                                                size: 20,
+                                              )
+                                            : const SizedBox.shrink(),
+                                        onTap: () {
+                                          final minutes = int.parse(entry.key);
+                                          if (minutes ==
+                                              privacyLockDelayMinutes)
+                                            return;
+                                          setState(
+                                            () => privacyLockDelayMinutes =
+                                                minutes,
+                                          );
+                                          widget.onPrivacyLockDelay(minutes);
+                                        },
+                                      ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'Note: Selecting "Immediately" will automatically lock NoteKar as soon as you switch apps, view recent apps, or open your phone notification panel.',
+                                ),
+                              ],
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Help & Guides'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Documentation',
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.auto_stories_rounded,
+                                    title: 'Guides',
+                                    color: p.accent,
+                                    status: 'Tutorials',
+                                    onTap: () => _openCategory(
+                                      'Guides',
+                                      parent: 'Help & Guides',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.help_outline_rounded,
+                                    title: 'Help',
+                                    color: p.orange,
+                                    status: 'FAQ',
+                                    onTap: () => _openCategory(
+                                      'Help',
+                                      parent: 'Help & Guides',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Explore interactive tutorials for tap logging, duration calculations, and troubleshooting.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                title: 'Legal & Compliance',
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.description_outlined,
+                                    title: 'Licenses',
+                                    color: p.accent,
+                                    status: 'Open Source',
+                                    onTap: () => _openCategory(
+                                      'Licenses',
+                                      parent: 'Help & Guides',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.article_outlined,
+                                    title: 'Terms of Use',
+                                    color: p.orange,
+                                    status: 'MIT',
+                                    onTap: () => _openCategory(
+                                      'Terms of Use',
+                                      parent: 'Help & Guides',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.security_rounded,
+                                    title: 'Privacy Policy',
+                                    color: p.green,
+                                    status: 'Offline-First',
+                                    onTap: () => _openCategory(
+                                      'Privacy Policy',
+                                      parent: 'Help & Guides',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Review open-source licenses, app usage terms, and offline-first privacy policies.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Advanced'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.accessibility_new_rounded,
+                                    title: 'Accessibility',
+                                    status:
+                                        hapticStyle[0].toUpperCase() +
+                                        hapticStyle.substring(1),
+                                    color: p.orange,
+                                    onTap: () => _openCategory(
+                                      'Accessibility',
+                                      parent: 'Advanced',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.bug_report_outlined,
+                                    title: 'Diagnostics',
+                                    status: 'v$appVersion',
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Diagnostics',
+                                      parent: 'Advanced',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.memory_rounded,
+                                    title: 'Device Health',
+                                    status: AdaptiveEngine().healthStatus,
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Device Health',
+                                      parent: 'Advanced',
+                                    ),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.restart_alt_rounded,
+                                    title: 'Reset',
+                                    status: 'Wipe',
+                                    color: p.red,
+                                    onTap: () => _openCategory(
+                                      'Reset',
+                                      parent: 'Advanced',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'These tools are intended for system maintenance and troubleshooting.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Accessibility'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Haptic Style',
+                                children: [
+                                  for (final style in [
+                                    'off',
+                                    'light',
+                                    'standard',
+                                  ])
+                                    SettingsRow(
+                                      p: p,
+                                      title:
+                                          style[0].toUpperCase() +
+                                          style.substring(1),
+                                      trailing: hapticStyle == style
+                                          ? Icon(
+                                              Icons.check_rounded,
+                                              color: p.accent,
+                                              size: 20,
+                                            )
+                                          : const SizedBox.shrink(),
+                                      onTap: () {
+                                        if (hapticStyle == style) return;
+                                        HapticFeedback.selectionClick();
+                                        setState(() => hapticStyle = style);
+                                        widget.onHapticStyle(style);
+                                      },
+                                    ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Configure the intensity of vibration feedback during taps and saves.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Reduced Motion',
+                                    color: p.green,
+                                    value: reduceMotion,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        reduceMotion = value;
+                                        if (value) homeMenuAnimations = false;
+                                      });
+                                      widget.onReduceMotion(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Disables fluid physics and parallax effects to improve performance and stability.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Larger Text',
+                                    color: p.orange,
+                                    value: largeText,
+                                    onChanged: (value) {
+                                      setState(() => largeText = value);
+                                      widget.onLargeText(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Increases the global font scale for improved legibility across all interfaces.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'High Contrast',
+                                    color: p.green,
+                                    value: highContrast,
+                                    onChanged: (value) {
+                                      setState(() => highContrast = value);
+                                      widget.onHighContrast(value);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Enhances visibility by using pure black backgrounds and high-intensity accent colors.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Reset'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.restore_rounded,
+                                    title: 'Reset Settings Only',
+                                    color: p.orange,
+                                    rowKind: 'popup',
+                                    onTap: () =>
+                                        unawaited(_confirmResetSettings()),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Restores all settings options to their factory defaults. Your saved moments and notes are kept intact.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.delete_forever_rounded,
+                                    title: 'Reset All Data',
+                                    color: p.red,
+                                    rowKind: 'popup',
+                                    onTap: () => unawaited(_confirmResetAll(p)),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Permanently deletes all saved timestamps and notes from this device. Preferences remain unchanged.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.restart_alt_rounded,
+                                    title: 'Factory Reset',
+                                    color: p.red,
+                                    rowKind: 'popup',
+                                    onTap: () =>
+                                        unawaited(_confirmFactoryReset(p)),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Completely clears all saved data and resets all settings to original fresh state.',
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Diagnostics'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _diagnosticsPage(p, entries, todayCount),
+                                const SizedBox(height: spacing48),
+                              ],
                             ),
-                          );
-                        },
-                        childCount: _trash.length,
-                      ),
+                          ),
+                        if (show('Device Health'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _deviceHealthPage(p),
+                                const SizedBox(height: spacing48),
+                              ],
+                            ),
+                          ),
+                        if (show('Privacy Policy'))
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: _privacyPolicyPage(p),
+                            ),
+                          ),
+                        if (show('Terms of Use'))
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: _termsOfUsePage(p),
+                            ),
+                          ),
+                        if (show('Licenses'))
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: _licensesPage(p),
+                            ),
+                          ),
+                        if (show("What's New"))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                ChangelogSettingsPage(p: p, latestOnly: true),
+                                const SizedBox(height: spacing48),
+                              ],
+                            ),
+                          ),
+                        if (show('Trash Bin')) ...[
+                          if (_trash.isNotEmpty)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: p.text2,
+                                          side: BorderSide(color: p.border),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          final confirmed =
+                                              await showGeneralDialog<bool>(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.42),
+                                                barrierDismissible: true,
+                                                barrierLabel:
+                                                    'Close restore confirmation',
+                                                transitionDuration:
+                                                    const Duration(
+                                                      milliseconds: 120,
+                                                    ),
+                                                pageBuilder: (_, _, _) =>
+                                                    ActionConfirmSheet(
+                                                      p: p,
+                                                      title:
+                                                          'Restore All Moments?',
+                                                      message:
+                                                          'This will return all items currently in the trash to your history.',
+                                                      confirmLabel:
+                                                          'Restore All',
+                                                      icon:
+                                                          Icons.restore_rounded,
+                                                    ),
+                                              );
+                                          if (confirmed == true) {
+                                            await widget.onRestoreAllTrash();
+                                          }
+                                        },
+                                        icon: const Icon(
+                                          Icons.restore_rounded,
+                                          size: 18,
+                                        ),
+                                        label: const Text(
+                                          'Restore All',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: p.text2,
+                                          side: BorderSide(color: p.border),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          final confirmed =
+                                              await showGeneralDialog<bool>(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.42),
+                                                barrierDismissible: true,
+                                                barrierLabel:
+                                                    'Close empty confirmation',
+                                                transitionDuration:
+                                                    const Duration(
+                                                      milliseconds: 120,
+                                                    ),
+                                                pageBuilder: (_, _, _) =>
+                                                    ActionConfirmSheet(
+                                                      p: p,
+                                                      title: 'Empty Trash?',
+                                                      message:
+                                                          'Permanently delete all trash? This cannot be undone.',
+                                                      confirmLabel: 'Empty',
+                                                      isDestructive: true,
+                                                      icon: Icons
+                                                          .delete_forever_rounded,
+                                                    ),
+                                              );
+                                          if (confirmed == true) {
+                                            await widget.onClearTrash();
+                                          }
+                                        },
+                                        icon: const Icon(
+                                          Icons.delete_forever_rounded,
+                                          size: 18,
+                                        ),
+                                        label: const Text(
+                                          'Empty Trash',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ...() {
+                            if (_trash.isEmpty) {
+                              return [
+                                SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: HIGEmptyState(
+                                    p: p,
+                                    icon: Icons.delete_outline_rounded,
+                                    title: 'Trash is Empty',
+                                    message:
+                                        'Deleted moments will appear here for 30 days.',
+                                  ),
+                                ),
+                              ];
+                            }
+
+                            return [
+                              SliverList(
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
+                                  final moment = _trash[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: p.surface2,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        border: Border.all(
+                                          color: p.border.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: momentColor(
+                                                p,
+                                                moment.type,
+                                              ).withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
+                                            ),
+                                            child: Icon(
+                                              momentIcon(moment.type),
+                                              color: momentColor(
+                                                p,
+                                                moment.type,
+                                              ),
+                                              size: 18,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      timeOnly(
+                                                        moment.timestamp,
+                                                      ),
+                                                      style: TextStyle(
+                                                        color: p.text,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      moment.date,
+                                                      style: TextStyle(
+                                                        color: p.text3,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                if (moment.note.isNotEmpty) ...[
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    moment.note,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: p.text2,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.restore_rounded,
+                                              color: p.text2,
+                                              size: 20,
+                                            ),
+                                            onPressed: () async {
+                                              await widget.onRestoreTrashMoment(
+                                                moment.id,
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.delete_forever_rounded,
+                                              color: p.text2,
+                                              size: 20,
+                                            ),
+                                            onPressed: () async {
+                                              final confirmed = await showGeneralDialog<bool>(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.42),
+                                                barrierDismissible: true,
+                                                barrierLabel:
+                                                    'Close delete confirmation',
+                                                transitionDuration:
+                                                    const Duration(
+                                                      milliseconds: 120,
+                                                    ),
+                                                pageBuilder: (_, _, _) =>
+                                                    ActionConfirmSheet(
+                                                      p: p,
+                                                      title:
+                                                          'Delete Permanently?',
+                                                      message:
+                                                          'This moment will be erased forever.',
+                                                      confirmLabel: 'Delete',
+                                                      isDestructive: true,
+                                                      icon: Icons
+                                                          .delete_forever_rounded,
+                                                    ),
+                                              );
+                                              if (confirmed == true) {
+                                                await widget
+                                                    .onDeleteTrashPermanent(
+                                                      moment.id,
+                                                    );
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }, childCount: _trash.length),
+                              ),
+                            ];
+                          }(),
+                          const SliverPadding(
+                            padding: EdgeInsets.only(bottom: 48),
+                          ),
+                        ],
+                        if (show('Changelog'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                ChangelogSettingsPage(p: p, latestOnly: false),
+                                const SizedBox(height: spacing48),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
-                  ];
-                }(),
-                const SliverPadding(padding: EdgeInsets.only(bottom: 48)),
-              ],
-              if (show('Changelog'))
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: spacing8),
-                      ChangelogSettingsPage(p: p, latestOnly: false),
-                      const SizedBox(height: spacing48),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
     if (!largeText) return sheet;
     return sheet;
   }
@@ -5345,11 +7263,7 @@ class _PolicySection extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   text,
-                  style: TextStyle(
-                    color: p.text2,
-                    fontSize: 13,
-                    height: 1.5,
-                  ),
+                  style: TextStyle(color: p.text2, fontSize: 13, height: 1.5),
                 ),
               ],
             ),

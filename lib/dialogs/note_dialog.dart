@@ -72,11 +72,7 @@ class _NoteDialogState extends State<NoteDialog> {
             widget.initialNote.isEmpty
                 ? 'Add a short detail to this moment.'
                 : 'Update the note attached to this moment.',
-            style: TextStyle(
-              color: widget.p.text2,
-              fontSize: 12,
-              height: 1.35,
-            ),
+            style: TextStyle(color: widget.p.text2, fontSize: 12, height: 1.35),
           ),
           const SizedBox(height: spacing12),
           SizedBox(
@@ -211,12 +207,11 @@ class _LinearCharacterIndicator extends StatelessWidget {
     final alert = remaining <= 20;
     final danger = remaining <= 0;
 
-    final color =
-        danger
-            ? p.red
-            : alert
-            ? p.orange
-            : p.accent.withValues(alpha: 0.8);
+    final color = danger
+        ? p.red
+        : alert
+        ? p.orange
+        : p.accent.withValues(alpha: 0.8);
 
     return Row(
       children: [
@@ -236,7 +231,10 @@ class _LinearCharacterIndicator extends StatelessWidget {
                   color: color,
                   borderRadius: BorderRadius.circular(999),
                   boxShadow: [
-                    BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 4),
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                    ),
                   ],
                 ),
               ),

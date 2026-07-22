@@ -3,11 +3,7 @@ import 'dart:developer' as developer;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum PerformanceTier {
-  low,
-  balanced,
-  high,
-}
+enum PerformanceTier { low, balanced, high }
 
 class AdaptiveEngine {
   static final AdaptiveEngine _instance = AdaptiveEngine._internal();
@@ -39,13 +35,13 @@ class AdaptiveEngine {
     // Try to load cached RAM and sensor state
     _ramGb = effectivePrefs.getInt('device_total_ram_gb') ?? 0;
     _cachedSensorAvailable = effectivePrefs.getBool('device_sensor_available');
-    
+
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
       _model = '${androidInfo.manufacturer} ${androidInfo.model}';
       _osVersion = 'Android ${androidInfo.version.release}';
       _processors = Platform.numberOfProcessors;
-      
+
       // If RAM is not cached, detect it
       if (_ramGb == 0) {
         _ramGb = await _detectAndroidRam();
@@ -74,7 +70,7 @@ class AdaptiveEngine {
       _model = iosInfo.utsname.machine;
       _osVersion = 'iOS ${iosInfo.systemVersion}';
       _processors = Platform.numberOfProcessors;
-      
+
       // iOS Heuristic (Simplified as iOS RAM is harder to get but OS is optimized)
       if (_processors <= 2) {
         _tier = PerformanceTier.low;
@@ -108,9 +104,15 @@ class AdaptiveEngine {
       }
     } on FileSystemException catch (e) {
       // Expected on some restricted OS skins/Android 14+ configurations
-      developer.log('RAM detection restricted: ${e.message}', name: 'adaptive_engine');
+      developer.log(
+        'RAM detection restricted: ${e.message}',
+        name: 'adaptive_engine',
+      );
     } catch (e) {
-      developer.log('Unexpected RAM detection error: $e', name: 'adaptive_engine');
+      developer.log(
+        'Unexpected RAM detection error: $e',
+        name: 'adaptive_engine',
+      );
     }
     return 0;
   }
@@ -133,9 +135,12 @@ class AdaptiveEngine {
 
   String get optimizationSummary {
     return switch (_tier) {
-      PerformanceTier.low => 'Visual effects and background blur are disabled to ensure smooth performance.',
-      PerformanceTier.balanced => 'Standard visual effects enabled. Background blur optimized for efficiency.',
-      PerformanceTier.high => 'All premium visual effects and high-fidelity animations are enabled.',
+      PerformanceTier.low =>
+        'Visual effects and background blur are disabled to ensure smooth performance.',
+      PerformanceTier.balanced =>
+        'Standard visual effects enabled. Background blur optimized for efficiency.',
+      PerformanceTier.high =>
+        'All premium visual effects and high-fidelity animations are enabled.',
     };
   }
 }

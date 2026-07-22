@@ -48,11 +48,7 @@ class SettingsGroup extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Text(
               description!,
-              style: TextStyle(
-                color: p.text2,
-                fontSize: 13,
-                height: 1.4,
-              ),
+              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
             ),
           ),
         Container(
@@ -60,7 +56,9 @@ class SettingsGroup extends StatelessWidget {
           decoration: BoxDecoration(
             color: p.surface2,
             borderRadius: BorderRadius.circular(32), // iOS 26 High-Radius style
-            border: p.name == 'amoled' ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8) : null,
+            border: p.name == 'amoled'
+                ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8)
+                : null,
           ),
           child: Column(
             children: [
@@ -70,7 +68,9 @@ class SettingsGroup extends StatelessWidget {
                   Divider(
                     height: 0.5,
                     color: p.border,
-                    indent: insetDividers ? 57 : 0, // Inset to align right after squircle icon
+                    indent: insetDividers
+                        ? 57
+                        : 0, // Inset to align right after squircle icon
                   ),
               ],
             ],
@@ -109,6 +109,7 @@ class SettingsRow extends StatelessWidget {
   final bool active;
   final String? highlight;
   final Widget? trailing;
+
   /// 'nav'   → chevron_right (default internal navigation)
   /// 'link'  → open_in_new  (opens an external URL)
   /// 'popup' → info_outline  (opens an inline popup/dialog)
@@ -125,11 +126,23 @@ class SettingsRow extends StatelessWidget {
     if (onTap != null && trailing == null) {
       switch (rowKind) {
         case 'link':
-          trailingIndicator = Icon(Icons.open_in_new_rounded, color: p.text3, size: 16);
+          trailingIndicator = Icon(
+            Icons.open_in_new_rounded,
+            color: p.text3,
+            size: 16,
+          );
         case 'popup':
-          trailingIndicator = Icon(Icons.info_outline_rounded, color: p.text3, size: 18);
+          trailingIndicator = Icon(
+            Icons.info_outline_rounded,
+            color: p.text3,
+            size: 18,
+          );
         default:
-          trailingIndicator = Icon(Icons.chevron_right_rounded, color: p.text3, size: 20);
+          trailingIndicator = Icon(
+            Icons.chevron_right_rounded,
+            color: p.text3,
+            size: 20,
+          );
       }
     }
 
@@ -140,7 +153,10 @@ class SettingsRow extends StatelessWidget {
         onTap?.call();
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: hasIcon ? 16 : 20, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: hasIcon ? 16 : 20,
+          vertical: 12,
+        ),
         decoration: BoxDecoration(
           color: active ? rowColor.withValues(alpha: 0.1) : Colors.transparent,
         ),
@@ -188,7 +204,11 @@ class SettingsRow extends StatelessWidget {
                       subtitle!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: p.text2, fontSize: 12, height: 1.3),
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 12,
+                        height: 1.3,
+                      ),
                     ),
                   ],
                 ],
@@ -205,10 +225,7 @@ class SettingsRow extends StatelessWidget {
                 ),
               ),
             ],
-            if (trailing != null) ...[
-              const SizedBox(width: 8),
-              trailing!,
-            ],
+            if (trailing != null) ...[const SizedBox(width: 8), trailing!],
             if (trailingIndicator != null) ...[
               const SizedBox(width: 6),
               trailingIndicator,
@@ -312,12 +329,12 @@ class SegmentedSetting extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: active
                             ? [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
                             : null,
                       ),
                       child: Text(
@@ -325,8 +342,9 @@ class SegmentedSetting extends StatelessWidget {
                         style: TextStyle(
                           color: active ? p.text : p.text2,
                           fontSize: 13,
-                          fontWeight:
-                              active ? FontWeight.w800 : FontWeight.w600,
+                          fontWeight: active
+                              ? FontWeight.w800
+                              : FontWeight.w600,
                         ),
                       ),
                     ),
@@ -418,10 +436,15 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
         widget.onChanged(!value);
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: hasIcon ? 16 : 20, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: hasIcon ? 16 : 20,
+          vertical: 12,
+        ),
         decoration: const BoxDecoration(color: Colors.transparent),
         child: Row(
-          crossAxisAlignment: hasSubtitle ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          crossAxisAlignment: hasSubtitle
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
           children: [
             if (hasIcon) ...[
               Container(
@@ -509,15 +532,17 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                       AnimatedAlign(
                         duration: const Duration(milliseconds: 200),
                         curve: Curves.easeInOut,
-                        alignment:
-                            value ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment: value
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
                         child: AnimatedBuilder(
                           animation: _stretchController,
                           builder: (context, child) {
                             // Fluid "pill" thumb stretch animation
                             final stretch = _stretchController.value * 10;
                             return Container(
-                              width: 34 + stretch, // Refined base thumb width 34
+                              width:
+                                  34 + stretch, // Refined base thumb width 34
                               height: 28,
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -631,8 +656,9 @@ class AppIconChoice extends StatelessWidget {
             height: 72,
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color:
-                  active ? p.accent.withValues(alpha: 0.2) : Colors.transparent,
+              color: active
+                  ? p.accent.withValues(alpha: 0.2)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: active ? p.accent : Colors.transparent,
@@ -738,12 +764,12 @@ class ColorChoiceSetting extends StatelessWidget {
                   ),
                   boxShadow: active
                       ? [
-                        BoxShadow(
-                          color: color.withValues(alpha: 0.25),
-                          blurRadius: 14,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
+                          BoxShadow(
+                            color: color.withValues(alpha: 0.25),
+                            blurRadius: 14,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
                       : null,
                 ),
                 child: AnimatedContainer(
@@ -807,7 +833,9 @@ class SliderScale extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 26), // Increased by 2px for final exact visual alignment
+      padding: const EdgeInsets.symmetric(
+        horizontal: 26,
+      ), // Increased by 2px for final exact visual alignment
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -815,8 +843,9 @@ class SliderScale extends StatelessWidget {
             Container(
               width: 2,
               height: 4,
-              color:
-                  val == activeValue ? p.accent : p.text3.withValues(alpha: 0.5),
+              color: val == activeValue
+                  ? p.accent
+                  : p.text3.withValues(alpha: 0.5),
             ),
         ],
       ),
@@ -825,11 +854,7 @@ class SliderScale extends StatelessWidget {
 }
 
 class SettingsPageSubtitle extends StatelessWidget {
-  const SettingsPageSubtitle({
-    super.key,
-    required this.p,
-    required this.text,
-  });
+  const SettingsPageSubtitle({super.key, required this.p, required this.text});
 
   final Palette p;
   final String text;
@@ -926,7 +951,9 @@ class SettingsBetaNote extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 3.5), // Precisely aligned with 13px Inter cap-height
+            padding: const EdgeInsets.only(
+              top: 3.5,
+            ), // Precisely aligned with 13px Inter cap-height
             child: Icon(
               Icons.info_outline_rounded,
               color: p.text3.withValues(alpha: 0.6),
@@ -1009,15 +1036,17 @@ class SettingsSearchBox extends StatelessWidget {
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.search_rounded, color: p.text3, size: 20),
           prefixIconConstraints: const BoxConstraints(minWidth: 32),
-          suffixIcon:
-              controller.text.isEmpty
-                  ? null
-                  : IconButton(
-                    onPressed: onClear,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    icon: Icon(Icons.close_rounded, color: p.text3, size: 18),
+          suffixIcon: controller.text.isEmpty
+              ? null
+              : IconButton(
+                  onPressed: onClear,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
                   ),
+                  icon: Icon(Icons.close_rounded, color: p.text3, size: 18),
+                ),
           suffixIconConstraints: const BoxConstraints(minWidth: 32),
           hintText: 'Search settings',
           hintStyle: TextStyle(color: p.text3),
@@ -1065,7 +1094,10 @@ class SettingsAboutBlock extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 2.5,
+                ),
                 decoration: BoxDecoration(
                   color: p.accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
@@ -1082,7 +1114,10 @@ class SettingsAboutBlock extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 2.5,
+                ),
                 decoration: BoxDecoration(
                   color: p.text3.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
@@ -1117,14 +1152,20 @@ class SettingsAboutBlock extends StatelessWidget {
                     ..onTap = () => onOpenLink(yabpSite),
                 ),
                 const TextSpan(
-                  text: ' as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.',
+                  text:
+                      ' as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.',
                 ),
               ],
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          Divider(color: p.border.withValues(alpha: 0.5), height: 1, indent: 40, endIndent: 40),
+          Divider(
+            color: p.border.withValues(alpha: 0.5),
+            height: 1,
+            indent: 40,
+            endIndent: 40,
+          ),
           const SizedBox(height: 20),
           Text(
             '© 2026 NoteKar',
@@ -1162,9 +1203,7 @@ class GithubIcon extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _GithubPainter(color),
-      ),
+      child: CustomPaint(painter: _GithubPainter(color)),
     );
   }
 }
@@ -1220,4 +1259,3 @@ class _GithubPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

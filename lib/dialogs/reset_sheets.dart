@@ -96,7 +96,10 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
               ),
@@ -115,7 +118,10 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
                     onPressed: _canReset
                         ? () => Navigator.pop(context, true)
                         : null,
-                    child: const Text('Reset', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text(
+                      'Reset',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ),
               ),
@@ -171,7 +177,9 @@ class _FactoryResetOverlayState extends State<FactoryResetOverlay> {
   Widget build(BuildContext context) {
     return Positioned.fill(
       child: Container(
-        color: const Color(0xFF0A0A0C), // Pure ultra-dark grey screen for premium look
+        color: const Color(
+          0xFF0A0A0C,
+        ), // Pure ultra-dark grey screen for premium look
         child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -241,7 +249,8 @@ class _FactoryResetOverlayState extends State<FactoryResetOverlay> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
-                  'NoteKar respects your privacy. All data removal operations occur locally on your device and cannot be undone.'.localized(context),
+                  'NoteKar respects your privacy. All data removal operations occur locally on your device and cannot be undone.'
+                      .localized(context),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.25),
@@ -360,7 +369,11 @@ class ActionConfirmSheet extends StatelessWidget {
               color: color.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon ?? Icons.info_outline_rounded, color: color, size: 24),
+            child: Icon(
+              icon ?? Icons.info_outline_rounded,
+              color: color,
+              size: 24,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -383,7 +396,10 @@ class ActionConfirmSheet extends StatelessWidget {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
               ),
@@ -400,7 +416,10 @@ class ActionConfirmSheet extends StatelessWidget {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context, true),
-                    child: Text(confirmLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    child: Text(
+                      confirmLabel,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ),
               ),

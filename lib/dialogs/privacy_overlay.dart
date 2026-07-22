@@ -69,13 +69,11 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
                     decoration: BoxDecoration(
                       color: p.accent.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
-                      border: Border.all(color: p.accent.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.2),
+                      ),
                     ),
-                    child: Icon(
-                      Icons.lock_rounded,
-                      color: p.accent,
-                      size: 40,
-                    ),
+                    child: Icon(Icons.lock_rounded, color: p.accent, size: 40),
                   ),
                 ),
                 const SizedBox(height: spacing32),

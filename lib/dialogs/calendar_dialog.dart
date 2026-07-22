@@ -78,7 +78,15 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
             ),
             Row(
               children: [
-                for (final label in const ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'])
+                for (final label in const [
+                  'Su',
+                  'Mo',
+                  'Tu',
+                  'We',
+                  'Th',
+                  'Fr',
+                  'Sa',
+                ])
                   Expanded(
                     child: Text(
                       label,
@@ -110,7 +118,7 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                   final key = dateKey(date);
                   final available = widget.availableDateKeys.contains(key);
                   final selected = key == dateKey(widget.initialDate);
-                  
+
                   return Padding(
                     padding: const EdgeInsets.all(3),
                     child: PressableScale(
@@ -128,24 +136,26 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                           color: selected
                               ? widget.p.accent
                               : available
-                                  ? widget.p.surface2.withValues(alpha: 0.5)
-                                  : Colors.transparent,
+                              ? widget.p.surface2.withValues(alpha: 0.5)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: selected
                                 ? widget.p.accent
                                 : available
-                                    ? widget.p.border.withValues(alpha: 0.3)
-                                    : Colors.transparent,
+                                ? widget.p.border.withValues(alpha: 0.3)
+                                : Colors.transparent,
                             width: 1.2,
                           ),
                           boxShadow: selected
                               ? [
                                   BoxShadow(
-                                    color: widget.p.accent.withValues(alpha: 0.3),
+                                    color: widget.p.accent.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
-                                  )
+                                  ),
                                 ]
                               : null,
                         ),
@@ -158,10 +168,12 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                                 color: selected
                                     ? Colors.white
                                     : available
-                                        ? widget.p.text
-                                        : widget.p.text3.withValues(alpha: 0.25),
+                                    ? widget.p.text
+                                    : widget.p.text3.withValues(alpha: 0.25),
                                 fontSize: 14,
-                                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                                fontWeight: selected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 3),
@@ -172,8 +184,8 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                                 color: selected
                                     ? Colors.white
                                     : available
-                                        ? widget.p.accent
-                                        : Colors.transparent,
+                                    ? widget.p.accent
+                                    : Colors.transparent,
                                 shape: BoxShape.circle,
                               ),
                             ),

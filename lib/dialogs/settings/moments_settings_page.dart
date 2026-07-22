@@ -19,7 +19,8 @@ class MomentsSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final previewText = (lastDeletedPreview != null && lastDeletedPreview!.isNotEmpty)
+    final previewText =
+        (lastDeletedPreview != null && lastDeletedPreview!.isNotEmpty)
         ? lastDeletedPreview!
         : 'No moments deleted';
 
@@ -45,7 +46,8 @@ class MomentsSettingsPage extends StatelessWidget {
               ),
               SettingsPageDescription(
                 p: p,
-                text: 'View and restore moments deleted within the last 30 days.',
+                text:
+                    'View and restore moments deleted within the last 30 days.',
               ),
             ],
             SettingsGroup(
@@ -59,7 +61,9 @@ class MomentsSettingsPage extends StatelessWidget {
                   value: controller.compactHistory,
                   onChanged: (val) {
                     controller.setCompactHistory(val);
-                    controller.setHistoryDensity(val ? 'compact' : 'comfortable');
+                    controller.setHistoryDensity(
+                      val ? 'compact' : 'comfortable',
+                    );
                   },
                 ),
                 SettingsSwitchRow(
@@ -73,7 +77,8 @@ class MomentsSettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Controls log spacing density and requires confirmation before deleting history moments.',
+              text:
+                  'Controls log spacing density and requires confirmation before deleting history moments.',
             ),
             SettingsGroup(
               p: p,
@@ -89,7 +94,8 @@ class MomentsSettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Includes years, months, and days breakdown for long time intervals.',
+              text:
+                  'Includes years, months, and days breakdown for long time intervals.',
             ),
             SettingsGroup(
               p: p,
@@ -105,7 +111,8 @@ class MomentsSettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Enables streamlined icon-only quick action buttons when managing history moments.',
+              text:
+                  'Enables streamlined icon-only quick action buttons when managing history moments.',
             ),
             const SizedBox(height: 48),
           ],

@@ -37,7 +37,9 @@ class FeedbackDialog extends StatelessWidget {
                 color: p.red,
                 onTap: () {
                   Navigator.pop(context);
-                  onOpenLink('$githubIssues/new?labels=bug&template=bug_report.md');
+                  onOpenLink(
+                    '$githubIssues/new?labels=bug&template=bug_report.md',
+                  );
                 },
               ),
               SettingsRow(
@@ -48,14 +50,17 @@ class FeedbackDialog extends StatelessWidget {
                 color: p.accent,
                 onTap: () {
                   Navigator.pop(context);
-                  onOpenLink('$githubIssues/new?labels=enhancement&template=feature_request.md');
+                  onOpenLink(
+                    '$githubIssues/new?labels=enhancement&template=feature_request.md',
+                  );
                 },
               ),
             ],
           ),
           SettingsPageDescription(
             p: p,
-            text: 'Feedback helps NoteKar grow. You can also send an email for direct support.',
+            text:
+                'Feedback helps NoteKar grow. You can also send an email for direct support.',
           ),
           const SizedBox(height: spacing8),
           OutlinedButton(

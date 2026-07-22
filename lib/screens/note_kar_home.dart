@@ -116,6 +116,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   set _entries(List<Moment> val) {
     _entriesNotifier.value = val;
   }
+
   final ValueNotifier<List<Moment>> _trashNotifier = ValueNotifier([]);
   String? _toast;
   bool _toastVisible = false;
@@ -138,11 +139,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   int _lastMotionMs = 0;
 
-  Palette get p => paletteFor(
-    _theme,
-    highContrast: _highContrast,
-    accentName: _accentColor,
-  );
+  Palette get p =>
+      paletteFor(_theme, highContrast: _highContrast, accentName: _accentColor);
 
   @override
   void initState() {
@@ -416,9 +414,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final startupTask = developer.TimelineTask()..start('notekar.startup.load');
 
     // 1. Prioritize SharedPreferences to identify first-run users ASAP.
-    final prefs = widget.preloadedPrefs ?? await SharedPreferences.getInstance();
+    final prefs =
+        widget.preloadedPrefs ?? await SharedPreferences.getInstance();
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-    final remindersWalkthroughSeen = prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
+    final remindersWalkthroughSeen =
+        prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
 
     if (!welcomeSeen || !remindersWalkthroughSeen) {
       if (mounted) {
@@ -441,7 +441,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     if (migrated.isNotEmpty) {
-      _logger.info('Merging ${migrated.length} migrated entries into active list');
+      _logger.info(
+        'Merging ${migrated.length} migrated entries into active list',
+      );
     }
 
     setState(() {
@@ -485,7 +487,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _homeMenuAnimations = prefs.getBool('m-home-menu-animations') ?? false;
       _enableTranslucency = prefs.getBool('m-translucency') ?? false;
       _extendedDuration = prefs.getBool('m-extended-duration') ?? false;
-      _minimalMomentOptions = prefs.getBool('m-minimal-moment-options') ?? false;
+      _minimalMomentOptions =
+          prefs.getBool('m-minimal-moment-options') ?? false;
       _showHistoryText = prefs.getBool('m-show-history-text') ?? true;
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
       _requireLongPressNote =
@@ -496,7 +499,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       final savedInfo = prefs.getString('m-latest-update-info');
       if (savedInfo != null) {
         try {
-          _latestUpdateInfo = AppUpdateInfo.fromJson(jsonDecode(savedInfo) as Map<String, dynamic>);
+          _latestUpdateInfo = AppUpdateInfo.fromJson(
+            jsonDecode(savedInfo) as Map<String, dynamic>,
+          );
         } catch (_) {}
       }
       _locale = prefs.getString('m-locale') ?? 'system';
@@ -668,7 +673,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-    final remindersWalkthroughSeen = prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
+    final remindersWalkthroughSeen =
+        prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
 
     if (!welcomeSeen) {
       if (!mounted) return;
@@ -742,11 +748,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         barrierDismissible: true,
         barrierLabel: 'Close what is new',
         transitionDuration: const Duration(milliseconds: 120),
-        pageBuilder: (_, _, _) => ChangelogDialog(
-          p: p,
-          latestOnly: true,
-          largeText: _largeText,
-        ),
+        pageBuilder: (_, _, _) =>
+            ChangelogDialog(p: p, latestOnly: true, largeText: _largeText),
       );
       await prefs.setString(_lastSeenVersionKey, appVersion);
     });
@@ -808,14 +811,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       await _repository.saveMoment(entry);
       if (_prefs?.getBool('reminder_inactivity_enabled') ?? false) {
-        final intervalMinutes = _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
-        unawaited(_fileChannel.invokeMethod('scheduleReminder', {
-          'id': 'reminder_inactivity',
-          'type': 'inactivity',
-          'intervalMinutes': intervalMinutes,
-          'title': reminderTitle,
-          'body': reminderBody,
-        }));
+        final intervalMinutes =
+            _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
+        unawaited(
+          _fileChannel.invokeMethod('scheduleReminder', {
+            'id': 'reminder_inactivity',
+            'type': 'inactivity',
+            'intervalMinutes': intervalMinutes,
+            'title': reminderTitle,
+            'body': reminderBody,
+          }),
+        );
       }
       unawaited(_updateAndroidWidget());
       _showUndo();
@@ -1045,14 +1051,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _nextId = 1;
     });
     _applySystemUiStyle();
-    
+
     // Stage 1: Prep (1s)
     await Future<void>.delayed(const Duration(milliseconds: 1000));
     if (!mounted) return;
     setState(() {
       _factoryResetProgress = 0.20;
       _factoryResetText = 'Deleting Database Records...';
-      _factoryResetSubText = 'Securely clearing moments, notes, and trash data...';
+      _factoryResetSubText =
+          'Securely clearing moments, notes, and trash data...';
       _factoryResetIcon = Icons.delete_sweep_rounded;
     });
 
@@ -1065,7 +1072,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() {
       _factoryResetProgress = 0.55;
       _factoryResetText = 'Purging Shared Preferences...';
-      _factoryResetSubText = 'Resetting personalization settings and secure keys...';
+      _factoryResetSubText =
+          'Resetting personalization settings and secure keys...';
       _factoryResetIcon = Icons.lock_reset_rounded;
     });
 
@@ -1140,7 +1148,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() {
       _factoryResetProgress = 0.96;
       _factoryResetText = 'Finalizing System Recovery...';
-      _factoryResetSubText = 'Wipe completed. Setting up system for a clean launch...';
+      _factoryResetSubText =
+          'Wipe completed. Setting up system for a clean launch...';
       _factoryResetIcon = Icons.published_with_changes_rounded;
     });
 
@@ -1275,7 +1284,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _requireLongPressNote = snapshot['requireLongPressNote'] as bool;
       _extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
       _enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
-      _minimalMomentOptions = snapshot['minimalMomentOptions'] as bool? ?? false;
+      _minimalMomentOptions =
+          snapshot['minimalMomentOptions'] as bool? ?? false;
       _privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
     });
     await _prefs?.setString('m-theme', _theme);
@@ -1346,7 +1356,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       transitionDuration: const Duration(milliseconds: 120),
       pageBuilder: (_, _, _) => NoteDialog(
         p: p,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
         largeText: _largeText,
       ),
     );
@@ -1377,7 +1390,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         compactRows: _compactHistory,
         largeText: _largeText,
         minimalMomentOptions: _minimalMomentOptions,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
         onDelete: _deleteEntry,
         onRestore: _restoreEntry,
         onUpdateNote: _updateMomentNote,
@@ -1391,7 +1407,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _showRecentlyDeleted() async {
-    final p = paletteFor(_theme, highContrast: _highContrast, accentName: _accentColor);
+    final p = paletteFor(
+      _theme,
+      highContrast: _highContrast,
+      accentName: _accentColor,
+    );
     final trashEntries = _repository.getTrashMoments();
 
     await showModalBottomSheet<void>(
@@ -1404,7 +1424,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       builder: (_) => RecentlyDeletedDialog(
         p: p,
         trashEntries: trashEntries,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
         onRestoreMoment: (id) async {
           await _repository.restoreTrashMoment(id);
           setState(() {
@@ -1485,7 +1508,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         lastSavedAt: _entries.isEmpty
             ? null
             : _entries.map((entry) => entry.timestamp).reduce(math.max),
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
         lastDeletedPreview: lastDeletedPreview,
         trashEntriesNotifier: _trashNotifier,
         onTheme: (value) {
@@ -1647,7 +1673,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
             p: p,
             latestOnly: latestOnly,
             largeText: _largeText,
-            blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+            blur:
+                _enableTranslucency &&
+                AdaptiveEngine().supportsBlur &&
+                !_reduceMotion,
           ),
         ),
         onReset: _resetAll,
@@ -1694,7 +1723,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         p: p,
         latestOnly: true,
         largeText: _largeText,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
       ),
     );
   }
@@ -1709,7 +1741,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (_, _, _) => ChangelogDialog(
         p: p,
         largeText: _largeText,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
       ),
     );
   }
@@ -1864,7 +1899,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         setState(() {
           _latestUpdateInfo = latest;
         });
-        await _prefs?.setString('m-latest-update-info', jsonEncode(latest.toJson()));
+        await _prefs?.setString(
+          'm-latest-update-info',
+          jsonEncode(latest.toJson()),
+        );
         _setUpdateStatus(status);
         return (status: status, info: latest);
       } else if (mounted) {
@@ -1936,7 +1974,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() => _lastBackupAt = now);
     await _prefs?.setInt('m-last-backup-at', now);
   }
-
 
   Future<bool> _setPrivacyLock(bool value) async {
     if (!value) {
@@ -2291,7 +2328,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         p: p,
         summary: summary,
         largeText: _largeText,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
       ),
     );
   }
@@ -2328,7 +2368,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         p: p,
         title: 'Time Between Moments'.localized(context),
         largeText: _largeText,
-        blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2586,7 +2629,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     motionX: motion.dx,
                     motionY: motion.dy,
                     showHistoryText: _showHistoryText,
-                    blur: _enableTranslucency && AdaptiveEngine().supportsBlur && !_reduceMotion,
+                    blur:
+                        _enableTranslucency &&
+                        AdaptiveEngine().supportsBlur &&
+                        !_reduceMotion,
                   );
                 },
               ),
@@ -2609,7 +2655,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     border: Border.all(color: palette.border),
                   ),
                   child: Text(
-                    'deleted ${_lastDeletedPreview!.type} moment'.localized(context),
+                    'deleted ${_lastDeletedPreview!.type} moment'.localized(
+                      context,
+                    ),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: palette.text2,
@@ -2640,10 +2688,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
 
     if (_largeText) {
-      body = MediaQuery(
-        data: largerTextQuery(context),
-        child: body,
-      );
+      body = MediaQuery(data: largerTextQuery(context), child: body);
     }
 
     return PopScope(

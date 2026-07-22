@@ -199,7 +199,10 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                   itemBuilder: (_, index) {
                     if (index >= rows.length) {
                       return Padding(
-                        padding: const EdgeInsets.only(top: 4, bottom: spacing48),
+                        padding: const EdgeInsets.only(
+                          top: 4,
+                          bottom: spacing48,
+                        ),
                         child: PressableScale(
                           onTap: () => setState(() {
                             _visibleCount += _pageSize;
@@ -262,8 +265,10 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: momentColor(widget.p, entry.type)
-                                        .withValues(alpha: 0.12),
+                                    color: momentColor(
+                                      widget.p,
+                                      entry.type,
+                                    ).withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -285,7 +290,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                       fontFeatures: const [
-                                        FontFeature.tabularFigures()
+                                        FontFeature.tabularFigures(),
                                       ],
                                     ),
                                   ),

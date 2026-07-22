@@ -31,7 +31,8 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserver {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with WidgetsBindingObserver {
   late PageController _pageController;
   int _currentPage = 0;
 
@@ -72,8 +73,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
 
   Future<void> _checkPermissions() async {
     try {
-      final bool notificationGranted = await _fileChannel.invokeMethod<bool>('canPostNotifications') ?? false;
-      final bool batteryExempt = await _fileChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ?? false;
+      final bool notificationGranted =
+          await _fileChannel.invokeMethod<bool>('canPostNotifications') ??
+          false;
+      final bool batteryExempt =
+          await _fileChannel.invokeMethod<bool>(
+            'isIgnoringBatteryOptimizations',
+          ) ??
+          false;
       if (mounted) {
         setState(() {
           _notificationGranted = notificationGranted;
@@ -120,13 +127,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
           ),
           const SizedBox(height: 8),
           Text(
-            'A quiet, offline-first way to mark moments the second they happen.'.localized(context),
+            'A quiet, offline-first way to mark moments the second they happen.'
+                .localized(context),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: p.text2,
-              fontSize: 15,
-              height: 1.4,
-            ),
+            style: TextStyle(color: p.text2, fontSize: 15, height: 1.4),
           ),
           const SizedBox(height: 32),
           Row(
@@ -154,7 +158,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
           SegmentedSetting(
             p: p,
             title: 'Startup Mode'.localized(context),
-            subtitle: 'Choose how NoteKar starts when you open it'.localized(context),
+            subtitle: 'Choose how NoteKar starts when you open it'.localized(
+              context,
+            ),
             value: defaultMode,
             values: const {'single': 'Single', 'two-way': 'Two-Way'},
             onChanged: (value) {
@@ -166,7 +172,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
           SegmentedSetting(
             p: p,
             title: 'App Language'.localized(context),
-            subtitle: 'Choose your preferred interface language'.localized(context),
+            subtitle: 'Choose your preferred interface language'.localized(
+              context,
+            ),
             value: currentLocale,
             values: const {
               'system': 'System',
@@ -208,12 +216,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
           const SizedBox(height: 6),
           Center(
             child: Text(
-              'Everything is stored locally and private to your device.'.localized(context),
+              'Everything is stored locally and private to your device.'
+                  .localized(context),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: p.text2,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: p.text2, fontSize: 14),
             ),
           ),
           const SizedBox(height: 32),
@@ -224,25 +230,31 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                 p: p,
                 icon: Icons.touch_app_rounded,
                 title: 'Tap to save'.localized(context),
-                text: 'Log a moment instantly from the main screen.'.localized(context),
+                text: 'Log a moment instantly from the main screen.'.localized(
+                  context,
+                ),
               ),
               _buildFeatureRow(
                 p: p,
                 icon: Icons.swap_vert_rounded,
                 title: 'Track starts and stops'.localized(context),
-                text: 'Use Single or Two-Way mode based on your flow.'.localized(context),
+                text: 'Use Single or Two-Way mode based on your flow.'
+                    .localized(context),
               ),
               _buildFeatureRow(
                 p: p,
                 icon: Icons.edit_note_rounded,
                 title: 'Hold for notes'.localized(context),
-                text: 'Attach context without slowing the app down.'.localized(context),
+                text: 'Attach context without slowing the app down.'.localized(
+                  context,
+                ),
               ),
               _buildFeatureRow(
                 p: p,
                 icon: Icons.history_rounded,
                 title: 'Review and export'.localized(context),
-                text: 'Filter history, compare moments, export, or backup.'.localized(context),
+                text: 'Filter history, compare moments, export, or backup.'
+                    .localized(context),
               ),
             ],
           ),
@@ -280,7 +292,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
               children: [
                 Text(
                   title,
-                  style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
+                  style: TextStyle(
+                    color: p.text,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -313,10 +329,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
               border: Border.all(color: p.accent.withValues(alpha: 0.25)),
             ),
             alignment: Alignment.center,
-            child: GithubIcon(
-              size: 36,
-              color: p.accent,
-            ),
+            child: GithubIcon(size: 36, color: p.accent),
           ),
           const SizedBox(height: 24),
           Text(
@@ -331,13 +344,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
           ),
           const SizedBox(height: 8),
           Text(
-            'We have officially migrated our codebase to a new home. All future releases, updates, and issues will be managed here:'.localized(context),
+            'We have officially migrated our codebase to a new home. All future releases, updates, and issues will be managed here:'
+                .localized(context),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: p.text2,
-              fontSize: 14,
-              height: 1.45,
-            ),
+            style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
           ),
           const SizedBox(height: 24),
 
@@ -379,7 +389,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                           HapticFeedback.selectionClick();
                           try {
                             await _fileChannel.invokeMethod<void>('openUrl', {
-                              'url': 'https://github.com/dheeraz101/Notekar-Android'
+                              'url':
+                                  'https://github.com/dheeraz101/Notekar-Android',
                             });
                           } catch (_) {}
                         },
@@ -387,7 +398,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                           backgroundColor: p.accent,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
                         ),
                       ),
                     ),
@@ -399,21 +412,32 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                         onPressed: () {
                           HapticFeedback.selectionClick();
                           Clipboard.setData(
-                            const ClipboardData(text: 'https://github.com/dheeraz101/Notekar-Android'),
+                            const ClipboardData(
+                              text:
+                                  'https://github.com/dheeraz101/Notekar-Android',
+                            ),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Repository link copied to clipboard'.localized(context)),
+                              content: Text(
+                                'Repository link copied to clipboard'.localized(
+                                  context,
+                                ),
+                              ),
                               duration: const Duration(seconds: 2),
                               behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999),
+                              ),
                             ),
                           );
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: p.text2,
                           side: BorderSide(color: p.border),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
                         ),
                       ),
                     ),
@@ -429,21 +453,27 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
             p: p,
             icon: Icons.system_update_alt_rounded,
             title: 'Smaller, Optimized APKs'.localized(context),
-            text: 'Access split-per-ABI optimized binaries and Google Play AppBundles directly from the release page.'.localized(context),
+            text:
+                'Access split-per-ABI optimized binaries and Google Play AppBundles directly from the release page.'
+                    .localized(context),
           ),
           const SizedBox(height: 16),
           _buildMigrationBenefitRow(
             p: p,
             icon: Icons.bug_report_rounded,
             title: 'Active Issue Tracking'.localized(context),
-            text: 'Submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.'.localized(context),
+            text:
+                'Submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.'
+                    .localized(context),
           ),
           const SizedBox(height: 16),
           _buildMigrationBenefitRow(
             p: p,
             icon: Icons.security_rounded,
             title: 'Automated Security Scans'.localized(context),
-            text: 'All builds now undergo automated CodeQL scans and VirusTotal checks to ensure verification and safety.'.localized(context),
+            text:
+                'All builds now undergo automated CodeQL scans and VirusTotal checks to ensure verification and safety.'
+                    .localized(context),
           ),
           const SizedBox(height: 16),
         ],
@@ -477,7 +507,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
             children: [
               Text(
                 title,
-                style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 14.5),
+                style: TextStyle(
+                  color: p.text,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14.5,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -527,16 +561,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
           ),
           const SizedBox(height: 8),
           Text(
-            'Schedule offline reminders to log your days. Android requires the following permissions to deliver alerts on time when killed:'.localized(context),
+            'Schedule offline reminders to log your days. Android requires the following permissions to deliver alerts on time when killed:'
+                .localized(context),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: p.text2,
-              fontSize: 14,
-              height: 1.45,
-            ),
+            style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
           ),
           const SizedBox(height: 28),
-          
+
           // Setup Card 1: Notification Permission
           _buildPermissionSetupCard(
             p: p,
@@ -547,7 +578,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
             buttonText: 'Grant Permission'.localized(context),
             onAction: () async {
               HapticFeedback.selectionClick();
-              final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? false;
+              final granted =
+                  await _fileChannel.invokeMethod<bool>(
+                    'requestNotificationPermission',
+                  ) ??
+                  false;
               if (granted) _checkPermissions();
             },
           ),
@@ -558,12 +593,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
             p: p,
             icon: Icons.battery_saver_rounded,
             title: 'Disable Battery Optimization'.localized(context),
-            subtitle: 'Ensures Android doesn\'t freeze or skip scheduled reminders.'.localized(context),
+            subtitle:
+                'Ensures Android doesn\'t freeze or skip scheduled reminders.'
+                    .localized(context),
             isConfigured: _batteryExempt,
             buttonText: 'Set Unrestricted'.localized(context),
             onAction: () async {
               HapticFeedback.selectionClick();
-              await _fileChannel.invokeMethod('requestIgnoreBatteryOptimizations');
+              await _fileChannel.invokeMethod(
+                'requestIgnoreBatteryOptimizations',
+              );
               _checkPermissions();
             },
           ),
@@ -574,7 +613,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
             p: p,
             icon: Icons.autorenew_rounded,
             title: 'Allow Auto-Start Settings'.localized(context),
-            subtitle: 'On Xiaomi, Oppo, Vivo, Samsung, or Huawei, the OS terminates killed apps unless Auto-Start is granted.'.localized(context),
+            subtitle:
+                'On Xiaomi, Oppo, Vivo, Samsung, or Huawei, the OS terminates killed apps unless Auto-Start is granted.'
+                    .localized(context),
             isConfigured: false, // Cannot detect programmatically
             buttonText: 'Configure Settings'.localized(context),
             onAction: () async {
@@ -609,7 +650,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
             height: 38,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: isConfigured ? p.green.withValues(alpha: 0.14) : p.surface3,
+              color: isConfigured
+                  ? p.green.withValues(alpha: 0.14)
+                  : p.surface3,
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -651,13 +694,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
                       buttonText,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -687,7 +736,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                 children: [
                   if (_currentPage > 0)
                     IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new_rounded, color: p.text2, size: 20),
+                      icon: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: p.text2,
+                        size: 20,
+                      ),
                       onPressed: () {
                         _pageController.previousPage(
                           duration: const Duration(milliseconds: 300),
@@ -697,7 +750,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                     )
                   else
                     const SizedBox(width: 48, height: 48),
-                  
+
                   // Skip option for first-time setup
                   if (!isLastPage && widget.pages.length > 1)
                     TextButton(
@@ -716,7 +769,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                 ],
               ),
             ),
-            
+
             // Sliding Pages
             Expanded(
               child: PageView(
@@ -752,7 +805,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                           width: active ? 20 : 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: active ? p.accent : p.text3.withValues(alpha: 0.3),
+                            color: active
+                                ? p.accent
+                                : p.text3.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(999),
                           ),
                         );
@@ -786,8 +841,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with WidgetsBindingObserv
                       child: Text(
                         isLastPage
                             ? (widget.pages.length == 1
-                                ? 'Done'.localized(context)
-                                : 'Start Logging'.localized(context))
+                                  ? 'Done'.localized(context)
+                                  : 'Start Logging'.localized(context))
                             : 'Continue'.localized(context),
                         style: const TextStyle(
                           fontSize: 16,

@@ -169,19 +169,8 @@ jobs:
           AAB_SHA=$(sha256sum "$APK_DIR/$AAB_FILE" | awk '{print $1}')
           AAB_BYTES=$(stat -c%s "$APK_DIR/$AAB_FILE")
 
-          cat > "$APK_DIR/version.json" <<EOF
-          {
-            "version": "$VER",
-            "buildNumber": $BUILD,
-            "generatedAt": "$NOW",
-            "apks": [$APKS_JSON],
-            "bundle": {
-              "file": "$AAB_FILE",
-              "sha256": "$AAB_SHA",
-              "bytes": $AAB_BYTES
-            }
-          }
-          EOF
+          printf '{\n  "version": "%s",\n  "buildNumber": %s,\n  "generatedAt": "%s",\n  "apks": [%s],\n  "bundle": {\n    "file": "%s",\n    "sha256": "%s",\n    "bytes": %s\n  }\n}\n' \
+            "$VER" "$BUILD" "$NOW" "$APKS_JSON" "$AAB_FILE" "$AAB_SHA" "$AAB_BYTES" > "$APK_DIR/version.json"
 
           echo "✅ version.json:"
           cat "$APK_DIR/version.json"
@@ -212,11 +201,7 @@ jobs:
             cp "$NOTES_FILE" /tmp/release_notes.md
           else
             echo "⚠️  $NOTES_FILE not found — using fallback template"
-            cat > /tmp/release_notes.md <<EOF
-          ## 📦 Notekar ${{ steps.version.outputs.tag }}
-
-          Signed release — built automatically from the \`release\` branch.
-          EOF
+            printf '## 📦 Notekar %%s\n\nSigned release — built automatically from the `release` branch.\n' "${{ steps.version.outputs.tag }}" > /tmp/release_notes.md
           fi
 
           # Calculate universal APK hash and dynamic VirusTotal URL
@@ -246,27 +231,27 @@ jobs:
           fi
 
           # Always append the APK install guide + verify block at the bottom
-          cat >> /tmp/release_notes.md <<'EOF'
+          printf '
 
----
+          ---
 
-### Assets
+          ### Assets
 
-| File | Use when |
-|------|----------|
-| `notekar-VERSION-release.aab` | Play Store App Bundle (for developer publishing) |
-| `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
-| `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
-| `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
-| `notekar-VERSION-x86_64.apk` | x86_64 emulators / devices |
+          | File | Use when |
+          |------|----------|
+          | `notekar-VERSION-release.aab` | Play Store App Bundle (for developer publishing) |
+          | `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
+          | `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
+          | `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
+          | `notekar-VERSION-x86_64.apk` | x86_64 emulators / devices |
 
-### Verifying
+          ### Verifying
 
-Download `sha256.txt` alongside any APK/AAB and run:
-```bash
-sha256sum --check sha256.txt
-```
-EOF
+          Download `sha256.txt` alongside any APK/AAB and run:
+          ```bash
+          sha256sum --check sha256.txt
+          ```
+          ' >> /tmp/release_notes.md
 
           # Swap VERSION placeholder with actual version
           sed -i "s/VERSION/${{ steps.version.outputs.version }}/g" /tmp/release_notes.md

@@ -20,10 +20,16 @@ class AppLogger {
     _log('ERROR', message, error, stackTrace);
   }
 
-  void _log(String level, String message, [Object? error, StackTrace? stackTrace]) {
+  void _log(
+    String level,
+    String message, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) {
     final timestamp = DateTime.now().toIso8601String();
-    final logEntry = '[$timestamp] [$level] $message${error != null ? ': $error' : ''}';
-    
+    final logEntry =
+        '[$timestamp] [$level] $message${error != null ? ': $error' : ''}';
+
     _logs.add(logEntry);
     if (_logs.length > _maxLogs) {
       _logs.removeAt(0);

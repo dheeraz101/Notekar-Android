@@ -40,7 +40,8 @@ class _RippleState extends State<Ripple> with SingleTickerProviderStateMixin {
       child: AnimatedBuilder(
         animation: _controller,
         builder: (_, _) {
-          final scale = 1 + Curves.easeOutCubic.transform(_controller.value) * 2.4;
+          final scale =
+              1 + Curves.easeOutCubic.transform(_controller.value) * 2.4;
           return RepaintBoundary(
             child: Transform.scale(
               scale: scale,
@@ -218,7 +219,8 @@ class _SavedPulseState extends State<SavedPulse>
         animation: _controller,
         builder: (_, _) {
           final dy = -18 * Curves.easeOutCubic.transform(_controller.value);
-          final opacity = (1 - Curves.easeOut.transform(_controller.value)).clamp(0.0, 1.0);
+          final opacity = (1 - Curves.easeOut.transform(_controller.value))
+              .clamp(0.0, 1.0);
           final color = momentColor(widget.p, widget.type);
           return Transform.translate(
             offset: Offset(0, dy),
@@ -227,7 +229,10 @@ class _SavedPulseState extends State<SavedPulse>
                 opacity: opacity,
                 child: Container(
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
@@ -261,7 +266,8 @@ String _pulseLabel(String type, BuildContext context) {
   return switch (type) {
     'in' => isEs ? 'IN guardado' : (isHi ? 'IN सहेजा गया' : 'IN saved'),
     'out' => isEs ? 'OUT guardado' : (isHi ? 'OUT सहेजा गया' : 'OUT saved'),
-    'single' => isEs ? 'SINGLE guardado' : (isHi ? 'SINGLE सहेजा गया' : 'SINGLE saved'),
+    'single' =>
+      isEs ? 'SINGLE guardado' : (isHi ? 'SINGLE सहेजा गया' : 'SINGLE saved'),
     _ => isEs ? 'Guardado' : (isHi ? 'सहेजा गया' : 'Saved'),
   };
 }

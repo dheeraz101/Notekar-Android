@@ -49,25 +49,28 @@ void main() {
   });
 
   group('Async Isolate & Backup Tests', () {
-    test('validateNoteKarBackupContentAsync parses valid JSON payload', () async {
-      final jsonPayload = jsonEncode({
-        'app': 'NoteKar',
-        'kind': 'backup',
-        'version': '4.0.4',
-        'entries': [
-          {
-            'id': 1,
-            'timestamp': 1718000000000,
-            'type': 'single',
-            'note': 'Test note',
-          }
-        ],
-      });
+    test(
+      'validateNoteKarBackupContentAsync parses valid JSON payload',
+      () async {
+        final jsonPayload = jsonEncode({
+          'app': 'NoteKar',
+          'kind': 'backup',
+          'version': '4.0.4',
+          'entries': [
+            {
+              'id': 1,
+              'timestamp': 1718000000000,
+              'type': 'single',
+              'note': 'Test note',
+            },
+          ],
+        });
 
-      final result = await validateNoteKarBackupContentAsync(jsonPayload);
-      expect(result.isValid, isTrue);
-      expect(result.entries, hasLength(1));
-      expect(result.entries.first.note, 'Test note');
-    });
+        final result = await validateNoteKarBackupContentAsync(jsonPayload);
+        expect(result.isValid, isTrue);
+        expect(result.entries, hasLength(1));
+        expect(result.entries.first.note, 'Test note');
+      },
+    );
   });
 }

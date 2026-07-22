@@ -18,7 +18,9 @@ class Moment {
   factory Moment.fromJson(Map<String, dynamic> json) {
     final type = (json['type'] as String?) ?? 'single';
     // Validate type
-    final validatedType = {'single', 'in', 'out'}.contains(type) ? type : 'single';
+    final validatedType = {'single', 'in', 'out'}.contains(type)
+        ? type
+        : 'single';
     final timestamp = (json['timestamp'] as num).toInt();
 
     return Moment(
@@ -35,7 +37,9 @@ class Moment {
     if (id <= 0) return false;
     if (timestamp <= 0) return false;
     // Prevent future timestamps (allow 5 min drift)
-    if (timestamp > DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch) return false;
+    if (timestamp >
+        DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch)
+      return false;
     return true;
   }
 

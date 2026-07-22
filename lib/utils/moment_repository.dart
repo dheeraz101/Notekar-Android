@@ -30,7 +30,9 @@ class MomentRepository {
     if (_trashBox.length > 300) {
       unawaited(_trashBox.compact());
     }
-    _logger.info('MomentRepository initialized with ${_box.length} entries, ${_trashBox.length} trash entries');
+    _logger.info(
+      'MomentRepository initialized with ${_box.length} entries, ${_trashBox.length} trash entries',
+    );
   }
 
   Future<void> _autoPurgeOldTrash() async {
@@ -51,7 +53,9 @@ class MomentRepository {
 
       if (keysToRemove.isNotEmpty) {
         await _trashBox.deleteAll(keysToRemove);
-        _logger.info('Auto-purged ${keysToRemove.length} trash entries older than 30 days');
+        _logger.info(
+          'Auto-purged ${keysToRemove.length} trash entries older than 30 days',
+        );
       }
     } catch (e, stack) {
       _logger.error('Failed auto-purging old trash entries', e, stack);
@@ -218,11 +222,11 @@ class MomentRepository {
       final entries = (jsonDecode(legacyRows) as List)
           .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
           .toList();
-      
+
       for (final entry in entries) {
         await _box.put(entry.id, entry.toJson());
       }
-      
+
       await _prefs.remove(_legacyEntriesKey);
       _logger.info('Successfully migrated ${entries.length} legacy entries');
       return entries;

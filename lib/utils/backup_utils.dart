@@ -5,7 +5,9 @@ import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/app_logger.dart';
 
-Future<BackupValidationResult> validateNoteKarBackupContentAsync(String content) async {
+Future<BackupValidationResult> validateNoteKarBackupContentAsync(
+  String content,
+) async {
   if (content.length > 200000) {
     return Isolate.run(() => validateNoteKarBackupContent(content));
   }
@@ -14,7 +16,8 @@ Future<BackupValidationResult> validateNoteKarBackupContentAsync(String content)
 
 BackupValidationResult validateNoteKarBackupContent(String content) {
   final logger = AppLogger();
-  if (content.length > 25 * 1024 * 1024) { // Increased to 25MB
+  if (content.length > 25 * 1024 * 1024) {
+    // Increased to 25MB
     return const BackupValidationResult.invalid(
       'Backup is too large to import safely',
     );
@@ -51,7 +54,8 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
     );
   }
 
-  if (rawEntries.length > 100000) { // Increased limit
+  if (rawEntries.length > 100000) {
+    // Increased limit
     return const BackupValidationResult.invalid(
       'Backup has too many moments to import safely',
     );
@@ -70,7 +74,7 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
 
     final item = Map<String, dynamic>.from(row);
     final timestampValue = item['timestamp'];
-    
+
     // Robust validation for timestamp
     if (timestampValue is! num ||
         !timestampValue.isFinite ||
@@ -81,12 +85,15 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
     }
 
     final type = item['type'] is String ? item['type'] as String : 'single';
-    final validatedType = {'single', 'in', 'out'}.contains(type) ? type : 'single';
+    final validatedType = {'single', 'in', 'out'}.contains(type)
+        ? type
+        : 'single';
 
     final noteValue = item['note'];
     final note = (noteValue is String ? noteValue : '').trim();
-    
-    if (note.length > 2000) { // Limit extremely long notes
+
+    if (note.length > 2000) {
+      // Limit extremely long notes
       logger.warn('Note too long at index $i, truncating');
     }
 
@@ -128,7 +135,7 @@ BackupDryRunSummary buildBackupDryRunSummary({
   final existingKeys = existingEntries
       .map((entry) => '${entry.timestamp}|${entry.type}|${entry.note.trim()}')
       .toSet();
-  
+
   var newMoments = 0;
   var duplicates = 0;
 
@@ -159,8 +166,7 @@ int restorableBackupSettingsCount(Map<String, dynamic> settings) {
   if (['dark', 'light', 'amoled'].contains(settings['theme'])) count++;
   if (['single', 'two-way'].contains(settings['defaultMode'])) count++;
   final tapDelay = settings['tapDelay'];
-  if (tapDelay is num &&
-      delayValues.contains(tapDelay.toInt())) {
+  if (tapDelay is num && delayValues.contains(tapDelay.toInt())) {
     count++;
   }
   if (accentOptions.contains(settings['accentColor'])) {

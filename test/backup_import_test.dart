@@ -62,13 +62,18 @@ void main() {
 
   test('skips damaged backup rows resiliently', () {
     final result = validateNoteKarBackupContent(
-      backupJson(entries: ['bad-row', {
-        'id': 2,
-        'timestamp': secondTs,
-        'type': 'in',
-        'date': '2024-06-11',
-        'note': '',
-      }]),
+      backupJson(
+        entries: [
+          'bad-row',
+          {
+            'id': 2,
+            'timestamp': secondTs,
+            'type': 'in',
+            'date': '2024-06-11',
+            'note': '',
+          },
+        ],
+      ),
     );
 
     expect(result.isValid, isTrue);
@@ -104,7 +109,12 @@ void main() {
     final result = validateNoteKarBackupContent(
       backupJson(
         entries: [
-          {'id': 1, 'timestamp': firstTs, 'type': 'sideways', 'note': 'Unknown type moment'},
+          {
+            'id': 1,
+            'timestamp': firstTs,
+            'type': 'sideways',
+            'note': 'Unknown type moment',
+          },
         ],
       ),
     );

@@ -23,7 +23,8 @@ class _PressableScaleState extends State<PressableScale> {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = widget.enabled && (widget.onTap != null || widget.onLongPress != null);
+    final enabled =
+        widget.enabled && (widget.onTap != null || widget.onLongPress != null);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,

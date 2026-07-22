@@ -47,7 +47,10 @@ class MomentTile extends StatelessWidget {
                 child: Container(
                   width: 8, // Prominent iOS HIG style
                   height: 8,
-                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),

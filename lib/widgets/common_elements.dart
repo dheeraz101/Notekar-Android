@@ -64,7 +64,12 @@ class SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(spacing8, spacing24, spacing8, spacing8),
+      padding: const EdgeInsets.fromLTRB(
+        spacing8,
+        spacing24,
+        spacing8,
+        spacing8,
+      ),
       child: Text(
         text,
         style: TextStyle(
@@ -206,7 +211,10 @@ class DiagnosticRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(minHeight: 52),
-      padding: const EdgeInsets.symmetric(horizontal: spacing16, vertical: spacing12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: spacing16,
+        vertical: spacing12,
+      ),
       child: Align(
         alignment: Alignment.center,
         child: Row(
@@ -307,7 +315,10 @@ class HIGEmptyState extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: p.accent,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -326,10 +337,7 @@ class HIGEmptyState extends StatelessWidget {
 }
 
 class SliverStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  SliverStickyHeaderDelegate({
-    required this.child,
-    required this.height,
-  });
+  SliverStickyHeaderDelegate({required this.child, required this.height});
 
   final Widget child;
   final double height;

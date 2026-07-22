@@ -52,7 +52,7 @@ class _AppSheetState extends State<AppSheet> {
   @override
   void didUpdateWidget(AppSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the controller changes (e.g. returning to root settings), 
+    // If the controller changes (e.g. returning to root settings),
     // swap listeners and sync opacity immediately.
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_onScroll);
@@ -72,7 +72,9 @@ class _AppSheetState extends State<AppSheet> {
 
   void _onScroll() {
     if (!mounted) return;
-    final offset = widget.controller?.hasClients == true ? widget.controller!.offset : 0.0;
+    final offset = widget.controller?.hasClients == true
+        ? widget.controller!.offset
+        : 0.0;
     // Small title is invisible until we scroll past the large title area (~45px)
     // Then fades in rapidly over the next 20px.
     final newOpacity = ((offset - 45) / 20).clamp(0.0, 1.0);
@@ -104,7 +106,9 @@ class _AppSheetState extends State<AppSheet> {
           spacing16,
           widget.removeBottomPadding
               ? MediaQuery.paddingOf(context).bottom
-              : (widget.docked ? MediaQuery.paddingOf(context).bottom + spacing16 : spacing16),
+              : (widget.docked
+                    ? MediaQuery.paddingOf(context).bottom + spacing16
+                    : spacing16),
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: widget.docked ? 720 : 460),
@@ -138,16 +142,15 @@ class _AppSheetState extends State<AppSheet> {
                         ),
                       )
                     else if (widget.leadingAction != null)
-                      Positioned(
-                        left: 0,
-                        child: widget.leadingAction!,
-                      ),
+                      Positioned(left: 0, child: widget.leadingAction!),
                     Positioned.fill(
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 50),
                           child: Opacity(
-                            opacity: widget.showLargeTitle ? _titleOpacity : 1.0,
+                            opacity: widget.showLargeTitle
+                                ? _titleOpacity
+                                : 1.0,
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 180),
                               child: FittedBox(
@@ -201,10 +204,7 @@ class _AppSheetState extends State<AppSheet> {
     );
 
     if (widget.largeText) {
-      content = MediaQuery(
-        data: largerTextQuery(context),
-        child: content,
-      );
+      content = MediaQuery(data: largerTextQuery(context), child: content);
     }
 
     if (widget.docked) {
@@ -239,15 +239,8 @@ class _HeaderCircleButton extends StatelessWidget {
       child: Container(
         width: 36,
         height: 36,
-        decoration: BoxDecoration(
-          color: p.surface3,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: p.text2,
-          size: 22,
-        ),
+        decoration: BoxDecoration(color: p.surface3, shape: BoxShape.circle),
+        child: Icon(icon, color: p.text2, size: 22),
       ),
     );
   }
@@ -275,7 +268,9 @@ class AppSheetLargeTitle extends StatelessWidget {
         AnimatedBuilder(
           animation: scrollController ?? ScrollController(),
           builder: (context, _) {
-            final offset = scrollController?.hasClients == true ? scrollController!.offset : 0.0;
+            final offset = scrollController?.hasClients == true
+                ? scrollController!.offset
+                : 0.0;
             // Large title fades out slightly before the small title starts appearing
             final opacity = (1.0 - (offset / 40)).clamp(0.0, 1.0);
             return Opacity(
@@ -296,10 +291,7 @@ class AppSheetLargeTitle extends StatelessWidget {
             );
           },
         ),
-        if (extra != null) ...[
-          extra!,
-          const SizedBox(height: spacing16),
-        ],
+        if (extra != null) ...[extra!, const SizedBox(height: spacing16)],
       ],
     );
   }

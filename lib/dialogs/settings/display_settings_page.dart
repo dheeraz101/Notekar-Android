@@ -56,7 +56,8 @@ class DisplaySettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Set your preferred application language or follow system default.',
+              text:
+                  'Set your preferred application language or follow system default.',
             ),
             SettingsGroup(
               p: p,
@@ -108,7 +109,8 @@ class DisplaySettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Show descriptive text labels on primary navigation buttons.',
+              text:
+                  'Show descriptive text labels on primary navigation buttons.',
             ),
             SettingsGroup(
               p: p,
@@ -124,7 +126,8 @@ class DisplaySettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Increases the size of interactive elements for easier tapping.',
+              text:
+                  'Increases the size of interactive elements for easier tapping.',
             ),
             SettingsGroup(
               p: p,
@@ -200,7 +203,8 @@ class DisplaySettingsPage extends StatelessWidget {
             ),
             SettingsPageDescription(
               p: p,
-              text: 'Provides visual feedback for the time elapsed since your last moment.',
+              text:
+                  'Provides visual feedback for the time elapsed since your last moment.',
             ),
             const SizedBox(height: 48),
           ],

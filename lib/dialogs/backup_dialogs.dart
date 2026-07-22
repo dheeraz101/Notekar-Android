@@ -97,7 +97,10 @@ class BackupImportPreviewDialog extends StatelessWidget {
                         ),
                       ),
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
                 ),
@@ -118,7 +121,10 @@ class BackupImportPreviewDialog extends StatelessWidget {
                               summary.settingsToRestore == 0
                           ? null
                           : () => Navigator.pop(context, true),
-                      child: const Text('Import', style: TextStyle(fontWeight: FontWeight.w800)),
+                      child: const Text(
+                        'Import',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
                     ),
                   ),
                 ),
