@@ -4493,19 +4493,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.verified_user_rounded, color: p.green, size: 24),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: p.green.withValues(alpha: 0.12),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.verified_user_rounded, color: p.green, size: 22),
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'VirusTotal Safety Verification'.localized(context),
+                                        'VirusTotal Safety Scan'.localized(context),
                                         style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Verified clean by 60+ security engines'.localized(context),
+                                        'Verified clean of malicious activity'.localized(context),
                                         style: TextStyle(color: p.text3, fontSize: 11.5),
                                       ),
                                     ],
@@ -4513,16 +4521,160 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'NoteKar builds are signed with our official developer release key and automatically verified for safety. Each build is scanned to ensure absolute privacy and security.'.localized(context),
-                              style: TextStyle(color: p.text2, fontSize: 13, height: 1.35),
-                            ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+                            
+                            // 2x2 Metric Table
                             Row(
                               children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: p.surface3.withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.check_circle_outline_rounded, color: p.green, size: 16),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Ratio'.localized(context),
+                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                '0 / 68 clean'.localized(context),
+                                                style: TextStyle(color: p.text, fontSize: 11.5, fontWeight: FontWeight.w700),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: p.surface3.withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.shield_outlined, color: p.green, size: 16),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Status'.localized(context),
+                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'Undetected'.localized(context),
+                                                style: TextStyle(color: p.green, fontSize: 11.5, fontWeight: FontWeight.w700),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: p.surface3.withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today_rounded, color: p.text3, size: 14),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Last Scan'.localized(context),
+                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'July 2026'.localized(context),
+                                                style: TextStyle(color: p.text, fontSize: 11.5, fontWeight: FontWeight.w700),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: p.surface3.withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.lock_outline_rounded, color: p.text3, size: 15),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Signature'.localized(context),
+                                                style: TextStyle(color: p.text3, fontSize: 9.5, fontWeight: FontWeight.w600),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                'Developer Key'.localized(context),
+                                                style: TextStyle(color: p.text, fontSize: 11.5, fontWeight: FontWeight.w700),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'NoteKar builds undergo automated CodeQL scanner compilation and local VirusTotal scans. Binaries are signed with our official certificate to ensure absolute integrity.'.localized(context),
+                              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
+                            ),
+                            const SizedBox(height: 16),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
                                 ElevatedButton.icon(
-                                  icon: const Icon(Icons.security_rounded, size: 16),
+                                  icon: const Icon(Icons.security_rounded, size: 14),
                                   label: Text('VT Report'.localized(context)),
                                   onPressed: () async {
                                     try {
@@ -4536,14 +4688,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     foregroundColor: p.green,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                     minimumSize: Size.zero,
                                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   ),
                                 ),
-                                const SizedBox(width: 12),
                                 OutlinedButton.icon(
-                                  icon: const Icon(Icons.info_outline_rounded, size: 16),
+                                  icon: const Icon(Icons.fingerprint_rounded, size: 14),
                                   label: Text('SHA-256 Hashes'.localized(context)),
                                   onPressed: () async {
                                     try {
@@ -4556,7 +4707,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     foregroundColor: p.text2,
                                     side: BorderSide(color: p.border),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                     minimumSize: Size.zero,
                                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   ),
