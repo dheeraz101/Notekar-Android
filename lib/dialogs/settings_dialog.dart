@@ -256,6 +256,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool _monthlyReminderEnabled = false;
   int _monthlyReminderDay = 1;
   TimeOfDay _monthlyReminderTime = const TimeOfDay(hour: 21, minute: 0);
+  String _dailyReminderBody = 'Time to log a moment!';
+  String _weeklyReminderBody = 'Time to log a moment!';
+  String _monthlyReminderBody = 'Time to log a moment!';
 
   static const _fileChannel = MethodChannel('notekar/files');
   final _logger = AppLogger();
@@ -270,6 +273,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         hour: _prefs?.getInt('reminder_daily_hour') ?? 21,
         minute: _prefs?.getInt('reminder_daily_minute') ?? 0,
       );
+      _dailyReminderBody = _prefs?.getString('reminder_daily_body') ?? 'Time to log a moment!';
       
       _inactivityReminderEnabled = _prefs?.getBool('reminder_inactivity_enabled') ?? false;
       _inactivityIntervalMins = _prefs?.getInt('reminder_inactivity_interval_mins') ?? 240;
@@ -282,6 +286,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         hour: _prefs?.getInt('reminder_weekly_hour') ?? 21,
         minute: _prefs?.getInt('reminder_weekly_minute') ?? 0,
       );
+      _weeklyReminderBody = _prefs?.getString('reminder_weekly_body') ?? 'Time to log a moment!';
       
       _monthlyReminderEnabled = _prefs?.getBool('reminder_monthly_enabled') ?? false;
       _monthlyReminderDay = _prefs?.getInt('reminder_monthly_day') ?? 1;
@@ -289,6 +294,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         hour: _prefs?.getInt('reminder_monthly_hour') ?? 21,
         minute: _prefs?.getInt('reminder_monthly_minute') ?? 0,
       );
+      _monthlyReminderBody = _prefs?.getString('reminder_monthly_body') ?? 'Time to log a moment!';
     });
   }
 
@@ -311,7 +317,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'hour': _dailyReminderTime.hour,
             'minute': _dailyReminderTime.minute,
             'title': 'logging reminder'.localized(context),
-            'body': 'time to log a moment!'.localized(context),
+            'body': _dailyReminderBody == 'Time to log a moment!' ? _dailyReminderBody.localized(context) : _dailyReminderBody,
           });
         } else {
           await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_daily'});
@@ -337,7 +343,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'minute': _weeklyReminderTime.minute,
             'daysOfWeek': _weeklyReminderDays,
             'title': 'logging reminder'.localized(context),
-            'body': 'time to log a moment!'.localized(context),
+            'body': _weeklyReminderBody == 'Time to log a moment!' ? _weeklyReminderBody.localized(context) : _weeklyReminderBody,
           });
         } else {
           await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_weekly'});
@@ -351,7 +357,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'minute': _monthlyReminderTime.minute,
             'dayOfMonth': _monthlyReminderDay,
             'title': 'logging reminder'.localized(context),
-            'body': 'time to log a moment!'.localized(context),
+            'body': _monthlyReminderBody == 'Time to log a moment!' ? _monthlyReminderBody.localized(context) : _monthlyReminderBody,
           });
         } else {
           await _fileChannel.invokeMethod('cancelReminder', {'id': 'reminder_monthly'});
@@ -360,6 +366,39 @@ class _SettingsDialogState extends State<SettingsDialog> {
     } catch (e, stack) {
       _logger.error('Failed to sync reminder: $id', e, stack);
     }
+  }
+
+  Future<String?> _showTextPrompt(String title, String initialValue) async {
+    final controller = TextEditingController(text: initialValue);
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 1,
+            maxLength: 60,
+            style: TextStyle(color: paletteFor(theme).text),
+            decoration: InputDecoration(
+              hintText: 'Enter reminder message...',
+              hintStyle: TextStyle(color: paletteFor(theme).text3),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: Text('cancel'.localized(context)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: Text('okay'.localized(context)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   List<Moment> get entries => widget.entriesNotifier.value;
@@ -1207,6 +1246,77 @@ class _SettingsDialogState extends State<SettingsDialog> {
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
+        status: null,
+      ),
+      item(
+        title: 'Reminders',
+        subtitle: 'Daily, inactivity, weekly, and monthly notification reminders',
+        category: 'Reminders',
+        icon: Icons.notifications_active_outlined,
+        keywords: ['reminders', 'notifications', 'daily', 'weekly', 'monthly', 'inactivity', 'alerts', 'log'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: _getRemindersStatus(),
+      ),
+      item(
+        title: 'Daily Reminder',
+        subtitle: 'Toggle daily logging reminder alerts',
+        category: 'Reminders',
+        icon: Icons.alarm_rounded,
+        keywords: ['daily', 'reminder', 'alarm', 'notification', 'schedule'],
+        kind: 'switch',
+        boolValue: _dailyReminderEnabled,
+        onBoolChanged: (bool value) async {
+          setState(() => _dailyReminderEnabled = value);
+          await _prefs?.setBool('reminder_daily_enabled', value);
+          await _syncReminder('daily');
+        },
+        status: null,
+      ),
+      item(
+        title: 'Inactivity Reminder',
+        subtitle: 'Toggle inactivity-based timestamp reminders',
+        category: 'Reminders',
+        icon: Icons.timer_off_outlined,
+        keywords: ['inactivity', 'inactive', 'timer', 'alert', 'reminders'],
+        kind: 'switch',
+        boolValue: _inactivityReminderEnabled,
+        onBoolChanged: (bool value) async {
+          setState(() => _inactivityReminderEnabled = value);
+          await _prefs?.setBool('reminder_inactivity_enabled', value);
+          await _syncReminder('inactivity');
+        },
+        status: null,
+      ),
+      item(
+        title: 'Weekly Reminder',
+        subtitle: 'Toggle weekly notification alerts',
+        category: 'Reminders',
+        icon: Icons.calendar_view_week_rounded,
+        keywords: ['weekly', 'days', 'sunday', 'monday', 'reminders'],
+        kind: 'switch',
+        boolValue: _weeklyReminderEnabled,
+        onBoolChanged: (bool value) async {
+          setState(() => _weeklyReminderEnabled = value);
+          await _prefs?.setBool('reminder_weekly_enabled', value);
+          await _syncReminder('weekly');
+        },
+        status: null,
+      ),
+      item(
+        title: 'Monthly Reminder',
+        subtitle: 'Toggle monthly notification alerts',
+        category: 'Reminders',
+        icon: Icons.calendar_month_rounded,
+        keywords: ['monthly', 'month', 'days', 'reminders'],
+        kind: 'switch',
+        boolValue: _monthlyReminderEnabled,
+        onBoolChanged: (bool value) async {
+          setState(() => _monthlyReminderEnabled = value);
+          await _prefs?.setBool('reminder_monthly_enabled', value);
+          await _syncReminder('monthly');
+        },
         status: null,
       ),
     ];
@@ -3051,7 +3161,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             await _syncReminder('daily');
                           },
                         ),
-                        if (_dailyReminderEnabled)
+                        if (_dailyReminderEnabled) ...[
                           SettingsRow(
                             p: p,
                             title: 'Time'.localized(context),
@@ -3071,6 +3181,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               }
                             },
                           ),
+                          SettingsRow(
+                            p: p,
+                            title: 'Message'.localized(context),
+                            status: _dailyReminderBody,
+                            color: p.accent,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final msg = await _showTextPrompt('Daily Reminder Message', _dailyReminderBody);
+                              if (msg != null && msg.isNotEmpty) {
+                                setState(() => _dailyReminderBody = msg);
+                                await _prefs?.setString('reminder_daily_body', msg);
+                                await _syncReminder('daily');
+                              }
+                            },
+                          ),
+                        ],
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'Triggers a daily logging reminder alert at your chosen time.'.localized(context)),
@@ -3249,6 +3375,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               }
                             },
                           ),
+                          SettingsRow(
+                            p: p,
+                            title: 'Message'.localized(context),
+                            status: _weeklyReminderBody,
+                            color: p.green,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final msg = await _showTextPrompt('Weekly Reminder Message', _weeklyReminderBody);
+                              if (msg != null && msg.isNotEmpty) {
+                                setState(() => _weeklyReminderBody = msg);
+                                await _prefs?.setString('reminder_weekly_body', msg);
+                                await _syncReminder('weekly');
+                              }
+                            },
+                          ),
                         ],
                       ],
                     ),
@@ -3319,6 +3460,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 setState(() => _monthlyReminderTime = time);
                                 await _prefs?.setInt('reminder_monthly_hour', time.hour);
                                 await _prefs?.setInt('reminder_monthly_minute', time.minute);
+                                await _syncReminder('monthly');
+                              }
+                            },
+                          ),
+                          SettingsRow(
+                            p: p,
+                            title: 'Message'.localized(context),
+                            status: _monthlyReminderBody,
+                            color: p.red,
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final msg = await _showTextPrompt('Monthly Reminder Message', _monthlyReminderBody);
+                              if (msg != null && msg.isNotEmpty) {
+                                setState(() => _monthlyReminderBody = msg);
+                                await _prefs?.setString('reminder_monthly_body', msg);
                                 await _syncReminder('monthly');
                               }
                             },
@@ -3672,6 +3828,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         GuideRow(p: p, icon: Icons.auto_awesome_rounded, title: 'Adaptive Engine', text: 'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.'),
                         GuideRow(p: p, icon: Icons.delete_outline_rounded, title: 'Restore Deleted Moments', text: 'Open Trash Bin in History or Settings > Moments to view, restore, or permanently remove deleted moments.'),
                         GuideRow(p: p, icon: Icons.backup_rounded, title: 'Back Up Data', text: 'Export a JSON backup before resetting, changing phones, or testing a new build.'),
+                        GuideRow(p: p, icon: Icons.notifications_active_outlined, title: 'Logging Reminders', text: 'Configure daily, weekly, monthly, or inactivity-based notifications under Settings > Logging > Reminders. Custom messages let you personalize alerts.'),
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar stores moments privately on this device. Backups are files you control.'),
@@ -3699,6 +3856,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         HelpRow(p: p, question: 'The app icon did not change immediately', answer: 'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.'),
                         HelpRow(p: p, question: 'A moment was saved accidentally', answer: 'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.'),
                         HelpRow(p: p, question: 'My data disappeared after clearing app storage', answer: 'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.'),
+                        HelpRow(p: p, question: 'Will reminders work when the app is closed?', answer: 'Yes! NoteKar registers reminders directly with Android\'s system AlarmManager. The OS will launch our background notification receiver and show the alert even if the app is closed or force-killed.'),
+                        HelpRow(p: p, question: 'Why am I not receiving reminders?', answer: 'Make sure Android notification permissions are allowed for NoteKar. On some devices, OEM power-saving modes or background execution restrictions may block or delay scheduled alarms. Consider disabling battery optimization for NoteKar.'),
                       ],
                     ),
                     SettingsPageDescription(p: p, text: 'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.'),
