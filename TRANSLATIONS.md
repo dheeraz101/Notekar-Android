@@ -66,7 +66,7 @@ Any string can call `.localized(context)` to automatically check the user's acti
 1. Open [`lib/utils/l10n_utils.dart`](lib/utils/l10n_utils.dart).
 2. Locate the `switch (key.toLowerCase())` block.
 3. Add your English string key in lowercase, and specify translations for Hindi (`hi`) and Spanish (`es`):
-```dart
+```text
       'your english text' => switch (l10n.localeName) {
         'es' => 'Su texto en español',
         'hi' => 'आपका हिंदी पाठ',

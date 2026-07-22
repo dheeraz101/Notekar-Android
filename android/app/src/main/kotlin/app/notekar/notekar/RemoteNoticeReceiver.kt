@@ -116,10 +116,9 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
                 if (data.optBoolean("enabled", true).not()) return
                 if (!isAllowedForStable(data)) return
                 if (!isInsideSchedule(data)) return
-                val title = data.optString("title", "NoteKar notice").takeIf { it.isNotBlank() }
-                    ?: "NoteKar notice"
-                val message = data.optString("body", data.optString("message", "")).takeIf { it.isNotBlank() }
-                    ?: "Open NoteKar to see the latest notice."
+                if (!isVersionInRange(context, data)) return
+                val title = getLocalizedField(data, "title", "NoteKar notice")
+                val message = getLocalizedField(data, "body", getLocalizedField(data, "message", "Open NoteKar to see the latest notice."))
                 val id = data.optString("id", "$title|$message")
                 val maxShows = data.optInt("maxShows", 1).coerceAtLeast(1)
                 val cooldownMs = data.optLong("cooldownHours", 24L).coerceAtLeast(0L) * 60L * 60L * 1000L
@@ -244,6 +243,43 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
             if (showAfter != null && now < showAfter) return false
             if (showUntil != null && now > showUntil) return false
             return true
+        }
+
+        private fun isVersionInRange(context: Context, data: JSONObject): Boolean {
+            val minVer = data.optString("minVersion", "").trim()
+            val maxVer = data.optString("maxVersion", "").trim()
+            if (minVer.isBlank() && maxVer.isBlank()) return true
+
+            val currentVer = try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
+            } catch (e: Exception) {
+                ""
+            }
+            if (currentVer.isBlank()) return true
+
+            if (minVer.isNotBlank() && compareVersions(currentVer, minVer) < 0) return false
+            if (maxVer.isNotBlank() && compareVersions(currentVer, maxVer) > 0) return false
+            return true
+        }
+
+        private fun compareVersions(v1: String, v2: String): Int {
+            val parts1 = v1.split(".").mapNotNull { it.toIntOrNull() }
+            val parts2 = v2.split(".").mapNotNull { it.toIntOrNull() }
+            val length = maxOf(parts1.size, parts2.size)
+            for (i in 0 until length) {
+                val p1 = parts1.getOrElse(i) { 0 }
+                val p2 = parts2.getOrElse(i) { 0 }
+                if (p1 != p2) return p1.compareTo(p2)
+            }
+            return 0
+        }
+
+        private fun getLocalizedField(data: JSONObject, field: String, defaultVal: String): String {
+            val locale = Locale.getDefault().language
+            val localizedKey = "${field}_$locale"
+            val value = data.optString(localizedKey, "").trim()
+            if (value.isNotBlank()) return value
+            return data.optString(field, defaultVal)
         }
 
         private fun parseTime(value: String): Long? {
