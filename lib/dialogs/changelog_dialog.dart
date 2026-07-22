@@ -5,6 +5,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class ChangelogDialog extends StatefulWidget {
   const ChangelogDialog({
@@ -721,7 +722,7 @@ class _WhatsNewPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "What's New in NoteKar",
+                      "What's New in NoteKar".localized(context),
                       style: TextStyle(
                         color: p.text,
                         fontSize: 17,

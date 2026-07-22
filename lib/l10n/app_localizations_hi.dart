@@ -18,7 +18,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get historyTitle => 'इतिहास';
 
   @override
-  String get whatsNewTitle => 'NoteKar में नया क्या है';
+  String get whatsNewTitle => 'नया क्या है';
 
   @override
   String get changelogTitle => 'बदलावों की सूची';

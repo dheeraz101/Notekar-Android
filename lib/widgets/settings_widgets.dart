@@ -70,7 +70,7 @@ class SettingsGroup extends StatelessWidget {
                   Divider(
                     height: 0.5,
                     color: p.border,
-                    indent: insetDividers ? 64 : 0, // Inset to align right after squircle icon
+                    indent: insetDividers ? 57 : 0, // Inset to align right after squircle icon
                   ),
               ],
             ],
@@ -422,8 +422,8 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
           children: [
             if (hasIcon) ...[
               Container(
-                width: 32,
-                height: 32,
+                width: 29,
+                height: 29,
                 margin: hasSubtitle ? const EdgeInsets.only(top: 9) : null,
                 decoration: BoxDecoration(
                   color: (enabled && value ? switchColor : p.text3).withValues(
@@ -434,7 +434,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                 child: Icon(
                   widget.icon,
                   color: enabled && value ? switchColor : p.text2,
-                  size: 16,
+                  size: 18,
                 ),
               ),
               const SizedBox(width: 12),

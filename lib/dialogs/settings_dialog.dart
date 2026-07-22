@@ -246,6 +246,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late int privacyLockDelayMinutes;
   late String currentLocale;
 
+  String? _editingReminderType;
+  final TextEditingController _reminderMessageController = TextEditingController();
+
   // Reminders Settings
   bool _dailyReminderEnabled = false;
   TimeOfDay _dailyReminderTime = const TimeOfDay(hour: 21, minute: 0);
@@ -381,217 +384,155 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
-  Future<String?> _showIOSMessagePicker(
-    BuildContext context,
-    String title,
-    String currentValue,
-    String prefKey,
-  ) async {
-    final p = paletteFor(theme);
+  void _openReminderMessageEditor(String type) {
+    setState(() {
+      _editingReminderType = type;
+      String initialText = '';
+      if (type == 'daily') initialText = _dailyReminderBody;
+      if (type == 'weekly') initialText = _weeklyReminderBody;
+      if (type == 'monthly') initialText = _monthlyReminderBody;
+      _reminderMessageController.text = initialText;
+    });
+    _openCategory('Reminder Message');
+  }
+
+  Widget _reminderMessagePage(Palette p) {
+    if (_editingReminderType == null) return const SizedBox.shrink();
+    
+    final type = _editingReminderType!;
+    
+    final prefKey = type == 'daily' ? 'reminder_daily_body' : (type == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body');
     final recentsKey = '${prefKey}_recents';
     final recents = _prefs?.getStringList(recentsKey) ?? <String>[];
     
+    final currentValue = type == 'daily' ? _dailyReminderBody : (type == 'weekly' ? _weeklyReminderBody : _monthlyReminderBody);
     recents.removeWhere((item) => item.trim().isEmpty || item == currentValue);
 
-    final controller = TextEditingController(text: currentValue);
-    
-    final updatedValue = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            decoration: BoxDecoration(
-              color: p.surface.withValues(alpha: 0.85),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-              border: Border.all(color: p.accent.withValues(alpha: 0.2), width: 1.5),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              'Current Message'.localized(context).toUpperCase(),
+              style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
             ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-              child: Glass(
-                p: p,
-                radius: 32,
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 48,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: p.text3.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(2.5),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      title.localized(context),
-                      style: TextStyle(color: p.text, fontSize: 18, fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Current Message'.localized(context).toUpperCase(),
-                      style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: p.surface2.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: p.border.withValues(alpha: 0.3)),
-                      ),
-                      child: Text(
-                        currentValue.trim().isEmpty 
-                            ? 'No message set (will show default reminder)'.localized(context) 
-                            : currentValue,
-                        style: TextStyle(
-                          color: currentValue.trim().isEmpty ? p.text3 : p.text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          fontStyle: currentValue.trim().isEmpty ? FontStyle.italic : FontStyle.normal,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (recents.isNotEmpty) ...[
-                      Text(
-                        'Recent Messages'.localized(context).toUpperCase(),
-                        style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                      ),
-                      const SizedBox(height: 8),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 180),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              for (final item in recents.take(5))
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: PressableScale(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      controller.text = item;
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                      decoration: BoxDecoration(
-                                        color: p.surface3.withValues(alpha: 0.3),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: p.border.withValues(alpha: 0.15)),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.history_rounded, color: p.text3, size: 16),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              item,
-                                              style: TextStyle(color: p.text2, fontSize: 14, fontWeight: FontWeight.w500),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    Text(
-                      'Edit Message'.localized(context).toUpperCase(),
-                      style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: controller,
-                      autofocus: true,
-                      maxLines: 1,
-                      maxLength: 60,
-                      style: TextStyle(color: p.text, fontSize: 15, fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(
-                        hintText: 'Enter reminder message...',
-                        hintStyle: TextStyle(color: p.text3),
-                        counterText: '',
-                        filled: true,
-                        fillColor: p.surface2.withValues(alpha: 0.5),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: p.accent, width: 1.5),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: p.border.withValues(alpha: 0.3)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () => Navigator.pop(context, null),
-                            style: TextButton.styleFrom(
-                              foregroundColor: p.text2,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: Text('cancel'.localized(context), style: const TextStyle(fontWeight: FontWeight.w700)),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final newText = controller.text.trim();
-                              Navigator.pop(context, newText);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: p.accent,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                            child: Text('Save'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: p.border.withValues(alpha: 0.5)),
+            ),
+            child: Text(
+              currentValue.trim().isEmpty 
+                  ? 'No message set (will show default reminder)'.localized(context) 
+                  : currentValue,
+              style: TextStyle(
+                color: currentValue.trim().isEmpty ? p.text3 : p.text,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                fontStyle: currentValue.trim().isEmpty ? FontStyle.italic : FontStyle.normal,
               ),
             ),
           ),
-        );
-      },
+          const SizedBox(height: 24),
+          if (recents.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'Recent Messages'.localized(context).toUpperCase(),
+                style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SettingsGroup(
+              p: p,
+              insetDividers: true,
+              children: [
+                for (final item in recents.take(5))
+                  SettingsRow(
+                    p: p,
+                    icon: Icons.history_rounded,
+                    title: item,
+                    color: p.text3,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _reminderMessageController.text = item;
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              'Edit Message'.localized(context).toUpperCase(),
+              style: TextStyle(color: p.text3, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _reminderMessageController,
+            maxLines: 1,
+            maxLength: 60,
+            style: TextStyle(color: p.text, fontSize: 15, fontWeight: FontWeight.w500),
+            decoration: InputDecoration(
+              hintText: 'Enter reminder message...'.localized(context),
+              hintStyle: TextStyle(color: p.text3),
+              counterText: '',
+              filled: true,
+              fillColor: p.surface2,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: p.accent, width: 1.5),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: p.border.withValues(alpha: 0.5)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          FilledButton(
+            onPressed: () async {
+              final newText = _reminderMessageController.text.trim();
+              if (newText != currentValue) {
+                if (currentValue.trim().isNotEmpty && currentValue != 'Time to log a moment!') {
+                  recents.insert(0, currentValue);
+                  final uniqueRecents = recents.toSet().toList();
+                  await _prefs?.setStringList(recentsKey, uniqueRecents.take(5).toList());
+                }
+                
+                setState(() {
+                  if (type == 'daily') _dailyReminderBody = newText;
+                  if (type == 'weekly') _weeklyReminderBody = newText;
+                  if (type == 'monthly') _monthlyReminderBody = newText;
+                });
+                await _prefs?.setString(prefKey, newText);
+                await _syncReminder(type);
+              }
+              _popCategory();
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: p.accent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: Text('Save'.localized(context), style: const TextStyle(fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(height: 48),
+        ],
+      ),
     );
-
-    if (updatedValue != null) {
-      if (updatedValue != currentValue) {
-        if (currentValue.trim().isNotEmpty && currentValue != 'Time to log a moment!') {
-          recents.insert(0, currentValue);
-        }
-        final uniqueRecents = recents.toSet().toList();
-        final limitedRecents = uniqueRecents.take(5).toList();
-        await _prefs?.setStringList(recentsKey, limitedRecents);
-      }
-      return updatedValue;
-    }
-    return null;
   }
 
   Future<TimeOfDay?> _showIOSTimePicker(BuildContext context, TimeOfDay initialTime) async {
@@ -764,6 +705,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _activeController.dispose();
     _settingsSearchController.dispose();
     _settingsSearchFocusNode.dispose();
+    _reminderMessageController.dispose();
     super.dispose();
   }
 
@@ -2598,7 +2540,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
       },
       child: AppSheet(
         p: p,
-        title: (category ?? 'Settings').localized(context),
+        title: category == 'Reminder Message' 
+            ? (_editingReminderType == 'daily' 
+                ? 'Daily Reminder Message'.localized(context) 
+                : (_editingReminderType == 'weekly' 
+                    ? 'Weekly Reminder Message'.localized(context) 
+                    : 'Monthly Reminder Message'.localized(context)))
+            : (category ?? 'Settings').localized(context),
         onBack: category != null ? _popCategory : null,
         docked: true,
         blur: !reduceMotion && enableTranslucency && engine.supportsBlur,
@@ -2709,8 +2657,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           SettingsRow(
                             p: p,
                             icon: Icons.storage_rounded,
-                            title: 'Data & Backup',
-                            status: '${entries.length} Logs',
+                            title: 'Data & Backup'.localized(context),
+                            status: '${entries.length} ${'Logs'.localized(context)}',
                             color: p.green,
                             onTap: () => _openCategory('Data & Backup'),
                           ),
@@ -3286,8 +3234,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         SettingsRow(
                           p: p,
                           icon: Icons.history_rounded,
-                          title: 'Moments',
-                          status: '${entries.length} Logs',
+                          title: 'Moments'.localized(context),
+                          status: '${entries.length} ${'Logs'.localized(context)}',
                           color: p.orange,
                           onTap: () => _openCategory('Moments', parent: 'Logging'),
                         ),
@@ -3578,20 +3526,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             title: 'Message'.localized(context),
                             status: _dailyReminderBody.trim().isEmpty ? 'Empty'.localized(context) : 'Set'.localized(context),
                             color: p.accent,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final msg = await _showIOSMessagePicker(
-                                context,
-                                'Daily Reminder Message',
-                                _dailyReminderBody,
-                                'reminder_daily_body',
-                              );
-                              if (msg != null) {
-                                setState(() => _dailyReminderBody = msg);
-                                await _prefs?.setString('reminder_daily_body', msg);
-                                await _syncReminder('daily');
-                              }
-                            },
+                            onTap: () => _openReminderMessageEditor('daily'),
                           ),
                         ],
                       ],
@@ -3777,20 +3712,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             title: 'Message'.localized(context),
                             status: _weeklyReminderBody.trim().isEmpty ? 'Empty'.localized(context) : 'Set'.localized(context),
                             color: p.green,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final msg = await _showIOSMessagePicker(
-                                context,
-                                'Weekly Reminder Message',
-                                _weeklyReminderBody,
-                                'reminder_weekly_body',
-                              );
-                              if (msg != null) {
-                                setState(() => _weeklyReminderBody = msg);
-                                await _prefs?.setString('reminder_weekly_body', msg);
-                                await _syncReminder('weekly');
-                              }
-                            },
+                            onTap: () => _openReminderMessageEditor('weekly'),
                           ),
                         ],
                       ],
@@ -3871,20 +3793,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             title: 'Message'.localized(context),
                             status: _monthlyReminderBody.trim().isEmpty ? 'Empty'.localized(context) : 'Set'.localized(context),
                             color: p.red,
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final msg = await _showIOSMessagePicker(
-                                context,
-                                'Monthly Reminder Message',
-                                _monthlyReminderBody,
-                                'reminder_monthly_body',
-                              );
-                              if (msg != null) {
-                                setState(() => _monthlyReminderBody = msg);
-                                await _prefs?.setString('reminder_monthly_body', msg);
-                                await _syncReminder('monthly');
-                              }
-                            },
+                            onTap: () => _openReminderMessageEditor('monthly'),
                           ),
                         ],
                       ],
@@ -3894,6 +3803,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     const SizedBox(height: spacing48),
                   ]),
                 ),
+              if (show('Reminder Message'))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _reminderMessagePage(p),
+                  ),
+                ),
               if (show('Moments'))
                 SliverList(
                   delegate: SliverChildListDelegate([
@@ -3902,7 +3818,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
                         child: Text(
-                          'RECENTLY DELETED',
+                          'RECENTLY DELETED'.localized(context),
                           style: TextStyle(
                             color: p.text3,
                             fontSize: 13,
@@ -3924,11 +3840,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 SettingsRow(
                                   p: p,
                                   icon: Icons.delete_outline_rounded,
-                                  title: 'Trash Bin',
-                                  status: '${_trash.length} items',
+                                  title: 'Trash Bin'.localized(context),
+                                  status: '${_trash.length} ${(_trash.length == 1 ? "item" : "items").localized(context)}',
                                   color: p.orange,
                                   onTap: () => _openCategory('Trash Bin', parent: 'Moments'),
                                 ),
+                                Divider(height: 0.5, color: p.border),
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -3937,8 +3854,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   ),
                                   child: Text(
                                     _trash.isEmpty
-                                        ? 'Restore or permanently remove deleted moments'
-                                        : '${_trash.first.date} • ${_trash.first.note.isEmpty ? 'No note' : _trash.first.note}',
+                                        ? 'Restore or permanently remove deleted moments'.localized(context)
+                                        : '${_trash.first.date} • ${_trash.first.note.isEmpty ? 'No note'.localized(context) : _trash.first.note}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -4027,9 +3944,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         SettingsRow(
                           p: p,
                           icon: Icons.search_rounded,
-                          title: 'Search Notes',
+                          title: 'Search Notes'.localized(context),
                           color: p.accent,
-                          status: '${entries.where((e) => e.note.isNotEmpty).length} Notes',
+                          status: '${entries.where((e) => e.note.isNotEmpty).length} ${'Notes'.localized(context)}',
                           onTap: () => _openCategory('Search Notes', parent: 'Moments'),
                         ),
                       ],
@@ -4376,8 +4293,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       p: p,
                       insetDividers: true,
                       children: [
-                        SettingsRow(p: p, icon: Icons.archive_outlined, title: 'Backup & Export', status: '${entries.length} Logs', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
-                        SettingsRow(p: p, icon: Icons.health_and_safety_outlined, title: 'Backup Status', status: _dataHealthStatus, color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
+                        SettingsRow(p: p, icon: Icons.archive_outlined, title: 'Backup & Export'.localized(context), status: '${entries.length} ${'Logs'.localized(context)}', color: p.green, onTap: () => _openCategory('Backup & Export', parent: 'Data & Backup')),
+                        SettingsRow(p: p, icon: Icons.health_and_safety_outlined, title: 'Backup Status'.localized(context), status: _dataHealthStatus, color: p.accent, onTap: () => _openCategory('Backup Status', parent: 'Data & Backup')),
                       ],
                     ),
                     SettingsPageDescription(

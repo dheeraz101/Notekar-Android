@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class RecentlyDeletedDialog extends StatefulWidget {
   const RecentlyDeletedDialog({
@@ -56,9 +57,9 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
       transitionDuration: const Duration(milliseconds: 120),
       pageBuilder: (_, _, _) => ActionConfirmSheet(
         p: widget.p,
-        title: 'Restore All Moments?',
-        message: 'This will return all items currently in the trash to your history.',
-        confirmLabel: 'Restore All',
+        title: 'Restore All Moments?'.localized(context),
+        message: 'This will return all items currently in the trash to your history.'.localized(context),
+        confirmLabel: 'Restore All'.localized(context),
         icon: Icons.restore_rounded,
       ),
     );
@@ -78,9 +79,9 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
       transitionDuration: const Duration(milliseconds: 120),
       pageBuilder: (_, _, _) => ActionConfirmSheet(
         p: widget.p,
-        title: 'Empty Trash?',
-        message: 'This will permanently delete all moments in the trash. This action cannot be undone.',
-        confirmLabel: 'Empty Trash',
+        title: 'Empty Trash?'.localized(context),
+        message: 'This will permanently delete all moments in the trash. This action cannot be undone.'.localized(context),
+        confirmLabel: 'Empty Trash'.localized(context),
         isDestructive: true,
         icon: Icons.delete_forever_rounded,
       ),
@@ -98,7 +99,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
 
     return AppSheet(
       p: p,
-      title: 'Trash Bin',
+      title: 'Trash Bin'.localized(context),
       blur: widget.blur,
       docked: true,
       onBack: () => Navigator.pop(context),
@@ -117,7 +118,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: spacing4),
                 child: AppSheetLargeTitle(
                   p: p,
-                  title: 'Trash Bin',
+                  title: 'Trash Bin'.localized(context),
                   scrollController: _scrollController,
                 ),
               ),
@@ -141,7 +142,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                           ),
                           onPressed: _confirmRestoreAll,
                           icon: const Icon(Icons.restore_rounded, size: 18),
-                          label: const Text('Restore All', style: TextStyle(fontWeight: FontWeight.w700)),
+                          label: Text('Restore All'.localized(context), style: const TextStyle(fontWeight: FontWeight.w700)),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -157,7 +158,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                           ),
                           onPressed: _confirmEmptyTrash,
                           icon: const Icon(Icons.delete_forever_rounded, size: 18),
-                          label: const Text('Empty Trash', style: TextStyle(fontWeight: FontWeight.w700)),
+                          label: Text('Empty Trash'.localized(context), style: const TextStyle(fontWeight: FontWeight.w700)),
                         ),
                       ),
                     ],
@@ -184,7 +185,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                       ),
                       const SizedBox(height: 14),
                       Text(
-                        'Trash is Empty',
+                        'Trash is Empty'.localized(context),
                         style: TextStyle(
                           color: p.text,
                           fontSize: 18,
@@ -193,7 +194,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Deleted moments will appear here for easy restoration.',
+                        'Deleted moments will appear here for easy restoration.'.localized(context),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: p.text2, fontSize: 13, height: 1.35),
                       ),
@@ -211,7 +212,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                             Icon(Icons.timer_outlined, color: p.orange, size: 16),
                             const SizedBox(width: 8),
                             Text(
-                              'Items auto-delete permanently after 30 days',
+                              'Items auto-delete permanently after 30 days'.localized(context),
                               style: TextStyle(
                                 color: p.text3,
                                 fontSize: 12,
@@ -297,7 +298,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                               ),
                             ),
                             IconButton(
-                              tooltip: 'Restore',
+                              tooltip: 'Restore'.localized(context),
                               icon: Icon(Icons.restore_rounded, color: p.text2, size: 20),
                               onPressed: () async {
                                 await widget.onRestoreMoment(moment.id);
@@ -307,7 +308,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                               },
                             ),
                             IconButton(
-                              tooltip: 'Delete Permanently',
+                              tooltip: 'Delete Permanently'.localized(context),
                               icon: Icon(Icons.delete_forever_rounded, color: p.text2, size: 20),
                               onPressed: () async {
                                 final confirmed = await showGeneralDialog<bool>(
@@ -318,9 +319,9 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
                                   transitionDuration: const Duration(milliseconds: 120),
                                   pageBuilder: (_, _, _) => ActionConfirmSheet(
                                     p: widget.p,
-                                    title: 'Delete Permanently?',
-                                    message: 'This moment will be erased forever.',
-                                    confirmLabel: 'Delete',
+                                    title: 'Delete Permanently?'.localized(context),
+                                    message: 'This moment will be erased forever.'.localized(context),
+                                    confirmLabel: 'Delete'.localized(context),
                                     isDestructive: true,
                                     icon: Icons.delete_forever_rounded,
                                   ),

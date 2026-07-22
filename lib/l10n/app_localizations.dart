@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatsNewTitle.
   ///
   /// In en, this message translates to:
-  /// **'What\'s New in NoteKar'**
+  /// **'What\'s New'**
   String get whatsNewTitle;
 
   /// No description provided for @changelogTitle.

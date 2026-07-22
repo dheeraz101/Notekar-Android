@@ -12,7 +12,16 @@ extension LocalizedString on String {
       'notekar' || 'apptitle' => l10n.appTitle,
       'settings' || 'settingstitle' => l10n.settingsTitle,
       'history' || 'historytitle' => l10n.historyTitle,
-      "what's new in notekar" || "what's new" || 'whats new' || 'whatsnewtitle' => l10n.whatsNewTitle,
+      "what's new" || 'whats new' || 'whatsnewtitle' => switch (l10n.localeName) {
+        'es' => 'Novedades',
+        'hi' => 'नया क्या है',
+        _ => "What's New",
+      },
+      "what's new in notekar" => switch (l10n.localeName) {
+        'es' => 'Novedades en NoteKar',
+        'hi' => 'NoteKar में नया क्या है',
+        _ => "What's New in NoteKar",
+      },
       'changelog' || 'changelogtitle' => l10n.changelogTitle,
       'display' || 'displaycategory' => l10n.displayCategory,
       'accent color' || 'accentcolorcategory' => l10n.accentColorCategory,
@@ -271,6 +280,251 @@ extension LocalizedString on String {
         'es' => 'Día del mes',
         'hi' => 'महीने का दिन',
         _ => 'Day of month',
+      },
+      'trash bin' => switch (l10n.localeName) {
+        'es' => 'Papelera',
+        'hi' => 'कचरा पात्र',
+        _ => 'Trash Bin',
+      },
+      'current message' => switch (l10n.localeName) {
+        'es' => 'Mensaje actual',
+        'hi' => 'वर्तमान संदेश',
+        _ => 'Current Message',
+      },
+      'recent messages' => switch (l10n.localeName) {
+        'es' => 'Mensajes recientes',
+        'hi' => 'हाल के संदेश',
+        _ => 'Recent Messages',
+      },
+      'edit message' => switch (l10n.localeName) {
+        'es' => 'Editar mensaje',
+        'hi' => 'संदेश संपादित करें',
+        _ => 'Edit Message',
+      },
+      'daily reminder message' => switch (l10n.localeName) {
+        'es' => 'Mensaje de recordatorio diario',
+        'hi' => 'दैनिक अनुस्मारक संदेश',
+        _ => 'Daily Reminder Message',
+      },
+      'weekly reminder message' => switch (l10n.localeName) {
+        'es' => 'Mensaje de recordatorio semanal',
+        'hi' => 'साप्ताहिक अनुस्मारक संदेश',
+        _ => 'Weekly Reminder Message',
+      },
+      'monthly reminder message' => switch (l10n.localeName) {
+        'es' => 'Mensaje de recordatorio mensual',
+        'hi' => 'मासिक अनुस्मारक संदेश',
+        _ => 'Monthly Reminder Message',
+      },
+      'restore all moments?' => switch (l10n.localeName) {
+        'es' => '¿Restaurar todos los momentos?',
+        'hi' => 'सभी क्षण पुनर्स्थापित करें?',
+        _ => 'Restore All Moments?',
+      },
+      'this will return all items currently in the trash to your history.' => switch (l10n.localeName) {
+        'es' => 'Esto devolverá todos los elementos actualmente en la papelera a su historial.',
+        'hi' => 'यह वर्तमान में कचरा पात्र में मौजूद सभी वस्तुओं को आपके इतिहास में वापस कर देगा।',
+        _ => 'This will return all items currently in the trash to your history.',
+      },
+      'restore all' => switch (l10n.localeName) {
+        'es' => 'Restaurar todo',
+        'hi' => 'सभी को पुनर्स्थापित करें',
+        _ => 'Restore All',
+      },
+      'empty trash?' => switch (l10n.localeName) {
+        'es' => '¿Vaciar papelera?',
+        'hi' => 'कचरा पात्र खाली करें?',
+        _ => 'Empty Trash?',
+      },
+      'this will permanently delete all moments in the trash. this action cannot be undone.' => switch (l10n.localeName) {
+        'es' => 'Esto eliminará permanentemente todos los momentos de la papelera. Esta acción no se puede deshacer.',
+        'hi' => 'यह कचरा पात्र के सभी क्षणों को स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।',
+        _ => 'This will permanently delete all moments in the trash. This action cannot be undone.',
+      },
+      'delete permanently?' => switch (l10n.localeName) {
+        'es' => '¿Eliminar permanentemente?',
+        'hi' => 'स्थायी रूप से हटाएं?',
+        _ => 'Delete Permanently?',
+      },
+      'this moment will be erased forever.' => switch (l10n.localeName) {
+        'es' => 'Este momento se borrará para siempre.',
+        'hi' => 'यह क्षण हमेशा के लिए मिटा दिया जाएगा।',
+        _ => 'This moment will be erased forever.',
+      },
+      'item' => switch (l10n.localeName) {
+        'es' => 'elemento',
+        'hi' => 'वस्तु',
+        _ => 'item',
+      },
+      'items' => switch (l10n.localeName) {
+        'es' => 'elementos',
+        'hi' => 'वस्तुओं',
+        _ => 'items',
+      },
+      'no note' => switch (l10n.localeName) {
+        'es' => 'Sin nota',
+        'hi' => 'कोई नोट नहीं',
+        _ => 'No note',
+      },
+      'recently deleted' => switch (l10n.localeName) {
+        'es' => 'ELIMINADO RECIENTEMENTE',
+        'hi' => 'हाल ही में हटाया गया',
+        _ => 'RECENTLY DELETED',
+      },
+      'restore or permanently remove deleted moments' => switch (l10n.localeName) {
+        'es' => 'Restaurar o eliminar permanentemente momentos eliminados',
+        'hi' => 'हटाए गए क्षणों को पुनर्स्थापित करें या स्थायी रूप से हटा दें',
+        _ => 'Restore or permanently remove deleted moments',
+      },
+      'logs' => switch (l10n.localeName) {
+        'es' => 'Registros',
+        'hi' => 'लॉग्स',
+        _ => 'Logs',
+      },
+      'notes' => switch (l10n.localeName) {
+        'es' => 'Notas',
+        'hi' => 'नोट्स',
+        _ => 'Notes',
+      },
+      'alarms permission required' => switch (l10n.localeName) {
+        'es' => 'Permiso de alarmas requerido',
+        'hi' => 'अलार्म अनुमति आवश्यक है',
+        _ => 'Alarms Permission Required',
+      },
+      'to trigger reminders precisely when the app is closed, notekar requires the "alarms & reminders" permission.' => switch (l10n.localeName) {
+        'es' => 'Para activar recordatorios con precisión cuando la aplicación está cerrada, NoteKar requiere el permiso de "Alarmas y recordatorios".',
+        'hi' => 'ऐप बंद होने पर सटीक रूप से अनुस्मारक ट्रिगर करने के लिए, NoteKar को "अलार्म और अनुस्मारक" अनुमति की आवश्यकता होती है।',
+        _ => 'To trigger reminders precisely when the app is closed, NoteKar requires the "Alarms & Reminders" permission.',
+      },
+      'grant permission' => switch (l10n.localeName) {
+        'es' => 'Conceder permiso',
+        'hi' => 'अनुमति दें',
+        _ => 'Grant Permission',
+      },
+      'battery optimization active' => switch (l10n.localeName) {
+        'es' => 'Optimización de batería activa',
+        'hi' => 'बैटरी ऑप्टिमाइज़ेशन सक्रिय',
+        _ => 'Battery Optimization Active',
+      },
+      'aggressive battery cleaners on low-end devices can kill notekar in the background. disable battery optimization to guarantee reminders fire 100% of the time.' => switch (l10n.localeName) {
+        'es' => 'Los limpiadores de batería agresivos en dispositivos de gama baja pueden cerrar NoteKar en segundo plano. Desactiva la optimización de batería para garantizar que los recordatorios se activen siempre.',
+        'hi' => 'कम-एंड डिवाइस पर आक्रामक बैटरी क्लीनर बैकग्राउंड में NoteKar को बंद कर सकते हैं। यह सुनिश्चित करने के लिए कि अनुस्मारक हमेशा समय पर मिलें, बैटरी ऑप्टिमाइज़ेशन को अक्षम करें।',
+        _ => 'Aggressive battery cleaners on low-end devices can kill NoteKar in the background. Disable battery optimization to guarantee reminders fire 100% of the time.',
+      },
+      'disable battery optimization' => switch (l10n.localeName) {
+        'es' => 'Desactivar optimización de batería',
+        'hi' => 'बैटरी ऑप्टिमाइज़ेशन अक्षम करें',
+        _ => 'Disable Battery Optimization',
+      },
+      'sun' => switch (l10n.localeName) {
+        'es' => 'Dom',
+        'hi' => 'रवि',
+        _ => 'Sun',
+      },
+      'mon' => switch (l10n.localeName) {
+        'es' => 'Lun',
+        'hi' => 'सोम',
+        _ => 'Mon',
+      },
+      'tue' => switch (l10n.localeName) {
+        'es' => 'Mar',
+        'hi' => 'मंगल',
+        _ => 'Tue',
+      },
+      'wed' => switch (l10n.localeName) {
+        'es' => 'Mié',
+        'hi' => 'बुध',
+        _ => 'Wed',
+      },
+      'thu' => switch (l10n.localeName) {
+        'es' => 'Jue',
+        'hi' => 'गुरु',
+        _ => 'Thu',
+      },
+      'fri' => switch (l10n.localeName) {
+        'es' => 'Vie',
+        'hi' => 'शुक्र',
+        _ => 'Fri',
+      },
+      'sat' => switch (l10n.localeName) {
+        'es' => 'Sáb',
+        'hi' => 'शनि',
+        _ => 'Sat',
+      },
+      'sunday' => switch (l10n.localeName) {
+        'es' => 'Domingo',
+        'hi' => 'रविवार',
+        _ => 'Sunday',
+      },
+      'monday' => switch (l10n.localeName) {
+        'es' => 'Lunes',
+        'hi' => 'सोमवार',
+        _ => 'Monday',
+      },
+      'tuesday' => switch (l10n.localeName) {
+        'es' => 'Martes',
+        'hi' => 'मंगलवार',
+        _ => 'Tuesday',
+      },
+      'wednesday' => switch (l10n.localeName) {
+        'es' => 'Miércoles',
+        'hi' => 'बुधवार',
+        _ => 'Wednesday',
+      },
+      'thursday' => switch (l10n.localeName) {
+        'es' => 'Jueves',
+        'hi' => 'गुरुवार',
+        _ => 'Thursday',
+      },
+      'friday' => switch (l10n.localeName) {
+        'es' => 'Viernes',
+        'hi' => 'शुक्रवार',
+        _ => 'Friday',
+      },
+      'saturday' => switch (l10n.localeName) {
+        'es' => 'Sábado',
+        'hi' => 'शनिवार',
+        _ => 'Saturday',
+      },
+      'time' => switch (l10n.localeName) {
+        'es' => 'Hora',
+        'hi' => 'समय',
+        _ => 'Time',
+      },
+      'message' => switch (l10n.localeName) {
+        'es' => 'Mensaje',
+        'hi' => 'संदेश',
+        _ => 'Message',
+      },
+      'empty' => switch (l10n.localeName) {
+        'es' => 'Vacío',
+        'hi' => 'खाली',
+        _ => 'Empty',
+      },
+      'set' => switch (l10n.localeName) {
+        'es' => 'Establecido',
+        'hi' => 'सेट',
+        _ => 'Set',
+      },
+      'hour' => switch (l10n.localeName) {
+        'es' => 'hora',
+        'hi' => 'घंटा',
+        _ => 'hour',
+      },
+      'hours' => switch (l10n.localeName) {
+        'es' => 'horas',
+        'hi' => 'घंटे',
+        _ => 'hours',
+      },
+      'no message set (will show default reminder)' => switch (l10n.localeName) {
+        'es' => 'Sin mensaje establecido (se mostrará el recordatorio predeterminado)',
+        'hi' => 'कोई संदेश सेट नहीं है (डिफ़ॉल्ट अनुस्मारक दिखाया जाएगा)',
+        _ => 'No message set (will show default reminder)',
+      },
+      'enter reminder message...' => switch (l10n.localeName) {
+        'es' => 'Ingresar mensaje de recordatorio...',
+        'hi' => 'अनुस्मारक संदेश दर्ज करें...',
+        _ => 'Enter reminder message...',
       },
       _ => this,
     };
