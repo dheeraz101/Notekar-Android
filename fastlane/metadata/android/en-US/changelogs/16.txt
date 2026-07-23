@@ -1,0 +1,1 @@
+Dynamic update center for in-app downloads/installation, Stable and Beta update tracks, offline commits caching, dynamic VirusTotal security scans, and Cupertino style progress indicators.

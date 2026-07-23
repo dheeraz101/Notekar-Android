@@ -23,6 +23,27 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '4.0.7',
+      date: 'July 23, 2026',
+      highlights: [
+        'In-App Download & Installation: Integrated update download and install engine with MD5/SHA256 checksum integrity verification.',
+        'Stable & Beta Tracks: Toggles to choose between stable releases and pre-release developer beta builds under updates options.',
+        'Offline Commits Caching: Persistently saves the commit feed to SharedPreferences for offline reading with offline warnings.',
+        'Dynamic VirusTotal Reports: Automatically fetches clean scan ratios, scan execution dates, and verification status colors.',
+        'iOS 26 Style Cupertino Indicators: Replaced CircularProgressIndicator screens with premium, high-fidelity CupertinoActivityIndicators.',
+      ],
+      items: [
+        'Added: Dynamic in-app update center to download and install new releases.',
+        'Added: Stable and Beta update tracks toggle under Updates & Notices.',
+        'Added: Persistent offline caching and offline error states for update commits.',
+        'Added: Real-time scan statistics display on the VirusTotal security card.',
+        'Added: Apple-style CupertinoActivityIndicator widgets throughout all screens.',
+        'Added: Dynamic settings search indexing for track selection, security, and commits.',
+        'Improved: Card container padding and layout widths aligned to a standard format.',
+        'Improved: FAQ support sections updated with offline commits and security references.',
+      ],
+    ),
+    (
       version: '4.0.6',
       date: 'July 22, 2026',
       highlights: [
