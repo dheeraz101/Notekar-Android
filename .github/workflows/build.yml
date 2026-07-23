@@ -307,11 +307,11 @@ jobs:
             VT_STATUS="Detected by ${MALICIOUS} / ${TOTAL} engines"
           fi
 
-          # Construct the new Security block
-          export SECURITY_BLOCK=$(printf "\n----\n\n## Security\n\n🛡️ **VirusTotal Status**: \`%s\`  \n🔗 [View Full Report](%s)  \n📅 Last scanned: %s\n\n---" "$VT_STATUS" "$VT_URL" "$SCAN_DATE_STR")
-
-          # Replace the Security block in /tmp/release_notes.md
-          perl -0777 -pi -e 's~(?m)^###? Security.*?(?=\n###? |\z)~$ENV{SECURITY_BLOCK}\n~g' /tmp/release_notes.md
+          # Replace the Security block in /tmp/release_notes.md using Python
+          export VT_STATUS="$VT_STATUS"
+          export VT_URL="$VT_URL"
+          export SCAN_DATE_STR="$SCAN_DATE_STR"
+          python3 -c 'import os, re; text = open("/tmp/release_notes.md").read(); status = os.environ["VT_STATUS"]; url = os.environ["VT_URL"]; date = os.environ["SCAN_DATE_STR"]; block = f"\n----\n\n## Security\n\n🛡️ **VirusTotal Status**: `{status}`  \n🔗 [View Full Report]({url})  \n📅 Last scanned: {date}\n\n---"; updated = re.sub(r"(?m)^###? Security.*?(?=\n###? |\Z)", block + "\n", text, flags=re.DOTALL); open("/tmp/release_notes.md", "w").write(updated)'
 
           # Always append the APK install guide + verify block at the bottom
           printf "\n---\n\n### Assets\n\n| File | Use when |\n|------|----------|\n| \`notekar-VERSION-universal.apk\` | Not sure? Use this — works on all devices |\n| \`notekar-VERSION-arm64-v8a.apk\` | Most modern phones (recommended, smaller) |\n| \`notekar-VERSION-armeabi-v7a.apk\` | Older 32-bit phones |\n| \`notekar-VERSION-x86_64.apk\` | x86_64 emulators / devices |\n\n### Verifying\n\nDownload \`sha256.txt\` alongside any APK and run:\n\`\`\`bash\nsha256sum --check sha256.txt\n\`\`\`\n" >> /tmp/release_notes.md

@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [5.0.0] - 2026-07-23 (versionCode 19) [Stable]
+
+### Added
+- **Windows-Style Updates Classification System**: Automatically classifies update packages into Feature, Security, or Beta updates with matching colors, channel badges, and layout designs.
+- **Native Markdown Text Renderer (`MarkdownText`)**: Formats headers, bullet lists, bold text, horizontal rules, custom code tags, and hyperlinks inside release notes natively using the app color palette.
+- **Double Action Buttons**: The update checker card now supports downloading/installing packages and re-checking update status simultaneously.
+- **Background reminders & UI refinements**: Added premium iOS Cupertino Activity Indicators, a 3-second transparent overlay when toggling release tracks, and focus listeners for composer icons.
+- **Track Switch Downgrades explanation guide** inside the Help FAQ section.
+- **Polished track select numbered list** on the Build Choose subpage with baseline-aligned number columns.
+- **Build automation**: Automated PowerShell version calculations for Major (`-stable`), Minor (`-security`), and Patch (`-beta`) increments across core config files.
+
+### Fixed
+- Fixed 404 download errors on Beta APK downloads by tracking branch release tagNames.
+- Fixed VirusTotal pipeline size limit failures (HTTP 413) on universal APK files up to 650MB.
+- Fixed Perl regex syntax compilation warnings inside release formatters.
+- Fixed update classification heuristical conflict warnings inside release note headers.
+
 ## [4.0.9] - 2026-07-23 (versionCode 18) [Beta]
 
 ### Added

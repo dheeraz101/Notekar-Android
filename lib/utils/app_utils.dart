@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
-const appVersion = '4.0.9';
-const appBuildNumber = '18';
+const appVersion = '5.0.0';
+const appBuildNumber = '19';
 const appBuildDate = '2026-07-23';
 
 // 8pt Grid Constants

@@ -1,0 +1,1 @@
+Windows-Style updates classification system, native MarkdownText renderer, double action checker controls, Cupertino spinners, and baseline-aligned track list rules. Fixed 404 Beta download errors and VirusTotal upload size limit failures.

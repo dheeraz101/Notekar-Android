@@ -23,6 +23,30 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.0.0',
+      date: 'July 23, 2026',
+      highlights: [
+        'Windows-Style Updates Classification: Dynamically categorizes packages into Major Feature, Security, or Beta updates with matching colors, badges, and designs.',
+        'Native Markdown Text Renderer: native formatting of headers, bullet lists, code blocks, bold text, and highlights using the active theme color palette.',
+        'Double Card Action Controls: Added double actions to ready updates cards, supporting both "Install Now" and "Check for updates".',
+        'Refined Track Selectors: Restructured the Build Choose subpage numbered rules layout with perfectly baseline-aligned columns.',
+      ],
+      items: [
+        'Added: Windows-Style Updates Classification System dividing updates into Feature, Security, and Beta tracks with custom layouts.',
+        'Added: Native Markdown Text Renderer (MarkdownText) in settings for rich rendering of headers, lists, code, bold text, and hyperlinks.',
+        'Added: Double Action Buttons on the update checking card, supporting both "Install Now" and "Check for updates".',
+        'Added: Background reminders, Cupertino spinners, track switching overlays, and reminder message editor focus checkmarks.',
+        'Added: Track Switch Downgrades explanation guide to the Help FAQ section.',
+        'Added: Polished numbering list inside the Build Choose page with baseline-aligned number columns.',
+        'Added: Automated powershell script calculations for major (-stable), minor (-security), and patch (-beta) increments.',
+        'Fixed: Resolved 404 download errors on Beta APK downloads by tracking branch tagNames.',
+        'Fixed: Resolved VirusTotal pipeline size limit failures by fetching custom large-file upload URLs.',
+        'Fixed: Resolved Perl delimiter syntax warnings on release note generation scripts.',
+        'Fixed: Resolved update classification heuristic conflicts with markdown headers inside release bodies.',
+        'Fixed: version string layouts on the up-to-date panel to display version name alongside build codes.',
+      ],
+    ),
+    (
       version: '4.0.9',
       date: 'July 23, 2026',
       highlights: [
