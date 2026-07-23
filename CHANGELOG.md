@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [4.0.8] - 2026-07-23 (versionCode 17) [Beta]
+
+### Added
+- Windows-Style Update Classification System dividing updates into Feature, Security, and Beta tracks with custom layouts.
+- Dynamic Build Channel Badges displaying local build channel track status (Stable Build, Beta Build, or Security Build).
+- Dynamic editing suffix icon in the reminder message editor toggling between edit and checkmark controls.
+- 3-second transparent overlay modal with Cupertino Activity Indicators when switching release tracks.
+- Upgraded version management scripts supporting automatic calculation increments via `-stable`, `-beta`, or `-security` switches.
+
+## [4.0.7] - 2026-07-23 (versionCode 16)
+
+### Added
+- Integrated update installer downloading, verifying MD5 hashes, and installing releases in-app.
+- Offline commits caching saving commit logs for offline viewing, warning users when loading offline.
+- Dynamic VirusTotal reports showing clean scan ratios, scan execution dates, and verification color banners.
+- Sleek Apple iOS 26 style CupertinoActivityIndicator widgets replacing CircularProgressIndicators.
+- Settings search indexing support for track selection, security reports, and commits caches.
+- Dynamic 999-to-32 radius card transitions inside the changelog sheet.
+
 ## [4.0.6] - 2026-07-22 (versionCode 15)
 
 ### Added

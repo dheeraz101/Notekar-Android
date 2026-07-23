@@ -1,0 +1,1 @@
+Windows-style update classification system, build track badges (Stable, Beta, Security), dynamic textfield suffix editing icons, and Cupertino loading overlays.

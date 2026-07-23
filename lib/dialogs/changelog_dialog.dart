@@ -23,6 +23,24 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '4.0.8',
+      date: 'July 23, 2026',
+      highlights: [
+        'Windows-Style Update Heuristics: Dynamically classifies update packages into Feature, Security, or Beta updates with unique layout designs.',
+        'Track Transition Dialog Overlays: Smooth 3-second transparent dialog overlay with Apple Cupertino loading spinners when switching tracks.',
+        'Dynamic Reminder Editor Suffix: Focused input fields toggle the editing pencil icon to a checkmark in theme accent to save changes.',
+        'Automatic Version Release Calculators: Version management script increments major, minor, or patch versions via flags.',
+        'Dynamic Local Build Channel Status: Displays channel badges (Stable, Beta, or Security Build) directly on the up-to-date panel.',
+      ],
+      items: [
+        'Added: Windows-Style Update Classification System dividing updates into Feature, Security, and Beta tracks with custom layouts.',
+        'Added: Dynamic Build Channel Badges displaying local build channel track status (Stable Build, Beta Build, or Security Build).',
+        'Added: Dynamic editing suffix icon in the reminder message editor toggling between edit and checkmark controls.',
+        'Added: 3-second transparent overlay modal with Cupertino Activity Indicators when switching release tracks.',
+        'Added: Upgraded version management scripts supporting automatic calculation increments via -stable, -beta, or -security switches.',
+      ],
+    ),
+    (
       version: '4.0.7',
       date: 'July 23, 2026',
       highlights: [
