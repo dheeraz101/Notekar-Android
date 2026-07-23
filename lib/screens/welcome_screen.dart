@@ -867,12 +867,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     ? const NeverScrollableScrollPhysics()
                     : const BouncingScrollPhysics(),
                 children: widget.pages.map((key) {
-                  if (key == 'welcome') return _buildWelcomePage(p);
-                  if (key == 'features') return _buildFeaturesPage(p);
-                  if (key == 'repo-move') return _buildRepoMovePage(p);
-                  if (key == 'updates-permission')
+                  if (key == 'welcome') {
+                    return _buildWelcomePage(p);
+                  }
+                  if (key == 'features') {
+                    return _buildFeaturesPage(p);
+                  }
+                  if (key == 'repo-move') {
+                    return _buildRepoMovePage(p);
+                  }
+                  if (key == 'updates-permission') {
                     return _buildUpdatesPermissionPage(p);
-                  if (key == 'reminders') return _buildRemindersPage(p);
+                  }
+                  if (key == 'reminders') {
+                    return _buildRemindersPage(p);
+                  }
                   return const SizedBox.shrink();
                 }).toList(),
               ),
