@@ -83,6 +83,14 @@ jobs:
       - name: Show pub dependencies tree
         run: flutter pub deps
 
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run Quality Gate Verification
+        run: |
+          flutter analyze
+          flutter test
+
       # ── 4. Signing setup ─────────────────────────────────────────────────
       - name: Decode keystore
         run: |
@@ -237,10 +245,10 @@ jobs:
             if [ "$VT_RESPONSE" -eq 200 ]; then
               echo "✅ Successfully uploaded to VirusTotal."
               
-              # Poll for report stats (up to 120 seconds)
+              # Poll for report stats (up to 300 seconds / 5 minutes)
               echo "🔍 Waiting for VirusTotal report to compile..."
-              for i in {1..12}; do
-                sleep 10
+              for i in {1..20}; do
+                sleep 15
                 VT_REPORT=$(curl --request GET \
                   --url "https://www.virustotal.com/api/v3/files/${UNIVERSAL_SHA}" \
                   --header "x-apikey: $VIRUSTOTAL_API_KEY" \
@@ -265,6 +273,7 @@ jobs:
                     break
                   fi
                 fi
+                echo "⌛ Still waiting for VirusTotal analysis ($((i * 15))s elapsed)..."
               done
             else
               echo "❌ VirusTotal upload failed (HTTP $VT_RESPONSE). Response:"

@@ -101,6 +101,26 @@ if (-not $BuildNumber) {
     $BuildNumber = $currentBuild + 1
 }
 
+# Query local git log since last tag to auto-populate changelogs
+$gitCommits = ""
+try {
+    $lastTag = (git describe --tags --abbrev=0) 2>$null
+    if ($lastTag) {
+        $commitsList = (git log "$lastTag..HEAD" --oneline) 2>$null
+    } else {
+        $commitsList = (git log -n 10 --oneline) 2>$null
+    }
+    if ($commitsList) {
+        $gitCommits = ($commitsList | ForEach-Object { "- $_" }) -join "`r`n"
+    }
+} catch {
+    # Fallback if git fails
+}
+
+if ([string]::IsNullOrWhiteSpace($gitCommits)) {
+    $gitCommits = "- Placeholder changelog / commit note here."
+}
+
 # 1. Update version across core config files
 Update-TextFile -Path $pubspecPath -Update {
     param($text)
@@ -130,7 +150,7 @@ if (-not (Test-Path -LiteralPath $fastlaneDir)) {
 }
 $fastlaneFile = Join-Path $fastlaneDir "$BuildNumber.txt"
 if (-not (Test-Path -LiteralPath $fastlaneFile)) {
-    $fastlaneContent = "Placeholder: Write F-Droid changelog for version $Version (build $BuildNumber) here."
+    $fastlaneContent = "Update to $Version (build $BuildNumber):`r`n$gitCommits"
     Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
     Write-Host "Created F-Droid changelog template: $fastlaneFile"
 }
@@ -146,7 +166,7 @@ if (-not (Test-Path -LiteralPath $releaseNotesFile)) {
     if ($security) {
         $prefix = "## 🛡️ Security Update`r`n`r`n"
     }
-    $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
+    $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n### What's Changed`r`n$gitCommits`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
     Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
     Write-Host "Created GitHub Release notes template: $releaseNotesFile"
 }
@@ -161,7 +181,13 @@ if (Test-Path -LiteralPath $changelogPath) {
         Write-Host "Changelog entry for version $Version already exists in changelog_dialog.dart"
     } else {
         $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
-        $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n        'Placeholder Highlight: Add your main highlights here.',`n      ],`n      items: [`n        'Added: Placeholder changelog items here.',`n      ],`n    ),"
+        $jsItems = ""
+        if ($commitsList) {
+            $jsItems = ($commitsList | ForEach-Object { "        '$_'," }) -join "`n"
+        } else {
+            $jsItems = "        'Updated app to version $Version',"
+        }
+        $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n        'Active development release.',`n      ],`n      items: [`n$jsItems`n      ],`n    ),"
         $changelogText = $changelogText.Replace("  static const releases = [", $newReleaseEntry)
         Set-Content -LiteralPath $changelogPath -Value $changelogText -NoNewline
         Write-Host "Injected new empty in-app changelog section for v$Version inside changelog_dialog.dart"
@@ -184,7 +210,7 @@ if (Test-Path -LiteralPath $changelogMdPath) {
         } elseif ($stable) {
             $tagSuffix = " [Stable]"
         }
-        $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n### Added`r`n- Placeholder changelog items here.`r`n`r`n### Fixed`r`n- Placeholder bug fixes here.`r`n`r`n"
+        $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n### Changed`r`n$gitCommits`r`n`r`n"
         $firstHeaderIndex = $changelogMdText.IndexOf("## [")
         if ($firstHeaderIndex -ge 0) {
             $changelogMdText = $changelogMdText.Insert($firstHeaderIndex, $newChangelogEntry)

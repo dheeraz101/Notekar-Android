@@ -59,6 +59,9 @@ class SettingsDialog extends StatefulWidget {
     required this.minimalMomentOptions,
     required this.enableTranslucency,
     required this.privacyLockDelayMinutes,
+    required this.isSystemLockAvailable,
+    required this.privacyLockType,
+    required this.onPrivacyLockTypeChanged,
     required this.updateStatus,
     this.updateInfo,
     required this.checkingUpdates,
@@ -74,6 +77,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onHapticStyle,
     required this.onHistoryDensity,
     required this.onPrivacyLock,
+    required this.onResetPrivacyPin,
     required this.onBackupReminderDays,
     required this.onRemoteNotices,
     required this.onReduceMotion,
@@ -151,6 +155,9 @@ class SettingsDialog extends StatefulWidget {
   final bool minimalMomentOptions;
   final bool enableTranslucency;
   final int privacyLockDelayMinutes;
+  final bool isSystemLockAvailable;
+  final String privacyLockType;
+  final Future<bool> Function(String value) onPrivacyLockTypeChanged;
   final String updateStatus;
   final AppUpdateInfo? updateInfo;
   final bool checkingUpdates;
@@ -166,6 +173,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<String> onHapticStyle;
   final ValueChanged<String> onHistoryDensity;
   final Future<bool> Function(bool value) onPrivacyLock;
+  final Future<void> Function() onResetPrivacyPin;
   final ValueChanged<int> onBackupReminderDays;
   final ValueChanged<bool> onRemoteNotices;
   final ValueChanged<bool> onReduceMotion;
@@ -1642,6 +1650,47 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
+      if (privacyLock && widget.isSystemLockAvailable)
+        item(
+          title: 'Configure Lock',
+          subtitle: 'Choose between System Lock or In-App PIN',
+          category: 'Configure Lock',
+          icon: Icons.security_rounded,
+          keywords: [
+            'configure lock',
+            'system lock',
+            'in-app pin',
+            'custom lock',
+            'change passcode',
+            'biometric selector',
+            'pin type',
+          ],
+          kind: 'nav',
+          boolValue: null,
+          onBoolChanged: null,
+          status: widget.privacyLockType == 'system' ? 'System Lock' : 'In-App PIN',
+        ),
+      if (privacyLock)
+        item(
+          title: 'When to Lock',
+          subtitle: 'Change screen lock timing delay',
+          category: 'App Lock',
+          icon: Icons.timer_rounded,
+          keywords: [
+            'delay',
+            'lock timing',
+            'lock delay',
+            'immediately',
+            'after 1 minute',
+            'when to lock',
+          ],
+          kind: 'nav',
+          boolValue: null,
+          onBoolChanged: null,
+          status: privacyLockDelayMinutes == 0
+              ? 'Immediately'
+              : 'After $privacyLockDelayMinutes Min',
+        ),
       item(
         title: 'Accessibility',
         subtitle: 'Haptic style, motion, larger text, high contrast',
@@ -5469,9 +5518,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   GuideRow(
                                     p: p,
                                     icon: Icons.lock_rounded,
-                                    title: 'App Lock Timing',
+                                    title: 'App Lock & Custom PIN',
                                     text:
-                                        'App Lock uses your biometric or PIN. Immediate lock covers NoteKar in Recents or background.',
+                                        'Configure App Lock to use either native biometrics (System Lock) or a secure local passcode (In-App PIN). Features rate-limiting lockout protection.',
                                   ),
                                   GuideRow(
                                     p: p,
@@ -5592,9 +5641,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   ),
                                   HelpRow(
                                     p: p,
-                                    question: 'App Lock will not turn on',
+                                    question: 'How does App Lock protect NoteKar?',
                                     answer:
-                                        'Add a biometric or PIN/Pattern lock in Android settings, then try again. NoteKar uses your system credentials for maximum security.',
+                                        'You can lock NoteKar using either your device\'s native credentials (System Lock) or a custom 4-digit passcode (In-App PIN). If you choose System Lock, removing your device lock screen security will automatically disable App Lock for safety. In-App PIN runs independently and includes rate-limiting lockout protection.',
                                   ),
                                   HelpRow(
                                     p: p,
@@ -6635,6 +6684,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       }
                                     },
                                   ),
+                                  if (privacyLock && widget.isSystemLockAvailable)
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Configure Lock',
+                                      status: widget.privacyLockType == 'system' ? 'System Lock' : 'In-App PIN',
+                                      onTap: () => _openCategory('Configure Lock'),
+                                    ),
+                                  if (privacyLock && widget.privacyLockType == 'custom_pin')
+                                    SettingsRow(
+                                      p: p,
+                                      title: 'Reset PIN Lock'.localized(context),
+                                      subtitle: 'Change your secure in-app passcode.'.localized(context),
+                                      color: p.accent,
+                                      onTap: () async {
+                                        await widget.onResetPrivacyPin();
+                                      },
+                                    ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -6686,6 +6752,130 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       'Note: Selecting "Immediately" will automatically lock NoteKar as soon as you switch apps, view recent apps, or open your phone notification panel.',
                                 ),
                               ],
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Configure Lock'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    title: 'System Lock'.localized(context),
+                                    subtitle: 'Use fingerprint, face, or system PIN.'.localized(context),
+                                    trailing: widget.privacyLockType == 'system'
+                                        ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                                        : const SizedBox.shrink(),
+                                    onTap: () async {
+                                      if (widget.privacyLockType == 'system') return;
+                                      final success = await widget.onPrivacyLockTypeChanged('system');
+                                      if (success && mounted) {
+                                        _popCategory();
+                                      }
+                                    },
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    title: 'In-App PIN'.localized(context),
+                                    subtitle: 'Configure a dedicated 4-digit passcode.'.localized(context),
+                                    trailing: widget.privacyLockType == 'custom_pin'
+                                        ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                                        : const SizedBox.shrink(),
+                                    onTap: () async {
+                                      if (widget.privacyLockType == 'custom_pin') return;
+                                      final success = await widget.onPrivacyLockTypeChanged('custom_pin');
+                                      if (success && mounted) {
+                                        _popCategory();
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(20, 5, 20, 16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Select how you want to unlock NoteKar. System Lock integrates natively with Android biometric credentials, while In-App PIN utilizes a custom passcode secure to this application.'.localized(context),
+                                      style: TextStyle(
+                                        color: p.text3,
+                                        fontSize: 13,
+                                        height: 1.45,
+                                        letterSpacing: -0.05,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: 20,
+                                          child: Text(
+                                            '1.',
+                                            style: TextStyle(
+                                              color: p.text3,
+                                              fontSize: 13,
+                                              height: 1.45,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: -0.05,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            'System Lock integrates directly with your Android keyguard system, providing hardware-level biometric or PIN protection.'.localized(context),
+                                            style: TextStyle(
+                                              color: p.text3,
+                                              fontSize: 13,
+                                              height: 1.45,
+                                              letterSpacing: -0.05,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: 20,
+                                          child: Text(
+                                            '2.',
+                                            style: TextStyle(
+                                              color: p.text3,
+                                              fontSize: 13,
+                                              height: 1.45,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: -0.05,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            'In-App PIN is cryptographically secured locally using SHA-256 and has built-in brute-force protection to prevent unauthorized access.'.localized(context),
+                                            style: TextStyle(
+                                              color: p.text3,
+                                              fontSize: 13,
+                                              height: 1.45,
+                                              letterSpacing: -0.05,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SettingsBetaNote(
+                                p: p,
+                                text: 'The current features on this page are under Beta stage.'.localized(context),
+                                onLearnMore: () => _showBetaInfoPopup(p),
+                              ),
                               const SizedBox(height: spacing48),
                             ]),
                           ),

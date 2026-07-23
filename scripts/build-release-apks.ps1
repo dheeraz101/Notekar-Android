@@ -237,9 +237,25 @@ if (-not $BuildNumber) {
     $BuildNumber = $pubspecVersion.BuildNumber
 }
 
-Require-ReleaseSigning
+# Pre-flight Release Checks
+try {
+    $gitStatus = (git status --porcelain) 2>$null
+    if ($gitStatus) {
+        Write-Warning "You have uncommitted changes in your git workspace. It is highly recommended to commit all changes before generating release builds."
+    }
+} catch {}
 
 $flutter = Find-Flutter
+
+Write-Host "🔍 Running pre-flight static analysis..."
+& $flutter analyze
+if ($LASTEXITCODE -ne 0) {
+    throw "Static analysis failed. Please fix code quality issues before building release APKs."
+}
+Write-Host "✅ Static analysis passed."
+
+Require-ReleaseSigning
+
 $releaseDir = Join-Path $repoRoot "releases/v$Version"
 $versionsDir = Join-Path $repoRoot "versions/v$Version"
 $apkOutputDir = Join-Path $repoRoot 'build/app/outputs/flutter-apk'
