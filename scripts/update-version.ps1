@@ -168,6 +168,32 @@ if (Test-Path -LiteralPath $changelogPath) {
     }
 }
 
+# 5. Automate CHANGELOG.md updates
+$changelogMdPath = Join-Path $repoRoot "CHANGELOG.md"
+if (Test-Path -LiteralPath $changelogMdPath) {
+    $changelogMdText = Get-Content -LiteralPath $changelogMdPath -Raw
+    $changelogSearch = "## [$Version]"
+    if ($changelogMdText -match [regex]::Escape($changelogSearch)) {
+        Write-Host "Changelog entry for version $Version already exists in CHANGELOG.md"
+    } else {
+        $tagSuffix = ""
+        if ($beta) {
+            $tagSuffix = " [Beta]"
+        } elseif ($security) {
+            $tagSuffix = " [Security]"
+        } elseif ($stable) {
+            $tagSuffix = " [Stable]"
+        }
+        $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n### Added`r`n- Placeholder changelog items here.`r`n`r`n### Fixed`r`n- Placeholder bug fixes here.`r`n`r`n"
+        $firstHeaderIndex = $changelogMdText.IndexOf("## [")
+        if ($firstHeaderIndex -ge 0) {
+            $changelogMdText = $changelogMdText.Insert($firstHeaderIndex, $newChangelogEntry)
+            Set-Content -LiteralPath $changelogMdPath -Value $changelogMdText -NoNewline
+            Write-Host "Injected new empty changelog section for v$Version inside CHANGELOG.md"
+        }
+    }
+}
+
 Write-Host ''
 Write-Host "Version metadata is ready ($releaseTypeLabel):"
 Write-Host "  Version:    $Version"

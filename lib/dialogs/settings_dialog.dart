@@ -24,6 +24,7 @@ import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
+import 'package:notekar/widgets/markdown_text.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -2711,12 +2712,147 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
           ],
         ),
-        const SizedBox(height: spacing12),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'
-                  .localized(context),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 5, 20, 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'
+                    .localized(context),
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13,
+                  height: 1.45,
+                  letterSpacing: -0.05,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    child: Text(
+                      '1.',
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Switching to the Stable Build track will fetch the last released stable build and show the update.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    child: Text(
+                      '2.',
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Switching to the Beta Build track will fetch the last compiled beta build and show the update.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    child: Text(
+                      '3.',
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'If in a Beta build and switched to Stable now, you will only receive Stable releases when a higher version is published.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    child: Text(
+                      '4.',
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'If in a Stable build and switched to Beta now, you will receive upcoming Beta releases immediately as they are published.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 13,
+                        height: 1.45,
+                        letterSpacing: -0.05,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         SettingsBetaNote(
           p: p,
@@ -5405,6 +5541,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   ),
                                   HelpRow(
                                     p: p,
+                                    question: 'Switching track shows no update',
+                                    answer:
+                                        'If you are on a Beta release (which has a higher version code) and switch to the Stable track, Android prevents installing an older version (downgrading). You will see the update option once a newer Stable build is officially released. Alternatively, you can uninstall the Beta version and download the Stable version manually.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
                                     question: 'Update check failed',
                                     answer:
                                         'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.',
@@ -7333,16 +7475,15 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     });
 
     try {
-      final path = await _updateService.downloadApk(
-        widget.updateInfo!.version,
-        (progress) {
-          if (mounted) {
-            setState(() {
-              _downloadProgress = progress;
-            });
-          }
-        },
-      );
+      final path = await _updateService.downloadApk(widget.updateInfo!, (
+        progress,
+      ) {
+        if (mounted) {
+          setState(() {
+            _downloadProgress = progress;
+          });
+        }
+      });
 
       if (path == null) {
         if (mounted) {
@@ -7365,10 +7506,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         });
       }
 
-      final ok = await _updateService.verifyApkHash(
-        widget.updateInfo!.version,
-        path,
-      );
+      final ok = await _updateService.verifyApkHash(widget.updateInfo!, path);
       if (mounted) {
         setState(() {
           _verificationStatus = ok ? 'verified' : 'failed';
@@ -7610,7 +7748,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               const SizedBox(height: 8),
             ],
             Text(
-              'Currently on $appBuildDate build'.localized(context),
+              'Currently on v$appVersion ($appBuildNumber)'.localized(context),
               style: TextStyle(color: p.text3, fontSize: 13),
             ),
             const SizedBox(height: 16),
@@ -7716,9 +7854,10 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                 border: Border.all(color: p.border),
               ),
               child: SingleChildScrollView(
-                child: Text(
-                  widget.updateInfo!.body,
-                  style: TextStyle(color: p.text2, fontSize: 12, height: 1.45),
+                child: MarkdownText(
+                  text: widget.updateInfo!.body,
+                  p: p,
+                  onOpenLink: widget.onOpenLink,
                 ),
               ),
             ),
@@ -7793,6 +7932,19 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: p.surface3,
+                    foregroundColor: p.text,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  onPressed: widget.onCheckUpdates,
+                  child: Text('Check for updates'.localized(context)),
+                ),
               ],
             ),
           ] else if (_verificationStatus == 'verifying') ...[
@@ -7823,6 +7975,19 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     : 'Download & Install'.localized(context),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
+            ),
+            const SizedBox(height: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: p.surface3,
+                foregroundColor: p.text,
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              onPressed: widget.onCheckUpdates,
+              child: Text('Check for updates'.localized(context)),
             ),
           ],
         ],

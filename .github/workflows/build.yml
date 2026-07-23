@@ -308,7 +308,7 @@ jobs:
           fi
 
           # Construct the new Security block
-          export SECURITY_BLOCK=$(printf "## Security\n\n🛡️ **VirusTotal Status**: \`%s\`  \n🔗 [View Full Report](%s)  \n📅 Last scanned: %s" "$VT_STATUS" "$VT_URL" "$SCAN_DATE_STR")
+          export SECURITY_BLOCK=$(printf "\n----\n\n## Security\n\n🛡️ **VirusTotal Status**: \`%s\`  \n🔗 [View Full Report](%s)  \n📅 Last scanned: %s\n\n---" "$VT_STATUS" "$VT_URL" "$SCAN_DATE_STR")
 
           # Replace the Security block in /tmp/release_notes.md
           perl -0777 -pi -e 's~(?m)^###? Security.*?(?=\n###? |\z)~$ENV{SECURITY_BLOCK}\n~g' /tmp/release_notes.md

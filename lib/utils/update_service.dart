@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppUpdateInfo {
   final String version;
+  final String tagName;
   final String body;
   final DateTime? date;
   final bool isSecurity;
@@ -15,6 +16,7 @@ class AppUpdateInfo {
 
   AppUpdateInfo({
     required this.version,
+    required this.tagName,
     required this.body,
     this.date,
     required this.isSecurity,
@@ -24,6 +26,7 @@ class AppUpdateInfo {
 
   Map<String, dynamic> toJson() => {
     'version': version,
+    'tagName': tagName,
     'body': body,
     'date': date?.toIso8601String(),
     'isSecurity': isSecurity,
@@ -33,6 +36,7 @@ class AppUpdateInfo {
 
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) => AppUpdateInfo(
     version: json['version'] as String,
+    tagName: json['tagName'] as String? ?? 'v${json['version']}',
     body: json['body'] as String? ?? '',
     date: json['date'] != null
         ? DateTime.tryParse(json['date'] as String)
@@ -191,20 +195,22 @@ class UpdateService {
       }
 
       final isSecurity =
-          isSecurityUpdate ||
-          body.toLowerCase().contains('security') ||
-          body.toLowerCase().contains('cve');
+          !isBetaUpdate &&
+          (isSecurityUpdate ||
+              body.toLowerCase().contains('critical security') ||
+              body.toLowerCase().contains('cve-'));
       final isImportant = isSecurity || isFeatureUpdate;
 
-      final type = isSecurity
-          ? 'Security Update'
-          : (isBetaUpdate ? 'Beta Update' : 'Feature Update');
+      final type = isBetaUpdate
+          ? 'Beta Update'
+          : (isSecurity ? 'Security Update' : 'Feature Update');
 
       _logger.info(
         'Latest version fetched (${trackBeta ? "Beta" : "Stable"}): $version ($type)',
       );
       return AppUpdateInfo(
         version: version,
+        tagName: tag ?? 'v$version',
         body: body,
         date: date,
         isSecurity: isSecurity,
@@ -268,15 +274,16 @@ class UpdateService {
   }
 
   Future<String?> downloadApk(
-    String version,
+    AppUpdateInfo info,
     void Function(double progress) onProgress,
   ) async {
     final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
     if (cacheDir == null) return null;
 
+    final cleanVersion = info.version.split('-').first;
     final url =
-        'https://github.com/dheeraz101/Notekar-Android/releases/download/v$version/notekar-$version-universal.apk';
-    final savePath = '$cacheDir/notekar-$version-universal.apk';
+        'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
+    final savePath = '$cacheDir/notekar-$cleanVersion-universal.apk';
 
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15);
@@ -321,12 +328,12 @@ class UpdateService {
     }
   }
 
-  Future<bool> verifyApkHash(String version, String apkFilePath) async {
+  Future<bool> verifyApkHash(AppUpdateInfo info, String apkFilePath) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10);
     try {
       final url =
-          'https://github.com/dheeraz101/Notekar-Android/releases/download/v$version/sha256.txt';
+          'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/sha256.txt';
       final request = await client.getUrl(Uri.parse(url));
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
 
