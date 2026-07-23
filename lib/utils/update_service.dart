@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppUpdateInfo {
   final String version;
@@ -46,6 +47,47 @@ class UpdateService {
   final _logger = AppLogger();
   static const _channel = MethodChannel('notekar/files');
 
+  Future<Map<String, dynamic>?> fetchCurrentVirusTotalInfo({bool trackBeta = false}) async {
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 10);
+    try {
+      final trackSuffix = trackBeta ? '-beta' : '';
+      final url = 'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/refs/tags/v$appVersion$trackSuffix/build/app/outputs/flutter-apk/version.json';
+      
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+      final response = await request.close();
+      if (response.statusCode != 200) {
+        // Fallback to release download URL if raw asset is not available
+        final releaseUrl = 'https://github.com/dheeraz101/Notekar-Android/releases/download/v$appVersion$trackSuffix/version.json';
+        final relRequest = await client.getUrl(Uri.parse(releaseUrl));
+        relRequest.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+        final relResponse = await relRequest.close();
+        if (relResponse.statusCode != 200) {
+          return null;
+        }
+        final bodyText = await relResponse.transform(utf8.decoder).join();
+        final data = jsonDecode(bodyText);
+        if (data is Map && data.containsKey('virustotal')) {
+          final vt = data['virustotal'];
+          if (vt is Map) {
+            return Map<String, dynamic>.from(vt);
+          }
+        }
+        return null;
+      }
+      final bodyText = await response.transform(utf8.decoder).join();
+      final data = jsonDecode(bodyText);
+      if (data is Map && data.containsKey('virustotal')) {
+        final vt = data['virustotal'];
+        if (vt is Map) {
+          return Map<String, dynamic>.from(vt);
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
   Future<AppUpdateInfo?> fetchLatestVersion({bool trackBeta = false}) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10);
@@ -66,6 +108,24 @@ class UpdateService {
       final bodyText = await response.transform(utf8.decoder).join();
       final data = jsonDecode(bodyText);
       if (data is! List || data.isEmpty) return null;
+
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        for (final item in data) {
+          if (item is! Map) continue;
+          final tagName = item['tag_name'] as String? ?? '';
+          if (tagName.contains(appVersion)) {
+            final body = item['body'] as String? ?? '';
+            final match = RegExp(r'https://www.virustotal.com/gui/file/[0-9a-fA-F]{32,}').firstMatch(body);
+            if (match != null) {
+              final vtUrl = match.group(0);
+              if (vtUrl != null) {
+                await prefs.setString('notekar.current_virustotal_url', vtUrl);
+              }
+            }
+          }
+        }
+      } catch (_) {}
 
       Map? targetRelease;
       for (final item in data) {

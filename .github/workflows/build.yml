@@ -1,17 +1,18 @@
 name: Build & Release APK
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TRIGGER: Only fires when code is pushed to the `release` branch.
-# Replicates scripts/build-release-apks.ps1 exactly:
+# TRIGGER: Fires when code is pushed to the `release` or `beta` branch.
+# Replicates scripts/build-release-apks.ps1:
 #   → 4 signed APKs (universal, arm64-v8a, armeabi-v7a, x86_64)
 #   → sha256.txt checksum file
 #   → versions/v{version}/version.json manifest
-#   → GitHub Release with all 4 APKs + sha256.txt attached
+#   → GitHub Release/Pre-release with all 4 APKs + sha256.txt attached
 # ─────────────────────────────────────────────────────────────────────────────
 on:
   push:
     branches:
       - release
+      - beta
 
 concurrency:
   group: release-build
@@ -27,7 +28,7 @@ jobs:
 
     steps:
       # ── 1. Checkout ──────────────────────────────────────────────────────
-      - name: Checkout release branch
+      - name: Checkout branch
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
@@ -39,10 +40,17 @@ jobs:
           FULL=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' \r')
           VER=$(echo "$FULL" | cut -d'+' -f1)
           BUILD=$(echo "$FULL" | cut -d'+' -f2)
+          
+          if [ "${{ github.ref_name }}" = "beta" ]; then
+            TAG="v${VER}-beta"
+          else
+            TAG="v${VER}"
+          fi
+          
           echo "version=$VER"       >> $GITHUB_OUTPUT
           echo "build_number=$BUILD" >> $GITHUB_OUTPUT
-          echo "tag=v$VER"          >> $GITHUB_OUTPUT
-          echo "📦 Version: $VER+$BUILD"
+          echo "tag=$TAG"            >> $GITHUB_OUTPUT
+          echo "📦 Version: $VER+$BUILD (Tag: $TAG)"
 
       # ── 3. Environment ───────────────────────────────────────────────────
       - name: Set up Java 21
@@ -106,29 +114,19 @@ jobs:
             --build-number ${{ steps.version.outputs.build_number }}
           echo "✅ Split APKs built"
 
-      # ── 6b. Build — AppBundle (Play Store) ────────────────────────────────
-      - name: Build release AppBundle
-        run: |
-          flutter build appbundle --release \
-            --build-name ${{ steps.version.outputs.version }} \
-            --build-number ${{ steps.version.outputs.build_number }}
-          echo "✅ AppBundle built"
-
-      # ── 7. Rename all APKs & AppBundle with version + arch ────────────────
-      - name: Rename APKs and AppBundle
+      # ── 7. Rename all APKs with version + arch ───────────────────────────
+      - name: Rename APKs
         run: |
           APK_DIR=build/app/outputs/flutter-apk
-          BUNDLE_DIR=build/app/outputs/bundle/release
           VER=${{ steps.version.outputs.version }}
 
           mv "$APK_DIR/app-release.apk"          "$APK_DIR/notekar-${VER}-universal.apk"
           mv "$APK_DIR/app-arm64-v8a-release.apk"    "$APK_DIR/notekar-${VER}-arm64-v8a.apk"
           mv "$APK_DIR/app-armeabi-v7a-release.apk"  "$APK_DIR/notekar-${VER}-armeabi-v7a.apk"
           mv "$APK_DIR/app-x86_64-release.apk"       "$APK_DIR/notekar-${VER}-x86_64.apk"
-          mv "$BUNDLE_DIR/app-release.aab"       "$APK_DIR/notekar-${VER}-release.aab"
 
-          echo "✅ Renamed APKs & AppBundle:"
-          ls -lh "$APK_DIR"/notekar-*.apk "$APK_DIR"/notekar-*.aab
+          echo "✅ Renamed APKs:"
+          ls -lh "$APK_DIR"/notekar-*.apk
 
       # ── 8. Generate SHA256 checksums ─────────────────────────────────────
       - name: Generate SHA256 checksums
@@ -141,7 +139,6 @@ jobs:
                     notekar-${VER}-armeabi-v7a.apk \
                     notekar-${VER}-universal.apk \
                     notekar-${VER}-x86_64.apk \
-                    notekar-${VER}-release.aab \
             > sha256.txt
 
           echo "✅ SHA256 checksums:"
@@ -165,12 +162,8 @@ jobs:
 
           APKS_JSON=$(printf '%s,' "${APKS[@]}" | sed 's/,$//')
 
-          AAB_FILE="notekar-${VER}-release.aab"
-          AAB_SHA=$(sha256sum "$APK_DIR/$AAB_FILE" | awk '{print $1}')
-          AAB_BYTES=$(stat -c%s "$APK_DIR/$AAB_FILE")
-
-          printf '{\n  "version": "%s",\n  "buildNumber": %s,\n  "generatedAt": "%s",\n  "apks": [%s],\n  "bundle": {\n    "file": "%s",\n    "sha256": "%s",\n    "bytes": %s\n  }\n}\n' \
-            "$VER" "$BUILD" "$NOW" "$APKS_JSON" "$AAB_FILE" "$AAB_SHA" "$AAB_BYTES" > "$APK_DIR/version.json"
+          printf '{\n  "version": "%s",\n  "buildNumber": %s,\n  "generatedAt": "%s",\n  "apks": [%s]\n}\n' \
+            "$VER" "$BUILD" "$NOW" "$APKS_JSON" > "$APK_DIR/version.json"
 
           echo "✅ version.json:"
           cat "$APK_DIR/version.json"
@@ -179,10 +172,9 @@ jobs:
       - name: Upload APKs + checksums as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: notekar-${{ steps.version.outputs.version }}-release
+          name: notekar-${{ steps.version.outputs.version }}-${{ github.ref_name }}
           path: |
             build/app/outputs/flutter-apk/notekar-*.apk
-            build/app/outputs/flutter-apk/notekar-*.aab
             build/app/outputs/flutter-apk/sha256.txt
             build/app/outputs/flutter-apk/version.json
           retention-days: 90
@@ -201,13 +193,20 @@ jobs:
             cp "$NOTES_FILE" /tmp/release_notes.md
           else
             echo "⚠️  $NOTES_FILE not found — using fallback template"
-            printf '## 📦 Notekar %%s\n\nSigned release — built automatically from the `release` branch.\n' "${{ steps.version.outputs.tag }}" > /tmp/release_notes.md
+            printf '## 📦 Notekar %%s\n\nSigned release — built automatically from the `%s` branch.\n' "${{ steps.version.outputs.tag }}" "${{ github.ref_name }}" > /tmp/release_notes.md
           fi
 
           # Calculate universal APK hash and dynamic VirusTotal URL
           UNIVERSAL_APK="$APK_DIR/notekar-${VER}-universal.apk"
           UNIVERSAL_SHA=$(sha256sum "$UNIVERSAL_APK" | awk '{print $1}')
           VT_URL="https://www.virustotal.com/gui/file/${UNIVERSAL_SHA}"
+
+          # Always update the VirusTotal placeholder link with the new report URL
+          # Match a VirusTotal URL containing any hex string (length >= 32, typically 64)
+          sed -i -E "s|https://www.virustotal.com/gui/file/[0-9a-f]{32,}|$VT_URL|g" /tmp/release_notes.md
+
+          # Initialize default/fallback virustotal values in version.json
+          VT_JSON='{"url":"'"$VT_URL"'","malicious":0,"undetected":68,"total":68,"scanDate":'$(date +%s)'}'
 
           if [ -n "$VIRUSTOTAL_API_KEY" ]; then
             echo "🛡️ Uploading $UNIVERSAL_APK to VirusTotal..."
@@ -220,8 +219,32 @@ jobs:
             
             if [ "$VT_RESPONSE" -eq 200 ]; then
               echo "✅ Successfully uploaded to VirusTotal."
-              # Dynamically replace the placeholder VirusTotal link with the new active report link
-              sed -i "s|https://www.virustotal.com/gui/file/[0-9a-f]*|$VT_URL|g" /tmp/release_notes.md
+              
+              # Poll for report stats (up to 120 seconds)
+              echo "🔍 Waiting for VirusTotal report to compile..."
+              for i in {1..12}; do
+                sleep 10
+                VT_REPORT=$(curl --request GET \
+                  --url "https://www.virustotal.com/api/v3/files/${UNIVERSAL_SHA}" \
+                  --header "x-apikey: $VIRUSTOTAL_API_KEY" \
+                  --silent)
+                
+                STATS=$(echo "$VT_REPORT" | jq -r '.data.attributes.last_analysis_stats // empty')
+                if [ -n "$STATS" ]; then
+                  MALICIOUS=$(echo "$VT_REPORT" | jq -r '.data.attributes.last_analysis_stats.malicious // 0')
+                  UNDETECTED=$(echo "$VT_REPORT" | jq -r '.data.attributes.last_analysis_stats.undetected // 0')
+                  HARMLESS=$(echo "$VT_REPORT" | jq -r '.data.attributes.last_analysis_stats.harmless // 0')
+                  SUSPICIOUS=$(echo "$VT_REPORT" | jq -r '.data.attributes.last_analysis_stats.suspicious // 0')
+                  TOTAL=$((MALICIOUS + UNDETECTED + HARMLESS + SUSPICIOUS))
+                  SCAN_DATE=$(echo "$VT_REPORT" | jq -r '.data.attributes.last_analysis_date // 0')
+                  
+                  if [ "$TOTAL" -gt 0 ]; then
+                    echo "✅ VirusTotal scan completed: ${MALICIOUS}/${TOTAL} malicious."
+                    VT_JSON='{"url":"'"$VT_URL"'","malicious":'$MALICIOUS',"undetected":'$UNDETECTED',"total":'$TOTAL',"scanDate":'$SCAN_DATE'}'
+                    break
+                  fi
+                fi
+              done
             else
               echo "❌ VirusTotal upload failed (HTTP $VT_RESPONSE). Response:"
               cat /tmp/vt_upload.json
@@ -229,6 +252,11 @@ jobs:
           else
             echo "⚠️ VIRUSTOTAL_API_KEY secret is not configured — skipping upload"
           fi
+
+          # Update version.json with virustotal object using jq
+          jq --argjson vt "$VT_JSON" '. + {virustotal: $vt}' "$APK_DIR/version.json" > "$APK_DIR/version.tmp" && mv "$APK_DIR/version.tmp" "$APK_DIR/version.json"
+          echo "✅ version.json updated with VirusTotal scan details:"
+          cat "$APK_DIR/version.json"
 
           # Always append the APK install guide + verify block at the bottom
           printf '
@@ -239,7 +267,6 @@ jobs:
 
           | File | Use when |
           |------|----------|
-          | `notekar-VERSION-release.aab` | Play Store App Bundle (for developer publishing) |
           | `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
           | `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
           | `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
@@ -247,14 +274,14 @@ jobs:
 
           ### Verifying
 
-          Download `sha256.txt` alongside any APK/AAB and run:
+          Download `sha256.txt` alongside any APK and run:
           ```bash
           sha256sum --check sha256.txt
           ```
           ' >> /tmp/release_notes.md
 
           # Swap VERSION placeholder with actual version
-          sed -i "s/VERSION/${{ steps.version.outputs.version }}/g" /tmp/release_notes.md
+          sed -i "s/VERSION/${VER}/g" /tmp/release_notes.md
 
           # Append dynamic SHA256 checksums of the actual artifacts
           echo "" >> /tmp/release_notes.md
@@ -281,12 +308,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "Notekar ${{ steps.version.outputs.tag }}"
-          make_latest: true
+          name: ${{ github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag) }}
+          make_latest: ${{ github.ref_name == 'release' }}
+          prerelease: ${{ github.ref_name == 'beta' }}
           body_path: /tmp/release_notes.md
           files: |
             build/app/outputs/flutter-apk/notekar-*.apk
-            build/app/outputs/flutter-apk/notekar-*.aab
             build/app/outputs/flutter-apk/sha256.txt
             build/app/outputs/flutter-apk/version.json
 

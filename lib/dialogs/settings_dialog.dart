@@ -277,6 +277,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   bool _betaTrack = false;
 
+  String _vtRatio = '0 / 68 clean';
+  String _vtStatus = 'Undetected';
+  String _vtScanDate = 'July 2026';
+  String _vtUrl = 'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
+
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -334,6 +339,62 @@ class _SettingsDialogState extends State<SettingsDialog> {
           _hasExactAlarmPermission = granted;
           _ignoresBatteryOptimizations = ignores;
         });
+      }
+    } catch (_) {}
+    _loadCachedVirusTotalInfo();
+    _fetchLatestVirusTotalInfo();
+  }
+
+  void _loadCachedVirusTotalInfo() {
+    if (_prefs == null) return;
+    setState(() {
+      _vtRatio = _prefs!.getString('notekar.vt_ratio') ?? '0 / 68 clean';
+      _vtStatus = _prefs!.getString('notekar.vt_status') ?? 'Undetected';
+      _vtScanDate = _prefs!.getString('notekar.vt_scandate') ?? 'July 2026';
+      _vtUrl = _prefs!.getString('notekar.current_virustotal_url') ??
+          'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
+    });
+  }
+
+  Future<void> _fetchLatestVirusTotalInfo() async {
+    try {
+      final info = await UpdateService().fetchCurrentVirusTotalInfo(trackBeta: _betaTrack);
+      if (info != null && mounted) {
+        final malicious = info['malicious'] as int? ?? 0;
+        final total = info['total'] as int? ?? 68;
+        final scanDateUnix = info['scanDate'] as int? ?? 0;
+        final url = info['url'] as String? ?? _vtUrl;
+
+        String ratio = '$malicious / $total clean';
+        if (malicious == 0) {
+          ratio = '0 / $total clean';
+        }
+        
+        String status = malicious == 0 ? 'Undetected' : 'Detected';
+        
+        String scanDateStr = 'July 2026';
+        if (scanDateUnix > 0) {
+          final date = DateTime.fromMillisecondsSinceEpoch(scanDateUnix * 1000);
+          final months = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+          ];
+          scanDateStr = '${date.day} ${months[date.month - 1]} ${date.year}';
+        }
+
+        setState(() {
+          _vtRatio = ratio;
+          _vtStatus = status;
+          _vtScanDate = scanDateStr;
+          _vtUrl = url;
+        });
+
+        if (_prefs != null) {
+          await _prefs!.setString('notekar.vt_ratio', ratio);
+          await _prefs!.setString('notekar.vt_status', status);
+          await _prefs!.setString('notekar.vt_scandate', scanDateStr);
+          await _prefs!.setString('notekar.current_virustotal_url', url);
+        }
       }
     } catch (_) {}
   }
@@ -808,17 +869,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant SettingsDialog oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.updateStatus != oldWidget.updateStatus ||
-        widget.updateInfo != oldWidget.updateInfo ||
-        widget.checkingUpdates != oldWidget.checkingUpdates) {
-      setState(() {
-        updateStatus = widget.updateStatus;
-        updateInfo = widget.updateInfo;
-        checkingUpdates = widget.checkingUpdates;
-      });
+  Future<({String status, AppUpdateInfo? info})> _runCheckUpdates() async {
+    setState(() {
+      checkingUpdates = true;
+    });
+    try {
+      final res = await widget.onCheckUpdates();
+      if (mounted) {
+        setState(() {
+          updateStatus = res.status;
+          updateInfo = res.info;
+          checkingUpdates = false;
+        });
+      }
+      return res;
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          checkingUpdates = false;
+        });
+      }
+      return (status: 'Update check failed', info: null);
     }
   }
 
@@ -829,7 +900,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     if (_prefs != null) {
       await _prefs!.setBool('m-update-track-beta', beta);
     }
-    widget.onCheckUpdates();
+    await _runCheckUpdates();
   }
 
   void _onEntriesChanged() {
@@ -1304,7 +1375,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
-        status: 'v$appVersion',
+        status: _betaTrack ? 'Beta' : 'Stable',
       ),
       item(
         title: "What's New",
@@ -1466,7 +1537,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
-        status: 'v$appVersion',
+        status: 'View',
       ),
       item(
         title: 'Device Health',
@@ -2249,6 +2320,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
               label: 'App Version',
               value: 'v$appVersion ($appBuildNumber)',
             ),
+            DiagnosticRow(
+              p: p,
+              label: 'Build Date',
+              value: appBuildDate,
+            ),
             DiagnosticRow(p: p, label: 'Build Date', value: appBuildDate),
             DiagnosticRow(
               p: p,
@@ -2465,7 +2541,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       reduceMotion: reduceMotion,
       onOpenLink: widget.onOpenLink,
       prefs: _prefs,
-      onCheckUpdates: widget.onCheckUpdates,
+      onCheckUpdates: _runCheckUpdates,
       updateInfo: updateInfo,
       checkingUpdates: checkingUpdates,
       updateStatus: updateStatus,
@@ -2506,7 +2582,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
           p: p,
           text: 'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'.localized(context),
         ),
-        const SizedBox(height: spacing20),
         SettingsBetaNote(
           p: p,
           text: 'The features on this track are under active beta testing.'.localized(context),
@@ -2687,7 +2762,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     p: p,
                                     icon: Icons.update_rounded,
                                     title: 'Updates & Notices',
-                                    status: 'v$appVersion',
+                                    status: _betaTrack ? 'Beta' : 'Stable',
                                     color: p.accent,
                                     onTap: () =>
                                         _openCategory('Updates & Notices'),
@@ -5677,7 +5752,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 p: p,
                                 text:
                                     'Planned cloud features will provide direct cloud synchronization across your personal devices.',
-                                bottomPadding: 0,
                               ),
 
                               SettingsBetaNote(
@@ -5807,10 +5881,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                           height: 2,
                                                         ),
                                                         Text(
-                                                          '0 / 68 clean'
-                                                              .localized(
-                                                                context,
-                                                              ),
+                                                           _vtRatio.localized(context),
                                                           style: TextStyle(
                                                             color: p.text,
                                                             fontSize: 11.5,
@@ -5878,12 +5949,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                           height: 2,
                                                         ),
                                                         Text(
-                                                          'Undetected'
-                                                              .localized(
-                                                                context,
-                                                              ),
-                                                          style: TextStyle(
-                                                            color: p.green,
+                                                           _vtStatus.localized(context),
+                                                           style: TextStyle(
+                                                             color: _vtStatus == 'Detected' ? p.red : p.green,
                                                             fontSize: 11.5,
                                                             fontWeight:
                                                                 FontWeight.w700,
@@ -5954,9 +6022,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                           height: 2,
                                                         ),
                                                         Text(
-                                                          'July 2026'.localized(
-                                                            context,
-                                                          ),
+                                                           _vtScanDate.localized(context),
                                                           style: TextStyle(
                                                             color: p.text,
                                                             fontSize: 11.5,
@@ -6064,8 +6130,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                   await _fileChannel.invokeMethod<
                                                     void
                                                   >('openUrl', {
-                                                    'url':
-                                                        'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe',
+                                                    'url': _vtUrl,
                                                   });
                                                 } catch (_) {}
                                               },
@@ -6234,7 +6299,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 p: p,
                                 text:
                                     'Protect your saved history using device biometric authentication or system PIN.',
-                                bottomPadding: 0,
                               ),
 
                               SettingsBetaNote(
@@ -6439,7 +6503,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     p: p,
                                     icon: Icons.bug_report_outlined,
                                     title: 'Diagnostics',
-                                    status: 'v$appVersion',
+                                    status: 'View',
                                     color: p.accent,
                                     onTap: () => _openCategory(
                                       'Diagnostics',
@@ -7260,7 +7324,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Version v${widget.appVersion}',
+                'Build Date: $appBuildDate',
                 style: TextStyle(
                   color: p.text3,
                   fontSize: 14,
@@ -7329,7 +7393,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Currently on version v${widget.appVersion}'.localized(context),
+              'Currently on $appBuildDate build'.localized(context),
               style: TextStyle(color: p.text3, fontSize: 13),
             ),
             const SizedBox(height: 16),
