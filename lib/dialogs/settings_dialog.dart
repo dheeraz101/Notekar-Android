@@ -2472,51 +2472,48 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
   Widget _buildChoosePage(Palette p) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: spacing20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SettingsGroup(
-            p: p,
-            insetDividers: true,
-            children: [
-              SettingsRow(
-                p: p,
-                icon: Icons.check_circle_outline_rounded,
-                title: 'Stable Build',
-                subtitle: 'Recommended for standard users.'.localized(context),
-                trailing: !_betaTrack
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                    : const SizedBox.shrink(),
-                onTap: () => _saveTrackPreference(false),
-              ),
-              SettingsRow(
-                p: p,
-                icon: Icons.track_changes_rounded,
-                title: 'Beta Build',
-                subtitle: 'Early access to active development features.'.localized(context),
-                trailing: _betaTrack
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                    : const SizedBox.shrink(),
-                onTap: () => _saveTrackPreference(true),
-              ),
-            ],
-          ),
-          const SizedBox(height: spacing12),
-          SettingsPageDescription(
-            p: p,
-            text: 'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'.localized(context),
-          ),
-          const SizedBox(height: spacing20),
-          SettingsBetaNote(
-            p: p,
-            text: 'The features on this track are under active beta testing.'.localized(context),
-            onLearnMore: () => _showBetaInfoPopup(p),
-          ),
-          const SizedBox(height: spacing48),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsGroup(
+          p: p,
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.check_circle_outline_rounded,
+              title: 'Stable Build',
+              subtitle: 'Recommended for standard users.'.localized(context),
+              trailing: !_betaTrack
+                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  : const SizedBox.shrink(),
+              onTap: () => _saveTrackPreference(false),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.track_changes_rounded,
+              title: 'Beta Build',
+              subtitle: 'Early access to active development features.'.localized(context),
+              trailing: _betaTrack
+                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  : const SizedBox.shrink(),
+              onTap: () => _saveTrackPreference(true),
+            ),
+          ],
+        ),
+        const SizedBox(height: spacing12),
+        SettingsPageDescription(
+          p: p,
+          text: 'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'.localized(context),
+        ),
+        const SizedBox(height: spacing20),
+        SettingsBetaNote(
+          p: p,
+          text: 'The features on this track are under active beta testing.'.localized(context),
+          onLearnMore: () => _showBetaInfoPopup(p),
+        ),
+        const SizedBox(height: spacing48),
+      ],
     );
   }
 
@@ -5297,12 +5294,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         if (show('Update Center'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: spacing20,
-                              ),
-                              child: _updateCenterPage(p),
-                            ),
+                            child: _updateCenterPage(p),
                           ),
                         if (show('Build Choose'))
                           SliverList(
@@ -6671,59 +6663,34 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         if (show('Device Health'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: spacing8),
-                                  _deviceHealthPage(p),
-                                  const SizedBox(height: spacing48),
-                                ],
-                              ),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _deviceHealthPage(p),
+                                const SizedBox(height: spacing48),
+                              ],
                             ),
                           ),
                         if (show('Privacy Policy'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: _privacyPolicyPage(p),
-                            ),
+                            child: _privacyPolicyPage(p),
                           ),
                         if (show('Terms of Use'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: _termsOfUsePage(p),
-                            ),
+                            child: _termsOfUsePage(p),
                           ),
                         if (show('Licenses'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: _licensesPage(p),
-                            ),
+                            child: _licensesPage(p),
                           ),
                         if (show("What's New"))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: spacing8),
-                                  ChangelogSettingsPage(p: p, latestOnly: true),
-                                  const SizedBox(height: spacing48),
-                                ],
-                              ),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                ChangelogSettingsPage(p: p, latestOnly: true),
+                                const SizedBox(height: spacing48),
+                              ],
                             ),
                           ),
                         if (show('Trash Bin')) ...[
@@ -7019,17 +6986,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ],
                         if (show('Changelog'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: spacing8),
-                                  ChangelogSettingsPage(p: p, latestOnly: false),
-                                  const SizedBox(height: spacing48),
-                                ],
-                              ),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                ChangelogSettingsPage(p: p, latestOnly: false),
+                                const SizedBox(height: spacing48),
+                              ],
                             ),
                           ),
                       ],
@@ -7751,10 +7713,8 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: spacing20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Align(
             alignment: Alignment.center,
@@ -7898,7 +7858,6 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
             },
           ),
         ],
-      ),
-    );
+      );
   }
 }
