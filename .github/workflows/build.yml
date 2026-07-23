@@ -194,7 +194,7 @@ jobs:
             cp "$NOTES_FILE" /tmp/release_notes.md
           else
             echo "⚠️  $NOTES_FILE not found — using fallback template"
-            printf '## 📦 Notekar %%s\n\nSigned release — built automatically from the `%s` branch.\n' "${{ steps.version.outputs.tag }}" "${{ github.ref_name }}" > /tmp/release_notes.md
+            printf '## 📦 Notekar %s\n\nSigned release — built automatically from the `%s` branch.\n' "${{ steps.version.outputs.tag }}" "${{ github.ref_name }}" > /tmp/release_notes.md
           fi
 
           # Calculate universal APK hash and dynamic VirusTotal URL
@@ -210,12 +210,28 @@ jobs:
           VT_JSON='{"url":"'"$VT_URL"'","malicious":0,"undetected":60,"total":60,"scanDate":'$SCAN_DATE'}'
 
           if [ -n "$VIRUSTOTAL_API_KEY" ]; then
+            echo "🛡️ Fetching upload URL from VirusTotal..."
+            UPLOAD_URL_RESPONSE=$(curl --request GET \
+              --url https://www.virustotal.com/api/v3/files/upload_url \
+              --header "x-apikey: $VIRUSTOTAL_API_KEY" \
+              --silent)
+            
+            UPLOAD_URL=$(echo "$UPLOAD_URL_RESPONSE" | jq -r '.data // empty')
+            
+            if [ -n "$UPLOAD_URL" ] && [ "$UPLOAD_URL" != "null" ]; then
+              echo "✅ Obtained large file upload URL: $UPLOAD_URL"
+              TARGET_URL="$UPLOAD_URL"
+            else
+              echo "⚠️ Could not obtain large file upload URL — falling back to standard endpoint"
+              TARGET_URL="https://www.virustotal.com/api/v3/files"
+            fi
+
             echo "🛡️ Uploading $UNIVERSAL_APK to VirusTotal..."
             VT_RESPONSE=$(curl --request POST \
-              --url https://www.virustotal.com/api/v3/files \
+              --url "$TARGET_URL" \
               --header "x-apikey: $VIRUSTOTAL_API_KEY" \
               --form "file=@$UNIVERSAL_APK" \
-              --write-out "%%{http_code}" \
+              --write-out "%{http_code}" \
               --silent --output /tmp/vt_upload.json)
             
             if [ "$VT_RESPONSE" -eq 200 ]; then
@@ -283,7 +299,7 @@ jobs:
           fi
 
           # Format the last scan date
-          SCAN_DATE_STR=$(date -d "@$SCAN_DATE" +"%%B %%d, %%Y" 2>/dev/null || date -r "$SCAN_DATE" +"%%B %%d, %%Y")
+          SCAN_DATE_STR=$(date -d "@$SCAN_DATE" +"%B %d, %Y" 2>/dev/null || date -r "$SCAN_DATE" +"%B %d, %Y")
 
           if [ "$MALICIOUS" -eq 0 ]; then
             VT_STATUS="Undetected by 60+ engines"
@@ -295,7 +311,7 @@ jobs:
           export SECURITY_BLOCK=$(printf "## Security\n\n🛡️ **VirusTotal Status**: \`%s\`  \n🔗 [View Full Report](%s)  \n📅 Last scanned: %s" "$VT_STATUS" "$VT_URL" "$SCAN_DATE_STR")
 
           # Replace the Security block in /tmp/release_notes.md
-          perl -0777 -pi -e 's|(?m)^###? Security.*?(?=\n###? |\z)|$ENV{SECURITY_BLOCK}\n|g' /tmp/release_notes.md
+          perl -0777 -pi -e 's~(?m)^###? Security.*?(?=\n###? |\z)~$ENV{SECURITY_BLOCK}\n~g' /tmp/release_notes.md
 
           # Always append the APK install guide + verify block at the bottom
           printf "\n---\n\n### Assets\n\n| File | Use when |\n|------|----------|\n| \`notekar-VERSION-universal.apk\` | Not sure? Use this — works on all devices |\n| \`notekar-VERSION-arm64-v8a.apk\` | Most modern phones (recommended, smaller) |\n| \`notekar-VERSION-armeabi-v7a.apk\` | Older 32-bit phones |\n| \`notekar-VERSION-x86_64.apk\` | x86_64 emulators / devices |\n\n### Verifying\n\nDownload \`sha256.txt\` alongside any APK and run:\n\`\`\`bash\nsha256sum --check sha256.txt\n\`\`\`\n" >> /tmp/release_notes.md

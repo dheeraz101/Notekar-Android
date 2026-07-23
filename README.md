@@ -4,7 +4,7 @@
 
 > **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero friction. 100% Offline-First & Privacy-Focused.
 
-![version](https://img.shields.io/badge/version-4.0.6-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
+![version](https://img.shields.io/badge/version-4.0.8-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
 
 ---
 
@@ -18,13 +18,13 @@
 ## 📖 Table of Contents
 - [📸 Screenshots / UI Preview](#-screenshots--ui-preview)
 - [🎯 Features & Highlights](#-features--highlights)
-- [🛠️ Tech Stack](#️-tech-stack)
+- [🛠️ Tech Stack](#-tech-stack)
 - [🌐 Community Translations](#-community-translations)
 - [🔒 Privacy & Legal Policy](#-privacy--legal-policy)
 - [☕ Support](#-support)
 - [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
 - [📦 Project Structure](#-project-structure)
-- [🛠️ Building & Running Locally](#️-building--running-locally)
+- [🛠️ Building & Running Locally](#-building--running-locally)
 - [🔑 Building Release APKs & Keystore Setup](#-building-release-apks--keystore-setup)
 - [📄 License & Attribution](#-license--attribution)
 
