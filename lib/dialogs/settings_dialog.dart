@@ -280,7 +280,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _vtRatio = '0 / 68 clean';
   String _vtStatus = 'Undetected';
   String _vtScanDate = 'July 2026';
-  String _vtUrl = 'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
+  String _vtUrl =
+      'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
 
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
@@ -351,14 +352,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _vtRatio = _prefs!.getString('notekar.vt_ratio') ?? '0 / 68 clean';
       _vtStatus = _prefs!.getString('notekar.vt_status') ?? 'Undetected';
       _vtScanDate = _prefs!.getString('notekar.vt_scandate') ?? 'July 2026';
-      _vtUrl = _prefs!.getString('notekar.current_virustotal_url') ??
+      _vtUrl =
+          _prefs!.getString('notekar.current_virustotal_url') ??
           'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
     });
   }
 
   Future<void> _fetchLatestVirusTotalInfo() async {
     try {
-      final info = await UpdateService().fetchCurrentVirusTotalInfo(trackBeta: _betaTrack);
+      final info = await UpdateService().fetchCurrentVirusTotalInfo(
+        trackBeta: _betaTrack,
+      );
       if (info != null && mounted) {
         final malicious = info['malicious'] as int? ?? 0;
         final total = info['total'] as int? ?? 68;
@@ -369,15 +373,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
         if (malicious == 0) {
           ratio = '0 / $total clean';
         }
-        
+
         String status = malicious == 0 ? 'Undetected' : 'Detected';
-        
+
         String scanDateStr = 'July 2026';
         if (scanDateUnix > 0) {
           final date = DateTime.fromMillisecondsSinceEpoch(scanDateUnix * 1000);
           final months = [
-            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
           ];
           scanDateStr = '${date.day} ${months[date.month - 1]} ${date.year}';
         }
@@ -1415,7 +1429,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
         subtitle: 'Dynamic scan report, security ratio, and signature status',
         category: 'Updates & Notices',
         icon: Icons.security_rounded,
-        keywords: ['security', 'virustotal', 'scan', 'malicious', 'clean', 'undetected', 'ratio'],
+        keywords: [
+          'security',
+          'virustotal',
+          'scan',
+          'malicious',
+          'clean',
+          'undetected',
+          'ratio',
+        ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
@@ -1430,7 +1452,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
-        status: _prefs != null && _prefs!.containsKey('notekar.commits_cache') ? 'Cached' : 'Empty',
+        status: _prefs != null && _prefs!.containsKey('notekar.commits_cache')
+            ? 'Cached'
+            : 'Empty',
       ),
       item(
         title: 'Backup & Export',
@@ -2353,11 +2377,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               label: 'App Version',
               value: 'v$appVersion ($appBuildNumber)',
             ),
-            DiagnosticRow(
-              p: p,
-              label: 'Build Date',
-              value: appBuildDate,
-            ),
+            DiagnosticRow(p: p, label: 'Build Date', value: appBuildDate),
             DiagnosticRow(p: p, label: 'Build Date', value: appBuildDate),
             DiagnosticRow(
               p: p,
@@ -2566,6 +2586,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
     );
   }
+
   Widget _updateCenterPage(Palette p) {
     return UpdateCenterView(
       p: p,
@@ -2580,6 +2601,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       updateStatus: updateStatus,
     );
   }
+
   Widget _buildChoosePage(Palette p) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2602,7 +2624,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               p: p,
               icon: Icons.track_changes_rounded,
               title: 'Beta Build',
-              subtitle: 'Early access to active development features.'.localized(context),
+              subtitle: 'Early access to active development features.'
+                  .localized(context),
               trailing: _betaTrack
                   ? Icon(Icons.check_rounded, color: p.accent, size: 20)
                   : const SizedBox.shrink(),
@@ -2613,11 +2636,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
         const SizedBox(height: spacing12),
         SettingsPageDescription(
           p: p,
-          text: 'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'.localized(context),
+          text:
+              'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'
+                  .localized(context),
         ),
         SettingsBetaNote(
           p: p,
-          text: 'The features on this track are under active beta testing.'.localized(context),
+          text: 'The features on this track are under active beta testing.'
+              .localized(context),
           onLearnMore: () => _showBetaInfoPopup(p),
         ),
         const SizedBox(height: spacing48),
@@ -5293,14 +5319,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.',
                                   ),
                                   HelpRow(
-                                     p: p,
-                                     question: 'Can I view updates while offline?',
-                                     answer:
-                                         'Yes! NoteKar automatically caches the latest commits feed when you check for updates online. If you are offline, you will still see the cached feed, though checking for new updates will show a "No internet" notice.',
-                                   ),
-                                   HelpRow(
-                                     p: p,
-                                     question: 'Update check failed',
+                                    p: p,
+                                    question:
+                                        'Can I view updates while offline?',
+                                    answer:
+                                        'Yes! NoteKar automatically caches the latest commits feed when you check for updates online. If you are offline, you will still see the cached feed, though checking for new updates will show a "No internet" notice.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'Update check failed',
                                     answer:
                                         'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.',
                                   ),
@@ -5393,8 +5420,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   HelpRow(
                                     p: p,
                                     question: 'Is NoteKar safe to use?',
-                                     answer:
-                                         'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Updates & Notices.',
+                                    answer:
+                                        'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Updates & Notices.',
                                   ),
                                 ],
                               ),
@@ -5407,9 +5434,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ]),
                           ),
                         if (show('Update Center'))
-                          SliverToBoxAdapter(
-                            child: _updateCenterPage(p),
-                          ),
+                          SliverToBoxAdapter(child: _updateCenterPage(p)),
                         if (show('Build Choose'))
                           SliverList(
                             delegate: SliverChildListDelegate([
@@ -5458,7 +5483,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                             width: 8,
                                             height: 8,
                                             decoration: BoxDecoration(
-                                              color: (updateInfo!.isSecurity == true || updateInfo!.isImportant == true)
+                                              color:
+                                                  (updateInfo!.isSecurity ==
+                                                          true ||
+                                                      updateInfo!.isImportant ==
+                                                          true)
                                                   ? p.red
                                                   : p.orange,
                                               shape: BoxShape.circle,
@@ -5491,7 +5520,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     icon: Icons.track_changes_rounded,
                                     title: 'Build Channel',
                                     color: p.accent,
-                                    status: _betaTrack ? 'Beta'.localized(context) : 'Stable'.localized(context),
+                                    status: _betaTrack
+                                        ? 'Beta'.localized(context)
+                                        : 'Stable'.localized(context),
                                     onTap: () => _openCategory(
                                       'Build Choose',
                                       parent: 'Updates & Notices',
@@ -5502,7 +5533,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Keep NoteKar up to date with the latest features and security patches.'.localized(context),
+                                    'Keep NoteKar up to date with the latest features and security patches.'
+                                        .localized(context),
                               ),
                               SettingsGroup(
                                 p: p,
@@ -5522,7 +5554,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Checks for official announcement notices and bug fix announcements.'.localized(context),
+                                    'Checks for official announcement notices and bug fix announcements.'
+                                        .localized(context),
                               ),
                               SettingsGroup(
                                 p: p,
@@ -5916,7 +5949,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                           height: 2,
                                                         ),
                                                         Text(
-                                                           _vtRatio.localized(context),
+                                                          _vtRatio.localized(
+                                                            context,
+                                                          ),
                                                           style: TextStyle(
                                                             color: p.text,
                                                             fontSize: 11.5,
@@ -5984,9 +6019,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                           height: 2,
                                                         ),
                                                         Text(
-                                                           _vtStatus.localized(context),
-                                                           style: TextStyle(
-                                                             color: _vtStatus == 'Detected' ? p.red : p.green,
+                                                          _vtStatus.localized(
+                                                            context,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color:
+                                                                _vtStatus ==
+                                                                    'Detected'
+                                                                ? p.red
+                                                                : p.green,
                                                             fontSize: 11.5,
                                                             fontWeight:
                                                                 FontWeight.w700,
@@ -6057,7 +6098,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                           height: 2,
                                                         ),
                                                         Text(
-                                                           _vtScanDate.localized(context),
+                                                          _vtScanDate.localized(
+                                                            context,
+                                                          ),
                                                           style: TextStyle(
                                                             color: p.text,
                                                             fontSize: 11.5,
@@ -6162,11 +6205,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                             child: ElevatedButton(
                                               onPressed: () async {
                                                 try {
-                                                  await _fileChannel.invokeMethod<
-                                                    void
-                                                  >('openUrl', {
-                                                    'url': _vtUrl,
-                                                  });
+                                                  await _fileChannel
+                                                      .invokeMethod<void>(
+                                                        'openUrl',
+                                                        {'url': _vtUrl},
+                                                      );
                                                 } catch (_) {}
                                               },
                                               style: ElevatedButton.styleFrom(
@@ -6771,17 +6814,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ),
                           ),
                         if (show('Privacy Policy'))
-                          SliverToBoxAdapter(
-                            child: _privacyPolicyPage(p),
-                          ),
+                          SliverToBoxAdapter(child: _privacyPolicyPage(p)),
                         if (show('Terms of Use'))
-                          SliverToBoxAdapter(
-                            child: _termsOfUsePage(p),
-                          ),
+                          SliverToBoxAdapter(child: _termsOfUsePage(p)),
                         if (show('Licenses'))
-                          SliverToBoxAdapter(
-                            child: _licensesPage(p),
-                          ),
+                          SliverToBoxAdapter(child: _licensesPage(p)),
                         if (show("What's New"))
                           SliverToBoxAdapter(
                             child: Column(
@@ -7166,7 +7203,9 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   Future<void> _checkCache() async {
     if (widget.updateInfo == null) return;
     try {
-      final path = await _updateService.getCachedApkPath(widget.updateInfo!.version);
+      final path = await _updateService.getCachedApkPath(
+        widget.updateInfo!.version,
+      );
       if (path != null) {
         final file = File(path);
         if (await file.exists()) {
@@ -7214,13 +7253,16 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     });
 
     try {
-      final path = await _updateService.downloadApk(widget.updateInfo!.version, (progress) {
-        if (mounted) {
-          setState(() {
-            _downloadProgress = progress;
-          });
-        }
-      });
+      final path = await _updateService.downloadApk(
+        widget.updateInfo!.version,
+        (progress) {
+          if (mounted) {
+            setState(() {
+              _downloadProgress = progress;
+            });
+          }
+        },
+      );
 
       if (path == null) {
         if (mounted) {
@@ -7243,14 +7285,21 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         });
       }
 
-      final ok = await _updateService.verifyApkHash(widget.updateInfo!.version, path);
+      final ok = await _updateService.verifyApkHash(
+        widget.updateInfo!.version,
+        path,
+      );
       if (mounted) {
         setState(() {
           _verificationStatus = ok ? 'verified' : 'failed';
         });
         if (!ok) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Integrity check failed: checksum mismatch'.localized(context))),
+            SnackBar(
+              content: Text(
+                'Integrity check failed: checksum mismatch'.localized(context),
+              ),
+            ),
           );
         }
       }
@@ -7269,7 +7318,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     if (_downloadedApkPath == null) return;
     final channel = const MethodChannel('notekar/files');
 
-    final canInstall = await channel.invokeMethod<bool>('canInstallPackages') ?? false;
+    final canInstall =
+        await channel.invokeMethod<bool>('canInstallPackages') ?? false;
     if (!canInstall) {
       if (!mounted) return;
       await showGeneralDialog<void>(
@@ -7280,20 +7330,25 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         transitionDuration: const Duration(milliseconds: 120),
         pageBuilder: (_, _, _) => UpdatePermissionSheet(
           p: widget.p,
-          blur: !widget.reduceMotion && widget.enableTranslucency && AdaptiveEngine().supportsBlur,
+          blur:
+              !widget.reduceMotion &&
+              widget.enableTranslucency &&
+              AdaptiveEngine().supportsBlur,
         ),
       );
-      final canInstallNow = await channel.invokeMethod<bool>('canInstallPackages') ?? false;
+      final canInstallNow =
+          await channel.invokeMethod<bool>('canInstallPackages') ?? false;
       if (!canInstallNow) return;
     }
 
-    final success = await channel.invokeMethod<bool>(
-      'installApk',
-      {'filePath': _downloadedApkPath},
-    );
+    final success = await channel.invokeMethod<bool>('installApk', {
+      'filePath': _downloadedApkPath,
+    });
     if (success == false && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Installation failed to start'.localized(context))),
+        SnackBar(
+          content: Text('Installation failed to start'.localized(context)),
+        ),
       );
     }
   }
@@ -7321,7 +7376,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: spacing24),
-        
+
         // Header Logo & Version info
         Center(
           child: Column(
@@ -7381,7 +7436,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
         SettingsPageDescription(
           p: p,
-          text: 'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
+          text:
+              'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
           bottomPadding: spacing48,
         ),
       ],
@@ -7389,9 +7445,14 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   }
 
   Widget _buildDownloadInstallCard(Palette p) {
-    final blurEnabled = !widget.reduceMotion && widget.enableTranslucency && AdaptiveEngine().supportsBlur;
+    final blurEnabled =
+        !widget.reduceMotion &&
+        widget.enableTranslucency &&
+        AdaptiveEngine().supportsBlur;
     final availableVersion = widget.updateInfo?.version ?? '';
-    final cleanVersion = availableVersion.startsWith('v') ? availableVersion : 'v$availableVersion';
+    final cleanVersion = availableVersion.startsWith('v')
+        ? availableVersion
+        : 'v$availableVersion';
 
     if (widget.checkingUpdates) {
       return Glass(
@@ -7404,10 +7465,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CupertinoActivityIndicator(
-                radius: 16,
-                color: p.accent,
-              ),
+              CupertinoActivityIndicator(radius: 16, color: p.accent),
               const SizedBox(height: 16),
               Text(
                 'Checking for updates...'.localized(context),
@@ -7431,7 +7489,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             const SizedBox(height: 16),
             Text(
               'You are up to date'.localized(context),
-              style: TextStyle(color: p.text, fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: p.text,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -7443,7 +7505,9 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               style: FilledButton.styleFrom(
                 backgroundColor: p.surface3,
                 foregroundColor: p.text,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
               ),
               onPressed: widget.onCheckUpdates,
               child: Text('Check for updates'.localized(context)),
@@ -7467,7 +7531,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               const SizedBox(width: 10),
               Text(
                 'Update Available'.localized(context),
-                style: TextStyle(color: p.text, fontSize: 18, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ],
           ),
@@ -7478,8 +7546,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               color: widget.updateInfo!.isSecurity == true
                   ? p.red.withValues(alpha: 0.12)
                   : (widget.updateInfo!.isImportant == true
-                      ? p.orange.withValues(alpha: 0.12)
-                      : p.green.withValues(alpha: 0.12)),
+                        ? p.orange.withValues(alpha: 0.12)
+                        : p.green.withValues(alpha: 0.12)),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -7487,7 +7555,9 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               style: TextStyle(
                 color: widget.updateInfo!.isSecurity == true
                     ? p.red
-                    : (widget.updateInfo!.isImportant == true ? p.orange : p.green),
+                    : (widget.updateInfo!.isImportant == true
+                          ? p.orange
+                          : p.green),
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
               ),
@@ -7496,18 +7566,27 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           const SizedBox(height: 16),
           Text(
             'Version $cleanVersion',
-            style: TextStyle(color: p.text, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
-            'This update includes new features, performance improvements, and bug fixes.'.localized(context),
+            'This update includes new features, performance improvements, and bug fixes.'
+                .localized(context),
             style: TextStyle(color: p.text2, fontSize: 13.5, height: 1.45),
           ),
           if (widget.updateInfo!.body.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
               "What's New:".localized(context),
-              style: TextStyle(color: p.text, fontSize: 13, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: p.text,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 8),
             Container(
@@ -7542,7 +7621,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     ),
                     Text(
                       '${(_downloadProgress * 100).toInt()}%',
-                      style: TextStyle(color: p.accent, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -7558,7 +7641,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                 ),
               ],
             ),
-          ] else if (_downloadedApkPath != null && _verificationStatus == 'verified') ...[
+          ] else if (_downloadedApkPath != null &&
+              _verificationStatus == 'verified') ...[
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -7568,7 +7652,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     const SizedBox(width: 6),
                     Text(
                       'Package verified & ready'.localized(context),
-                      style: TextStyle(color: p.green, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: p.green,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -7578,10 +7666,15 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     backgroundColor: p.green,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
                   onPressed: _installApk,
-                  child: Text('Install Now'.localized(context), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Install Now'.localized(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -7590,7 +7683,10 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               children: [
                 CupertinoActivityIndicator(radius: 7, color: p.accent),
                 const SizedBox(width: 8),
-                Text('Verifying integrity checksum...'.localized(context), style: TextStyle(color: p.text2, fontSize: 13)),
+                Text(
+                  'Verifying integrity checksum...'.localized(context),
+                  style: TextStyle(color: p.text2, fontSize: 13),
+                ),
               ],
             ),
           ] else ...[
@@ -7599,7 +7695,9 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                 backgroundColor: p.accent,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
               ),
               onPressed: _startDownload,
               child: Text(
@@ -7617,7 +7715,10 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
   Widget _buildCacheCard(Palette p) {
     if (_cacheSizeMb <= 0.0) return const SizedBox.shrink();
-    final blurEnabled = !widget.reduceMotion && widget.enableTranslucency && AdaptiveEngine().supportsBlur;
+    final blurEnabled =
+        !widget.reduceMotion &&
+        widget.enableTranslucency &&
+        AdaptiveEngine().supportsBlur;
 
     return Glass(
       p: p,
@@ -7634,11 +7735,16 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               children: [
                 Text(
                   'Build Cache Size'.localized(context),
-                  style: TextStyle(color: p.text, fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'.localized(context),
+                  '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'
+                      .localized(context),
                   style: TextStyle(color: p.text3, fontSize: 12),
                 ),
               ],
@@ -7654,6 +7760,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     );
   }
 }
+
 class _PolicySection extends StatelessWidget {
   const _PolicySection({
     required this.p,
@@ -7755,7 +7862,9 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _commitsError = 'Failed to load repository activity'.localized(context);
+          _commitsError = 'Failed to load repository activity'.localized(
+            context,
+          );
           _loadingCommits = false;
         });
       }
@@ -7782,12 +7891,18 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
             children: [
               Icon(Icons.error_outline_rounded, color: p.red, size: 36),
               const SizedBox(height: 12),
-              Text(_commitsError!, style: TextStyle(color: p.red, fontSize: 13.5)),
+              Text(
+                _commitsError!,
+                style: TextStyle(color: p.red, fontSize: 13.5),
+              ),
               const SizedBox(height: 16),
               PressableScale(
                 onTap: _fetchCommits,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: p.accent,
                     borderRadius: BorderRadius.circular(999),
@@ -7795,11 +7910,19 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.refresh_rounded, color: Colors.white, size: 16),
+                      const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Retry'.localized(context),
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -7814,156 +7937,167 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(48),
-          child: Text('No recent activity found'.localized(context), style: TextStyle(color: p.text3, fontSize: 13.5)),
+          child: Text(
+            'No recent activity found'.localized(context),
+            style: TextStyle(color: p.text3, fontSize: 13.5),
+          ),
         ),
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: PressableScale(
-              onTap: _fetchCommits,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                decoration: BoxDecoration(
-                  color: p.accent,
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: [
-                    BoxShadow(
-                      color: p.accent.withValues(alpha: 0.25),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+      children: [
+        Align(
+          alignment: Alignment.center,
+          child: PressableScale(
+            onTap: _fetchCommits,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              decoration: BoxDecoration(
+                color: p.accent,
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: [
+                  BoxShadow(
+                    color: p.accent.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.refresh_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Refresh Activity'.localized(context),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.refresh_rounded, color: Colors.white, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Refresh Activity'.localized(context),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 20),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _commits!.length,
-            itemBuilder: (context, index) {
-              final commit = _commits![index];
-              final sha = commit['sha'] as String;
-              final shortSha = sha.length > 7 ? sha.substring(0, 7) : sha;
-              final msg = commit['message'] as String;
-              final author = commit['author'] as String;
-              final date = commit['date'] as DateTime?;
+        ),
+        const SizedBox(height: 20),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _commits!.length,
+          itemBuilder: (context, index) {
+            final commit = _commits![index];
+            final sha = commit['sha'] as String;
+            final shortSha = sha.length > 7 ? sha.substring(0, 7) : sha;
+            final msg = commit['message'] as String;
+            final author = commit['author'] as String;
+            final date = commit['date'] as DateTime?;
 
-              String timeAgo = '';
-              if (date != null) {
-                final diff = DateTime.now().difference(date);
-                if (diff.inDays > 0) {
-                  timeAgo = '${diff.inDays}d ago';
-                } else if (diff.inHours > 0) {
-                  timeAgo = '${diff.inHours}h ago';
-                } else {
-                  timeAgo = '${diff.inMinutes}m ago';
-                }
+            String timeAgo = '';
+            if (date != null) {
+              final diff = DateTime.now().difference(date);
+              if (diff.inDays > 0) {
+                timeAgo = '${diff.inDays}d ago';
+              } else if (diff.inHours > 0) {
+                timeAgo = '${diff.inHours}h ago';
+              } else {
+                timeAgo = '${diff.inMinutes}m ago';
               }
+            }
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                decoration: BoxDecoration(
-                  color: p.surface,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: p.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: p.accent.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.commit_rounded, color: p.accent, size: 16),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: p.surface,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: p.border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                author,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                    child: Icon(
+                      Icons.commit_rounded,
+                      color: p.accent,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              author,
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                decoration: BoxDecoration(
-                                  color: p.surface3,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  shortSha,
-                                  style: TextStyle(
-                                    color: p.text3,
-                                    fontSize: 9.5,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1.5,
                               ),
-                              const Spacer(),
-                              Text(
-                                timeAgo,
+                              decoration: BoxDecoration(
+                                color: p.surface3,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                shortSha,
                                 style: TextStyle(
                                   color: p.text3,
-                                  fontSize: 11,
+                                  fontSize: 9.5,
+                                  fontFamily: 'monospace',
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            msg,
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 12.5,
-                              height: 1.35,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            const Spacer(),
+                            Text(
+                              timeAgo,
+                              style: TextStyle(color: p.text3, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          msg,
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 12.5,
+                            height: 1.35,
                           ),
-                        ],
-                      ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      );
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 }

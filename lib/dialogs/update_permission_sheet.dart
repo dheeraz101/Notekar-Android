@@ -7,11 +7,7 @@ import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class UpdatePermissionSheet extends StatefulWidget {
-  const UpdatePermissionSheet({
-    super.key,
-    required this.p,
-    this.blur = false,
-  });
+  const UpdatePermissionSheet({super.key, required this.p, this.blur = false});
 
   final Palette p;
   final bool blur;
@@ -49,8 +45,11 @@ class _UpdatePermissionSheetState extends State<UpdatePermissionSheet>
 
   Future<void> _checkPermissions() async {
     try {
-      final notif = await _fileChannel.invokeMethod<bool>('canPostNotifications') ?? false;
-      final install = await _fileChannel.invokeMethod<bool>('canInstallPackages') ?? false;
+      final notif =
+          await _fileChannel.invokeMethod<bool>('canPostNotifications') ??
+          false;
+      final install =
+          await _fileChannel.invokeMethod<bool>('canInstallPackages') ?? false;
       if (mounted) {
         setState(() {
           _notificationGranted = notif;
@@ -76,13 +75,10 @@ class _UpdatePermissionSheetState extends State<UpdatePermissionSheet>
           children: [
             const SizedBox(height: 8),
             Text(
-              'To download and install software updates directly within NoteKar, please configure the following security settings:'.localized(context),
+              'To download and install software updates directly within NoteKar, please configure the following security settings:'
+                  .localized(context),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: p.text2,
-                fontSize: 14,
-                height: 1.45,
-              ),
+              style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
             ),
             const SizedBox(height: 28),
 
@@ -90,12 +86,18 @@ class _UpdatePermissionSheetState extends State<UpdatePermissionSheet>
             _buildSetupCard(
               icon: Icons.notifications_active_rounded,
               title: 'Push Alerts & Notices'.localized(context),
-              subtitle: 'Notifies you immediately when new releases are compiled.'.localized(context),
+              subtitle:
+                  'Notifies you immediately when new releases are compiled.'
+                      .localized(context),
               isConfigured: _notificationGranted,
               buttonText: 'Grant Permission'.localized(context),
               onAction: () async {
                 HapticFeedback.selectionClick();
-                final granted = await _fileChannel.invokeMethod<bool>('requestNotificationPermission') ?? false;
+                final granted =
+                    await _fileChannel.invokeMethod<bool>(
+                      'requestNotificationPermission',
+                    ) ??
+                    false;
                 if (granted) _checkPermissions();
               },
             ),
@@ -105,12 +107,16 @@ class _UpdatePermissionSheetState extends State<UpdatePermissionSheet>
             _buildSetupCard(
               icon: Icons.install_mobile_rounded,
               title: 'Allow App Installation'.localized(context),
-              subtitle: 'Required by Android to launch the system package archive installer for downloaded APKs.'.localized(context),
+              subtitle:
+                  'Required by Android to launch the system package archive installer for downloaded APKs.'
+                      .localized(context),
               isConfigured: _installGranted,
               buttonText: 'Configure Settings'.localized(context),
               onAction: () async {
                 HapticFeedback.selectionClick();
-                await _fileChannel.invokeMethod('openInstallPermissionSettings');
+                await _fileChannel.invokeMethod(
+                  'openInstallPermissionSettings',
+                );
               },
             ),
             const SizedBox(height: 28),
@@ -130,7 +136,10 @@ class _UpdatePermissionSheetState extends State<UpdatePermissionSheet>
               },
               child: Text(
                 'Done'.localized(context),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -165,7 +174,9 @@ class _UpdatePermissionSheetState extends State<UpdatePermissionSheet>
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: (isConfigured ? p.green : p.accent).withValues(alpha: 0.12),
+                  color: (isConfigured ? p.green : p.accent).withValues(
+                    alpha: 0.12,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

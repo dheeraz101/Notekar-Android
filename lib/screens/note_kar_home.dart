@@ -1873,7 +1873,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
     try {
       final trackBeta = _prefs?.getBool('m-update-track-beta') ?? false;
-      final latest = await _updateService.fetchLatestVersion(trackBeta: trackBeta);
+      final latest = await _updateService.fetchLatestVersion(
+        trackBeta: trackBeta,
+      );
 
       final elapsed = DateTime.now().difference(started);
       if (elapsed < const Duration(seconds: 5)) {

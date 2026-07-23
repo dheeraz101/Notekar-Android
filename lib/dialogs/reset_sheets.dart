@@ -303,10 +303,7 @@ class AppIconApplyingDialog extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CupertinoActivityIndicator(
-                      radius: 16,
-                      color: p.accent,
-                    ),
+                    CupertinoActivityIndicator(radius: 16, color: p.accent),
                     Icon(Icons.apps_rounded, color: p.accent, size: 23),
                   ],
                 ),

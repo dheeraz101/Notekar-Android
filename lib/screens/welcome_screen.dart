@@ -83,8 +83,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ) ??
           false;
       final bool installGranted =
-          await _fileChannel.invokeMethod<bool>('canInstallPackages') ??
-          false;
+          await _fileChannel.invokeMethod<bool>('canInstallPackages') ?? false;
       if (mounted) {
         setState(() {
           _notificationGranted = notificationGranted;
@@ -577,7 +576,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             p: p,
             icon: Icons.notifications_active_rounded,
             title: 'Push Alerts & Notices'.localized(context),
-            subtitle: 'Notifies you immediately when new releases are compiled.'.localized(context),
+            subtitle: 'Notifies you immediately when new releases are compiled.'
+                .localized(context),
             isConfigured: _notificationGranted,
             buttonText: 'Grant Permission'.localized(context),
             onAction: () async {
@@ -870,7 +870,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   if (key == 'welcome') return _buildWelcomePage(p);
                   if (key == 'features') return _buildFeaturesPage(p);
                   if (key == 'repo-move') return _buildRepoMovePage(p);
-                  if (key == 'updates-permission') return _buildUpdatesPermissionPage(p);
+                  if (key == 'updates-permission')
+                    return _buildUpdatesPermissionPage(p);
                   if (key == 'reminders') return _buildRemindersPage(p);
                   return const SizedBox.shrink();
                 }).toList(),

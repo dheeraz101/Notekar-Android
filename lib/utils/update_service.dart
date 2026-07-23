@@ -23,45 +23,52 @@ class AppUpdateInfo {
   });
 
   Map<String, dynamic> toJson() => {
-        'version': version,
-        'body': body,
-        'date': date?.toIso8601String(),
-        'isSecurity': isSecurity,
-        'isImportant': isImportant,
-        'type': type,
-      };
+    'version': version,
+    'body': body,
+    'date': date?.toIso8601String(),
+    'isSecurity': isSecurity,
+    'isImportant': isImportant,
+    'type': type,
+  };
 
   factory AppUpdateInfo.fromJson(Map<String, dynamic> json) => AppUpdateInfo(
-        version: json['version'] as String,
-        body: json['body'] as String? ?? '',
-        date: json['date'] != null
-            ? DateTime.tryParse(json['date'] as String)
-            : null,
-        isSecurity: json['isSecurity'] as bool? ?? false,
-        isImportant: json['isImportant'] as bool? ?? false,
-        type: json['type'] as String? ?? 'Regular Update',
-      );
+    version: json['version'] as String,
+    body: json['body'] as String? ?? '',
+    date: json['date'] != null
+        ? DateTime.tryParse(json['date'] as String)
+        : null,
+    isSecurity: json['isSecurity'] as bool? ?? false,
+    isImportant: json['isImportant'] as bool? ?? false,
+    type: json['type'] as String? ?? 'Regular Update',
+  );
 }
 
 class UpdateService {
   final _logger = AppLogger();
   static const _channel = MethodChannel('notekar/files');
 
-  Future<Map<String, dynamic>?> fetchCurrentVirusTotalInfo({bool trackBeta = false}) async {
+  Future<Map<String, dynamic>?> fetchCurrentVirusTotalInfo({
+    bool trackBeta = false,
+  }) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10);
     try {
       final trackSuffix = trackBeta ? '-beta' : '';
-      final url = 'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/refs/tags/v$appVersion$trackSuffix/build/app/outputs/flutter-apk/version.json';
-      
+      final url =
+          'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/refs/tags/v$appVersion$trackSuffix/build/app/outputs/flutter-apk/version.json';
+
       final request = await client.getUrl(Uri.parse(url));
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
       final response = await request.close();
       if (response.statusCode != 200) {
         // Fallback to release download URL if raw asset is not available
-        final releaseUrl = 'https://github.com/dheeraz101/Notekar-Android/releases/download/v$appVersion$trackSuffix/version.json';
+        final releaseUrl =
+            'https://github.com/dheeraz101/Notekar-Android/releases/download/v$appVersion$trackSuffix/version.json';
         final relRequest = await client.getUrl(Uri.parse(releaseUrl));
-        relRequest.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+        relRequest.headers.set(
+          HttpHeaders.userAgentHeader,
+          'NoteKar/$appVersion',
+        );
         final relResponse = await relRequest.close();
         if (relResponse.statusCode != 200) {
           return null;
@@ -116,7 +123,9 @@ class UpdateService {
           final tagName = item['tag_name'] as String? ?? '';
           if (tagName.contains(appVersion)) {
             final body = item['body'] as String? ?? '';
-            final match = RegExp(r'https://www.virustotal.com/gui/file/[0-9a-fA-F]{32,}').firstMatch(body);
+            final match = RegExp(
+              r'https://www.virustotal.com/gui/file/[0-9a-fA-F]{32,}',
+            ).firstMatch(body);
             if (match != null) {
               final vtUrl = match.group(0);
               if (vtUrl != null) {
@@ -144,7 +153,8 @@ class UpdateService {
 
       if (targetRelease == null) return null;
 
-      final tag = (targetRelease['tag_name'] as String?) ??
+      final tag =
+          (targetRelease['tag_name'] as String?) ??
           (targetRelease['name'] as String?);
       final version = tag?.replaceFirst(RegExp(r'^[vV]'), '').trim();
       if (version == null) return null;
@@ -156,13 +166,15 @@ class UpdateService {
           : null;
 
       final lowerBody = body.toLowerCase();
-      final lowerName =
-          ((targetRelease['name'] as String?) ?? '').toLowerCase();
+      final lowerName = ((targetRelease['name'] as String?) ?? '')
+          .toLowerCase();
 
-      final isSecurity = lowerBody.contains('security') ||
+      final isSecurity =
+          lowerBody.contains('security') ||
           lowerBody.contains('cve') ||
           lowerName.contains('security');
-      final isImportant = isSecurity ||
+      final isImportant =
+          isSecurity ||
           lowerBody.contains('critical') ||
           lowerBody.contains('important') ||
           lowerName.contains('critical') ||
@@ -306,10 +318,9 @@ class UpdateService {
       if (response.statusCode != 200) return false;
 
       final manifestText = await response.transform(utf8.decoder).join();
-      final localHash = await _channel.invokeMethod<String>(
-        'getFileSha256',
-        {'filePath': apkFilePath},
-      );
+      final localHash = await _channel.invokeMethod<String>('getFileSha256', {
+        'filePath': apkFilePath,
+      });
       if (localHash == null || localHash.isEmpty) return false;
 
       // Extract hash of universal apk from manifest text
@@ -321,7 +332,8 @@ class UpdateService {
         if (parts.length >= 2) {
           final hash = parts[0].trim().toLowerCase();
           final filename = parts[1].trim();
-          if (filename.contains('universal') && hash == localHash.toLowerCase()) {
+          if (filename.contains('universal') &&
+              hash == localHash.toLowerCase()) {
             _logger.info('Checksum matches target: $hash');
             return true;
           }
