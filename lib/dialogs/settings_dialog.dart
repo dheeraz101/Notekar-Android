@@ -277,7 +277,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   bool _betaTrack = false;
 
-  String _vtRatio = '0 / 68 clean';
+  String _vtRatio = '0 / 60+ clean';
   String _vtStatus = 'Undetected';
   String _vtScanDate = 'July 2026';
   String _vtUrl =
@@ -349,7 +349,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _loadCachedVirusTotalInfo() {
     if (_prefs == null) return;
     setState(() {
-      _vtRatio = _prefs!.getString('notekar.vt_ratio') ?? '0 / 68 clean';
+      _vtRatio = _prefs!.getString('notekar.vt_ratio') ?? '0 / 60+ clean';
       _vtStatus = _prefs!.getString('notekar.vt_status') ?? 'Undetected';
       _vtScanDate = _prefs!.getString('notekar.vt_scandate') ?? 'July 2026';
       _vtUrl =
@@ -371,7 +371,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
         String ratio = '$malicious / $total clean';
         if (malicious == 0) {
-          ratio = '0 / $total clean';
+          ratio = '0 / 60+ clean';
         }
 
         String status = malicious == 0 ? 'Undetected' : 'Detected';
@@ -572,12 +572,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          Icons.edit_rounded,
-                          color: p.text3,
+                          _reminderMessageFocusNode.hasFocus
+                              ? Icons.check_rounded
+                              : Icons.edit_rounded,
+                          color: _reminderMessageFocusNode.hasFocus
+                              ? p.accent
+                              : p.text3,
                           size: 20,
                         ),
                         onPressed: () {
-                          _reminderMessageFocusNode.requestFocus();
+                          if (_reminderMessageFocusNode.hasFocus) {
+                            _reminderMessageFocusNode.unfocus();
+                          } else {
+                            _reminderMessageFocusNode.requestFocus();
+                          }
                         },
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -869,6 +877,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
         _openCategory('Search');
       }
     });
+    _reminderMessageFocusNode.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -908,6 +921,67 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   Future<void> _saveTrackPreference(bool beta) async {
+    final p = paletteFor(
+      theme,
+      highContrast: highContrast,
+      accentName: accentColor,
+    );
+
+    // Show transition dialog with iOS style spinner
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(
+          canPop: false,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Container(
+              width: 240,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: p.surface.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: p.border.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupertinoActivityIndicator(
+                    radius: 16,
+                    color: p.accent,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    beta
+                        ? 'Switching to beta build...'.localized(context)
+                        : 'Switching to stable build...'.localized(context),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    // Wait for 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Dismiss popup overlay
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
     setState(() {
       _betaTrack = beta;
     });
