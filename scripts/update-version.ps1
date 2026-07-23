@@ -1,14 +1,20 @@
 param(
-    [Parameter(Mandatory = $true)]
-    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [Parameter(Mandatory = $false)]
+    [switch]$stable,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$beta,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$security,
+
+    [Parameter(Mandatory = $false)]
     [string]$Version,
 
     [Parameter(Mandatory = $false)]
-    [ValidateRange(1, 2100000000)]
     [int]$BuildNumber,
 
     [Parameter(Mandatory = $false)]
-    [ValidatePattern('^\d{4}-\d{2}-\d{2}$')]
     [string]$BuildDate = (Get-Date -Format 'yyyy-MM-dd')
 )
 
@@ -45,23 +51,54 @@ $appUtilsPath = Join-Path $repoRoot 'lib/utils/app_utils.dart'
 if (-not (Test-Path -LiteralPath $pubspecPath)) {
     throw "pubspec.yaml was not found at $pubspecPath"
 }
-
 if (-not (Test-Path -LiteralPath $localPropertiesPath)) {
     throw "android/local.properties was not found at $localPropertiesPath"
 }
-
 if (-not (Test-Path -LiteralPath $appUtilsPath)) {
     throw "lib/utils/app_utils.dart was not found at $appUtilsPath"
 }
 
+# Read and parse current version from pubspec.yaml
 $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
-$versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$')
-if (-not $versionMatch.Success -and -not $BuildNumber) {
-    throw 'Could not read the existing build number from pubspec.yaml. Pass -BuildNumber explicitly.'
+$versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)\s*$')
+if (-not $versionMatch.Success) {
+    throw "Could not parse current version from pubspec.yaml."
+}
+
+$currentMajor = [int]$versionMatch.Groups[1].Value
+$currentMinor = [int]$versionMatch.Groups[2].Value
+$currentPatch = [int]$versionMatch.Groups[3].Value
+$currentBuild = [int]$versionMatch.Groups[4].Value
+
+$nextMajor = $currentMajor
+$nextMinor = $currentMinor
+$nextPatch = $currentPatch
+$releaseTypeLabel = "Custom"
+
+if ($stable) {
+    $nextMajor = $currentMajor + 1
+    $nextMinor = 0
+    $nextPatch = 0
+    $releaseTypeLabel = "Stable Feature Release"
+} elseif ($security) {
+    $nextMinor = $currentMinor + 1
+    $nextPatch = 0
+    $releaseTypeLabel = "Security & Quality Release"
+} elseif ($beta) {
+    $nextPatch = $currentPatch + 1
+    $releaseTypeLabel = "Beta Build"
+} else {
+    if (-not $Version) {
+        throw "Please specify the release type parameter (-stable, -beta, -security) or pass -Version explicitly."
+    }
+}
+
+if (-not $Version) {
+    $Version = "$nextMajor.$nextMinor.$nextPatch"
 }
 
 if (-not $BuildNumber) {
-    $BuildNumber = [int]$versionMatch.Groups[2].Value + 1
+    $BuildNumber = $currentBuild + 1
 }
 
 # 1. Update version across core config files
@@ -96,29 +133,28 @@ if (-not (Test-Path -LiteralPath $fastlaneFile)) {
     $fastlaneContent = "Placeholder: Write F-Droid changelog for version $Version (build $BuildNumber) here."
     Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
     Write-Host "Created F-Droid changelog template: $fastlaneFile"
-} else {
-    Write-Host "F-Droid changelog file for build $BuildNumber already exists."
 }
 
-# 3. Automate GitHub Release notes template creation
+# 3. Automate GitHub Release notes template creation with optional Security Update prefix
 $releaseNotesDir = Join-Path $repoRoot "releases/v$Version"
 if (-not (Test-Path -LiteralPath $releaseNotesDir)) {
     New-Item -ItemType Directory -Path $releaseNotesDir -Force | Out-Null
 }
 $releaseNotesFile = Join-Path $releaseNotesDir "RELEASE_NOTES.md"
 if (-not (Test-Path -LiteralPath $releaseNotesFile)) {
-    $releaseNotesContent = "## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
+    $prefix = ""
+    if ($security) {
+        $prefix = "## 🛡️ Security Update`r`n`r`n"
+    }
+    $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
     Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
     Write-Host "Created GitHub Release notes template: $releaseNotesFile"
-} else {
-    Write-Host "GitHub Release notes file for v$Version already exists."
 }
 
 # 4. Automate In-App Changelog section injection inside changelog_dialog.dart
 $changelogPath = Join-Path $repoRoot "lib/dialogs/changelog_dialog.dart"
 if (Test-Path -LiteralPath $changelogPath) {
     $changelogText = Get-Content -LiteralPath $changelogPath -Raw
-    # Normalize line endings in file for consistent matching
     $changelogText = $changelogText -replace "`r`n", "`n"
     $versionSearch = "version: '$Version'"
     if ($changelogText -match [regex]::Escape($versionSearch)) {
@@ -133,7 +169,7 @@ if (Test-Path -LiteralPath $changelogPath) {
 }
 
 Write-Host ''
-Write-Host "Version metadata is ready:"
+Write-Host "Version metadata is ready ($releaseTypeLabel):"
 Write-Host "  Version:    $Version"
 Write-Host "  Build:      $BuildNumber"
 Write-Host "  Build date: $BuildDate"

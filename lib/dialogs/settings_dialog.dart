@@ -282,6 +282,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _vtScanDate = 'July 2026';
   String _vtUrl =
       'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
+  String _currentBuildChannel = '';
 
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
@@ -355,6 +356,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _vtUrl =
           _prefs!.getString('notekar.current_virustotal_url') ??
           'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
+      _currentBuildChannel =
+          _prefs!.getString('notekar.current_build_channel') ?? '';
     });
   }
 
@@ -396,11 +399,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
           scanDateStr = '${date.day} ${months[date.month - 1]} ${date.year}';
         }
 
+        final channel =
+            info['channel'] as String? ?? (_betaTrack ? 'beta' : 'stable');
+
         setState(() {
           _vtRatio = ratio;
           _vtStatus = status;
           _vtScanDate = scanDateStr;
           _vtUrl = url;
+          _currentBuildChannel = channel;
         });
 
         if (_prefs != null) {
@@ -408,6 +415,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           await _prefs!.setString('notekar.vt_status', status);
           await _prefs!.setString('notekar.vt_scandate', scanDateStr);
           await _prefs!.setString('notekar.current_virustotal_url', url);
+          await _prefs!.setString('notekar.current_build_channel', channel);
         }
       }
     } catch (_) {}
@@ -2668,6 +2676,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       updateInfo: updateInfo,
       checkingUpdates: checkingUpdates,
       updateStatus: updateStatus,
+      currentBuildChannel: _currentBuildChannel,
     );
   }
 
@@ -7224,6 +7233,7 @@ class UpdateCenterView extends StatefulWidget {
     this.updateInfo,
     required this.checkingUpdates,
     required this.updateStatus,
+    required this.currentBuildChannel,
   });
 
   final Palette p;
@@ -7236,6 +7246,7 @@ class UpdateCenterView extends StatefulWidget {
   final AppUpdateInfo? updateInfo;
   final bool checkingUpdates;
   final String updateStatus;
+  final String currentBuildChannel;
 
   @override
   State<UpdateCenterView> createState() => _UpdateCenterViewState();
@@ -7522,6 +7533,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     final cleanVersion = availableVersion.startsWith('v')
         ? availableVersion
         : 'v$availableVersion';
+    final currentBuildChannel = widget.currentBuildChannel;
 
     if (widget.checkingUpdates) {
       return Glass(
@@ -7565,6 +7577,38 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               ),
             ),
             const SizedBox(height: 8),
+            if (currentBuildChannel.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: currentBuildChannel == 'security'
+                      ? p.red.withValues(alpha: 0.12)
+                      : (currentBuildChannel == 'beta'
+                            ? p.green.withValues(alpha: 0.12)
+                            : p.accent.withValues(alpha: 0.12)),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  (currentBuildChannel == 'security'
+                          ? 'Security Build'
+                          : (currentBuildChannel == 'beta'
+                                ? 'Beta Build'
+                                : 'Stable Build'))
+                      .localized(context),
+                  style: TextStyle(
+                    color: currentBuildChannel == 'security'
+                        ? p.red
+                        : (currentBuildChannel == 'beta' ? p.green : p.accent),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             Text(
               'Currently on $appBuildDate build'.localized(context),
               style: TextStyle(color: p.text3, fontSize: 13),

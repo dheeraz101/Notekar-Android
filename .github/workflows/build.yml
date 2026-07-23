@@ -13,6 +13,7 @@ on:
     branches:
       - release
       - beta
+      - security
 
 concurrency:
   group: release-build
@@ -257,10 +258,29 @@ jobs:
             echo "⚠️ VIRUSTOTAL_API_KEY secret is not configured — skipping upload"
           fi
 
-          # Update version.json with virustotal object using jq
-          jq --argjson vt "$VT_JSON" '. + {virustotal: $vt}' "$APK_DIR/version.json" > "$APK_DIR/version.tmp" && mv "$APK_DIR/version.tmp" "$APK_DIR/version.json"
-          echo "✅ version.json updated with VirusTotal scan details:"
+          # Determine the channel and type based on the branch name
+          if [ "${{ github.ref_name }}" = "beta" ]; then
+            CHANNEL="beta"
+            UPDATE_TYPE="Beta Update"
+          elif [ "${{ github.ref_name }}" = "security" ]; then
+            CHANNEL="security"
+            UPDATE_TYPE="Security Update"
+          else
+            CHANNEL="stable"
+            UPDATE_TYPE="Feature Update"
+          fi
+
+          # Update version.json with virustotal object, channel, and updateType using jq
+          jq --argjson vt "$VT_JSON" --arg ch "$CHANNEL" --arg ty "$UPDATE_TYPE" '. + {virustotal: $vt, channel: $ch, updateType: $ty}' "$APK_DIR/version.json" > "$APK_DIR/version.tmp" && mv "$APK_DIR/version.tmp" "$APK_DIR/version.json"
+          echo "✅ version.json updated with metadata and VirusTotal details:"
           cat "$APK_DIR/version.json"
+
+          # Prepend Security Update header if pushing on security branch
+          if [ "${{ github.ref_name }}" = "security" ]; then
+            if ! grep -q "Security Update" /tmp/release_notes.md; then
+              printf "## 🛡️ Security Update\n\n" | cat - /tmp/release_notes.md > /tmp/release_notes.tmp && mv /tmp/release_notes.tmp /tmp/release_notes.md
+            fi
+          fi
 
           # Format the last scan date
           SCAN_DATE_STR=$(date -d "@$SCAN_DATE" +"%%B %%d, %%Y" 2>/dev/null || date -r "$SCAN_DATE" +"%%B %%d, %%Y")
@@ -308,8 +328,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag) }}
-          make_latest: ${{ github.ref_name == 'release' }}
+          name: ${{ github.ref_name == 'security' && format('Notekar {0} (Security Update)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag)) }}
+          make_latest: ${{ github.ref_name == 'release' || github.ref_name == 'security' }}
           prerelease: ${{ github.ref_name == 'beta' }}
           body_path: /tmp/release_notes.md
           files: |
