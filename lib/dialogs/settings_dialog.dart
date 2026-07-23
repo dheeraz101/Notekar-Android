@@ -943,17 +943,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
               decoration: BoxDecoration(
                 color: p.surface.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: p.border.withValues(alpha: 0.2),
-                ),
+                border: Border.all(color: p.border.withValues(alpha: 0.2)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CupertinoActivityIndicator(
-                    radius: 16,
-                    color: p.accent,
-                  ),
+                  CupertinoActivityIndicator(radius: 16, color: p.accent),
                   const SizedBox(height: 16),
                   Text(
                     beta
@@ -7617,20 +7612,20 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: widget.updateInfo!.isSecurity == true
+              color: widget.updateInfo!.type == 'Security Update'
                   ? p.red.withValues(alpha: 0.12)
-                  : (widget.updateInfo!.isImportant == true
-                        ? p.orange.withValues(alpha: 0.12)
+                  : (widget.updateInfo!.type == 'Feature Update'
+                        ? p.accent.withValues(alpha: 0.12)
                         : p.green.withValues(alpha: 0.12)),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              widget.updateInfo!.type,
+              widget.updateInfo!.type.localized(context),
               style: TextStyle(
-                color: widget.updateInfo!.isSecurity == true
+                color: widget.updateInfo!.type == 'Security Update'
                     ? p.red
-                    : (widget.updateInfo!.isImportant == true
-                          ? p.orange
+                    : (widget.updateInfo!.type == 'Feature Update'
+                          ? p.accent
                           : p.green),
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -7648,7 +7643,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           ),
           const SizedBox(height: 12),
           Text(
-            'This update includes new features, performance improvements, and bug fixes.'
+            (widget.updateInfo!.type == 'Security Update'
+                    ? 'This critical update contains important security patches, bug fixes, and stability improvements.'
+                    : (widget.updateInfo!.type == 'Feature Update'
+                          ? 'This major update introduces brand new features, improvements, and interface designs to NoteKar.'
+                          : 'This pre-release version includes early feature drafts and optimizations for developer testing.'))
                 .localized(context),
             style: TextStyle(color: p.text2, fontSize: 13.5, height: 1.45),
           ),

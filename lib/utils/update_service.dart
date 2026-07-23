@@ -165,24 +165,40 @@ class UpdateService {
           ? DateTime.tryParse(publishedAtStr)
           : null;
 
-      final lowerBody = body.toLowerCase();
-      final lowerName = ((targetRelease['name'] as String?) ?? '')
-          .toLowerCase();
+      // Parse version parts to classify update type dynamically
+      final versionParts = version
+          .split(RegExp(r'[^0-9]+'))
+          .where((p) => p.isNotEmpty)
+          .map(int.parse)
+          .toList();
+
+      bool isSecurityUpdate = false;
+      bool isFeatureUpdate = false;
+      bool isBetaUpdate =
+          version.toLowerCase().contains('beta') ||
+          (tag?.toLowerCase().contains('beta') ?? false);
+
+      if (!isBetaUpdate && versionParts.length >= 3) {
+        final minor = versionParts[1];
+        final patch = versionParts[2];
+        if (minor == 0 && patch == 0) {
+          isFeatureUpdate = true;
+        } else if (minor > 0 && patch == 0) {
+          isSecurityUpdate = true;
+        } else if (patch > 0) {
+          isBetaUpdate = true;
+        }
+      }
 
       final isSecurity =
-          lowerBody.contains('security') ||
-          lowerBody.contains('cve') ||
-          lowerName.contains('security');
-      final isImportant =
-          isSecurity ||
-          lowerBody.contains('critical') ||
-          lowerBody.contains('important') ||
-          lowerName.contains('critical') ||
-          lowerName.contains('important');
+          isSecurityUpdate ||
+          body.toLowerCase().contains('security') ||
+          body.toLowerCase().contains('cve');
+      final isImportant = isSecurity || isFeatureUpdate;
 
       final type = isSecurity
           ? 'Security Update'
-          : (isImportant ? 'Critical Update' : 'Regular Update');
+          : (isBetaUpdate ? 'Beta Update' : 'Feature Update');
 
       _logger.info(
         'Latest version fetched (${trackBeta ? "Beta" : "Stable"}): $version ($type)',
