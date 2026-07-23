@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [4.0.9] - 2026-07-23 (versionCode 18) [Beta]
+
+### Added
+- Custom Markdown Text Renderer (`MarkdownText`) in settings for rich rendering of headers, lists, code, bold text, and hyperlinks.
+- Double Action Buttons on the update checking card, supporting both "Install Now" and "Check for updates".
+- Track Switch Downgrades explanation guide to the Help FAQ section.
+- Polished numbering list inside the Build Choose page with baseline-aligned number columns.
+
+### Fixed
+- Resolved 404 download errors on Beta APK downloads by tracking tagNames in the update checker.
+- Resolved VirusTotal pipeline size limit failures by fetching custom large-file upload URLs.
+- Resolved Perl delimiter syntax warnings on release note generation scripts.
+- Resolved update classification heuristic conflicts with markdown headers inside release bodies.
+- Fixed version string layouts on the up-to-date panel to display version name alongside build codes.
+
 ## [4.0.8] - 2026-07-23 (versionCode 17) [Beta]
 
 ### Added

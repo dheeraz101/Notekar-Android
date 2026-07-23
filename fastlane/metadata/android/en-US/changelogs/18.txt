@@ -1,0 +1,1 @@
+Native MarkdownText renderer, double action buttons for downloading/checking, track switch downgrade FAQ, and polished track list alignments. Fixed 404 Beta download errors and VirusTotal upload size limits.

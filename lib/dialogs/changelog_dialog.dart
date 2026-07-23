@@ -23,6 +23,27 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '4.0.9',
+      date: 'July 23, 2026',
+      highlights: [
+        'Custom Markdown Text Renderer: Rich rendering of headers, lists, code blocks, bold text, and hyperlinks in What\'s New release notes.',
+        'Double Card Action Buttons: Supports downloading, installing, and re-checking for updates simultaneously.',
+        'Track Switching FAQ Guides: Explains system package downgrades on Android when changing release tracks.',
+        'Horizontal Baseline Alignments: Separates numbers and rules inside Build Choose track settings, preventing text wrapping.',
+      ],
+      items: [
+        'Added: Custom Markdown Text Renderer (MarkdownText) in settings for rich rendering of headers, lists, code, bold text, and hyperlinks.',
+        'Added: Double Action Buttons on the update checking card, supporting both "Install Now" and "Check for updates".',
+        'Added: Track Switch Downgrades explanation guide to the Help FAQ section.',
+        'Added: Polished numbering list inside the Build Choose page with baseline-aligned number columns.',
+        'Fixed: Resolved 404 download errors on Beta APK downloads by tracking tagNames in the update checker.',
+        'Fixed: Resolved VirusTotal pipeline size limit failures by fetching custom large-file upload URLs.',
+        'Fixed: Resolved Perl delimiter syntax warnings on release note generation scripts.',
+        'Fixed: Resolved update classification heuristic conflicts with markdown headers inside release bodies.',
+        'Fixed: version string layouts on the up-to-date panel to display version name alongside build codes.',
+      ],
+    ),
+    (
       version: '4.0.8',
       date: 'July 23, 2026',
       highlights: [
