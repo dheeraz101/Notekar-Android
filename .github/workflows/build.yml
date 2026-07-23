@@ -272,36 +272,13 @@ jobs:
           fi
 
           # Construct the new Security block
-          export SECURITY_BLOCK="## Security
-
-🛡️ **VirusTotal Status**: \`$VT_STATUS\`  
-🔗 [View Full Report]($VT_URL)  
-📅 Last scanned: $SCAN_DATE_STR"
+          export SECURITY_BLOCK=$(printf "## Security\n\n🛡️ **VirusTotal Status**: \`%s\`  \n🔗 [View Full Report](%s)  \n📅 Last scanned: %s" "$VT_STATUS" "$VT_URL" "$SCAN_DATE_STR")
 
           # Replace the Security block in /tmp/release_notes.md
           perl -0777 -pi -e 's|(?m)^###? Security.*?(?=\n###? |\z)|$ENV{SECURITY_BLOCK}\n|g' /tmp/release_notes.md
 
           # Always append the APK install guide + verify block at the bottom
-          printf '
-
-          ---
-
-          ### Assets
-
-          | File | Use when |
-          |------|----------|
-          | `notekar-VERSION-universal.apk` | Not sure? Use this — works on all devices |
-          | `notekar-VERSION-arm64-v8a.apk` | Most modern phones (recommended, smaller) |
-          | `notekar-VERSION-armeabi-v7a.apk` | Older 32-bit phones |
-          | `notekar-VERSION-x86_64.apk` | x86_64 emulators / devices |
-
-          ### Verifying
-
-          Download `sha256.txt` alongside any APK and run:
-          ```bash
-          sha256sum --check sha256.txt
-          ```
-          ' >> /tmp/release_notes.md
+          printf "\n---\n\n### Assets\n\n| File | Use when |\n|------|----------|\n| \`notekar-VERSION-universal.apk\` | Not sure? Use this — works on all devices |\n| \`notekar-VERSION-arm64-v8a.apk\` | Most modern phones (recommended, smaller) |\n| \`notekar-VERSION-armeabi-v7a.apk\` | Older 32-bit phones |\n| \`notekar-VERSION-x86_64.apk\` | x86_64 emulators / devices |\n\n### Verifying\n\nDownload \`sha256.txt\` alongside any APK and run:\n\`\`\`bash\nsha256sum --check sha256.txt\n\`\`\`\n" >> /tmp/release_notes.md
 
           # Swap VERSION placeholder with actual version
           sed -i "s/VERSION/${VER}/g" /tmp/release_notes.md
