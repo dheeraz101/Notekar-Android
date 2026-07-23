@@ -1400,6 +1400,39 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
+        title: 'Update Track',
+        subtitle: 'Choose between Stable and Beta releases',
+        category: 'Updates & Notices',
+        icon: Icons.track_changes_rounded,
+        keywords: ['update', 'track', 'beta', 'stable', 'release', 'notices'],
+        kind: 'selector',
+        boolValue: null,
+        onBoolChanged: null,
+        status: _betaTrack ? 'Beta' : 'Stable',
+      ),
+      item(
+        title: 'VirusTotal Scan',
+        subtitle: 'Dynamic scan report, security ratio, and signature status',
+        category: 'Updates & Notices',
+        icon: Icons.security_rounded,
+        keywords: ['security', 'virustotal', 'scan', 'malicious', 'clean', 'undetected', 'ratio'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: _vtRatio,
+      ),
+      item(
+        title: 'Offline Commits Cache',
+        subtitle: 'View downloaded update commits feed offline',
+        category: 'Updates & Notices',
+        icon: Icons.history_rounded,
+        keywords: ['commits', 'cache', 'github', 'history', 'feed', 'offline'],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: _prefs != null && _prefs!.containsKey('notekar.commits_cache') ? 'Cached' : 'Empty',
+      ),
+      item(
         title: 'Backup & Export',
         subtitle:
             'CSV, JSON, download, restore, import, file, reminder, health',
@@ -5260,8 +5293,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.',
                                   ),
                                   HelpRow(
-                                    p: p,
-                                    question: 'Update check failed',
+                                     p: p,
+                                     question: 'Can I view updates while offline?',
+                                     answer:
+                                         'Yes! NoteKar automatically caches the latest commits feed when you check for updates online. If you are offline, you will still see the cached feed, though checking for new updates will show a "No internet" notice.',
+                                   ),
+                                   HelpRow(
+                                     p: p,
+                                     question: 'Update check failed',
                                     answer:
                                         'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.',
                                   ),
@@ -5354,8 +5393,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   HelpRow(
                                     p: p,
                                     question: 'Is NoteKar safe to use?',
-                                    answer:
-                                        'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Privacy & Security.',
+                                     answer:
+                                         'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Updates & Notices.',
                                   ),
                                 ],
                               ),
@@ -5410,13 +5449,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         if (checkingUpdates)
-                                          const SizedBox(
-                                            width: 12,
-                                            height: 12,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.grey,
-                                            ),
+                                          const CupertinoActivityIndicator(
+                                            radius: 6,
+                                            color: Colors.grey,
                                           )
                                         else if (updateInfo != null)
                                           Container(
@@ -7364,15 +7399,22 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         radius: 24,
         blur: blurEnabled,
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Checking for updates...'.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 14),
-            ),
-          ],
+        child: SizedBox(
+          height: 154,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CupertinoActivityIndicator(
+                radius: 16,
+                color: p.accent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Checking for updates...'.localized(context),
+                style: TextStyle(color: p.text2, fontSize: 14),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -7546,7 +7588,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           ] else if (_verificationStatus == 'verifying') ...[
             Row(
               children: [
-                SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: p.accent)),
+                CupertinoActivityIndicator(radius: 7, color: p.accent),
                 const SizedBox(width: 8),
                 Text('Verifying integrity checksum...'.localized(context), style: TextStyle(color: p.text2, fontSize: 13)),
               ],

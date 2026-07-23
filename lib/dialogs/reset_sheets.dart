@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -302,10 +303,9 @@ class AppIconApplyingDialog extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CircularProgressIndicator(
-                      strokeWidth: 3,
+                    CupertinoActivityIndicator(
+                      radius: 16,
                       color: p.accent,
-                      backgroundColor: p.surface3,
                     ),
                     Icon(Icons.apps_rounded, color: p.accent, size: 23),
                   ],
