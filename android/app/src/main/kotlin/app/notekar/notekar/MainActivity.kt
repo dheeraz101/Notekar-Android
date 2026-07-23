@@ -221,7 +221,7 @@ class MainActivity : FlutterActivity() {
                     result.success(openAutoStartSettings())
                 }
                 "appCacheDir" -> {
-                    result.success(applicationContext.cacheDir.absolutePath)
+                    result.success(applicationContext.externalCacheDir?.absolutePath ?: applicationContext.cacheDir.absolutePath)
                 }
                 "canInstallPackages" -> {
                     result.success(canInstallPackages())

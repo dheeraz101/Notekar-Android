@@ -288,18 +288,158 @@ class UpdateService {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15);
     try {
+      final testRequest = await client.getUrl(Uri.parse(url));
+      testRequest.headers.set(
+        HttpHeaders.userAgentHeader,
+        'NoteKar/$appVersion',
+      );
+      testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+
+      final testResponse = await testRequest.close();
+      final finalUrl = testResponse.redirects.isNotEmpty
+          ? testResponse.redirects.last.location.toString()
+          : url;
+
+      final contentRange = testResponse.headers.value(
+        HttpHeaders.contentRangeHeader,
+      );
+      final isRangeSupported =
+          testResponse.statusCode == 206 &&
+          contentRange != null &&
+          contentRange.contains('/');
+
+      int totalSize = 0;
+      if (isRangeSupported) {
+        final parts = contentRange.split('/');
+        if (parts.length == 2) {
+          totalSize = int.tryParse(parts[1]) ?? 0;
+        }
+      }
+
+      await testResponse.drain();
+
+      if (isRangeSupported && totalSize > 1024 * 1024 * 5) {
+        _logger.info('Optimizing download using parallel HTTP Range chunks...');
+        final chunkCount = 4;
+        final chunkSize = (totalSize / chunkCount).ceil();
+        final List<Future<String?>> futures = [];
+        final List<int> downloadedChunkBytes = List.filled(chunkCount, 0);
+
+        for (int i = 0; i < chunkCount; i++) {
+          final start = i * chunkSize;
+          final end = (i == chunkCount - 1)
+              ? totalSize - 1
+              : (start + chunkSize - 1);
+          final partPath = '$savePath.part$i';
+
+          futures.add(
+            _downloadPart(
+              client: client,
+              url: finalUrl,
+              partPath: partPath,
+              start: start,
+              end: end,
+              onProgress: (bytes) {
+                downloadedChunkBytes[i] = bytes;
+                final currentTotal = downloadedChunkBytes.reduce(
+                  (a, b) => a + b,
+                );
+                onProgress(currentTotal / totalSize);
+              },
+            ),
+          );
+        }
+
+        final parts = await Future.wait(futures);
+        if (parts.any((p) => p == null)) {
+          _logger.warn(
+            'Parallel download failed, falling back to standard download...',
+          );
+          for (int i = 0; i < chunkCount; i++) {
+            final f = File('$savePath.part$i');
+            if (await f.exists()) await f.delete();
+          }
+          return await _downloadStandard(client, url, savePath, onProgress);
+        }
+
+        final file = File(savePath);
+        if (await file.exists()) await file.delete();
+        final sink = file.openWrite();
+        for (int i = 0; i < chunkCount; i++) {
+          final partFile = File('$savePath.part$i');
+          await sink.addStream(partFile.openRead());
+          await partFile.delete();
+        }
+        await sink.close();
+        _logger.info('APK downloaded & merged successfully to: $savePath');
+        return savePath;
+      } else {
+        return await _downloadStandard(client, url, savePath, onProgress);
+      }
+    } catch (e, stack) {
+      _logger.error('Failed to download APK file', e, stack);
+      return null;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<String?> _downloadPart({
+    required HttpClient client,
+    required String url,
+    required String partPath,
+    required int start,
+    required int end,
+    required void Function(int bytes) onProgress,
+  }) async {
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+      request.headers.set(HttpHeaders.rangeHeader, 'bytes=$start-$end');
+
+      final response = await request.close();
+      if (response.statusCode != 206 && response.statusCode != 200) {
+        return null;
+      }
+
+      final file = File(partPath);
+      final sink = file.openWrite();
+      var bytes = 0;
+
+      await for (final chunk in response) {
+        sink.add(chunk);
+        bytes += chunk.length;
+        onProgress(bytes);
+      }
+      await sink.close();
+      return partPath;
+    } catch (e, stack) {
+      _logger.error('Failed downloading chunk $start-$end', e, stack);
+      return null;
+    }
+  }
+
+  Future<String?> _downloadStandard(
+    HttpClient client,
+    String url,
+    String savePath,
+    void Function(double progress) onProgress,
+  ) async {
+    try {
       final request = await client.getUrl(Uri.parse(url));
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
 
       final response = await request.close();
       if (response.statusCode != 200) {
-        _logger.warn('Download APK failed: HTTP ${response.statusCode}');
+        _logger.warn(
+          'Standard download APK failed: HTTP ${response.statusCode}',
+        );
         return null;
       }
 
       final contentLength = response.contentLength;
       if (contentLength <= 0) {
-        _logger.warn('Download APK failed: Invalid content length');
+        _logger.warn('Standard download APK failed: Invalid content length');
         return null;
       }
 
@@ -314,17 +454,13 @@ class UpdateService {
       await for (final chunk in response) {
         sink.add(chunk);
         downloadedBytes += chunk.length;
-        final progress = downloadedBytes / contentLength;
-        onProgress(progress);
+        onProgress(downloadedBytes / contentLength);
       }
       await sink.close();
-      _logger.info('APK downloaded successfully to: $savePath');
       return savePath;
     } catch (e, stack) {
-      _logger.error('Failed to download APK file', e, stack);
+      _logger.error('Standard download failed', e, stack);
       return null;
-    } finally {
-      client.close(force: true);
     }
   }
 

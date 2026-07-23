@@ -7573,8 +7573,69 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
   Future<void> _clearCache() async {
     HapticFeedback.mediumImpact();
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+              CurvedAnimation(
+                parent: ModalRoute.of(context)!.animation!,
+                curve: Curves.easeOutBack,
+              ),
+            ),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              decoration: BoxDecoration(
+                color: widget.p.surface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: widget.p.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CupertinoActivityIndicator(
+                      radius: 12,
+                      color: widget.p.accent,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Deleting cache...'.localized(context),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: widget.p.text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    await Future.delayed(const Duration(milliseconds: 1200));
     await _updateService.clearCachedBuilds();
+
     if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Build cache cleared'.localized(context))),
       );
@@ -7845,7 +7906,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             ),
             const SizedBox(height: 8),
             Container(
-              constraints: const BoxConstraints(maxHeight: 120),
+              constraints: const BoxConstraints(maxHeight: 240),
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -8007,35 +8068,51 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
       radius: 24,
       blur: blurEnabled,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.cleaning_services_rounded, color: p.orange, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Build Cache Size'.localized(context),
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+          Row(
+            children: [
+              Icon(Icons.cleaning_services_rounded, color: p.orange, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Build Cache Size'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'
+                          .localized(context),
+                      style: TextStyle(color: p.text3, fontSize: 12),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'
-                      .localized(context),
-                  style: TextStyle(color: p.text3, fontSize: 12),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: p.red),
+          const SizedBox(height: 16),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: p.red.withValues(alpha: 0.15),
+              foregroundColor: p.red,
+              minimumSize: const Size.fromHeight(44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
             onPressed: _clearCache,
-            child: Text('Delete Cache'.localized(context)),
+            child: Text(
+              'Delete Cache'.localized(context),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
