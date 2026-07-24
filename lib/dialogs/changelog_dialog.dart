@@ -24,6 +24,26 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.2',
+      date: 'July 25, 2026',
+      highlights: [
+        'Hardware-Backed DB Encryption: Secure your database using 256-bit AES keys generated inside the Android Keystore.',
+        'Persistent Lock-Screen Panel: Add a sticky, low-priority control drawer to log check-in/out directly from the lock screen.',
+        'Apple-Style Security Onboarding: Presents cryptographic upgrade details dynamically to users to build trust.',
+        'Quick Settings Tile & Launcher Shortcuts: Fast status bar tile and launcher options to bypass the main app shell.',
+        'App Switcher Privacy: Obfuscate active app screens and block screenshot capture when backgrounding the app.',
+        'Scroll Performance Optimizations: GPU repaint boundary caching for high-speed scrolling on long history lists.',
+      ],
+      items: [
+        'Hardware-Backed DB Encryption via Android Keystore',
+        'Persistent Lock-Screen notification control panel',
+        'Apple-Style security onboarding & release notice screens',
+        'Status bar Quick Settings tile & dynamic app shortcuts',
+        'App Switcher privacy obfuscation (screenshot blocking)',
+        'Scroll layout performance & list optimizations',
+      ],
+    ),
+    (
       version: '5.1.1',
       date: 'July 24, 2026',
       highlights: [

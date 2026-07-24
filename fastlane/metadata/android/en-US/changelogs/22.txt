@@ -1,0 +1,7 @@
+Update to 5.1.2 (build 22):
+- Hardware-Backed DB Encryption via Android Keystore
+- Persistent Lock-Screen notification control panel
+- Apple-Style security onboarding & release notice screens
+- Status bar Quick Settings tile & dynamic app shortcuts
+- App Switcher privacy obfuscation (screenshot blocking)
+- Scroll layout performance & list optimizations

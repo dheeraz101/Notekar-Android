@@ -7,6 +7,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.2] - 2026-07-25 (versionCode 22) [Beta]
+
+### Added
+
+- Feat: Hardware-Backed database encryption using 256-bit AES keys inside Android Keystore
+- Feat: Persistent low-priority status bar drawer control panel for lock screen checking
+- Feat: Apple-style cryptographic upgrade onboarding/release presentation screens
+- Feat: Native Quick Settings Status Bar tile to compose notes or check status instantly
+- Feat: Dynamic home launcher shortcuts for fast background check-in/out commands
+- Feat: App switcher screen content obfuscation and dynamic screenshot blocking
+- Optimize: Repaint boundary layout caches for optimized scrolling speeds on long lists
+
 ## [5.1.1] - 2026-07-24 (versionCode 21) [Beta]
 
 ### Changed
