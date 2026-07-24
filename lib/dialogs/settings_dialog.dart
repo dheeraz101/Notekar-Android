@@ -3873,9 +3873,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     p: p,
                                     icon: Icons.dashboard_customize_outlined,
                                     title: 'Dashboard',
-                                    subtitle:
-                                        'Detailed habits, charts, and intelligent insights'
-                                            .localized(context),
                                     color: p.accent,
                                     onTap: () => _openCategory(
                                       'Dashboard',
