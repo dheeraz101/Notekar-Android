@@ -392,7 +392,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
           child: PrivacyLockOverlay(
             p: p,
             onUnlock: () => unawaited(_unlockPrivacyLock()),
-            isSystemLockAvailable: _systemLockAvailable && _privacyLockType == 'system',
+            isSystemLockAvailable:
+                _systemLockAvailable && _privacyLockType == 'system',
             customPin: _prefs?.getString('m-custom-pin'),
             failedAttempts: _prefs?.getInt('m-failed-attempts') ?? 0,
             lockoutUntil: _prefs?.getInt('m-lockout-until') ?? 0,
@@ -1998,7 +1999,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
             _privacyLock = false;
             _privacyUnlocked = false;
             unawaited(_prefs?.setBool('m-privacy-lock', false));
-            _showToast('App Lock disabled because device screen lock was removed.'.localized(context), warning: true);
+            _showToast(
+              'App Lock disabled because device screen lock was removed.'
+                  .localized(context),
+              warning: true,
+            );
           }
           _privacyLockType = 'custom_pin';
         }
@@ -2016,9 +2021,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (context, anim1, anim2) {
         return Scaffold(
           backgroundColor: p.bg,
-          body: SafeArea(
-            child: _PinSetupWidget(p: p),
-          ),
+          body: SafeArea(child: _PinSetupWidget(p: p)),
         );
       },
     );
@@ -2873,7 +2876,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
             PrivacyLockOverlay(
               p: palette,
               onUnlock: () => unawaited(_unlockPrivacyLock()),
-              isSystemLockAvailable: _systemLockAvailable && _privacyLockType == 'system',
+              isSystemLockAvailable:
+                  _systemLockAvailable && _privacyLockType == 'system',
               customPin: _prefs?.getString('m-custom-pin'),
               failedAttempts: _prefs?.getInt('m-failed-attempts') ?? 0,
               lockoutUntil: _prefs?.getInt('m-lockout-until') ?? 0,
@@ -2921,7 +2925,8 @@ class _PinSetupWidget extends StatefulWidget {
   State<_PinSetupWidget> createState() => _PinSetupWidgetState();
 }
 
-class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProviderStateMixin {
+class _PinSetupWidgetState extends State<_PinSetupWidget>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
 
@@ -3059,11 +3064,11 @@ class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProvi
             desc.localized(context),
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: _isCorrect
-                  ? p.green
-                  : (_hasError ? p.red : textCol2),
+              color: _isCorrect ? p.green : (_hasError ? p.red : textCol2),
               fontSize: 13,
-              fontWeight: (_isCorrect || _hasError) ? FontWeight.bold : FontWeight.normal,
+              fontWeight: (_isCorrect || _hasError)
+                  ? FontWeight.bold
+                  : FontWeight.normal,
             ),
           ),
         ),
@@ -3075,10 +3080,7 @@ class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProvi
             if (_shakeController.isAnimating) {
               offset = math.sin(_shakeController.value * math.pi * 4) * 16.0;
             }
-            return Transform.translate(
-              offset: Offset(offset, 0),
-              child: child,
-            );
+            return Transform.translate(offset: Offset(offset, 0), child: child);
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -3105,10 +3107,7 @@ class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProvi
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: dotColor,
-                  border: Border.all(
-                    color: borderColor,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: borderColor, width: 1.5),
                 ),
               );
             }),
@@ -3187,7 +3186,12 @@ class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProvi
     );
   }
 
-  Widget _buildWarningPage(Palette p, bool isDark, Color textCol, Color textCol2) {
+  Widget _buildWarningPage(
+    Palette p,
+    bool isDark,
+    Color textCol,
+    Color textCol2,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -3221,12 +3225,15 @@ class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProvi
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : Colors.black.withValues(alpha: 0.02),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: p.border),
             ),
             child: Text(
-              'WARNING: If you forget this passcode, your data will be permanently locked and you won\'t be able to access it. Kindly use a rememberable PIN and backup your data.'.localized(context),
+              'WARNING: If you forget this passcode, your data will be permanently locked and you won\'t be able to access it. Kindly use a rememberable PIN and backup your data.'
+                  .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: textCol2,
@@ -3465,10 +3472,7 @@ class _PinSetupWidgetState extends State<_PinSetupWidget> with SingleTickerProvi
     return Container(
       width: 76,
       height: 76,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: bgCol,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: bgCol),
       child: Material(
         color: Colors.transparent,
         shape: const CircleBorder(),

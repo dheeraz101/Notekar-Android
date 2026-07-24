@@ -197,7 +197,8 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
     final isDark = p.bg.computeLuminance() < 0.5;
 
     // Detect if glass effects are allowed (not low end, translucency enabled, motion enabled)
-    final useGlass = widget.enableTranslucency &&
+    final useGlass =
+        widget.enableTranslucency &&
         AdaptiveEngine().supportsBlur &&
         !widget.reduceMotion;
 
@@ -344,7 +345,9 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
             Icons.lock_rounded,
             color: _isCorrect
                 ? p.green
-                : (_hasError ? p.red : (isDark ? Colors.white : Colors.black87)),
+                : (_hasError
+                      ? p.red
+                      : (isDark ? Colors.white : Colors.black87)),
             size: 32,
           ),
         ),
@@ -367,9 +370,7 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
             style: TextStyle(
               color: _secondsRemaining > 0
                   ? p.red
-                  : (_isCorrect
-                      ? p.green
-                      : (_hasError ? p.red : textCol2)),
+                  : (_isCorrect ? p.green : (_hasError ? p.red : textCol2)),
               fontSize: 13,
               fontWeight: (_secondsRemaining > 0 || _isCorrect || _hasError)
                   ? FontWeight.bold
@@ -433,10 +434,7 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: dotColor,
-                    border: Border.all(
-                      color: borderColor,
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: borderColor, width: 1.5),
                   ),
                 );
               }),
@@ -563,10 +561,7 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
     return Container(
       width: 76,
       height: 76,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: bgCol,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: bgCol),
       child: Material(
         color: Colors.transparent,
         shape: const CircleBorder(),

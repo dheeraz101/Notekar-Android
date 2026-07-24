@@ -254,6 +254,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool minimalMomentOptions;
   late bool enableTranslucency;
   late int privacyLockDelayMinutes;
+  late String privacyLockType;
   late String currentLocale;
 
   String? _editingReminderType;
@@ -877,6 +878,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     minimalMomentOptions = widget.minimalMomentOptions;
     enableTranslucency = widget.enableTranslucency;
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
+    privacyLockType = widget.privacyLockType;
     currentLocale = widget.currentLocale;
 
     widget.entriesNotifier.addListener(_onEntriesChanged);
@@ -1668,7 +1670,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           kind: 'nav',
           boolValue: null,
           onBoolChanged: null,
-          status: widget.privacyLockType == 'system' ? 'System Lock' : 'In-App PIN',
+          status: privacyLockType == 'system' ? 'System Lock' : 'In-App PIN',
         ),
       if (privacyLock)
         item(
@@ -5641,7 +5643,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   ),
                                   HelpRow(
                                     p: p,
-                                    question: 'How does App Lock protect NoteKar?',
+                                    question:
+                                        'How does App Lock protect NoteKar?',
                                     answer:
                                         'You can lock NoteKar using either your device\'s native credentials (System Lock) or a custom 4-digit passcode (In-App PIN). If you choose System Lock, removing your device lock screen security will automatically disable App Lock for safety. In-App PIN runs independently and includes rate-limiting lockout protection.',
                                   ),
@@ -6684,18 +6687,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                       }
                                     },
                                   ),
-                                  if (privacyLock && widget.isSystemLockAvailable)
+                                  if (privacyLock &&
+                                      widget.isSystemLockAvailable)
                                     SettingsRow(
                                       p: p,
                                       title: 'Configure Lock',
-                                      status: widget.privacyLockType == 'system' ? 'System Lock' : 'In-App PIN',
-                                      onTap: () => _openCategory('Configure Lock'),
+                                      status: privacyLockType == 'system'
+                                          ? 'System Lock'
+                                          : 'In-App PIN',
+                                      onTap: () =>
+                                          _openCategory('Configure Lock'),
                                     ),
-                                  if (privacyLock && widget.privacyLockType == 'custom_pin')
+                                  if (privacyLock &&
+                                      privacyLockType == 'custom_pin')
                                     SettingsRow(
                                       p: p,
-                                      title: 'Reset PIN Lock'.localized(context),
-                                      subtitle: 'Change your secure in-app passcode.'.localized(context),
+                                      title: 'Reset PIN Lock'.localized(
+                                        context,
+                                      ),
+                                      subtitle:
+                                          'Change your secure in-app passcode.'
+                                              .localized(context),
                                       color: p.accent,
                                       onTap: () async {
                                         await widget.onResetPrivacyPin();
@@ -6765,14 +6777,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   SettingsRow(
                                     p: p,
                                     title: 'System Lock'.localized(context),
-                                    subtitle: 'Use fingerprint, face, or system PIN.'.localized(context),
-                                    trailing: widget.privacyLockType == 'system'
-                                        ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                                    subtitle:
+                                        'Use fingerprint, face, or system PIN.'
+                                            .localized(context),
+                                    trailing: privacyLockType == 'system'
+                                        ? Icon(
+                                            Icons.check_rounded,
+                                            color: p.accent,
+                                            size: 20,
+                                          )
                                         : const SizedBox.shrink(),
                                     onTap: () async {
-                                      if (widget.privacyLockType == 'system') return;
-                                      final success = await widget.onPrivacyLockTypeChanged('system');
+                                      if (privacyLockType == 'system') {
+                                        return;
+                                      }
+                                      final success = await widget
+                                          .onPrivacyLockTypeChanged('system');
                                       if (success && mounted) {
+                                        setState(() {
+                                          privacyLockType = 'system';
+                                        });
                                         _popCategory();
                                       }
                                     },
@@ -6780,14 +6804,28 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   SettingsRow(
                                     p: p,
                                     title: 'In-App PIN'.localized(context),
-                                    subtitle: 'Configure a dedicated 4-digit passcode.'.localized(context),
-                                    trailing: widget.privacyLockType == 'custom_pin'
-                                        ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                                    subtitle:
+                                        'Configure a dedicated 4-digit passcode.'
+                                            .localized(context),
+                                    trailing: privacyLockType == 'custom_pin'
+                                        ? Icon(
+                                            Icons.check_rounded,
+                                            color: p.accent,
+                                            size: 20,
+                                          )
                                         : const SizedBox.shrink(),
                                     onTap: () async {
-                                      if (widget.privacyLockType == 'custom_pin') return;
-                                      final success = await widget.onPrivacyLockTypeChanged('custom_pin');
+                                      if (privacyLockType == 'custom_pin') {
+                                        return;
+                                      }
+                                      final success = await widget
+                                          .onPrivacyLockTypeChanged(
+                                            'custom_pin',
+                                          );
                                       if (success && mounted) {
+                                        setState(() {
+                                          privacyLockType = 'custom_pin';
+                                        });
                                         _popCategory();
                                       }
                                     },
@@ -6795,12 +6833,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 ],
                               ),
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 5, 20, 16.0),
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  5,
+                                  20,
+                                  16.0,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Select how you want to unlock NoteKar. System Lock integrates natively with Android biometric credentials, while In-App PIN utilizes a custom passcode secure to this application.'.localized(context),
+                                      'Select how you want to unlock NoteKar. System Lock integrates natively with Android biometric credentials, while In-App PIN utilizes a custom passcode secure to this application.'
+                                          .localized(context),
                                       style: TextStyle(
                                         color: p.text3,
                                         fontSize: 13,
@@ -6810,7 +6854,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     ),
                                     const SizedBox(height: 12),
                                     Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           width: 20,
@@ -6827,7 +6872,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         ),
                                         Expanded(
                                           child: Text(
-                                            'System Lock integrates directly with your Android keyguard system, providing hardware-level biometric or PIN protection.'.localized(context),
+                                            'System Lock integrates directly with your Android keyguard system, providing hardware-level biometric or PIN protection.'
+                                                .localized(context),
                                             style: TextStyle(
                                               color: p.text3,
                                               fontSize: 13,
@@ -6840,7 +6886,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     ),
                                     const SizedBox(height: 8),
                                     Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           width: 20,
@@ -6857,7 +6904,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         ),
                                         Expanded(
                                           child: Text(
-                                            'In-App PIN is cryptographically secured locally using SHA-256 and has built-in brute-force protection to prevent unauthorized access.'.localized(context),
+                                            'In-App PIN is cryptographically secured locally using SHA-256 and has built-in brute-force protection to prevent unauthorized access.'
+                                                .localized(context),
                                             style: TextStyle(
                                               color: p.text3,
                                               fontSize: 13,
@@ -6873,7 +6921,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               ),
                               SettingsBetaNote(
                                 p: p,
-                                text: 'The current features on this page are under Beta stage.'.localized(context),
+                                text:
+                                    'The current features on this page are under Beta stage.'
+                                        .localized(context),
                                 onLearnMore: () => _showBetaInfoPopup(p),
                               ),
                               const SizedBox(height: spacing48),
