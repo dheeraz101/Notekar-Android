@@ -56,178 +56,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         manager: AppWidgetManager,
         appWidgetId: Int
     ) {
-        val views = RemoteViews(
-            context.packageName,
-            R.layout.notekar_widget
-        )
-
-        val prefs = context.getSharedPreferences(
-            PREFS_NAME,
-            Context.MODE_PRIVATE
-        )
-
-        val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
-        val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
-        val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
-        val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, 0L)
-        val hasMoments = prefs.getBoolean(KEY_HAS_MOMENTS, false)
-
-        val options = manager.getAppWidgetOptions(appWidgetId)
-        val minWidth = options.getInt(
-            AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH
-        )
-
-        val compact = minWidth < 200
-
-        views.setTextViewText(
-            R.id.widget_count,
-            todayCount.toString()
-        )
-
-        views.setTextViewText(
-            R.id.widget_mode,
-            if (mode == "single") {
-                "SINGLE MODE"
-            } else {
-                "NEXT: ${nextAction.uppercase()}"
-            }
-        )
-
-        // Count color refinement
-        views.setTextColor(
-            R.id.widget_count,
-            android.graphics.Color.parseColor("#FF0A84FF")
-        )
-
-        val lastType = prefs.getString(KEY_LAST_TYPE, "") ?: ""
-        val lastText = if (!hasMoments || lastTimestamp <= 0L) {
-            "No moments"
-        } else {
-            val time = SimpleDateFormat(
-                "h:mm a",
-                Locale.getDefault()
-            ).format(Date(lastTimestamp))
-
-            val typePrefix = when (lastType.lowercase(Locale.ROOT)) {
-                "in" -> "📥 IN at "
-                "out" -> "📤 OUT at "
-                "single" -> "⚡ Tap at "
-                "note" -> "📝 Note at "
-                else -> ""
-            }
-
-            "$typePrefix$time"
-        }
-
-        views.setTextViewText(
-            R.id.widget_last,
-            lastText
-        )
-
-        // Visibility handling for smaller widget sizes
-        if (compact) {
-            views.setViewVisibility(R.id.widget_mode, View.GONE)
-            views.setViewVisibility(R.id.widget_last, View.GONE)
-            views.setViewVisibility(R.id.widget_clock, View.GONE)
-        } else {
-            views.setViewVisibility(R.id.widget_mode, View.VISIBLE)
-            views.setViewVisibility(R.id.widget_last, View.VISIBLE)
-            views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
-        }
-
-        views.setOnClickPendingIntent(
-            R.id.widget_root,
-            launchIntent(
-                context,
-                appWidgetId,
-                ACTION_OPEN,
-                "open"
-            )
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widget_single,
-            launchBackgroundLogIntent(context, appWidgetId + 10, "single")
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widget_in,
-            launchBackgroundLogIntent(context, appWidgetId + 20, "in")
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widget_out,
-            launchBackgroundLogIntent(context, appWidgetId + 30, "out")
-        )
-
-        views.setOnClickPendingIntent(
-            R.id.widget_note,
-            launchQuickNoteActivityIntent(context, appWidgetId + 40)
-        )
-
-        manager.updateAppWidget(appWidgetId, views)
-    }
-
-    private fun launchIntent(
-        context: Context,
-        requestCode: Int,
-        actionName: String,
-        launchAction: String
-    ): PendingIntent {
-        val intent = Intent(
-            context,
-            MainActivity::class.java
-        ).apply {
-            action = actionName
-            putExtra(
-                MainActivity.EXTRA_LAUNCH_ACTION,
-                launchAction
-            )
-
-            flags =
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-
-        return PendingIntent.getActivity(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or
-                    PendingIntent.FLAG_IMMUTABLE
-        )
-    }
-
-    private fun launchBackgroundLogIntent(
-        context: Context,
-        requestCode: Int,
-        logType: String
-    ): PendingIntent {
-        val intent = Intent(context, NoteKarWidgetProvider::class.java).apply {
-            action = ACTION_LOG_BG
-            putExtra(EXTRA_LOG_TYPE, logType)
-        }
-        return PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-    }
-
-    private fun launchQuickNoteActivityIntent(
-        context: Context,
-        requestCode: Int
-    ): PendingIntent {
-        val intent = Intent(context, QuickNoteActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        return PendingIntent.getActivity(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        Companion.updateWidget(context, manager, appWidgetId)
     }
 
     companion object {
@@ -245,6 +74,68 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_LAST_TIMESTAMP = "last_timestamp"
         const val KEY_HAS_MOMENTS = "has_moments"
         const val KEY_HISTORY = "history"
+
+        private fun launchIntent(
+            context: Context,
+            requestCode: Int,
+            actionName: String,
+            launchAction: String
+        ): PendingIntent {
+            val intent = Intent(
+                context,
+                MainActivity::class.java
+            ).apply {
+                action = actionName
+                putExtra(
+                    MainActivity.EXTRA_LAUNCH_ACTION,
+                    launchAction
+                )
+
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+
+            return PendingIntent.getActivity(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or
+                        PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        private fun launchBackgroundLogIntent(
+            context: Context,
+            requestCode: Int,
+            logType: String
+        ): PendingIntent {
+            val intent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                action = ACTION_LOG_BG
+                putExtra(EXTRA_LOG_TYPE, logType)
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        private fun launchQuickNoteActivityIntent(
+            context: Context,
+            requestCode: Int
+        ): PendingIntent {
+            val intent = Intent(context, QuickNoteActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            return PendingIntent.getActivity(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
 
         fun performBackgroundLog(context: Context, type: String, note: String = "") {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -323,8 +214,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
             val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
             val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
-            val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, 0L)
-            val hasMoments = prefs.getBoolean(KEY_HAS_MOMENTS, false)
 
             val options = manager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(
@@ -418,7 +307,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             views.setOnClickPendingIntent(
                 R.id.widget_root,
-                NoteKarWidgetProvider().launchIntent(
+                launchIntent(
                     context,
                     appWidgetId,
                     ACTION_OPEN,
@@ -428,26 +317,22 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             views.setOnClickPendingIntent(
                 R.id.widget_single,
-                NoteKarWidgetProvider().launchBackgroundLogIntent(
-                    context,
-                    appWidgetId + 10,
-                    "single"
-                )
+                launchBackgroundLogIntent(context, appWidgetId + 10, "single")
             )
 
             views.setOnClickPendingIntent(
                 R.id.widget_in,
-                NoteKarWidgetProvider().launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+                launchBackgroundLogIntent(context, appWidgetId + 20, "in")
             )
 
             views.setOnClickPendingIntent(
                 R.id.widget_out,
-                NoteKarWidgetProvider().launchBackgroundLogIntent(context, appWidgetId + 30, "out")
+                launchBackgroundLogIntent(context, appWidgetId + 30, "out")
             )
 
             views.setOnClickPendingIntent(
                 R.id.widget_note,
-                NoteKarWidgetProvider().launchQuickNoteActivityIntent(context, appWidgetId + 40)
+                launchQuickNoteActivityIntent(context, appWidgetId + 40)
             )
 
             manager.updateAppWidget(appWidgetId, views)
