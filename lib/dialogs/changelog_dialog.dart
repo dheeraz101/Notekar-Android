@@ -1,11 +1,12 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
-import 'package:notekar/utils/l10n_utils.dart';
 
 class ChangelogDialog extends StatefulWidget {
   const ChangelogDialog({
@@ -22,6 +23,30 @@ class ChangelogDialog extends StatefulWidget {
   final bool largeText;
 
   static const releases = [
+    (
+      version: '5.1.0',
+      date: 'July 24, 2026',
+      highlights: [
+        'Security and stability improvements.',
+        'Introduce App Lock with custom PIN, improve build pipeline, and polish release workflow',
+        'Improve update workflow, build UI, and release automation',
+      ],
+      items: [
+        'Chore: integrate VS Code formatting on save, Lefthook configuration, and pre-commit hooks',
+        'Fix: resolve settings dialog type selection sync lag and align code formatting/lints with CI requirements',
+        'Feat: introduce App Lock with custom PIN, improve build pipeline, and polish release workflow',
+        'Optimize downloader with parallel HTTP range requests, redirect appCacheDir to externalCacheDir, and redesign build cache cards',
+        'Feat: improve update workflow, build UI, and release automation',
+        'Updated Readme and fixed it & also fixed the virustotal large file issues',
+        'Publish v4.0.8 Beta changelogs and release notes',
+        'Upgrade update-version script and add build channel badges',
+        'Implement professional-style updates classification system',
+        'Fix YAML syntax validation in build.yml',
+        'Enhance release notes layout, track switching overlays, and editor icons',
+        'Fix info control structures in welcome_screen.dart',
+        'Release v4.0.7 (16) - formatted & dynamic gitignore',
+      ],
+    ),
     (
       version: '5.0.0',
       date: 'July 23, 2026',

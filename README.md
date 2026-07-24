@@ -4,7 +4,7 @@
 
 > **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero friction. 100% Offline-First & Privacy-Focused.
 
-![version](https://img.shields.io/badge/version-5.0.0-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
+![version](https://img.shields.io/badge/version-5.1.0-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
 
 ---
 

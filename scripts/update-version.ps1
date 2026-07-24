@@ -23,7 +23,8 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 Set-Location $repoRoot
 
-function Update-TextFile {
+function Update-TextFile
+{
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path,
@@ -35,7 +36,8 @@ function Update-TextFile {
     $text = Get-Content -LiteralPath $Path -Raw
     $updated = & $Update $text
 
-    if ($updated -eq $text) {
+    if ($updated -eq $text)
+    {
         Write-Host "No changes needed: $Path"
         return
     }
@@ -48,20 +50,24 @@ $pubspecPath = Join-Path $repoRoot 'pubspec.yaml'
 $localPropertiesPath = Join-Path $repoRoot 'android/local.properties'
 $appUtilsPath = Join-Path $repoRoot 'lib/utils/app_utils.dart'
 
-if (-not (Test-Path -LiteralPath $pubspecPath)) {
+if (-not (Test-Path -LiteralPath $pubspecPath))
+{
     throw "pubspec.yaml was not found at $pubspecPath"
 }
-if (-not (Test-Path -LiteralPath $localPropertiesPath)) {
+if (-not (Test-Path -LiteralPath $localPropertiesPath))
+{
     throw "android/local.properties was not found at $localPropertiesPath"
 }
-if (-not (Test-Path -LiteralPath $appUtilsPath)) {
+if (-not (Test-Path -LiteralPath $appUtilsPath))
+{
     throw "lib/utils/app_utils.dart was not found at $appUtilsPath"
 }
 
 # Read and parse current version from pubspec.yaml
 $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
 $versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)\s*$')
-if (-not $versionMatch.Success) {
+if (-not $versionMatch.Success)
+{
     throw "Could not parse current version from pubspec.yaml."
 }
 
@@ -75,50 +81,79 @@ $nextMinor = $currentMinor
 $nextPatch = $currentPatch
 $releaseTypeLabel = "Custom"
 
-if ($stable) {
+if ($stable)
+{
     $nextMajor = $currentMajor + 1
     $nextMinor = 0
     $nextPatch = 0
     $releaseTypeLabel = "Stable Feature Release"
-} elseif ($security) {
+}
+elseif ($security)
+{
     $nextMinor = $currentMinor + 1
     $nextPatch = 0
     $releaseTypeLabel = "Security & Quality Release"
-} elseif ($beta) {
+}
+elseif ($beta)
+{
     $nextPatch = $currentPatch + 1
     $releaseTypeLabel = "Beta Build"
-} else {
-    if (-not $Version) {
+}
+else
+{
+    if (-not $Version)
+    {
         throw "Please specify the release type parameter (-stable, -beta, -security) or pass -Version explicitly."
     }
 }
 
-if (-not $Version) {
+if (-not $Version)
+{
     $Version = "$nextMajor.$nextMinor.$nextPatch"
 }
 
-if (-not $BuildNumber) {
+if (-not $BuildNumber)
+{
     $BuildNumber = $currentBuild + 1
 }
 
 # Query local git log since last tag to auto-populate changelogs
 $gitCommits = ""
-try {
-    $lastTag = (git describe --tags --abbrev=0) 2>$null
-    if ($lastTag) {
-        $commitsList = (git log "$lastTag..HEAD" --oneline) 2>$null
-    } else {
-        $commitsList = (git log -n 10 --oneline) 2>$null
+$cleanCommits = @()
+try
+{
+    $lastTag = (git describe --tags --abbrev=0) 2> $null
+    if ($lastTag)
+    {
+        $commitsList = (git log "$lastTag..HEAD" --oneline) 2> $null
     }
-    if ($commitsList) {
-        $gitCommits = ($commitsList | ForEach-Object { "- $_" }) -join "`r`n"
+    else
+    {
+        $commitsList = (git log -n 10 --oneline) 2> $null
     }
-} catch {
+    if ($commitsList)
+    {
+        # Strip commit hash and capitalize first letter
+        $cleanCommits = $commitsList | ForEach-Object {
+            $msg = $_ -replace '^[0-9a-f]+\s+', ''
+            if ($msg.Length -gt 0)
+            {
+                $msg = $msg.Substring(0, 1).ToUpper() + $msg.Substring(1)
+            }
+            $msg
+        }
+        $gitCommits = ($cleanCommits | ForEach-Object { "- $_" }) -join "`r`n"
+    }
+}
+catch
+{
     # Fallback if git fails
 }
 
-if ([string]::IsNullOrWhiteSpace($gitCommits)) {
+if ( [string]::IsNullOrWhiteSpace($gitCommits))
+{
     $gitCommits = "- Placeholder changelog / commit note here."
+    $cleanCommits = @("Placeholder changelog / commit note here.")
 }
 
 # 1. Update version across core config files
@@ -145,11 +180,13 @@ Update-TextFile -Path $appUtilsPath -Update {
 
 # 2. Automate F-Droid / Fastlane Changelog creation
 $fastlaneDir = Join-Path $repoRoot "fastlane/metadata/android/en-US/changelogs"
-if (-not (Test-Path -LiteralPath $fastlaneDir)) {
+if (-not (Test-Path -LiteralPath $fastlaneDir))
+{
     New-Item -ItemType Directory -Path $fastlaneDir -Force | Out-Null
 }
 $fastlaneFile = Join-Path $fastlaneDir "$BuildNumber.txt"
-if (-not (Test-Path -LiteralPath $fastlaneFile)) {
+if (-not (Test-Path -LiteralPath $fastlaneFile))
+{
     $fastlaneContent = "Update to $Version (build $BuildNumber):`r`n$gitCommits"
     Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
     Write-Host "Created F-Droid changelog template: $fastlaneFile"
@@ -157,13 +194,16 @@ if (-not (Test-Path -LiteralPath $fastlaneFile)) {
 
 # 3. Automate GitHub Release notes template creation with optional Security Update prefix
 $releaseNotesDir = Join-Path $repoRoot "releases/v$Version"
-if (-not (Test-Path -LiteralPath $releaseNotesDir)) {
+if (-not (Test-Path -LiteralPath $releaseNotesDir))
+{
     New-Item -ItemType Directory -Path $releaseNotesDir -Force | Out-Null
 }
 $releaseNotesFile = Join-Path $releaseNotesDir "RELEASE_NOTES.md"
-if (-not (Test-Path -LiteralPath $releaseNotesFile)) {
+if (-not (Test-Path -LiteralPath $releaseNotesFile))
+{
     $prefix = ""
-    if ($security) {
+    if ($security)
+    {
         $prefix = "## 🛡️ Security Update`r`n`r`n"
     }
     $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n### What's Changed`r`n$gitCommits`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
@@ -173,21 +213,66 @@ if (-not (Test-Path -LiteralPath $releaseNotesFile)) {
 
 # 4. Automate In-App Changelog section injection inside changelog_dialog.dart
 $changelogPath = Join-Path $repoRoot "lib/dialogs/changelog_dialog.dart"
-if (Test-Path -LiteralPath $changelogPath) {
+if (Test-Path -LiteralPath $changelogPath)
+{
     $changelogText = Get-Content -LiteralPath $changelogPath -Raw
     $changelogText = $changelogText -replace "`r`n", "`n"
     $versionSearch = "version: '$Version'"
-    if ($changelogText -match [regex]::Escape($versionSearch)) {
+    if ($changelogText -match [regex]::Escape($versionSearch))
+    {
         Write-Host "Changelog entry for version $Version already exists in changelog_dialog.dart"
-    } else {
+    }
+    else
+    {
         $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
-        $jsItems = ""
-        if ($commitsList) {
-            $jsItems = ($commitsList | ForEach-Object { "        '$_'," }) -join "`n"
-        } else {
+
+        # Derive highlights (What's New)
+        $hlList = @()
+        if ($security)
+        {
+            $hlList += "Security and stability improvements."
+        }
+
+        # Find all Feat: / Feature: commits
+        $featCommits = $cleanCommits | Where-Object { $_ -match "^Feat(ure)?:\s*" }
+        foreach ($c in $featCommits)
+        {
+            $cleaned = $c -replace "^Feat(ure)?:\s*", ""
+            if ($cleaned.Length -gt 0)
+            {
+                $cleaned = $cleaned.Substring(0, 1).ToUpper() + $cleaned.Substring(1)
+                $hlList += $cleaned
+            }
+        }
+
+        # Fallback if no highlights found
+        if ($hlList.Count -eq 0)
+        {
+            if ($beta)
+            {
+                $hlList += "Beta testing and feedback build."
+            }
+            elseif ($stable)
+            {
+                $hlList += "Stable feature updates and enhancements."
+            }
+            else
+            {
+                $hlList += "Quality improvements and stability updates."
+            }
+        }
+
+        $jsHighlights = ($hlList | ForEach-Object { "        '$_'," }) -join "`n"
+
+        if ($cleanCommits.Count -gt 0)
+        {
+            $jsItems = ($cleanCommits | ForEach-Object { "        '$_'," }) -join "`n"
+        }
+        else
+        {
             $jsItems = "        'Updated app to version $Version',"
         }
-        $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n        'Active development release.',`n      ],`n      items: [`n$jsItems`n      ],`n    ),"
+        $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n$jsHighlights`n      ],`n      items: [`n$jsItems`n      ],`n    ),"
         $changelogText = $changelogText.Replace("  static const releases = [", $newReleaseEntry)
         Set-Content -LiteralPath $changelogPath -Value $changelogText -NoNewline
         Write-Host "Injected new empty in-app changelog section for v$Version inside changelog_dialog.dart"
@@ -196,27 +281,47 @@ if (Test-Path -LiteralPath $changelogPath) {
 
 # 5. Automate CHANGELOG.md updates
 $changelogMdPath = Join-Path $repoRoot "CHANGELOG.md"
-if (Test-Path -LiteralPath $changelogMdPath) {
+if (Test-Path -LiteralPath $changelogMdPath)
+{
     $changelogMdText = Get-Content -LiteralPath $changelogMdPath -Raw
     $changelogSearch = "## [$Version]"
-    if ($changelogMdText -match [regex]::Escape($changelogSearch)) {
+    if ($changelogMdText -match [regex]::Escape($changelogSearch))
+    {
         Write-Host "Changelog entry for version $Version already exists in CHANGELOG.md"
-    } else {
+    }
+    else
+    {
         $tagSuffix = ""
-        if ($beta) {
+        if ($beta)
+        {
             $tagSuffix = " [Beta]"
-        } elseif ($security) {
+        }
+        elseif ($security)
+        {
             $tagSuffix = " [Security]"
-        } elseif ($stable) {
+        }
+        elseif ($stable)
+        {
             $tagSuffix = " [Stable]"
         }
         $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n### Changed`r`n$gitCommits`r`n`r`n"
         $firstHeaderIndex = $changelogMdText.IndexOf("## [")
-        if ($firstHeaderIndex -ge 0) {
+        if ($firstHeaderIndex -ge 0)
+        {
             $changelogMdText = $changelogMdText.Insert($firstHeaderIndex, $newChangelogEntry)
             Set-Content -LiteralPath $changelogMdPath -Value $changelogMdText -NoNewline
             Write-Host "Injected new empty changelog section for v$Version inside CHANGELOG.md"
         }
+    }
+}
+
+# 6. Automate README.md badge updates
+$readmePath = Join-Path $repoRoot "README.md"
+if (Test-Path -LiteralPath $readmePath)
+{
+    Update-TextFile -Path $readmePath -Update {
+        param($text)
+        [regex]::Replace($text, 'https://img\.shields\.io/badge/version-\d+\.\d+\.\d+-blue', "https://img.shields.io/badge/version-$Version-blue")
     }
 }
 
