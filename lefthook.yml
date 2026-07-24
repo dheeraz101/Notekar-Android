@@ -1,0 +1,9 @@
+# Lefthook configuration for NoteKar CI/CD pipeline and local checks
+# Run: `lefthook install` to configure Git hooks using Lefthook
+
+pre-commit:
+  commands:
+    format:
+      run: dart format lib/ test/ && git add -u
+    analyze:
+      run: flutter analyze

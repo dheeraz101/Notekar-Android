@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
+
 import 'package:hive/hive.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MomentRepository {
   static const String _entryBoxName = 'notekar_entries_v1';
@@ -17,10 +18,55 @@ class MomentRepository {
   late SharedPreferences _prefs;
   final _logger = AppLogger();
 
+  // In-memory cache to boost read performance
+  List<Moment>? _cachedMoments;
+  List<Moment>? _cachedTrashMoments;
+
   Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
     _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
-    _box = await Hive.openBox<dynamic>(_entryBoxName);
-    _trashBox = await Hive.openBox<dynamic>(_trashBoxName);
+
+    // Database Corruption Recovery Wrapper
+    try {
+      _box = await Hive.openBox<dynamic>(_entryBoxName);
+    } catch (e, stack) {
+      _logger.error(
+        'Failed to open entry box due to corruption. Recreating...',
+        e,
+        stack,
+      );
+      try {
+        await Hive.deleteBoxFromDisk(_entryBoxName);
+        _box = await Hive.openBox<dynamic>(_entryBoxName);
+      } catch (innerE, innerStack) {
+        _logger.error(
+          'Failed to recreate corrupted entry box.',
+          innerE,
+          innerStack,
+        );
+        rethrow;
+      }
+    }
+
+    try {
+      _trashBox = await Hive.openBox<dynamic>(_trashBoxName);
+    } catch (e, stack) {
+      _logger.error(
+        'Failed to open trash box due to corruption. Recreating...',
+        e,
+        stack,
+      );
+      try {
+        await Hive.deleteBoxFromDisk(_trashBoxName);
+        _trashBox = await Hive.openBox<dynamic>(_trashBoxName);
+      } catch (innerE, innerStack) {
+        _logger.error(
+          'Failed to recreate corrupted trash box.',
+          innerE,
+          innerStack,
+        );
+        rethrow;
+      }
+    }
 
     await _autoPurgeOldTrash();
 
@@ -30,6 +76,11 @@ class MomentRepository {
     if (_trashBox.length > 300) {
       unawaited(_trashBox.compact());
     }
+
+    // Pre-populate the cache in the background for zero-delay read paths
+    getAllMoments();
+    getTrashMoments();
+
     _logger.info(
       'MomentRepository initialized with ${_box.length} entries, ${_trashBox.length} trash entries',
     );
@@ -53,6 +104,7 @@ class MomentRepository {
 
       if (keysToRemove.isNotEmpty) {
         await _trashBox.deleteAll(keysToRemove);
+        _cachedTrashMoments = null; // Invalidate cache
         _logger.info(
           'Auto-purged ${keysToRemove.length} trash entries older than 30 days',
         );
@@ -63,12 +115,16 @@ class MomentRepository {
   }
 
   List<Moment> getAllMoments() {
+    if (_cachedMoments != null) {
+      return _cachedMoments!;
+    }
     try {
       final moments = _box.values
           .whereType<Map>()
           .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
           .toList();
       moments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _cachedMoments = moments;
       return moments;
     } catch (e, stack) {
       _logger.error('Failed to load moments from Hive', e, stack);
@@ -77,6 +133,9 @@ class MomentRepository {
   }
 
   List<Moment> getTrashMoments() {
+    if (_cachedTrashMoments != null) {
+      return _cachedTrashMoments!;
+    }
     try {
       final moments = <Moment>[];
       for (final value in _trashBox.values) {
@@ -91,6 +150,7 @@ class MomentRepository {
         }
       }
       moments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _cachedTrashMoments = moments;
       return moments;
     } catch (e, stack) {
       _logger.error('Failed to load trash moments from Hive', e, stack);
@@ -105,6 +165,12 @@ class MomentRepository {
       if (moment.id >= currentNextId) {
         await _prefs.setInt(_nextIdKey, moment.id + 1);
       }
+      // Update local cache
+      if (_cachedMoments != null) {
+        _cachedMoments!.removeWhere((m) => m.id == moment.id);
+        _cachedMoments!.add(moment);
+        _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      }
     } catch (e, stack) {
       _logger.error('Failed to save moment ${moment.id}', e, stack);
       rethrow;
@@ -115,15 +181,30 @@ class MomentRepository {
     try {
       final raw = _box.get(id);
       if (raw != null) {
+        Map<String, dynamic>? jsonMap;
         if (raw is Map) {
-          await _trashBox.put(id, Map<String, dynamic>.from(raw));
+          jsonMap = Map<String, dynamic>.from(raw);
         } else if (raw is Moment) {
-          await _trashBox.put(id, raw.toJson());
-        } else {
-          await _trashBox.put(id, raw);
+          jsonMap = raw.toJson();
+        }
+        if (jsonMap != null) {
+          await _trashBox.put(id, jsonMap);
+          // Update trash cache
+          if (_cachedTrashMoments != null) {
+            final moment = Moment.fromJson(jsonMap);
+            _cachedTrashMoments!.removeWhere((m) => m.id == id);
+            _cachedTrashMoments!.add(moment);
+            _cachedTrashMoments!.sort(
+              (a, b) => b.timestamp.compareTo(a.timestamp),
+            );
+          }
         }
       }
       await _box.delete(id);
+      // Update entries cache
+      if (_cachedMoments != null) {
+        _cachedMoments!.removeWhere((m) => m.id == id);
+      }
     } catch (e, stack) {
       _logger.error('Failed to delete moment $id', e, stack);
       rethrow;
@@ -134,14 +215,27 @@ class MomentRepository {
     try {
       final raw = _trashBox.get(id);
       if (raw != null) {
+        Map<String, dynamic>? jsonMap;
         if (raw is Map) {
-          await _box.put(id, Map<String, dynamic>.from(raw));
+          jsonMap = Map<String, dynamic>.from(raw);
         } else if (raw is Moment) {
-          await _box.put(id, raw.toJson());
-        } else {
-          await _box.put(id, raw);
+          jsonMap = raw.toJson();
+        }
+        if (jsonMap != null) {
+          await _box.put(id, jsonMap);
+          // Update entries cache
+          if (_cachedMoments != null) {
+            final moment = Moment.fromJson(jsonMap);
+            _cachedMoments!.removeWhere((m) => m.id == id);
+            _cachedMoments!.add(moment);
+            _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          }
         }
         await _trashBox.delete(id);
+        // Update trash cache
+        if (_cachedTrashMoments != null) {
+          _cachedTrashMoments!.removeWhere((m) => m.id == id);
+        }
       }
     } catch (e, stack) {
       _logger.error('Failed to restore trash moment $id', e, stack);
@@ -154,6 +248,9 @@ class MomentRepository {
       final entries = _trashBox.toMap();
       await _box.putAll(entries);
       await _trashBox.clear();
+      // Invalidate caches
+      _cachedMoments = null;
+      _cachedTrashMoments = null;
     } catch (e, stack) {
       _logger.error('Failed to restore all trash moments', e, stack);
       rethrow;
@@ -163,6 +260,10 @@ class MomentRepository {
   Future<void> permanentlyDeleteTrashMoment(int id) async {
     try {
       await _trashBox.delete(id);
+      // Update trash cache
+      if (_cachedTrashMoments != null) {
+        _cachedTrashMoments!.removeWhere((m) => m.id == id);
+      }
     } catch (e, stack) {
       _logger.error('Failed to permanently delete trash moment $id', e, stack);
       rethrow;
@@ -172,6 +273,7 @@ class MomentRepository {
   Future<void> clearTrash() async {
     try {
       await _trashBox.clear();
+      _cachedTrashMoments = [];
     } catch (e, stack) {
       _logger.error('Failed to clear trash', e, stack);
       rethrow;
@@ -186,6 +288,9 @@ class MomentRepository {
       }
       await _box.clear();
       await _prefs.remove(_nextIdKey);
+      // Update caches
+      _cachedMoments = [];
+      _cachedTrashMoments = null;
     } catch (e, stack) {
       _logger.error('Failed to clear all moments', e, stack);
       rethrow;
@@ -203,6 +308,10 @@ class MomentRepository {
       }
       await _box.putAll(entries);
       await _prefs.setInt(_nextIdKey, maxId + 1);
+      // Update cache
+      final copy = List<Moment>.from(moments);
+      copy.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _cachedMoments = copy;
     } catch (e, stack) {
       _logger.error('Failed to replace all moments', e, stack);
       rethrow;
@@ -228,6 +337,7 @@ class MomentRepository {
       }
 
       await _prefs.remove(_legacyEntriesKey);
+      _cachedMoments = null; // Invalidate cache
       _logger.info('Successfully migrated ${entries.length} legacy entries');
       return entries;
     } catch (e, stack) {
