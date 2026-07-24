@@ -287,6 +287,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   bool _betaTrack = false;
   bool obfuscateInRecents = false;
+  bool showPersistentNotification = false;
 
   String _vtRatio = '0 / 60+ clean';
   String _vtStatus = 'Undetected';
@@ -300,6 +301,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
     setState(() {
       _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
       obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
+      showPersistentNotification =
+          _prefs?.getBool('show_persistent_notification') ?? false;
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _dailyReminderEnabled =
@@ -1723,6 +1726,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
             await const MethodChannel(
               'notekar/files',
             ).invokeMethod<void>('setObfuscateInRecents', {'enabled': value});
+          } catch (_) {}
+        },
+        status: null,
+      ),
+      item(
+        title: 'Persistent Control Panel',
+        subtitle:
+            'Show a sticky notification in the drawer to log check-in/out from lock screen',
+        category: 'Logging',
+        icon: Icons.notification_important_rounded,
+        keywords: [
+          'control panel',
+          'persistent',
+          'notification',
+          'lock screen',
+          'lockscreen log',
+          'sticky notification',
+          'quick log notification',
+        ],
+        kind: 'switch',
+        boolValue: showPersistentNotification,
+        onBoolChanged: (bool value) async {
+          if (_prefs != null) {
+            await _prefs!.setBool('show_persistent_notification', value);
+          }
+          setState(() => showPersistentNotification = value);
+          try {
+            await const MethodChannel('notekar/files').invokeMethod<void>(
+              'setPersistentControlPanel',
+              {'enabled': value},
+            );
           } catch (_) {}
         },
         status: null,
@@ -3998,6 +4032,47 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 text:
                                     'These settings define how moments are recorded and prepared for export.',
                               ),
+                              const SizedBox(height: 12),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Notification Panel',
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    icon: Icons.notification_important_rounded,
+                                    title: 'Persistent Control Panel',
+                                    subtitle:
+                                        'Show a sticky notification in the drawer to log check-in/out directly from the lock screen.',
+                                    value: showPersistentNotification,
+                                    color: p.accent,
+                                    onChanged: (value) async {
+                                      if (_prefs != null) {
+                                        await _prefs!.setBool(
+                                          'show_persistent_notification',
+                                          value,
+                                        );
+                                      }
+                                      setState(
+                                        () =>
+                                            showPersistentNotification = value,
+                                      );
+                                      try {
+                                        await const MethodChannel(
+                                          'notekar/files',
+                                        ).invokeMethod<void>(
+                                          'setPersistentControlPanel',
+                                          {'enabled': value},
+                                        );
+                                      } catch (_) {}
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Enables quick, low-priority control notification in the system drawer for convenience.',
+                              ),
                               const SizedBox(height: spacing48),
                             ]),
                           ),
@@ -5715,6 +5790,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     text:
                                         'Turn on Hide App Content in Recents under Settings > Privacy & Security to cover app screens and block screenshots when minimizing the app.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.notification_important_rounded,
+                                    title: 'Persistent Control Panel',
+                                    text:
+                                        'Enable in Settings > Logging to show a low-priority, sticky control notification in the system drawer for instant checking IN/OUT from the lock screen.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -5870,6 +5952,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         'How do I block screenshots and screen previews?',
                                     answer:
                                         'Enable "Hide App Content in Recents" under Settings > Privacy & Security. Once enabled, screenshots will be blocked inside NoteKar, and the system app switcher card will appear blank.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I log directly from the lock screen?',
+                                    answer:
+                                        'Turn on "Persistent Control Panel" in Settings > Logging. A sticky, low-priority control card will appear in your notification drawer with quick actions to log IN, OUT, or write a quick note instantly.',
                                   ),
                                 ],
                               ),

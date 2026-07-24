@@ -40,6 +40,16 @@ class MainActivity : FlutterActivity() {
             android.util.Log.e("MainActivity", "Failed to reschedule reminders on launch", e)
         }
 
+        try {
+            val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val showPanel = prefs.getBoolean("flutter.show_persistent_notification", false)
+            if (showPanel) {
+                showPersistentControlPanel(this)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to initialize persistent control panel", e)
+        }
+
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "notekar/files"
@@ -297,6 +307,20 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     } catch (e: Exception) {
                         result.error("FLAG_SECURE_FAILED", e.message, null)
+                    }
+                }
+
+                "setPersistentControlPanel" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    try {
+                        if (enabled) {
+                            showPersistentControlPanel(this)
+                        } else {
+                            cancelPersistentControlPanel(this)
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("PANEL_FAILED", e.message, null)
                     }
                 }
 
@@ -779,11 +803,89 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun showPersistentControlPanel(context: Context) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = "notekar_persistent_control"
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Persistent Control Panel",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Quick actions to log check-in/out or compose notes from lock screen"
+                setShowBadge(false)
+            }
+            manager.createNotificationChannel(channel)
+        }
+
+        val inIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+            action = NoteKarWidgetProvider.ACTION_LOG_BG
+            putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "in")
+        }
+        val inPending = PendingIntent.getBroadcast(
+            context,
+            1001,
+            inIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val outIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+            action = NoteKarWidgetProvider.ACTION_LOG_BG
+            putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "out")
+        }
+        val outPending = PendingIntent.getBroadcast(
+            context,
+            1002,
+            outIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val noteIntent = Intent(context, QuickNoteActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        val notePending = PendingIntent.getActivity(
+            context,
+            1003,
+            noteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val mainIntent = Intent(context, MainActivity::class.java)
+        val mainPending = PendingIntent.getActivity(
+            context,
+            1000,
+            mainIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_stat_notekar)
+            .setContentTitle("NoteKar Control Panel")
+            .setContentText("Tap to open. Use quick actions below to log instantly.")
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(mainPending)
+            .setOngoing(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .addAction(R.drawable.ic_stat_notekar, "Log IN", inPending)
+            .addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
+            .addAction(R.drawable.ic_stat_notekar, "Quick NOTE", notePending)
+            .build()
+
+        manager.notify(PERSISTENT_NOTIFICATION_ID, notification)
+    }
+
+    private fun cancelPersistentControlPanel(context: Context) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(PERSISTENT_NOTIFICATION_ID)
+    }
+
     companion object {
         private const val OPEN_TEXT_FILE_REQUEST = 4021
         private const val NOTIFICATION_PERMISSION_REQUEST = 4022
         private const val PRIVACY_LOCK_REQUEST = 4023
         private const val UPDATE_NOTIFICATION_ID = 3100
+        private const val PERSISTENT_NOTIFICATION_ID = 3105
         private const val UPDATE_CHANNEL_ID = "notekar_updates"
         const val EXTRA_LAUNCH_ACTION = "app.notekar.notekar.extra.LAUNCH_ACTION"
         const val ACTION_NOTE = "app.notekar.notekar.ACTION_NOTE"
