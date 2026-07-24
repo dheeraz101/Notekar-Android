@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -22,12 +23,90 @@ class MomentRepository {
   List<Moment>? _cachedMoments;
   List<Moment>? _cachedTrashMoments;
 
+  Future<List<int>?> _getOrGenerateEncryptionKey() async {
+    const secureStorage = FlutterSecureStorage();
+    try {
+      final base64Key = await secureStorage.read(key: 'hive_secure_key');
+      if (base64Key != null) {
+        return base64.decode(base64Key);
+      }
+
+      // Check if we need to migrate plain text boxes
+      final hasOldData =
+          await Hive.boxExists(_entryBoxName) ||
+          await Hive.boxExists(_trashBoxName);
+      Map<dynamic, dynamic>? oldEntries;
+      Map<dynamic, dynamic>? oldTrash;
+
+      if (hasOldData) {
+        try {
+          final box = await Hive.openBox<dynamic>(_entryBoxName);
+          final trashBox = await Hive.openBox<dynamic>(_trashBoxName);
+          oldEntries = Map<dynamic, dynamic>.from(box.toMap());
+          oldTrash = Map<dynamic, dynamic>.from(trashBox.toMap());
+          await box.close();
+          await trashBox.close();
+        } catch (e, stack) {
+          _logger.error(
+            'Failed to read old plain text data for migration',
+            e,
+            stack,
+          );
+        }
+      }
+
+      final newKey = Hive.generateSecureKey();
+      await secureStorage.write(
+        key: 'hive_secure_key',
+        value: base64.encode(newKey),
+      );
+
+      if (oldEntries != null || oldTrash != null) {
+        // Re-write to encrypted boxes after key generation
+        final cipher = HiveAesCipher(newKey);
+        final box = await Hive.openBox<dynamic>(
+          _entryBoxName,
+          encryptionCipher: cipher,
+        );
+        final trashBox = await Hive.openBox<dynamic>(
+          _trashBoxName,
+          encryptionCipher: cipher,
+        );
+        if (oldEntries != null) await box.putAll(oldEntries);
+        if (oldTrash != null) await trashBox.putAll(oldTrash);
+        await box.close();
+        await trashBox.close();
+      }
+
+      return newKey;
+    } catch (e, stack) {
+      _logger.error(
+        'Secure storage failure, falling back to unencrypted or cached key',
+        e,
+        stack,
+      );
+      final fallbackBase64 = _prefs.getString('hive_fallback_key');
+      if (fallbackBase64 != null) {
+        return base64.decode(fallbackBase64);
+      }
+      final fallbackKey = Hive.generateSecureKey();
+      await _prefs.setString('hive_fallback_key', base64.encode(fallbackKey));
+      return fallbackKey;
+    }
+  }
+
   Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
     _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
 
+    final encryptionKey = await _getOrGenerateEncryptionKey();
+    final cipher = encryptionKey != null ? HiveAesCipher(encryptionKey) : null;
+
     // Database Corruption Recovery Wrapper
     try {
-      _box = await Hive.openBox<dynamic>(_entryBoxName);
+      _box = await Hive.openBox<dynamic>(
+        _entryBoxName,
+        encryptionCipher: cipher,
+      );
     } catch (e, stack) {
       _logger.error(
         'Failed to open entry box due to corruption. Recreating...',
@@ -36,7 +115,10 @@ class MomentRepository {
       );
       try {
         await Hive.deleteBoxFromDisk(_entryBoxName);
-        _box = await Hive.openBox<dynamic>(_entryBoxName);
+        _box = await Hive.openBox<dynamic>(
+          _entryBoxName,
+          encryptionCipher: cipher,
+        );
       } catch (innerE, innerStack) {
         _logger.error(
           'Failed to recreate corrupted entry box.',
@@ -48,7 +130,10 @@ class MomentRepository {
     }
 
     try {
-      _trashBox = await Hive.openBox<dynamic>(_trashBoxName);
+      _trashBox = await Hive.openBox<dynamic>(
+        _trashBoxName,
+        encryptionCipher: cipher,
+      );
     } catch (e, stack) {
       _logger.error(
         'Failed to open trash box due to corruption. Recreating...',
@@ -57,7 +142,10 @@ class MomentRepository {
       );
       try {
         await Hive.deleteBoxFromDisk(_trashBoxName);
-        _trashBox = await Hive.openBox<dynamic>(_trashBoxName);
+        _trashBox = await Hive.openBox<dynamic>(
+          _trashBoxName,
+          encryptionCipher: cipher,
+        );
       } catch (innerE, innerStack) {
         _logger.error(
           'Failed to recreate corrupted trash box.',

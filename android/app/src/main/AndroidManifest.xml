@@ -207,6 +207,17 @@
             android:launchMode="singleInstance"
             android:taskAffinity="app.notekar.notekar.quicknote"
             android:exported="false" />
+
+        <service
+            android:name=".QuickNoteTileService"
+            android:icon="@drawable/ic_stat_notekar"
+            android:label="Quick Note"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -19,6 +19,7 @@ dependencies:
   device_info_plus: ^13.2.0
   quick_actions: ^1.0.10
   crypto: ^3.0.6
+  flutter_secure_storage: ^10.3.1
 
 dev_dependencies:
   flutter_test:

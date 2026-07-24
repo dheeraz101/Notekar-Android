@@ -571,8 +571,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
     const quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       if (!mounted) return;
-      if (shortcutType == 'quick_log_in' || shortcutType == 'quick_log_out') {
-        unawaited(_logEntry());
+      if (shortcutType == 'quick_log_in') {
+        unawaited(_logEntry(forcedType: 'in'));
+      } else if (shortcutType == 'quick_log_out') {
+        unawaited(_logEntry(forcedType: 'out'));
+      } else if (shortcutType == 'compose_note') {
+        unawaited(_openNote());
       } else if (shortcutType == 'open_history') {
         unawaited(_openHistory());
       }
@@ -586,6 +590,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       const ShortcutItem(
         type: 'quick_log_out',
         localizedTitle: 'Instant Log (OUT)',
+        icon: 'ic_launcher',
+      ),
+      const ShortcutItem(
+        type: 'compose_note',
+        localizedTitle: 'Compose Note',
         icon: 'ic_launcher',
       ),
       const ShortcutItem(
@@ -766,23 +775,35 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
-  Future<void> _logEntry({String? note, Offset? position}) async {
+  Future<void> _logEntry({
+    String? note,
+    Offset? position,
+    String? forcedType,
+  }) async {
     if (_isSaving) return;
     _isSaving = true;
 
     final now = DateTime.now();
     final reminderTitle = 'logging reminder'.localized(context);
     final reminderBody = 'time to log a moment!'.localized(context);
-    var type = 'single';
+    var type = forcedType ?? 'single';
     final oldInOut = _inout;
     final oldSessionStart = _sessionStart;
 
-    if (_mode == 'two-way') {
+    if (forcedType == null && _mode == 'two-way') {
       type = _inout;
       if (_inout == 'in') {
         _sessionStart = now.millisecondsSinceEpoch;
         _inout = 'out';
       } else {
+        _sessionStart = null;
+        _inout = 'in';
+      }
+    } else if (forcedType != null) {
+      if (forcedType == 'in') {
+        _sessionStart = now.millisecondsSinceEpoch;
+        _inout = 'out';
+      } else if (forcedType == 'out') {
         _sessionStart = null;
         _inout = 'in';
       }

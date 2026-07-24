@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -9,8 +10,8 @@ import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
-import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -599,6 +600,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         },
                         childCount: _listItems.length + (hasOlderRows ? 1 : 0),
                         addAutomaticKeepAlives: false,
+                        addRepaintBoundaries: true,
                       ),
                     ),
                   ),
@@ -612,8 +614,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 reverseDuration: const Duration(milliseconds: 250),
-                switchInCurve:
-                    Curves.easeOutBack, // Professional iOS spring curve
+                switchInCurve: Curves.easeOutBack,
+                // Professional iOS spring curve
                 switchOutCurve: Curves.easeIn,
                 transitionBuilder: (child, animation) {
                   final slide = Tween<Offset>(
