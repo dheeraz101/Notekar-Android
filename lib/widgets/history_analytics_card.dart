@@ -762,24 +762,21 @@ class IntelligentInsightsCard extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           _buildInsightRow(
-            Icons.access_time_filled_rounded,
-            p.accent,
+            Icons.access_time_rounded,
             'Time Slot Bias',
             'Your peak slot is $peakSlot ($peakPercentage% of logs).',
             p,
           ),
           const Divider(height: 24, thickness: 0.5, color: Colors.transparent),
           _buildInsightRow(
-            Icons.calendar_month_rounded,
-            p.green,
+            Icons.calendar_today_rounded,
             'Weekly Pattern',
             densityCompare,
             p,
           ),
           const Divider(height: 24, thickness: 0.5, color: Colors.transparent),
           _buildInsightRow(
-            Icons.star_rounded,
-            p.orange,
+            Icons.star_outline_rounded,
             'Peak Performance Day',
             'You log most consistently on ${peakDayName}s.',
             p,
@@ -789,23 +786,16 @@ class IntelligentInsightsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInsightRow(
-    IconData icon,
-    Color iconColor,
-    String title,
-    String body,
-    Palette p,
-  ) {
-    return Row(
+  Widget _buildInsightRow(IconData icon, String title, String body, Palette p) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: iconColor, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
+        Row(
+          children: [
+            Icon(icon, color: p.accent, size: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
                 title,
                 style: TextStyle(
                   color: p.text,
@@ -813,12 +803,15 @@ class IntelligentInsightsCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                body,
-                style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.35),
-              ),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.only(left: 24),
+          child: Text(
+            body,
+            style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.35),
           ),
         ),
       ],
