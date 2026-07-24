@@ -8,11 +8,11 @@
     android:padding="10dp"
     android:background="@drawable/notekar_widget_background">
 
-    <!-- Top Display Panel (Stats + View Point) -->
+    <!-- Top Display Panel (Stats + History Stack) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1.0"
         android:orientation="horizontal"
         android:baselineAligned="false">
 
@@ -20,7 +20,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.1"
+            android:layout_weight="1.0"
             android:layout_gravity="center_vertical"
             android:orientation="vertical">
 
@@ -31,14 +31,14 @@
                 android:format12Hour="h:mm a"
                 android:format24Hour="HH:mm"
                 android:textColor="#FFFFFFFF"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textColor="#FF0A84FF"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:includeFontPadding="false" />
 
@@ -57,7 +57,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="MOMENTS"
+                    android:text="LOGS"
                     android:textColor="#99FFFFFF"
                     android:textSize="8sp"
                     android:textStyle="bold"
@@ -75,101 +75,138 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Right Column: Last Log View Point Card -->
+        <!-- Right Column: History Stack -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.4"
+            android:layout_weight="2.0"
             android:orientation="vertical"
-            android:padding="6dp"
             android:gravity="center_vertical"
-            android:background="@drawable/notekar_widget_button">
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="LAST LOG VIEW"
-                android:textColor="#80FFFFFF"
-                android:textSize="8sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.05" />
-
-            <TextView
-                android:id="@+id/widget_last"
+                android:id="@+id/widget_history_0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="No moments"
+                android:text=""
                 android:textColor="#FFFFFFFF"
-                android:textSize="11sp"
+                android:textSize="9.5sp"
                 android:textStyle="bold"
-                android:maxLines="2"
-                android:includeFontPadding="false" />
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_history_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1.5dp"
+                android:text=""
+                android:textColor="#CCFFFFFF"
+                android:textSize="9.5sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_history_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1.5dp"
+                android:text=""
+                android:textColor="#99FFFFFF"
+                android:textSize="9.5sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_history_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1.5dp"
+                android:text=""
+                android:textColor="#66FFFFFF"
+                android:textSize="9.5sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Bottom Actions Dock (Large Buttons Row) -->
+    <!-- Bottom Actions Dock (2x2 Grid, 70% height) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="46dp"
+        android:layout_height="0dp"
+        android:layout_weight="2.3"
         android:layout_marginTop="6dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/widget_in"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+        <!-- Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_margin="1.5dp"
-            android:gravity="center"
-            android:text="📥 IN"
-            android:textColor="#FF34C759"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:background="@drawable/notekar_widget_button"
-            android:backgroundTint="#1534C759" />
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/widget_out"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="1.5dp"
-            android:gravity="center"
-            android:text="📤 OUT"
-            android:textColor="#FFFF3B30"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:background="@drawable/notekar_widget_button"
-            android:backgroundTint="#15FF3B30" />
+            <TextView
+                android:id="@+id/widget_in"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:gravity="center"
+                android:text="IN"
+                android:textColor="#FFFFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/notekar_widget_button" />
 
-        <TextView
-            android:id="@+id/widget_single"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="1.5dp"
-            android:gravity="center"
-            android:text="⚡ Tap"
-            android:textColor="#FF007AFF"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:background="@drawable/notekar_widget_button"
-            android:backgroundTint="#15007AFF" />
+            <TextView
+                android:id="@+id/widget_out"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:gravity="center"
+                android:text="OUT"
+                android:textColor="#FFFFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/notekar_widget_button" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/widget_note"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+        <!-- Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_margin="1.5dp"
-            android:gravity="center"
-            android:text="📝 Note"
-            android:textColor="#FFAF52DE"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:background="@drawable/notekar_widget_button"
-            android:backgroundTint="#15AF52DE" />
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:id="@+id/widget_single"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:gravity="center"
+                android:text="TAP"
+                android:textColor="#FFFFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/notekar_widget_button" />
+
+            <TextView
+                android:id="@+id/widget_note"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:gravity="center"
+                android:text="NOTE"
+                android:textColor="#FFFFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/notekar_widget_button" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

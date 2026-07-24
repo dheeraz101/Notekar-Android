@@ -1342,6 +1342,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     final latest = _entries.isEmpty ? null : _entries.first;
 
+    // Serialize last 10 moments for widget history stack
+    final historyList = _entries
+        .take(10)
+        .map((e) => '${e.timestamp}|${e.type}|${e.note}')
+        .toList();
+
     try {
       await _fileChannel.invokeMethod<void>('updateWidgetState', {
         'todayCount': todayCount,
@@ -1350,6 +1356,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'lastType': latest?.type ?? '',
         'lastTimestamp': latest?.timestamp ?? 0,
         'hasMoments': latest != null,
+        'historyList': historyList,
       });
     } catch (_) {
       // Widget updates must never affect logging.

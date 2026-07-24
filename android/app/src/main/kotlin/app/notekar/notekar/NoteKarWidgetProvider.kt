@@ -244,6 +244,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_LAST_TYPE = "last_type"
         const val KEY_LAST_TIMESTAMP = "last_timestamp"
         const val KEY_HAS_MOMENTS = "has_moments"
+        const val KEY_HISTORY = "history"
 
         fun performBackgroundLog(context: Context, type: String, note: String = "") {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -253,11 +254,22 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val newCount = todayCount + 1
             val now = System.currentTimeMillis()
 
-            // Toggle next action if two-way
             val newNextAction = if (mode == "two-way") {
                 if (type == "in") "out" else "in"
             } else {
                 "single"
+            }
+
+            // Update local history string instantly
+            val currentHistory = prefs.getString(KEY_HISTORY, "") ?: ""
+            val newEntry = "$now|$type|$note"
+            val updatedHistory = if (currentHistory.isEmpty()) {
+                newEntry
+            } else {
+                val list = currentHistory.split("\n").toMutableList()
+                list.add(0, newEntry)
+                val limit = if (list.size > 10) 10 else list.size
+                list.subList(0, limit).joinToString("\n")
             }
 
             // Update widget preferences
@@ -267,9 +279,10 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 .putLong(KEY_LAST_TIMESTAMP, now)
                 .putBoolean(KEY_HAS_MOMENTS, true)
                 .putString(KEY_LAST_TYPE, type)
+                .putString(KEY_HISTORY, updatedHistory)
                 .apply()
 
-            // Update all widgets visually
+            // Update all widgets visually and instantly
             updateAllWidgets(context)
 
             // Write to pending queue inside Flutter's default SharedPreferences file
@@ -292,6 +305,154 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             Toast.makeText(context, "Logged $label successfully", Toast.LENGTH_SHORT).show()
         }
 
+        fun updateWidget(
+            context: Context,
+            manager: AppWidgetManager,
+            appWidgetId: Int
+        ) {
+            val views = RemoteViews(
+                context.packageName,
+                R.layout.notekar_widget
+            )
+
+            val prefs = context.getSharedPreferences(
+                PREFS_NAME,
+                Context.MODE_PRIVATE
+            )
+
+            val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
+            val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
+            val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
+            val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, 0L)
+            val hasMoments = prefs.getBoolean(KEY_HAS_MOMENTS, false)
+
+            val options = manager.getAppWidgetOptions(appWidgetId)
+            val minWidth = options.getInt(
+                AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH
+            )
+
+            val compact = minWidth < 200
+
+            views.setTextViewText(
+                R.id.widget_count,
+                todayCount.toString()
+            )
+
+            views.setTextViewText(
+                R.id.widget_mode,
+                if (mode == "single") {
+                    "SINGLE MODE"
+                } else {
+                    "NEXT: ${nextAction.uppercase(Locale.ROOT)}"
+                }
+            )
+
+            // Count color refinement
+            views.setTextColor(
+                R.id.widget_count,
+                android.graphics.Color.parseColor("#FF0A84FF")
+            )
+
+            // Bind history stack
+            val historyString = prefs.getString(KEY_HISTORY, "") ?: ""
+            val historyLines =
+                if (historyString.isEmpty()) emptyList() else historyString.split("\n")
+
+            val historyTextViewIds = intArrayOf(
+                R.id.widget_history_0,
+                R.id.widget_history_1,
+                R.id.widget_history_2,
+                R.id.widget_history_3
+            )
+
+            if (compact) {
+                views.setViewVisibility(R.id.widget_clock, View.GONE)
+                for (viewId in historyTextViewIds) {
+                    views.setViewVisibility(viewId, View.GONE)
+                }
+            } else {
+                views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
+                for (i in historyTextViewIds.indices) {
+                    val viewId = historyTextViewIds[i]
+                    if (i < historyLines.size) {
+                        val parts = historyLines[i].split("|")
+                        if (parts.size >= 2) {
+                            val timestamp = parts[0].toLongOrNull() ?: 0L
+                            val type = parts[1]
+                            val note = if (parts.size > 2) parts[2] else ""
+
+                            val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
+                                Date(timestamp)
+                            )
+
+                            val typeLabel = when (type.lowercase(Locale.ROOT)) {
+                                "in" -> "📥 IN"
+                                "out" -> "📤 OUT"
+                                "single" -> "⚡ Tap"
+                                "note" -> "📝 " + (if (note.isNotEmpty()) note else "Note")
+                                else -> type.uppercase(Locale.ROOT)
+                            }
+
+                            val noteSuffix =
+                                if (type.lowercase(Locale.ROOT) != "note" && note.isNotEmpty()) {
+                                    " ($note)"
+                                } else {
+                                    ""
+                                }
+
+                            views.setTextViewText(viewId, "$time - $typeLabel$noteSuffix")
+                            views.setViewVisibility(viewId, View.VISIBLE)
+                        } else {
+                            views.setViewVisibility(viewId, View.GONE)
+                        }
+                    } else {
+                        if (i == 0 && historyLines.isEmpty()) {
+                            views.setTextViewText(viewId, "No history")
+                            views.setViewVisibility(viewId, View.VISIBLE)
+                        } else {
+                            views.setViewVisibility(viewId, View.GONE)
+                        }
+                    }
+                }
+            }
+
+            views.setOnClickPendingIntent(
+                R.id.widget_root,
+                NoteKarWidgetProvider().launchIntent(
+                    context,
+                    appWidgetId,
+                    ACTION_OPEN,
+                    "open"
+                )
+            )
+
+            views.setOnClickPendingIntent(
+                R.id.widget_single,
+                NoteKarWidgetProvider().launchBackgroundLogIntent(
+                    context,
+                    appWidgetId + 10,
+                    "single"
+                )
+            )
+
+            views.setOnClickPendingIntent(
+                R.id.widget_in,
+                NoteKarWidgetProvider().launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+            )
+
+            views.setOnClickPendingIntent(
+                R.id.widget_out,
+                NoteKarWidgetProvider().launchBackgroundLogIntent(context, appWidgetId + 30, "out")
+            )
+
+            views.setOnClickPendingIntent(
+                R.id.widget_note,
+                NoteKarWidgetProvider().launchQuickNoteActivityIntent(context, appWidgetId + 40)
+            )
+
+            manager.updateAppWidget(appWidgetId, views)
+        }
+
         fun updateAllWidgets(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
 
@@ -304,18 +465,9 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             if (ids.isEmpty()) return
 
-            val intent = Intent(
-                context,
-                NoteKarWidgetProvider::class.java
-            ).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(
-                    AppWidgetManager.EXTRA_APPWIDGET_IDS,
-                    ids
-                )
+            for (id in ids) {
+                updateWidget(context, manager, id)
             }
-
-            context.sendBroadcast(intent)
         }
     }
 }

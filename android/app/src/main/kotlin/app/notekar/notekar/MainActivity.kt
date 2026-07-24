@@ -1,28 +1,28 @@
 package app.notekar.notekar
 
 import android.Manifest
-import android.content.ContentValues
 import android.app.AlarmManager
 import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
+import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
-import android.provider.Settings
 import android.os.Environment
+import android.os.PowerManager
 import android.provider.MediaStore
+import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
-import java.io.File
-import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.content.Context
+import java.io.File
 
 class MainActivity : FlutterActivity() {
     private var pendingOpenResult: MethodChannel.Result? = null
@@ -40,7 +40,10 @@ class MainActivity : FlutterActivity() {
             android.util.Log.e("MainActivity", "Failed to reschedule reminders on launch", e)
         }
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "notekar/files").setMethodCallHandler { call, result ->
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "notekar/files"
+        ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "saveTextFile" -> {
                     val fileName = call.argument<String>("fileName") ?: "notekar-export.txt"
@@ -53,11 +56,17 @@ class MainActivity : FlutterActivity() {
                         result.error("EXPORT_FAILED", error.message, null)
                     }
                 }
+
                 "openTextFile" -> {
                     if (pendingOpenResult != null) {
                         try {
-                            pendingOpenResult?.error("OPEN_CANCELLED", "New file picker request received", null)
-                        } catch (_: Exception) { }
+                            pendingOpenResult?.error(
+                                "OPEN_CANCELLED",
+                                "New file picker request received",
+                                null
+                            )
+                        } catch (_: Exception) {
+                        }
                         pendingOpenResult = null
                     }
                     pendingOpenResult = result
@@ -73,21 +82,29 @@ class MainActivity : FlutterActivity() {
                         result.error("OPEN_FAILED", error.message, null)
                     }
                 }
+
                 "appDataDir" -> result.success(applicationContext.filesDir.absolutePath)
                 "canUsePrivacyLock" -> result.success(canUsePrivacyLock())
                 "authenticatePrivacyLock" -> {
                     if (pendingPrivacyResult != null) {
                         try {
-                            pendingPrivacyResult?.error("AUTH_CANCELLED", "New auth request received", null)
-                        } catch (_: Exception) { }
+                            pendingPrivacyResult?.error(
+                                "AUTH_CANCELLED",
+                                "New auth request received",
+                                null
+                            )
+                        } catch (_: Exception) {
+                        }
                         pendingPrivacyResult = null
                     }
                     authenticatePrivacyLock(result)
                 }
+
                 "getLaunchAction" -> {
                     result.success(pendingLaunchAction)
                     pendingLaunchAction = null
                 }
+
                 "updateWidgetState" -> {
                     try {
                         val todayCount = call.argument<Int>("todayCount") ?: 0
@@ -96,6 +113,8 @@ class MainActivity : FlutterActivity() {
                         val lastType = call.argument<String>("lastType") ?: ""
                         val lastTimestamp = call.argument<Number>("lastTimestamp")?.toLong() ?: 0L
                         val hasMoments = call.argument<Boolean>("hasMoments") ?: false
+                        val historyList = call.argument<List<String>>("historyList") ?: emptyList()
+                        val historyString = historyList.joinToString("\n")
 
                         val prefs = getSharedPreferences(
                             NoteKarWidgetProvider.PREFS_NAME,
@@ -109,6 +128,7 @@ class MainActivity : FlutterActivity() {
                             .putString(NoteKarWidgetProvider.KEY_LAST_TYPE, lastType)
                             .putLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, lastTimestamp)
                             .putBoolean(NoteKarWidgetProvider.KEY_HAS_MOMENTS, hasMoments)
+                            .putString(NoteKarWidgetProvider.KEY_HISTORY, historyString)
                             .apply()
 
                         NoteKarWidgetProvider.updateAllWidgets(this)
@@ -117,6 +137,7 @@ class MainActivity : FlutterActivity() {
                         result.error("WIDGET_UPDATE_FAILED", e.message, null)
                     }
                 }
+
                 "setAppIconStyle" -> {
                     val style = call.argument<String>("style") ?: "default"
                     try {
@@ -126,6 +147,7 @@ class MainActivity : FlutterActivity() {
                         result.error("ICON_STYLE_FAILED", error.message, null)
                     }
                 }
+
                 "openUrl" -> {
                     val url = call.argument<String>("url") ?: ""
                     try {
@@ -135,10 +157,12 @@ class MainActivity : FlutterActivity() {
                         result.error("OPEN_URL_FAILED", error.message, null)
                     }
                 }
+
                 "showUpdateNotification" -> {
                     val title = call.argument<String>("title") ?: "NoteKar update available"
                     val body = call.argument<String>("body") ?: "Tap to open the latest release."
-                    val url = call.argument<String>("url") ?: "https://github.com/dheeraz101/Notekar-Android/releases"
+                    val url = call.argument<String>("url")
+                        ?: "https://github.com/dheeraz101/Notekar-Android/releases"
                     try {
                         showUpdateNotification(title, body, url)
                         result.success(null)
@@ -146,18 +170,26 @@ class MainActivity : FlutterActivity() {
                         result.error("NOTIFICATION_FAILED", error.message, null)
                     }
                 }
+
                 "canPostNotifications" -> {
                     result.success(canPostNotifications())
                 }
+
                 "requestNotificationPermission" -> {
                     if (pendingNotificationResult != null) {
                         try {
-                            pendingNotificationResult?.error("PERMISSION_CANCELLED", "New permission request received", null)
-                        } catch (_: Exception) { }
+                            pendingNotificationResult?.error(
+                                "PERMISSION_CANCELLED",
+                                "New permission request received",
+                                null
+                            )
+                        } catch (_: Exception) {
+                        }
                         pendingNotificationResult = null
                     }
                     requestNotificationPermission(result)
                 }
+
                 "canScheduleExactAlarms" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -166,11 +198,13 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     }
                 }
+
                 "requestExactAlarmPermission" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         try {
                             val intent = Intent().apply {
-                                action = android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                action =
+                                    android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
                                 data = Uri.parse("package:${packageName}")
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
@@ -178,10 +212,11 @@ class MainActivity : FlutterActivity() {
                             result.success(true)
                         } catch (e: Exception) {
                             try {
-                                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.parse("package:${packageName}")
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
+                                val intent =
+                                    Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.parse("package:${packageName}")
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
                                 startActivity(intent)
                                 result.success(true)
                             } catch (_: Exception) {
@@ -192,24 +227,28 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     }
                 }
+
                 "isIgnoringBatteryOptimizations" -> {
                     val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
                     result.success(pm.isIgnoringBatteryOptimizations(packageName))
                 }
+
                 "requestIgnoreBatteryOptimizations" -> {
                     try {
-                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                            data = Uri.parse("package:${packageName}")
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
+                        val intent =
+                            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                data = Uri.parse("package:${packageName}")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
                         startActivity(intent)
                         result.success(true)
                     } catch (e: Exception) {
                         try {
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.parse("package:${packageName}")
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
+                            val intent =
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.parse("package:${packageName}")
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
                             startActivity(intent)
                             result.success(true)
                         } catch (_: Exception) {
@@ -217,37 +256,54 @@ class MainActivity : FlutterActivity() {
                         }
                     }
                 }
+
                 "openAutoStartSettings" -> {
                     result.success(openAutoStartSettings())
                 }
+
                 "appCacheDir" -> {
-                    result.success(applicationContext.externalCacheDir?.absolutePath ?: applicationContext.cacheDir.absolutePath)
+                    result.success(
+                        applicationContext.externalCacheDir?.absolutePath
+                            ?: applicationContext.cacheDir.absolutePath
+                    )
                 }
+
                 "canInstallPackages" -> {
                     result.success(canInstallPackages())
                 }
+
                 "openInstallPermissionSettings" -> {
                     result.success(openInstallPermissionSettings())
                 }
+
                 "installApk" -> {
                     val filePath = call.argument<String>("filePath") ?: ""
                     result.success(installApk(filePath))
                 }
+
                 "getFileSha256" -> {
                     val filePath = call.argument<String>("filePath") ?: ""
                     result.success(getFileSha256(filePath))
                 }
+
                 "configureRemoteNotices" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: false
                     val feedUrl = call.argument<String>("feedUrl") ?: ""
                     val checkOnlyOnOpen = call.argument<Boolean>("checkOnlyOnOpen") ?: false
-                    RemoteNoticeReceiver.configure(applicationContext, enabled, feedUrl, checkOnlyOnOpen)
+                    RemoteNoticeReceiver.configure(
+                        applicationContext,
+                        enabled,
+                        feedUrl,
+                        checkOnlyOnOpen
+                    )
                     result.success(null)
                 }
+
                 "checkRemoteNoticesNow" -> {
                     RemoteNoticeReceiver.checkNow(applicationContext)
                     result.success(null)
                 }
+
                 "scheduleReminder" -> {
                     val id = call.argument<String>("id") ?: ""
                     val type = call.argument<String>("type") ?: "daily"
@@ -274,6 +330,7 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(null)
                 }
+
                 "cancelReminder" -> {
                     val id = call.argument<String>("id") ?: ""
                     if (id.isNotBlank()) {
@@ -281,6 +338,7 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(null)
                 }
+
                 else -> result.notImplemented()
             }
         }
@@ -310,7 +368,7 @@ class MainActivity : FlutterActivity() {
 
         val granted =
             grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
 
         result?.success(granted)
     }
@@ -325,9 +383,10 @@ class MainActivity : FlutterActivity() {
                 return
             }
             try {
-                val text = applicationContext.contentResolver.openInputStream(data.data!!)?.use { stream ->
-                    stream.bufferedReader(Charsets.UTF_8).readText()
-                }
+                val text =
+                    applicationContext.contentResolver.openInputStream(data.data!!)?.use { stream ->
+                        stream.bufferedReader(Charsets.UTF_8).readText()
+                    }
                 result.success(text)
             } catch (error: Exception) {
                 result.error("READ_FAILED", error.message, null)
@@ -537,29 +596,84 @@ class MainActivity : FlutterActivity() {
 
     private fun canPostNotifications(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun openAutoStartSettings(): Boolean {
         val manufacturer = Build.MANUFACTURER.lowercase()
         val intents = listOf(
             // Xiaomi
-            Intent().setComponent(ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
+            Intent().setComponent(
+                ComponentName(
+                    "com.miui.securitycenter",
+                    "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                )
+            ),
             // Oppo
-            Intent().setComponent(ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
-            Intent().setComponent(ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
-            Intent().setComponent(ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startupapp.StartupAppListActivity")),
+            Intent().setComponent(
+                ComponentName(
+                    "com.coloros.safecenter",
+                    "com.coloros.safecenter.permission.startup.StartupAppListActivity"
+                )
+            ),
+            Intent().setComponent(
+                ComponentName(
+                    "com.oppo.safe",
+                    "com.oppo.safe.permission.startup.StartupAppListActivity"
+                )
+            ),
+            Intent().setComponent(
+                ComponentName(
+                    "com.coloros.safecenter",
+                    "com.coloros.safecenter.permission.startupapp.StartupAppListActivity"
+                )
+            ),
             // Vivo
-            Intent().setComponent(ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
-            Intent().setComponent(ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
-            Intent().setComponent(ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
+            Intent().setComponent(
+                ComponentName(
+                    "com.iqoo.secure",
+                    "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
+                )
+            ),
+            Intent().setComponent(
+                ComponentName(
+                    "com.iqoo.secure",
+                    "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager"
+                )
+            ),
+            Intent().setComponent(
+                ComponentName(
+                    "com.vivo.permissionmanager",
+                    "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+                )
+            ),
             // Huawei
-            Intent().setComponent(ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
-            Intent().setComponent(ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")),
+            Intent().setComponent(
+                ComponentName(
+                    "com.huawei.systemmanager",
+                    "com.huawei.systemmanager.optimize.process.ProtectActivity"
+                )
+            ),
+            Intent().setComponent(
+                ComponentName(
+                    "com.huawei.systemmanager",
+                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                )
+            ),
             // OnePlus
-            Intent().setComponent(ComponentName("com.oneplus.security", "com.oneplus.security.chainlaunch.AppBootLaunchActivity")),
+            Intent().setComponent(
+                ComponentName(
+                    "com.oneplus.security",
+                    "com.oneplus.security.chainlaunch.AppBootLaunchActivity"
+                )
+            ),
             // Asus
-            Intent().setComponent(ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.entry.FunctionActivity"))
+            Intent().setComponent(
+                ComponentName(
+                    "com.asus.mobilemanager",
+                    "com.asus.mobilemanager.entry.FunctionActivity"
+                )
+            )
         )
 
         for (intent in intents) {
@@ -567,7 +681,8 @@ class MainActivity : FlutterActivity() {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
                 return true
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
         }
 
         // Fallback: open App Info settings
