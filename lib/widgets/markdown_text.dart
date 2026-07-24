@@ -127,7 +127,7 @@ class MarkdownText extends StatelessWidget {
   }) {
     final List<InlineSpan> spans = [];
     final regExp = RegExp(
-      r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|https?:\/\/[^\s]+)',
+      r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|https?://[^\s]+)',
       caseSensitive: false,
     );
 
