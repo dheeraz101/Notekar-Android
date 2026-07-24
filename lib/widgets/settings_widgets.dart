@@ -2,10 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
-import 'package:notekar/utils/l10n_utils.dart';
 
 class SettingsGroup extends StatelessWidget {
   const SettingsGroup({
@@ -264,7 +264,8 @@ class SegmentedSetting extends StatelessWidget {
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     return Glass(
       p: p,
-      radius: 32, // iOS 26 style
+      radius: 32,
+      // iOS 26 style
       blur: blur,
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -500,7 +501,8 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
-                width: 62, // Refined HIG width
+                width: 62,
+                // Refined HIG width
                 height: 32,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
@@ -752,7 +754,8 @@ class ColorChoiceSetting extends StatelessWidget {
               onTap: () => onChanged(key),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 140),
-                width: 64, // Increased to fit card
+                width: 64,
+                // Increased to fit card
                 height: 64,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -827,6 +830,7 @@ class DelayStepButton extends StatelessWidget {
 
 class SliderScale extends StatelessWidget {
   const SliderScale({super.key, required this.p, required this.activeValue});
+
   final Palette p;
   final int activeValue;
 
@@ -947,52 +951,34 @@ class SettingsBetaNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 3.5,
-            ), // Precisely aligned with 13px Inter cap-height
-            child: Icon(
-              Icons.info_outline_rounded,
-              color: p.text3.withValues(alpha: 0.6),
-              size: 13,
-            ),
+      child: Text.rich(
+        TextSpan(
+          // Baseline style for the entire rich text block
+          style: TextStyle(
+            color: p.text3,
+            fontSize: 13,
+            height: 1.45,
+            fontWeight: FontWeight.w400,
+            fontVariations: const [FontVariation('wght', 400)],
+            letterSpacing: -0.05,
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                // Baseline style for the entire rich text block
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 13,
-                  height: 1.45,
-                  fontWeight: FontWeight.w400,
-                  fontVariations: const [FontVariation('wght', 400)],
-                  letterSpacing: -0.05,
-                ),
-                children: [
-                  TextSpan(text: '$text '),
-                  TextSpan(
-                    text: 'Learn More',
-                    style: const TextStyle(
-                      color: Color(0xFF007AFF),
-                      // Force identical font properties to description
-                      fontSize: 13,
-                      height: 1.45,
-                      fontWeight: FontWeight.w400,
-                      fontVariations: [FontVariation('wght', 400)],
-                      decoration: TextDecoration.none,
-                    ),
-                    recognizer: TapGestureRecognizer()..onTap = onLearnMore,
-                  ),
-                ],
+          children: [
+            TextSpan(text: '$text '),
+            TextSpan(
+              text: 'Learn More'.localized(context),
+              style: const TextStyle(
+                color: Color(0xFF007AFF),
+                // Force identical font properties to description
+                fontSize: 13,
+                height: 1.45,
+                fontWeight: FontWeight.w400,
+                fontVariations: [FontVariation('wght', 400)],
+                decoration: TextDecoration.none,
               ),
+              recognizer: TapGestureRecognizer()..onTap = onLearnMore,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1042,12 +1028,12 @@ class SettingsSearchBox extends StatelessWidget {
                   onPressed: onClear,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
+                    minWidth: 40,
+                    minHeight: 40,
                   ),
                   icon: Icon(Icons.close_rounded, color: p.text3, size: 18),
                 ),
-          suffixIconConstraints: const BoxConstraints(minWidth: 32),
+          suffixIconConstraints: const BoxConstraints(minWidth: 40),
           hintText: 'Search settings',
           hintStyle: TextStyle(color: p.text3),
           border: InputBorder.none,

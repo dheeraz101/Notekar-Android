@@ -1340,6 +1340,48 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
       ),
       item(
+        title: 'Dashboard',
+        subtitle: 'Interactive summaries, grids, trends, and correlations',
+        category: 'Dashboard',
+        icon: Icons.dashboard_customize_outlined,
+        keywords: [
+          'dashboard',
+          'analytics',
+          'heatmap',
+          'trends',
+          'insights',
+          'graphs',
+          'correlation',
+          'habits',
+          'charts',
+          'summary',
+          'history grid',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'View',
+      ),
+      item(
+        title: 'Logging',
+        subtitle: 'Configure default mode, tap cooldowns, and reminders',
+        category: 'Logging',
+        icon: Icons.bolt_rounded,
+        keywords: [
+          'logging',
+          'captures',
+          'moments',
+          'default mode',
+          'cooldown',
+          'intervals',
+          'startup',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: defaultMode == 'single' ? 'Single' : 'Two-Way',
+      ),
+      item(
         title: 'Startup Mode',
         subtitle: 'Default mode when opening the app',
         category: 'Capture',
@@ -2034,9 +2076,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _showBetaInfoPopup(Palette p) {
     showGeneralDialog<void>(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.52),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       barrierDismissible: true,
-      barrierLabel: 'Close beta info',
+      barrierLabel: 'Dismiss',
       transitionDuration: const Duration(milliseconds: 150),
       pageBuilder: (_, anim1, _) => ScaleTransition(
         scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
@@ -2044,75 +2086,63 @@ class _SettingsDialogState extends State<SettingsDialog> {
           child: Material(
             color: Colors.transparent,
             child: Container(
-              width: 320,
-              padding: const EdgeInsets.all(22),
+              width: 310,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: p.border.withValues(alpha: 0.6)),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: p.border.withValues(alpha: 0.5)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.28),
-                    blurRadius: 32,
-                    offset: const Offset(0, 16),
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.science_rounded,
-                      color: p.accent,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
                   Text(
-                    'NoteKar Beta',
-                    textAlign: TextAlign.center,
+                    'Beta Feature'.localized(context),
                     style: TextStyle(
                       color: p.text,
                       fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: -0.4,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
-                    'You are testing upcoming features before stable release. Features are actively polished while your data remains 100% private and local.',
-                    textAlign: TextAlign.center,
+                    'This feature is currently in active development. While fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. All calculations, data, and security policies remain entirely local to your device.'
+                        .localized(context),
+                    textAlign: TextAlign.left,
                     style: TextStyle(
                       color: p.text2,
                       fontSize: 13,
-                      height: 1.45,
+                      height: 1.5,
+                      letterSpacing: -0.1,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   PressableScale(
                     onTap: () => Navigator.pop(context),
                     child: Container(
                       width: double.infinity,
-                      height: 50,
+                      height: 48,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: p.accent,
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Text(
-                        'Got It',
-                        style: TextStyle(
+                      child: Text(
+                        'Got It'.localized(context),
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.1,
                         ),
                       ),
                     ),
@@ -3987,6 +4017,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 'Correlation Intelligence',
                               ),
                               IntelligentInsightsCard(p: p, entries: entries),
+                              SettingsBetaNote(
+                                p: p,
+                                text:
+                                    'The dashboard metrics and predictive insights are under active beta testing.'
+                                        .localized(context),
+                                onLearnMore: () => _showBetaInfoPopup(p),
+                              ),
                               const SizedBox(height: spacing48),
                             ]),
                           ),
@@ -5625,6 +5662,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     text:
                                         'Configure daily, weekly, monthly, or inactivity-based notifications under Settings > Logging > Reminders. Custom messages let you personalize alerts.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.dashboard_customize_rounded,
+                                    title: 'Dashboard & Analytics',
+                                    text:
+                                        'Open Settings > Logging > Dashboard to see habit grids, activity trends, correlation insights, and anomaly alerts compiled locally.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.widgets_rounded,
+                                    title: 'Home Screen Widget',
+                                    text:
+                                        'Add the NoteKar widget to your launcher. Tap IN, OUT, or TAP to log instantly in the background with real-time widget updates, or tap NOTE to open a native quick-log overlay.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -5760,6 +5811,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     question: 'Is NoteKar safe to use?',
                                     answer:
                                         'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Updates & Notices.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I add and use the home screen widget?',
+                                    answer:
+                                        'Touch and hold an empty space on your phone\'s home screen, select Widgets, and drag NoteKar to your screen. You can log immediately using the quick-action buttons. Tapping the top history stack opens the main app.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'Is my Dashboard data uploaded?',
+                                    answer:
+                                        'No. All stats, activity heatmaps, anomalies, and correlation graphs are computed completely offline on your device. We do not track or upload your habits or logs.',
                                   ),
                                 ],
                               ),

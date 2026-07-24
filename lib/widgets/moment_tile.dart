@@ -78,8 +78,8 @@ class MomentTile extends StatelessWidget {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 constraints: const BoxConstraints.tightFor(
-                  width: 18,
-                  height: 18,
+                  width: 28,
+                  height: 22,
                 ),
                 padding: EdgeInsets.zero,
                 onPressed: onDelete,

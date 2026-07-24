@@ -7,6 +7,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.1] - 2026-07-24 (versionCode 21) [Beta]
+
+### Changed
+
+- Style: overhaul beta popup and settings notes to conform to Apple's minimalist HIG (left-aligned
+  typography, icon-less layout)
+- Optimize: expand button touch targets to HIG compliance (44x44 sheet headers, wider compact delete
+  buttons, and 40px search clear targets)
+- Feat: map Logging and Dashboard sub-pages in Settings search index, and add comprehensive
+  widget/dashboard Help FAQs and Guides
+- Fix: remove redundant backslash escapes in markdown RegExp
+- Fix: remove old unresolved widget references and clean static update bindings
+- Feat: implement 2x2 action widget layout, live history updates, and custom quick note dialog
+- Fix: resolve widget inflation crash and align dashboard insights layout
+- Style: remove subtitle from Dashboard settings card row
+- Feat: restructure widget with split actions dock/view-point and organize Dashboard page
+- Feat: implement widget live action status suffixes and dedicated insights Dashboard sub-page
+- Feat: implement GitHub activity heatmap, intelligent insights, and gap alerts
+- Feat: implement native background widget logging, quick note dialog, and update client
+  enhancements
+
 ## [5.1.0] - 2026-07-24 (versionCode 20) [Security]
 
 ### Changed
@@ -17,15 +38,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Feat: introduce App Lock with custom PIN, improve build pipeline, and polish release workflow
 - Optimize downloader with parallel HTTP range requests, redirect appCacheDir to externalCacheDir,
   and redesign build cache cards
-- Feat: improve update workflow, build UI, and release automation
-- Updated Readme and fixed it & also fixed the virustotal large file issues
-- Publish v4.0.8 Beta changelogs and release notes
-- Upgrade update-version script and add build channel badges
-- Implement professional-style updates classification system
-- Fix YAML syntax validation in build.yml
-- Enhance release notes layout, track switching overlays, and editor icons
-- Fix info control structures in welcome_screen.dart
-- Release v4.0.7 (16) - formatted & dynamic gitignore
 
 ## [5.0.0] - 2026-07-23 (versionCode 19) [Stable]
 

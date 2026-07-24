@@ -236,11 +236,21 @@ class _HeaderCircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressableScale(
       onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(color: p.surface3, shape: BoxShape.circle),
-        child: Icon(icon, color: p.text2, size: 22),
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: Align(
+          alignment: Alignment.center,
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: p.surface3,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: p.text2, size: 22),
+          ),
+        ),
       ),
     );
   }

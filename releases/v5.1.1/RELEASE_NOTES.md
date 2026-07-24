@@ -1,0 +1,28 @@
+## Notekar v5.1.1
+
+Signed release - built automatically from the branch.
+
+### What's Changed
+
+- Style: overhaul beta popup and settings notes to conform to Apple's minimalist HIG (left-aligned
+  typography, icon-less layout)
+- Optimize: expand button touch targets to HIG compliance (44x44 sheet headers, wider compact delete
+  buttons, and 40px search clear targets)
+- Feat: map Logging and Dashboard sub-pages in Settings search index, and add comprehensive
+  widget/dashboard Help FAQs and Guides
+- Fix: remove redundant backslash escapes in markdown RegExp
+- Fix: remove old unresolved widget references and clean static update bindings
+- Feat: implement 2x2 action widget layout, live history updates, and custom quick note dialog
+- Fix: resolve widget inflation crash and align dashboard insights layout
+- Style: remove subtitle from Dashboard settings card row
+- Feat: restructure widget with split actions dock/view-point and organize Dashboard page
+- Feat: implement widget live action status suffixes and dedicated insights Dashboard sub-page
+- Feat: implement GitHub activity heatmap, intelligent insights, and gap alerts
+- Feat: implement native background widget logging, quick note dialog, and update client
+  enhancements
+
+### Security and Integrity
+
+NoteKar binaries undergo automated compilation and scanning.
+
+- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder

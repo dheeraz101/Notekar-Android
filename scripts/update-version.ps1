@@ -117,31 +117,67 @@ if (-not $BuildNumber)
     $BuildNumber = $currentBuild + 1
 }
 
-# Query local git log since last tag to auto-populate changelogs
+# Query local git log since last version commit to auto-populate changelogs without duplicates
 $gitCommits = ""
 $cleanCommits = @()
 try
 {
-    $lastTag = (git describe --tags --abbrev=0) 2> $null
-    if ($lastTag)
+    $startCommit = ""
+
+    # Try finding the last version commit in git history (matching message starting with 'v' and a digit)
+    $lastVerCommit = (git log --grep="^v[0-9]" -n 1 --format="%H") 2> $null
+    if ($lastVerCommit)
     {
-        $commitsList = (git log "$lastTag..HEAD" --oneline) 2> $null
+        # If HEAD is already the version commit, skip it to find the previous one
+        $headHash = (git rev-parse HEAD) 2> $null
+        if ($lastVerCommit -eq $headHash)
+        {
+            $lastVerCommit = (git log --grep="^v[0-9]" --skip=1 -n 1 --format="%H") 2> $null
+        }
+    }
+
+    # Fallback to the last git tag if no version commit found
+    if (-not $lastVerCommit)
+    {
+        $lastTag = (git describe --tags --abbrev=0) 2> $null
+        if ($lastTag)
+        {
+            $startCommit = $lastTag
+        }
+    }
+    else
+    {
+        $startCommit = $lastVerCommit
+    }
+
+    if ($startCommit)
+    {
+        $commitsList = (git log "$startCommit..HEAD" --oneline) 2> $null
     }
     else
     {
         $commitsList = (git log -n 10 --oneline) 2> $null
     }
+
     if ($commitsList)
     {
-        # Strip commit hash and capitalize first letter
+        # Strip commit hash, capitalize first letter, and clean shell message/flag artifacts
         $cleanCommits = $commitsList | ForEach-Object {
+            # Strip hash prefix
             $msg = $_ -replace '^[0-9a-f]+\s+', ''
+
+            # Strip trailing leaked shell parameters (e.g. -m flags)
+            $msg = $msg -replace '\s*"\s*-m\s*.*$', ''
+            $msg = $msg -replace '\s*-\s*m\s*.*$', ''
+
+            $msg = $msg.Trim()
             if ($msg.Length -gt 0)
             {
                 $msg = $msg.Substring(0, 1).ToUpper() + $msg.Substring(1)
             }
             $msg
-        }
+        } | Where-Object { [string]::IsNullOrWhiteSpace($_) -eq $false }
+
         $gitCommits = ($cleanCommits | ForEach-Object { "- $_" }) -join "`r`n"
     }
 }
