@@ -108,15 +108,15 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 Locale.getDefault()
             ).format(Date(lastTimestamp))
 
-            val typeSuffix = when (lastType.lowercase(Locale.ROOT)) {
-                "in" -> " (IN)"
-                "out" -> " (OUT)"
-                "single" -> " (Tap)"
-                "note" -> " (Note)"
+            val typePrefix = when (lastType.lowercase(Locale.ROOT)) {
+                "in" -> "📥 IN at "
+                "out" -> "📤 OUT at "
+                "single" -> "⚡ Tap at "
+                "note" -> "📝 Note at "
                 else -> ""
             }
 
-            "Last: $time$typeSuffix"
+            "$typePrefix$time"
         }
 
         views.setTextViewText(

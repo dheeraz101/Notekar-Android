@@ -3946,6 +3946,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           SliverList(
                             delegate: SliverChildListDelegate([
                               const SizedBox(height: spacing8),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.'
+                                        .localized(context),
+                              ),
                               AnomalyAlertCard(
                                 p: p,
                                 entries: entries,
@@ -3962,12 +3968,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                           .inHours >=
                                       48)
                                 const SizedBox(height: 6),
+                              _buildDashboardSectionHeader(
+                                p,
+                                Icons.analytics_outlined,
+                                'Real-time Metrics',
+                              ),
                               ActivitySummaryCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
+                              _buildDashboardSectionHeader(
+                                p,
+                                Icons.trending_up_rounded,
+                                'Habit Frequency & Trends',
+                              ),
                               ActivityTrendsCard(p: p, entries: entries),
                               const SizedBox(height: 6),
                               ActivityHeatmapCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
+                              _buildDashboardSectionHeader(
+                                p,
+                                Icons.insights_rounded,
+                                'Correlation Intelligence',
+                              ),
                               IntelligentInsightsCard(p: p, entries: entries),
                               const SizedBox(height: spacing48),
                             ]),
@@ -7647,6 +7668,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
     if (!largeText) return sheet;
     return sheet;
+  }
+
+  Widget _buildDashboardSectionHeader(Palette p, IconData icon, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6, top: 16, bottom: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: p.accent, size: 15),
+          const SizedBox(width: 8),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
