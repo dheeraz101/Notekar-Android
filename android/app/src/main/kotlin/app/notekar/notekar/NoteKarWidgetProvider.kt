@@ -99,6 +99,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             android.graphics.Color.parseColor("#FF0A84FF")
         )
 
+        val lastType = prefs.getString(KEY_LAST_TYPE, "") ?: ""
         val lastText = if (!hasMoments || lastTimestamp <= 0L) {
             "No moments"
         } else {
@@ -107,7 +108,15 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 Locale.getDefault()
             ).format(Date(lastTimestamp))
 
-            "Last: $time"
+            val typeSuffix = when (lastType.lowercase(Locale.ROOT)) {
+                "in" -> " (IN)"
+                "out" -> " (OUT)"
+                "single" -> " (Tap)"
+                "note" -> " (Note)"
+                else -> ""
+            }
+
+            "Last: $time$typeSuffix"
         }
 
         views.setTextViewText(

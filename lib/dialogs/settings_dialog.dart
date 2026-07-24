@@ -835,6 +835,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   List<Moment> get entries => widget.entriesNotifier.value;
+
   List<Moment> get _trash => widget.trashEntriesNotifier.value;
 
   String updateStatus = '';
@@ -3864,25 +3865,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         if (show('Logging'))
                           SliverList(
                             delegate: SliverChildListDelegate([
-                              AnomalyAlertCard(
+                              const SizedBox(height: spacing8),
+                              SettingsGroup(
                                 p: p,
-                                entries: entries,
-                                onLogNow: () =>
-                                    Navigator.of(context).pop('log'),
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.dashboard_customize_outlined,
+                                    title: 'Dashboard',
+                                    subtitle:
+                                        'Detailed habits, charts, and intelligent insights'
+                                            .localized(context),
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Dashboard',
+                                      parent: 'Logging',
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 6),
-                              ActivitySummaryCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
-                              ActivityTrendsCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
-                              ActivityHeatmapCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
-                              IntelligentInsightsCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Visual overview of your logging frequency, 7-day activity trends, and average interval between moments.',
+                                    'Interactive summary dashboards, activity heatmaps, weekly trends, and intelligence insights.'
+                                        .localized(context),
                               ),
                               const SizedBox(height: 12),
                               SettingsGroup(
@@ -3933,6 +3939,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 text:
                                     'These settings define how moments are recorded and prepared for export.',
                               ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Dashboard'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              AnomalyAlertCard(
+                                p: p,
+                                entries: entries,
+                                onLogNow: () =>
+                                    Navigator.of(context).pop('log'),
+                              ),
+                              if (entries.isNotEmpty &&
+                                  DateTime.now()
+                                          .difference(
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              entries.first.timestamp,
+                                            ),
+                                          )
+                                          .inHours >=
+                                      48)
+                                const SizedBox(height: 6),
+                              ActivitySummaryCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
+                              ActivityTrendsCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
+                              ActivityHeatmapCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
+                              IntelligentInsightsCard(p: p, entries: entries),
                               const SizedBox(height: spacing48),
                             ]),
                           ),
@@ -7967,20 +8003,20 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         _buildCacheCard(p),
         const SizedBox(height: spacing24),
 
+        SettingsPageDescription(
+          p: p,
+          text:
+              'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
+          bottomPadding: spacing16,
+        ),
+        const SizedBox(height: spacing8),
         SettingsBetaNote(
           p: p,
           text: 'The current features on this page are under Beta stage.'
               .localized(context),
           onLearnMore: widget.onLearnMoreBeta,
         ),
-        const SizedBox(height: spacing24),
-
-        SettingsPageDescription(
-          p: p,
-          text:
-              'NoteKar is open source. You can always find the latest builds and source code on GitHub.',
-          bottomPadding: spacing48,
-        ),
+        const SizedBox(height: spacing48),
       ],
     );
   }
