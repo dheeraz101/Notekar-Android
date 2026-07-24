@@ -152,9 +152,10 @@
             android:value="2" />
         <receiver
             android:name=".NoteKarWidgetProvider"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.notekar.notekar.ACTION_LOG_BG" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -198,6 +199,14 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <activity
+            android:name=".QuickNoteActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="app.notekar.notekar.quicknote"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

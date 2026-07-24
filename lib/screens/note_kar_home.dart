@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
-import 'package:crypto/crypto.dart';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:notekar/main.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
@@ -16,21 +15,22 @@ import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
-import 'package:notekar/screens/welcome_screen.dart';
+import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
+import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/backup_utils.dart';
-import 'package:notekar/widgets/clock_face.dart';
-import 'package:notekar/widgets/feedback_widgets.dart';
-import 'package:notekar/widgets/toolbar.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
-import 'package:notekar/utils/app_logger.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
-import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/clock_face.dart';
+import 'package:notekar/widgets/feedback_widgets.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/toolbar.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,7 +116,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _lastId;
   int _nextId = 1;
   final ValueNotifier<List<Moment>> _entriesNotifier = ValueNotifier([]);
+
   List<Moment> get _entries => _entriesNotifier.value;
+
   set _entries(List<Moment> val) {
     _entriesNotifier.value = val;
   }
@@ -527,6 +529,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       _locale = prefs.getString('m-locale') ?? 'system';
     });
+
+    await _syncBackgroundLogs(prefs);
 
     _applySystemUiStyle();
     _initQuickActions();
@@ -1350,6 +1354,59 @@ class _NoteKarHomeState extends State<NoteKarHome>
     } catch (_) {
       // Widget updates must never affect logging.
     }
+  }
+
+  Future<void> _syncBackgroundLogs(SharedPreferences prefs) async {
+    final pendingCount = prefs.getInt('pending_count') ?? 0;
+    if (pendingCount <= 0) return;
+
+    _logger.info('Syncing $pendingCount background logs from native widget...');
+
+    final List<Moment> newEntries = [];
+    int nextId = _repository.getNextId();
+
+    for (int i = 0; i < pendingCount; i++) {
+      final logStr = prefs.getString('log_$i');
+      if (logStr != null && logStr.contains('|')) {
+        final parts = logStr.split('|');
+        if (parts.length >= 2) {
+          final timestamp =
+              int.tryParse(parts[0]) ?? DateTime.now().millisecondsSinceEpoch;
+          final type = parts[1]; // 'in', 'out', or 'single'
+          final note = parts.length > 2 ? parts[2] : '';
+
+          final entry = Moment(
+            id: nextId++,
+            timestamp: timestamp,
+            date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
+            type: type,
+            note: note,
+          );
+          newEntries.add(entry);
+        }
+      }
+    }
+
+    // Save all new entries to repository
+    for (final entry in newEntries) {
+      await _repository.saveMoment(entry);
+    }
+
+    // Clear SharedPreferences queue keys
+    for (int i = 0; i < pendingCount; i++) {
+      await prefs.remove('log_$i');
+    }
+    await prefs.remove('pending_count');
+
+    // Reload the full list from Hive to refresh states
+    final updatedEntries = _repository.getAllMoments();
+    setState(() {
+      _entries = updatedEntries;
+      _nextId = nextId;
+    });
+
+    // Update native widget UI
+    unawaited(_updateAndroidWidget());
   }
 
   Future<void> _openNote() async {

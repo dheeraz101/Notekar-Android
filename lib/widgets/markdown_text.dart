@@ -127,7 +127,7 @@ class MarkdownText extends StatelessWidget {
   }) {
     final List<InlineSpan> spans = [];
     final regExp = RegExp(
-      r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`)',
+      r'(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|https?:\/\/[^\s]+)',
       caseSensitive: false,
     );
 
@@ -198,6 +198,26 @@ class MarkdownText extends StatelessWidget {
               onTap: () => onOpenLink(url),
               child: Text(
                 label,
+                style: TextStyle(
+                  color: p.accent,
+                  fontSize: headerSize,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationColor: p.accent,
+                ),
+              ),
+            ),
+          ),
+        );
+      } else if (matchText.startsWith('http://') ||
+          matchText.startsWith('https://')) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: GestureDetector(
+              onTap: () => onOpenLink(matchText),
+              child: Text(
+                matchText,
                 style: TextStyle(
                   color: p.accent,
                   fontSize: headerSize,

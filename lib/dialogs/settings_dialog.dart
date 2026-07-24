@@ -2729,6 +2729,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       checkingUpdates: checkingUpdates,
       updateStatus: updateStatus,
       currentBuildChannel: _currentBuildChannel,
+      onLearnMoreBeta: () => _showBetaInfoPopup(p),
     );
   }
 
@@ -7616,6 +7617,7 @@ class UpdateCenterView extends StatefulWidget {
     required this.checkingUpdates,
     required this.updateStatus,
     required this.currentBuildChannel,
+    required this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -7629,6 +7631,7 @@ class UpdateCenterView extends StatefulWidget {
   final bool checkingUpdates;
   final String updateStatus;
   final String currentBuildChannel;
+  final VoidCallback onLearnMoreBeta;
 
   @override
   State<UpdateCenterView> createState() => _UpdateCenterViewState();
@@ -7953,6 +7956,14 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         _buildCacheCard(p),
         const SizedBox(height: spacing24),
 
+        SettingsBetaNote(
+          p: p,
+          text: 'The current features on this page are under Beta stage.'
+              .localized(context),
+          onLearnMore: widget.onLearnMoreBeta,
+        ),
+        const SizedBox(height: spacing24),
+
         SettingsPageDescription(
           p: p,
           text:
@@ -7972,7 +7983,27 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     final cleanVersion = availableVersion.startsWith('v')
         ? availableVersion
         : 'v$availableVersion';
-    final currentBuildChannel = widget.currentBuildChannel;
+
+    // Classify installed build channel dynamically from semver
+    final versionParts = widget.appVersion
+        .split(RegExp(r'[^0-9]+'))
+        .where((part) => part.isNotEmpty)
+        .map(int.parse)
+        .toList();
+    bool isInstalledBeta = widget.appVersion.toLowerCase().contains('beta');
+    bool isInstalledSecurity = false;
+    if (!isInstalledBeta && versionParts.length >= 3) {
+      final minor = versionParts[1];
+      final patch = versionParts[2];
+      if (minor > 0 && patch == 0) {
+        isInstalledSecurity = true;
+      } else if (patch > 0) {
+        isInstalledBeta = true;
+      }
+    }
+    final currentBuildChannel = isInstalledSecurity
+        ? 'security'
+        : (isInstalledBeta ? 'beta' : 'stable');
 
     if (widget.checkingUpdates) {
       return Glass(
@@ -8243,6 +8274,19 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
+                  onPressed: () => widget.onOpenLink(githubReleases),
+                  child: Text('Download from GitHub'.localized(context)),
+                ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: p.surface3,
+                    foregroundColor: p.text,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
                   onPressed: widget.onCheckUpdates,
                   child: Text('Check for updates'.localized(context)),
                 ),
@@ -8276,6 +8320,19 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     : 'Download & Install'.localized(context),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
+            ),
+            const SizedBox(height: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: p.surface3,
+                foregroundColor: p.text,
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              onPressed: () => widget.onOpenLink(githubReleases),
+              child: Text('Download from GitHub'.localized(context)),
             ),
             const SizedBox(height: 8),
             FilledButton(

@@ -8,11 +8,22 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
+import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class NoteKarWidgetProvider : AppWidgetProvider() {
+
+    override fun onReceive(context: Context, intent: Intent?) {
+        super.onReceive(context, intent)
+        if (intent == null) return
+        val action = intent.action
+        if (action == ACTION_LOG_BG) {
+            val logType = intent.getStringExtra(EXTRA_LOG_TYPE) ?: return
+            performBackgroundLog(context, logType)
+        }
+    }
 
     override fun onUpdate(
         context: Context,
@@ -127,42 +138,22 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
         views.setOnClickPendingIntent(
             R.id.widget_single,
-            launchIntent(
-                context,
-                appWidgetId + 10,
-                MainActivity.ACTION_SINGLE,
-                "single"
-            )
+            launchBackgroundLogIntent(context, appWidgetId + 10, "single")
         )
 
         views.setOnClickPendingIntent(
             R.id.widget_in,
-            launchIntent(
-                context,
-                appWidgetId + 20,
-                MainActivity.ACTION_IN,
-                "in"
-            )
+            launchBackgroundLogIntent(context, appWidgetId + 20, "in")
         )
 
         views.setOnClickPendingIntent(
             R.id.widget_out,
-            launchIntent(
-                context,
-                appWidgetId + 30,
-                MainActivity.ACTION_OUT,
-                "out"
-            )
+            launchBackgroundLogIntent(context, appWidgetId + 30, "out")
         )
 
         views.setOnClickPendingIntent(
             R.id.widget_note,
-            launchIntent(
-                context,
-                appWidgetId + 40,
-                MainActivity.ACTION_NOTE,
-                "note"
-            )
+            launchQuickNoteActivityIntent(context, appWidgetId + 40)
         )
 
         manager.updateAppWidget(appWidgetId, views)
@@ -186,7 +177,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
         return PendingIntent.getActivity(
@@ -194,11 +185,46 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or
-                PendingIntent.FLAG_IMMUTABLE
+                    PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun launchBackgroundLogIntent(
+        context: Context,
+        requestCode: Int,
+        logType: String
+    ): PendingIntent {
+        val intent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+            action = ACTION_LOG_BG
+            putExtra(EXTRA_LOG_TYPE, logType)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun launchQuickNoteActivityIntent(
+        context: Context,
+        requestCode: Int
+    ): PendingIntent {
+        val intent = Intent(context, QuickNoteActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        return PendingIntent.getActivity(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 
     companion object {
+        const val ACTION_LOG_BG = "app.notekar.notekar.ACTION_LOG_BG"
+        const val EXTRA_LOG_TYPE = "log_type"
+
         private const val ACTION_OPEN =
             "app.notekar.notekar.ACTION_OPEN"
 
@@ -209,6 +235,53 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_LAST_TYPE = "last_type"
         const val KEY_LAST_TIMESTAMP = "last_timestamp"
         const val KEY_HAS_MOMENTS = "has_moments"
+
+        fun performBackgroundLog(context: Context, type: String, note: String = "") {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
+            val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
+
+            val newCount = todayCount + 1
+            val now = System.currentTimeMillis()
+
+            // Toggle next action if two-way
+            val newNextAction = if (mode == "two-way") {
+                if (type == "in") "out" else "in"
+            } else {
+                "single"
+            }
+
+            // Update widget preferences
+            prefs.edit()
+                .putInt(KEY_TODAY_COUNT, newCount)
+                .putString(KEY_NEXT_ACTION, newNextAction)
+                .putLong(KEY_LAST_TIMESTAMP, now)
+                .putBoolean(KEY_HAS_MOMENTS, true)
+                .putString(KEY_LAST_TYPE, type)
+                .apply()
+
+            // Update all widgets visually
+            updateAllWidgets(context)
+
+            // Write to pending queue inside Flutter's default SharedPreferences file
+            val bgPrefs =
+                context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val currentCount = bgPrefs.getInt("flutter.pending_count", 0)
+            val logString = "$now|$type|$note"
+
+            bgPrefs.edit()
+                .putString("flutter.log_$currentCount", logString)
+                .putInt("flutter.pending_count", currentCount + 1)
+                .apply()
+
+            // Toast feedback
+            val label = when (type) {
+                "in" -> "IN"
+                "out" -> "OUT"
+                else -> "Moment"
+            }
+            Toast.makeText(context, "Logged $label successfully", Toast.LENGTH_SHORT).show()
+        }
 
         fun updateAllWidgets(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
