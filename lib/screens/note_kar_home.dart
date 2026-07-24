@@ -1522,7 +1522,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ? 'Last deleted: ${timeOnly(trash.first.timestamp)}${trash.first.note.isNotEmpty ? ' - ${trash.first.note}' : ''}'
         : 'No moments deleted';
 
-    await showModalBottomSheet<void>(
+    final result = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.42),
@@ -1778,6 +1778,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         },
       ),
     );
+
+    if (result == 'log') {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _logEntry();
+      });
+    }
   }
 
   Future<void> _openWhatsNew() async {

@@ -3864,10 +3864,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         if (show('Logging'))
                           SliverList(
                             delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
+                              AnomalyAlertCard(
+                                p: p,
+                                entries: entries,
+                                onLogNow: () =>
+                                    Navigator.of(context).pop('log'),
+                              ),
+                              const SizedBox(height: 6),
                               ActivitySummaryCard(p: p, entries: entries),
                               const SizedBox(height: 6),
                               ActivityTrendsCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
+                              ActivityHeatmapCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
+                              IntelligentInsightsCard(p: p, entries: entries),
+                              const SizedBox(height: 6),
                               SettingsPageDescription(
                                 p: p,
                                 text:
