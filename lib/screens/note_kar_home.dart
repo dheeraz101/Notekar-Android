@@ -710,6 +710,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
     final remindersWalkthroughSeen =
         prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
+    final securityWalkthroughSeen =
+        prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
 
     if (!welcomeSeen) {
       if (!mounted) return;
@@ -735,6 +737,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             },
             pages: const [
               'welcome',
+              'security',
               'features',
               'repo-move',
               'updates-permission',
@@ -745,6 +748,34 @@ class _NoteKarHomeState extends State<NoteKarHome>
       );
       await prefs.setBool(_welcomeSeenKey, true);
       await prefs.setBool('notekar.remindersWalkthroughSeen', true);
+      await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
+    } else if (!securityWalkthroughSeen) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => WelcomeScreen(
+            p: p,
+            theme: _theme,
+            defaultMode: _defaultMode,
+            currentLocale: _locale,
+            onLocaleChanged: (value) {
+              NoteKarApp.of(context)?.setLocale(value);
+              setState(() => _locale = value);
+            },
+            onTheme: (value) {
+              setState(() => _theme = value);
+              _saveSetting('m-theme', value);
+              _applySystemUiStyle();
+            },
+            onDefaultMode: (value) {
+              setState(() => _defaultMode = value);
+              _saveSetting('m-default-mode', value);
+            },
+            pages: const ['security'],
+          ),
+        ),
+      );
+      await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
     } else if (!remindersWalkthroughSeen) {
       if (!mounted) return;
       await Navigator.of(context).push(

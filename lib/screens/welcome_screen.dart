@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/widgets/settings_widgets.dart';
-import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
@@ -190,6 +190,88 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               setState(() => currentLocale = value);
               widget.onLocaleChanged(value);
             },
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecurityPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(Icons.lock_person_rounded, color: p.accent, size: 38),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'Security & Cryptographic Upgrade'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Notekar is now more secure than ever, built to protect your private records.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 32),
+          SettingsGroup(
+            p: p,
+            children: [
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.vpn_key_rounded,
+                title: 'Hardware-Backed Encryption'.localized(context),
+                text:
+                    'All databases are locked with 256-bit AES keys generated inside the secure Android Keystore, protecting data even on rooted devices.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.blur_on_rounded,
+                title: 'App Switcher Obfuscation'.localized(context),
+                text:
+                    'Hides your active screen and text previews in the system task switcher, keeping your private thoughts hidden from prying eyes.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.password_rounded,
+                title: 'Secure Passcode Protection'.localized(context),
+                text:
+                    'In-app PIN configuration is derived using secure key-derivation functions with random salts to prevent passcode extraction.'
+                        .localized(context),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
         ],
@@ -704,7 +786,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             subtitle:
                 'On Xiaomi, Oppo, Vivo, Samsung, or Huawei, the OS terminates killed apps unless Auto-Start is granted.'
                     .localized(context),
-            isConfigured: false, // Cannot detect programmatically
+            isConfigured: false,
+            // Cannot detect programmatically
             buttonText: 'Configure Settings'.localized(context),
             onAction: () async {
               HapticFeedback.selectionClick();
@@ -869,6 +952,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 children: widget.pages.map((key) {
                   if (key == 'welcome') {
                     return _buildWelcomePage(p);
+                  }
+                  if (key == 'security') {
+                    return _buildSecurityPage(p);
                   }
                   if (key == 'features') {
                     return _buildFeaturesPage(p);
