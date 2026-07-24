@@ -286,6 +286,20 @@ class MainActivity : FlutterActivity() {
                     result.success(getFileSha256(filePath))
                 }
 
+                "setObfuscateInRecents" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    try {
+                        if (enabled) {
+                            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                        } else {
+                            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("FLAG_SECURE_FAILED", e.message, null)
+                    }
+                }
+
                 "configureRemoteNotices" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: false
                     val feedUrl = call.argument<String>("feedUrl") ?: ""

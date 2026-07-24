@@ -51,6 +51,12 @@ class NoteKarAppState extends State<NoteKarApp> {
   void initState() {
     super.initState();
     _locale = widget.prefs?.getString('m-locale') ?? 'system';
+    final obfuscate = widget.prefs?.getBool('obfuscate_in_recents') ?? false;
+    if (obfuscate) {
+      const MethodChannel(
+        'notekar/files',
+      ).invokeMethod<void>('setObfuscateInRecents', {'enabled': true});
+    }
   }
 
   void setLocale(String locale) {

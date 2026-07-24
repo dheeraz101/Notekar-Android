@@ -286,6 +286,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   SharedPreferences? _prefs;
 
   bool _betaTrack = false;
+  bool obfuscateInRecents = false;
 
   String _vtRatio = '0 / 60+ clean';
   String _vtStatus = 'Undetected';
@@ -298,6 +299,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
       _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
+      obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _dailyReminderEnabled =
@@ -1692,6 +1694,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
               setState(() => privacyLock = true);
             }
           });
+        },
+        status: null,
+      ),
+      item(
+        title: 'Hide App Content in Recents',
+        subtitle:
+            'Obfuscate screens and block screenshots in the system switcher',
+        category: 'Privacy & Security',
+        icon: Icons.screenshot_rounded,
+        keywords: [
+          'hide content',
+          'recents',
+          'app switcher',
+          'obfuscate',
+          'screenshot',
+          'prevent screenshots',
+          'privacy screen',
+        ],
+        kind: 'switch',
+        boolValue: obfuscateInRecents,
+        onBoolChanged: (bool value) async {
+          if (_prefs != null) {
+            await _prefs!.setBool('obfuscate_in_recents', value);
+          }
+          setState(() => obfuscateInRecents = value);
+          try {
+            await const MethodChannel(
+              'notekar/files',
+            ).invokeMethod<void>('setObfuscateInRecents', {'enabled': value});
+          } catch (_) {}
         },
         status: null,
       ),
@@ -5676,6 +5708,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     text:
                                         'Add the NoteKar widget to your launcher. Tap IN, OUT, or TAP to log instantly in the background with real-time widget updates, or tap NOTE to open a native quick-log overlay.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.screenshot_rounded,
+                                    title: 'Hide Content in Recents',
+                                    text:
+                                        'Turn on Hide App Content in Recents under Settings > Privacy & Security to cover app screens and block screenshots when minimizing the app.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -5824,6 +5863,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     question: 'Is my Dashboard data uploaded?',
                                     answer:
                                         'No. All stats, activity heatmaps, anomalies, and correlation graphs are computed completely offline on your device. We do not track or upload your habits or logs.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I block screenshots and screen previews?',
+                                    answer:
+                                        'Enable "Hide App Content in Recents" under Settings > Privacy & Security. Once enabled, screenshots will be blocked inside NoteKar, and the system app switcher card will appear blank.',
                                   ),
                                 ],
                               ),
@@ -6779,6 +6825,45 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 p: p,
                                 text:
                                     'Protect your saved history using device biometric authentication or system PIN.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    icon: Icons.screenshot_rounded,
+                                    title: 'Hide App Content in Recents',
+                                    subtitle:
+                                        'Obfuscate application screens and block screenshots in the system recents switcher.',
+                                    value: obfuscateInRecents,
+                                    color: p.green,
+                                    onChanged: (value) async {
+                                      if (_prefs != null) {
+                                        await _prefs!.setBool(
+                                          'obfuscate_in_recents',
+                                          value,
+                                        );
+                                      }
+                                      setState(
+                                        () => obfuscateInRecents = value,
+                                      );
+                                      try {
+                                        await const MethodChannel(
+                                          'notekar/files',
+                                        ).invokeMethod<void>(
+                                          'setObfuscateInRecents',
+                                          {'enabled': value},
+                                        );
+                                      } catch (_) {}
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Requires user consent. When enabled, your sensitive moments and notes cannot be viewed from the app switcher.',
                               ),
 
                               SettingsBetaNote(
@@ -8902,6 +8987,17 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
               ),
             );
           },
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            'Only the top 10 commits are shown'.localized(context),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
         ),
       ],
     );

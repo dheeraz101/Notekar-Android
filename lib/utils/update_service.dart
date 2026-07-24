@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -512,7 +513,8 @@ class UpdateService {
     try {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
       if (cacheDir == null) return null;
-      final file = File('$cacheDir/notekar-$version-universal.apk');
+      final cleanVersion = version.split('-').first;
+      final file = File('$cacheDir/notekar-$cleanVersion-universal.apk');
       if (await file.exists()) {
         return file.path;
       }
