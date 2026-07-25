@@ -2408,6 +2408,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       letterSpacing: -0.1,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      _openFeedback();
+                    },
+                    child: Text(
+                      'Give Feedback'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   PressableScale(
                     onTap: () => Navigator.pop(context),
@@ -4284,6 +4300,15 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                                     color: p.green,
                                     rowKind: 'popup',
                                     onTap: _openFeedback,
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.email_rounded,
+                                    title: 'Email Support',
+                                    color: p.accent,
+                                    rowKind: 'link',
+                                    onTap: () =>
+                                        widget.onOpenLink(supportEmail),
                                   ),
                                   SettingsRow(
                                     p: p,
