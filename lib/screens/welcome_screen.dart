@@ -279,6 +279,91 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
+  Widget _buildNetworkMonitorPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.network_check_rounded,
+                color: p.accent,
+                size: 38,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'Network & Data Transparency'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'NoteKar now includes a built-in offline-first Network Monitor to track and verify internet connectivity.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 32),
+          SettingsGroup(
+            p: p,
+            children: [
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.wifi_find_rounded,
+                title: 'Real-time Traffic Audit'.localized(context),
+                text:
+                    'Every single outbound network request made by NoteKar is audited and shown in settings. You know exactly when and why the app uses internet.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.verified_user_rounded,
+                title: '100% Offline Integrity'.localized(context),
+                text:
+                    'All network logs remain stored locally in private storage. No tracking SDKs or telemetry exist. Your privacy is mathematically secure.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.system_update_alt_rounded,
+                title: 'Smart Bandwidth Saver'.localized(context),
+                text:
+                    'Warns you before downloading in-app software updates via mobile data and estimates download sizes to save your monthly bandwidth data.'
+                        .localized(context),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFeaturesPage(Palette p) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -967,6 +1052,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'reminders') {
                     return _buildRemindersPage(p);
+                  }
+                  if (key == 'network-monitor') {
+                    return _buildNetworkMonitorPage(p);
                   }
                   return const SizedBox.shrink();
                 }).toList(),

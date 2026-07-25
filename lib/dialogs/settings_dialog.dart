@@ -1274,6 +1274,32 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: '100% Offline',
       ),
       item(
+        title: 'Network Monitor',
+        subtitle: 'Audit application network traffic logs',
+        category: 'Advanced',
+        icon: Icons.network_check_rounded,
+        keywords: [
+          'network monitor',
+          'traffic',
+          'internet',
+          'data usage',
+          'does the app use internet',
+          'is the app sending data',
+          'where does the app send data',
+          'network traffic',
+          'network logs',
+          'wifi',
+          'mobile data',
+          'api logs',
+          'requests',
+          'privacy log',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'View',
+      ),
+      item(
         title: 'Theme',
         subtitle: 'Dark, light, or amoled mode',
         category: 'Display',
@@ -6030,6 +6056,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         'Can I view updates while offline?',
                                     answer:
                                         'Yes! NoteKar automatically caches the latest commits feed when you check for updates online. If you are offline, you will still see the cached feed, though checking for new updates will show a "No internet" notice.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question: 'What is the Network Monitor?',
+                                    answer:
+                                        'NoteKar includes an offline-first Network Monitor that displays a real-time audit log of every internet request made by the app (like update checks, changelogs, and notice checks), including status codes, request sizes, and purpose. No data ever leaves your device.',
                                   ),
                                   HelpRow(
                                     p: p,

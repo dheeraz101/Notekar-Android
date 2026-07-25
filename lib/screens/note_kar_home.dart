@@ -434,8 +434,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
     final remindersWalkthroughSeen =
         prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
+    final securityWalkthroughSeen =
+        prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
+    final networkWalkthroughSeen =
+        prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
 
-    if (!welcomeSeen || !remindersWalkthroughSeen) {
+    if (!welcomeSeen ||
+        !remindersWalkthroughSeen ||
+        !securityWalkthroughSeen ||
+        !networkWalkthroughSeen) {
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -712,6 +719,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
     final securityWalkthroughSeen =
         prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
+    final networkWalkthroughSeen =
+        prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
 
     if (!welcomeSeen) {
       if (!mounted) return;
@@ -742,6 +751,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               'repo-move',
               'updates-permission',
               'reminders',
+              'network-monitor',
             ],
           ),
         ),
@@ -749,6 +759,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool(_welcomeSeenKey, true);
       await prefs.setBool('notekar.remindersWalkthroughSeen', true);
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
+      await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
     } else if (!securityWalkthroughSeen) {
       if (!mounted) return;
       await Navigator.of(context).push(
@@ -803,6 +814,33 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
       );
       await prefs.setBool('notekar.remindersWalkthroughSeen', true);
+    } else if (!networkWalkthroughSeen) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => WelcomeScreen(
+            p: p,
+            theme: _theme,
+            defaultMode: _defaultMode,
+            currentLocale: _locale,
+            onLocaleChanged: (value) {
+              NoteKarApp.of(context)?.setLocale(value);
+              setState(() => _locale = value);
+            },
+            onTheme: (value) {
+              setState(() => _theme = value);
+              _saveSetting('m-theme', value);
+              _applySystemUiStyle();
+            },
+            onDefaultMode: (value) {
+              setState(() => _defaultMode = value);
+              _saveSetting('m-default-mode', value);
+            },
+            pages: const ['network-monitor'],
+          ),
+        ),
+      );
+      await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
     }
   }
 
