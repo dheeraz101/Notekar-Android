@@ -1,5 +1,5 @@
 /**
- * NoteKar Secure Feedback Proxy (Cloudflare Workers template)
+ * NoteKar Secure Feedback Proxy (Cloudflare Workers template with Rate Limiting)
  * 
  * Securely forwards in-app bug reports and feature requests to GitHub Issues
  * without leaking your GitHub Personal Access Token (PAT).
@@ -10,6 +10,8 @@
  *    - GITHUB_TOKEN: A GitHub PAT with write permission to your repository's issues.
  *    - NOTEKAR_API_KEY: A secret header string shared with the app client (to prevent direct bot spam).
  */
+
+const ipCache = new Map();
 
 export default {
   async fetch(request, env, ctx) {
@@ -41,6 +43,25 @@ export default {
         });
       }
 
+      // 3. IP-based Rate Limiter (Max 3 reports per hour per IP)
+      const clientIp = request.headers.get("CF-Connecting-IP") || "unknown-ip";
+      const now = Date.now();
+      const userRequests = ipCache.get(clientIp) || [];
+      
+      // Filter out requests older than 1 hour (3,600,000 ms)
+      const recentRequests = userRequests.filter(timestamp => now - timestamp < 3600000);
+      
+      if (recentRequests.length >= 3) {
+        return new Response(JSON.stringify({ error: "Too many feedback requests. Please try again in an hour." }), {
+          status: 429,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+      
+      // Log current request timestamp
+      recentRequests.push(now);
+      ipCache.set(clientIp, recentRequests);
+
       const payload = await request.json();
       const { title, body, labels } = payload;
 
@@ -51,7 +72,7 @@ export default {
         });
       }
 
-      // 3. Post to GitHub Issues API
+      // 4. Post to GitHub Issues API
       const repoOwner = "dheeraz101";
       const repoName = "Notekar-Android";
       const githubUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/issues`;

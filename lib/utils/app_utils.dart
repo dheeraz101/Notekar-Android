@@ -30,9 +30,11 @@ const githubIssues = 'https://github.com/dheeraz101/Notekar-Android/issues';
 const coffeeLink = 'https://buymeacoffee.com/dheeraz';
 const githubReleases = 'https://github.com/dheeraz101/Notekar-Android/releases';
 const supportEmail = 'mailto:yabp.support@gmail.com';
-const feedbackProxyUrl =
-    'https://notekar-feedback.dheeraz.workers.dev/api/feedback';
-const feedbackApiKey = 'notekar-app-secret-feedback-key-2026';
+const feedbackProxyUrl = 'https://notekar-feedback-proxy.dheeraj8v.workers.dev';
+const feedbackApiKey = String.fromEnvironment(
+  'FEEDBACK_API_KEY',
+  defaultValue: 'notekar-app-secret-feedback-key-2026',
+);
 const notificationFeed =
     'https://raw.githubusercontent.com/dheeraz101/NotekarN/refs/heads/main/notification.json';
 

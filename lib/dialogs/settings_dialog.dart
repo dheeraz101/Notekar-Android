@@ -855,6 +855,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   // Error handling caches
   void Function(FlutterErrorDetails)? _oldOnError;
   bool Function(Object, StackTrace)? _oldPlatformOnError;
+  String _feedbackSubmitStatus = 'idle';
 
   // Feedback text controllers
   final TextEditingController _bugTitleController = TextEditingController();
@@ -2916,22 +2917,10 @@ ${stackTrace ?? 'No stack trace provided.'}
     }
 
     if (!mounted) return;
-    setState(() => _submittingFeedback = true);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: CupertinoActivityIndicator(radius: 16, color: p.accent),
-        ),
-      ),
-    );
+    setState(() {
+      _submittingFeedback = true;
+      _feedbackSubmitStatus = 'submitting';
+    });
 
     final engine = AdaptiveEngine();
 
@@ -3039,10 +3028,6 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
       );
     }
 
-    if (mounted) {
-      Navigator.pop(context);
-    }
-
     await NetworkLogger.log(
       url: url,
       method: 'POST',
@@ -3054,27 +3039,133 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
     );
 
     if (mounted) {
-      setState(() => _submittingFeedback = false);
       if (success) {
-        _showCustomAlert(
-          p: p,
-          title: 'Success',
-          message:
-              'Feedback submitted successfully. Thank you for your support!',
-          icon: Icons.check_circle_outline_rounded,
-          iconColor: p.green,
-        );
-        _popCategory();
+        setState(() {
+          _feedbackSubmitStatus = 'success';
+        });
+        await Future.delayed(const Duration(milliseconds: 1500));
+        if (mounted) {
+          setState(() {
+            _submittingFeedback = false;
+            _feedbackSubmitStatus = 'idle';
+          });
+          _popCategory();
+        }
       } else {
-        _showCustomAlert(
-          p: p,
-          title: 'Submission Failed',
-          message: 'Failed to submit feedback. ($statusCode: $statusText)',
-          icon: Icons.error_outline_rounded,
-          iconColor: p.red,
-        );
+        setState(() {
+          _feedbackSubmitStatus = 'failed';
+        });
+        await Future.delayed(const Duration(milliseconds: 3000));
+        if (mounted) {
+          setState(() {
+            _submittingFeedback = false;
+            _feedbackSubmitStatus = 'idle';
+          });
+          _showCustomAlert(
+            p: p,
+            title: 'Submission Failed',
+            message: 'Failed to submit feedback. ($statusCode: $statusText)',
+            icon: Icons.error_outline_rounded,
+            iconColor: p.red,
+          );
+        }
       }
     }
+  }
+
+  Widget _buildSubmitButton(Palette p, String type, bool formValid) {
+    Color btnColor;
+    Widget child;
+    bool isDisabled = !formValid || _feedbackSubmitStatus == 'submitting';
+
+    if (_feedbackSubmitStatus == 'submitting') {
+      btnColor = p.accent;
+      child = Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CupertinoActivityIndicator(color: Colors.white, radius: 8),
+          const SizedBox(width: 8),
+          Text(
+            'Submitting...'.localized(context),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      );
+    } else if (_feedbackSubmitStatus == 'success') {
+      btnColor = p.green;
+      child = Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.check_circle_outline_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Submitted!'.localized(context),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      );
+    } else if (_feedbackSubmitStatus == 'failed') {
+      btnColor = p.red;
+      child = Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Submission Failed!'.localized(context),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      );
+    } else {
+      btnColor = p.accent;
+      child = Text(
+        (type == 'bug' ? 'Submit Bug Report' : 'Submit Feature Request')
+            .localized(context),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+        ),
+      );
+    }
+
+    return PressableScale(
+      onTap: isDisabled ? null : () => _submitFeedback(type, p),
+      child: Opacity(
+        opacity: isDisabled ? 0.5 : 1.0,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          height: 48,
+          decoration: BoxDecoration(
+            color: btnColor,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          alignment: Alignment.center,
+          child: child,
+        ),
+      ),
+    );
   }
 
   Widget _feedbackRootPage(Palette p) {
@@ -3226,31 +3317,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
           ],
         ),
         const SizedBox(height: 16),
-        if (_submittingFeedback)
-          const Center(child: CircularProgressIndicator())
-        else
-          PressableScale(
-            onTap: _bugFormValid ? () => _submitFeedback('bug', p) : null,
-            child: Opacity(
-              opacity: _bugFormValid ? 1.0 : 0.5,
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: p.accent,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Submit Bug Report'.localized(context),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
-          ),
+        _buildSubmitButton(p, 'bug', _bugFormValid),
       ],
     );
   }
@@ -3367,31 +3434,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
           ],
         ),
         const SizedBox(height: 16),
-        if (_submittingFeedback)
-          const Center(child: CircularProgressIndicator())
-        else
-          PressableScale(
-            onTap: _featFormValid ? () => _submitFeedback('feature', p) : null,
-            child: Opacity(
-              opacity: _featFormValid ? 1.0 : 0.5,
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: p.accent,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Submit Feature Request'.localized(context),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
-          ),
+        _buildSubmitButton(p, 'feature', _featFormValid),
       ],
     );
   }
