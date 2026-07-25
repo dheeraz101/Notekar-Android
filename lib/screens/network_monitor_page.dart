@@ -77,13 +77,13 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    return AppSheet(
-      p: p,
-      title: 'Network Monitor'.localized(context),
-      docked: true,
-      blur: _useTranslucency,
-      child: Material(
-        color: Colors.transparent,
+    return Material(
+      color: Colors.transparent,
+      child: AppSheet(
+        p: p,
+        title: 'Network Monitor'.localized(context),
+        docked: true,
+        blur: _useTranslucency,
         child: SizedBox(
           width: 410,
           height: MediaQuery.sizeOf(context).height * 0.8,
@@ -100,7 +100,7 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
                   color: _useTranslucency
                       ? p.surface2.withValues(alpha: 0.8)
                       : p.surface2,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(32),
                   border: Border.all(color: p.border.withValues(alpha: 0.5)),
                 ),
                 child: Column(
@@ -253,13 +253,13 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
                               color: _useTranslucency
                                   ? p.surface.withValues(alpha: 0.4)
                                   : p.surface2,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(24),
                               border: Border.all(
                                 color: p.border.withValues(alpha: 0.2),
                               ),
                             ),
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(24),
                               onTap: () {
                                 HapticFeedback.selectionClick();
                                 setState(() {
