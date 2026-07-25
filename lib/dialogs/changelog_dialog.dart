@@ -24,6 +24,23 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.4',
+      date: 'July 25, 2026',
+      highlights: [
+        'Implement inline button spinner, success/failed states and compile-time API key injection',
+        'Implement offline check, iOS spinner overlay, and automated crash reporting',
+        'Add Email Support tile and Beta dialog Feedback link',
+        'Implement secure template-structured in-app feedback system',
+      ],
+      items: [
+        'Implement inline button spinner, success/failed states and compile-time API key injection',
+        'Implement offline check, iOS spinner overlay, and automated crash reporting',
+        'Format beta popup feedback redirect link and remove underline',
+        'Add Email Support tile and Beta dialog Feedback link',
+        'Implement secure template-structured in-app feedback system',
+      ],
+    ),
+    (
       version: '5.1.3',
       date: 'July 25, 2026',
       highlights: [

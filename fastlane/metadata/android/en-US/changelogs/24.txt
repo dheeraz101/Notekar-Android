@@ -1,0 +1,6 @@
+Update to 5.1.4 (build 24):
+- New: Implement inline button spinner, success/failed states and compile-time API key injection
+- New: Implement offline check, iOS spinner overlay, and automated crash reporting
+- New: Add Email Support tile and Beta dialog Feedback link
+- New: Implement secure template-structured in-app feedback system
+- Format beta popup feedback redirect link and remove underline

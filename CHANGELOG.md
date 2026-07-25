@@ -7,15 +7,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.4] - 2026-07-25 (versionCode 24) [Beta]
+
+### What's New
+
+- Implement inline button spinner, success/failed states and compile-time API key injection
+- Implement offline check, iOS spinner overlay, and automated crash reporting
+- Add Email Support tile and Beta dialog Feedback link
+- Implement secure template-structured in-app feedback system
+
+### Improvements
+
+- Format beta popup feedback redirect link and remove underline
+
 ## [5.1.3] - 2026-07-25 (versionCode 23) [Beta]
 
 ### What's New
+
 - Add network monitor welcome card, FAQs, and fix upgrader walkthrough checks
 - Implement mobile data update warning & network monitor page
 - Upgrade widget layout and settings search index
 - Index app version, safety, and privacy in search database
 
 ### Improvements
+
 - Remove extra margins/padding to match standard settings card widths
 - Integrate Network Monitor natively as a settings dialog subpage
 - Wrap NetworkMonitor root in Material and align card dimensions
