@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/widgets/common_elements.dart';
@@ -9,8 +10,15 @@ import 'package:notekar/widgets/pressable_scale.dart';
 
 class NetworkMonitorPage extends StatefulWidget {
   final Palette p;
+  final bool enableTranslucency;
+  final bool reduceMotion;
 
-  const NetworkMonitorPage({super.key, required this.p});
+  const NetworkMonitorPage({
+    super.key,
+    required this.p,
+    required this.enableTranslucency,
+    required this.reduceMotion,
+  });
 
   @override
   State<NetworkMonitorPage> createState() => _NetworkMonitorPageState();
@@ -61,6 +69,11 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
     return '${totalKb.toStringAsFixed(1)} KB';
   }
 
+  bool get _useTranslucency =>
+      !widget.reduceMotion &&
+      widget.enableTranslucency &&
+      AdaptiveEngine().supportsBlur;
+
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
@@ -68,7 +81,7 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
       p: p,
       title: 'Network Monitor'.localized(context),
       docked: true,
-      blur: true,
+      blur: _useTranslucency,
       child: Material(
         color: Colors.transparent,
         child: SizedBox(
@@ -84,7 +97,9 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: p.surface2.withValues(alpha: 0.8),
+                  color: _useTranslucency
+                      ? p.surface2.withValues(alpha: 0.8)
+                      : p.surface2,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: p.border.withValues(alpha: 0.5)),
                 ),
@@ -158,12 +173,27 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
                         ),
                         PressableScale(
                           onTap: _clearLogs,
-                          child: Text(
-                            'Clear History'.localized(context),
-                            style: TextStyle(
-                              color: p.red,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.red.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: p.red.withValues(alpha: 0.25),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              'Clear'.localized(context),
+                              style: TextStyle(
+                                color: p.red,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.2,
+                              ),
                             ),
                           ),
                         ),
@@ -220,7 +250,9 @@ class _NetworkMonitorPageState extends State<NetworkMonitorPage> {
                           return Container(
                             margin: const EdgeInsets.only(bottom: 10),
                             decoration: BoxDecoration(
-                              color: p.surface.withValues(alpha: 0.4),
+                              color: _useTranslucency
+                                  ? p.surface.withValues(alpha: 0.4)
+                                  : p.surface2,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: p.border.withValues(alpha: 0.2),

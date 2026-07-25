@@ -3708,6 +3708,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                                 pageBuilder: (context, _, _) =>
                                                     NetworkMonitorPage(
                                                       p: widget.p,
+                                                      enableTranslucency:
+                                                          enableTranslucency,
+                                                      reduceMotion:
+                                                          reduceMotion,
                                                     ),
                                               );
                                               return;
@@ -7610,7 +7614,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         barrierDismissible: true,
                                         barrierLabel: 'Network Monitor',
                                         pageBuilder: (context, _, _) =>
-                                            NetworkMonitorPage(p: widget.p),
+                                            NetworkMonitorPage(
+                                              p: widget.p,
+                                              enableTranslucency:
+                                                  enableTranslucency,
+                                              reduceMotion: reduceMotion,
+                                            ),
                                       );
                                     },
                                   ),
@@ -8186,7 +8195,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         p: p,
         title: 'Security & Integrity'.localized(context),
         docked: true,
-        blur: true,
+        blur:
+            !reduceMotion &&
+            enableTranslucency &&
+            AdaptiveEngine().supportsBlur,
         child: SizedBox(
           width: 410,
           child: SingleChildScrollView(
@@ -8286,7 +8298,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         p: p,
         title: 'Privacy & Offline Model'.localized(context),
         docked: true,
-        blur: true,
+        blur:
+            !reduceMotion &&
+            enableTranslucency &&
+            AdaptiveEngine().supportsBlur,
         child: SizedBox(
           width: 410,
           child: SingleChildScrollView(
