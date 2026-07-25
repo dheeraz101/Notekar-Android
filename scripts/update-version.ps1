@@ -117,9 +117,12 @@ if (-not $BuildNumber)
     $BuildNumber = $currentBuild + 1
 }
 
-# Query local git log since last version commit to auto-populate changelogs without duplicates
-$gitCommits = ""
+# Parse and clean git log since last version commit to auto-populate user-facing changelogs
 $cleanCommits = @()
+$features = @()
+$improvements = @()
+$fixes = @()
+
 try
 {
     $startCommit = ""
@@ -161,24 +164,73 @@ try
 
     if ($commitsList)
     {
-        # Strip commit hash, capitalize first letter, and clean shell message/flag artifacts
-        $cleanCommits = $commitsList | ForEach-Object {
+        foreach ($line in $commitsList)
+        {
             # Strip hash prefix
-            $msg = $_ -replace '^[0-9a-f]+\s+', ''
+            $msg = $line -replace '^[0-9a-f]+\s+', ''
 
             # Strip trailing leaked shell parameters (e.g. -m flags)
             $msg = $msg -replace '\s*"\s*-m\s*.*$', ''
             $msg = $msg -replace '\s*-\s*m\s*.*$', ''
-
             $msg = $msg.Trim()
-            if ($msg.Length -gt 0)
-            {
-                $msg = $msg.Substring(0, 1).ToUpper() + $msg.Substring(1)
-            }
-            $msg
-        } | Where-Object { [string]::IsNullOrWhiteSpace($_) -eq $false }
 
-        $gitCommits = ($cleanCommits | ForEach-Object { "- $_" }) -join "`r`n"
+            if ( [string]::IsNullOrWhiteSpace($msg))
+            {
+                continue
+            }
+
+            # Identify category based on prefix
+            $category = "improvement"
+            if ($msg -match '^(feat)(?:\([^)]+\))?:\s*')
+            {
+                $category = "feature"
+            }
+            elseif ($msg -match '^(fix|bug)(?:\([^)]+\))?:\s*')
+            {
+                $category = "fix"
+            }
+            elseif ($msg -match '^(chore|test|ci|build|docs)(?:\([^)]+\))?:\s*')
+            {
+                # Skip internal developer commits to keep user-facing release notes clean
+                continue
+            }
+
+            # Strip conventional commit prefixes like feat:, feat(scope):, style:, refactor:, etc.
+            $cleanMsg = $msg -replace '^(feat|fix|style|refactor|perf|docs|chore|test|ci|build)(?:\([^)]+\))?:\s*', ''
+            if ($cleanMsg.Length -gt 0)
+            {
+                $cleanMsg = $cleanMsg.Substring(0, 1).ToUpper() + $cleanMsg.Substring(1)
+            }
+
+            # Add to categories (avoid duplicates)
+            if ($category -eq "feature")
+            {
+                if ($features -notcontains $cleanMsg)
+                {
+                    $features += $cleanMsg
+                }
+            }
+            elseif ($category -eq "fix")
+            {
+                if ($fixes -notcontains $cleanMsg)
+                {
+                    $fixes += $cleanMsg
+                }
+            }
+            else
+            {
+                if ($improvements -notcontains $cleanMsg)
+                {
+                    $improvements += $cleanMsg
+                }
+            }
+
+            # Build a list of all clean commits for items list
+            if ($cleanCommits -notcontains $cleanMsg)
+            {
+                $cleanCommits += $cleanMsg
+            }
+        }
     }
 }
 catch
@@ -186,11 +238,65 @@ catch
     # Fallback if git fails
 }
 
-if ( [string]::IsNullOrWhiteSpace($gitCommits))
+# Fallbacks if list is empty
+if ($cleanCommits.Count -eq 0)
 {
-    $gitCommits = "- Placeholder changelog / commit note here."
-    $cleanCommits = @("Placeholder changelog / commit note here.")
+    $fallbackMsg = "Quality improvements and stability enhancements."
+    $cleanCommits = @($fallbackMsg)
+    $improvements = @($fallbackMsg)
 }
+
+# Construct formatted markdown for CHANGELOG.md and RELEASE_NOTES.md
+$mdSections = @()
+if ($features.Count -gt 0)
+{
+    $mdSections += "### What's New"
+    foreach ($f in $features)
+    {
+        $mdSections += "- $f"
+    }
+}
+if ($improvements.Count -gt 0)
+{
+    if ($mdSections.Count -gt 0)
+    {
+        $mdSections += ""
+    }
+    $mdSections += "### Improvements"
+    foreach ($imp in $improvements)
+    {
+        $mdSections += "- $imp"
+    }
+}
+if ($fixes.Count -gt 0)
+{
+    if ($mdSections.Count -gt 0)
+    {
+        $mdSections += ""
+    }
+    $mdSections += "### Bug Fixes"
+    foreach ($fx in $fixes)
+    {
+        $mdSections += "- $fx"
+    }
+}
+$gitCommits = $mdSections -join "`r`n"
+
+# Construct formatted list for F-Droid / Fastlane (needs to be extremely concise and bulleted, no markdown headers)
+$fastlaneBullets = @()
+foreach ($f in $features)
+{
+    $fastlaneBullets += "- New: $f"
+}
+foreach ($imp in $improvements)
+{
+    $fastlaneBullets += "- $imp"
+}
+foreach ($fx in $fixes)
+{
+    $fastlaneBullets += "- Fix: $fx"
+}
+$fastlaneCommits = $fastlaneBullets -join "`r`n"
 
 # 1. Update version across core config files
 Update-TextFile -Path $pubspecPath -Update {
@@ -221,12 +327,9 @@ if (-not (Test-Path -LiteralPath $fastlaneDir))
     New-Item -ItemType Directory -Path $fastlaneDir -Force | Out-Null
 }
 $fastlaneFile = Join-Path $fastlaneDir "$BuildNumber.txt"
-if (-not (Test-Path -LiteralPath $fastlaneFile))
-{
-    $fastlaneContent = "Update to $Version (build $BuildNumber):`r`n$gitCommits"
-    Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
-    Write-Host "Created F-Droid changelog template: $fastlaneFile"
-}
+$fastlaneContent = "Update to $Version (build $BuildNumber):`r`n$fastlaneCommits"
+Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
+Write-Host "Created/Updated F-Droid changelog: $fastlaneFile"
 
 # 3. Automate GitHub Release notes template creation with optional Security Update prefix
 $releaseNotesDir = Join-Path $repoRoot "releases/v$Version"
@@ -235,17 +338,14 @@ if (-not (Test-Path -LiteralPath $releaseNotesDir))
     New-Item -ItemType Directory -Path $releaseNotesDir -Force | Out-Null
 }
 $releaseNotesFile = Join-Path $releaseNotesDir "RELEASE_NOTES.md"
-if (-not (Test-Path -LiteralPath $releaseNotesFile))
+$prefix = ""
+if ($security)
 {
-    $prefix = ""
-    if ($security)
-    {
-        $prefix = "## 🛡️ Security Update`r`n`r`n"
-    }
-    $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n### What's Changed`r`n$gitCommits`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
-    Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
-    Write-Host "Created GitHub Release notes template: $releaseNotesFile"
+    $prefix = "## 🛡️ Security Update`r`n`r`n"
 }
+$releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n$gitCommits`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
+Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
+Write-Host "Created/Updated GitHub Release notes template: $releaseNotesFile"
 
 # 4. Automate In-App Changelog section injection inside changelog_dialog.dart
 $changelogPath = Join-Path $repoRoot "lib/dialogs/changelog_dialog.dart"
@@ -253,66 +353,48 @@ if (Test-Path -LiteralPath $changelogPath)
 {
     $changelogText = Get-Content -LiteralPath $changelogPath -Raw
     $changelogText = $changelogText -replace "`r`n", "`n"
-    $versionSearch = "version: '$Version'"
-    if ($changelogText -match [regex]::Escape($versionSearch))
+
+    $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
+
+    # Highlights: use features list
+    $hlList = @()
+    if ($security)
     {
-        Write-Host "Changelog entry for version $Version already exists in changelog_dialog.dart"
+        $hlList += "Security and stability improvements."
     }
-    else
+    foreach ($f in $features)
     {
-        $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
-
-        # Derive highlights (What's New)
-        $hlList = @()
-        if ($security)
+        $hlList += $f
+    }
+    if ($hlList.Count -eq 0)
+    {
+        if ($beta)
         {
-            $hlList += "Security and stability improvements."
+            $hlList += "Beta testing and feedback build."
         }
-
-        # Find all Feat: / Feature: commits
-        $featCommits = $cleanCommits | Where-Object { $_ -match "^Feat(ure)?:\s*" }
-        foreach ($c in $featCommits)
+        elseif ($stable)
         {
-            $cleaned = $c -replace "^Feat(ure)?:\s*", ""
-            if ($cleaned.Length -gt 0)
-            {
-                $cleaned = $cleaned.Substring(0, 1).ToUpper() + $cleaned.Substring(1)
-                $hlList += $cleaned
-            }
-        }
-
-        # Fallback if no highlights found
-        if ($hlList.Count -eq 0)
-        {
-            if ($beta)
-            {
-                $hlList += "Beta testing and feedback build."
-            }
-            elseif ($stable)
-            {
-                $hlList += "Stable feature updates and enhancements."
-            }
-            else
-            {
-                $hlList += "Quality improvements and stability updates."
-            }
-        }
-
-        $jsHighlights = ($hlList | ForEach-Object { "        '$_'," }) -join "`n"
-
-        if ($cleanCommits.Count -gt 0)
-        {
-            $jsItems = ($cleanCommits | ForEach-Object { "        '$_'," }) -join "`n"
+            $hlList += "Stable feature updates and enhancements."
         }
         else
         {
-            $jsItems = "        'Updated app to version $Version',"
+            $hlList += "Quality improvements and stability updates."
         }
-        $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n$jsHighlights`n      ],`n      items: [`n$jsItems`n      ],`n    ),"
-        $changelogText = $changelogText.Replace("  static const releases = [", $newReleaseEntry)
-        Set-Content -LiteralPath $changelogPath -Value $changelogText -NoNewline
-        Write-Host "Injected new empty in-app changelog section for v$Version inside changelog_dialog.dart"
     }
+
+    $jsHighlights = ($hlList | ForEach-Object { "        '$_'," }) -join "`n"
+    $jsItems = ($cleanCommits | ForEach-Object { "        '$_'," }) -join "`n"
+
+    $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n$jsHighlights`n      ],`n      items: [`n$jsItems`n      ],`n    ),"
+
+    $entryPattern = "(?s)\(\s*version:\s*'$Version',.*?\),\s*"
+    if ($changelogText -match $entryPattern)
+    {
+        $changelogText = $changelogText -replace $entryPattern, ""
+    }
+    $changelogText = $changelogText.Replace("  static const releases = [", $newReleaseEntry)
+    Set-Content -LiteralPath $changelogPath -Value $changelogText -NoNewline
+    Write-Host "Injected/Updated in-app changelog section for v$Version inside changelog_dialog.dart"
 }
 
 # 5. Automate CHANGELOG.md updates
@@ -320,35 +402,39 @@ $changelogMdPath = Join-Path $repoRoot "CHANGELOG.md"
 if (Test-Path -LiteralPath $changelogMdPath)
 {
     $changelogMdText = Get-Content -LiteralPath $changelogMdPath -Raw
-    $changelogSearch = "## [$Version]"
-    if ($changelogMdText -match [regex]::Escape($changelogSearch))
+
+    $tagSuffix = ""
+    if ($beta)
     {
-        Write-Host "Changelog entry for version $Version already exists in CHANGELOG.md"
+        $tagSuffix = " [Beta]"
+    }
+    elseif ($security)
+    {
+        $tagSuffix = " [Security]"
+    }
+    elseif ($stable)
+    {
+        $tagSuffix = " [Stable]"
+    }
+
+    $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n$gitCommits`r`n`r`n"
+
+    $changelogMdPattern = "(?s)## \[$Version\].*?(?=## \[|\Z)"
+    if ($changelogMdText -match "## \[$Version\]")
+    {
+        $changelogMdText = $changelogMdText -replace $changelogMdPattern, $newChangelogEntry
+        Write-Host "Updated CHANGELOG.md entry for version $Version"
     }
     else
     {
-        $tagSuffix = ""
-        if ($beta)
-        {
-            $tagSuffix = " [Beta]"
-        }
-        elseif ($security)
-        {
-            $tagSuffix = " [Security]"
-        }
-        elseif ($stable)
-        {
-            $tagSuffix = " [Stable]"
-        }
-        $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n### Changed`r`n$gitCommits`r`n`r`n"
         $firstHeaderIndex = $changelogMdText.IndexOf("## [")
         if ($firstHeaderIndex -ge 0)
         {
             $changelogMdText = $changelogMdText.Insert($firstHeaderIndex, $newChangelogEntry)
-            Set-Content -LiteralPath $changelogMdPath -Value $changelogMdText -NoNewline
-            Write-Host "Injected new empty changelog section for v$Version inside CHANGELOG.md"
+            Write-Host "Injected new changelog section for v$Version inside CHANGELOG.md"
         }
     }
+    Set-Content -LiteralPath $changelogMdPath -Value $changelogMdText -NoNewline
 }
 
 # 6. Automate README.md badge updates

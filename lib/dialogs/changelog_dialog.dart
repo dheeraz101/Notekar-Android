@@ -24,6 +24,27 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.3',
+      date: 'July 25, 2026',
+      highlights: [
+        'Add network monitor welcome card, FAQs, and fix upgrader walkthrough checks',
+        'Implement mobile data update warning & network monitor page',
+        'Upgrade widget layout and settings search index',
+        'Index app version, safety, and privacy in search database',
+      ],
+      items: [
+        'Remove extra margins/padding to match standard settings card widths',
+        'Integrate Network Monitor natively as a settings dialog subpage',
+        'Wrap NetworkMonitor root in Material and align card dimensions',
+        'Update NetworkMonitor with clear pill button & dynamic translucency',
+        'Wrap network monitor in Material to resolve double yellow underlines',
+        'Add network monitor welcome card, FAQs, and fix upgrader walkthrough checks',
+        'Implement mobile data update warning & network monitor page',
+        'Upgrade widget layout and settings search index',
+        'Index app version, safety, and privacy in search database',
+      ],
+    ),
+    (
       version: '5.1.2',
       date: 'July 25, 2026',
       highlights: [
