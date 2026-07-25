@@ -2432,7 +2432,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: useTranslucency ? p.surface2.withValues(alpha: 0.8) : p.surface2,
         borderRadius: BorderRadius.circular(32),
@@ -2568,160 +2567,157 @@ class _SettingsDialogState extends State<SettingsDialog> {
         !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur;
 
     return [
-      SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        sliver: SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            final entry = _networkLogs[index];
-            final isExpanded = _expandedNetworkLogIndex == index;
-            final timeStr =
-                '${entry.timestamp.hour.toString().padLeft(2, '0')}:${entry.timestamp.minute.toString().padLeft(2, '0')}:${entry.timestamp.second.toString().padLeft(2, '0')}';
-            final dateStr =
-                '${entry.timestamp.year}-${entry.timestamp.month.toString().padLeft(2, '0')}-${entry.timestamp.day.toString().padLeft(2, '0')}';
+      SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final entry = _networkLogs[index];
+          final isExpanded = _expandedNetworkLogIndex == index;
+          final timeStr =
+              '${entry.timestamp.hour.toString().padLeft(2, '0')}:${entry.timestamp.minute.toString().padLeft(2, '0')}:${entry.timestamp.second.toString().padLeft(2, '0')}';
+          final dateStr =
+              '${entry.timestamp.year}-${entry.timestamp.month.toString().padLeft(2, '0')}-${entry.timestamp.day.toString().padLeft(2, '0')}';
 
-            Color statusColor = p.green;
-            if (entry.statusCode < 200 || entry.statusCode >= 300) {
-              statusColor = p.red;
-            }
+          Color statusColor = p.green;
+          if (entry.statusCode < 200 || entry.statusCode >= 300) {
+            statusColor = p.red;
+          }
 
-            Color methodBg = p.accent.withValues(alpha: 0.1);
-            Color methodText = p.accent;
-            if (entry.method == 'HEAD') {
-              methodBg = p.text2.withValues(alpha: 0.1);
-              methodText = p.text2;
-            }
+          Color methodBg = p.accent.withValues(alpha: 0.1);
+          Color methodText = p.accent;
+          if (entry.method == 'HEAD') {
+            methodBg = p.text2.withValues(alpha: 0.1);
+            methodText = p.text2;
+          }
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                color: useTranslucency
-                    ? p.surface.withValues(alpha: 0.4)
-                    : p.surface2,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: p.border.withValues(alpha: 0.2)),
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  setState(() {
-                    _expandedNetworkLogIndex = isExpanded ? null : index;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: methodBg,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              entry.method,
-                              style: TextStyle(
-                                color: methodText,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: useTranslucency
+                  ? p.surface.withValues(alpha: 0.4)
+                  : p.surface2,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: p.border.withValues(alpha: 0.2)),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() {
+                  _expandedNetworkLogIndex = isExpanded ? null : index;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              entry.purpose.localized(context),
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          decoration: BoxDecoration(
+                            color: methodBg,
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            entry.size,
+                          child: Text(
+                            entry.method,
                             style: TextStyle(
-                              color: p.text2,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                              color: methodText,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: statusColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Status ${entry.statusCode}',
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '$dateStr • $timeStr',
-                            style: TextStyle(color: p.text3, fontSize: 10.5),
-                          ),
-                        ],
-                      ),
-                      if (isExpanded) ...[
-                        const SizedBox(height: 12),
-                        Divider(
-                          color: p.border.withValues(alpha: 0.2),
-                          height: 1,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            entry.purpose.localized(context),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         Text(
-                          'ENDPOINT URL'.localized(context),
+                          entry.size,
                           style: TextStyle(
-                            color: p.text3,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        SelectableText(
-                          entry.url,
-                          style: TextStyle(
-                            color: p.accent,
-                            fontFamily: 'monospace',
+                            color: p.text2,
                             fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Status ${entry.statusCode}',
+                              style: TextStyle(
+                                color: statusColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '$dateStr • $timeStr',
+                          style: TextStyle(color: p.text3, fontSize: 10.5),
+                        ),
+                      ],
+                    ),
+                    if (isExpanded) ...[
+                      const SizedBox(height: 12),
+                      Divider(
+                        color: p.border.withValues(alpha: 0.2),
+                        height: 1,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'ENDPOINT URL'.localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        entry.url,
+                        style: TextStyle(
+                          color: p.accent,
+                          fontFamily: 'monospace',
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
-            );
-          }, childCount: _networkLogs.length),
-        ),
+            ),
+          );
+        }, childCount: _networkLogs.length),
       ),
     ];
   }
