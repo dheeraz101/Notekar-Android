@@ -223,11 +223,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val compact = minWidth < 200
 
             views.setTextViewText(
-                R.id.widget_count,
-                todayCount.toString()
-            )
-
-            views.setTextViewText(
                 R.id.widget_mode,
                 if (mode == "single") {
                     "SINGLE MODE"
@@ -236,72 +231,54 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 }
             )
 
-            // Count color refinement
-            views.setTextColor(
-                R.id.widget_count,
-                android.graphics.Color.parseColor("#FF0A84FF")
-            )
-
             // Bind history stack
             val historyString = prefs.getString(KEY_HISTORY, "") ?: ""
             val historyLines =
                 if (historyString.isEmpty()) emptyList() else historyString.split("\n")
 
-            val historyTextViewIds = intArrayOf(
-                R.id.widget_history_0,
-                R.id.widget_history_1,
-                R.id.widget_history_2,
-                R.id.widget_history_3
-            )
-
             if (compact) {
                 views.setViewVisibility(R.id.widget_clock, View.GONE)
-                for (viewId in historyTextViewIds) {
-                    views.setViewVisibility(viewId, View.GONE)
-                }
+                views.setViewVisibility(R.id.widget_history_card, View.GONE)
             } else {
                 views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
-                for (i in historyTextViewIds.indices) {
-                    val viewId = historyTextViewIds[i]
-                    if (i < historyLines.size) {
-                        val parts = historyLines[i].split("|")
-                        if (parts.size >= 2) {
-                            val timestamp = parts[0].toLongOrNull() ?: 0L
-                            val type = parts[1]
-                            val note = if (parts.size > 2) parts[2] else ""
+                views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
 
-                            val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
-                                Date(timestamp)
-                            )
+                // Show total logs on the right end of the top line
+                views.setTextViewText(R.id.widget_total_logs, "$todayCount Logs")
 
-                            val typeLabel = when (type.lowercase(Locale.ROOT)) {
-                                "in" -> "📥 IN"
-                                "out" -> "📤 OUT"
-                                "single" -> "⚡ Tap"
-                                "note" -> "📝 " + (if (note.isNotEmpty()) note else "Note")
-                                else -> type.uppercase(Locale.ROOT)
-                            }
+                if (historyLines.isNotEmpty()) {
+                    val parts = historyLines[0].split("|")
+                    if (parts.size >= 2) {
+                        val timestamp = parts[0].toLongOrNull() ?: 0L
+                        val type = parts[1]
+                        val note = if (parts.size > 2) parts[2] else ""
 
-                            val noteSuffix =
-                                if (type.lowercase(Locale.ROOT) != "note" && note.isNotEmpty()) {
-                                    " ($note)"
-                                } else {
-                                    ""
-                                }
+                        val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
+                            Date(timestamp)
+                        )
 
-                            views.setTextViewText(viewId, "$time - $typeLabel$noteSuffix")
-                            views.setViewVisibility(viewId, View.VISIBLE)
-                        } else {
-                            views.setViewVisibility(viewId, View.GONE)
+                        val typeLabel = when (type.lowercase(Locale.ROOT)) {
+                            "in" -> "📥 IN"
+                            "out" -> "📤 OUT"
+                            "single" -> "⚡ TAP"
+                            "note" -> "📝 NOTE"
+                            else -> type.uppercase(Locale.ROOT)
                         }
-                    } else {
-                        if (i == 0 && historyLines.isEmpty()) {
-                            views.setTextViewText(viewId, "No history")
-                            views.setViewVisibility(viewId, View.VISIBLE)
+
+                        views.setTextViewText(R.id.widget_last_log_info, "$typeLabel • $time")
+
+                        if (note.isNotEmpty()) {
+                            views.setTextViewText(R.id.widget_last_log_note, note)
                         } else {
-                            views.setViewVisibility(viewId, View.GONE)
+                            views.setTextViewText(R.id.widget_last_log_note, "No note details...")
                         }
                     }
+                } else {
+                    views.setTextViewText(R.id.widget_last_log_info, "No logs today")
+                    views.setTextViewText(
+                        R.id.widget_last_log_note,
+                        "Tap buttons below to start log"
+                    )
                 }
             }
 

@@ -8,19 +8,20 @@
     android:padding="10dp"
     android:background="@drawable/notekar_widget_background">
 
-    <!-- Top Display Panel (Stats + History Stack) -->
+    <!-- Top Display Panel (Stats + History Card) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1.0"
         android:orientation="horizontal"
-        android:baselineAligned="false">
+        android:baselineAligned="false"
+        android:gravity="center_vertical">
 
-        <!-- Left Column: Clock & Log Summary -->
+        <!-- Left Column: Clock & Mode -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.0"
+            android:layout_weight="0.85"
             android:layout_gravity="center_vertical"
             android:orientation="vertical">
 
@@ -35,99 +36,71 @@
                 android:textStyle="bold"
                 android:includeFontPadding="false" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/widget_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#FF0A84FF"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:includeFontPadding="false" />
-
-                <TextView
-                    android:id="@+id/widget_count_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:text="LOGS"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="8sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-            </LinearLayout>
-
             <TextView
                 android:id="@+id/widget_mode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="3dp"
                 android:text="TWO-WAY"
                 android:textColor="#FF64D2FF"
-                android:textSize="9sp"
-                android:textStyle="bold" />
+                android:textSize="8.5sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false" />
         </LinearLayout>
 
-        <!-- Right Column: History Stack -->
+        <!-- Right Column: History Preview Card -->
         <LinearLayout
+            android:id="@+id/widget_history_card"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2.0"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.15"
             android:orientation="vertical"
-            android:gravity="center_vertical"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp">
+            android:padding="8dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/notekar_widget_card">
 
+            <!-- Top Line: Current Log + Time (Left) & Total Logs (Right) -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/widget_last_log_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="IN • 10:45 AM"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/widget_total_logs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="15 Logs"
+                    android:textColor="#FF0A84FF"
+                    android:textSize="9.5sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+            </RelativeLayout>
+
+            <!-- Bottom Line: Note description -->
             <TextView
-                android:id="@+id/widget_history_0"
+                android:id="@+id/widget_last_log_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#FFFFFFFF"
+                android:layout_marginTop="4dp"
+                android:text="No note details..."
+                android:textColor="#B3FFFFFF"
                 android:textSize="9.5sp"
-                android:textStyle="bold"
                 android:maxLines="1"
-                android:ellipsize="end" />
+                android:ellipsize="end"
+                android:includeFontPadding="false" />
 
-            <TextView
-                android:id="@+id/widget_history_1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1.5dp"
-                android:text=""
-                android:textColor="#CCFFFFFF"
-                android:textSize="9.5sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_history_2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1.5dp"
-                android:text=""
-                android:textColor="#99FFFFFF"
-                android:textSize="9.5sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_history_3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1.5dp"
-                android:text=""
-                android:textColor="#66FFFFFF"
-                android:textSize="9.5sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
         </LinearLayout>
     </LinearLayout>
 
