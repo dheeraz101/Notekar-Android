@@ -24,7 +24,7 @@ import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
-import 'package:notekar/screens/network_monitor_page.dart';
+import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/widgets/markdown_text.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -257,6 +257,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late int privacyLockDelayMinutes;
   late String privacyLockType;
   late String currentLocale;
+  List<NetworkLogEntry> _networkLogs = [];
+  bool _loadingNetworkLogs = false;
+  int? _expandedNetworkLogIndex;
 
   String? _editingReminderType;
   final TextEditingController _reminderMessageController =
@@ -1053,6 +1056,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _openCategory(String name, {String? parent}) {
+    if (name == 'Network Monitor') {
+      _loadNetworkLogs();
+    }
     setState(() {
       _prevStackLength = _categoryStack.length;
       if (category != null) _categoryStack.add(category!);
@@ -2385,6 +2391,341 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
+  Future<void> _loadNetworkLogs() async {
+    setState(() => _loadingNetworkLogs = true);
+    final logs = await NetworkLogger.getLogs();
+    if (mounted) {
+      setState(() {
+        _networkLogs = logs;
+        _loadingNetworkLogs = false;
+      });
+    }
+  }
+
+  Future<void> _clearNetworkLogs() async {
+    HapticFeedback.mediumImpact();
+    await NetworkLogger.clearLogs();
+    await _loadNetworkLogs();
+  }
+
+  Widget _networkMonitorHeader(Palette p) {
+    double totalKb = 0;
+    for (final entry in _networkLogs) {
+      final sizeStr = entry.size.toLowerCase();
+      if (sizeStr.contains('kb')) {
+        totalKb += double.tryParse(sizeStr.replaceAll('kb', '').trim()) ?? 0.0;
+      } else if (sizeStr.contains('mb')) {
+        totalKb +=
+            (double.tryParse(sizeStr.replaceAll('mb', '').trim()) ?? 0.0) *
+            1024.0;
+      }
+    }
+    String totalData = '';
+    if (totalKb > 1024) {
+      totalData = '${(totalKb / 1024).toStringAsFixed(2)} MB';
+    } else {
+      totalData = '${totalKb.toStringAsFixed(1)} KB';
+    }
+
+    final useTranslucency =
+        !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: useTranslucency ? p.surface2.withValues(alpha: 0.8) : p.surface2,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: p.border.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Data Consumed'.localized(context).toUpperCase(),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    totalData,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Total Requests'.localized(context).toUpperCase(),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${_networkLogs.length} reqs',
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Divider(color: p.border.withValues(alpha: 0.3), height: 1),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Offline Privacy Log'.localized(context),
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              PressableScale(
+                onTap: _clearNetworkLogs,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.red.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(99),
+                    border: Border.all(
+                      color: p.red.withValues(alpha: 0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'Clear'.localized(context),
+                    style: TextStyle(
+                      color: p.red,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _networkMonitorLogsList(Palette p) {
+    if (_loadingNetworkLogs) {
+      return [
+        const SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    }
+    if (_networkLogs.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: HIGEmptyState(
+            p: p,
+            icon: Icons.wifi_tethering_off_rounded,
+            title: 'No Network Traffic',
+            message:
+                'All network activities made by NoteKar are audited and recorded here.',
+            compact: true,
+          ),
+        ),
+      ];
+    }
+
+    final useTranslucency =
+        !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur;
+
+    return [
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final entry = _networkLogs[index];
+            final isExpanded = _expandedNetworkLogIndex == index;
+            final timeStr =
+                '${entry.timestamp.hour.toString().padLeft(2, '0')}:${entry.timestamp.minute.toString().padLeft(2, '0')}:${entry.timestamp.second.toString().padLeft(2, '0')}';
+            final dateStr =
+                '${entry.timestamp.year}-${entry.timestamp.month.toString().padLeft(2, '0')}-${entry.timestamp.day.toString().padLeft(2, '0')}';
+
+            Color statusColor = p.green;
+            if (entry.statusCode < 200 || entry.statusCode >= 300) {
+              statusColor = p.red;
+            }
+
+            Color methodBg = p.accent.withValues(alpha: 0.1);
+            Color methodText = p.accent;
+            if (entry.method == 'HEAD') {
+              methodBg = p.text2.withValues(alpha: 0.1);
+              methodText = p.text2;
+            }
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: useTranslucency
+                    ? p.surface.withValues(alpha: 0.4)
+                    : p.surface2,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: p.border.withValues(alpha: 0.2)),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  setState(() {
+                    _expandedNetworkLogIndex = isExpanded ? null : index;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: methodBg,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              entry.method,
+                              style: TextStyle(
+                                color: methodText,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              entry.purpose.localized(context),
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            entry.size,
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Status ${entry.statusCode}',
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            '$dateStr • $timeStr',
+                            style: TextStyle(color: p.text3, fontSize: 10.5),
+                          ),
+                        ],
+                      ),
+                      if (isExpanded) ...[
+                        const SizedBox(height: 12),
+                        Divider(
+                          color: p.border.withValues(alpha: 0.2),
+                          height: 1,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'ENDPOINT URL'.localized(context),
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          entry.url,
+                          style: TextStyle(
+                            color: p.accent,
+                            fontFamily: 'monospace',
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }, childCount: _networkLogs.length),
+        ),
+      ),
+    ];
+  }
+
   Widget _deviceHealthPage(Palette p) {
     final engine = AdaptiveEngine();
     return Column(
@@ -3701,19 +4042,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                             }
                                             if (result.title ==
                                                 'Network Monitor') {
-                                              showGeneralDialog(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                barrierLabel: 'Network Monitor',
-                                                pageBuilder: (context, _, _) =>
-                                                    NetworkMonitorPage(
-                                                      p: widget.p,
-                                                      enableTranslucency:
-                                                          enableTranslucency,
-                                                      reduceMotion:
-                                                          reduceMotion,
-                                                    ),
-                                              );
+                                              _openCategory('Network Monitor');
                                               return;
                                             }
                                             if (result.title ==
@@ -7608,20 +7937,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                     title: 'Network Monitor',
                                     status: 'View',
                                     color: p.accent,
-                                    onTap: () {
-                                      showGeneralDialog(
-                                        context: context,
-                                        barrierDismissible: true,
-                                        barrierLabel: 'Network Monitor',
-                                        pageBuilder: (context, _, _) =>
-                                            NetworkMonitorPage(
-                                              p: widget.p,
-                                              enableTranslucency:
-                                                  enableTranslucency,
-                                              reduceMotion: reduceMotion,
-                                            ),
-                                      );
-                                    },
+                                    onTap: () => _openCategory(
+                                      'Network Monitor',
+                                      parent: 'Advanced',
+                                    ),
                                   ),
                                   SettingsRow(
                                     p: p,
@@ -7837,6 +8156,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               ],
                             ),
                           ),
+                        if (show('Network Monitor')) ...[
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _networkMonitorHeader(p),
+                                const SizedBox(height: 12),
+                              ],
+                            ),
+                          ),
+                          ..._networkMonitorLogsList(p),
+                          const SliverToBoxAdapter(
+                            child: SizedBox(height: spacing48),
+                          ),
+                        ],
                         if (show('Privacy Policy'))
                           SliverToBoxAdapter(child: _privacyPolicyPage(p)),
                         if (show('Terms of Use'))
