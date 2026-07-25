@@ -1,0 +1,10 @@
+Update to 5.1.3 (build 23):
+- New: Add network monitor welcome card, FAQs, and fix upgrader walkthrough checks
+- New: Implement mobile data update warning & network monitor page
+- New: Upgrade widget layout and settings search index
+- New: Index app version, safety, and privacy in search database
+- Remove extra margins/padding to match standard settings card widths
+- Integrate Network Monitor natively as a settings dialog subpage
+- Wrap NetworkMonitor root in Material and align card dimensions
+- Update NetworkMonitor with clear pill button & dynamic translucency
+- Wrap network monitor in Material to resolve double yellow underlines
