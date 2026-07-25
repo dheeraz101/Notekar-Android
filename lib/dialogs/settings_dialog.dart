@@ -2409,20 +2409,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      _openFeedback();
-                    },
-                    child: Text(
-                      'Give Feedback'.localized(context),
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.underline,
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        '* Have suggestions or found a bug? '.localized(
+                          context,
+                        ),
+                        style: TextStyle(color: p.text2, fontSize: 13),
                       ),
-                    ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          _openFeedback();
+                        },
+                        child: Text(
+                          'Give Feedback'.localized(context),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   PressableScale(
