@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -7,12 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
-import 'package:notekar/dialogs/feedback_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
+import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
@@ -24,7 +25,6 @@ import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
-import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/widgets/markdown_text.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -851,6 +851,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
   AppUpdateInfo? updateInfo;
   bool checkingUpdates = false;
 
+  // Feedback text controllers
+  final TextEditingController _bugTitleController = TextEditingController();
+  final TextEditingController _bugDescController = TextEditingController();
+  final TextEditingController _bugContextController = TextEditingController();
+
+  final TextEditingController _featTitleController = TextEditingController();
+  final TextEditingController _featDescController = TextEditingController();
+  final TextEditingController _featContextController = TextEditingController();
+
+  // Feedback focus nodes
+  final FocusNode _bugTitleFocusNode = FocusNode();
+  final FocusNode _bugDescFocusNode = FocusNode();
+  final FocusNode _bugContextFocusNode = FocusNode();
+
+  final FocusNode _featTitleFocusNode = FocusNode();
+  final FocusNode _featDescFocusNode = FocusNode();
+  final FocusNode _featContextFocusNode = FocusNode();
+
+  // Feedback validation states
+  bool _bugFormValid = false;
+  bool _featFormValid = false;
+  bool _submittingFeedback = false;
+
   final TextEditingController _settingsSearchController =
       TextEditingController();
   final FocusNode _settingsSearchFocusNode = FocusNode();
@@ -901,6 +924,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _loadRecentSearches();
     _loadRemindersSettings();
 
+    _loadFeedbackDrafts();
+
+    _bugTitleController.addListener(_validateBugForm);
+    _bugDescController.addListener(_validateBugForm);
+    _bugContextController.addListener(() => _saveFeedbackDrafts());
+
+    _featTitleController.addListener(_validateFeatForm);
+    _featDescController.addListener(_validateFeatForm);
+    _featContextController.addListener(() => _saveFeedbackDrafts());
+
     _settingsSearchFocusNode.addListener(() {
       if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
         _openCategory('Search');
@@ -922,6 +955,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _settingsSearchFocusNode.dispose();
     _reminderMessageController.dispose();
     _reminderMessageFocusNode.dispose();
+
+    _bugTitleController.dispose();
+    _bugDescController.dispose();
+    _bugContextController.dispose();
+    _featTitleController.dispose();
+    _featDescController.dispose();
+    _featContextController.dispose();
+
+    _bugTitleFocusNode.dispose();
+    _bugDescFocusNode.dispose();
+    _bugContextFocusNode.dispose();
+    _featTitleFocusNode.dispose();
+    _featDescFocusNode.dispose();
+    _featContextFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -2408,6 +2456,527 @@ class _SettingsDialogState extends State<SettingsDialog> {
     await _loadNetworkLogs();
   }
 
+  Future<void> _loadFeedbackDrafts() async {
+    final prefs = await SharedPreferences.getInstance();
+    _bugTitleController.text = prefs.getString('draft_bug_title') ?? '';
+    _bugDescController.text = prefs.getString('draft_bug_desc') ?? '';
+    _bugContextController.text = prefs.getString('draft_bug_context') ?? '';
+
+    _featTitleController.text = prefs.getString('draft_feat_title') ?? '';
+    _featDescController.text = prefs.getString('draft_feat_desc') ?? '';
+    _featContextController.text = prefs.getString('draft_feat_context') ?? '';
+
+    _validateBugForm();
+    _validateFeatForm();
+  }
+
+  Future<void> _saveFeedbackDrafts() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('draft_bug_title', _bugTitleController.text);
+    await prefs.setString('draft_bug_desc', _bugDescController.text);
+    await prefs.setString('draft_bug_context', _bugContextController.text);
+
+    await prefs.setString('draft_feat_title', _featTitleController.text);
+    await prefs.setString('draft_feat_desc', _featDescController.text);
+    await prefs.setString('draft_feat_context', _featContextController.text);
+  }
+
+  void _validateBugForm() {
+    final valid =
+        _bugTitleController.text.trim().isNotEmpty &&
+        _bugDescController.text.trim().isNotEmpty;
+    if (valid != _bugFormValid) {
+      setState(() => _bugFormValid = valid);
+    }
+    _saveFeedbackDrafts();
+  }
+
+  void _validateFeatForm() {
+    final valid =
+        _featTitleController.text.trim().isNotEmpty &&
+        _featDescController.text.trim().isNotEmpty;
+    if (valid != _featFormValid) {
+      setState(() => _featFormValid = valid);
+    }
+    _saveFeedbackDrafts();
+  }
+
+  Future<void> _clearBugDraft() async {
+    _bugTitleController.clear();
+    _bugDescController.clear();
+    _bugContextController.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_bug_title');
+    await prefs.remove('draft_bug_desc');
+    await prefs.remove('draft_bug_context');
+    setState(() => _bugFormValid = false);
+  }
+
+  Future<void> _clearFeatDraft() async {
+    _featTitleController.clear();
+    _featDescController.clear();
+    _featContextController.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_feat_title');
+    await prefs.remove('draft_feat_desc');
+    await prefs.remove('draft_feat_context');
+    setState(() => _featFormValid = false);
+  }
+
+  Future<void> _submitFeedback(String type, Palette p) async {
+    if (_submittingFeedback) return;
+    setState(() => _submittingFeedback = true);
+    final engine = AdaptiveEngine();
+
+    String title = '';
+    String body = '';
+    List<String> labels = [];
+
+    if (type == 'bug') {
+      title = _bugTitleController.text.trim();
+      labels = ['bug'];
+
+      body =
+          '''
+**Describe the bug**
+${_bugDescController.text.trim()}
+
+**To Reproduce**
+1. Open NoteKar Android App
+2. ${_bugDescController.text.trim()}
+
+**Expected behavior**
+Refer to description.
+
+**Environment**
+ - Device Model: ${engine.model}
+ - Android OS Version: ${engine.osVersion}
+ - NoteKar Version: v$appVersion (build $appBuildNumber)
+
+**Additional context**
+${_bugContextController.text.trim().isEmpty ? 'None' : _bugContextController.text.trim()}
+''';
+    } else {
+      title = _featTitleController.text.trim();
+      labels = ['enhancement'];
+
+      body =
+          '''
+**Is your feature request related to a problem? Please describe.**
+${_featDescController.text.trim()}
+
+**Describe the solution you'd like**
+Refer to description.
+
+**Describe alternatives you've considered**
+None.
+
+**Additional context**
+${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.text.trim()}
+''';
+    }
+
+    final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 15);
+
+    final url = feedbackProxyUrl;
+    int statusCode = 0;
+    String statusText = '';
+    int bodySize = 0;
+    bool success = false;
+
+    try {
+      final request = await client.postUrl(Uri.parse(url));
+      request.headers.set('Content-Type', 'application/json');
+      request.headers.set('X-Notekar-API-Key', feedbackApiKey);
+
+      final payload = {'title': title, 'body': body, 'labels': labels};
+
+      final jsonStr = jsonEncode(payload);
+      final bodyBytes = utf8.encode(jsonStr);
+      bodySize = bodyBytes.length;
+
+      request.add(bodyBytes);
+
+      final response = await request.close();
+      statusCode = response.statusCode;
+
+      final responseBody = await response.transform(utf8.decoder).join();
+      statusText = responseBody;
+
+      if (statusCode == 201 || statusCode == 200) {
+        success = true;
+        NotekarHaptics.success(hapticStyle);
+        if (type == 'bug') {
+          await _clearBugDraft();
+        } else {
+          await _clearFeatDraft();
+        }
+      } else {
+        NotekarHaptics.warning(hapticStyle);
+      }
+    } catch (e) {
+      statusCode = 0;
+      statusText = e.toString();
+      NotekarHaptics.warning(hapticStyle);
+    } finally {
+      client.close();
+    }
+
+    await NetworkLogger.log(
+      url: url,
+      method: 'POST',
+      statusCode: statusCode,
+      size: '$bodySize B',
+      purpose: type == 'bug'
+          ? 'Bug Report Submission'
+          : 'Feature Request Submission',
+    );
+
+    if (mounted) {
+      setState(() => _submittingFeedback = false);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Feedback submitted successfully!'.localized(context),
+            ),
+            backgroundColor: p.green,
+          ),
+        );
+        _popCategory();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${'Failed to submit feedback'.localized(context)} ($statusCode: $statusText)',
+            ),
+            backgroundColor: p.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _feedbackRootPage(Palette p) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.bug_report_rounded,
+              title: 'Report a Bug'.localized(context),
+              subtitle: "Something isn't working as expected.".localized(
+                context,
+              ),
+              color: p.red,
+              onTap: () => _openCategory('Bug Report'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.auto_awesome_rounded,
+              title: 'Request a Feature'.localized(context),
+              subtitle: 'Suggest a new idea or improvement.'.localized(context),
+              color: p.accent,
+              onTap: () => _openCategory('Feature Request'),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Choose a category to submit structured feedback directly to our GitHub issues page. Your device specifications will be automatically attached.'
+                  .localized(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _bugReportFormPage(Palette p) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_bugTitleController.text.isNotEmpty ||
+            _bugDescController.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _clearBugDraft,
+                icon: Icon(Icons.delete_sweep_rounded, size: 16, color: p.red),
+                label: Text(
+                  'Clear Draft'.localized(context),
+                  style: TextStyle(color: p.red, fontSize: 13),
+                ),
+              ),
+            ),
+          ),
+        SettingsGroup(
+          p: p,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Title'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _bugTitleController,
+                    focusNode: _bugTitleFocusNode,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) =>
+                        FocusScope.of(context).requestFocus(_bugDescFocusNode),
+                    style: TextStyle(color: p.text, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Brief summary (e.g., app crash on sync)'
+                          .localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Describe the bug & steps to reproduce'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _bugDescController,
+                    focusNode: _bugDescFocusNode,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) => FocusScope.of(
+                      context,
+                    ).requestFocus(_bugContextFocusNode),
+                    maxLines: 4,
+                    style: TextStyle(color: p.text, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'What went wrong and how to trigger it?'
+                          .localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Additional Context (Optional)'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _bugContextController,
+                    focusNode: _bugContextFocusNode,
+                    textInputAction: TextInputAction.done,
+                    maxLines: 2,
+                    style: TextStyle(color: p.text, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Any other relevant details or specs'.localized(
+                        context,
+                      ),
+                      hintStyle: TextStyle(color: p.text3),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (_submittingFeedback)
+          const Center(child: CircularProgressIndicator())
+        else
+          PressableScale(
+            onTap: _bugFormValid ? () => _submitFeedback('bug', p) : null,
+            child: Opacity(
+              opacity: _bugFormValid ? 1.0 : 0.5,
+              child: Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: p.accent,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Submit Bug Report'.localized(context),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _featureRequestFormPage(Palette p) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_featTitleController.text.isNotEmpty ||
+            _featDescController.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _clearFeatDraft,
+                icon: Icon(Icons.delete_sweep_rounded, size: 16, color: p.red),
+                label: Text(
+                  'Clear Draft'.localized(context),
+                  style: TextStyle(color: p.red, fontSize: 13),
+                ),
+              ),
+            ),
+          ),
+        SettingsGroup(
+          p: p,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Title'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _featTitleController,
+                    focusNode: _featTitleFocusNode,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) =>
+                        FocusScope.of(context).requestFocus(_featDescFocusNode),
+                    style: TextStyle(color: p.text, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Brief summary (e.g., search history logs)'
+                          .localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Describe your idea'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _featDescController,
+                    focusNode: _featDescFocusNode,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) => FocusScope.of(
+                      context,
+                    ).requestFocus(_featContextFocusNode),
+                    maxLines: 4,
+                    style: TextStyle(color: p.text, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText:
+                          'What problem does it solve & how should it work?'
+                              .localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Additional Context (Optional)'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _featContextController,
+                    focusNode: _featContextFocusNode,
+                    textInputAction: TextInputAction.done,
+                    maxLines: 2,
+                    style: TextStyle(color: p.text, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'Any mockups, details, or other context'
+                          .localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (_submittingFeedback)
+          const Center(child: CircularProgressIndicator())
+        else
+          PressableScale(
+            onTap: _featFormValid ? () => _submitFeedback('feature', p) : null,
+            child: Opacity(
+              opacity: _featFormValid ? 1.0 : 0.5,
+              child: Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: p.accent,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Submit Feature Request'.localized(context),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _networkMonitorHeader(Palette p) {
     double totalKb = 0;
     for (final entry in _networkLogs) {
@@ -3292,25 +3861,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _openFeedback() {
-    showGeneralDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close feedback',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => FeedbackDialog(
-        p: paletteFor(
-          theme,
-          highContrast: highContrast,
-          accentName: accentColor,
-        ),
-        onOpenLink: widget.onOpenLink,
-        blur:
-            !reduceMotion &&
-            enableTranslucency &&
-            AdaptiveEngine().supportsBlur,
-      ),
-    );
+    _openCategory('Feedback');
   }
 
   Widget _updateCenterPage(Palette p) {
@@ -8173,6 +8724,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           SliverToBoxAdapter(child: _termsOfUsePage(p)),
                         if (show('Licenses'))
                           SliverToBoxAdapter(child: _licensesPage(p)),
+                        if (show('Feedback'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _feedbackRootPage(p),
+                                const SizedBox(height: spacing48),
+                              ],
+                            ),
+                          ),
+                        if (show('Bug Report'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _bugReportFormPage(p),
+                                const SizedBox(height: spacing48),
+                              ],
+                            ),
+                          ),
+                        if (show('Feature Request'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                _featureRequestFormPage(p),
+                                const SizedBox(height: spacing48),
+                              ],
+                            ),
+                          ),
                         if (show("What's New"))
                           SliverToBoxAdapter(
                             child: Column(
