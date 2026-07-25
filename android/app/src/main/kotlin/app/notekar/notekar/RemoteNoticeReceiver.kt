@@ -12,10 +12,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.Locale
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class RemoteNoticeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
@@ -23,7 +23,8 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
         if (action == Intent.ACTION_BOOT_COMPLETED ||
             action == Intent.ACTION_MY_PACKAGE_REPLACED ||
             action == "android.intent.action.QUICKBOOT_POWERON" ||
-            action == "com.htc.intent.action.QUICKBOOT_POWERON") {
+            action == "com.htc.intent.action.QUICKBOOT_POWERON"
+        ) {
             val prefs = prefs(context)
             if (prefs.getBoolean(KEY_ENABLED, false)) {
                 schedule(context)
@@ -58,7 +59,12 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
         private const val REQUEST_CODE = 3201
         private const val INTERVAL_MS = 6L * 60L * 60L * 1000L
 
-        fun configure(context: Context, enabled: Boolean, feedUrl: String, checkOnlyOnOpen: Boolean = false) {
+        fun configure(
+            context: Context,
+            enabled: Boolean,
+            feedUrl: String,
+            checkOnlyOnOpen: Boolean = false
+        ) {
             prefs(context).edit()
                 .putBoolean(KEY_ENABLED, enabled)
                 .putBoolean(KEY_CHECK_ON_OPEN, checkOnlyOnOpen)
@@ -103,7 +109,11 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
         private fun checkFeed(context: Context) {
             val prefs = prefs(context)
-            if (!prefs.getBoolean(KEY_ENABLED, false) && !prefs.getBoolean(KEY_CHECK_ON_OPEN, false)) return
+            if (!prefs.getBoolean(KEY_ENABLED, false) && !prefs.getBoolean(
+                    KEY_CHECK_ON_OPEN,
+                    false
+                )
+            ) return
             if (!canPostNotifications(context)) return
             val feedUrl = prefs.getString(KEY_FEED_URL, "") ?: ""
             if (feedUrl.isBlank()) return
@@ -115,10 +125,24 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
                 setRequestProperty("User-Agent", "NoteKar-Android")
                 useCaches = false
             }
+            var responseCode = -1
+            var bodyText = ""
             try {
-                if (connection.responseCode !in 200..299) return
-                val bodyText = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                
+                responseCode = connection.responseCode
+                if (responseCode in 200..299) {
+                    bodyText =
+                        connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                }
+                logNetworkRequest(
+                    context,
+                    feedUrl,
+                    "GET",
+                    responseCode,
+                    "Remote Notice Feed Sync",
+                    bodyText.toByteArray(Charsets.UTF_8).size.toLong()
+                )
+                if (responseCode !in 200..299) return
+
                 // Parse either list of notices or single notice object
                 val notices = try {
                     org.json.JSONArray(bodyText)
@@ -144,10 +168,8 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
                     // Dismissed permanently check
                     val countKey = KEY_PREFIX_COUNT + id
+                    val maxShows = data.optInt("maxShows", 1)
                     val shownCount = prefs.getInt(countKey, 0)
-                    if (shownCount >= 9999) continue
-
-                    val maxShows = data.optInt("maxShows", 1).coerceAtLeast(1)
                     if (shownCount >= maxShows) continue
 
                     val priority = data.optString("priority", "normal").trim().lowercase()
@@ -155,7 +177,8 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
                     // Cooldown check (bypassed if high priority)
                     if (!isHighPriority) {
-                        val cooldownMs = data.optLong("cooldownHours", 24L).coerceAtLeast(0L) * 60L * 60L * 1000L
+                        val cooldownMs =
+                            data.optLong("cooldownHours", 24L).coerceAtLeast(0L) * 60L * 60L * 1000L
                         val lastShownKey = KEY_PREFIX_LAST_SHOWN + id
                         val lastShownAt = prefs.getLong(lastShownKey, 0L)
                         if (lastShownAt > 0L && now - lastShownAt < cooldownMs) continue
@@ -178,7 +201,11 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
                 val data = candidateNotice ?: return
                 val title = getLocalizedField(data, "title", "NoteKar notice")
-                val message = getLocalizedField(data, "body", getLocalizedField(data, "message", "Open NoteKar to see the latest notice."))
+                val message = getLocalizedField(
+                    data,
+                    "body",
+                    getLocalizedField(data, "message", "Open NoteKar to see the latest notice.")
+                )
                 val id = data.optString("id", "")
 
                 val countKey = KEY_PREFIX_COUNT + id
@@ -201,6 +228,57 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
                 )
             } finally {
                 connection.disconnect()
+            }
+        }
+
+        private fun logNetworkRequest(
+            context: Context,
+            url: String,
+            method: String,
+            statusCode: Int,
+            purpose: String,
+            sizeBytes: Long
+        ) {
+            try {
+                val bgPrefs =
+                    context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val existingLogsJson =
+                    bgPrefs.getString("flutter.notekar_network_logs", "[]") ?: "[]"
+                val jsonArray = org.json.JSONArray(existingLogsJson)
+
+                val newLog = org.json.JSONObject().apply {
+                    put("url", url)
+                    put("method", method)
+                    put("statusCode", statusCode)
+                    put("timestamp", System.currentTimeMillis())
+                    put("purpose", purpose)
+                    put(
+                        "size",
+                        if (sizeBytes > 0) String.format(
+                            java.util.Locale.US,
+                            "%.2f KB",
+                            sizeBytes.toDouble() / 1024.0
+                        ) else "Unknown"
+                    )
+                }
+
+                // Insert at front
+                val tempArray = org.json.JSONArray()
+                tempArray.put(newLog)
+                for (i in 0 until jsonArray.length()) {
+                    if (tempArray.length() >= 50) break
+                    tempArray.put(jsonArray.get(i))
+                }
+
+                bgPrefs.edit()
+                    .putString("flutter.notekar_network_logs", tempArray.toString())
+                    .apply()
+            } catch (e: Exception) {
+                android.util.Log.e(
+                    "RemoteNoticeReceiver",
+                    "Failed to log native network request",
+                    e
+                )
             }
         }
 
@@ -272,7 +350,7 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
         private fun canPostNotifications(context: Context): Boolean {
             return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         }
 
         private fun actionFromUrl(url: String): String {

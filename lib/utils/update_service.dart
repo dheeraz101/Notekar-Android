@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/network_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppUpdateInfo {
@@ -65,6 +66,18 @@ class UpdateService {
       final request = await client.getUrl(Uri.parse(url));
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
       final response = await request.close();
+
+      // Log the main request
+      await NetworkLogger.log(
+        url: url,
+        method: 'GET',
+        statusCode: response.statusCode,
+        purpose: 'VirusTotal Info Sync',
+        size: response.contentLength > 0
+            ? '${(response.contentLength / 1024).toStringAsFixed(2)} KB'
+            : 'Unknown',
+      );
+
       if (response.statusCode != 200) {
         // Fallback to release download URL if raw asset is not available
         final releaseUrl =
@@ -75,6 +88,18 @@ class UpdateService {
           'NoteKar/$appVersion',
         );
         final relResponse = await relRequest.close();
+
+        // Log the fallback request
+        await NetworkLogger.log(
+          url: releaseUrl,
+          method: 'GET',
+          statusCode: relResponse.statusCode,
+          purpose: 'VirusTotal Info Sync (Fallback)',
+          size: relResponse.contentLength > 0
+              ? '${(relResponse.contentLength / 1024).toStringAsFixed(2)} KB'
+              : 'Unknown',
+        );
+
         if (relResponse.statusCode != 200) {
           return null;
         }
@@ -112,6 +137,17 @@ class UpdateService {
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
 
       final response = await request.close();
+      await NetworkLogger.log(
+        url:
+            'https://api.github.com/repos/dheeraz101/Notekar-Android/releases?per_page=10',
+        method: 'GET',
+        statusCode: response.statusCode,
+        purpose: 'Check For App Updates',
+        size: response.contentLength > 0
+            ? '${(response.contentLength / 1024).toStringAsFixed(2)} KB'
+            : 'Unknown',
+      );
+
       if (response.statusCode != 200) {
         _logger.warn('Update check failed with status: ${response.statusCode}');
         return null;
@@ -238,6 +274,17 @@ class UpdateService {
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
 
       final response = await request.close();
+      await NetworkLogger.log(
+        url:
+            'https://api.github.com/repos/dheeraz101/Notekar-Android/commits?per_page=10',
+        method: 'GET',
+        statusCode: response.statusCode,
+        purpose: 'Fetch Recent Commit Logs',
+        size: response.contentLength > 0
+            ? '${(response.contentLength / 1024).toStringAsFixed(2)} KB'
+            : 'Unknown',
+      );
+
       if (response.statusCode != 200) {
         _logger.warn('Failed to fetch commits: ${response.statusCode}');
         return null;
@@ -316,6 +363,16 @@ class UpdateService {
           totalSize = int.tryParse(parts[1]) ?? 0;
         }
       }
+
+      await NetworkLogger.log(
+        url: url,
+        method: 'GET',
+        statusCode: testResponse.statusCode,
+        purpose: 'APK Package Download',
+        size: totalSize > 0
+            ? '${(totalSize / (1024 * 1024)).toStringAsFixed(2)} MB'
+            : 'Unknown',
+      );
 
       await testResponse.drain();
 
@@ -475,6 +532,15 @@ class UpdateService {
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
 
       final response = await request.close();
+      await NetworkLogger.log(
+        url: url,
+        method: 'GET',
+        statusCode: response.statusCode,
+        purpose: 'Verify Release Checksum',
+        size: response.contentLength > 0
+            ? '${(response.contentLength / 1024).toStringAsFixed(2)} KB'
+            : 'Unknown',
+      );
       if (response.statusCode != 200) return false;
 
       final manifestText = await response.transform(utf8.decoder).join();
@@ -543,5 +609,47 @@ class UpdateService {
 
   bool isUpdateAvailable(String latest, String current) {
     return isNewerVersion(latest, current);
+  }
+
+  Future<double?> getApkSizeMb(AppUpdateInfo info) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
+    try {
+      final cleanVersion = info.version.split('-').first;
+      final url =
+          'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
+
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+      request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+
+      final response = await request.close();
+      final contentRange = response.headers.value(
+        HttpHeaders.contentRangeHeader,
+      );
+      await response.drain();
+
+      // Log this size metadata query
+      await NetworkLogger.log(
+        url: url,
+        method: 'HEAD',
+        statusCode: response.statusCode,
+        purpose: 'Query Update Package Size',
+        size: '0.1 KB',
+      );
+
+      if (contentRange != null && contentRange.contains('/')) {
+        final parts = contentRange.split('/');
+        if (parts.length == 2) {
+          final bytes = int.tryParse(parts[1]);
+          if (bytes != null) {
+            return bytes / (1024 * 1024);
+          }
+        }
+      }
+    } catch (_) {
+    } finally {
+      client.close(force: true);
+    }
+    return null;
   }
 }

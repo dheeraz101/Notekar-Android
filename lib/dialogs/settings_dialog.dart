@@ -24,6 +24,7 @@ import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
+import 'package:notekar/screens/network_monitor_page.dart';
 import 'package:notekar/widgets/markdown_text.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -1973,6 +1974,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: AdaptiveEngine().healthStatus,
       ),
       item(
+        title: 'Network Monitor',
+        subtitle: 'Audit application network traffic logs',
+        category: 'Network Monitor',
+        icon: Icons.network_check_rounded,
+        keywords: [
+          'network monitor',
+          'traffic',
+          'internet',
+          'data usage',
+          'audit',
+          'privacy log',
+          'api requests',
+          'wifi',
+          'bytes',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'View',
+      ),
+      item(
         title: 'Reset All Data',
         subtitle: 'Erase every moment and note',
         category: 'Reset',
@@ -3648,6 +3670,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                               _showPrivacyDetailsSheet(
                                                 context,
                                                 p,
+                                              );
+                                              return;
+                                            }
+                                            if (result.title ==
+                                                'Network Monitor') {
+                                              showGeneralDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                barrierLabel: 'Network Monitor',
+                                                pageBuilder: (context, _, _) =>
+                                                    NetworkMonitorPage(
+                                                      p: widget.p,
+                                                    ),
                                               );
                                               return;
                                             }
@@ -7533,6 +7568,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   ),
                                   SettingsRow(
                                     p: p,
+                                    icon: Icons.network_check_rounded,
+                                    title: 'Network Monitor',
+                                    status: 'View',
+                                    color: p.accent,
+                                    onTap: () {
+                                      showGeneralDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        barrierLabel: 'Network Monitor',
+                                        pageBuilder: (context, _, _) =>
+                                            NetworkMonitorPage(p: widget.p),
+                                      );
+                                    },
+                                  ),
+                                  SettingsRow(
+                                    p: p,
                                     icon: Icons.restart_alt_rounded,
                                     title: 'Reset',
                                     status: 'Wipe',
@@ -8436,6 +8487,210 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
     } catch (_) {}
   }
 
+  Future<void> _checkBeforeDownload() async {
+    if (widget.updateInfo == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final dontShowAgain = prefs.getBool('dont_show_update_warning') ?? false;
+
+    if (dontShowAgain) {
+      unawaited(_startDownload());
+      return;
+    }
+
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+
+    // Show a loading dialog while fetching size
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: widget.p.surface,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: CircularProgressIndicator(color: widget.p.accent),
+          ),
+        ),
+      ),
+    );
+
+    double? fetchedSizeMb = await _updateService.getApkSizeMb(
+      widget.updateInfo!,
+    );
+
+    if (mounted) {
+      navigator.pop(); // Close loading dialog using captured navigator
+    }
+
+    String sizeText = '';
+    if (fetchedSizeMb != null) {
+      sizeText = '${fetchedSizeMb.toStringAsFixed(1)} MB';
+    } else {
+      final isSplit =
+          widget.updateInfo!.version.toLowerCase().contains('arm') ||
+          widget.updateInfo!.version.toLowerCase().contains('x86');
+      sizeText = isSplit ? '30 MB (Estimated)' : '60 MB (Estimated)';
+    }
+
+    if (!mounted) return;
+
+    bool dontShowCheckbox = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final p = widget.p;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: p.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: p.border.withValues(alpha: 0.2)),
+              ),
+              title: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: p.orange, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Network Warning'.localized(context),
+                    style: TextStyle(
+                      color: p.text,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Warning!: The current update will be downloaded via your mobile data, if you wish to switch to Wifi please do so and continue to download the update over Wifi.'
+                        .localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(
+                        'Download Size: '.localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        sizeText,
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () {
+                      setDialogState(() {
+                        dontShowCheckbox = !dontShowCheckbox;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Checkbox(
+                              value: dontShowCheckbox,
+                              activeColor: p.accent,
+                              checkColor: Colors.white,
+                              onChanged: (val) {
+                                setDialogState(() {
+                                  dontShowCheckbox = val ?? false;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Don't show this warning again".localized(
+                                context,
+                              ),
+                              style: TextStyle(
+                                color: p.text2,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Cancel'.localized(context),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    HapticFeedback.mediumImpact();
+                    final navigator = Navigator.of(context);
+                    if (dontShowCheckbox) {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('dont_show_update_warning', true);
+                    }
+                    if (mounted) {
+                      navigator.pop();
+                      unawaited(_startDownload());
+                    }
+                  },
+                  child: Text(
+                    'Download'.localized(context),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _startDownload() async {
     if (widget.updateInfo == null) return;
     setState(() {
@@ -9040,7 +9295,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              onPressed: _startDownload,
+              onPressed: _checkBeforeDownload,
               child: Text(
                 _verificationStatus == 'failed'
                     ? 'Retry Download'.localized(context)
