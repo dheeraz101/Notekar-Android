@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -851,6 +852,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
   AppUpdateInfo? updateInfo;
   bool checkingUpdates = false;
 
+  // Error handling caches
+  void Function(FlutterErrorDetails)? _oldOnError;
+  bool Function(Object, StackTrace)? _oldPlatformOnError;
+
   // Feedback text controllers
   final TextEditingController _bugTitleController = TextEditingController();
   final TextEditingController _bugDescController = TextEditingController();
@@ -939,11 +944,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
         _openCategory('Search');
       }
     });
-    _reminderMessageFocusNode.addListener(() {
+    _oldOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      _oldOnError?.call(details);
       if (mounted) {
-        setState(() {});
+        _showErrorReporterDialog(details.exception, details.stack);
       }
-    });
+    };
+
+    _oldPlatformOnError = PlatformDispatcher.instance.onError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      if (mounted) {
+        _showErrorReporterDialog(error, stack);
+        return true;
+      }
+      return _oldPlatformOnError?.call(error, stack) ?? false;
+    };
   }
 
   @override
@@ -970,10 +986,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _featDescFocusNode.dispose();
     _featContextFocusNode.dispose();
 
+    FlutterError.onError = _oldOnError;
+    PlatformDispatcher.instance.onError = _oldPlatformOnError;
+
     super.dispose();
   }
 
   Future<({String status, AppUpdateInfo? info})> _runCheckUpdates() async {
+    if (await _isOffline()) {
+      _showCustomAlert(
+        p: paletteFor(
+          theme,
+          highContrast: highContrast,
+          accentName: accentColor,
+        ),
+        title: 'Offline',
+        message:
+            'No internet connection detected. Please connect to the internet to check for updates.',
+        icon: Icons.wifi_off_rounded,
+        iconColor: Colors.orange,
+      );
+      return (status: 'Offline', info: null);
+    }
+
     setState(() {
       checkingUpdates = true;
     });
@@ -2344,7 +2379,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     try {
       await action();
     } catch (e) {
-      widget.onFeedback('Export failed: $e');
+      _showErrorReporterDialog(e, null);
     }
   }
 
@@ -2352,7 +2387,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     try {
       await widget.onImportBackup();
     } catch (e) {
-      widget.onFeedback('Import failed: $e');
+      _showErrorReporterDialog(e, null);
     }
   }
 
@@ -2482,6 +2517,322 @@ class _SettingsDialogState extends State<SettingsDialog> {
     await _loadNetworkLogs();
   }
 
+  Future<bool> _isOffline() async {
+    try {
+      final result = await InternetAddress.lookup('github.com');
+      return result.isEmpty || result[0].rawAddress.isEmpty;
+    } on SocketException catch (_) {
+      return true;
+    }
+  }
+
+  Future<void> _showCustomAlert({
+    required Palette p,
+    required String title,
+    required String message,
+    required IconData icon,
+    Color? iconColor,
+    String? confirmLabel,
+    VoidCallback? onConfirm,
+    String cancelLabel = 'Close',
+  }) {
+    final finalIconColor = iconColor ?? p.accent;
+    return showGeneralDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      transitionDuration: const Duration(milliseconds: 150),
+      pageBuilder: (_, anim1, _) => ScaleTransition(
+        scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 320,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: p.border.withValues(alpha: 0.5)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 28,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: finalIconColor.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, color: finalIconColor, size: 28),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title.localized(context),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    message.localized(context),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 13,
+                      height: 1.5,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (confirmLabel != null && onConfirm != null) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: p.text,
+                              side: BorderSide(color: p.border),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              cancelLabel.localized(context),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: finalIconColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onConfirm();
+                            },
+                            child: Text(
+                              confirmLabel.localized(context),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    PressableScale(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: double.infinity,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: p.accent,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Text(
+                          cancelLabel.localized(context),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorReporterDialog(dynamic error, dynamic stackTrace) {
+    final p = paletteFor(
+      theme,
+      highContrast: highContrast,
+      accentName: accentColor,
+    );
+
+    _showCustomAlert(
+      p: p,
+      title: 'System Error',
+      message:
+          'NoteKar encountered an unexpected error: $error\n\nWould you like to automatically report this crash details to our developer team?',
+      icon: Icons.error_outline_rounded,
+      iconColor: p.red,
+      confirmLabel: 'Report',
+      cancelLabel: 'Cancel',
+      onConfirm: () async {
+        await _submitAutoCrashReport(error, stackTrace, p);
+      },
+    );
+  }
+
+  Future<void> _submitAutoCrashReport(
+    dynamic error,
+    dynamic stackTrace,
+    Palette p,
+  ) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: CupertinoActivityIndicator(radius: 16, color: p.accent),
+        ),
+      ),
+    );
+
+    final engine = AdaptiveEngine();
+    final title = '[CRASH] Automated Error Report';
+    final body =
+        '''
+**Describe the bug**
+Automated crash report captured during runtime.
+
+**Error Details**
+```
+$error
+```
+
+**Stack Trace**
+```
+${stackTrace ?? 'No stack trace provided.'}
+```
+
+**Environment**
+ - Device Model: ${engine.model}
+ - Android OS Version: ${engine.osVersion}
+ - NoteKar Version: v$appVersion (build $appBuildNumber)
+''';
+
+    final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 15);
+    final url = feedbackProxyUrl;
+
+    int statusCode = 0;
+    String statusText = '';
+    int bodySize = 0;
+    bool success = false;
+
+    final startTime = DateTime.now();
+
+    try {
+      final request = await client.postUrl(Uri.parse(url));
+      request.headers.set('Content-Type', 'application/json');
+      request.headers.set('X-Notekar-API-Key', feedbackApiKey);
+
+      final payload = {
+        'title': title,
+        'body': body,
+        'labels': ['bug', 'automated-report'],
+      };
+
+      final jsonStr = jsonEncode(payload);
+      final bodyBytes = utf8.encode(jsonStr);
+      bodySize = bodyBytes.length;
+
+      request.add(bodyBytes);
+
+      final response = await request.close();
+      statusCode = response.statusCode;
+      final responseBody = await response.transform(utf8.decoder).join();
+      statusText = responseBody;
+
+      if (statusCode == 201 || statusCode == 200) {
+        success = true;
+        NotekarHaptics.success(hapticStyle);
+      } else {
+        NotekarHaptics.warning(hapticStyle);
+      }
+    } catch (e) {
+      statusCode = 0;
+      statusText = e.toString();
+      NotekarHaptics.warning(hapticStyle);
+    } finally {
+      client.close();
+    }
+
+    final elapsed = DateTime.now().difference(startTime);
+    if (elapsed.inMilliseconds < 2000) {
+      await Future.delayed(
+        Duration(milliseconds: 2000 - elapsed.inMilliseconds),
+      );
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+
+    await NetworkLogger.log(
+      url: url,
+      method: 'POST',
+      statusCode: statusCode,
+      size: '$bodySize B',
+      purpose: 'Automated Crash Report',
+    );
+
+    if (mounted) {
+      if (success) {
+        _showCustomAlert(
+          p: p,
+          title: 'Success',
+          message:
+              'Error report sent successfully. Thank you for helping us improve NoteKar!',
+          icon: Icons.check_circle_outline_rounded,
+          iconColor: p.green,
+        );
+      } else {
+        _showCustomAlert(
+          p: p,
+          title: 'Failed',
+          message: 'Failed to send crash report. ($statusCode: $statusText)',
+          icon: Icons.error_outline_rounded,
+          iconColor: p.red,
+        );
+      }
+    }
+  }
+
   Future<void> _loadFeedbackDrafts() async {
     final prefs = await SharedPreferences.getInstance();
     _bugTitleController.text = prefs.getString('draft_bug_title') ?? '';
@@ -2551,7 +2902,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   Future<void> _submitFeedback(String type, Palette p) async {
     if (_submittingFeedback) return;
+
+    if (await _isOffline()) {
+      _showCustomAlert(
+        p: p,
+        title: 'Offline',
+        message:
+            'No internet connection detected. Please connect to the internet to submit feedback.',
+        icon: Icons.wifi_off_rounded,
+        iconColor: Colors.orange,
+      );
+      return;
+    }
+
+    if (!mounted) return;
     setState(() => _submittingFeedback = true);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: CupertinoActivityIndicator(radius: 16, color: p.accent),
+        ),
+      ),
+    );
+
     final engine = AdaptiveEngine();
 
     String title = '';
@@ -2611,6 +2992,8 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
     int bodySize = 0;
     bool success = false;
 
+    final startTime = DateTime.now();
+
     try {
       final request = await client.postUrl(Uri.parse(url));
       request.headers.set('Content-Type', 'application/json');
@@ -2649,6 +3032,17 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
       client.close();
     }
 
+    final elapsed = DateTime.now().difference(startTime);
+    if (elapsed.inMilliseconds < 2000) {
+      await Future.delayed(
+        Duration(milliseconds: 2000 - elapsed.inMilliseconds),
+      );
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+
     await NetworkLogger.log(
       url: url,
       method: 'POST',
@@ -2662,23 +3056,22 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
     if (mounted) {
       setState(() => _submittingFeedback = false);
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Feedback submitted successfully!'.localized(context),
-            ),
-            backgroundColor: p.green,
-          ),
+        _showCustomAlert(
+          p: p,
+          title: 'Success',
+          message:
+              'Feedback submitted successfully. Thank you for your support!',
+          icon: Icons.check_circle_outline_rounded,
+          iconColor: p.green,
         );
         _popCategory();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${'Failed to submit feedback'.localized(context)} ($statusCode: $statusText)',
-            ),
-            backgroundColor: p.red,
-          ),
+        _showCustomAlert(
+          p: p,
+          title: 'Submission Failed',
+          message: 'Failed to submit feedback. ($statusCode: $statusText)',
+          icon: Icons.error_outline_rounded,
+          iconColor: p.red,
         );
       }
     }
