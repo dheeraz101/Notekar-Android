@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 import 'dart:math' as math;
@@ -855,30 +854,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   // Error handling caches
   void Function(FlutterErrorDetails)? _oldOnError;
   bool Function(Object, StackTrace)? _oldPlatformOnError;
-  String _feedbackSubmitStatus = 'idle';
-
-  // Feedback text controllers
-  final TextEditingController _bugTitleController = TextEditingController();
-  final TextEditingController _bugDescController = TextEditingController();
-  final TextEditingController _bugContextController = TextEditingController();
-
-  final TextEditingController _featTitleController = TextEditingController();
-  final TextEditingController _featDescController = TextEditingController();
-  final TextEditingController _featContextController = TextEditingController();
-
-  // Feedback focus nodes
-  final FocusNode _bugTitleFocusNode = FocusNode();
-  final FocusNode _bugDescFocusNode = FocusNode();
-  final FocusNode _bugContextFocusNode = FocusNode();
-
-  final FocusNode _featTitleFocusNode = FocusNode();
-  final FocusNode _featDescFocusNode = FocusNode();
-  final FocusNode _featContextFocusNode = FocusNode();
-
-  // Feedback validation states
-  bool _bugFormValid = false;
-  bool _featFormValid = false;
-  bool _submittingFeedback = false;
 
   final TextEditingController _settingsSearchController =
       TextEditingController();
@@ -930,16 +905,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _loadRecentSearches();
     _loadRemindersSettings();
 
-    _loadFeedbackDrafts();
-
-    _bugTitleController.addListener(_validateBugForm);
-    _bugDescController.addListener(_validateBugForm);
-    _bugContextController.addListener(() => _saveFeedbackDrafts());
-
-    _featTitleController.addListener(_validateFeatForm);
-    _featDescController.addListener(_validateFeatForm);
-    _featContextController.addListener(() => _saveFeedbackDrafts());
-
     _settingsSearchFocusNode.addListener(() {
       if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
         _openCategory('Search');
@@ -972,20 +937,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _settingsSearchFocusNode.dispose();
     _reminderMessageController.dispose();
     _reminderMessageFocusNode.dispose();
-
-    _bugTitleController.dispose();
-    _bugDescController.dispose();
-    _bugContextController.dispose();
-    _featTitleController.dispose();
-    _featDescController.dispose();
-    _featContextController.dispose();
-
-    _bugTitleFocusNode.dispose();
-    _bugDescFocusNode.dispose();
-    _bugContextFocusNode.dispose();
-    _featTitleFocusNode.dispose();
-    _featDescFocusNode.dispose();
-    _featContextFocusNode.dispose();
 
     FlutterError.onError = _oldOnError;
     PlatformDispatcher.instance.onError = _oldPlatformOnError;
@@ -1933,7 +1884,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
-        title: 'Hide App Content in Recents',
+        title: 'Hide App Content',
         subtitle:
             'Obfuscate screens and block screenshots in the system switcher',
         category: 'Privacy & Security',
@@ -2479,7 +2430,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: p.accent,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         'Got It'.localized(context),
@@ -2697,38 +2648,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
       iconColor: p.red,
       confirmLabel: 'Report',
       cancelLabel: 'Cancel',
-      onConfirm: () async {
-        await _submitAutoCrashReport(error, stackTrace, p);
+      onConfirm: () {
+        _submitAutoCrashReport(error, stackTrace, p);
       },
     );
   }
 
-  Future<void> _submitAutoCrashReport(
-    dynamic error,
-    dynamic stackTrace,
-    Palette p,
-  ) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: CupertinoActivityIndicator(radius: 16, color: p.accent),
-        ),
-      ),
-    );
-
+  void _submitAutoCrashReport(dynamic error, dynamic stackTrace, Palette p) {
     final engine = AdaptiveEngine();
-    final title = '[CRASH] Automated Error Report';
-    final body =
-        '''
-**Describe the bug**
-Automated crash report captured during runtime.
+    final appVer = '$appVersion ($appBuildNumber)';
+    final title = Uri.encodeComponent('[CRASH]: Automated Error Report');
+    final body = Uri.encodeComponent('''
+### Automated Crash Report
 
 **Error Details**
 ```
@@ -2740,432 +2671,84 @@ $error
 ${stackTrace ?? 'No stack trace provided.'}
 ```
 
-**Environment**
- - Device Model: ${engine.model}
- - Android OS Version: ${engine.osVersion}
- - NoteKar Version: v$appVersion (build $appBuildNumber)
-''';
+<details>
+<summary><b>Device Details (Auto-generated)</b></summary>
 
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 15);
-    final url = feedbackProxyUrl;
+- **App Version**: $appVer
+- **Device**: ${engine.model}
+- **OS**: ${engine.osVersion}
 
-    int statusCode = 0;
-    String statusText = '';
-    int bodySize = 0;
-    bool success = false;
-
-    final startTime = DateTime.now();
-
-    try {
-      final request = await client.postUrl(Uri.parse(url));
-      request.headers.set('Content-Type', 'application/json');
-      request.headers.set('X-Notekar-API-Key', feedbackApiKey);
-
-      final payload = {
-        'title': title,
-        'body': body,
-        'labels': ['bug', 'automated-report'],
-      };
-
-      final jsonStr = jsonEncode(payload);
-      final bodyBytes = utf8.encode(jsonStr);
-      bodySize = bodyBytes.length;
-
-      request.add(bodyBytes);
-
-      final response = await request.close();
-      statusCode = response.statusCode;
-      final responseBody = await response.transform(utf8.decoder).join();
-      statusText = responseBody;
-
-      if (statusCode == 201 || statusCode == 200) {
-        success = true;
-        NotekarHaptics.success(hapticStyle);
-      } else {
-        NotekarHaptics.warning(hapticStyle);
-      }
-    } catch (e) {
-      statusCode = 0;
-      statusText = e.toString();
-      NotekarHaptics.warning(hapticStyle);
-    } finally {
-      client.close();
-    }
-
-    final elapsed = DateTime.now().difference(startTime);
-    if (elapsed.inMilliseconds < 2000) {
-      await Future.delayed(
-        Duration(milliseconds: 2000 - elapsed.inMilliseconds),
-      );
-    }
+</details>
+''');
+    final labels = Uri.encodeComponent('bug,automated-report');
+    final url = '$githubRepo/issues/new?title=$title&body=$body&labels=$labels';
 
     if (mounted) {
       Navigator.pop(context);
-    }
-
-    await NetworkLogger.log(
-      url: url,
-      method: 'POST',
-      statusCode: statusCode,
-      size: '$bodySize B',
-      purpose: 'Automated Crash Report',
-    );
-
-    if (mounted) {
-      if (success) {
-        _showCustomAlert(
-          p: p,
-          title: 'Success',
-          message:
-              'Error report sent successfully. Thank you for helping us improve NoteKar!',
-          icon: Icons.check_circle_outline_rounded,
-          iconColor: p.green,
-        );
-      } else {
-        _showCustomAlert(
-          p: p,
-          title: 'Failed',
-          message: 'Failed to send crash report. ($statusCode: $statusText)',
-          icon: Icons.error_outline_rounded,
-          iconColor: p.red,
-        );
-      }
+      widget.onOpenLink(url);
     }
   }
 
-  Future<void> _loadFeedbackDrafts() async {
-    final prefs = await SharedPreferences.getInstance();
-    _bugTitleController.text = prefs.getString('draft_bug_title') ?? '';
-    _bugDescController.text = prefs.getString('draft_bug_desc') ?? '';
-    _bugContextController.text = prefs.getString('draft_bug_context') ?? '';
+  void _openGithubIssue(String type) {
+    final appVer = '$appVersion ($appBuildNumber)';
+    final deviceModel = AdaptiveEngine().model;
+    final osVer = AdaptiveEngine().osVersion;
+    final perfTier = AdaptiveEngine().tier.toString().split('.').last;
+    final currentTime = DateTime.now().toLocal().toString();
 
-    _featTitleController.text = prefs.getString('draft_feat_title') ?? '';
-    _featDescController.text = prefs.getString('draft_feat_desc') ?? '';
-    _featContextController.text = prefs.getString('draft_feat_context') ?? '';
-
-    _validateBugForm();
-    _validateFeatForm();
-  }
-
-  Future<void> _saveFeedbackDrafts() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('draft_bug_title', _bugTitleController.text);
-    await prefs.setString('draft_bug_desc', _bugDescController.text);
-    await prefs.setString('draft_bug_context', _bugContextController.text);
-
-    await prefs.setString('draft_feat_title', _featTitleController.text);
-    await prefs.setString('draft_feat_desc', _featDescController.text);
-    await prefs.setString('draft_feat_context', _featContextController.text);
-  }
-
-  void _validateBugForm() {
-    final valid =
-        _bugTitleController.text.trim().isNotEmpty &&
-        _bugDescController.text.trim().isNotEmpty;
-    if (valid != _bugFormValid) {
-      setState(() => _bugFormValid = valid);
-    }
-    _saveFeedbackDrafts();
-  }
-
-  void _validateFeatForm() {
-    final valid =
-        _featTitleController.text.trim().isNotEmpty &&
-        _featDescController.text.trim().isNotEmpty;
-    if (valid != _featFormValid) {
-      setState(() => _featFormValid = valid);
-    }
-    _saveFeedbackDrafts();
-  }
-
-  Future<void> _clearBugDraft() async {
-    _bugTitleController.clear();
-    _bugDescController.clear();
-    _bugContextController.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('draft_bug_title');
-    await prefs.remove('draft_bug_desc');
-    await prefs.remove('draft_bug_context');
-    setState(() => _bugFormValid = false);
-  }
-
-  Future<void> _clearFeatDraft() async {
-    _featTitleController.clear();
-    _featDescController.clear();
-    _featContextController.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('draft_feat_title');
-    await prefs.remove('draft_feat_desc');
-    await prefs.remove('draft_feat_context');
-    setState(() => _featFormValid = false);
-  }
-
-  Future<void> _submitFeedback(String type, Palette p) async {
-    if (_submittingFeedback) return;
-
-    if (await _isOffline()) {
-      _showCustomAlert(
-        p: p,
-        title: 'Offline',
-        message:
-            'No internet connection detected. Please connect to the internet to submit feedback.',
-        icon: Icons.wifi_off_rounded,
-        iconColor: Colors.orange,
-      );
-      return;
-    }
-
-    if (!mounted) return;
-    setState(() {
-      _submittingFeedback = true;
-      _feedbackSubmitStatus = 'submitting';
-    });
-
-    final engine = AdaptiveEngine();
-
-    String title = '';
-    String body = '';
-    List<String> labels = [];
+    String titlePrefix = '';
+    String bodyTemplate = '';
+    String label = '';
 
     if (type == 'bug') {
-      title = _bugTitleController.text.trim();
-      labels = ['bug'];
-
-      body =
+      titlePrefix = '[Bug]: ';
+      label = 'bug';
+      bodyTemplate =
           '''
-**Describe the bug**
-${_bugDescController.text.trim()}
+### Describe the Bug
+(Write what happened here...)
 
-**To Reproduce**
-1. Open NoteKar Android App
-2. ${_bugDescController.text.trim()}
+### Steps to Reproduce
+1. Go to...
+2. Click on...
 
-**Expected behavior**
-Refer to description.
+<details>
+<summary><b>Device Details (Auto-generated)</b></summary>
 
-**Environment**
- - Device Model: ${engine.model}
- - Android OS Version: ${engine.osVersion}
- - NoteKar Version: v$appVersion (build $appBuildNumber)
+- **App Version**: $appVer
+- **Device**: $deviceModel
+- **OS**: $osVer
+- **Performance Tier**: $perfTier
+- **Date/Time**: $currentTime
 
-**Additional context**
-${_bugContextController.text.trim().isEmpty ? 'None' : _bugContextController.text.trim()}
+</details>
 ''';
     } else {
-      title = _featTitleController.text.trim();
-      labels = ['enhancement'];
-
-      body =
+      titlePrefix = '[Feature]: ';
+      label = 'enhancement';
+      bodyTemplate =
           '''
-**Is your feature request related to a problem? Please describe.**
-${_featDescController.text.trim()}
+### Describe your Idea
+(Write your feature request here...)
 
-**Describe the solution you'd like**
-Refer to description.
+<details>
+<summary><b>Device Details (Auto-generated)</b></summary>
 
-**Describe alternatives you've considered**
-None.
+- **App Version**: $appVer
+- **Device**: $deviceModel
+- **OS**: $osVer
 
-**Additional context**
-${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.text.trim()}
+</details>
 ''';
     }
 
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 15);
+    final encodedTitle = Uri.encodeComponent(titlePrefix);
+    final encodedBody = Uri.encodeComponent(bodyTemplate);
+    final encodedLabels = Uri.encodeComponent(label);
 
-    final url = feedbackProxyUrl;
-    int statusCode = 0;
-    String statusText = '';
-    int bodySize = 0;
-    bool success = false;
-
-    final startTime = DateTime.now();
-
-    try {
-      final request = await client.postUrl(Uri.parse(url));
-      request.headers.set('Content-Type', 'application/json');
-      request.headers.set('X-Notekar-API-Key', feedbackApiKey);
-
-      final payload = {'title': title, 'body': body, 'labels': labels};
-
-      final jsonStr = jsonEncode(payload);
-      final bodyBytes = utf8.encode(jsonStr);
-      bodySize = bodyBytes.length;
-
-      request.add(bodyBytes);
-
-      final response = await request.close();
-      statusCode = response.statusCode;
-
-      final responseBody = await response.transform(utf8.decoder).join();
-      statusText = responseBody;
-
-      if (statusCode == 201 || statusCode == 200) {
-        success = true;
-        NotekarHaptics.success(hapticStyle);
-        if (type == 'bug') {
-          await _clearBugDraft();
-        } else {
-          await _clearFeatDraft();
-        }
-      } else {
-        NotekarHaptics.warning(hapticStyle);
-      }
-    } catch (e) {
-      statusCode = 0;
-      statusText = e.toString();
-      NotekarHaptics.warning(hapticStyle);
-    } finally {
-      client.close();
-    }
-
-    final elapsed = DateTime.now().difference(startTime);
-    if (elapsed.inMilliseconds < 2000) {
-      await Future.delayed(
-        Duration(milliseconds: 2000 - elapsed.inMilliseconds),
-      );
-    }
-
-    await NetworkLogger.log(
-      url: url,
-      method: 'POST',
-      statusCode: statusCode,
-      size: '$bodySize B',
-      purpose: type == 'bug'
-          ? 'Bug Report Submission'
-          : 'Feature Request Submission',
-    );
-
-    if (mounted) {
-      if (success) {
-        setState(() {
-          _feedbackSubmitStatus = 'success';
-        });
-        await Future.delayed(const Duration(milliseconds: 1500));
-        if (mounted) {
-          setState(() {
-            _submittingFeedback = false;
-            _feedbackSubmitStatus = 'idle';
-          });
-          _popCategory();
-        }
-      } else {
-        setState(() {
-          _feedbackSubmitStatus = 'failed';
-        });
-        await Future.delayed(const Duration(milliseconds: 3000));
-        if (mounted) {
-          setState(() {
-            _submittingFeedback = false;
-            _feedbackSubmitStatus = 'idle';
-          });
-          _showCustomAlert(
-            p: p,
-            title: 'Submission Failed',
-            message: 'Failed to submit feedback. ($statusCode: $statusText)',
-            icon: Icons.error_outline_rounded,
-            iconColor: p.red,
-          );
-        }
-      }
-    }
-  }
-
-  Widget _buildSubmitButton(Palette p, String type, bool formValid) {
-    Color btnColor;
-    Widget child;
-    bool isDisabled = !formValid || _feedbackSubmitStatus == 'submitting';
-
-    if (_feedbackSubmitStatus == 'submitting') {
-      btnColor = p.accent;
-      child = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CupertinoActivityIndicator(color: Colors.white, radius: 8),
-          const SizedBox(width: 8),
-          Text(
-            'Submitting...'.localized(context),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-        ],
-      );
-    } else if (_feedbackSubmitStatus == 'success') {
-      btnColor = p.green;
-      child = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.check_circle_outline_rounded,
-            color: Colors.white,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Submitted!'.localized(context),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-        ],
-      );
-    } else if (_feedbackSubmitStatus == 'failed') {
-      btnColor = p.red;
-      child = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: Colors.white,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Submission Failed!'.localized(context),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-        ],
-      );
-    } else {
-      btnColor = p.accent;
-      child = Text(
-        (type == 'bug' ? 'Submit Bug Report' : 'Submit Feature Request')
-            .localized(context),
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
-        ),
-      );
-    }
-
-    return PressableScale(
-      onTap: isDisabled ? null : () => _submitFeedback(type, p),
-      child: Opacity(
-        opacity: isDisabled ? 0.5 : 1.0,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          height: 48,
-          decoration: BoxDecoration(
-            color: btnColor,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          alignment: Alignment.center,
-          child: child,
-        ),
-      ),
-    );
+    final url =
+        '$githubRepo/issues/new?title=$encodedTitle&body=$encodedBody&labels=$encodedLabels';
+    widget.onOpenLink(url);
   }
 
   Widget _feedbackRootPage(Palette p) {
@@ -3183,7 +2766,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                 context,
               ),
               color: p.red,
-              onTap: () => _openCategory('Bug Report'),
+              onTap: () => _openGithubIssue('bug'),
             ),
             SettingsRow(
               p: p,
@@ -3191,250 +2774,16 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
               title: 'Request a Feature'.localized(context),
               subtitle: 'Suggest a new idea or improvement.'.localized(context),
               color: p.accent,
-              onTap: () => _openCategory('Feature Request'),
+              onTap: () => _openGithubIssue('feature'),
             ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Choose a category to submit structured feedback directly to our GitHub issues page. Your device specifications will be automatically attached.'
+              'Select an option to open GitHub and submit a structured issue. Your device specifications will be prefilled automatically.'
                   .localized(context),
         ),
-      ],
-    );
-  }
-
-  Widget _bugReportFormPage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_bugTitleController.text.isNotEmpty ||
-            _bugDescController.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: _clearBugDraft,
-                icon: Icon(Icons.delete_sweep_rounded, size: 16, color: p.red),
-                label: Text(
-                  'Clear Draft'.localized(context),
-                  style: TextStyle(color: p.red, fontSize: 13),
-                ),
-              ),
-            ),
-          ),
-        SettingsGroup(
-          p: p,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Title'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _bugTitleController,
-                    focusNode: _bugTitleFocusNode,
-                    textInputAction: TextInputAction.next,
-                    onSubmitted: (_) =>
-                        FocusScope.of(context).requestFocus(_bugDescFocusNode),
-                    style: TextStyle(color: p.text, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: 'Brief summary (e.g., app crash on sync)'
-                          .localized(context),
-                      hintStyle: TextStyle(color: p.text3),
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Describe the bug & steps to reproduce'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _bugDescController,
-                    focusNode: _bugDescFocusNode,
-                    textInputAction: TextInputAction.next,
-                    onSubmitted: (_) => FocusScope.of(
-                      context,
-                    ).requestFocus(_bugContextFocusNode),
-                    maxLines: 4,
-                    style: TextStyle(color: p.text, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: 'What went wrong and how to trigger it?'
-                          .localized(context),
-                      hintStyle: TextStyle(color: p.text3),
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Additional Context (Optional)'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _bugContextController,
-                    focusNode: _bugContextFocusNode,
-                    textInputAction: TextInputAction.done,
-                    maxLines: 2,
-                    style: TextStyle(color: p.text, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: 'Any other relevant details or specs'.localized(
-                        context,
-                      ),
-                      hintStyle: TextStyle(color: p.text3),
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildSubmitButton(p, 'bug', _bugFormValid),
-      ],
-    );
-  }
-
-  Widget _featureRequestFormPage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_featTitleController.text.isNotEmpty ||
-            _featDescController.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: _clearFeatDraft,
-                icon: Icon(Icons.delete_sweep_rounded, size: 16, color: p.red),
-                label: Text(
-                  'Clear Draft'.localized(context),
-                  style: TextStyle(color: p.red, fontSize: 13),
-                ),
-              ),
-            ),
-          ),
-        SettingsGroup(
-          p: p,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Title'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _featTitleController,
-                    focusNode: _featTitleFocusNode,
-                    textInputAction: TextInputAction.next,
-                    onSubmitted: (_) =>
-                        FocusScope.of(context).requestFocus(_featDescFocusNode),
-                    style: TextStyle(color: p.text, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: 'Brief summary (e.g., search history logs)'
-                          .localized(context),
-                      hintStyle: TextStyle(color: p.text3),
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Describe your idea'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _featDescController,
-                    focusNode: _featDescFocusNode,
-                    textInputAction: TextInputAction.next,
-                    onSubmitted: (_) => FocusScope.of(
-                      context,
-                    ).requestFocus(_featContextFocusNode),
-                    maxLines: 4,
-                    style: TextStyle(color: p.text, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText:
-                          'What problem does it solve & how should it work?'
-                              .localized(context),
-                      hintStyle: TextStyle(color: p.text3),
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Additional Context (Optional)'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _featContextController,
-                    focusNode: _featContextFocusNode,
-                    textInputAction: TextInputAction.done,
-                    maxLines: 2,
-                    style: TextStyle(color: p.text, fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: 'Any mockups, details, or other context'
-                          .localized(context),
-                      hintStyle: TextStyle(color: p.text3),
-                      border: InputBorder.none,
-                      isDense: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildSubmitButton(p, 'feature', _featFormValid),
       ],
     );
   }
@@ -7537,7 +6886,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                                     question:
                                         'How do I block screenshots and screen previews?',
                                     answer:
-                                        'Enable "Hide App Content in Recents" under Settings > Privacy & Security. Once enabled, screenshots will be blocked inside NoteKar, and the system app switcher card will appear blank.',
+                                        'Enable "Hide App Content" under Settings > Privacy & Security. Once enabled, screenshots will be blocked inside NoteKar, and the system app switcher card will appear blank.',
                                   ),
                                   HelpRow(
                                     p: p,
@@ -7816,6 +7165,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
 
                               SettingsGroup(
                                 p: p,
+                                title: 'CSV Export',
                                 insetDividers: true,
                                 children: [
                                   SettingsRow(
@@ -7843,6 +7193,18 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                                       ),
                                     ),
                                   ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Export moments to standard CSV formats. "Export CSV" saves your entire history, while "Export Last 7 Days" saves only recent records.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                title: 'JSON Export',
+                                children: [
                                   SettingsRow(
                                     p: p,
                                     icon: Icons.code_rounded,
@@ -7854,6 +7216,19 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                                       _runExport('JSON', widget.onExportJson),
                                     ),
                                   ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Export moments to developer-friendly JSON format for advanced integrations and data portability.',
+                              ),
+
+                              SettingsGroup(
+                                p: p,
+                                title: 'Database Backups',
+                                insetDividers: true,
+                                children: [
                                   SettingsRow(
                                     p: p,
                                     icon: Icons.archive_outlined,
@@ -7882,7 +7257,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Export moments to standard CSV or JSON files for backups, external analysis, or phone transfers.',
+                                    'Manage complete database backups. Safely archive your entire history or restore it when migrating to another device.',
                               ),
                               const SizedBox(height: spacing48),
                             ]),
@@ -8508,7 +7883,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                                   SettingsSwitchRow(
                                     p: p,
                                     icon: Icons.screenshot_rounded,
-                                    title: 'Hide App Content in Recents',
+                                    title: 'Hide App Content',
                                     subtitle:
                                         'Obfuscate application screens and block screenshots in the system recents switcher.',
                                     value: obfuscateInRecents,
@@ -9205,26 +8580,7 @@ ${_featContextController.text.trim().isEmpty ? 'None' : _featContextController.t
                               ],
                             ),
                           ),
-                        if (show('Bug Report'))
-                          SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _bugReportFormPage(p),
-                                const SizedBox(height: spacing48),
-                              ],
-                            ),
-                          ),
-                        if (show('Feature Request'))
-                          SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _featureRequestFormPage(p),
-                                const SizedBox(height: spacing48),
-                              ],
-                            ),
-                          ),
+
                         if (show("What's New"))
                           SliverToBoxAdapter(
                             child: Column(
@@ -10906,6 +10262,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
   List<Map<String, dynamic>>? _commits;
   bool _loadingCommits = false;
   String? _commitsError;
+  int _visibleCount = 10;
 
   @override
   void initState() {
@@ -11059,8 +10416,48 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _commits!.length,
+          itemCount:
+              math.min(_visibleCount, _commits!.length) +
+              (_commits!.length > math.min(_visibleCount, _commits!.length)
+                  ? 1
+                  : 0),
           itemBuilder: (context, index) {
+            final shownCount = math.min(_visibleCount, _commits!.length);
+
+            if (index == shownCount) {
+              return PressableScale(
+                onTap: () {
+                  setState(() {
+                    if (_visibleCount == 10) {
+                      _visibleCount = 30;
+                    } else if (_visibleCount == 30) {
+                      _visibleCount = 60;
+                    } else {
+                      _visibleCount = 100;
+                    }
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: p.surface,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: p.border),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Show More'.localized(context),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            }
+
             final commit = _commits![index];
             final sha = commit['sha'] as String;
             final shortSha = sha.length > 7 ? sha.substring(0, 7) : sha;
@@ -11167,7 +10564,8 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
         const SizedBox(height: 12),
         Center(
           child: Text(
-            'Only the top 10 commits are shown'.localized(context),
+            'Showing ${math.min(_visibleCount, _commits!.length)} of ${_commits!.length} commits'
+                .localized(context),
             style: TextStyle(
               color: p.text3,
               fontSize: 12,

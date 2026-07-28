@@ -1,5 +1,6 @@
-import 'dart:io';
 import 'dart:developer' as developer;
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,7 +8,9 @@ enum PerformanceTier { low, balanced, high }
 
 class AdaptiveEngine {
   static final AdaptiveEngine _instance = AdaptiveEngine._internal();
+
   factory AdaptiveEngine() => _instance;
+
   AdaptiveEngine._internal();
 
   PerformanceTier _tier = PerformanceTier.balanced;
@@ -16,16 +19,26 @@ class AdaptiveEngine {
   String _model = 'Unknown';
   String _osVersion = 'Unknown';
   bool? _cachedSensorAvailable;
+  List<String> _supportedAbis = [];
 
   PerformanceTier get tier => _tier;
+
   int get ramGb => _ramGb;
+
   int get processors => _processors;
+
   String get model => _model;
+
   String get osVersion => _osVersion;
 
+  List<String> get supportedAbis => _supportedAbis;
+
   bool get isLowEnd => _tier == PerformanceTier.low;
+
   bool get supportsBlur => _tier != PerformanceTier.low;
+
   bool get supportsAdvancedAnimations => _tier == PerformanceTier.high;
+
   bool? get cachedSensorAvailable => _cachedSensorAvailable;
 
   Future<void> initialize({SharedPreferences? prefs}) async {
@@ -41,6 +54,7 @@ class AdaptiveEngine {
       _model = '${androidInfo.manufacturer} ${androidInfo.model}';
       _osVersion = 'Android ${androidInfo.version.release}';
       _processors = Platform.numberOfProcessors;
+      _supportedAbis = androidInfo.supportedAbis;
 
       // If RAM is not cached, detect it
       if (_ramGb == 0) {

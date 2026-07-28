@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/network_logger.dart';
@@ -239,8 +240,8 @@ class UpdateService {
       final isImportant = isSecurity || isFeatureUpdate;
 
       final type = isBetaUpdate
-          ? 'Beta Update'
-          : (isSecurity ? 'Security Update' : 'Feature Update');
+          ? 'BR (Beta Release)'
+          : (isSecurity ? 'SR (Security Release)' : 'SB (Stable Build)');
 
       _logger.info(
         'Latest version fetched (${trackBeta ? "Beta" : "Stable"}): $version ($type)',
@@ -268,7 +269,7 @@ class UpdateService {
     try {
       final request = await client.getUrl(
         Uri.parse(
-          'https://api.github.com/repos/dheeraz101/Notekar-Android/commits?per_page=10',
+          'https://api.github.com/repos/dheeraz101/Notekar-Android/commits?per_page=100',
         ),
       );
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
@@ -276,7 +277,7 @@ class UpdateService {
       final response = await request.close();
       await NetworkLogger.log(
         url:
-            'https://api.github.com/repos/dheeraz101/Notekar-Android/commits?per_page=10',
+            'https://api.github.com/repos/dheeraz101/Notekar-Android/commits?per_page=100',
         method: 'GET',
         statusCode: response.statusCode,
         purpose: 'Fetch Recent Commit Logs',
@@ -328,25 +329,57 @@ class UpdateService {
     final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
     if (cacheDir == null) return null;
 
+    final abis = AdaptiveEngine().supportedAbis;
+    String suffix = 'universal';
+    if (abis.isNotEmpty) {
+      final primary = abis.first.toLowerCase();
+      if (primary.contains('arm64')) {
+        suffix = 'arm64-v8a';
+      } else if (primary.contains('armeabi') || primary.contains('armv7')) {
+        suffix = 'armeabi-v7a';
+      } else if (primary.contains('x86_64')) {
+        suffix = 'x86_64';
+      }
+    }
+
     final cleanVersion = info.version.split('-').first;
     final url =
-        'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
-    final savePath = '$cacheDir/notekar-$cleanVersion-universal.apk';
+        'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
+    final savePath = '$cacheDir/notekar-$cleanVersion-$suffix.apk';
 
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15);
     try {
-      final testRequest = await client.getUrl(Uri.parse(url));
+      var testRequest = await client.getUrl(Uri.parse(url));
       testRequest.headers.set(
         HttpHeaders.userAgentHeader,
         'NoteKar/$appVersion',
       );
       testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
 
-      final testResponse = await testRequest.close();
+      var testResponse = await testRequest.close();
+      var activeUrl = url;
+      var activeSavePath = savePath;
+
+      if (testResponse.statusCode == 404 && suffix != 'universal') {
+        suffix = 'universal';
+        activeUrl =
+            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
+        activeSavePath = '$cacheDir/notekar-$cleanVersion-universal.apk';
+
+        await testResponse.drain();
+        testRequest = await client.getUrl(Uri.parse(activeUrl));
+        testRequest.headers.set(
+          HttpHeaders.userAgentHeader,
+          'NoteKar/$appVersion',
+        );
+        testRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+        testResponse = await testRequest.close();
+      }
+
       final finalUrl = testResponse.redirects.isNotEmpty
           ? testResponse.redirects.last.location.toString()
-          : url;
+          : activeUrl;
 
       final contentRange = testResponse.headers.value(
         HttpHeaders.contentRangeHeader,
@@ -365,7 +398,7 @@ class UpdateService {
       }
 
       await NetworkLogger.log(
-        url: url,
+        url: activeUrl,
         method: 'GET',
         statusCode: testResponse.statusCode,
         purpose: 'APK Package Download',
@@ -388,7 +421,7 @@ class UpdateService {
           final end = (i == chunkCount - 1)
               ? totalSize - 1
               : (start + chunkSize - 1);
-          final partPath = '$savePath.part$i';
+          final partPath = '$activeSavePath.part$i';
 
           futures.add(
             _downloadPart(
@@ -414,25 +447,37 @@ class UpdateService {
             'Parallel download failed, falling back to standard download...',
           );
           for (int i = 0; i < chunkCount; i++) {
-            final f = File('$savePath.part$i');
+            final f = File('$activeSavePath.part$i');
             if (await f.exists()) await f.delete();
           }
-          return await _downloadStandard(client, url, savePath, onProgress);
+          return await _downloadStandard(
+            client,
+            activeUrl,
+            activeSavePath,
+            onProgress,
+          );
         }
 
-        final file = File(savePath);
+        final file = File(activeSavePath);
         if (await file.exists()) await file.delete();
         final sink = file.openWrite();
         for (int i = 0; i < chunkCount; i++) {
-          final partFile = File('$savePath.part$i');
+          final partFile = File('$activeSavePath.part$i');
           await sink.addStream(partFile.openRead());
           await partFile.delete();
         }
         await sink.close();
-        _logger.info('APK downloaded & merged successfully to: $savePath');
-        return savePath;
+        _logger.info(
+          'APK downloaded & merged successfully to: $activeSavePath',
+        );
+        return activeSavePath;
       } else {
-        return await _downloadStandard(client, url, savePath, onProgress);
+        return await _downloadStandard(
+          client,
+          activeUrl,
+          activeSavePath,
+          onProgress,
+        );
       }
     } catch (e, stack) {
       _logger.error('Failed to download APK file', e, stack);

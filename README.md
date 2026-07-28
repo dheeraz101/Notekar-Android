@@ -22,6 +22,8 @@
 - [🌐 Community Translations](#-community-translations)
 - [🔒 Privacy & Legal Policy](#-privacy--legal-policy)
 - [☕ Support](#-support)
+- [🚀 Version Release Scheme](#-version-release-scheme)
+- [🔮 Upcoming Development Roadmap](#-upcoming-development-roadmap)
 - [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
 - [📦 Project Structure](#-project-structure)
 - [🛠️ Building & Running Locally](#-building--running-locally)
@@ -102,6 +104,31 @@ If NoteKar helps you, you can support the project here:
 [![Buy Me A Chai](https://buymeachai.ezee.li/assets/images/buymeachai-button.png)](https://buymeachai.ezee.li/dheeraz)
 
 Your support helps keep NoteKar free, offline-first, and actively maintained.
+
+## 🚀 Version Release Scheme
+
+NoteKar uses shortcodes in version tags to differentiate build stability:
+
+* **BR (Beta Release)**: Early access, pre-release builds featuring experimental UI changes and
+  active feature development.
+* **SR (Security Release)**: Critical maintenance updates, library upgrades, security patches, and
+  hotfixes.
+* **SB (Stable Build)**: Production-ready public builds that have passed thorough quality assurance
+  and stability tests.
+
+---
+
+## 🔮 Upcoming Development Roadmap
+
+We are planning to build the following features in upcoming updates:
+
+* **Sobriety (Relapse / Nofap) Streaks & Day Counter**:
+    - **Dynamic Streak Widget**: Dynamic day counter card with milestone awards and streak progress
+      tracks.
+    - **Relapse Trigger Log**: Privacy-focused triggers diary to analyze mood, location, or time
+      patterns offline.
+    - **AMOLED Lockscreen Overlay**: Fast checking from home widgets to keep the user accountable
+      without opening the app.
 
 ---
 

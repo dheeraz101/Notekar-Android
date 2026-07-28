@@ -406,15 +406,15 @@ if (Test-Path -LiteralPath $changelogMdPath)
     $tagSuffix = ""
     if ($beta)
     {
-        $tagSuffix = " [Beta]"
+        $tagSuffix = " [BR]"
     }
     elseif ($security)
     {
-        $tagSuffix = " [Security]"
+        $tagSuffix = " [SR]"
     }
     elseif ($stable)
     {
-        $tagSuffix = " [Stable]"
+        $tagSuffix = " [SB]"
     }
 
     $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n$gitCommits`r`n`r`n"

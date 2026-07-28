@@ -14,6 +14,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryDialog extends StatefulWidget {
   const HistoryDialog({
@@ -64,6 +65,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   int _visibleCount = _pageSize;
   int? _pendingDeleteId;
   final _scrollController = ScrollController();
+  bool _enableNoteOnClick = false;
 
   // Memoized lists
   List<Moment> _filteredEntries = [];
@@ -75,6 +77,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
     _entries = List<Moment>.from(widget.entries);
     _availableDateKeys = _entries.map((entry) => entry.date).toSet();
     _rebuildMemoizedLists();
+    _loadNoteOnClick();
+  }
+
+  Future<void> _loadNoteOnClick() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
+      });
+    }
   }
 
   void _rebuildMemoizedLists() {
@@ -567,29 +579,18 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                       entry: entry,
                                       selected: selected,
                                       compact: widget.compactRows,
-                                      onLongPress: () =>
-                                          _showMomentDetails(entry),
-                                      onTap: () {
-                                        setState(() {
-                                          if (selected) {
-                                            _selected.removeWhere(
-                                              (item) => item.id == entry.id,
-                                            );
-                                          } else {
-                                            if (_selected.length == 2) {
-                                              _selected.removeAt(0);
-                                            }
-                                            _selected.add(entry);
-                                          }
-                                        });
-                                        if (_selected.length == 2) {
-                                          widget.onDuration(
-                                            _selected[0],
-                                            _selected[1],
-                                          );
-                                          setState(() => _selected.clear());
-                                        }
-                                      },
+                                      onLongPress: _enableNoteOnClick
+                                          ? () => _handleSelection(
+                                              entry,
+                                              selected,
+                                            )
+                                          : () => _showMomentDetails(entry),
+                                      onTap: _enableNoteOnClick
+                                          ? () => _showMomentDetails(entry)
+                                          : () => _handleSelection(
+                                              entry,
+                                              selected,
+                                            ),
                                       onDelete: () => _removeEntry(entry),
                                     ),
                                   ),
@@ -835,6 +836,23 @@ class _HistoryDialogState extends State<HistoryDialog> {
     });
 
     await widget.onUpdateNote(entry.id, updated.note);
+  }
+
+  void _handleSelection(Moment entry, bool selected) {
+    setState(() {
+      if (selected) {
+        _selected.removeWhere((item) => item.id == entry.id);
+      } else {
+        if (_selected.length == 2) {
+          _selected.removeAt(0);
+        }
+        _selected.add(entry);
+      }
+    });
+    if (_selected.length == 2) {
+      widget.onDuration(_selected[0], _selected[1]);
+      setState(() => _selected.clear());
+    }
   }
 
   Future<void> _showMomentDetails(Moment entry) async {

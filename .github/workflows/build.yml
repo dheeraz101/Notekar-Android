@@ -112,8 +112,7 @@ jobs:
         run: |
           flutter build apk --release \
             --build-name ${{ steps.version.outputs.version }} \
-            --build-number ${{ steps.version.outputs.build_number }} \
-            --dart-define=FEEDBACK_API_KEY=${{ secrets.NOTEKAR_API_KEY }}
+            --build-number ${{ steps.version.outputs.build_number }}
           echo "✅ Universal APK built"
 
       # ── 6. Build — Split-per-ABI APKs (arm64, armeabi-v7a, x86_64) ──────
@@ -121,8 +120,7 @@ jobs:
         run: |
           flutter build apk --release --split-per-abi \
             --build-name ${{ steps.version.outputs.version }} \
-            --build-number ${{ steps.version.outputs.build_number }} \
-            --dart-define=FEEDBACK_API_KEY=${{ secrets.NOTEKAR_API_KEY }}
+            --build-number ${{ steps.version.outputs.build_number }}
           echo "✅ Split APKs built"
 
       # ── 7. Rename all APKs with version + arch ───────────────────────────

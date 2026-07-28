@@ -39,7 +39,7 @@ jobs:
         run: flutter test
 
       - name: Build release APK
-        run: flutter build apk --release --split-per-abi --dart-define=FEEDBACK_API_KEY=${{ secrets.NOTEKAR_API_KEY }}
+        run: flutter build apk --release --split-per-abi
 
       - name: Upload Universal APK to VirusTotal
         run: |

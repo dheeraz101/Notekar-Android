@@ -30,6 +30,19 @@ class MainActivity : FlutterActivity() {
     private var pendingLaunchAction: String? = null
     private var pendingNotificationResult: MethodChannel.Result? = null
 
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        try {
+            val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val obfuscate = prefs.getBoolean("flutter.obfuscate_in_recents", false)
+            if (obfuscate) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to apply FLAG_SECURE early in onCreate", e)
+        }
+        super.onCreate(savedInstanceState)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         pendingLaunchAction = actionFromIntent(intent)
