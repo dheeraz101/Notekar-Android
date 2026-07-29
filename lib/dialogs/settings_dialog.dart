@@ -31,6 +31,7 @@ import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
+import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -6210,249 +6211,49 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Sobriety Companion'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Privacy-first streak tracking and relapse diary. All data stays on your device. Existing logs are never altered.'
-                                        .localized(context),
-                              ),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Streak Mode'.localized(context),
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    icon: Icons.self_improvement_rounded,
-                                    title: 'Enable Sobriety Mode'.localized(
-                                      context,
-                                    ),
-                                    subtitle:
-                                        'Adds a clean streak card to your home screen and adapts home screen widgets.'
-                                            .localized(context),
-                                    color: p.orange,
-                                    value: enableSobrietyMode,
-                                    onChanged: (value) async {
-                                      if (_prefs != null) {
-                                        await _prefs!.setBool(
-                                          'enable_sobriety_mode',
-                                          value,
-                                        );
-                                      }
-                                      setState(
-                                        () => enableSobrietyMode = value,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                              if (enableSobrietyMode) ...[
-                                SettingsPageDescription(
-                                  p: p,
-                                  text:
-                                      'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show RESET and DIARY buttons.'
-                                          .localized(context),
-                                ),
-                                const SizedBox(height: 12),
-                                SettingsGroup(
-                                  p: p,
-                                  title: 'Streak Reset Logic'.localized(
-                                    context,
-                                  ),
-                                  children: [
-                                    SettingsSwitchRow(
-                                      p: p,
-                                      icon: Icons.restart_alt_rounded,
-                                      title: 'Reset on Relapse Tag Only'
-                                          .localized(context),
-                                      subtitle:
-                                          'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.'
-                                              .localized(context),
-                                      color: p.orange,
-                                      value: sobrietyResetType == 'relapse',
-                                      onChanged: (value) async {
-                                        final nextType = value
-                                            ? 'relapse'
-                                            : 'any';
-                                        if (_prefs != null) {
-                                          await _prefs!.setString(
-                                            'sobriety_reset_type',
-                                            nextType,
-                                          );
-                                        }
-                                        setState(
-                                          () => sobrietyResetType = nextType,
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                SettingsGroup(
-                                  p: p,
-                                  title: 'Trigger Diary'.localized(context),
-                                  children: [
-                                    SettingsRow(
-                                      p: p,
-                                      icon: Icons.analytics_rounded,
-                                      title: 'Trigger Analysis'.localized(
-                                        context,
-                                      ),
-                                      subtitle:
-                                          'View your relapse pattern insights, top moods, and peak vulnerability windows.'
-                                              .localized(context),
-                                      color: p.orange,
-                                      trailing: Icon(
-                                        Icons.chevron_right_rounded,
-                                        color: p.text3,
-                                        size: 20,
-                                      ),
-                                      onTap: () => _openCategory(
-                                        'Trigger Analysis',
-                                        parent: 'Sobriety Companion',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SettingsPageDescription(
-                                  p: p,
-                                  text:
-                                      'When logging a moment with Sobriety Mode on, you can tag mood (Bored, Anxious, Lonely...) and trigger (Social Media, Late Night...). These are stored as hashtags in the note for full backwards compatibility.'
-                                          .localized(context),
-                                ),
-                                const SizedBox(height: 12),
-                                SettingsGroup(
-                                  p: p,
-                                  title: 'Custom Start Date'.localized(context),
-                                  children: [
-                                    SettingsRow(
-                                      p: p,
-                                      icon: Icons.calendar_today_rounded,
-                                      title: 'Set Sobriety Start Date'
-                                          .localized(context),
-                                      subtitle: sobrietyCustomStartMs != null
-                                          ? '${"From".localized(context)} ${datePretty(sobrietyCustomStartMs!)} ${"at".localized(context)} ${timeOnly(sobrietyCustomStartMs!).substring(0, 5)}'
-                                          : 'Not set: using last log or relapse tag'
-                                                .localized(context),
-                                      color: p.orange,
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          if (sobrietyCustomStartMs != null)
-                                            GestureDetector(
-                                              onTap: () async {
-                                                await _prefs?.remove(
-                                                  'sobriety_custom_start_ms',
-                                                );
-                                                setState(
-                                                  () => sobrietyCustomStartMs =
-                                                      null,
-                                                );
-                                              },
-                                              child: Icon(
-                                                Icons.close_rounded,
-                                                color: p.text3,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          const SizedBox(width: 4),
-                                          Icon(
-                                            Icons.chevron_right_rounded,
-                                            color: p.text3,
-                                            size: 20,
-                                          ),
-                                        ],
-                                      ),
-                                      onTap: () async {
-                                        final now = DateTime.now();
-                                        final initialDateTime =
-                                            sobrietyCustomStartMs != null
-                                            ? DateTime.fromMillisecondsSinceEpoch(
-                                                sobrietyCustomStartMs!,
-                                              )
-                                            : now.subtract(
-                                                const Duration(days: 7),
-                                              );
-                                        final picked =
-                                            await _showIOSDateTimePicker(
-                                              context,
-                                              initialDateTime,
-                                            );
-                                        if (picked != null && mounted) {
-                                          final ms =
-                                              picked.millisecondsSinceEpoch;
-                                          await _prefs?.setInt(
-                                            'sobriety_custom_start_ms',
-                                            ms,
-                                          );
-                                          setState(
-                                            () => sobrietyCustomStartMs = ms,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SettingsPageDescription(
-                                  p: p,
-                                  text:
-                                      'Were you already clean before installing? Set your actual start date here. This overrides automatic detection from your logs.'
-                                          .localized(context),
-                                ),
-                                const SizedBox(height: 12),
-                                SettingsGroup(
-                                  p: p,
-                                  title: 'Milestone Theme'.localized(context),
-                                  children: [
-                                    SettingsRow(
-                                      p: p,
-                                      icon: Icons.palette_rounded,
-                                      title: 'Theme Style'.localized(context),
-                                      subtitle: () {
-                                        final t = kMilestoneThemes.firstWhere(
-                                          (t) => t.id == sobrietyMilestoneTheme,
-                                          orElse: () => kMilestoneThemes.first,
-                                        );
-                                        return '${t.emoji} ${t.name.localized(context)}: ${t.description.localized(context)}';
-                                      }(),
-                                      color: p.orange,
-                                      trailing: Icon(
-                                        Icons.chevron_right_rounded,
-                                        color: p.text3,
-                                        size: 20,
-                                      ),
-                                      onTap: () => _openCategory(
-                                        'Milestone Theme',
-                                        parent: 'Sobriety Companion',
-                                      ),
-                                    ),
-                                    SettingsRow(
-                                      p: p,
-                                      icon: Icons.emoji_events_rounded,
-                                      title: 'View All Milestones'.localized(
-                                        context,
-                                      ),
-                                      subtitle:
-                                          'See all 21 milestones with descriptions from day 1 to 10 years.'
-                                              .localized(context),
-                                      color: p.orange,
-                                      trailing: Icon(
-                                        Icons.chevron_right_rounded,
-                                        color: p.text3,
-                                        size: 20,
-                                      ),
-                                      onTap: () => _openCategory(
-                                        'Milestones',
-                                        parent: 'Sobriety Companion',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: SobrietyCompanionSettingsPage(
+                              p: p,
+                              enableSobrietyMode: enableSobrietyMode,
+                              sobrietyResetType: sobrietyResetType,
+                              sobrietyCustomStartMs: sobrietyCustomStartMs,
+                              sobrietyMilestoneTheme: sobrietyMilestoneTheme,
+                              onEnableSobrietyModeChanged: (value) async {
+                                if (_prefs != null) {
+                                  await _prefs!.setBool(
+                                    'enable_sobriety_mode',
+                                    value,
+                                  );
+                                }
+                                setState(() => enableSobrietyMode = value);
+                              },
+                              onSobrietyResetTypeChanged: (value) async {
+                                if (_prefs != null) {
+                                  await _prefs!.setString(
+                                    'sobriety_reset_type',
+                                    value,
+                                  );
+                                }
+                                setState(() => sobrietyResetType = value);
+                              },
+                              onSobrietyCustomStartMsChanged: (value) async {
+                                if (value == null) {
+                                  await _prefs?.remove(
+                                    'sobriety_custom_start_ms',
+                                  );
+                                } else {
+                                  await _prefs?.setInt(
+                                    'sobriety_custom_start_ms',
+                                    value,
+                                  );
+                                }
+                                setState(() => sobrietyCustomStartMs = value);
+                              },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onSelectStartDate: (context, initial) =>
+                                  _showIOSDateTimePicker(context, initial),
+                            ),
                           ),
                         if (show('Trigger Analysis'))
                           SliverList(
