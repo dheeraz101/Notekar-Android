@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 import 'dart:math' as math;
@@ -292,6 +293,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool _betaTrack = false;
   bool obfuscateInRecents = false;
   bool showPersistentNotification = false;
+  bool enableNoteOnClick = false;
 
   String _vtRatio = '0 / 60+ clean';
   String _vtStatus = 'Undetected';
@@ -307,6 +309,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
       showPersistentNotification =
           _prefs?.getBool('show_persistent_notification') ?? false;
+      enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _dailyReminderEnabled =
@@ -1645,6 +1648,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
+        title: 'Note on Click',
+        subtitle:
+            'Tap a moment to view or edit its note, and long-press to select for duration.',
+        category: 'Moments',
+        icon: Icons.edit_note_rounded,
+        keywords: [
+          'note',
+          'click',
+          'tap',
+          'history',
+          'edit',
+          'select',
+          'long-press',
+        ],
+        kind: 'switch',
+        boolValue: enableNoteOnClick,
+        onBoolChanged: (bool value) async {
+          if (_prefs != null) {
+            await _prefs!.setBool('enable_note_on_click', value);
+          }
+          setState(() => enableNoteOnClick = value);
+        },
+        status: null,
+      ),
+      item(
         title: 'Extended Duration',
         subtitle: 'Show days, months, and years in time between moments',
         category: 'Moments',
@@ -1914,7 +1942,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
-        title: 'Persistent Control Panel',
+        title: 'Persistent Control',
         subtitle:
             'Show a sticky notification in the drawer to log check-in/out from lock screen',
         category: 'Logging',
@@ -4969,7 +4997,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   SettingsSwitchRow(
                                     p: p,
                                     icon: Icons.notification_important_rounded,
-                                    title: 'Persistent Control Panel',
+                                    title: 'Persistent Control',
                                     subtitle:
                                         'Show a sticky notification in the drawer to log check-in/out directly from the lock screen.',
                                     value: showPersistentNotification,
@@ -5056,7 +5084,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               SettingsBetaNote(
                                 p: p,
                                 text:
-                                    'The dashboard metrics and predictive insights are under active beta testing.'
+                                    'The current features on this page are under Beta stage.'
                                         .localized(context),
                                 onLearnMore: () => _showBetaInfoPopup(p),
                               ),
@@ -6299,12 +6327,29 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       widget.onConfirmDelete(value);
                                     },
                                   ),
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    title: 'Note on Click',
+                                    subtitle:
+                                        'Tap a moment to view or edit its note, and long-press to select for duration.',
+                                    color: p.accent,
+                                    value: enableNoteOnClick,
+                                    onChanged: (value) async {
+                                      if (_prefs != null) {
+                                        await _prefs!.setBool(
+                                          'enable_note_on_click',
+                                          value,
+                                        );
+                                      }
+                                      setState(() => enableNoteOnClick = value);
+                                    },
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Controls log spacing density and requires a safety confirmation before deleting history moments.',
+                                    'Controls log spacing density, tap actions, and delete confirmations for history moments.',
                               ),
 
                               SettingsGroup(
@@ -6722,7 +6767,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   GuideRow(
                                     p: p,
                                     icon: Icons.notification_important_rounded,
-                                    title: 'Persistent Control Panel',
+                                    title: 'Persistent Control',
                                     text:
                                         'Enable in Settings > Logging to show a low-priority, sticky control notification in the system drawer for instant checking IN/OUT from the lock screen.',
                                   ),
@@ -6893,7 +6938,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     question:
                                         'How do I log directly from the lock screen?',
                                     answer:
-                                        'Turn on "Persistent Control Panel" in Settings > Logging. A sticky, low-priority control card will appear in your notification drawer with quick actions to log IN, OUT, or write a quick note instantly.',
+                                        'Turn on "Persistent Control" in Settings > Logging. A sticky, low-priority control card will appear in your notification drawer with quick actions to log IN, OUT, or write a quick note instantly.',
                                   ),
                                 ],
                               ),
@@ -10263,18 +10308,72 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
   bool _loadingCommits = false;
   String? _commitsError;
   int _visibleCount = 10;
+  SharedPreferences? _prefs;
 
   @override
   void initState() {
     super.initState();
+    _initAndLoadCache();
+  }
+
+  Future<void> _initAndLoadCache() async {
+    try {
+      _prefs = await SharedPreferences.getInstance();
+      final cachedStr = _prefs?.getString('notekar.cached_commits');
+      if (cachedStr != null && cachedStr.isNotEmpty) {
+        final decoded = _deserializeCommits(cachedStr);
+        if (decoded.isNotEmpty && mounted) {
+          setState(() {
+            _commits = decoded;
+          });
+        }
+      }
+    } catch (_) {}
     _fetchCommits();
   }
 
+  String _serializeCommits(List<Map<String, dynamic>> commits) {
+    final list = commits.map((c) {
+      return {
+        'sha': c['sha'],
+        'message': c['message'],
+        'author': c['author'],
+        'date': (c['date'] as DateTime?)?.toIso8601String(),
+      };
+    }).toList();
+    return jsonEncode(list);
+  }
+
+  List<Map<String, dynamic>> _deserializeCommits(String jsonString) {
+    final decoded = jsonDecode(jsonString);
+    if (decoded is List) {
+      return decoded
+          .map((c) {
+            if (c is Map) {
+              final dateStr = c['date'] as String?;
+              return {
+                'sha': c['sha'] as String? ?? '',
+                'message': c['message'] as String? ?? '',
+                'author': c['author'] as String? ?? '',
+                'date': dateStr != null ? DateTime.tryParse(dateStr) : null,
+              };
+            }
+            return <String, dynamic>{};
+          })
+          .where((m) => m.isNotEmpty)
+          .toList();
+    }
+    return [];
+  }
+
   Future<void> _fetchCommits() async {
-    setState(() {
-      _loadingCommits = true;
-      _commitsError = null;
-    });
+    if (mounted) {
+      setState(() {
+        _loadingCommits =
+            (_commits == null); // Only show spinner if no cache exists
+        _commitsError = null;
+      });
+    }
     try {
       final list = await _updateService.fetchRecentCommits();
       if (mounted) {
@@ -10283,16 +10382,32 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
           _loadingCommits = false;
         });
       }
+      if (list != null && list.isNotEmpty) {
+        final cacheList = list.take(10).toList();
+        await _prefs?.setString(
+          'notekar.cached_commits',
+          _serializeCommits(cacheList),
+        );
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _commitsError = 'Failed to load repository activity'.localized(
-            context,
-          );
+          if (_commits == null) {
+            _commitsError = 'Failed to load repository activity'.localized(
+              context,
+            );
+          }
           _loadingCommits = false;
         });
       }
     }
+  }
+
+  void _onRefresh() {
+    setState(() {
+      _visibleCount = 10;
+    });
+    _fetchCommits();
   }
 
   @override
@@ -10307,7 +10422,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
         ),
       );
     }
-    if (_commitsError != null) {
+    if (_commitsError != null && (_commits == null || _commits!.isEmpty)) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(48),
@@ -10321,7 +10436,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
               ),
               const SizedBox(height: 16),
               PressableScale(
-                onTap: _fetchCommits,
+                onTap: _onRefresh,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -10369,13 +10484,16 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
       );
     }
 
+    final shownCount = math.min(_visibleCount, _commits!.length);
+    final hasMore = _commits!.length > shownCount;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Align(
           alignment: Alignment.center,
           child: PressableScale(
-            onTap: _fetchCommits,
+            onTap: _onRefresh,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               decoration: BoxDecoration(
@@ -10413,159 +10531,164 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
           ),
         ),
         const SizedBox(height: 20),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount:
-              math.min(_visibleCount, _commits!.length) +
-              (_commits!.length > math.min(_visibleCount, _commits!.length)
-                  ? 1
-                  : 0),
-          itemBuilder: (context, index) {
-            final shownCount = math.min(_visibleCount, _commits!.length);
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ...List.generate(shownCount, (index) {
+              final commit = _commits![index];
+              final sha = commit['sha'] as String;
+              final shortSha = sha.length > 7 ? sha.substring(0, 7) : sha;
+              final msg = commit['message'] as String;
+              final author = commit['author'] as String;
+              final date = commit['date'] as DateTime?;
 
-            if (index == shownCount) {
-              return PressableScale(
-                onTap: () {
-                  setState(() {
-                    if (_visibleCount == 10) {
-                      _visibleCount = 30;
-                    } else if (_visibleCount == 30) {
-                      _visibleCount = 60;
-                    } else {
-                      _visibleCount = 100;
-                    }
-                  });
-                },
+              String timeAgo = '';
+              if (date != null) {
+                final diff = DateTime.now().difference(date);
+                if (diff.inDays > 0) {
+                  timeAgo = '${diff.inDays}d ago';
+                } else if (diff.inHours > 0) {
+                  timeAgo = '${diff.inHours}h ago';
+                } else {
+                  timeAgo = '${diff.inMinutes}m ago';
+                }
+              }
+
+              return RepaintBoundary(
+                key: ValueKey(sha),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  height: 60,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: p.surface,
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(color: p.border),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Show More'.localized(context),
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            final commit = _commits![index];
-            final sha = commit['sha'] as String;
-            final shortSha = sha.length > 7 ? sha.substring(0, 7) : sha;
-            final msg = commit['message'] as String;
-            final author = commit['author'] as String;
-            final date = commit['date'] as DateTime?;
-
-            String timeAgo = '';
-            if (date != null) {
-              final diff = DateTime.now().difference(date);
-              if (diff.inDays > 0) {
-                timeAgo = '${diff.inDays}d ago';
-              } else if (diff.inHours > 0) {
-                timeAgo = '${diff.inHours}h ago';
-              } else {
-                timeAgo = '${diff.inMinutes}m ago';
-              }
-            }
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: BoxDecoration(
-                color: p.surface,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: p.border),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.commit_rounded,
-                      color: p.accent,
-                      size: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: p.accent.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.commit_rounded,
+                          color: p.accent,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              author,
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: p.surface3,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                shortSha,
-                                style: TextStyle(
-                                  color: p.text3,
-                                  fontSize: 9.5,
-                                  fontFamily: 'monospace',
+                            Row(
+                              children: [
+                                Text(
+                                  author,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 1.5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.surface3,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    shortSha,
+                                    style: TextStyle(
+                                      color: p.text3,
+                                      fontSize: 9.5,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  timeAgo,
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const Spacer(),
+                            const SizedBox(height: 3),
                             Text(
-                              timeAgo,
-                              style: TextStyle(color: p.text3, fontSize: 11),
+                              msg,
+                              style: TextStyle(
+                                color: p.text2,
+                                fontSize: 12.5,
+                                height: 1.35,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          msg,
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 12.5,
-                            height: 1.35,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            if (hasMore)
+              RepaintBoundary(
+                key: const ValueKey('commits_show_more_button'),
+                child: PressableScale(
+                  onTap: () {
+                    setState(() {
+                      if (_visibleCount == 10) {
+                        _visibleCount = 30;
+                      } else if (_visibleCount == 30) {
+                        _visibleCount = 60;
+                      } else {
+                        _visibleCount = 100;
+                      }
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: p.surface,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: p.border),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Show More'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                ],
+                ),
               ),
-            );
-          },
+          ],
         ),
         const SizedBox(height: 12),
         Center(
           child: Text(
-            'Showing ${math.min(_visibleCount, _commits!.length)} of ${_commits!.length} commits'
-                .localized(context),
+            'Showing $shownCount of ${_commits!.length} commits'.localized(
+              context,
+            ),
             style: TextStyle(
               color: p.text3,
               fontSize: 12,
