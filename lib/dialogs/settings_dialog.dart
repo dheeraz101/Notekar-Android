@@ -17,6 +17,7 @@ import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
+import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
@@ -4966,144 +4967,38 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Logging'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.dashboard_customize_outlined,
-                                    title: 'Dashboard',
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Dashboard',
-                                      parent: 'Logging',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Interactive summary dashboards, activity heatmaps, weekly trends, and intelligence insights.'
-                                        .localized(context),
-                              ),
-                              const SizedBox(height: 12),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Logging Controls',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.touch_app_rounded,
-                                    title: 'Capture',
-                                    status: defaultMode == 'single'
-                                        ? 'Single'
-                                        : 'Two-Way',
-                                    color: p.green,
-                                    onTap: () => _openCategory(
-                                      'Capture',
-                                      parent: 'Logging',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.history_rounded,
-                                    title: 'Moments'.localized(context),
-                                    status:
-                                        '${entries.length} ${'Logs'.localized(context)}',
-                                    color: p.orange,
-                                    onTap: () => _openCategory(
-                                      'Moments',
-                                      parent: 'Logging',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.notifications_active_outlined,
-                                    title: 'Reminders',
-                                    status: _getRemindersStatus(),
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Reminders',
-                                      parent: 'Logging',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'These settings define how moments are recorded and prepared for export.',
-                              ),
-                              const SizedBox(height: 12),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.self_improvement_rounded,
-                                    title: 'Sobriety Companion',
-                                    color: p.orange,
-                                    status: enableSobrietyMode ? 'On' : 'Off',
-                                    onTap: () => _openCategory(
-                                      'Sobriety Companion',
-                                      parent: 'Logging',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Track clean streaks, log relapses with mood and trigger tags, and view offline pattern analysis.',
-                              ),
-                              const SizedBox(height: 12),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Notification Panel',
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    icon: Icons.notification_important_rounded,
-                                    title: 'Persistent Control',
-                                    subtitle:
-                                        'Show a sticky notification in the drawer to log check-in/out directly from the lock screen.',
-                                    value: showPersistentNotification,
-                                    color: p.accent,
-                                    onChanged: (value) async {
-                                      if (_prefs != null) {
-                                        await _prefs!.setBool(
-                                          'show_persistent_notification',
-                                          value,
-                                        );
-                                      }
-                                      setState(
-                                        () =>
-                                            showPersistentNotification = value,
+                          SliverToBoxAdapter(
+                            child: LoggingSettingsPage(
+                              p: p,
+                              defaultMode: defaultMode,
+                              entriesCount: entries.length,
+                              remindersStatus: _getRemindersStatus(),
+                              enableSobrietyMode: enableSobrietyMode,
+                              showPersistentNotification:
+                                  showPersistentNotification,
+                              onShowPersistentNotificationChanged:
+                                  (value) async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setBool(
+                                        'show_persistent_notification',
+                                        value,
                                       );
-                                      try {
-                                        await const MethodChannel(
-                                          'notekar/files',
-                                        ).invokeMethod<void>(
-                                          'setPersistentControlPanel',
-                                          {'enabled': value},
-                                        );
-                                      } catch (_) {}
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Enables quick, low-priority control notification in the system drawer for convenience.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                                    }
+                                    setState(
+                                      () => showPersistentNotification = value,
+                                    );
+                                    try {
+                                      await const MethodChannel(
+                                        'notekar/files',
+                                      ).invokeMethod<void>(
+                                        'setPersistentControlPanel',
+                                        {'enabled': value},
+                                      );
+                                    } catch (_) {}
+                                  },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
                           ),
                         if (show('Dashboard'))
                           SliverList(
