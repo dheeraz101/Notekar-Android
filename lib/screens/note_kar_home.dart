@@ -2115,11 +2115,30 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _openExternalLink(String url) async {
-    try {
-      await _fileChannel.invokeMethod<void>('openUrl', {'url': url});
-    } catch (_) {
-      await Clipboard.setData(ClipboardData(text: url));
-      if (mounted) _showToast('Link copied');
+    if (!mounted) return;
+    final confirmed = await showGeneralDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close external link warning',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => ActionConfirmSheet(
+        p: p,
+        title: 'Leave NoteKar?'.localized(context),
+        message:
+            '${'You are now going out of the app to the external link:'.localized(context)}\n\n$url',
+        confirmLabel: 'Open'.localized(context),
+        icon: Icons.open_in_new_rounded,
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _fileChannel.invokeMethod<void>('openUrl', {'url': url});
+      } catch (_) {
+        await Clipboard.setData(ClipboardData(text: url));
+        if (mounted) _showToast('Link copied');
+      }
     }
   }
 

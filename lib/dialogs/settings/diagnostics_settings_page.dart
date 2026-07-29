@@ -32,6 +32,7 @@ class DiagnosticsSettingsPage extends StatefulWidget {
     required this.networkLogs,
     required this.loadingNetworkLogs,
     required this.onClearNetworkLogs,
+    required this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -50,6 +51,7 @@ class DiagnosticsSettingsPage extends StatefulWidget {
   final List<NetworkLogEntry> networkLogs;
   final bool loadingNetworkLogs;
   final VoidCallback onClearNetworkLogs;
+  final VoidCallback onLearnMoreBeta;
 
   @override
   State<DiagnosticsSettingsPage> createState() =>
@@ -335,6 +337,13 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
           text: 'Technical stats about your device and the Adaptive Engine.'
               .localized(context),
         ),
+        SettingsBetaNote(
+          p: widget.p,
+          text: 'The current features on this page are under Beta stage.'
+              .localized(context),
+          onLearnMore: widget.onLearnMoreBeta,
+        ),
+        const SizedBox(height: spacing48),
       ],
     );
   }

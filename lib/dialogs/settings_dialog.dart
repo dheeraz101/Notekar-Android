@@ -4788,6 +4788,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               networkLogs: _networkLogs,
                               loadingNetworkLogs: _loadingNetworkLogs,
                               onClearNetworkLogs: _clearNetworkLogs,
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Device Health'))
@@ -4811,6 +4812,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               networkLogs: _networkLogs,
                               loadingNetworkLogs: _loadingNetworkLogs,
                               onClearNetworkLogs: _clearNetworkLogs,
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Network Monitor'))
@@ -4834,6 +4836,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               networkLogs: _networkLogs,
                               loadingNetworkLogs: _loadingNetworkLogs,
                               onClearNetworkLogs: _clearNetworkLogs,
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Privacy Policy'))

@@ -135,18 +135,8 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                         decoration: BoxDecoration(
                           color: selected
                               ? widget.p.accent
-                              : available
-                              ? widget.p.surface2.withValues(alpha: 0.5)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: selected
-                                ? widget.p.accent
-                                : available
-                                ? widget.p.border.withValues(alpha: 0.3)
-                                : Colors.transparent,
-                            width: 1.2,
-                          ),
+                          shape: BoxShape.circle,
                           boxShadow: selected
                               ? [
                                   BoxShadow(
@@ -173,7 +163,9 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                                 fontSize: 14,
                                 fontWeight: selected
                                     ? FontWeight.w800
-                                    : FontWeight.w600,
+                                    : (available
+                                          ? FontWeight.w700
+                                          : FontWeight.w500),
                               ),
                             ),
                             const SizedBox(height: 3),
