@@ -11,6 +11,7 @@ import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
+import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
@@ -3396,58 +3397,6 @@ ${stackTrace ?? 'No stack trace provided.'}
     );
   }
 
-  Widget _appIconsPage(Palette p) {
-    const icons = {
-      'default': ('Default', 'icon-maskable-512.png'),
-      'black': ('Black', 'app_icons/black.png'),
-      'blue': ('Blue', 'app_icons/blue.png'),
-      'gold': ('Gold', 'app_icons/gold.png'),
-      'green': ('Green', 'app_icons/green.png'),
-      'orange': ('Orange', 'app_icons/orange.png'),
-      'red': ('Red', 'app_icons/red.png'),
-    };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: spacing12),
-        SizedBox(
-          height: 125, // Gallery height
-          child: RepaintBoundary(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: spacing16),
-              itemCount: icons.length,
-              itemBuilder: (context, index) {
-                final entry = icons.entries.elementAt(index);
-                return Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: AppIconChoice(
-                    p: p,
-                    label: entry.value.$1,
-                    asset: entry.value.$2,
-                    active: appIconStyle == entry.key,
-                    onTap: () {
-                      if (entry.key == appIconStyle) return;
-                      NotekarHaptics.selection('standard');
-                      setState(() => appIconStyle = entry.key);
-                      unawaited(widget.onAppIconStyle(entry.key));
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        SettingsPageDescription(
-          p: p,
-          showIcon: true,
-          text:
-              'App Icons change the Android launcher icon. Note: Some launchers may take a few seconds to update.',
-        ),
-      ],
-    );
-  }
-
   Future<void> _confirmResetAll(Palette p) async {
     final yes = await showGeneralDialog<bool>(
       context: context,
@@ -4412,12 +4361,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
                         if (show('App Icons'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _appIconsPage(p),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: AppIconsSettingsPage(
+                              p: p,
+                              appIconStyle: appIconStyle,
+                              onAppIconStyleChanged: (value) {
+                                setState(() => appIconStyle = value);
+                                unawaited(widget.onAppIconStyle(value));
+                              },
                             ),
                           ),
                         if (show('Logging'))
