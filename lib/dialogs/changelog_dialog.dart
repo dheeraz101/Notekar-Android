@@ -24,6 +24,12 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.7',
+      date: 'July 29, 2026',
+      highlights: ['Beta testing and feedback build.'],
+      items: ['Fixed the Download system #4 App download'],
+    ),
+    (
       version: '5.1.6',
       date: 'July 29, 2026',
       highlights: [

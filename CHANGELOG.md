@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.7] - 2026-07-29 (versionCode 27) [BR]
+
+### Improvements
+
+- Fixed the Download system #4 App download
+
 ## [5.1.6] - 2026-07-29 (versionCode 26) [BR]
 
 ### What's New
