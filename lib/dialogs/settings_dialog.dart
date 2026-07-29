@@ -3210,67 +3210,88 @@ ${stackTrace ?? 'No stack trace provided.'}
                           SliverList(
                             delegate: SliverChildListDelegate([
                               const SizedBox(height: spacing8),
-                              if (_settingsQuery.trim().isEmpty &&
-                                  _recentSearches.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    8,
-                                    20,
-                                    12,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'RECENT SEARCHES',
-                                        style: TextStyle(
-                                          color: p.text3,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.2,
-                                        ),
+                              if (_settingsQuery.trim().isEmpty) ...[
+                                if (_recentSearches.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 64),
+                                    child: HIGEmptyState(
+                                      p: p,
+                                      icon: Icons.search_rounded,
+                                      title: 'Search Settings'.localized(
+                                        context,
                                       ),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          final prefs =
-                                              await SharedPreferences.getInstance();
-                                          await prefs.remove(
-                                            'recent_settings_searches',
-                                          );
-                                          setState(() => _recentSearches = []);
-                                        },
-                                        child: Text(
-                                          'Clear',
+                                      message:
+                                          'Type to find themes, notifications, security, diagnostic logs, and capture mode configurations.'
+                                              .localized(context),
+                                      compact: true,
+                                    ),
+                                  )
+                                else ...[
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      8,
+                                      20,
+                                      12,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'RECENT SEARCHES',
                                           style: TextStyle(
-                                            color: p.accent,
+                                            color: p.text3,
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.2,
                                           ),
                                         ),
-                                      ),
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final prefs =
+                                                await SharedPreferences.getInstance();
+                                            await prefs.remove(
+                                              'recent_settings_searches',
+                                            );
+                                            setState(
+                                              () => _recentSearches = [],
+                                            );
+                                          },
+                                          child: Text(
+                                            'Clear',
+                                            style: TextStyle(
+                                              color: p.accent,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SettingsGroup(
+                                    p: p,
+                                    insetDividers: true,
+                                    children: [
+                                      for (final term in _recentSearches)
+                                        SettingsRow(
+                                          p: p,
+                                          icon: Icons.history_rounded,
+                                          title: term,
+                                          color: p.text3,
+                                          onTap: () {
+                                            _settingsSearchController.text =
+                                                term;
+                                            setState(
+                                              () => _settingsQuery = term,
+                                            );
+                                            _saveRecentSearch(term);
+                                          },
+                                        ),
                                     ],
                                   ),
-                                ),
-                                SettingsGroup(
-                                  p: p,
-                                  insetDividers: true,
-                                  children: [
-                                    for (final term in _recentSearches)
-                                      SettingsRow(
-                                        p: p,
-                                        icon: Icons.history_rounded,
-                                        title: term,
-                                        color: p.text3,
-                                        onTap: () {
-                                          _settingsSearchController.text = term;
-                                          setState(() => _settingsQuery = term);
-                                          _saveRecentSearch(term);
-                                        },
-                                      ),
-                                  ],
-                                ),
+                                ],
                               ] else if (_settingsQuery.trim().isNotEmpty) ...[
                                 SettingsGroup(
                                   p: p,
