@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
-import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
@@ -26,13 +25,14 @@ import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/reminders_settings_page.dart';
+import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
 import 'package:notekar/dialogs/settings/security_privacy_details_sheets.dart';
+import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -42,7 +42,6 @@ import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
-import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -567,179 +566,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _reminderMessageController.text = initialText;
     });
     _openCategory('Reminder Message');
-  }
-
-  Widget _reminderMessagePage(Palette p) {
-    if (_editingReminderType == null) return const SizedBox.shrink();
-
-    final type = _editingReminderType!;
-
-    final prefKey = type == 'daily'
-        ? 'reminder_daily_body'
-        : (type == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body');
-    final recentsKey = '${prefKey}_recents';
-    final recents = _prefs?.getStringList(recentsKey) ?? <String>[];
-
-    final currentValue = type == 'daily'
-        ? _dailyReminderBody
-        : (type == 'weekly' ? _weeklyReminderBody : _monthlyReminderBody);
-    recents.removeWhere((item) => item.trim().isEmpty || item == currentValue);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      'Reminder Message'.localized(context).toUpperCase(),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _reminderMessageController,
-                    focusNode: _reminderMessageFocusNode,
-                    maxLines: 1,
-                    maxLength: 60,
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Enter reminder message...'.localized(context),
-                      hintStyle: TextStyle(color: p.text3),
-                      counterText: '',
-                      filled: true,
-                      fillColor: p.surface2,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _reminderMessageFocusNode.hasFocus
-                              ? Icons.check_rounded
-                              : Icons.edit_rounded,
-                          color: _reminderMessageFocusNode.hasFocus
-                              ? p.accent
-                              : p.text3,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          if (_reminderMessageFocusNode.hasFocus) {
-                            _reminderMessageFocusNode.unfocus();
-                          } else {
-                            _reminderMessageFocusNode.requestFocus();
-                          }
-                        },
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: p.accent, width: 1.5),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: p.border.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  if (recents.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        'Recent Messages'.localized(context).toUpperCase(),
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SettingsGroup(
-                      p: p,
-                      insetDividers: true,
-                      children: [
-                        for (final item in recents.take(5))
-                          SettingsRow(
-                            p: p,
-                            icon: Icons.history_rounded,
-                            title: item,
-                            color: p.text3,
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              _reminderMessageController.text = item;
-                            },
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16, top: 16),
-            child: FilledButton(
-              onPressed: () async {
-                final newText = _reminderMessageController.text.trim();
-                if (newText != currentValue) {
-                  if (currentValue.trim().isNotEmpty &&
-                      currentValue != 'Time to log a moment!') {
-                    recents.insert(0, currentValue);
-                    final uniqueRecents = recents.toSet().toList();
-                    await _prefs?.setStringList(
-                      recentsKey,
-                      uniqueRecents.take(5).toList(),
-                    );
-                  }
-
-                  setState(() {
-                    if (type == 'daily') _dailyReminderBody = newText;
-                    if (type == 'weekly') _weeklyReminderBody = newText;
-                    if (type == 'monthly') _monthlyReminderBody = newText;
-                  });
-                  await _prefs?.setString(prefKey, newText);
-                  await _syncReminder(type);
-                }
-                _popCategory();
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: p.accent,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Text(
-                'Save'.localized(context),
-                style: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<DateTime?> _showIOSDateTimePicker(
@@ -2518,203 +2344,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
-  Widget _buildSobrietyAnalyticsCard(Palette p) {
-    final relapseMoments = widget.entriesNotifier.value
-        .where((e) => e.note.contains('#relapse'))
-        .toList();
-    if (relapseMoments.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: spacing16,
-          vertical: spacing8,
-        ),
-        padding: const EdgeInsets.all(spacing16),
-        decoration: BoxDecoration(
-          color: p.surface2,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: p.border),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.spa_rounded, color: p.accent, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              'No relapses recorded yet!'.localized(context),
-              style: TextStyle(
-                color: p.text,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Your clean streak is active and running.'.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 12),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final Map<String, int> triggerCounts = {};
-    final Map<String, int> moodCounts = {};
-    final Map<int, int> hourCounts = {};
-
-    for (var m in relapseMoments) {
-      final note = m.note;
-      final triggerMatch = RegExp(r'#trigger:(\w+)').firstMatch(note);
-      if (triggerMatch != null) {
-        final t = triggerMatch.group(1)!;
-        triggerCounts[t] = (triggerCounts[t] ?? 0) + 1;
-      }
-      final moodMatch = RegExp(r'#mood:(\w+)').firstMatch(note);
-      if (moodMatch != null) {
-        final md = moodMatch.group(1)!;
-        moodCounts[md] = (moodCounts[md] ?? 0) + 1;
-      }
-      final dt = DateTime.fromMillisecondsSinceEpoch(m.timestamp);
-      final hour = dt.hour;
-      hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
-    }
-
-    String topTrigger = 'None';
-    int maxTriggerCount = 0;
-    triggerCounts.forEach((k, v) {
-      if (v > maxTriggerCount) {
-        maxTriggerCount = v;
-        topTrigger = k.replaceAll('_', ' ').toUpperCase();
-      }
-    });
-
-    String topMood = 'None';
-    int maxMoodCount = 0;
-    moodCounts.forEach((k, v) {
-      if (v > maxMoodCount) {
-        maxMoodCount = v;
-        topMood = k.toUpperCase();
-      }
-    });
-
-    final Map<String, int> rangeCounts = {
-      'Morning': 0,
-      'Afternoon': 0,
-      'Evening': 0,
-      'Night': 0,
-    };
-    hourCounts.forEach((h, count) {
-      if (h >= 5 && h < 12) {
-        rangeCounts['Morning'] = rangeCounts['Morning']! + count;
-      } else if (h >= 12 && h < 17) {
-        rangeCounts['Afternoon'] = rangeCounts['Afternoon']! + count;
-      } else if (h >= 17 && h < 21) {
-        rangeCounts['Evening'] = rangeCounts['Evening']! + count;
-      } else {
-        rangeCounts['Night'] = rangeCounts['Night']! + count;
-      }
-    });
-
-    String peakTimeRange = 'Night';
-    int maxRangeCount = 0;
-    rangeCounts.forEach((k, v) {
-      if (v > maxRangeCount) {
-        maxRangeCount = v;
-        peakTimeRange = k;
-      }
-    });
-
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: spacing16,
-        vertical: spacing8,
-      ),
-      padding: const EdgeInsets.all(spacing16),
-      decoration: BoxDecoration(
-        color: p.surface2,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: p.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.analytics_rounded, color: p.orange, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Sobriety Trigger Analysis'.localized(context),
-                style: TextStyle(
-                  color: p.text,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: _buildMetricTile(
-                  p,
-                  'Total Relapses',
-                  '${relapseMoments.length}',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(child: _buildMetricTile(p, 'Top Trigger', topTrigger)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(child: _buildMetricTile(p, 'Top Mood', topMood)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildMetricTile(p, 'Peak Risk Window', peakTimeRange),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricTile(Palette p, String title, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: p.surface3,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: p.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title.localized(context).toUpperCase(),
-            style: TextStyle(
-              color: p.text2,
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value.localized(context),
-            style: TextStyle(
-              color: p.text,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showBetaInfoPopup(Palette p) {
     showGeneralDialog<void>(
       context: context,
@@ -3171,207 +2800,6 @@ ${stackTrace ?? 'No stack trace provided.'}
     _openCategory('Feedback');
   }
 
-  Widget _updateCenterPage(Palette p) {
-    return UpdateCenterView(
-      p: p,
-      appVersion: appVersion,
-      enableTranslucency: enableTranslucency,
-      reduceMotion: reduceMotion,
-      onOpenLink: widget.onOpenLink,
-      prefs: _prefs,
-      onCheckUpdates: _runCheckUpdates,
-      updateInfo: updateInfo,
-      checkingUpdates: checkingUpdates,
-      updateStatus: updateStatus,
-      currentBuildChannel: _currentBuildChannel,
-      onLearnMoreBeta: () => _showBetaInfoPopup(p),
-    );
-  }
-
-  Widget _buildChoosePage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SettingsGroup(
-          p: p,
-          insetDividers: true,
-          children: [
-            SettingsRow(
-              p: p,
-              icon: Icons.check_circle_outline_rounded,
-              title: 'Stable Build',
-              subtitle: 'Recommended for standard users.'.localized(context),
-              trailing: !_betaTrack
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                  : const SizedBox.shrink(),
-              onTap: () => _saveTrackPreference(false),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.track_changes_rounded,
-              title: 'Beta Build',
-              subtitle: 'Early access to active development features.'
-                  .localized(context),
-              trailing: _betaTrack
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                  : const SizedBox.shrink(),
-              onTap: () => _saveTrackPreference(true),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 5, 20, 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'
-                    .localized(context),
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 13,
-                  height: 1.45,
-                  letterSpacing: -0.05,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      '1.',
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Switching to the Stable Build track will fetch the last released stable build and show the update.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      '2.',
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Switching to the Beta Build track will fetch the last compiled beta build and show the update.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      '3.',
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'If in a Beta build and switched to Stable now, you will only receive Stable releases when a higher version is published.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      '4.',
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'If in a Stable build and switched to Beta now, you will receive upcoming Beta releases immediately as they are published.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 13,
-                        height: 1.45,
-                        letterSpacing: -0.05,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        SettingsBetaNote(
-          p: p,
-          text: 'The features on this track are under active beta testing.'
-              .localized(context),
-          onLearnMore: () => _showBetaInfoPopup(p),
-        ),
-        const SizedBox(height: spacing48),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = paletteFor(
@@ -3438,7 +2866,37 @@ ${stackTrace ?? 'No stack trace provided.'}
             child: RepaintBoundary(
               key: ValueKey('container-${category ?? 'root'}'),
               child: category == 'Reminder Message'
-                  ? _reminderMessagePage(p)
+                  ? ReminderMessagePage(
+                      p: p,
+                      editingReminderType: _editingReminderType ?? 'daily',
+                      currentValue: _editingReminderType == 'daily'
+                          ? _dailyReminderBody
+                          : (_editingReminderType == 'weekly'
+                                ? _weeklyReminderBody
+                                : _monthlyReminderBody),
+                      recents:
+                          _prefs?.getStringList(
+                            '${_editingReminderType == 'daily' ? 'reminder_daily_body' : (_editingReminderType == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body')}_recents',
+                          ) ??
+                          <String>[],
+                      onSave: (type, newText) async {
+                        setState(() {
+                          if (type == 'daily') _dailyReminderBody = newText;
+                          if (type == 'weekly') _weeklyReminderBody = newText;
+                          if (type == 'monthly') _monthlyReminderBody = newText;
+                        });
+                        await _prefs?.setString(
+                          type == 'daily'
+                              ? 'reminder_daily_body'
+                              : (type == 'weekly'
+                                    ? 'reminder_weekly_body'
+                                    : 'reminder_monthly_body'),
+                          newText,
+                        );
+                        await _syncReminder(type);
+                      },
+                      onPop: _popCategory,
+                    )
                   : CustomScrollView(
                       key: ValueKey('scroll-${category ?? 'root'}'),
                       controller: category == null ? _activeController : null,
@@ -4137,66 +3595,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Dashboard'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.'
-                                        .localized(context),
-                              ),
-                              AnomalyAlertCard(
-                                p: p,
-                                entries: entries,
-                                onLogNow: () =>
-                                    Navigator.of(context).pop('log'),
-                              ),
-                              if (entries.isNotEmpty &&
-                                  DateTime.now()
-                                          .difference(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                              entries.first.timestamp,
-                                            ),
-                                          )
-                                          .inHours >=
-                                      48)
-                                const SizedBox(height: 6),
-                              if (enableSobrietyMode) ...[
-                                _buildSobrietyAnalyticsCard(p),
-                                const SizedBox(height: 6),
-                              ],
-                              _buildDashboardSectionHeader(
-                                p,
-                                Icons.analytics_outlined,
-                                'Real-time Metrics',
-                              ),
-                              ActivitySummaryCard(p: p, entries: entries),
-                              const SizedBox(height: 8),
-                              _buildDashboardSectionHeader(
-                                p,
-                                Icons.trending_up_rounded,
-                                'Habit Frequency & Trends',
-                              ),
-                              ActivityTrendsCard(p: p, entries: entries),
-                              const SizedBox(height: 6),
-                              ActivityHeatmapCard(p: p, entries: entries),
-                              const SizedBox(height: 8),
-                              _buildDashboardSectionHeader(
-                                p,
-                                Icons.insights_rounded,
-                                'Correlation Intelligence',
-                              ),
-                              IntelligentInsightsCard(p: p, entries: entries),
-                              SettingsBetaNote(
-                                p: p,
-                                text:
-                                    'The current features on this page are under Beta stage.'
-                                        .localized(context),
-                                onLearnMore: () => _showBetaInfoPopup(p),
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: SettingsDashboardPage(
+                              p: p,
+                              entries: entries,
+                              enableSobrietyMode: enableSobrietyMode,
+                              onLogNow: () => Navigator.of(context).pop('log'),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Capture'))
                           SliverToBoxAdapter(
@@ -4592,398 +3998,49 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Trigger Analysis'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Offline analysis of your logged relapse moments. No data leaves your device.',
-                              ),
-                              _buildSobrietyAnalyticsCard(p),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: TriggerAnalysisPage(p: p, entries: entries),
                           ),
                         if (show('Milestone Theme'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Choose the narrative style for your milestone names. Each theme is psychologically curated to match a different self-image and motivation style.',
-                              ),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  for (final theme in kMilestoneThemes)
-                                    SettingsRow(
-                                      p: p,
-                                      title: '${theme.emoji} ${theme.name}',
-                                      subtitle: theme.description,
-                                      color: p.orange,
-                                      trailing:
-                                          sobrietyMilestoneTheme == theme.id
-                                          ? Icon(
-                                              Icons.check_circle_rounded,
-                                              color: p.orange,
-                                              size: 20,
-                                            )
-                                          : Icon(
-                                              Icons.circle_outlined,
-                                              color: p.text3,
-                                              size: 20,
-                                            ),
-                                      onTap: () async {
-                                        await _prefs?.setString(
-                                          'sobriety_milestone_theme',
-                                          theme.id,
-                                        );
-                                        setState(
-                                          () =>
-                                              sobrietyMilestoneTheme = theme.id,
-                                        );
-                                      },
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: MilestoneThemePage(
+                              p: p,
+                              sobrietyMilestoneTheme: sobrietyMilestoneTheme,
+                              onThemeChanged: (themeId) async {
+                                await _prefs?.setString(
+                                  'sobriety_milestone_theme',
+                                  themeId,
+                                );
+                                setState(
+                                  () => sobrietyMilestoneTheme = themeId,
+                                );
+                              },
+                            ),
                           ),
                         if (show('Milestones'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'All 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. Names shown in your current theme.',
-                              ),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  for (final milestone in kSobrietyMilestones)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: spacing16,
-                                        vertical: spacing12,
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            width: 52,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: p.orange.withValues(
-                                                alpha: 0.12,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  milestone.days.toString(),
-                                                  style: TextStyle(
-                                                    color: p.orange,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w900,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                                Text(
-                                                  'DAYS',
-                                                  style: TextStyle(
-                                                    color: p.orange.withValues(
-                                                      alpha: 0.7,
-                                                    ),
-                                                    fontSize: 8,
-                                                    fontWeight: FontWeight.w700,
-                                                    letterSpacing: 0.5,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  getMilestoneName(
-                                                    milestone,
-                                                    sobrietyMilestoneTheme,
-                                                  ),
-                                                  style: TextStyle(
-                                                    color: p.text,
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w800,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  milestone.whyItMatters,
-                                                  style: TextStyle(
-                                                    color: p.text2,
-                                                    fontSize: 11,
-                                                    height: 1.4,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  getMilestoneFlavor(
-                                                    milestone,
-                                                    sobrietyMilestoneTheme,
-                                                  ),
-                                                  style: TextStyle(
-                                                    color: p.orange.withValues(
-                                                      alpha: 0.8,
-                                                    ),
-                                                    fontSize: 10,
-                                                    fontStyle: FontStyle.italic,
-                                                    height: 1.4,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
-                          ),
-                        if (show('Search Notes')) ...[
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: SliverStickyHeaderDelegate(
-                              height: 80,
-                              child: Container(
-                                color: p.surface.withValues(
-                                  alpha:
-                                      !reduceMotion &&
-                                          enableTranslucency &&
-                                          AdaptiveEngine().supportsBlur
-                                      ? 0.65
-                                      : 1.0,
-                                ),
-                                padding: const EdgeInsets.fromLTRB(
-                                  spacing16,
-                                  spacing8,
-                                  spacing16,
-                                  spacing12,
-                                ),
-                                child: SearchNotesBox(
-                                  p: p,
-                                  controller: _settingsSearchController,
-                                  onChanged: (value) =>
-                                      setState(() => _settingsQuery = value),
-                                  onClear: () => setState(() {
-                                    _settingsSearchController.clear();
-                                    _settingsQuery = '';
-                                  }),
-                                ),
-                              ),
+                          SliverToBoxAdapter(
+                            child: MilestonesPage(
+                              p: p,
+                              sobrietyMilestoneTheme: sobrietyMilestoneTheme,
                             ),
                           ),
-                          if (_settingsQuery.trim().isEmpty)
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  20,
-                                  8,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'ALL NOTES',
-                                      style: TextStyle(
-                                        color: p.text3,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Text(
-                                      '${entries.where((e) => e.note.isNotEmpty).length} items',
-                                      style: TextStyle(
-                                        color: p.text3,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ...() {
-                            final notes = entries
-                                .where((e) => e.note.isNotEmpty)
-                                .where((e) {
-                                  final q = _settingsQuery.trim().toLowerCase();
-                                  if (q.isEmpty) return true;
-                                  return e.note.toLowerCase().contains(q) ||
-                                      datePretty(e.timestamp).contains(q) ||
-                                      timeOnly(e.timestamp).contains(q);
-                                })
-                                .toList();
-
-                            if (notes.isEmpty) {
-                              return [
-                                SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 48),
-                                    child: HIGEmptyState(
-                                      p: p,
-                                      icon: Icons.speaker_notes_off_rounded,
-                                      title: 'No Notes Found',
-                                      message: _settingsQuery.isEmpty
-                                          ? 'Capture your first note by holding the clock.'
-                                          : 'No notes match "${_settingsQuery.trim()}".',
-                                      compact: true,
-                                    ),
-                                  ),
-                                ),
-                              ];
-                            }
-
-                            return [
-                              SliverPadding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  spacing16,
-                                  spacing4,
-                                  spacing16,
-                                  spacing16,
-                                ),
-                                sliver: SliverList(
-                                  delegate: SliverChildBuilderDelegate((
-                                    context,
-                                    index,
-                                  ) {
-                                    if (index >= notes.length) return null;
-                                    final entry = notes[index];
-
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: compactHistory ? 10 : 16,
-                                      ),
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(
-                                          spacing16,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: p.surface2,
-                                          borderRadius: BorderRadius.circular(
-                                            32,
-                                          ),
-                                          border: Border.all(
-                                            color: p.border.withValues(
-                                              alpha: 0.6,
-                                            ),
-                                            width: 0.8,
-                                          ),
-                                          boxShadow: p.name == 'amoled'
-                                              ? null
-                                              : [
-                                                  BoxShadow(
-                                                    color: Colors.black
-                                                        .withValues(
-                                                          alpha: 0.04,
-                                                        ),
-                                                    blurRadius: 10,
-                                                    offset: const Offset(0, 4),
-                                                  ),
-                                                ],
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 4,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: momentColor(
-                                                      p,
-                                                      entry.type,
-                                                    ).withValues(alpha: 0.12),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    entry.type.toUpperCase(),
-                                                    style: TextStyle(
-                                                      color: momentColor(
-                                                        p,
-                                                        entry.type,
-                                                      ),
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w900,
-                                                      letterSpacing: 0.5,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 10),
-                                                Expanded(
-                                                  child: Text(
-                                                    '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
-                                                    style: TextStyle(
-                                                      color: p.text3,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      fontFeatures: const [
-                                                        FontFeature.tabularFigures(),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 12),
-                                            Text(
-                                              entry.note,
-                                              style: TextStyle(
-                                                color: p.text,
-                                                fontSize: 16,
-                                                height: 1.45,
-                                                fontWeight: FontWeight.w500,
-                                                letterSpacing: -0.2,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }, childCount: notes.length),
-                                ),
-                              ),
-                            ];
-                          }(),
-                        ],
+                        if (show('Search Notes'))
+                          ...SearchNotesSettingsPage.buildSlivers(
+                            context: context,
+                            p: p,
+                            entries: entries,
+                            settingsQuery: _settingsQuery,
+                            onQueryChanged: (value) =>
+                                setState(() => _settingsQuery = value),
+                            onClearQuery: () => setState(() {
+                              _settingsSearchController.clear();
+                              _settingsQuery = '';
+                            }),
+                            settingsSearchController: _settingsSearchController,
+                            compactHistory: compactHistory,
+                            reduceMotion: reduceMotion,
+                            enableTranslucency: enableTranslucency,
+                          ),
                         if (show('Guides'))
                           SliverList(
                             delegate: SliverChildListDelegate([
@@ -5298,13 +4355,30 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ]),
                           ),
                         if (show('Update Center'))
-                          SliverToBoxAdapter(child: _updateCenterPage(p)),
+                          SliverToBoxAdapter(
+                            child: UpdateCenterView(
+                              p: p,
+                              appVersion: appVersion,
+                              enableTranslucency: enableTranslucency,
+                              reduceMotion: reduceMotion,
+                              onOpenLink: widget.onOpenLink,
+                              prefs: _prefs,
+                              onCheckUpdates: _runCheckUpdates,
+                              updateInfo: updateInfo,
+                              checkingUpdates: checkingUpdates,
+                              updateStatus: updateStatus,
+                              currentBuildChannel: _currentBuildChannel,
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
+                          ),
                         if (show('Build Choose'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              _buildChoosePage(p),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: BuildTrackSelectPage(
+                              p: p,
+                              betaTrack: _betaTrack,
+                              onSaveTrackPreference: _saveTrackPreference,
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Commits'))
                           SliverToBoxAdapter(
@@ -5321,160 +4395,21 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Updates & Notices'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.system_update_outlined,
-                                    title: 'Software Update',
-                                    color: p.text2,
-                                    status: null,
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (checkingUpdates)
-                                          const CupertinoActivityIndicator(
-                                            radius: 6,
-                                            color: Colors.grey,
-                                          )
-                                        else if (updateInfo != null)
-                                          Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  (updateInfo!.isSecurity ==
-                                                          true ||
-                                                      updateInfo!.isImportant ==
-                                                          true)
-                                                  ? p.red
-                                                  : p.orange,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          )
-                                        else
-                                          Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: BoxDecoration(
-                                              color: p.green,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                        const SizedBox(width: spacing8),
-                                        Icon(
-                                          Icons.chevron_right_rounded,
-                                          color: p.text3,
-                                          size: 20,
-                                        ),
-                                      ],
-                                    ),
-                                    onTap: () => _openCategory(
-                                      'Update Center',
-                                      parent: 'Updates & Notices',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.track_changes_rounded,
-                                    title: 'Build Channel',
-                                    color: p.accent,
-                                    status: _betaTrack
-                                        ? 'Beta'.localized(context)
-                                        : 'Stable'.localized(context),
-                                    onTap: () => _openCategory(
-                                      'Build Choose',
-                                      parent: 'Updates & Notices',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Keep NoteKar up to date with the latest features and security patches.'
-                                        .localized(context),
-                              ),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'App Notices',
-                                    color: p.accent,
-                                    value: remoteNotices,
-                                    onChanged: (value) {
-                                      setState(() => remoteNotices = value);
-                                      widget.onRemoteNotices(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Checks for official announcement notices and bug fix announcements.'
-                                        .localized(context),
-                              ),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Release Notes & History',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.auto_awesome_rounded,
-                                    title: "What's New",
-                                    color: p.orange,
-                                    status: 'Recent'.localized(context),
-                                    onTap: () => _openCategory(
-                                      "What's New",
-                                      parent: 'Updates & Notices',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.history_edu_rounded,
-                                    title: 'Changelog',
-                                    color: p.green,
-                                    status: 'History'.localized(context),
-                                    onTap: () => _openCategory(
-                                      'Changelog',
-                                      parent: 'Updates & Notices',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.history_rounded,
-                                    title: 'Commits',
-                                    color: p.accent,
-                                    status: 'Activity'.localized(context),
-                                    onTap: () => _openCategory(
-                                      'Commits',
-                                      parent: 'Updates & Notices',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'View release highlights, version logs, and bug fix summaries for NoteKar.',
-                              ),
-
-                              SettingsBetaNote(
-                                p: p,
-                                text:
-                                    'The current features on this page are under Beta stage.',
-                                onLearnMore: () => _showBetaInfoPopup(p),
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: UpdatesNoticesSettingsPage(
+                              p: p,
+                              checkingUpdates: checkingUpdates,
+                              updateInfo: updateInfo,
+                              betaTrack: _betaTrack,
+                              remoteNotices: remoteNotices,
+                              onRemoteNoticesChanged: (value) {
+                                setState(() => remoteNotices = value);
+                                widget.onRemoteNotices(value);
+                              },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Data & Backup'))
                           SliverToBoxAdapter(
@@ -5987,26 +4922,5 @@ ${stackTrace ?? 'No stack trace provided.'}
     );
     if (!largeText) return sheet;
     return sheet;
-  }
-
-  Widget _buildDashboardSectionHeader(Palette p, IconData icon, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 6, top: 16, bottom: 6),
-      child: Row(
-        children: [
-          Icon(icon, color: p.accent, size: 15),
-          const SizedBox(width: 8),
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              color: p.text3,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.8,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

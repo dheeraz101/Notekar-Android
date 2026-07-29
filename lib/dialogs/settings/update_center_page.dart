@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:notekar/dialogs/update_permission_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/glass.dart';
-import 'package:notekar/widgets/settings_widgets.dart';
-import 'package:notekar/dialogs/update_permission_sheet.dart';
 import 'package:notekar/widgets/markdown_text.dart';
-import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UpdateCenterView extends StatefulWidget {
   const UpdateCenterView({
@@ -1028,6 +1029,301 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class BuildTrackSelectPage extends StatelessWidget {
+  const BuildTrackSelectPage({
+    super.key,
+    required this.p,
+    required this.betaTrack,
+    required this.onSaveTrackPreference,
+    required this.onLearnMoreBeta,
+  });
+
+  final Palette p;
+  final bool betaTrack;
+  final ValueChanged<bool> onSaveTrackPreference;
+  final VoidCallback onLearnMoreBeta;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsGroup(
+          p: p,
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.check_circle_outline_rounded,
+              title: 'Stable Build',
+              subtitle: 'Recommended for standard users.'.localized(context),
+              trailing: !betaTrack
+                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  : const SizedBox.shrink(),
+              onTap: () => onSaveTrackPreference(false),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.track_changes_rounded,
+              title: 'Beta Build',
+              subtitle: 'Early access to active development features.'
+                  .localized(context),
+              trailing: betaTrack
+                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  : const SizedBox.shrink(),
+              onTap: () => onSaveTrackPreference(true),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 5, 20, 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'
+                    .localized(context),
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13,
+                  height: 1.45,
+                  letterSpacing: -0.05,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildNumberingRow(
+                context,
+                '1.',
+                'Switching to the Stable Build track will fetch the last released stable build and show the update.',
+              ),
+              const SizedBox(height: 8),
+              _buildNumberingRow(
+                context,
+                '2.',
+                'Switching to the Beta Build track will fetch the last compiled beta build and show the update.',
+              ),
+              const SizedBox(height: 8),
+              _buildNumberingRow(
+                context,
+                '3.',
+                'If in a Beta build and switched to Stable now, you will only receive Stable releases when a higher version is published.',
+              ),
+              const SizedBox(height: 8),
+              _buildNumberingRow(
+                context,
+                '4.',
+                'If in a Stable build and switched to Beta now, you will receive upcoming Beta releases immediately as they are published.',
+              ),
+            ],
+          ),
+        ),
+        SettingsBetaNote(
+          p: p,
+          text: 'The features on this track are under active beta testing.'
+              .localized(context),
+          onLearnMore: onLearnMoreBeta,
+        ),
+        const SizedBox(height: spacing48),
+      ],
+    );
+  }
+
+  Widget _buildNumberingRow(BuildContext context, String num, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 20,
+          child: Text(
+            num,
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 13,
+              height: 1.45,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.05,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            text.localized(context),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 13,
+              height: 1.45,
+              letterSpacing: -0.05,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class UpdatesNoticesSettingsPage extends StatelessWidget {
+  const UpdatesNoticesSettingsPage({
+    super.key,
+    required this.p,
+    required this.checkingUpdates,
+    required this.updateInfo,
+    required this.betaTrack,
+    required this.remoteNotices,
+    required this.onRemoteNoticesChanged,
+    required this.onOpenCategory,
+    required this.onLearnMoreBeta,
+  });
+
+  final Palette p;
+  final bool checkingUpdates;
+  final AppUpdateInfo? updateInfo;
+  final bool betaTrack;
+  final bool remoteNotices;
+  final ValueChanged<bool> onRemoteNoticesChanged;
+  final void Function(String category, {required String parent}) onOpenCategory;
+  final VoidCallback onLearnMoreBeta;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: spacing8),
+        SettingsGroup(
+          p: p,
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.system_update_outlined,
+              title: 'Software Update',
+              color: p.text2,
+              status: null,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (checkingUpdates)
+                    const CupertinoActivityIndicator(
+                      radius: 6,
+                      color: Colors.grey,
+                    )
+                  else if (updateInfo != null)
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color:
+                            (updateInfo!.isSecurity == true ||
+                                updateInfo!.isImportant == true)
+                            ? p.red
+                            : p.orange,
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: p.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  const SizedBox(width: spacing8),
+                  Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                ],
+              ),
+              onTap: () =>
+                  onOpenCategory('Update Center', parent: 'Updates & Notices'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.track_changes_rounded,
+              title: 'Build Channel',
+              color: p.accent,
+              status: betaTrack
+                  ? 'Beta'.localized(context)
+                  : 'Stable'.localized(context),
+              onTap: () =>
+                  onOpenCategory('Build Choose', parent: 'Updates & Notices'),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Keep NoteKar up to date with the latest features and security patches.'
+                  .localized(context),
+        ),
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'App Notices',
+              color: p.accent,
+              value: remoteNotices,
+              onChanged: onRemoteNoticesChanged,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Checks for official announcement notices and bug fix announcements.'
+                  .localized(context),
+        ),
+        SettingsGroup(
+          p: p,
+          title: 'Release Notes & History',
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.auto_awesome_rounded,
+              title: "What's New",
+              color: p.orange,
+              status: 'Recent'.localized(context),
+              onTap: () =>
+                  onOpenCategory("What's New", parent: 'Updates & Notices'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.history_edu_rounded,
+              title: 'Changelog',
+              color: p.green,
+              status: 'History'.localized(context),
+              onTap: () =>
+                  onOpenCategory('Changelog', parent: 'Updates & Notices'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.history_rounded,
+              title: 'Commits',
+              color: p.accent,
+              status: 'Activity'.localized(context),
+              onTap: () =>
+                  onOpenCategory('Commits', parent: 'Updates & Notices'),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'View release highlights, version logs, and bug fix summaries for NoteKar.'
+                  .localized(context),
+        ),
+        SettingsBetaNote(
+          p: p,
+          text: 'The current features on this page are under Beta stage.'
+              .localized(context),
+          onLearnMore: onLearnMoreBeta,
+        ),
+        const SizedBox(height: spacing48),
+      ],
     );
   }
 }

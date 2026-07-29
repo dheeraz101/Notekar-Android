@@ -557,3 +557,185 @@ class RemindersSettingsPage extends StatelessWidget {
     );
   }
 }
+
+class ReminderMessagePage extends StatefulWidget {
+  const ReminderMessagePage({
+    super.key,
+    required this.p,
+    required this.editingReminderType,
+    required this.currentValue,
+    required this.recents,
+    required this.onSave,
+    required this.onPop,
+  });
+
+  final Palette p;
+  final String editingReminderType;
+  final String currentValue;
+  final List<String> recents;
+  final Future<void> Function(String type, String newText) onSave;
+  final VoidCallback onPop;
+
+  @override
+  State<ReminderMessagePage> createState() => _ReminderMessagePageState();
+}
+
+class _ReminderMessagePageState extends State<ReminderMessagePage> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentValue);
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      'Reminder Message'.localized(context).toUpperCase(),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    maxLines: 1,
+                    maxLength: 60,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Enter reminder message...'.localized(context),
+                      hintStyle: TextStyle(color: p.text3),
+                      counterText: '',
+                      filled: true,
+                      fillColor: p.surface2,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _focusNode.hasFocus
+                              ? Icons.check_rounded
+                              : Icons.edit_rounded,
+                          color: _focusNode.hasFocus ? p.accent : p.text3,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          if (_focusNode.hasFocus) {
+                            _focusNode.unfocus();
+                          } else {
+                            _focusNode.requestFocus();
+                          }
+                        },
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: p.accent, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (widget.recents.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        'Recent Messages'.localized(context).toUpperCase(),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SettingsGroup(
+                      p: p,
+                      insetDividers: true,
+                      children: [
+                        for (final item in widget.recents.take(5))
+                          SettingsRow(
+                            p: p,
+                            icon: Icons.history_rounded,
+                            title: item,
+                            color: p.text3,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              _controller.text = item;
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16, top: 16),
+            child: FilledButton(
+              onPressed: () async {
+                final newText = _controller.text.trim();
+                await widget.onSave(widget.editingReminderType, newText);
+                widget.onPop();
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: p.accent,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                'Save'.localized(context),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
