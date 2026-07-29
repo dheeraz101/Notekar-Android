@@ -96,6 +96,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _minimalMomentOptions = false;
   bool _startupComplete = false;
   Map<String, dynamic>? _pendingTap;
+  bool _enableNoteOnClick = false;
   bool _showHistoryText = true;
   bool _showLastSavedHint = true;
   bool _requireLongPressNote = false;
@@ -436,6 +437,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     // Phase 1: Load non-DB settings instantly so the UI can paint immediately
     setState(() {
       _prefs = prefs;
+      _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _mode = _defaultMode;
@@ -1001,7 +1003,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   void _handleTap(TapUpDetails details) {
     if (_isDelayBlocked()) return;
-    unawaited(_logEntry(position: details.globalPosition));
+    if (_enableNoteOnClick) {
+      unawaited(_openNote(position: details.globalPosition));
+    } else {
+      unawaited(_logEntry(position: details.globalPosition));
+    }
   }
 
   void _toggleMode() {
@@ -1552,7 +1558,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
-  Future<void> _openNote() async {
+  Future<void> _openNote({Offset? position}) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
       return;
@@ -1579,7 +1585,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _showToast('Add a note to save', warning: true);
         return;
       }
-      unawaited(_logEntry(note: note.isEmpty ? null : note));
+      unawaited(
+        _logEntry(note: note.isEmpty ? null : note, position: position),
+      );
     }
   }
 
@@ -1933,6 +1941,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         },
       ),
     );
+
+    if (mounted) {
+      setState(() {
+        _enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
+      });
+    }
 
     if (result == 'log') {
       Future.delayed(const Duration(milliseconds: 200), () {
