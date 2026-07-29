@@ -22,7 +22,8 @@ const double spacing64 = 64.0;
 const int maxNoteLength = 500;
 
 const officialSite = 'https://notekarapp.vercel.app';
-const yabpSite = 'https://yabp.netlify.app/';
+const yabpSite =
+    'https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/';
 const privacyPolicyUrl = 'https://notekarapp.vercel.app/privacy.html';
 const termsUrl = 'https://notekarapp.vercel.app/terms.html';
 const githubRepo = 'https://github.com/dheeraz101/Notekar-Android';

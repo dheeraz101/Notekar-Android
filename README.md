@@ -2,20 +2,32 @@
 
 ![NoteKar Banner](screenshot/notekar_banner.png)
 
-> **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero friction. 100% Offline-First & Privacy-Focused.
+> **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero
+> friction. 100% Offline-First & Privacy-Focused.
 
 ![version](https://img.shields.io/badge/version-5.1.7-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
+
+<a href="https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/">
+  <img src="https://raw.githubusercontent.com/dheeraz101/Yet-Another-Boring-Project/main/logo.png" width="48" height="48" alt="YABP Initiative Logo" style="display: inline-block; vertical-align: middle;" />
+</a>
 
 ---
 
 > [!IMPORTANT]
-> 🚀 **Official Release Hub for NoteKar**  
-> **This repository is the official home for all new NoteKar version releases, Android APK downloads, and active app development.**  
-> 📥 To download the latest stable Android APK release, visit the **[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
+> 🚀 **Official Release Hub for NoteKar**
+>
+> **This repository is the official home for all new NoteKar version releases, Android APK
+downloads, and active app development.**
+>
+> 📥 To download the latest stable Android APK release, visit the *
+*[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
+>
+> 🌐 Old Notekar Site Repo **[Github](https://github.com/dheeraz101/Notekar)**.
 
 ---
 
 ## 📖 Table of Contents
+
 - [📸 Screenshots / UI Preview](#-screenshots--ui-preview)
 - [🎯 Features & Highlights](#-features--highlights)
 - [🛠️ Tech Stack](#-tech-stack)
@@ -34,31 +46,37 @@
 
 ## 📸 Screenshots / UI Preview
 
-Designed for speed, simplicity, and privacy. Every screen is optimized for quick timestamp logging with minimal interaction.
+Designed for speed, simplicity, and privacy. Every screen is optimized for quick timestamp logging
+with minimal interaction.
 
-| Welcome | Premium | Permissions | Home | History |
-| :---: | :---: | :---: | :---: | :---: |
+|                                        Welcome                                        |                                        Premium                                        |                                      Permissions                                      |                                         Home                                          |                                        History                                        |
+|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|
 | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="175"> |
-| *Quick onboarding and setup.* | *Premium features at a glance.* | *Configure permissions for reminders.* | *Log timestamps with a single tap.* | *Browse and manage saved entries.* |
+|                             _Quick onboarding and setup._                             |                            _Premium features at a glance._                            |                        _Configure permissions for reminders._                         |                          _Log timestamps with a single tap._                          |                          _Browse and manage saved entries._                           |
 
-| Settings | Privacy | Help | Statistics | Reminders |
-| :---: | :---: | :---: | :---: | :---: |
+|                                       Settings                                        |                                        Privacy                                        |                                         Help                                          |                                      Statistics                                       |                                       Reminders                                        |
+|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
 | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="175"> |
-| *Customize app preferences.* | *Privacy, security, and diagnostics.* | *Guides, FAQs, and legal information.* | *View activity insights and trends.* | *Schedule daily and inactivity reminders.* |
+|                             _Customize app preferences._                              |                         _Privacy, security, and diagnostics._                         |                        _Guides, FAQs, and legal information._                         |                         _View activity insights and trends._                          |                       _Schedule daily and inactivity reminders._                       |
 
 ---
 
 ## 🎯 Features & Highlights
 
 - **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly.
-- **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for work/study) and **Single mode** (one-shot timestamp logging).
-- **Rich Local Storage**: Fast, persistent local storage powered by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
-- **Android OS Auto-Backup Support**: Supports standard Android system auto-backup (Google Drive system backup), ensuring your data can be restored when switching Android devices.
+- **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for
+  work/study) and **Single mode** (one-shot timestamp logging).
+- **Rich Local Storage**: Fast, persistent local storage powered
+  by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
+- **Android OS Auto-Backup Support**: Supports standard Android system auto-backup (Google Drive
+  system backup), ensuring your data can be restored when switching Android devices.
 - **Transparent & Minimal Permissions**:
-  - `INTERNET`: Exclusively used to check for software releases and fetch bug fix announcements.
-  - `POST_NOTIFICATIONS`: Used locally for update alerts and timestamp reminders.
-- **Zero Backend / Zero Analytics**: No cloud databases, no user accounts, no tracking scripts, no third-party ads.
-- **Data Control & Export**: Export all timestamp entries into standard CSV or JSON formats at any time.
+    - `INTERNET`: Exclusively used to check for software releases and fetch bug fix announcements.
+    - `POST_NOTIFICATIONS`: Used locally for update alerts and timestamp reminders.
+- **Zero Backend / Zero Analytics**: No cloud databases, no user accounts, no tracking scripts, no
+  third-party ads.
+- **Data Control & Export**: Export all timestamp entries into standard CSV or JSON formats at any
+  time.
 
 ---
 
@@ -66,33 +84,39 @@ Designed for speed, simplicity, and privacy. Every screen is optimized for quick
 
 NoteKar is built using modern, performance-oriented technologies:
 
-| Component | Technology |
-| :--- | :--- |
-| **Language** | [Dart](https://dart.dev/) |
-| **Framework** | [Flutter](https://flutter.dev/) (SDK 3.12.0+) |
-| **Local Database** | [Hive](https://pub.dev/packages/hive) (NoSQL, lightning-fast key-value store) |
-| **State Management** | [Provider](https://pub.dev/packages/provider) |
-| **Architecture** | Clean Architecture |
-| **UI & Design** | Custom Apple-inspired design system with AMOLED dark mode support. |
-| **Platform Support** | Android 5.0 (API 21+) and above |
+| Component            | Technology                                                                    |
+|:---------------------|:------------------------------------------------------------------------------|
+| **Language**         | [Dart](https://dart.dev/)                                                     |
+| **Framework**        | [Flutter](https://flutter.dev/) (SDK 3.12.0+)                                 |
+| **Local Database**   | [Hive](https://pub.dev/packages/hive) (NoSQL, lightning-fast key-value store) |
+| **State Management** | [Provider](https://pub.dev/packages/provider)                                 |
+| **Architecture**     | Clean Architecture                                                            |
+| **UI & Design**      | Custom Apple-inspired design system with AMOLED dark mode support.            |
+| **Platform Support** | Android 5.0 (API 21+) and above                                               |
 
 ---
 
 ## 🌐 Community Translations
 
-Help make NoteKar available in your native language! We welcome translation contributions for any language.
+Help make NoteKar available in your native language! We welcome translation contributions for any
+language.
 
-- 📖 Read the **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a simple 3-step walkthrough on creating or updating `.arb` files.
+- 📖 Read the **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a simple 3-step
+  walkthrough on creating or updating `.arb` files.
 
 ---
 
 ## 🔒 Privacy & Legal Policy
 
-NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain stored locally on your device.
+NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain
+stored locally on your device.
 
-- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**: Full privacy policy detailing data handling, local storage, and permissions.
-- 📜 **[Terms of Use](https://dheeraz101.github.io/Notekar/terms.html)**: Terms of service and open-source usage.
-- 🌐 **[NoteKar Web PWA](https://dheeraz101.github.io/Notekar/)**: Official Web application & legal hub.
+- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**: Full privacy policy
+  detailing data handling, local storage, and permissions.
+- 📜 **[Terms of Use](https://dheeraz101.github.io/Notekar/terms.html)**: Terms of service and
+  open-source usage.
+- 🌐 **[NoteKar Web PWA](https://dheeraz101.github.io/Notekar/)**: Official Web application & legal
+  hub.
 
 ---
 
@@ -109,11 +133,11 @@ Your support helps keep NoteKar free, offline-first, and actively maintained.
 
 NoteKar uses shortcodes in version tags to differentiate build stability:
 
-* **BR (Beta Release)**: Early access, pre-release builds featuring experimental UI changes and
+- **BR (Beta Release)**: Early access, pre-release builds featuring experimental UI changes and
   active feature development.
-* **SR (Security Release)**: Critical maintenance updates, library upgrades, security patches, and
+- **SR (Security Release)**: Critical maintenance updates, library upgrades, security patches, and
   hotfixes.
-* **SB (Stable Build)**: Production-ready public builds that have passed thorough quality assurance
+- **SB (Stable Build)**: Production-ready public builds that have passed thorough quality assurance
   and stability tests.
 
 ---
@@ -122,7 +146,7 @@ NoteKar uses shortcodes in version tags to differentiate build stability:
 
 We are planning to build the following features in upcoming updates:
 
-* **Sobriety (Relapse / Nofap) Streaks & Day Counter**:
+- **Sobriety (Relapse / Nofap) Streaks & Day Counter**:
     - **Dynamic Streak Widget**: Dynamic day counter card with milestone awards and streak progress
       tracks.
     - **Relapse Trigger Log**: Privacy-focused triggers diary to analyze mood, location, or time
@@ -137,7 +161,8 @@ We are planning to build the following features in upcoming updates:
 NoteKar Android meets all official F-Droid inclusion requirements:
 
 - **100% Open Source**: Code licensed under the OSI-approved **MIT License**.
-- **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or closed-source libraries.
+- **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or closed-source
+  libraries.
 - **No Trackers**: Zero telemetry scripts or analytics frameworks.
 - **Fastlane Metadata**: Fully structured in `fastlane/metadata/android/en-US/`.
 
@@ -176,18 +201,22 @@ Notekar - Flutter/
 ## 🛠️ Building & Running Locally
 
 ### Prerequisites
+
 1. Install [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.12.0` or higher).
 2. Install [Android Studio](https://developer.android.com/studio) with Android SDK (API 21+).
 3. Connect an Android device (via USB Debugging or Wireless Debugging) or start an Android Emulator.
 
 ### Setup Steps
+
 1. **Clone the Android repository:**
+
    ```bash
    git clone https://github.com/dheeraz101/Notekar-Android.git
    cd Notekar-Android
    ```
 
 2. **Fetch Flutter packages:**
+
    ```bash
    flutter pub get
    ```
@@ -202,16 +231,19 @@ Notekar - Flutter/
 ## 🔑 Building Release APKs & Keystore Setup
 
 > [!IMPORTANT]
-> Signing secrets and keystores (`*.jks`, `key.properties`) are ignored by Git to ensure repository safety.
+> Signing secrets and keystores (`*.jks`, `key.properties`) are ignored by Git to ensure repository
+> safety.
 
 To build a signed release APK or App Bundle (`.aab`):
 
 1. **Generate a keystore** (if you don't already have one):
+
    ```bash
    keytool -genkey -v -keystore android/app/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
    ```
 
 2. **Create `android/key.properties`** in your local copy:
+
    ```properties
    storePassword=<your-store-password>
    keyPassword=<your-key-password>
@@ -230,6 +262,8 @@ To build a signed release APK or App Bundle (`.aab`):
 ## 📄 License & Attribution
 
 - **License:** Open source under the **[MIT License](LICENSE)**.
-- **Initiative:** Part of the [YABP (Yet Another Boring Project)](https://yabp.netlify.app/) initiative.
+- **Initiative:** Part of
+  the [YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)
+  initiative.
 - **Developer:** [Dheeraz](https://github.com/dheeraz101)
 - **Made with ❤ in India.**
