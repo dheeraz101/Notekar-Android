@@ -2122,14 +2122,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       barrierDismissible: true,
       barrierLabel: 'Close external link warning',
       transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => ActionConfirmSheet(
-        p: p,
-        title: 'Leave NoteKar?'.localized(context),
-        message:
-            '${'You are now going out of the app to the external link:'.localized(context)}\n\n$url',
-        confirmLabel: 'Open'.localized(context),
-        icon: Icons.open_in_new_rounded,
-      ),
+      pageBuilder: (_, _, _) => ExternalLinkConfirmSheet(p: p, url: url),
     );
 
     if (confirmed == true) {
@@ -3989,6 +3982,150 @@ class _PinSetupWidgetState extends State<_PinSetupWidget>
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ExternalLinkConfirmSheet extends StatelessWidget {
+  const ExternalLinkConfirmSheet({
+    super.key,
+    required this.p,
+    required this.url,
+  });
+
+  final Palette p;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    String domain = url;
+    try {
+      final uri = Uri.parse(url);
+      domain = uri.host;
+      if (domain.isEmpty) domain = url;
+    } catch (_) {}
+
+    return AppSheet(
+      p: p,
+      title: 'External Navigation'.localized(context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: p.orange.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(Icons.warning_amber_rounded, color: p.orange, size: 26),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'You are now leaving NoteKar to access an external website. Please review the destination address carefully:'
+                .localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text2,
+              fontSize: 13.5,
+              height: 1.45,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.lock_outline_rounded, color: p.green, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      domain.toUpperCase(),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                SelectableText(
+                  url,
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'NoteKar is offline-first. Your private data remains securely stored on your local device and is never shared.'
+                .localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: p.text3, fontSize: 11.5, height: 1.4),
+          ),
+          const SizedBox(height: spacing24),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: p.text,
+                      side: BorderSide(color: p.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(
+                      'Cancel'.localized(context),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: p.accent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(
+                      'Open Link'.localized(context),
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
