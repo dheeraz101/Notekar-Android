@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -5,21 +8,21 @@ import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/screens/note_kar_home.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Parallelize core initialization
-  final results = await Future.wait([
-    SharedPreferences.getInstance(),
-    AdaptiveEngine().initialize(),
-    _initHivePreload(),
-  ]);
+  final sharedPrefsFuture = SharedPreferences.getInstance();
+  final hivePreloadFuture = _initHivePreload();
+
+  final results = await Future.wait([sharedPrefsFuture, hivePreloadFuture]);
+
+  final prefs = results[0] as SharedPreferences;
+  unawaited(AdaptiveEngine().initialize(prefs: prefs));
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(NoteKarApp(prefs: results[0] as SharedPreferences));
+  runApp(NoteKarApp(prefs: prefs));
 }
 
 Future<void> _initHivePreload() async {

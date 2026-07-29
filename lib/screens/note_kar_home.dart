@@ -95,6 +95,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _extendedDuration = false;
   bool _minimalMomentOptions = false;
   bool _startupComplete = false;
+  Map<String, dynamic>? _pendingTap;
   bool _showHistoryText = true;
   bool _showLastSavedHint = true;
   bool _requireLongPressNote = false;
@@ -431,48 +432,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
     // 1. Prioritize SharedPreferences to identify first-run users ASAP.
     final prefs =
         widget.preloadedPrefs ?? await SharedPreferences.getInstance();
-    final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-    final remindersWalkthroughSeen =
-        prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
-    final securityWalkthroughSeen =
-        prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
-    final networkWalkthroughSeen =
-        prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
 
-    if (!welcomeSeen ||
-        !remindersWalkthroughSeen ||
-        !securityWalkthroughSeen ||
-        !networkWalkthroughSeen) {
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _showWelcomeIfNeeded(prefs);
-          }
-        });
-      }
-    }
-
-    // 2. Initialize Repository and load entries.
-    await _repository.initialize(preloadedPrefs: prefs);
-    final migrated = await _repository.migrateLegacyData();
-    final entries = _repository.getAllMoments();
-
-    if (!mounted) {
-      startupTask.finish();
-      return;
-    }
-
-    if (migrated.isNotEmpty) {
-      _logger.info(
-        'Merging ${migrated.length} migrated entries into active list',
-      );
-    }
-
+    // Phase 1: Load non-DB settings instantly so the UI can paint immediately
     setState(() {
       _prefs = prefs;
-      _entries = entries;
-      _trashNotifier.value = _repository.getTrashMoments();
-      _nextId = _repository.getNextId();
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _mode = _defaultMode;
@@ -537,41 +500,94 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _locale = prefs.getString('m-locale') ?? 'system';
     });
 
-    await _syncBackgroundLogs(prefs);
-
     _applySystemUiStyle();
-    _initQuickActions();
-    unawaited(_checkSystemLockAvailability());
-    try {
-      unawaited(_updateAndroidWidget());
-    } catch (e, stack) {
-      _logger.error('Failed to update widget on load', e, stack);
-    }
 
-    if (_homeMenuAnimations) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Phase 2: Deferred loading after the first frame has painted
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
+      final remindersWalkthroughSeen =
+          prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
+      final securityWalkthroughSeen =
+          prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
+      final networkWalkthroughSeen =
+          prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
+
+      if (!welcomeSeen ||
+          !remindersWalkthroughSeen ||
+          !securityWalkthroughSeen ||
+          !networkWalkthroughSeen) {
+        if (mounted) {
+          _showWelcomeIfNeeded(prefs);
+        }
+      }
+
+      // Initialize MomentRepository and load database entries
+      await _repository.initialize(preloadedPrefs: prefs);
+      final migrated = await _repository.migrateLegacyData();
+      final entries = _repository.getAllMoments();
+      final trash = _repository.getTrashMoments();
+      final nextId = _repository.getNextId();
+
+      if (!mounted) return;
+
+      if (migrated.isNotEmpty) {
+        _logger.info(
+          'Merging ${migrated.length} migrated entries into active list',
+        );
+      }
+
+      setState(() {
+        _entries = entries;
+        _trashNotifier.value = trash;
+        _nextId = nextId;
+        _startupComplete = true; // DB operations ready
+      });
+
+      // Run quick actions and notifications check
+      _initQuickActions();
+      await _syncBackgroundLogs(prefs);
+      unawaited(_checkSystemLockAvailability());
+      try {
+        unawaited(_updateAndroidWidget());
+      } catch (e, stack) {
+        _logger.error('Failed to update widget on load', e, stack);
+      }
+
+      if (_homeMenuAnimations) {
         try {
           unawaited(_restoreMotionAfterStartup(prefs));
         } catch (e, stack) {
           _logger.warn('Failed to restore motion after startup', e, stack);
         }
-      });
-    }
+      }
 
-    Future<void>.delayed(const Duration(seconds: 2), () {
-      if (mounted) _startupComplete = true;
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
       if (_privacyLock) {
         _syncPrivacyOverlay();
         unawaited(_unlockAfterFirstPaint(prefs));
-        return;
+      } else {
+        unawaited(_runStartupChecks(prefs));
       }
-      unawaited(_runStartupChecks(prefs));
+
+      // Process any taps that occurred while the database was loading
+      if (_pendingTap != null) {
+        await _processPendingTap();
+      }
     });
+
     startupTask.finish();
+  }
+
+  Future<void> _processPendingTap() async {
+    final pending = _pendingTap;
+    if (pending == null) return;
+    _pendingTap = null;
+
+    await _logEntry(
+      note: pending['note'] as String?,
+      position: pending['position'] as Offset?,
+      forcedType: pending['forcedType'] as String?,
+      timestamp: pending['timestamp'] as int?,
+    );
   }
 
   void _initQuickActions() {
@@ -848,11 +864,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
     String? note,
     Offset? position,
     String? forcedType,
+    int? timestamp,
   }) async {
     if (_isSaving) return;
     _isSaving = true;
 
-    final now = DateTime.now();
+    final now = timestamp != null
+        ? DateTime.fromMillisecondsSinceEpoch(timestamp)
+        : DateTime.now();
     final reminderTitle = 'logging reminder'.localized(context);
     final reminderBody = 'time to log a moment!'.localized(context);
     var type = forcedType ?? 'single';
@@ -876,6 +895,33 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _sessionStart = null;
         _inout = 'in';
       }
+    }
+
+    // Save to queue if DB is not ready yet
+    if (!_startupComplete) {
+      // Trigger optimistic UI animations (ripple and pulse) immediately
+      setState(() {
+        _lastTapTime = now.millisecondsSinceEpoch;
+        _lastTapPosition = position;
+        _lastSavedType = type;
+        _rippleToken++;
+        _savedPulseToken++;
+      });
+      NotekarHaptics.save(_hapticStyle, type);
+
+      _pendingTap = {
+        'note': note?.trim() ?? '',
+        'position': position,
+        'forcedType': forcedType,
+        'timestamp': now.millisecondsSinceEpoch,
+      };
+
+      // Rollback session state until DB load completes and actual log executes
+      _inout = oldInOut;
+      _sessionStart = oldSessionStart;
+
+      _isSaving = false;
+      return;
     }
 
     final entry = Moment(
@@ -1507,6 +1553,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _openNote() async {
+    if (!_startupComplete) {
+      _showToast('Loading database...', warning: true);
+      return;
+    }
     if (_isDelayBlocked()) return;
     NotekarHaptics.light(_hapticStyle);
     final note = await showGeneralDialog<String>(
@@ -1534,6 +1584,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _openHistory() async {
+    if (!_startupComplete) {
+      _showToast('Loading database...', warning: true);
+      return;
+    }
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1613,6 +1667,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _openSettings() async {
+    if (!_startupComplete) {
+      _showToast('Loading database...', warning: true);
+      return;
+    }
     final trash = _repository.getTrashMoments();
     _trashNotifier.value = trash;
     final lastDeletedPreview = trash.isNotEmpty

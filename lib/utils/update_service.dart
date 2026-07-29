@@ -178,7 +178,7 @@ class UpdateService {
         }
       } catch (_) {}
 
-      Map? targetRelease;
+      Map<dynamic, dynamic>? targetRelease;
       for (final item in data) {
         if (item is! Map) continue;
         final isPrerelease = item['prerelease'] as bool? ?? false;

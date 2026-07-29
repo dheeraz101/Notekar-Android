@@ -24,7 +24,9 @@ class MomentRepository {
   List<Moment>? _cachedTrashMoments;
 
   Future<List<int>?> _getOrGenerateEncryptionKey() async {
-    const secureStorage = FlutterSecureStorage();
+    const secureStorage = FlutterSecureStorage(
+      aOptions: AndroidOptions(resetOnError: true),
+    );
     try {
       final base64Key = await secureStorage.read(key: 'hive_secure_key');
       if (base64Key != null) {
@@ -156,18 +158,25 @@ class MomentRepository {
       }
     }
 
-    await _autoPurgeOldTrash();
-
-    if (_box.length > 300) {
-      unawaited(_box.compact());
-    }
-    if (_trashBox.length > 300) {
-      unawaited(_trashBox.compact());
-    }
+    unawaited(
+      Future(() async {
+        await _autoPurgeOldTrash();
+        if (_box.length > 300) {
+          unawaited(_box.compact());
+        }
+        if (_trashBox.length > 300) {
+          unawaited(_trashBox.compact());
+        }
+      }),
+    );
 
     // Pre-populate the cache in the background for zero-delay read paths
-    getAllMoments();
-    getTrashMoments();
+    unawaited(
+      Future(() {
+        getAllMoments();
+        getTrashMoments();
+      }),
+    );
 
     _logger.info(
       'MomentRepository initialized with ${_box.length} entries, ${_trashBox.length} trash entries',
@@ -208,7 +217,7 @@ class MomentRepository {
     }
     try {
       final moments = _box.values
-          .whereType<Map>()
+          .whereType<Map<dynamic, dynamic>>()
           .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
           .toList();
       moments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -417,7 +426,11 @@ class MomentRepository {
     _logger.info('Migrating legacy data from SharedPreferences');
     try {
       final entries = (jsonDecode(legacyRows) as List)
-          .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
+          .map(
+            (item) => Moment.fromJson(
+              Map<String, dynamic>.from(item as Map<dynamic, dynamic>),
+            ),
+          )
           .toList();
 
       for (final entry in entries) {

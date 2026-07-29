@@ -14,3 +14,6 @@
 
 # Hive / Binary persistence
 -keep class com.topjohnwu.libsu.** { *; }
+
+# Flutter Play Store split / deferred components (ignore warnings for unused Play Core SDK)
+-dontwarn com.google.android.play.core.**

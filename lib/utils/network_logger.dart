@@ -30,14 +30,15 @@ class NetworkLogEntry {
 
   factory NetworkLogEntry.fromJson(Map<String, dynamic> json) =>
       NetworkLogEntry(
-        url: json['url'] ?? '',
-        method: json['method'] ?? 'GET',
-        statusCode: json['statusCode'] ?? 200,
+        url: (json['url'] as String?) ?? '',
+        method: (json['method'] as String?) ?? 'GET',
+        statusCode: (json['statusCode'] as num?)?.toInt() ?? 200,
         timestamp: DateTime.fromMillisecondsSinceEpoch(
-          json['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+          (json['timestamp'] as num?)?.toInt() ??
+              DateTime.now().millisecondsSinceEpoch,
         ),
-        purpose: json['purpose'] ?? '',
-        size: json['size'] ?? 'Unknown',
+        purpose: (json['purpose'] as String?) ?? '',
+        size: (json['size'] as String?) ?? 'Unknown',
       );
 }
 
@@ -49,9 +50,13 @@ class NetworkLogger {
       final prefs = await SharedPreferences.getInstance();
       final jsonStr = prefs.getString(_key);
       if (jsonStr == null || jsonStr.isEmpty) return [];
-      final List<dynamic> decoded = json.decode(jsonStr);
+      final List<dynamic> decoded = json.decode(jsonStr) as List<dynamic>;
       return decoded
-          .map((e) => NetworkLogEntry.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => NetworkLogEntry.fromJson(
+              Map<String, dynamic>.from(e as Map<dynamic, dynamic>),
+            ),
+          )
           .toList();
     } catch (_) {
       return [];
