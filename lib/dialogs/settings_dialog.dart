@@ -32,6 +32,7 @@ import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
+import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -7141,249 +7142,103 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ]),
                           ),
                         if (show('Data & Backup'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.archive_outlined,
-                                    title: 'Backup & Export'.localized(context),
-                                    status:
-                                        '${entries.length} ${'Logs'.localized(context)}',
-                                    color: p.green,
-                                    onTap: () => _openCategory(
-                                      'Backup & Export',
-                                      parent: 'Data & Backup',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.health_and_safety_outlined,
-                                    title: 'Backup Status'.localized(context),
-                                    status: _dataHealthStatus,
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Backup Status',
-                                      parent: 'Data & Backup',
-                                    ),
-                                  ),
-                                ],
+                          SliverToBoxAdapter(
+                            child: DataBackupSettingsPage(
+                              p: p,
+                              subCategory: 'Data & Backup',
+                              entriesCount: entries.length,
+                              dataHealthStatus: _dataHealthStatus,
+                              backupReminderDays: backupReminderDays,
+                              onBackupReminderDaysChanged: (value) {
+                                setState(() => backupReminderDays = value);
+                                widget.onBackupReminderDays(value);
+                              },
+                              onExportCsv: () => unawaited(
+                                _runExport('CSV', widget.onExportCsv),
                               ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'NoteKar uses a private offline database. Use these tools to secure your history via manual exports.',
+                              onExportRecentCsv: () => unawaited(
+                                _runExport(
+                                  'Recent CSV',
+                                  widget.onExportRecentCsv,
+                                ),
                               ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                              onExportJson: () => unawaited(
+                                _runExport('JSON', widget.onExportJson),
+                              ),
+                              onExportBackup: () => unawaited(
+                                _runExport('Backup', widget.onExportBackup),
+                              ),
+                              onImportBackup: () => unawaited(_runImport()),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Backup & Export'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Backup Schedule',
-                                children: [
-                                  for (final days in [0, 7, 14, 30])
-                                    SettingsRow(
-                                      p: p,
-                                      title: days == 0
-                                          ? 'Disabled'
-                                          : 'Every $days Days',
-                                      trailing: backupReminderDays == days
-                                          ? Icon(
-                                              Icons.check_rounded,
-                                              color: p.accent,
-                                              size: 20,
-                                            )
-                                          : const SizedBox.shrink(),
-                                      onTap: () {
-                                        if (backupReminderDays == days) return;
-                                        setState(
-                                          () => backupReminderDays = days,
-                                        );
-                                        widget.onBackupReminderDays(days);
-                                      },
-                                    ),
-                                ],
+                          SliverToBoxAdapter(
+                            child: DataBackupSettingsPage(
+                              p: p,
+                              subCategory: 'Backup & Export',
+                              entriesCount: entries.length,
+                              dataHealthStatus: _dataHealthStatus,
+                              backupReminderDays: backupReminderDays,
+                              onBackupReminderDaysChanged: (value) {
+                                setState(() => backupReminderDays = value);
+                                widget.onBackupReminderDays(value);
+                              },
+                              onExportCsv: () => unawaited(
+                                _runExport('CSV', widget.onExportCsv),
                               ),
-                              SettingsPageDescription(
-                                p: p,
-                                text: backupReminderDays == 0
-                                    ? 'Reminders are currently disabled. Set an interval to be reminded to safeguard your data.'
-                                    : 'NoteKar will prompt for a backup every $backupReminderDays days.',
+                              onExportRecentCsv: () => unawaited(
+                                _runExport(
+                                  'Recent CSV',
+                                  widget.onExportRecentCsv,
+                                ),
                               ),
-
-                              SettingsGroup(
-                                p: p,
-                                title: 'CSV Export',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.table_chart_outlined,
-                                    title: 'Export CSV',
-                                    status: 'Table',
-                                    color: p.green,
-                                    rowKind: 'link',
-                                    onTap: () => unawaited(
-                                      _runExport('CSV', widget.onExportCsv),
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.date_range_outlined,
-                                    title: 'Export Last 7 Days',
-                                    status: 'Recent',
-                                    color: p.green,
-                                    rowKind: 'link',
-                                    onTap: () => unawaited(
-                                      _runExport(
-                                        'Recent CSV',
-                                        widget.onExportRecentCsv,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              onExportJson: () => unawaited(
+                                _runExport('JSON', widget.onExportJson),
                               ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Export moments to standard CSV formats. "Export CSV" saves your entire history, while "Export Last 7 Days" saves only recent records.',
+                              onExportBackup: () => unawaited(
+                                _runExport('Backup', widget.onExportBackup),
                               ),
-
-                              SettingsGroup(
-                                p: p,
-                                title: 'JSON Export',
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.code_rounded,
-                                    title: 'Export JSON',
-                                    status: 'Dev',
-                                    color: p.accent,
-                                    rowKind: 'link',
-                                    onTap: () => unawaited(
-                                      _runExport('JSON', widget.onExportJson),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Export moments to developer-friendly JSON format for advanced integrations and data portability.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                title: 'Database Backups',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.archive_outlined,
-                                    title: 'Export Backup',
-                                    status: 'Full',
-                                    color: p.accent,
-                                    rowKind: 'link',
-                                    onTap: () => unawaited(
-                                      _runExport(
-                                        'Backup',
-                                        widget.onExportBackup,
-                                      ),
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.unarchive_outlined,
-                                    title: 'Import Backup',
-                                    status: 'Restore',
-                                    color: p.orange,
-                                    rowKind: 'link',
-                                    onTap: () => unawaited(_runImport()),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Manage complete database backups. Safely archive your entire history or restore it when migrating to another device.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                              onImportBackup: () => unawaited(_runImport()),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Backup Status'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Active Protection',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.android_rounded,
-                                    title: 'Android Backup',
-                                    color: p.green,
-                                    status: 'Active',
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.favorite_outline_rounded,
-                                    title: 'Data Health',
-                                    color: p.green,
-                                    status: _dataHealthStatus,
-                                  ),
-                                ],
+                          SliverToBoxAdapter(
+                            child: DataBackupSettingsPage(
+                              p: p,
+                              subCategory: 'Backup Status',
+                              entriesCount: entries.length,
+                              dataHealthStatus: _dataHealthStatus,
+                              backupReminderDays: backupReminderDays,
+                              onBackupReminderDaysChanged: (value) {
+                                setState(() => backupReminderDays = value);
+                                widget.onBackupReminderDays(value);
+                              },
+                              onExportCsv: () => unawaited(
+                                _runExport('CSV', widget.onExportCsv),
                               ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Android OS auto-backup preserves app preferences only. Your moments and notes stay 100% local and private to this device.',
+                              onExportRecentCsv: () => unawaited(
+                                _runExport(
+                                  'Recent CSV',
+                                  widget.onExportRecentCsv,
+                                ),
                               ),
-
-                              SettingsGroup(
-                                p: p,
-                                title: 'Cloud & Sync (Planned)',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.lock_outlined,
-                                    title: 'Encrypted Backup',
-                                    color: p.orange,
-                                    status: 'Planned',
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.cloud_outlined,
-                                    title: 'Google Drive Backup',
-                                    color: p.orange,
-                                    status: 'Planned',
-                                  ),
-                                ],
+                              onExportJson: () => unawaited(
+                                _runExport('JSON', widget.onExportJson),
                               ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Planned cloud features will provide direct cloud synchronization across your personal devices.',
+                              onExportBackup: () => unawaited(
+                                _runExport('Backup', widget.onExportBackup),
                               ),
-
-                              SettingsBetaNote(
-                                p: p,
-                                text:
-                                    'The current features on this page are under Beta stage.',
-                                onLearnMore: () => _showBetaInfoPopup(p),
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                              onImportBackup: () => unawaited(_runImport()),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Privacy & Security'))
                           SliverToBoxAdapter(
