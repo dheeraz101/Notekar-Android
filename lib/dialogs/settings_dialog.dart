@@ -20,6 +20,7 @@ import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
+import 'package:notekar/dialogs/settings/legal_about_settings_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
@@ -3121,247 +3122,6 @@ ${stackTrace ?? 'No stack trace provided.'}
     widget.onOpenLink(url);
   }
 
-  Widget _licensesPage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: spacing8),
-        Center(
-          child: Column(
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: Image.asset(
-                    'icon-maskable-512.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'NoteKar',
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Text(
-                'Version v$appVersion',
-                style: TextStyle(color: p.text3, fontSize: 13),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: spacing32),
-        SettingsGroup(
-          p: p,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Software Licenses',
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'NoteKar is built using Flutter and several high-quality open source packages. You can view the full legal notices and individual package licenses below.',
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 14,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        FilledButton(
-          onPressed: () => showLicensePage(
-            context: context,
-            applicationName: 'NoteKar',
-            applicationVersion: 'v$appVersion',
-            applicationIcon: Padding(
-              padding: const EdgeInsets.all(12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'icon-maskable-512.png',
-                  width: 64,
-                  height: 64,
-                ),
-              ),
-            ),
-          ),
-          style: FilledButton.styleFrom(
-            backgroundColor: p.accent,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-          child: const Text(
-            'View Full Licenses',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-        ),
-        const SizedBox(height: spacing32),
-      ],
-    );
-  }
-
-  Widget _privacyPolicyPage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: spacing8),
-        Text(
-          'Your Privacy Matters',
-          style: TextStyle(
-            color: p.text,
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
-        ),
-        const SizedBox(height: spacing12),
-        Text(
-          'NoteKar is designed with an "Offline-First" philosophy. We believe your personal moments and notes belong to you and only you.',
-          style: TextStyle(color: p.text2, fontSize: 15, height: 1.45),
-        ),
-        const SizedBox(height: spacing24),
-        SettingsGroup(
-          p: p,
-          children: [
-            _PolicySection(
-              p: p,
-              icon: Icons.storage_rounded,
-              title: 'Local Storage',
-              text:
-                  'All moments and notes are stored locally on your device using an encrypted-ready database (Hive). No data is ever uploaded to a cloud server unless you manually export a backup file.',
-            ),
-            _PolicySection(
-              p: p,
-              icon: Icons.analytics_outlined,
-              title: 'No Tracking',
-              text:
-                  'We do not use any third-party analytics, tracking pixels, or advertising SDKs. Your app usage remains completely anonymous and private.',
-            ),
-            _PolicySection(
-              p: p,
-              icon: Icons.wifi_rounded,
-              title: 'Limited Connectivity',
-              text:
-                  'The app only uses the internet to check for software updates on GitHub and to fetch occasional app notices if enabled. No personal data is transmitted during these checks.',
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        FilledButton.icon(
-          onPressed: () => widget.onOpenLink(privacyPolicyUrl),
-          icon: const Icon(Icons.open_in_new_rounded, size: 18),
-          label: const Text(
-            'Full Online Policy',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          style: FilledButton.styleFrom(
-            backgroundColor: p.accent,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-        ),
-        const SizedBox(height: spacing32),
-      ],
-    );
-  }
-
-  Widget _termsOfUsePage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: spacing8),
-        Text(
-          'Terms of Use',
-          style: TextStyle(
-            color: p.text,
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
-        ),
-        const SizedBox(height: spacing12),
-        Text(
-          'By using NoteKar, you agree to our terms of service and how we handle open source licenses.',
-          style: TextStyle(color: p.text2, fontSize: 15, height: 1.45),
-        ),
-        const SizedBox(height: spacing24),
-        SettingsGroup(
-          p: p,
-          children: [
-            _PolicySection(
-              p: p,
-              icon: Icons.gavel_rounded,
-              title: 'App Usage',
-              text:
-                  'NoteKar is provided "as is" for personal use. You are responsible for your own data backups and for ensuring your use of the app complies with local laws.',
-            ),
-            _PolicySection(
-              p: p,
-              icon: Icons.code_rounded,
-              title: 'Open Source',
-              text:
-                  'NoteKar is open source software. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.',
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        FilledButton.icon(
-          onPressed: () => widget.onOpenLink(termsUrl),
-          icon: const Icon(Icons.open_in_new_rounded, size: 18),
-          label: const Text(
-            'Full Online Terms',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          style: FilledButton.styleFrom(
-            backgroundColor: p.orange,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-        ),
-        const SizedBox(height: spacing32),
-      ],
-    );
-  }
-
   Future<void> _confirmResetAll(Palette p) async {
     final yes = await showGeneralDialog<bool>(
       context: context,
@@ -6135,11 +5895,38 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Privacy Policy'))
-                          SliverToBoxAdapter(child: _privacyPolicyPage(p)),
+                          SliverToBoxAdapter(
+                            child: LegalAboutSettingsPage(
+                              p: p,
+                              subCategory: 'Privacy Policy',
+                              appVersion: appVersion,
+                              privacyPolicyUrl: privacyPolicyUrl,
+                              termsUrl: termsUrl,
+                              onOpenLink: widget.onOpenLink,
+                            ),
+                          ),
                         if (show('Terms of Use'))
-                          SliverToBoxAdapter(child: _termsOfUsePage(p)),
+                          SliverToBoxAdapter(
+                            child: LegalAboutSettingsPage(
+                              p: p,
+                              subCategory: 'Terms of Use',
+                              appVersion: appVersion,
+                              privacyPolicyUrl: privacyPolicyUrl,
+                              termsUrl: termsUrl,
+                              onOpenLink: widget.onOpenLink,
+                            ),
+                          ),
                         if (show('Licenses'))
-                          SliverToBoxAdapter(child: _licensesPage(p)),
+                          SliverToBoxAdapter(
+                            child: LegalAboutSettingsPage(
+                              p: p,
+                              subCategory: 'Licenses',
+                              appVersion: appVersion,
+                              privacyPolicyUrl: privacyPolicyUrl,
+                              termsUrl: termsUrl,
+                              onOpenLink: widget.onOpenLink,
+                            ),
+                          ),
                         if (show('Feedback'))
                           SliverToBoxAdapter(
                             child: FeedbackChangelogSettingsPage(
@@ -6454,63 +6241,6 @@ ${stackTrace ?? 'No stack trace provided.'}
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PolicySection extends StatelessWidget {
-  const _PolicySection({
-    required this.p,
-    required this.icon,
-    required this.title,
-    required this.text,
-  });
-
-  final Palette p;
-  final IconData icon;
-  final String title;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(18),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: p.accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: p.accent, size: 18),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  text,
-                  style: TextStyle(color: p.text2, fontSize: 13, height: 1.5),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
