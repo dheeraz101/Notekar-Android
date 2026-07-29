@@ -17,7 +17,7 @@
 > 🚀 **Official Release Hub for NoteKar**
 >
 > **This repository is the official home for all new NoteKar version releases, Android APK
-downloads, and active app development.**
+> downloads, and active app development.**
 >
 > 📥 To download the latest stable Android APK release, visit the *
 *[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
