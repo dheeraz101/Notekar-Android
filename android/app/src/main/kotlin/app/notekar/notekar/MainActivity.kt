@@ -139,6 +139,11 @@ class MainActivity : FlutterActivity() {
                         val historyList = call.argument<List<String>>("historyList") ?: emptyList()
                         val historyString = historyList.joinToString("\n")
 
+                        val sobrietyEnabled = call.argument<Boolean>("sobrietyEnabled") ?: false
+                        val streakDays = call.argument<String>("streakDays") ?: "0h"
+                        val streakMilestone = call.argument<String>("streakMilestone") ?: ""
+                        val lastRelapseTime = call.argument<String>("lastRelapseTime") ?: ""
+
                         val prefs = getSharedPreferences(
                             NoteKarWidgetProvider.PREFS_NAME,
                             Context.MODE_PRIVATE
@@ -152,6 +157,10 @@ class MainActivity : FlutterActivity() {
                             .putLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, lastTimestamp)
                             .putBoolean(NoteKarWidgetProvider.KEY_HAS_MOMENTS, hasMoments)
                             .putString(NoteKarWidgetProvider.KEY_HISTORY, historyString)
+                            .putBoolean(NoteKarWidgetProvider.KEY_SOBRIETY_ENABLED, sobrietyEnabled)
+                            .putString(NoteKarWidgetProvider.KEY_STREAK_DAYS, streakDays)
+                            .putString(NoteKarWidgetProvider.KEY_STREAK_MILESTONE, streakMilestone)
+                            .putString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, lastRelapseTime)
                             .apply()
 
                         NoteKarWidgetProvider.updateAllWidgets(this)

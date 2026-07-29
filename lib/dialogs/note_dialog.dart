@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NoteDialog extends StatefulWidget {
   const NoteDialog({
@@ -33,11 +34,28 @@ class _NoteDialogState extends State<NoteDialog> {
   final _scrollController = ScrollController();
   bool _showWarning = false;
 
+  bool _sobrietyMode = false;
+  String? _selectedMood;
+  String? _selectedTrigger;
+  bool _relapseSelected = false;
+
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
     _controller.addListener(_scrollToBottom);
+    _loadSobrietyMode();
+    // Pre-check if note already contains relapse or tags
+    if (widget.initialNote.contains('#relapse')) {
+      _relapseSelected = true;
+    }
+  }
+
+  Future<void> _loadSobrietyMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _sobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
+    });
   }
 
   void _scrollToBottom() {
@@ -128,6 +146,98 @@ class _NoteDialogState extends State<NoteDialog> {
             count: _controller.text.length,
             max: maxNoteLength,
           ),
+          if (_sobrietyMode) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Mark as Relapse / Reset',
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Switch.adaptive(
+                  value: _relapseSelected,
+                  activeTrackColor: widget.p.orange,
+                  onChanged: (value) {
+                    setState(() => _relapseSelected = value);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'MOOD TAG',
+              style: TextStyle(
+                color: widget.p.text2,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
+            ),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: ['Bored', 'Anxious', 'Fatigue', 'Stressed', 'Lonely']
+                    .map((mood) {
+                      final isSelected = _selectedMood == mood.toLowerCase();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _buildTagChip(mood, isSelected, () {
+                          setState(() {
+                            _selectedMood = isSelected
+                                ? null
+                                : mood.toLowerCase();
+                          });
+                        }, widget.p.accent),
+                      );
+                    })
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'TRIGGER TAG',
+              style: TextStyle(
+                color: widget.p.text2,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
+            ),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children:
+                    [
+                      'Social Media',
+                      'Video',
+                      'Alone',
+                      'Late Night',
+                      'Fatigue',
+                    ].map((trigger) {
+                      final triggerKey = trigger.toLowerCase().replaceAll(
+                        ' ',
+                        '_',
+                      );
+                      final isSelected = _selectedTrigger == triggerKey;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _buildTagChip(trigger, isSelected, () {
+                          setState(() {
+                            _selectedTrigger = isSelected ? null : triggerKey;
+                          });
+                        }, widget.p.orange),
+                      );
+                    }).toList(),
+              ),
+            ),
+          ],
           if (_showWarning)
             Padding(
               padding: const EdgeInsets.only(top: spacing8),
@@ -176,8 +286,66 @@ class _NoteDialogState extends State<NoteDialog> {
     );
   }
 
+  Widget _buildTagChip(
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+    Color activeColor,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.15)
+              : widget.p.surface3,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? activeColor : widget.p.border,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? activeColor : widget.p.text2,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _saveNote() {
-    final note = _controller.text.trim();
+    var note = _controller.text.trim();
+
+    if (_sobrietyMode) {
+      final List<String> tags = [];
+      if (_relapseSelected) {
+        tags.add('#relapse');
+      }
+      if (_selectedMood != null) {
+        tags.add('#mood:$_selectedMood');
+      }
+      if (_selectedTrigger != null) {
+        tags.add('#trigger:$_selectedTrigger');
+      }
+
+      if (tags.isNotEmpty) {
+        final tagsString = tags.join(' ');
+        if (note.isEmpty) {
+          note = tagsString;
+        } else {
+          var cleanNote = note;
+          cleanNote = cleanNote.replaceAll('#relapse', '').trim();
+          cleanNote = cleanNote.replaceAll(RegExp(r'#mood:\w+'), '').trim();
+          cleanNote = cleanNote.replaceAll(RegExp(r'#trigger:\w+'), '').trim();
+          note = cleanNote.isEmpty ? tagsString : '$cleanNote $tagsString';
+        }
+      }
+    }
 
     if (!widget.allowEmpty && note.isEmpty) {
       HapticFeedback.selectionClick();

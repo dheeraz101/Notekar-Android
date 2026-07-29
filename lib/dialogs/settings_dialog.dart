@@ -13,6 +13,7 @@ import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -122,11 +123,13 @@ class SettingsDialog extends StatefulWidget {
     required this.onClearTrash,
     required this.currentLocale,
     required this.onLocaleChanged,
+    this.initialCategory,
   });
 
   final String currentLocale;
   final ValueChanged<String> onLocaleChanged;
 
+  final String? initialCategory;
   final Palette p;
   final String theme;
   final String defaultMode;
@@ -294,6 +297,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool obfuscateInRecents = false;
   bool showPersistentNotification = false;
   bool enableNoteOnClick = false;
+  bool enableSobrietyMode = false;
+  String sobrietyResetType = 'any';
+  int? sobrietyCustomStartMs;
+  String sobrietyMilestoneTheme = 'science';
 
   String _vtRatio = '0 / 60+ clean';
   String _vtStatus = 'Undetected';
@@ -310,6 +317,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
       showPersistentNotification =
           _prefs?.getBool('show_persistent_notification') ?? false;
       enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
+      enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
+      sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
+      sobrietyCustomStartMs = _prefs?.getInt('sobriety_custom_start_ms');
+      sobrietyMilestoneTheme =
+          _prefs?.getString('sobriety_milestone_theme') ?? 'science';
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _dailyReminderEnabled =
@@ -897,6 +909,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
     privacyLockType = widget.privacyLockType;
     currentLocale = widget.currentLocale;
+
+    if (widget.initialCategory != null) {
+      category = widget.initialCategory;
+      _categoryStack.clear();
+    }
 
     widget.entriesNotifier.addListener(_onEntriesChanged);
     widget.trashEntriesNotifier.addListener(_onEntriesChanged);
@@ -2369,6 +2386,203 @@ class _SettingsDialogState extends State<SettingsDialog> {
     } catch (e) {
       _showErrorReporterDialog(e, null);
     }
+  }
+
+  Widget _buildSobrietyAnalyticsCard(Palette p) {
+    final relapseMoments = widget.entriesNotifier.value
+        .where((e) => e.note.contains('#relapse'))
+        .toList();
+    if (relapseMoments.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: spacing16,
+          vertical: spacing8,
+        ),
+        padding: const EdgeInsets.all(spacing16),
+        decoration: BoxDecoration(
+          color: p.surface2,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: p.border),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.spa_rounded, color: p.accent, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              'No relapses recorded yet!'.localized(context),
+              style: TextStyle(
+                color: p.text,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Your clean streak is active and running.'.localized(context),
+              style: TextStyle(color: p.text2, fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final Map<String, int> triggerCounts = {};
+    final Map<String, int> moodCounts = {};
+    final Map<int, int> hourCounts = {};
+
+    for (var m in relapseMoments) {
+      final note = m.note;
+      final triggerMatch = RegExp(r'#trigger:(\w+)').firstMatch(note);
+      if (triggerMatch != null) {
+        final t = triggerMatch.group(1)!;
+        triggerCounts[t] = (triggerCounts[t] ?? 0) + 1;
+      }
+      final moodMatch = RegExp(r'#mood:(\w+)').firstMatch(note);
+      if (moodMatch != null) {
+        final md = moodMatch.group(1)!;
+        moodCounts[md] = (moodCounts[md] ?? 0) + 1;
+      }
+      final dt = DateTime.fromMillisecondsSinceEpoch(m.timestamp);
+      final hour = dt.hour;
+      hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
+    }
+
+    String topTrigger = 'None';
+    int maxTriggerCount = 0;
+    triggerCounts.forEach((k, v) {
+      if (v > maxTriggerCount) {
+        maxTriggerCount = v;
+        topTrigger = k.replaceAll('_', ' ').toUpperCase();
+      }
+    });
+
+    String topMood = 'None';
+    int maxMoodCount = 0;
+    moodCounts.forEach((k, v) {
+      if (v > maxMoodCount) {
+        maxMoodCount = v;
+        topMood = k.toUpperCase();
+      }
+    });
+
+    final Map<String, int> rangeCounts = {
+      'Morning': 0,
+      'Afternoon': 0,
+      'Evening': 0,
+      'Night': 0,
+    };
+    hourCounts.forEach((h, count) {
+      if (h >= 5 && h < 12) {
+        rangeCounts['Morning'] = rangeCounts['Morning']! + count;
+      } else if (h >= 12 && h < 17) {
+        rangeCounts['Afternoon'] = rangeCounts['Afternoon']! + count;
+      } else if (h >= 17 && h < 21) {
+        rangeCounts['Evening'] = rangeCounts['Evening']! + count;
+      } else {
+        rangeCounts['Night'] = rangeCounts['Night']! + count;
+      }
+    });
+
+    String peakTimeRange = 'Night';
+    int maxRangeCount = 0;
+    rangeCounts.forEach((k, v) {
+      if (v > maxRangeCount) {
+        maxRangeCount = v;
+        peakTimeRange = k;
+      }
+    });
+
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: spacing16,
+        vertical: spacing8,
+      ),
+      padding: const EdgeInsets.all(spacing16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.analytics_rounded, color: p.orange, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Sobriety Trigger Analysis'.localized(context),
+                style: TextStyle(
+                  color: p.text,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildMetricTile(
+                  p,
+                  'Total Relapses',
+                  '${relapseMoments.length}',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: _buildMetricTile(p, 'Top Trigger', topTrigger)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(child: _buildMetricTile(p, 'Top Mood', topMood)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMetricTile(p, 'Peak Risk Window', peakTimeRange),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricTile(Palette p, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: p.surface3,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: p.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: p.text2,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showBetaInfoPopup(Palette p) {
@@ -4992,6 +5206,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                               const SizedBox(height: 12),
                               SettingsGroup(
                                 p: p,
+                                children: [
+                                  SettingsRow(
+                                    p: p,
+                                    icon: Icons.self_improvement_rounded,
+                                    title: 'Sobriety Companion',
+                                    color: p.orange,
+                                    status: enableSobrietyMode ? 'On' : 'Off',
+                                    onTap: () => _openCategory(
+                                      'Sobriety Companion',
+                                      parent: 'Logging',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Track clean streaks, log relapses with mood and trigger tags, and view offline pattern analysis.',
+                              ),
+                              const SizedBox(height: 12),
+                              SettingsGroup(
+                                p: p,
                                 title: 'Notification Panel',
                                 children: [
                                   SettingsSwitchRow(
@@ -5059,6 +5295,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                                           .inHours >=
                                       48)
                                 const SizedBox(height: 6),
+                              if (enableSobrietyMode) ...[
+                                _buildSobrietyAnalyticsCard(p),
+                                const SizedBox(height: 6),
+                              ],
                               _buildDashboardSectionHeader(
                                 p,
                                 Icons.analytics_outlined,
@@ -6411,6 +6651,407 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       parent: 'Moments',
                                     ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Sobriety Companion'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Privacy-first streak tracking and relapse diary. All data stays on your device. Existing logs are never altered.',
+                              ),
+                              SettingsGroup(
+                                p: p,
+                                title: 'Streak Mode',
+                                children: [
+                                  SettingsSwitchRow(
+                                    p: p,
+                                    icon: Icons.self_improvement_rounded,
+                                    title: 'Enable Sobriety Mode',
+                                    subtitle:
+                                        'Adds a clean streak card to your home screen and adapts home screen widgets.',
+                                    color: p.orange,
+                                    value: enableSobrietyMode,
+                                    onChanged: (value) async {
+                                      if (_prefs != null) {
+                                        await _prefs!.setBool(
+                                          'enable_sobriety_mode',
+                                          value,
+                                        );
+                                      }
+                                      setState(
+                                        () => enableSobrietyMode = value,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                              if (enableSobrietyMode) ...[
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show RESET and DIARY buttons.',
+                                ),
+                                const SizedBox(height: 12),
+                                SettingsGroup(
+                                  p: p,
+                                  title: 'Streak Reset Logic',
+                                  children: [
+                                    SettingsSwitchRow(
+                                      p: p,
+                                      icon: Icons.restart_alt_rounded,
+                                      title: 'Reset on Relapse Tag Only',
+                                      subtitle:
+                                          'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.',
+                                      color: p.orange,
+                                      value: sobrietyResetType == 'relapse',
+                                      onChanged: (value) async {
+                                        final nextType = value
+                                            ? 'relapse'
+                                            : 'any';
+                                        if (_prefs != null) {
+                                          await _prefs!.setString(
+                                            'sobriety_reset_type',
+                                            nextType,
+                                          );
+                                        }
+                                        setState(
+                                          () => sobrietyResetType = nextType,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                SettingsGroup(
+                                  p: p,
+                                  title: 'Trigger Diary',
+                                  children: [
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.analytics_rounded,
+                                      title: 'Trigger Analysis',
+                                      subtitle:
+                                          'View your relapse pattern insights, top moods, and peak vulnerability windows.',
+                                      color: p.orange,
+                                      trailing: Icon(
+                                        Icons.chevron_right_rounded,
+                                        color: p.text3,
+                                        size: 20,
+                                      ),
+                                      onTap: () => _openCategory(
+                                        'Trigger Analysis',
+                                        parent: 'Sobriety Companion',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'When logging a moment with Sobriety Mode on, you can tag mood (Bored, Anxious, Lonely\u2026) and trigger (Social Media, Late Night\u2026). These are stored as hashtags in the note for full backwards compatibility.',
+                                ),
+                                const SizedBox(height: 12),
+                                SettingsGroup(
+                                  p: p,
+                                  title: 'Custom Start Date',
+                                  children: [
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.calendar_today_rounded,
+                                      title: 'Set Sobriety Start Date',
+                                      subtitle: sobrietyCustomStartMs != null
+                                          ? 'From ${datePretty(sobrietyCustomStartMs!)}'
+                                          : 'Not set — using last log or relapse tag',
+                                      color: p.orange,
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (sobrietyCustomStartMs != null)
+                                            GestureDetector(
+                                              onTap: () async {
+                                                await _prefs?.remove(
+                                                  'sobriety_custom_start_ms',
+                                                );
+                                                setState(
+                                                  () => sobrietyCustomStartMs =
+                                                      null,
+                                                );
+                                              },
+                                              child: Icon(
+                                                Icons.close_rounded,
+                                                color: p.text3,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          const SizedBox(width: 4),
+                                          Icon(
+                                            Icons.chevron_right_rounded,
+                                            color: p.text3,
+                                            size: 20,
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () async {
+                                        final now = DateTime.now();
+                                        final initialDate =
+                                            sobrietyCustomStartMs != null
+                                            ? DateTime.fromMillisecondsSinceEpoch(
+                                                sobrietyCustomStartMs!,
+                                              )
+                                            : now.subtract(
+                                                const Duration(days: 7),
+                                              );
+                                        final picked = await showDatePicker(
+                                          context: context,
+                                          initialDate: initialDate,
+                                          firstDate: DateTime(2000),
+                                          lastDate: now,
+                                          helpText:
+                                              'When did you start this streak?',
+                                        );
+                                        if (picked != null && mounted) {
+                                          final ms =
+                                              picked.millisecondsSinceEpoch;
+                                          await _prefs?.setInt(
+                                            'sobriety_custom_start_ms',
+                                            ms,
+                                          );
+                                          setState(
+                                            () => sobrietyCustomStartMs = ms,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'Were you already clean before installing? Set your actual start date here. This overrides automatic detection from your logs.',
+                                ),
+                                const SizedBox(height: 12),
+                                SettingsGroup(
+                                  p: p,
+                                  title: 'Milestone Theme',
+                                  children: [
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.palette_rounded,
+                                      title: 'Theme Style',
+                                      subtitle: () {
+                                        final t = kMilestoneThemes.firstWhere(
+                                          (t) => t.id == sobrietyMilestoneTheme,
+                                          orElse: () => kMilestoneThemes.first,
+                                        );
+                                        return '${t.emoji} ${t.name} — ${t.description}';
+                                      }(),
+                                      color: p.orange,
+                                      trailing: Icon(
+                                        Icons.chevron_right_rounded,
+                                        color: p.text3,
+                                        size: 20,
+                                      ),
+                                      onTap: () => _openCategory(
+                                        'Milestone Theme',
+                                        parent: 'Sobriety Companion',
+                                      ),
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.emoji_events_rounded,
+                                      title: 'View All Milestones',
+                                      subtitle:
+                                          'See all 21 milestones with descriptions — from day 1 to 10 years.',
+                                      color: p.orange,
+                                      trailing: Icon(
+                                        Icons.chevron_right_rounded,
+                                        color: p.text3,
+                                        size: 20,
+                                      ),
+                                      onTap: () => _openCategory(
+                                        'Milestones',
+                                        parent: 'Sobriety Companion',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Trigger Analysis'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Offline analysis of your logged relapse moments. No data leaves your device.',
+                              ),
+                              _buildSobrietyAnalyticsCard(p),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Milestone Theme'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Choose the narrative style for your milestone names. Each theme is psychologically curated to match a different self-image and motivation style.',
+                              ),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  for (final theme in kMilestoneThemes)
+                                    SettingsRow(
+                                      p: p,
+                                      title: '${theme.emoji} ${theme.name}',
+                                      subtitle: theme.description,
+                                      color: p.orange,
+                                      trailing:
+                                          sobrietyMilestoneTheme == theme.id
+                                          ? Icon(
+                                              Icons.check_circle_rounded,
+                                              color: p.orange,
+                                              size: 20,
+                                            )
+                                          : Icon(
+                                              Icons.circle_outlined,
+                                              color: p.text3,
+                                              size: 20,
+                                            ),
+                                      onTap: () async {
+                                        await _prefs?.setString(
+                                          'sobriety_milestone_theme',
+                                          theme.id,
+                                        );
+                                        setState(
+                                          () =>
+                                              sobrietyMilestoneTheme = theme.id,
+                                        );
+                                      },
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: spacing48),
+                            ]),
+                          ),
+                        if (show('Milestones'))
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: spacing8),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'All 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. Names shown in your current theme.',
+                              ),
+                              SettingsGroup(
+                                p: p,
+                                children: [
+                                  for (final milestone in kSobrietyMilestones)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: spacing16,
+                                        vertical: spacing12,
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            width: 52,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: p.orange.withValues(
+                                                alpha: 0.12,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  milestone.days.toString(),
+                                                  style: TextStyle(
+                                                    color: p.orange,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w900,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                Text(
+                                                  'DAYS',
+                                                  style: TextStyle(
+                                                    color: p.orange.withValues(
+                                                      alpha: 0.7,
+                                                    ),
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.w700,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  getMilestoneName(
+                                                    milestone,
+                                                    sobrietyMilestoneTheme,
+                                                  ),
+                                                  style: TextStyle(
+                                                    color: p.text,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  milestone.whyItMatters,
+                                                  style: TextStyle(
+                                                    color: p.text2,
+                                                    fontSize: 11,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  getMilestoneFlavor(
+                                                    milestone,
+                                                    sobrietyMilestoneTheme,
+                                                  ),
+                                                  style: TextStyle(
+                                                    color: p.orange.withValues(
+                                                      alpha: 0.8,
+                                                    ),
+                                                    fontSize: 10,
+                                                    fontStyle: FontStyle.italic,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: spacing48),

@@ -74,6 +74,10 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_LAST_TIMESTAMP = "last_timestamp"
         const val KEY_HAS_MOMENTS = "has_moments"
         const val KEY_HISTORY = "history"
+        const val KEY_SOBRIETY_ENABLED = "sobriety_enabled"
+        const val KEY_STREAK_DAYS = "streak_days"
+        const val KEY_STREAK_MILESTONE = "streak_milestone"
+        const val KEY_LAST_RELAPSE_TIME = "last_relapse_time"
 
         private fun launchIntent(
             context: Context,
@@ -215,6 +219,11 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
             val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
 
+            val sobrietyEnabled = prefs.getBoolean(KEY_SOBRIETY_ENABLED, false)
+            val streakDays = prefs.getString(KEY_STREAK_DAYS, "0h") ?: "0h"
+            val streakMilestone = prefs.getString(KEY_STREAK_MILESTONE, "") ?: ""
+            val lastRelapseTime = prefs.getString(KEY_LAST_RELAPSE_TIME, "") ?: ""
+
             val options = manager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(
                 AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH
@@ -222,63 +231,96 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             val compact = minWidth < 200
 
-            views.setTextViewText(
-                R.id.widget_mode,
-                if (mode == "single") {
-                    "SINGLE MODE"
+            if (sobrietyEnabled) {
+                views.setViewVisibility(R.id.widget_in, View.GONE)
+                views.setViewVisibility(R.id.widget_out, View.GONE)
+                views.setTextViewText(R.id.widget_single, "RESET")
+                views.setTextViewText(R.id.widget_note, "DIARY")
+                views.setTextViewText(R.id.widget_mode, "SOBRIETY ACTIVE")
+
+                if (compact) {
+                    views.setViewVisibility(R.id.widget_clock, View.GONE)
+                    views.setViewVisibility(R.id.widget_history_card, View.GONE)
                 } else {
-                    "NEXT: ${nextAction.uppercase(Locale.ROOT)}"
-                }
-            )
+                    views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
 
-            // Bind history stack
-            val historyString = prefs.getString(KEY_HISTORY, "") ?: ""
-            val historyLines =
-                if (historyString.isEmpty()) emptyList() else historyString.split("\n")
-
-            if (compact) {
-                views.setViewVisibility(R.id.widget_clock, View.GONE)
-                views.setViewVisibility(R.id.widget_history_card, View.GONE)
-            } else {
-                views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
-                views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
-
-                // Show total logs on the right end of the top line
-                views.setTextViewText(R.id.widget_total_logs, "$todayCount Logs")
-
-                if (historyLines.isNotEmpty()) {
-                    val parts = historyLines[0].split("|")
-                    if (parts.size >= 2) {
-                        val timestamp = parts[0].toLongOrNull() ?: 0L
-                        val type = parts[1]
-                        val note = if (parts.size > 2) parts[2] else ""
-
-                        val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
-                            Date(timestamp)
-                        )
-
-                        val typeLabel = when (type.lowercase(Locale.ROOT)) {
-                            "in" -> "📥 IN"
-                            "out" -> "📤 OUT"
-                            "single" -> "⚡ TAP"
-                            "note" -> "📝 NOTE"
-                            else -> type.uppercase(Locale.ROOT)
-                        }
-
-                        views.setTextViewText(R.id.widget_last_log_info, "$typeLabel • $time")
-
-                        if (note.isNotEmpty()) {
-                            views.setTextViewText(R.id.widget_last_log_note, note)
-                        } else {
-                            views.setTextViewText(R.id.widget_last_log_note, "No note details...")
-                        }
-                    }
-                } else {
-                    views.setTextViewText(R.id.widget_last_log_info, "No logs today")
+                    views.setTextViewText(R.id.widget_total_logs, streakDays)
+                    views.setTextViewText(
+                        R.id.widget_last_log_info,
+                        if (streakMilestone.isNotEmpty()) streakMilestone else "Clean Streak"
+                    )
                     views.setTextViewText(
                         R.id.widget_last_log_note,
-                        "Tap buttons below to start log"
+                        if (lastRelapseTime.isNotEmpty()) "Last reset: $lastRelapseTime" else "No relapse recorded"
                     )
+                }
+            } else {
+                views.setViewVisibility(R.id.widget_in, View.VISIBLE)
+                views.setViewVisibility(R.id.widget_out, View.VISIBLE)
+                views.setTextViewText(R.id.widget_single, "TAP")
+                views.setTextViewText(R.id.widget_note, "NOTE")
+                views.setTextViewText(
+                    R.id.widget_mode,
+                    if (mode == "single") {
+                        "SINGLE MODE"
+                    } else {
+                        "NEXT: ${nextAction.uppercase(Locale.ROOT)}"
+                    }
+                )
+
+                // Bind history stack
+                val historyString = prefs.getString(KEY_HISTORY, "") ?: ""
+                val historyLines =
+                    if (historyString.isEmpty()) emptyList() else historyString.split("\n")
+
+                if (compact) {
+                    views.setViewVisibility(R.id.widget_clock, View.GONE)
+                    views.setViewVisibility(R.id.widget_history_card, View.GONE)
+                } else {
+                    views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
+
+                    // Show total logs on the right end of the top line
+                    views.setTextViewText(R.id.widget_total_logs, "$todayCount Logs")
+
+                    if (historyLines.isNotEmpty()) {
+                        val parts = historyLines[0].split("|")
+                        if (parts.size >= 2) {
+                            val timestamp = parts[0].toLongOrNull() ?: 0L
+                            val type = parts[1]
+                            val note = if (parts.size > 2) parts[2] else ""
+
+                            val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
+                                Date(timestamp)
+                            )
+
+                            val typeLabel = when (type.lowercase(Locale.ROOT)) {
+                                "in" -> "📥 IN"
+                                "out" -> "📤 OUT"
+                                "single" -> "⚡ TAP"
+                                "note" -> "📝 NOTE"
+                                else -> type.uppercase(Locale.ROOT)
+                            }
+
+                            views.setTextViewText(R.id.widget_last_log_info, "$typeLabel • $time")
+
+                            if (note.isNotEmpty()) {
+                                views.setTextViewText(R.id.widget_last_log_note, note)
+                            } else {
+                                views.setTextViewText(
+                                    R.id.widget_last_log_note,
+                                    "No note details..."
+                                )
+                            }
+                        }
+                    } else {
+                        views.setTextViewText(R.id.widget_last_log_info, "No logs today")
+                        views.setTextViewText(
+                            R.id.widget_last_log_note,
+                            "Tap buttons below to start log"
+                        )
+                    }
                 }
             }
 

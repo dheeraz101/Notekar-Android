@@ -19,6 +19,7 @@ import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -97,6 +98,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _startupComplete = false;
   Map<String, dynamic>? _pendingTap;
   bool _enableNoteOnClick = false;
+  bool _enableSobrietyMode = false;
+  String _sobrietyResetType = 'any';
+  DateTime? _sobrietyCustomStart;
+  String _sobrietyMilestoneTheme = 'science';
   bool _showHistoryText = true;
   bool _showLastSavedHint = true;
   bool _requireLongPressNote = false;
@@ -438,6 +443,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() {
       _prefs = prefs;
       _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
+      _enableSobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
+      _sobrietyResetType = prefs.getString('sobriety_reset_type') ?? 'any';
+      final customStartMs = prefs.getInt('sobriety_custom_start_ms');
+      _sobrietyCustomStart = customStartMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(customStartMs)
+          : null;
+      _sobrietyMilestoneTheme =
+          prefs.getString('sobriety_milestone_theme') ?? 'science';
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _mode = _defaultMode;
@@ -1490,6 +1503,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
         .map((e) => '${e.timestamp}|${e.type}|${e.note}')
         .toList();
 
+    final duration = _getSobrietyDuration();
+    final streakDays = _formatSobrietyStreak(duration);
+    final milestoneInfo = _getMilestoneInfo(duration);
+    final nextMilestone = (milestoneInfo['nextLabel'] ?? '') as String;
+    final remaining = (milestoneInfo['remaining'] ?? '') as String;
+    final streakMilestone = nextMilestone.isNotEmpty
+        ? '$nextMilestone ($remaining)'
+        : 'All Achieved!';
+
+    final latestRelapse = _getLatestRelapseTime();
+    final lastRelapseTime = latestRelapse != null
+        ? timeOnly(latestRelapse.millisecondsSinceEpoch)
+        : '';
+
     try {
       await _fileChannel.invokeMethod<void>('updateWidgetState', {
         'todayCount': todayCount,
@@ -1499,6 +1526,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'lastTimestamp': latest?.timestamp ?? 0,
         'hasMoments': latest != null,
         'historyList': historyList,
+        'sobrietyEnabled': _enableSobrietyMode,
+        'streakDays': streakDays,
+        'streakMilestone': streakMilestone,
+        'lastRelapseTime': lastRelapseTime,
       });
     } catch (_) {
       // Widget updates must never affect logging.
@@ -1674,7 +1705,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (mounted) setState(() {});
   }
 
-  Future<void> _openSettings() async {
+  Future<void> _openSettings({String? initialCategory}) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
       return;
@@ -1698,6 +1729,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       ),
       builder: (_) => SettingsDialog(
         p: p,
+        initialCategory: initialCategory,
         theme: _theme,
         defaultMode: _defaultMode,
         tapDelay: _tapDelay,
@@ -1945,6 +1977,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (mounted) {
       setState(() {
         _enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
+        _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
+        _sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
+        final customStartMs = _prefs?.getInt('sobriety_custom_start_ms');
+        _sobrietyCustomStart = customStartMs != null
+            ? DateTime.fromMillisecondsSinceEpoch(customStartMs)
+            : null;
+        _sobrietyMilestoneTheme =
+            _prefs?.getString('sobriety_milestone_theme') ?? 'science';
       });
     }
 
@@ -2762,6 +2802,179 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
   }
 
+  DateTime? _getLatestRelapseTime() {
+    if (_entries.isEmpty) return null;
+    if (_sobrietyResetType == 'relapse') {
+      final relapseMoments = _entries.where((e) => e.note.contains('#relapse'));
+      if (relapseMoments.isEmpty) {
+        final minTimestamp = _entries.map((e) => e.timestamp).reduce(math.min);
+        return DateTime.fromMillisecondsSinceEpoch(minTimestamp);
+      }
+      final maxTimestamp = relapseMoments
+          .map((e) => e.timestamp)
+          .reduce(math.max);
+      return DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+    } else {
+      final maxTimestamp = _entries.map((e) => e.timestamp).reduce(math.max);
+      return DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+    }
+  }
+
+  Duration _getSobrietyDuration() {
+    // Custom start date takes precedence over log-based calculation.
+    if (_sobrietyCustomStart != null) {
+      final diff = DateTime.now().difference(_sobrietyCustomStart!);
+      return diff.isNegative ? Duration.zero : diff;
+    }
+    final resetTime = _getLatestRelapseTime();
+    if (resetTime == null) return Duration.zero;
+    final diff = DateTime.now().difference(resetTime);
+    return diff.isNegative ? Duration.zero : diff;
+  }
+
+  String _formatSobrietyStreak(Duration duration) {
+    if (duration == Duration.zero) return '0h Clean';
+    final days = duration.inDays;
+    final hours = duration.inHours % 24;
+    final minutes = duration.inMinutes % 60;
+    if (days == 0) {
+      if (hours == 0) {
+        return '$minutes mins Clean';
+      }
+      return '${hours}h ${minutes}m Clean';
+    }
+    return '${days}d ${hours}h Clean';
+  }
+
+  Map<String, dynamic> _getMilestoneInfo(Duration duration) {
+    final result = getMilestoneProgress(duration);
+    final theme = _sobrietyMilestoneTheme;
+    final currentName = result.current != null
+        ? getMilestoneName(result.current!, theme)
+        : 'None';
+    final nextLabel = result.next != null
+        ? result.next!.dayLabel
+        : 'All Achieved!';
+    return {
+      'current': currentName,
+      'next': result.next != null
+          ? getMilestoneName(result.next!, theme)
+          : 'None',
+      'nextLabel': nextLabel,
+      'progress': result.progress,
+      'remaining': result.remainingLabel,
+    };
+  }
+
+  Widget _buildSobrietyStreakCard(Palette palette) {
+    final duration = _getSobrietyDuration();
+    final milestoneResult = getMilestoneProgress(duration);
+    final theme = _sobrietyMilestoneTheme;
+
+    // Pill label: first 24h → "Oh Clean", then milestone name
+    final String bigLabel;
+    if (duration.inHours < 24) {
+      bigLabel = 'Oh Clean';
+    } else {
+      bigLabel = milestoneResult.current != null
+          ? getMilestoneName(milestoneResult.current!, theme)
+          : 'Oh Clean';
+    }
+
+    final String smallLabel = milestoneResult.remainingLabel;
+    final double progress = milestoneResult.progress;
+
+    final Color fillColor = palette.orange;
+
+    return GestureDetector(
+      onTap: () {
+        // Open the Sobriety Companion settings page
+        _openSettings(initialCategory: 'Sobriety Companion');
+      },
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: Stack(
+              children: [
+                // Background track
+                Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: palette.surface2,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: palette.border, width: 1),
+                  ),
+                ),
+                // Progress fill
+                FractionallySizedBox(
+                  widthFactor: progress.clamp(0.05, 1.0),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: fillColor.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                // Text content
+                SizedBox(
+                  height: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (smallLabel.isNotEmpty)
+                                Text(
+                                  smallLabel,
+                                  style: TextStyle(
+                                    color: palette.text2,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.3,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              Text(
+                                bigLabel,
+                                style: TextStyle(
+                                  color: palette.text,
+                                  fontSize: smallLabel.isEmpty ? 20 : 17,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.3,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: palette.text3,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _applySystemUiStyle() {
     final palette = p;
     final light = _theme == 'light';
@@ -3023,6 +3236,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ),
             ),
           ),
+          if (_enableSobrietyMode)
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 64,
+              left: spacing24,
+              right: spacing24,
+              child: _buildSobrietyStreakCard(palette),
+            ),
           if (lastSaved && _showLastSavedHint)
             Positioned(
               left: 0,
