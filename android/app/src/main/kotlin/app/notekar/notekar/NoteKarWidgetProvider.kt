@@ -205,11 +205,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             manager: AppWidgetManager,
             appWidgetId: Int
         ) {
-            val views = RemoteViews(
-                context.packageName,
-                R.layout.notekar_widget
-            )
-
             val prefs = context.getSharedPreferences(
                 PREFS_NAME,
                 Context.MODE_PRIVATE
@@ -231,31 +226,33 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             val compact = minWidth < 200
 
+            val views = RemoteViews(
+                context.packageName,
+                if (sobrietyEnabled) R.layout.notekar_sobriety_widget else R.layout.notekar_widget
+            )
+
             if (sobrietyEnabled) {
-                views.setViewVisibility(R.id.widget_in, View.GONE)
-                views.setViewVisibility(R.id.widget_out, View.GONE)
-                views.setTextViewText(R.id.widget_single, "RESET")
-                views.setTextViewText(R.id.widget_note, "DIARY")
-                views.setTextViewText(R.id.widget_mode, "SOBRIETY ACTIVE")
+                // Sobriety Layout Binding
+                views.setTextViewText(R.id.widget_streak_days, streakDays)
 
                 if (compact) {
-                    views.setViewVisibility(R.id.widget_clock, View.GONE)
-                    views.setViewVisibility(R.id.widget_history_card, View.GONE)
+                    views.setViewVisibility(R.id.widget_details_container, View.GONE)
+                    views.setViewVisibility(R.id.widget_spacer, View.GONE)
                 } else {
-                    views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
-                    views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_details_container, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_spacer, View.VISIBLE)
 
-                    views.setTextViewText(R.id.widget_total_logs, streakDays)
                     views.setTextViewText(
-                        R.id.widget_last_log_info,
+                        R.id.widget_streak_milestone,
                         if (streakMilestone.isNotEmpty()) streakMilestone else "Clean Streak"
                     )
                     views.setTextViewText(
-                        R.id.widget_last_log_note,
+                        R.id.widget_last_relapse_time,
                         if (lastRelapseTime.isNotEmpty()) "Last reset: $lastRelapseTime" else "No relapse recorded"
                     )
                 }
             } else {
+                // Normal Layout Binding
                 views.setViewVisibility(R.id.widget_in, View.VISIBLE)
                 views.setViewVisibility(R.id.widget_out, View.VISIBLE)
                 views.setTextViewText(R.id.widget_single, "TAP")
@@ -324,6 +321,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 }
             }
 
+            // Click Handlers
             views.setOnClickPendingIntent(
                 R.id.widget_root,
                 launchIntent(
@@ -339,15 +337,17 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 launchBackgroundLogIntent(context, appWidgetId + 10, "single")
             )
 
-            views.setOnClickPendingIntent(
-                R.id.widget_in,
-                launchBackgroundLogIntent(context, appWidgetId + 20, "in")
-            )
+            if (!sobrietyEnabled) {
+                views.setOnClickPendingIntent(
+                    R.id.widget_in,
+                    launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+                )
 
-            views.setOnClickPendingIntent(
-                R.id.widget_out,
-                launchBackgroundLogIntent(context, appWidgetId + 30, "out")
-            )
+                views.setOnClickPendingIntent(
+                    R.id.widget_out,
+                    launchBackgroundLogIntent(context, appWidgetId + 30, "out")
+                )
+            }
 
             views.setOnClickPendingIntent(
                 R.id.widget_note,

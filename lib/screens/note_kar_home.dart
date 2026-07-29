@@ -2017,6 +2017,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _sobrietyMilestoneTheme =
             _prefs?.getString('sobriety_milestone_theme') ?? 'science';
       });
+      unawaited(_updateAndroidWidget());
     }
 
     if (result == 'log') {
