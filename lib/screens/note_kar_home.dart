@@ -4061,8 +4061,10 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                SelectableText(
+                Text(
                   url,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: p.accent,
                     fontSize: 12.5,
