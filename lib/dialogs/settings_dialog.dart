@@ -30,6 +30,7 @@ import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
+import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -6162,206 +6163,51 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
 
                         if (show('Moments'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              if (widget.onOpenTrash != null) ...[
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    16,
-                                    16,
-                                    8,
-                                  ),
-                                  child: Text(
-                                    'RECENTLY DELETED'.localized(context),
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  children: [
-                                    Container(
-                                      clipBehavior: Clip.antiAlias,
-                                      decoration: BoxDecoration(
-                                        color: p.surface2,
-                                        borderRadius: BorderRadius.circular(32),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          SettingsRow(
-                                            p: p,
-                                            icon: Icons.delete_outline_rounded,
-                                            title: 'Trash Bin'.localized(
-                                              context,
-                                            ),
-                                            status:
-                                                '${_trash.length} ${(_trash.length == 1 ? "item" : "items").localized(context)}',
-                                            color: p.orange,
-                                            onTap: () => _openCategory(
-                                              'Trash Bin',
-                                              parent: 'Moments',
-                                            ),
-                                          ),
-                                          Divider(height: 0.5, color: p.border),
-                                          Container(
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 12,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: p.surface3.withValues(
-                                                alpha: 0.35,
-                                              ),
-                                            ),
-                                            child: Text(
-                                              _trash.isEmpty
-                                                  ? 'Restore or permanently remove deleted moments'
-                                                        .localized(context)
-                                                  : '${_trash.first.date} • ${_trash.first.note.isEmpty ? 'No note'.localized(context) : _trash.first.note}',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: p.text3,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SettingsPageDescription(
-                                  p: p,
-                                  text:
-                                      'View and restore moments deleted within the last 30 days.',
-                                ),
-                              ],
-                              SettingsGroup(
-                                p: p,
-                                title: 'History Controls',
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Compact History',
-                                    color: p.accent,
-                                    value: compactHistory,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        compactHistory = value;
-                                        historyDensity = value
-                                            ? 'compact'
-                                            : 'comfortable';
-                                      });
-                                      widget.onCompactHistory(value);
-                                      widget.onHistoryDensity(historyDensity);
-                                    },
-                                  ),
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Confirm Delete',
-                                    color: p.red,
-                                    value: confirmDelete,
-                                    onChanged: (value) {
-                                      setState(() => confirmDelete = value);
-                                      widget.onConfirmDelete(value);
-                                    },
-                                  ),
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Note on Click',
-                                    subtitle:
-                                        'Tap a moment to view or edit its note, and long-press to select for duration.',
-                                    color: p.accent,
-                                    value: enableNoteOnClick,
-                                    onChanged: (value) async {
-                                      if (_prefs != null) {
-                                        await _prefs!.setBool(
-                                          'enable_note_on_click',
-                                          value,
-                                        );
-                                      }
-                                      setState(() => enableNoteOnClick = value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Controls log spacing density, tap actions, and delete confirmations for history moments.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Extended Duration',
-                                    color: p.accent,
-                                    value: extendedDuration,
-                                    onChanged: (value) {
-                                      setState(() => extendedDuration = value);
-                                      widget.onExtendedDuration(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Includes years, months, and days breakdown for long time intervals between moments.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Minimal Moment Options',
-                                    color: p.accent,
-                                    value: minimalMomentOptions,
-                                    onChanged: (value) {
-                                      setState(
-                                        () => minimalMomentOptions = value,
-                                      );
-                                      widget.onMinimalMomentOptions(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Enables streamlined icon-only quick action buttons when managing history moments.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.search_rounded,
-                                    title: 'Search Notes'.localized(context),
-                                    color: p.accent,
-                                    status:
-                                        '${entries.where((e) => e.note.isNotEmpty).length} ${'Notes'.localized(context)}',
-                                    onTap: () => _openCategory(
-                                      'Search Notes',
-                                      parent: 'Moments',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: MomentsSettingsPage(
+                              p: p,
+                              showTrashBin: widget.onOpenTrash != null,
+                              trash: _trash,
+                              compactHistory: compactHistory,
+                              confirmDelete: confirmDelete,
+                              enableNoteOnClick: enableNoteOnClick,
+                              extendedDuration: extendedDuration,
+                              minimalMomentOptions: minimalMomentOptions,
+                              notesCount: entries
+                                  .where((e) => e.note.isNotEmpty)
+                                  .length,
+                              onCompactHistoryChanged: (value) {
+                                setState(() => compactHistory = value);
+                                widget.onCompactHistory(value);
+                              },
+                              onHistoryDensityChanged: (value) {
+                                setState(() => historyDensity = value);
+                                widget.onHistoryDensity(value);
+                              },
+                              onConfirmDeleteChanged: (value) {
+                                setState(() => confirmDelete = value);
+                                widget.onConfirmDelete(value);
+                              },
+                              onEnableNoteOnClickChanged: (value) async {
+                                if (_prefs != null) {
+                                  await _prefs!.setBool(
+                                    'enable_note_on_click',
+                                    value,
+                                  );
+                                }
+                                setState(() => enableNoteOnClick = value);
+                              },
+                              onExtendedDurationChanged: (value) {
+                                setState(() => extendedDuration = value);
+                                widget.onExtendedDuration(value);
+                              },
+                              onMinimalMomentOptionsChanged: (value) {
+                                setState(() => minimalMomentOptions = value);
+                                widget.onMinimalMomentOptions(value);
+                              },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
                           ),
                         if (show('Sobriety Companion'))
                           SliverList(
