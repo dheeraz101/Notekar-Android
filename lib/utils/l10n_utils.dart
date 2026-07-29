@@ -69,6 +69,713 @@ extension LocalizedString on String {
         _ => 'Deleted SINGLE moment',
       },
 
+      // Sobriety Companion Translations
+      'sobriety companion' => switch (l10n.localeName) {
+        'es' => 'Compañero de Sobriedad',
+        'hi' => 'संयम साथी',
+        _ => 'Sobriety Companion',
+      },
+      'trigger analysis' => switch (l10n.localeName) {
+        'es' => 'Análisis de Disparadores',
+        'hi' => 'उकसाने वाले कारणों का विश्लेषण',
+        _ => 'Trigger Analysis',
+      },
+      'milestones' => switch (l10n.localeName) {
+        'es' => 'Hitos',
+        'hi' => 'मील के पत्थर',
+        _ => 'Milestones',
+      },
+      'milestone theme' => switch (l10n.localeName) {
+        'es' => 'Tema de Hitos',
+        'hi' => 'मील का पत्थर थीम',
+        _ => 'Milestone Theme',
+      },
+      'theme style' => switch (l10n.localeName) {
+        'es' => 'Estilo de Tema',
+        'hi' => 'थीम शैली',
+        _ => 'Theme Style',
+      },
+      'view all milestones' => switch (l10n.localeName) {
+        'es' => 'Ver todos los hitos',
+        'hi' => 'सभी मील के पत्थर देखें',
+        _ => 'View All Milestones',
+      },
+      'custom start date' => switch (l10n.localeName) {
+        'es' => 'Fecha de Inicio Personalizada',
+        'hi' => 'कस्टम प्रारंभ तिथि',
+        _ => 'Custom Start Date',
+      },
+      'set sobriety start date' => switch (l10n.localeName) {
+        'es' => 'Establecer Fecha de Inicio',
+        'hi' => 'संयम की प्रारंभ तिथि सेट करें',
+        _ => 'Set Sobriety Start Date',
+      },
+      'enable sobriety mode' => switch (l10n.localeName) {
+        'es' => 'Activar Modo de Sobriedad',
+        'hi' => 'संयम मोड सक्षम करें',
+        _ => 'Enable Sobriety Mode',
+      },
+      'select date and time' => switch (l10n.localeName) {
+        'es' => 'Seleccionar Fecha y Hora',
+        'hi' => 'दिनांक और समय चुनें',
+        _ => 'Select Date and Time',
+      },
+      'choose milestone theme' => switch (l10n.localeName) {
+        'es' => 'Elegir Tema de Hito',
+        'hi' => 'मील का पत्थर थीम चुनें',
+        _ => 'Choose Milestone Theme',
+      },
+      'not set: using last log or relapse tag' => switch (l10n.localeName) {
+        'es' => 'No establecido: usando último registro o etiqueta de recaída',
+        'hi' => 'सेट नहीं है: अंतिम लॉग या रिलैप्स टैग का उपयोग करना',
+        _ => 'Not set: using last log or relapse tag',
+      },
+      'were you already clean before installing? set your actual start date here. this overrides automatic detection from your logs.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            '¿Ya estabas limpio antes de instalar? Establece tu fecha de inicio real aquí. Esto anula la detección automática de tus registros.',
+          'hi' =>
+            'क्या आप इंस्टॉल करने से पहले ही संयम में थे? अपनी वास्तविक प्रारंभ तिथि यहाँ सेट करें। यह आपके लॉग से स्वचालित पहचान को अधिलेखित कर देता है।',
+          _ =>
+            'Were you already clean before installing? Set your actual start date here. This overrides automatic detection from your logs.',
+        },
+      'reset on relapse tag only' => switch (l10n.localeName) {
+        'es' => 'Restablecer solo con etiqueta de recaída',
+        'hi' => 'केवल रिलैप्स टैग पर रीसेट करें',
+        _ => 'Reset on Relapse Tag Only',
+      },
+      'only moments tagged #relapse reset the streak. turn off to reset on any new log.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Solo los momentos etiquetados como #recaida restablecen la racha. Apáguelo para restablecer con cualquier nuevo registro.',
+          'hi' =>
+            'केवल #relapse टैग किए गए क्षण ही संयम को रीसेट करते हैं। किसी भी नए लॉग पर रीसेट करने के लिए इसे बंद करें।',
+          _ =>
+            'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.',
+        },
+      'choose the narrative style for your milestone names. each theme is psychologically curated to match a different self-image and motivation style.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Elige el estilo de narrativa para tus hitos. Cada tema está seleccionado psicológicamente para coincidir con una autoimagen y estilo de motivación diferentes.',
+          'hi' =>
+            'अपने मील के पत्थर के नामों के लिए कथा शैली चुनें। प्रत्येक थीम को एक अलग आत्म-छवि और प्रेरणा शैली से मेल खाने के लिए मनोवैज्ञानिक रूप से तैयार किया गया है।',
+          _ =>
+            'Choose the narrative style for your milestone names. Each theme is psychologically curated to match a different self-image and motivation style.',
+        },
+      'all 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. names shown in your current theme.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Los 21 hitos desde 1 día hasta 10 años, en la neurociencia y psicología del comportamiento. Nombres mostrados en tu tema actual.',
+          'hi' =>
+            'तंत्रिका विज्ञान, लत सुधार अनुसंधान और व्यवहार मनोविज्ञान में निहित 1 दिन से 10 वर्ष तक के सभी 21 मील के पत्थर। आपकी वर्तमान थीम में नाम दिखाए गए हैं।',
+          _ =>
+            'All 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. Names shown in your current theme.',
+        },
+      'privacy-first streak tracking and relapse diary. all data stays on your device. existing logs are never altered.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Seguimiento de racha y diario de recaídas privado. Todos los datos permanecen en tu dispositivo. Los registros existentes nunca se alteran.',
+          'hi' =>
+            'गोपनीयता-प्रथम संयम ट्रैकिंग और रिलैप्स डायरी। सारा डेटा आपके डिवाइस पर रहता है। मौजूदा लॉग कभी भी नहीं बदले जाते।',
+          _ =>
+            'Privacy-first streak tracking and relapse diary. All data stays on your device. Existing logs are never altered.',
+        },
+      'your home screen will show a live streak card with milestone badges. the home widget will adapt to show reset and diary buttons.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Tu pantalla de inicio mostrará una tarjeta de racha en vivo con insignias de hitos. El widget de inicio se adaptará para mostrar botones de reinicio y diario.',
+          'hi' =>
+            'आपकी होम स्क्रीन मील के पत्थर के बैज के साथ एक लाइव संयम कार्ड दिखाएगी। होम विजेट रीसेट और डायरी बटन दिखाने के लिए अनुकूलित हो जाएगा।',
+          _ =>
+            'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show reset and diary buttons.',
+        },
+      'trigger diary' => switch (l10n.localeName) {
+        'es' => 'Diario de Disparadores',
+        'hi' => 'ट्रिगर डायरी',
+        _ => 'Trigger Diary',
+      },
+      'streak reset logic' => switch (l10n.localeName) {
+        'es' => 'Lógica de Reinicio de Racha',
+        'hi' => 'संयम रीसेट तर्क',
+        _ => 'Streak Reset Logic',
+      },
+      'streak mode' => switch (l10n.localeName) {
+        'es' => 'Modo de Racha',
+        'hi' => 'संयम मोड',
+        _ => 'Streak Mode',
+      },
+      'adds a clean streak card to your home screen and adapts home screen widgets.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Añade una tarjeta de racha limpia a tu pantalla de inicio y adapta los widgets.',
+          'hi' =>
+            'आपकी होम स्क्रीन पर एक संयम कार्ड जोड़ता है और होम स्क्रीन विजेट को अनुकूलित करता है।',
+          _ =>
+            'Adds a clean streak card to your home screen and adapts home screen widgets.',
+        },
+      'view your relapse pattern insights, top moods, and peak vulnerability windows.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Ver información de patrones de recaída, estados de ánimo principales y ventanas de vulnerabilidad máxima.',
+          'hi' =>
+            'अपने रिलैप्स पैटर्न अंतर्दृष्टि, शीर्ष मूड और चरम संवेदनशीलता विंडो देखें।',
+          _ =>
+            'View your relapse pattern insights, top moods, and peak vulnerability windows.',
+        },
+      'when logging a moment with sobriety mode on, you can tag mood (bored, anxious, lonely...) and trigger (social media, late night...). these are stored as hashtags in the note for full backwards compatibility.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Al registrar un momento con el Modo de Sobriedad activado, puedes etiquetar el estado de ánimo (Aburrido, Ansioso, Solitario...) y el disparador (Redes Sociales, Tarde en la Noche...). Se guardan como hashtags en la nota para compatibilidad total.',
+          'hi' =>
+            'संयम मोड चालू होने पर क्षण लॉग करते समय, आप मूड (बोर, चिंतित, अकेला...) और ट्रिगर (सोशल मीडिया, देर रात...) को टैग कर सकते हैं। ये पूर्ण संगतता के लिए नोट में हैशटैग के रूप में सहेजे जाते हैं।',
+          _ =>
+            'When logging a moment with Sobriety Mode on, you can tag mood (Bored, Anxious, Lonely...) and trigger (Social Media, Late Night...). These are stored as hashtags in the note for full backwards compatibility.',
+        },
+      'a privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Un rastreador de racha y diario de recaídas privado y sin conexión creado para potenciar tu viaje de recuperación.',
+          'hi' =>
+            'आपकी सुधार यात्रा को सशक्त बनाने के लिए बनाया गया एक गोपनीयता-प्रथम, ऑफ़लाइन संयम ट्रैकिंग और रिलैप्स डायरी।',
+          _ =>
+            'A privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.',
+        },
+      'your data is 100% private and stays offline on this device. enabling this does not alter any existing logs.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Tus datos son 100% privados y permanecen sin conexión en este dispositivo. Activar esto no altera los registros existentes.',
+          'hi' =>
+            'आपका डेटा 100% निजी है और इस डिवाइस पर ऑफ़लाइन रहता है। इसे सक्षम करने से कोई भी मौजूदा लॉग नहीं बदलता है।',
+          _ =>
+            'Your data is 100% private and stays offline on this device. Enabling this does not alter any existing logs.',
+        },
+
+      'sobriety trigger analysis' => switch (l10n.localeName) {
+        'es' => 'Análisis de Disparadores de Sobriedad',
+        'hi' => 'संयम ट्रिगर विश्लेषण',
+        _ => 'Sobriety Trigger Analysis',
+      },
+      'total relapses' => switch (l10n.localeName) {
+        'es' => 'Total de Recaídas',
+        'hi' => 'कुल रिलैप्स',
+        _ => 'Total Relapses',
+      },
+      'top trigger' => switch (l10n.localeName) {
+        'es' => 'Disparador Principal',
+        'hi' => 'मुख्य ट्रिगर',
+        _ => 'Top Trigger',
+      },
+      'top mood' => switch (l10n.localeName) {
+        'es' => 'Estado de Ánimo Principal',
+        'hi' => 'मुख्य मूड',
+        _ => 'Top Mood',
+      },
+      'peak risk window' => switch (l10n.localeName) {
+        'es' => 'Ventana de Mayor Riesgo',
+        'hi' => 'चरम जोखिम समय',
+        _ => 'Peak Risk Window',
+      },
+      'no relapses recorded yet!' => switch (l10n.localeName) {
+        'es' => '¡Aún no hay recaídas registradas!',
+        'hi' => 'अभी तक कोई रिलैप्स दर्ज नहीं किया गया है!',
+        _ => 'No relapses recorded yet!',
+      },
+      'your clean streak is active and running.' => switch (l10n.localeName) {
+        'es' => 'Tu racha limpia está activa y en marcha.',
+        'hi' => 'आपकी संयम यात्रा सक्रिय रूप से चल रही है।',
+        _ => 'Your clean streak is active and running.',
+      },
+      'offline analysis of your logged relapse moments. no data leaves your device.' =>
+        switch (l10n.localeName) {
+          'es' =>
+            'Análisis local de tus momentos de recaída registrados. Ningún dato sale de tu dispositivo.',
+          'hi' =>
+            'आपके दर्ज किए गए रिलैप्स क्षणों का ऑफ़लाइन विश्लेषण। कोई भी डेटा आपके डिवाइस से बाहर नहीं जाता है।',
+          _ =>
+            'Offline analysis of your logged relapse moments. No data leaves your device.',
+        },
+
+      // Common moods
+      'bored' => switch (l10n.localeName) {
+        'es' => 'Aburrido',
+        'hi' => 'ऊबा हुआ',
+        _ => 'Bored',
+      },
+      'anxious' => switch (l10n.localeName) {
+        'es' => 'Ansioso',
+        'hi' => 'चिंतित',
+        _ => 'Anxious',
+      },
+      'lonely' => switch (l10n.localeName) {
+        'es' => 'Solitario',
+        'hi' => 'अकेला',
+        _ => 'Lonely',
+      },
+      'tired' => switch (l10n.localeName) {
+        'es' => 'Cansado',
+        'hi' => 'थका हुआ',
+        _ => 'Tired',
+      },
+      'stressed' => switch (l10n.localeName) {
+        'es' => 'Estresado',
+        'hi' => 'तनावग्रस्त',
+        _ => 'Stressed',
+      },
+      'angry' => switch (l10n.localeName) {
+        'es' => 'Enojado',
+        'hi' => 'क्रोधित',
+        _ => 'Angry',
+      },
+      'sad' => switch (l10n.localeName) {
+        'es' => 'Triste',
+        'hi' => 'उदास',
+        _ => 'Sad',
+      },
+      'happy' => switch (l10n.localeName) {
+        'es' => 'Feliz',
+        'hi' => 'खुश',
+        _ => 'Happy',
+      },
+
+      // Common triggers
+      'social_media' || 'social media' => switch (l10n.localeName) {
+        'es' => 'Redes Sociales',
+        'hi' => 'सोशल मीडिया',
+        _ => 'Social Media',
+      },
+      'late_night' || 'late night' => switch (l10n.localeName) {
+        'es' => 'Tarde en la Noche',
+        'hi' => 'देर रात',
+        _ => 'Late Night',
+      },
+      'stress' => switch (l10n.localeName) {
+        'es' => 'Estrés',
+        'hi' => 'तनाव',
+        _ => 'Stress',
+      },
+      'boredom' => switch (l10n.localeName) {
+        'es' => 'Aburrimiento',
+        'hi' => 'ऊब',
+        _ => 'Boredom',
+      },
+      'loneliness' => switch (l10n.localeName) {
+        'es' => 'Soledad',
+        'hi' => 'अकेलापन',
+        _ => 'Loneliness',
+      },
+      'fatigue' => switch (l10n.localeName) {
+        'es' => 'Fatiga',
+        'hi' => 'थकान',
+        _ => 'Fatigue',
+      },
+      'friends' => switch (l10n.localeName) {
+        'es' => 'Amigos',
+        'hi' => 'मित्र',
+        _ => 'Friends',
+      },
+      'location' => switch (l10n.localeName) {
+        'es' => 'Ubicación',
+        'hi' => 'स्थान',
+        _ => 'Location',
+      },
+      'none' => switch (l10n.localeName) {
+        'es' => 'Ninguno',
+        'hi' => 'कोई नहीं',
+        _ => 'None',
+      },
+
+      // Time periods
+      'morning' => switch (l10n.localeName) {
+        'es' => 'Mañana',
+        'hi' => 'सुबह',
+        _ => 'Morning',
+      },
+      'afternoon' => switch (l10n.localeName) {
+        'es' => 'Tarde',
+        'hi' => 'दोपहर',
+        _ => 'Afternoon',
+      },
+      'evening' => switch (l10n.localeName) {
+        'es' => 'Tarde/Noche',
+        'hi' => 'शाम',
+        _ => 'Evening',
+      },
+      'night' => switch (l10n.localeName) {
+        'es' => 'Noche',
+        'hi' => 'रात',
+        _ => 'Night',
+      },
+
+      'from' => switch (l10n.localeName) {
+        'es' => 'Desde',
+        'hi' => 'से',
+        _ => 'From',
+      },
+      'at' => switch (l10n.localeName) {
+        'es' => 'a las',
+        'hi' => 'बजे',
+        _ => 'at',
+      },
+
+      // Theme names
+      'science' => switch (l10n.localeName) {
+        'es' => 'Ciencia',
+        'hi' => 'विज्ञान',
+        _ => 'Science',
+      },
+      'warrior' => switch (l10n.localeName) {
+        'es' => 'Guerrero',
+        'hi' => 'योद्धा',
+        _ => 'Warrior',
+      },
+      'navy' => switch (l10n.localeName) {
+        'es' => 'Armada',
+        'hi' => 'नौसेना',
+        _ => 'Navy',
+      },
+      'clan' => switch (l10n.localeName) {
+        'es' => 'Clan',
+        'hi' => 'कबीला',
+        _ => 'Clan',
+      },
+      'ancient' => switch (l10n.localeName) {
+        'es' => 'Antiguo',
+        'hi' => 'प्राचीन',
+        _ => 'Ancient',
+      },
+      'samurai' => switch (l10n.localeName) {
+        'es' => 'Samurái',
+        'hi' => 'समुराई',
+        _ => 'Samurai',
+      },
+      'space' => switch (l10n.localeName) {
+        'es' => 'Espacio',
+        'hi' => 'अंतरिक्ष',
+        _ => 'Space',
+      },
+      'kingdom' => switch (l10n.localeName) {
+        'es' => 'Reino',
+        'hi' => 'साम्राज्य',
+        _ => 'Kingdom',
+      },
+      'monk' => switch (l10n.localeName) {
+        'es' => 'Monje',
+        'hi' => 'साधु',
+        _ => 'Monk',
+      },
+      'phoenix' => switch (l10n.localeName) {
+        'es' => 'Fénix',
+        'hi' => 'फ़ीनिक्स',
+        _ => 'Phoenix',
+      },
+      'animal kingdom' => switch (l10n.localeName) {
+        'es' => 'Reino Animal',
+        'hi' => 'पशु साम्राज्य',
+        _ => 'Animal Kingdom',
+      },
+      'pokemon' => switch (l10n.localeName) {
+        'es' => 'Pokémon',
+        'hi' => 'पोकेमॉन',
+        _ => 'Pokemon',
+      },
+      'jujutsu kaisen' => switch (l10n.localeName) {
+        'es' => 'Jujutsu Kaisen',
+        'hi' => 'जुजुत्सु कैसेन',
+        _ => 'Jujutsu Kaisen',
+      },
+      'one piece' => switch (l10n.localeName) {
+        'es' => 'One Piece',
+        'hi' => 'वन पीस',
+        _ => 'One Piece',
+      },
+      'naruto' => switch (l10n.localeName) {
+        'es' => 'Naruto',
+        'hi' => 'नारुतो',
+        _ => 'Naruto',
+      },
+      'ben 10' => switch (l10n.localeName) {
+        'es' => 'Ben 10',
+        'hi' => 'बेन 10',
+        _ => 'Ben 10',
+      },
+      'attack on titan' => switch (l10n.localeName) {
+        'es' => 'Ataque a los Titanes',
+        'hi' => 'अटैक ऑन टाइटन',
+        _ => 'Attack on Titan',
+      },
+      'bleach' => switch (l10n.localeName) {
+        'es' => 'Bleach',
+        'hi' => 'ब्लीच',
+        _ => 'Bleach',
+      },
+      'my hero academia' => switch (l10n.localeName) {
+        'es' => 'My Hero Academia',
+        'hi' => 'माय हीरो एकेडेमिया',
+        _ => 'My Hero Academia',
+      },
+      'vinland saga' => switch (l10n.localeName) {
+        'es' => 'Vinland Saga',
+        'hi' => 'विनलैंड सागा',
+        _ => 'Vinland Saga',
+      },
+      'demon slayer' => switch (l10n.localeName) {
+        'es' => 'Guardianes de la Noche (Demon Slayer)',
+        'hi' => 'डिमोन स्लेयर',
+        _ => 'Demon Slayer',
+      },
+      'fullmetal alchemist' => switch (l10n.localeName) {
+        'es' => 'Fullmetal Alchemist',
+        'hi' => 'फुलमेटल अल्केमिस्ट',
+        _ => 'Fullmetal Alchemist',
+      },
+      'dragon ball' => switch (l10n.localeName) {
+        'es' => 'Dragon Ball',
+        'hi' => 'ड्रैगन बॉल',
+        _ => 'Dragon Ball',
+      },
+      'code geass' => switch (l10n.localeName) {
+        'es' => 'Code Geass',
+        'hi' => 'कोड गियास',
+        _ => 'Code Geass',
+      },
+      'death note' => switch (l10n.localeName) {
+        'es' => 'Death Note',
+        'hi' => 'डेथ नोट',
+        _ => 'Death Note',
+      },
+      'gintama' => switch (l10n.localeName) {
+        'es' => 'Gintama',
+        'hi' => 'गिंटामा',
+        _ => 'Gintama',
+      },
+      'hunter x hunter' => switch (l10n.localeName) {
+        'es' => 'Hunter x Hunter',
+        'hi' => 'हंटर एक्स हंटर',
+        _ => 'Hunter x Hunter',
+      },
+      'solo leveling' => switch (l10n.localeName) {
+        'es' => 'Solo Leveling',
+        'hi' => 'सोलो लेवलिंग',
+        _ => 'Solo Leveling',
+      },
+      'rpg / minecraft' => switch (l10n.localeName) {
+        'es' => 'RPG / Minecraft',
+        'hi' => 'आरपीजी / माइनक्राफ्ट',
+        _ => 'RPG / Minecraft',
+      },
+      'tech career' => switch (l10n.localeName) {
+        'es' => 'Carrera Tecnológica',
+        'hi' => 'टेक करियर',
+        _ => 'Tech Career',
+      },
+      'chess mastery' => switch (l10n.localeName) {
+        'es' => 'Maestría en Ajedrez',
+        'hi' => 'शतरंज महारत',
+        _ => 'Chess Mastery',
+      },
+      'star wars' => switch (l10n.localeName) {
+        'es' => 'Star Wars',
+        'hi' => 'स्टार वॉर्स',
+        _ => 'Star Wars',
+      },
+      'harry potter' => switch (l10n.localeName) {
+        'es' => 'Harry Potter',
+        'hi' => 'हैरी पॉटर',
+        _ => 'Harry Potter',
+      },
+      'marvel universe' => switch (l10n.localeName) {
+        'es' => 'Universo Marvel',
+        'hi' => 'मार्वल यूनिवर्स',
+        _ => 'Marvel Universe',
+      },
+
+      // Theme Descriptions
+      'clinical neuroscience terms. cold, precise, honest.' => switch (l10n
+          .localeName) {
+        'es' => 'Términos clínicos de neurociencia. Fríos, precisos, honestos.',
+        'hi' => 'नैदानिक तंत्रिका विज्ञान शब्द। स्पष्ट, सटीक, ईमानदार।',
+        _ => 'Clinical neuroscience terms. Cold, precise, honest.',
+      },
+      'army elite. every clean day is a battle fought and won.' =>
+        switch (l10n.localeName) {
+          'es' => 'Élite militar. Cada día limpio es una batalla ganada.',
+          'hi' => 'सेना के जवान। हर एक संयमित दिन जीती हुई जंग है।',
+          _ => 'Army elite. Every clean day is a battle fought and won.',
+        },
+      'seafaring odyssey. chart new waters and never look back.' =>
+        switch (l10n.localeName) {
+          'es' => 'Odisea marítima. Explora nuevas aguas y nunca mires atrás.',
+          'hi' =>
+            'समुद्री यात्रा। नए रास्तों पर चलें और कभी पीछे मुड़कर न देखें।',
+          _ => 'Seafaring odyssey. Chart new waters and never look back.',
+        },
+      'celtic highland clan. earn your place, carry the banner.' => switch (l10n
+          .localeName) {
+        'es' =>
+          'Clan celta de las tierras altas. Gana tu lugar, lleva el estandarte.',
+        'hi' => 'पहाड़ी कबीला। अपनी जगह कमाएं, ध्वज को आगे बढ़ाएं।',
+        _ => 'Celtic highland clan. Earn your place, carry the banner.',
+      },
+      'greek and roman glory. rise from mortal to olympian.' => switch (l10n
+          .localeName) {
+        'es' => 'Gloria griega y romana. Eleva tu estado de mortal a olímpico.',
+        'hi' => 'यूनानी और रोमन महिमा। साधारण मनुष्य से ओलंपियन बनें।',
+        _ => 'Greek and Roman glory. Rise from mortal to Olympian.',
+      },
+      'bushido code. master of the self.' => switch (l10n.localeName) {
+        'es' => 'Código Bushido. Dueño de uno mismo.',
+        'hi' => 'बुशीडो कोड। स्वयं पर नियंत्रण।',
+        _ => 'Bushido code. Master of the self.',
+      },
+      'cosmic exploration. every clean day is light-years gained.' =>
+        switch (l10n.localeName) {
+          'es' => 'Exploración cósmica. Cada día limpio son años luz ganados.',
+          'hi' => 'अंतरिक्ष अन्वेषण। हर एक संयमित दिन प्रकाश वर्ष के समान है।',
+          _ => 'Cosmic exploration. Every clean day is light-years gained.',
+        },
+      'medieval royalty. rise from serf to sovereign.' =>
+        switch (l10n.localeName) {
+          'es' => 'Realeza medieval. Asciende de siervo a soberano.',
+          'hi' => 'मध्यकालीन राजघराना। दास से शासक बनें।',
+          _ => 'Medieval royalty. Rise from serf to sovereign.',
+        },
+      'monastic journey. silence, stillness, and vows.' =>
+        switch (l10n.localeName) {
+          'es' => 'Viaje monástico. Silencio, quietud y votos.',
+          'hi' => 'मठवासी यात्रा। मौन, स्थिरता और प्रतिज्ञाएं।',
+          _ => 'Monastic journey. Silence, stillness, and vows.',
+        },
+      'rebirth through fire. the old is ash; you are the flame.' => switch (l10n
+          .localeName) {
+        'es' =>
+          'Renacimiento a través del fuego. El pasado es ceniza; tú eres la llama.',
+        'hi' => 'अग्नि से पुनर्जन्म। पुराना राख है; आप ज्वाला हैं।',
+        _ => 'Rebirth through fire. The old is ash; you are the flame.',
+      },
+      'survival of the fittest. tardigrade to mythical dragon.' => switch (l10n
+          .localeName) {
+        'es' => 'Supervivencia del más apto. Del tardígrado al dragón mítico.',
+        'hi' => 'योग्यतम की उत्तरजीविता। टार्डिग्रेड से पौराणिक ड्रैगन तक।',
+        _ => 'Survival of the fittest. Tardigrade to mythical Dragon.',
+      },
+      'magikarp to the creator god arceus.' => switch (l10n.localeName) {
+        'es' => 'De Magikarp al dios creador Arceus.',
+        'hi' => 'मैजिकारप से निर्माता भगवान आर्सियस तक।',
+        _ => 'Magikarp to the creator god Arceus.',
+      },
+      'cursed spirit to satoru gojo.' => switch (l10n.localeName) {
+        'es' => 'De espíritu maldito a Satoru Gojo.',
+        'hi' => 'शापित आत्मा से सटोरू गोजो तक।',
+        _ => 'Cursed spirit to Satoru Gojo.',
+      },
+      'east blue coby to the pirate king gol d. roger.' =>
+        switch (l10n.localeName) {
+          'es' => 'De Coby del East Blue al Rey de los Piratas Gol D. Roger.',
+          'hi' => 'ईस्ट ब्लू कोबी से समुद्री डाकू राजा गोल डी. रोजर तक।',
+          _ => 'East Blue Coby to the Pirate King Gol D. Roger.',
+        },
+      'konohamaru to the sage of six paths.' => switch (l10n.localeName) {
+        'es' => 'De Konohamaru al Sabio de los Seis Caminos.',
+        'hi' => 'कोनोहामारू से छह पथों के ऋषि तक।',
+        _ => 'Konohamaru to the Sage of Six Paths.',
+      },
+      'grey matter to alien x.' => switch (l10n.localeName) {
+        'es' => 'De Materia Gris a Alien X.',
+        'hi' => 'ग्रे मैटर से एलियन एक्स तक।',
+        _ => 'Grey Matter to Alien X.',
+      },
+      'pure titan to the founder ymir fritz.' => switch (l10n.localeName) {
+        'es' => 'De Titán puro a la Fundadora Ymir Fritz.',
+        'hi' => 'शुद्ध टाइटन से संस्थापक यमिर फ्रिट्ज तक।',
+        _ => 'Pure Titan to the Founder Ymir Fritz.',
+      },
+      'teddy bear kon to yhwach the almighty.' => switch (l10n.localeName) {
+        'es' => 'Del peluche Kon a Yhwach el Todopoderoso.',
+        'hi' => 'टेडी बियर कॉन से सर्वशक्तिमान इहवाच तक।',
+        _ => 'Teddy bear Kon to Yhwach the Almighty.',
+      },
+      'mineta to all might prime.' => switch (l10n.localeName) {
+        'es' => 'De Mineta a All Might Prime.',
+        'hi' => 'मिनेटा से ऑल माइट प्राइम तक।',
+        _ => 'Mineta to All Might Prime.',
+      },
+      'priest willibald to thors the troll of jom.' =>
+        switch (l10n.localeName) {
+          'es' => 'Del sacerdote Willibald a Thors el Trol de Jom.',
+          'hi' => 'पुजारी विलीबाल्ड से थोरस द ट्रोल ऑफ जोम तक।',
+          _ => 'Priest Willibald to Thors the Troll of Jom.',
+        },
+      'murata to yoriichi tsugikuni.' => switch (l10n.localeName) {
+        'es' => 'De Murata a Yoriichi Tsugikuni.',
+        'hi' => 'मुराता से योरीइची सुगिकुनी तक।',
+        _ => 'Murata to Yoriichi Tsugikuni.',
+      },
+      'yoki to the ultimate truth.' => switch (l10n.localeName) {
+        'es' => 'De Yoki a la Verdad última.',
+        'hi' => 'योकी से परम सत्य तक।',
+        _ => 'Yoki to the ultimate Truth.',
+      },
+      'yamcha to the omni-king zeno.' => switch (l10n.localeName) {
+        'es' => 'De Yamcha al Rey de Todo Zeno.',
+        'hi' => 'यामचा से ओम्नी-किंग ज़ेनो तक।',
+        _ => 'Yamcha to the Omni-King Zeno.',
+      },
+      'shirley to emperor lelouch vi britannia.' => switch (l10n.localeName) {
+        'es' => 'De Shirley al Emperador Lelouch vi Britannia.',
+        'hi' => 'शर्ली से सम्राट लेलौच वी ब्रिटानिया तक।',
+        _ => 'Shirley to Emperor Lelouch vi Britannia.',
+      },
+      'matsuda to the shinigami king.' => switch (l10n.localeName) {
+        'es' => 'De Matsuda al Rey Shinigami.',
+        'hi' => 'मात्सुदा से शिनिगामी किंग तक।',
+        _ => 'Matsuda to the Shinigami King.',
+      },
+      'shinpachi to utsuro.' => switch (l10n.localeName) {
+        'es' => 'De Shinpachi a Utsuro.',
+        'hi' => 'शिनपाची से उत्सुरो तक।',
+        _ => 'Shinpachi to Utsuro.',
+      },
+      'tonpa to adult gon.' => switch (l10n.localeName) {
+        'es' => 'De Tonpa a Gon adulto.',
+        'hi' => 'टोंपा से वयस्क गॉन तक।',
+        _ => 'Tonpa to Adult Gon.',
+      },
+      'e-rank sung jinwoo to shadow monarch.' => switch (l10n.localeName) {
+        'es' => 'De Sung Jinwoo de rango E al Monarca de las Sombras.',
+        'hi' => 'ई-रैंक सुंग जिनवू से शैडो मोनार्क तक।',
+        _ => 'E-Rank Sung Jinwoo to Shadow Monarch.',
+      },
+      'wooden shovel to creative mode god.' => switch (l10n.localeName) {
+        'es' => 'De pala de madera a dios del modo creativo.',
+        'hi' => 'लकड़ी के बेलचे से क्रिएटिव मोड गॉड तक।',
+        _ => 'Wooden Shovel to Creative Mode God.',
+      },
+      'html editor to turing award winner.' => switch (l10n.localeName) {
+        'es' => 'De editor HTML a ganador del Premio Turing.',
+        'hi' => 'HTML संपादक से ट्यूरिंग पुरस्कार विजेता तक।',
+        _ => 'HTML editor to Turing Award Winner.',
+      },
+      'scholar\'s mate victim to magnus carlsen.' => switch (l10n.localeName) {
+        'es' => 'De víctima del mate del pastor a Magnus Carlsen.',
+        'hi' => 'स्कॉलर्स मेट पीड़ित से मैग्नस कार्लसन तक।',
+        _ => 'Scholar\'s Mate victim to Magnus Carlsen.',
+      },
+      'moisture farmer to the chosen one.' => switch (l10n.localeName) {
+        'es' => 'De granjero de humedad al Elegido.',
+        'hi' => 'नमी किसान से चुने गए व्यक्ति (द चूज़न वन) तक।',
+        _ => 'Moisture farmer to the Chosen One.',
+      },
+      'muggle to merlin.' => switch (l10n.localeName) {
+        'es' => 'De Muggle a Merlín.',
+        'hi' => 'मगल से मर्लिन तक।',
+        _ => 'Muggle to Merlin.',
+      },
+      'civilian to the one above all.' => switch (l10n.localeName) {
+        'es' => 'De civil a El que está por encima de todo.',
+        'hi' => 'नागरिक से द वन एबोव ऑल (परमेश्वर) तक।',
+        _ => 'Civilian to The One Above All.',
+      },
+
       // Onboarding & Welcome Sheet Translations
       'welcome' => switch (l10n.localeName) {
         'es' => 'Bienvenido',

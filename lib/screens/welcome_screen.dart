@@ -147,7 +147,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 24),
           Center(
             child: Text(
-              'Sobriety Companion',
+              'Sobriety Companion'.localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text,
@@ -160,7 +160,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'A privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.',
+              'A privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.'
+                  .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
             ),
@@ -172,9 +173,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               SettingsSwitchRow(
                 p: p,
                 icon: Icons.self_improvement_rounded,
-                title: 'Enable Sobriety Mode',
+                title: 'Enable Sobriety Mode'.localized(context),
                 subtitle:
-                    'Adds a clean streak progress bar widget to your home screen.',
+                    'Adds a clean streak card to your home screen and adapts home screen widgets.'
+                        .localized(context),
                 color: p.orange,
                 value: _enableSobrietyMode,
                 onChanged: (value) async {
@@ -188,13 +190,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 SettingsRow(
                   p: p,
                   icon: Icons.palette_rounded,
-                  title: 'Milestone Theme',
+                  title: 'Milestone Theme'.localized(context),
                   subtitle: () {
                     final t = kMilestoneThemes.firstWhere(
                       (t) => t.id == _sobrietyMilestoneTheme,
                       orElse: () => kMilestoneThemes.first,
                     );
-                    return '${t.emoji} ${t.name}: ${t.description}';
+                    return '${t.emoji} ${t.name.localized(context)}: ${t.description.localized(context)}';
                   }(),
                   color: p.orange,
                   onTap: () => _showOnboardingThemePicker(context, p),
@@ -206,7 +208,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           SettingsPageDescription(
             p: p,
             text:
-                'Your data is 100% private and stays offline on this device. Enabling this does not alter any existing logs.',
+                'Your data is 100% private and stays offline on this device. Enabling this does not alter any existing logs.'
+                    .localized(context),
           ),
         ],
       ),
@@ -249,7 +252,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Choose Milestone Theme',
+                    'Choose Milestone Theme'.localized(context),
                     style: TextStyle(
                       color: p.text,
                       fontSize: 18,
@@ -266,8 +269,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           for (final theme in kMilestoneThemes)
                             SettingsRow(
                               p: p,
-                              title: '${theme.emoji} ${theme.name}',
-                              subtitle: theme.description,
+                              title:
+                                  '${theme.emoji} ${theme.name.localized(context)}',
+                              subtitle: theme.description.localized(context),
                               color: p.orange,
                               trailing: _sobrietyMilestoneTheme == theme.id
                                   ? Icon(

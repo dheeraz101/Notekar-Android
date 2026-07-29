@@ -2676,7 +2676,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title.toUpperCase(),
+            title.localized(context).toUpperCase(),
             style: TextStyle(
               color: p.text2,
               fontSize: 9,
@@ -2686,7 +2686,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           const SizedBox(height: 4),
           Text(
-            value,
+            value.localized(context),
             style: TextStyle(
               color: p.text,
               fontSize: 13,
@@ -6776,18 +6776,22 @@ ${stackTrace ?? 'No stack trace provided.'}
                               SettingsPageDescription(
                                 p: p,
                                 text:
-                                    'Privacy-first streak tracking and relapse diary. All data stays on your device. Existing logs are never altered.',
+                                    'Privacy-first streak tracking and relapse diary. All data stays on your device. Existing logs are never altered.'
+                                        .localized(context),
                               ),
                               SettingsGroup(
                                 p: p,
-                                title: 'Streak Mode',
+                                title: 'Streak Mode'.localized(context),
                                 children: [
                                   SettingsSwitchRow(
                                     p: p,
                                     icon: Icons.self_improvement_rounded,
-                                    title: 'Enable Sobriety Mode',
+                                    title: 'Enable Sobriety Mode'.localized(
+                                      context,
+                                    ),
                                     subtitle:
-                                        'Adds a clean streak card to your home screen and adapts home screen widgets.',
+                                        'Adds a clean streak card to your home screen and adapts home screen widgets.'
+                                            .localized(context),
                                     color: p.orange,
                                     value: enableSobrietyMode,
                                     onChanged: (value) async {
@@ -6808,19 +6812,24 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 SettingsPageDescription(
                                   p: p,
                                   text:
-                                      'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show RESET and DIARY buttons.',
+                                      'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show RESET and DIARY buttons.'
+                                          .localized(context),
                                 ),
                                 const SizedBox(height: 12),
                                 SettingsGroup(
                                   p: p,
-                                  title: 'Streak Reset Logic',
+                                  title: 'Streak Reset Logic'.localized(
+                                    context,
+                                  ),
                                   children: [
                                     SettingsSwitchRow(
                                       p: p,
                                       icon: Icons.restart_alt_rounded,
-                                      title: 'Reset on Relapse Tag Only',
+                                      title: 'Reset on Relapse Tag Only'
+                                          .localized(context),
                                       subtitle:
-                                          'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.',
+                                          'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.'
+                                              .localized(context),
                                       color: p.orange,
                                       value: sobrietyResetType == 'relapse',
                                       onChanged: (value) async {
@@ -6843,14 +6852,17 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 const SizedBox(height: 12),
                                 SettingsGroup(
                                   p: p,
-                                  title: 'Trigger Diary',
+                                  title: 'Trigger Diary'.localized(context),
                                   children: [
                                     SettingsRow(
                                       p: p,
                                       icon: Icons.analytics_rounded,
-                                      title: 'Trigger Analysis',
+                                      title: 'Trigger Analysis'.localized(
+                                        context,
+                                      ),
                                       subtitle:
-                                          'View your relapse pattern insights, top moods, and peak vulnerability windows.',
+                                          'View your relapse pattern insights, top moods, and peak vulnerability windows.'
+                                              .localized(context),
                                       color: p.orange,
                                       trailing: Icon(
                                         Icons.chevron_right_rounded,
@@ -6867,20 +6879,23 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 SettingsPageDescription(
                                   p: p,
                                   text:
-                                      'When logging a moment with Sobriety Mode on, you can tag mood (Bored, Anxious, Lonely\u2026) and trigger (Social Media, Late Night\u2026). These are stored as hashtags in the note for full backwards compatibility.',
+                                      'When logging a moment with Sobriety Mode on, you can tag mood (Bored, Anxious, Lonely...) and trigger (Social Media, Late Night...). These are stored as hashtags in the note for full backwards compatibility.'
+                                          .localized(context),
                                 ),
                                 const SizedBox(height: 12),
                                 SettingsGroup(
                                   p: p,
-                                  title: 'Custom Start Date',
+                                  title: 'Custom Start Date'.localized(context),
                                   children: [
                                     SettingsRow(
                                       p: p,
                                       icon: Icons.calendar_today_rounded,
-                                      title: 'Set Sobriety Start Date',
+                                      title: 'Set Sobriety Start Date'
+                                          .localized(context),
                                       subtitle: sobrietyCustomStartMs != null
-                                          ? 'From ${datePretty(sobrietyCustomStartMs!)} at ${timeOnly(sobrietyCustomStartMs!).substring(0, 5)}'
-                                          : 'Not set: using last log or relapse tag',
+                                          ? '${"From".localized(context)} ${datePretty(sobrietyCustomStartMs!)} ${"at".localized(context)} ${timeOnly(sobrietyCustomStartMs!).substring(0, 5)}'
+                                          : 'Not set: using last log or relapse tag'
+                                                .localized(context),
                                       color: p.orange,
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -6943,23 +6958,24 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 SettingsPageDescription(
                                   p: p,
                                   text:
-                                      'Were you already clean before installing? Set your actual start date here. This overrides automatic detection from your logs.',
+                                      'Were you already clean before installing? Set your actual start date here. This overrides automatic detection from your logs.'
+                                          .localized(context),
                                 ),
                                 const SizedBox(height: 12),
                                 SettingsGroup(
                                   p: p,
-                                  title: 'Milestone Theme',
+                                  title: 'Milestone Theme'.localized(context),
                                   children: [
                                     SettingsRow(
                                       p: p,
                                       icon: Icons.palette_rounded,
-                                      title: 'Theme Style',
+                                      title: 'Theme Style'.localized(context),
                                       subtitle: () {
                                         final t = kMilestoneThemes.firstWhere(
                                           (t) => t.id == sobrietyMilestoneTheme,
                                           orElse: () => kMilestoneThemes.first,
                                         );
-                                        return '${t.emoji} ${t.name}: ${t.description}';
+                                        return '${t.emoji} ${t.name.localized(context)}: ${t.description.localized(context)}';
                                       }(),
                                       color: p.orange,
                                       trailing: Icon(
@@ -6975,9 +6991,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     SettingsRow(
                                       p: p,
                                       icon: Icons.emoji_events_rounded,
-                                      title: 'View All Milestones',
+                                      title: 'View All Milestones'.localized(
+                                        context,
+                                      ),
                                       subtitle:
-                                          'See all 21 milestones with descriptions from day 1 to 10 years.',
+                                          'See all 21 milestones with descriptions from day 1 to 10 years.'
+                                              .localized(context),
                                       color: p.orange,
                                       trailing: Icon(
                                         Icons.chevron_right_rounded,
