@@ -27,6 +27,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
+import 'package:notekar/dialogs/settings/display_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -4888,266 +4889,62 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ]),
                           ),
                         if (show('Display'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Theme',
-                                showDividers: false,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: ThemeChoice(
-                                            p: p,
-                                            label: 'Dark',
-                                            active: theme == 'dark',
-                                            color: const Color(0xFF1C1C1E),
-                                            onTap: () {
-                                              if (theme == 'dark') return;
-                                              HapticFeedback.selectionClick();
-                                              setState(() => theme = 'dark');
-                                              widget.onTheme('dark');
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: ThemeChoice(
-                                            p: p,
-                                            label: 'Light',
-                                            active: theme == 'light',
-                                            color: const Color(0xFFF2F2F7),
-                                            onTap: () {
-                                              if (theme == 'light') return;
-                                              HapticFeedback.selectionClick();
-                                              setState(() => theme = 'light');
-                                              widget.onTheme('light');
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: ThemeChoice(
-                                            p: p,
-                                            label: 'AMOLED',
-                                            active: theme == 'amoled',
-                                            color: const Color(0xFF000000),
-                                            onTap: () {
-                                              if (theme == 'amoled') return;
-                                              HapticFeedback.selectionClick();
-                                              setState(() => theme = 'amoled');
-                                              widget.onTheme('amoled');
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Select a theme that best suits your environment.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Show Seconds',
-                                    color: p.accent,
-                                    value: showSeconds,
-                                    onChanged: (value) {
-                                      setState(() => showSeconds = value);
-                                      widget.onShowSeconds(value);
-                                    },
-                                  ),
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Highlight Seconds',
-                                    color: p.accent,
-                                    value: showSeconds && highlightSeconds,
-                                    enabled: showSeconds,
-                                    disabledMessage:
-                                        'Enable Show Seconds first',
-                                    onDisabledTap: widget.onFeedback,
-                                    onChanged: (value) {
-                                      if (!showSeconds) return;
-                                      setState(() => highlightSeconds = value);
-                                      widget.onHighlightSeconds(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Configure the home screen clock and visual feedback.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Button Labels',
-                                    color: p.green,
-                                    value: buttonLabels,
-                                    onChanged: (value) {
-                                      setState(() => buttonLabels = value);
-                                      widget.onButtonLabels(value);
-                                    },
-                                  ),
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'History Text',
-                                    color: p.green,
-                                    value: showHistoryText,
-                                    onChanged: (value) {
-                                      setState(() => showHistoryText = value);
-                                      widget.onShowHistoryText(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Show descriptive text labels on the primary navigation and action buttons.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Large Controls',
-                                    color: p.orange,
-                                    value: largeControls,
-                                    onChanged: (value) {
-                                      setState(() => largeControls = value);
-                                      widget.onLargeControls(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Increases the size of interactive elements for easier tapping.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Toolbar Backplate',
-                                    color: p.accent,
-                                    value: homeMenuPill,
-                                    onChanged: (value) {
-                                      setState(() => homeMenuPill = value);
-                                      widget.onHomeMenuPill(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Adds a subtle glass-like container behind the home toolbar.',
-                              ),
-
-                              if (AdaptiveEngine()
-                                  .supportsAdvancedAnimations) ...[
-                                SettingsGroup(
-                                  p: p,
-                                  children: [
-                                    SettingsSwitchRow(
-                                      p: p,
-                                      title: 'Live Icon Motion',
-                                      color: p.accent,
-                                      value:
-                                          !reduceMotion && homeMenuAnimations,
-                                      enabled: !reduceMotion,
-                                      disabledMessage:
-                                          'Disable Reduce Motion first',
-                                      onDisabledTap: widget.onFeedback,
-                                      onChanged: (value) async {
-                                        if (reduceMotion) return;
-                                        final applied = await widget
-                                            .onHomeMenuAnimations(value);
-                                        if (!mounted) return;
-                                        setState(() {
-                                          homeMenuAnimations = applied
-                                              ? value
-                                              : false;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SettingsPageDescription(
-                                  p: p,
-                                  text:
-                                      'Enables fluid physics for toolbar icons. Automatically scales based on CPU and RAM performance.',
-                                ),
-                              ],
-                              if (AdaptiveEngine().supportsBlur) ...[
-                                SettingsGroup(
-                                  p: p,
-                                  children: [
-                                    SettingsSwitchRow(
-                                      p: p,
-                                      title: 'Enable Translucency',
-                                      color: p.accent,
-                                      value:
-                                          !reduceMotion && enableTranslucency,
-                                      enabled: !reduceMotion,
-                                      onDisabledTap: widget.onFeedback,
-                                      onChanged: (value) {
-                                        setState(
-                                          () => enableTranslucency = value,
-                                        );
-                                        widget.onTranslucency(value);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SettingsPageDescription(
-                                  p: p,
-                                  text:
-                                      'Applies real-time Gaussian blur to system surfaces. Requires a high-performance GPU tier.',
-                                ),
-                              ],
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Last Saved Hint',
-                                    color: p.accent,
-                                    value: showLastSavedHint,
-                                    onChanged: (value) {
-                                      setState(() => showLastSavedHint = value);
-                                      widget.onShowLastSavedHint(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Provides visual feedback for the time elapsed since your last moment.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: DisplaySettingsPage(
+                              p: p,
+                              theme: theme,
+                              showSeconds: showSeconds,
+                              highlightSeconds: highlightSeconds,
+                              buttonLabels: buttonLabels,
+                              showHistoryText: showHistoryText,
+                              largeControls: largeControls,
+                              homeMenuPill: homeMenuPill,
+                              reduceMotion: reduceMotion,
+                              homeMenuAnimations: homeMenuAnimations,
+                              enableTranslucency: enableTranslucency,
+                              showLastSavedHint: showLastSavedHint,
+                              onThemeChanged: (val) {
+                                setState(() => theme = val);
+                                widget.onTheme(val);
+                              },
+                              onShowSecondsChanged: (val) {
+                                setState(() => showSeconds = val);
+                                widget.onShowSeconds(val);
+                              },
+                              onHighlightSecondsChanged: (val) {
+                                setState(() => highlightSeconds = val);
+                                widget.onHighlightSeconds(val);
+                              },
+                              onFeedback: widget.onFeedback,
+                              onButtonLabelsChanged: (val) {
+                                setState(() => buttonLabels = val);
+                                widget.onButtonLabels(val);
+                              },
+                              onShowHistoryTextChanged: (val) {
+                                setState(() => showHistoryText = val);
+                                widget.onShowHistoryText(val);
+                              },
+                              onLargeControlsChanged: (val) {
+                                setState(() => largeControls = val);
+                                widget.onLargeControls(val);
+                              },
+                              onHomeMenuPillChanged: (val) {
+                                setState(() => homeMenuPill = val);
+                                widget.onHomeMenuPill(val);
+                              },
+                              onHomeMenuAnimations: widget.onHomeMenuAnimations,
+                              onHomeMenuAnimationsChanged: (val) {
+                                setState(() => homeMenuAnimations = val);
+                              },
+                              onTranslucencyChanged: (val) {
+                                setState(() => enableTranslucency = val);
+                                widget.onTranslucency(val);
+                              },
+                              onShowLastSavedHintChanged: (val) {
+                                setState(() => showLastSavedHint = val);
+                                widget.onShowLastSavedHint(val);
+                              },
+                            ),
                           ),
                         if (show('Language'))
                           SliverList(
