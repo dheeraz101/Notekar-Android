@@ -267,13 +267,13 @@ const List<SobrietyMilestoneEntry> kSobrietyMilestones = [
     days: 1,
     dayLabel: "1 Day",
     whyItMatters:
-        "Acute withdrawal begins. The body starts clearing toxins within the first 24 hours — the hardest window.",
+        "Acute withdrawal begins. The body starts clearing toxins within the first 24 hours - the hardest window.",
   ),
   SobrietyMilestoneEntry(
     days: 3,
     dayLabel: "3 Days",
     whyItMatters:
-        "Physical withdrawal peaks at 72 hours for most substances. Cravings are at their most intense — surviving this is a major neurological victory.",
+        "Physical withdrawal peaks at 72 hours for most substances. Cravings are at their most intense, surviving this is a major neurological victory.",
   ),
   SobrietyMilestoneEntry(
     days: 7,
@@ -285,31 +285,31 @@ const List<SobrietyMilestoneEntry> kSobrietyMilestones = [
     days: 14,
     dayLabel: "2 Weeks",
     whyItMatters:
-        "REM sleep architecture normalises after 14 days — deep sleep returns. Mood swings reduce significantly as serotonin stabilises.",
+        "REM sleep architecture normalises after 14 days, deep sleep returns. Mood swings reduce significantly as serotonin stabilises.",
   ),
   SobrietyMilestoneEntry(
     days: 21,
     dayLabel: "21 Days",
     whyItMatters:
-        "Neural plasticity research identifies 21 days as the threshold where cortical grooves begin rewiring. Old pathways weaken; new ones are forming.",
+        "Neural plasticity research identifies 21 days as the threshold where cortical grooves begin rewiring. Old pathways weaken, new ones are forming.",
   ),
   SobrietyMilestoneEntry(
     days: 30,
     dayLabel: "30 Days",
     whyItMatters:
-        "The liver completes a full detox cycle. The prefrontal cortex — the seat of willpower — begins measurable structural recovery.",
+        "The liver completes a full detox cycle. The prefrontal cortex, the seat of willpower, begins measurable structural recovery.",
   ),
   SobrietyMilestoneEntry(
     days: 45,
     dayLabel: "45 Days",
     whyItMatters:
-        "Post-Acute Withdrawal Syndrome (PAWS) — the wave of cravings, anxiety and insomnia after physical detox — begins fading noticeably at 45 days.",
+        "Post-Acute Withdrawal Syndrome (PAWS), the wave of cravings, anxiety and insomnia after physical detox, begins fading noticeably at 45 days.",
   ),
   SobrietyMilestoneEntry(
     days: 60,
     dayLabel: "2 Months",
     whyItMatters:
-        "Neuroimaging (fMRI) studies show measurable grey-matter regrowth in the prefrontal cortex at the 60-day mark — physical brain healing you can scan.",
+        "Neuroimaging (fMRI) studies show measurable grey-matter regrowth in the prefrontal cortex at the 60-day mark, physical brain healing you can scan.",
   ),
   SobrietyMilestoneEntry(
     days: 90,
@@ -333,13 +333,13 @@ const List<SobrietyMilestoneEntry> kSobrietyMilestones = [
     days: 270,
     dayLabel: "9 Months",
     whyItMatters:
-        "9 months mirrors the gestational period — a full neuroplasticity cycle has completed. Your brain has, in a very real sense, rebuilt itself from scratch.",
+        "9 months mirrors the gestational period, a full neuroplasticity cycle has completed. Your brain has, in a very real sense, rebuilt itself from scratch.",
   ),
   SobrietyMilestoneEntry(
     days: 365,
     dayLabel: "1 Year",
     whyItMatters:
-        "A full year means you have experienced every seasonal trigger — holidays, anniversaries, seasons — at least once and stayed clean. PAWS is typically gone.",
+        "A full year means you have experienced every seasonal trigger (holidays, anniversaries, seasons) at least once and stayed clean. PAWS is typically gone.",
   ),
   SobrietyMilestoneEntry(
     days: 500,
@@ -363,13 +363,13 @@ const List<SobrietyMilestoneEntry> kSobrietyMilestones = [
     days: 1095,
     dayLabel: "3 Years",
     whyItMatters:
-        "At 3 years, neuroimaging shows structural brain changes comparable to individuals who never used. Recovery is no longer an exception — it is your baseline.",
+        "At 3 years, neuroimaging shows structural brain changes comparable to individuals who never used. Recovery is no longer an exception, it is your baseline.",
   ),
   SobrietyMilestoneEntry(
     days: 1460,
     dayLabel: "4 Years",
     whyItMatters:
-        "Chronic stress response normalises at 4 years. Cortisol dysregulation — a core driver of relapse — is no longer a significant physiological risk factor.",
+        "Chronic stress response normalises at 4 years. Cortisol dysregulation, a core driver of relapse, is no longer a significant physiological risk factor.",
   ),
   SobrietyMilestoneEntry(
     days: 1825,
@@ -387,7 +387,7 @@ const List<SobrietyMilestoneEntry> kSobrietyMilestones = [
     days: 3650,
     dayLabel: "10 Years",
     whyItMatters:
-        "A decade clean. Complete physiological and psychological transformation. You are living proof that the brain can heal — an irreversible achievement.",
+        "A decade clean. Complete physiological and psychological transformation. You are living proof that the brain can heal, an irreversible achievement.",
   ),
 ];
 
@@ -593,7 +593,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
   "navy": [
     ThemedMilestone(
       name: "Cast Off",
-      flavor: "Lines released, tides turning — the voyage has begun.",
+      flavor: "Lines released, tides turning  -  the voyage has begun.",
     ),
     ThemedMilestone(
       name: "Open Water",
@@ -606,7 +606,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Midwatch",
       flavor:
-          "The darkest watch before dawn — and you held it without flinching.",
+          "The darkest watch before dawn  -  and you held it without flinching.",
     ),
     ThemedMilestone(
       name: "Steady Bearing",
@@ -614,7 +614,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ),
     ThemedMilestone(
       name: "First Port",
-      flavor: "One month at sea — the first harbour in sight. You made it.",
+      flavor: "One month at sea  -  the first harbour in sight. You made it.",
     ),
     ThemedMilestone(
       name: "Deep Water",
@@ -890,7 +890,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "First Blood",
       flavor:
-          "The blade has been tested against the fiercest enemy — the self.",
+          "The blade has been tested against the fiercest enemy  -  the self.",
     ),
     ThemedMilestone(
       name: "Dojo Accepted",
@@ -916,7 +916,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Two-Month Zazen",
       flavor:
-          "Two months of daily zazen — seated meditation — without exception.",
+          "Two months of daily zazen  -  seated meditation  -  without exception.",
     ),
     ThemedMilestone(
       name: "Ronin No More",
@@ -1001,7 +1001,8 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ),
     ThemedMilestone(
       name: "Module Docked",
-      flavor: "21 days; docking with the station — mission critical achieved.",
+      flavor:
+          "21 days; docking with the station  -  mission critical achieved.",
     ),
     ThemedMilestone(
       name: "Lunar Month",
@@ -1063,7 +1064,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Edge of System",
       flavor:
-          "Five years; approaching the heliopause — the edge of our solar system.",
+          "Five years; approaching the heliopause  -  the edge of our solar system.",
     ),
     ThemedMilestone(
       name: "Interstellar",
@@ -1140,7 +1141,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Duke",
       flavor:
-          "18 months; elevated to Duke — second only to the royal family in power.",
+          "18 months; elevated to Duke  -  second only to the royal family in power.",
     ),
     ThemedMilestone(
       name: "Grand Duke",
@@ -1194,7 +1195,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "First Moon Fast",
       flavor:
-          "One complete lunar fast — mind and body intact through all of it.",
+          "One complete lunar fast  -  mind and body intact through all of it.",
     ),
     ThemedMilestone(
       name: "Inner Stillness",
@@ -1203,7 +1204,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Two Months Practice",
       flavor:
-          "Two months of daily prayer, meditation, and practice — unbroken.",
+          "Two months of daily prayer, meditation, and practice  -  unbroken.",
     ),
     ThemedMilestone(
       name: "Professed Monk",
@@ -1330,7 +1331,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Touched the Sun",
       flavor:
-          "18 months; like Icarus but stronger — you reached the sun and were not burned.",
+          "18 months; like Icarus but stronger  -  you reached the sun and were not burned.",
     ),
     ThemedMilestone(
       name: "Full Phoenix",
@@ -1711,7 +1712,7 @@ const Map<String, List<ThemedMilestone>> kThemeMilestones = {
     ThemedMilestone(
       name: "Gol D. Roger",
       flavor:
-          "Wealth, fame, power — the world is yours. You found the One Piece.",
+          "Wealth, fame, power  -  the world is yours. You found the One Piece.",
     ),
   ],
   "naruto": [

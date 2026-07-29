@@ -725,6 +725,119 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
+  Future<DateTime?> _showIOSDateTimePicker(
+    BuildContext context,
+    DateTime initialDateTime,
+  ) async {
+    final p = paletteFor(theme);
+    DateTime selectedDateTime = initialDateTime;
+
+    return showModalBottomSheet<DateTime>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: p.surface.withValues(alpha: 0.85),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(
+              color: p.accent.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Glass(
+              p: p,
+              radius: 32,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: p.text3.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Select Date and Time',
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 200,
+                    child: CupertinoTheme(
+                      data: CupertinoThemeData(
+                        textTheme: CupertinoTextThemeData(
+                          dateTimePickerTextStyle: TextStyle(
+                            color: p.text,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      child: CupertinoDatePicker(
+                        mode: CupertinoDatePickerMode.dateAndTime,
+                        initialDateTime: initialDateTime,
+                        maximumDate: DateTime.now(),
+                        onDateTimeChanged: (DateTime dateTime) {
+                          selectedDateTime = dateTime;
+                          HapticFeedback.selectionClick();
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context, null),
+                          style: TextButton.styleFrom(
+                            foregroundColor: p.text2,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () =>
+                              Navigator.pop(context, selectedDateTime),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: p.accent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text('Confirm'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<TimeOfDay?> _showIOSTimePicker(
     BuildContext context,
     TimeOfDay initialTime,
@@ -6766,8 +6879,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       icon: Icons.calendar_today_rounded,
                                       title: 'Set Sobriety Start Date',
                                       subtitle: sobrietyCustomStartMs != null
-                                          ? 'From ${datePretty(sobrietyCustomStartMs!)}'
-                                          : 'Not set — using last log or relapse tag',
+                                          ? 'From ${datePretty(sobrietyCustomStartMs!)} at ${timeOnly(sobrietyCustomStartMs!).substring(0, 5)}'
+                                          : 'Not set: using last log or relapse tag',
                                       color: p.orange,
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -6799,7 +6912,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       ),
                                       onTap: () async {
                                         final now = DateTime.now();
-                                        final initialDate =
+                                        final initialDateTime =
                                             sobrietyCustomStartMs != null
                                             ? DateTime.fromMillisecondsSinceEpoch(
                                                 sobrietyCustomStartMs!,
@@ -6807,14 +6920,11 @@ ${stackTrace ?? 'No stack trace provided.'}
                                             : now.subtract(
                                                 const Duration(days: 7),
                                               );
-                                        final picked = await showDatePicker(
-                                          context: context,
-                                          initialDate: initialDate,
-                                          firstDate: DateTime(2000),
-                                          lastDate: now,
-                                          helpText:
-                                              'When did you start this streak?',
-                                        );
+                                        final picked =
+                                            await _showIOSDateTimePicker(
+                                              context,
+                                              initialDateTime,
+                                            );
                                         if (picked != null && mounted) {
                                           final ms =
                                               picked.millisecondsSinceEpoch;
@@ -6849,7 +6959,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                           (t) => t.id == sobrietyMilestoneTheme,
                                           orElse: () => kMilestoneThemes.first,
                                         );
-                                        return '${t.emoji} ${t.name} — ${t.description}';
+                                        return '${t.emoji} ${t.name}: ${t.description}';
                                       }(),
                                       color: p.orange,
                                       trailing: Icon(
@@ -6867,7 +6977,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       icon: Icons.emoji_events_rounded,
                                       title: 'View All Milestones',
                                       subtitle:
-                                          'See all 21 milestones with descriptions — from day 1 to 10 years.',
+                                          'See all 21 milestones with descriptions from day 1 to 10 years.',
                                       color: p.orange,
                                       trailing: Icon(
                                         Icons.chevron_right_rounded,
