@@ -34,6 +34,7 @@ import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
+import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -7543,91 +7544,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ]),
                           ),
                         if (show('Help & Guides'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Documentation',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.auto_stories_rounded,
-                                    title: 'Guides',
-                                    color: p.accent,
-                                    status: 'Tutorials',
-                                    onTap: () => _openCategory(
-                                      'Guides',
-                                      parent: 'Help & Guides',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.help_outline_rounded,
-                                    title: 'Help',
-                                    color: p.orange,
-                                    status: 'FAQ',
-                                    onTap: () => _openCategory(
-                                      'Help',
-                                      parent: 'Help & Guides',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Explore interactive tutorials for tap logging, duration calculations, and troubleshooting.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                title: 'Legal & Compliance',
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.description_outlined,
-                                    title: 'Licenses',
-                                    color: p.accent,
-                                    status: 'Open Source',
-                                    onTap: () => _openCategory(
-                                      'Licenses',
-                                      parent: 'Help & Guides',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.article_outlined,
-                                    title: 'Terms of Use',
-                                    color: p.orange,
-                                    status: 'MIT',
-                                    onTap: () => _openCategory(
-                                      'Terms of Use',
-                                      parent: 'Help & Guides',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.security_rounded,
-                                    title: 'Privacy Policy',
-                                    color: p.green,
-                                    status: 'Offline-First',
-                                    onTap: () => _openCategory(
-                                      'Privacy Policy',
-                                      parent: 'Help & Guides',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Review open-source licenses, app usage terms, and offline-first privacy policies.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: HelpGuidesSettingsPage(
+                              p: p,
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
                           ),
                         if (show('Advanced'))
                           SliverToBoxAdapter(
