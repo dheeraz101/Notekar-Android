@@ -24,6 +24,17 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.5',
+      date: 'July 29, 2026',
+      highlights: ['Beta testing and feedback build.'],
+      items: [
+        'Optimize startup speed, enable R8 minification, and upgrade type safety',
+        'Keep cached commits on network failure, improve empty state, add inline refresh spinner, and remove RepaintBoundary on items to fix scrolling freezes',
+        'Rename persistent control and format beta note, performance(commits): cache and optimize commits list with repaint boundary and column layout, feat(analytics): fallback card for empty intelligent insights',
+        'Complete feedback proxy removal and settings polish',
+      ],
+    ),
+    (
       version: '5.1.4',
       date: 'July 25, 2026',
       highlights: [

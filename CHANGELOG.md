@@ -7,6 +7,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.5] - 2026-07-29 (versionCode 25) [BR]
+
+### Improvements
+
+- Optimize startup speed, enable R8 minification, and upgrade type safety
+- Rename persistent control and format beta note, performance(commits): cache and optimize commits
+  list with repaint boundary and column layout, feat(analytics): fallback card for empty intelligent
+  insights
+- Complete feedback proxy removal and settings polish
+
+### Bug Fixes
+
+- Keep cached commits on network failure, improve empty state, add inline refresh spinner, and
+  remove RepaintBoundary on items to fix scrolling freezes
+
 ## [5.1.4] - 2026-07-25 (versionCode 24) [Beta]
 
 ### What's New
