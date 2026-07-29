@@ -18,6 +18,7 @@ import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
+import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
@@ -25,6 +26,7 @@ import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/reminders_settings_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
+import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -3119,43 +3121,6 @@ ${stackTrace ?? 'No stack trace provided.'}
     widget.onOpenLink(url);
   }
 
-  Widget _feedbackRootPage(Palette p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SettingsGroup(
-          p: p,
-          children: [
-            SettingsRow(
-              p: p,
-              icon: Icons.bug_report_rounded,
-              title: 'Report a Bug'.localized(context),
-              subtitle: "Something isn't working as expected.".localized(
-                context,
-              ),
-              color: p.red,
-              onTap: () => _openGithubIssue('bug'),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.auto_awesome_rounded,
-              title: 'Request a Feature'.localized(context),
-              subtitle: 'Suggest a new idea or improvement.'.localized(context),
-              color: p.accent,
-              onTap: () => _openGithubIssue('feature'),
-            ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Select an option to open GitHub and submit a structured issue. Your device specifications will be prefilled automatically.'
-                  .localized(context),
-        ),
-      ],
-    );
-  }
-
   Widget _licensesPage(Palette p) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -6177,324 +6142,46 @@ ${stackTrace ?? 'No stack trace provided.'}
                           SliverToBoxAdapter(child: _licensesPage(p)),
                         if (show('Feedback'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _feedbackRootPage(p),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: FeedbackChangelogSettingsPage(
+                              p: p,
+                              subCategory: 'Feedback',
+                              onOpenGithubIssue: _openGithubIssue,
                             ),
                           ),
 
                         if (show("What's New"))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                ChangelogSettingsPage(p: p, latestOnly: true),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: FeedbackChangelogSettingsPage(
+                              p: p,
+                              subCategory: "What's New",
+                              onOpenGithubIssue: _openGithubIssue,
                             ),
                           ),
                         if (show('Trash Bin')) ...[
-                          if (_trash.isNotEmpty)
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: p.text2,
-                                          side: BorderSide(color: p.border),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              999,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
-                                          ),
-                                        ),
-                                        onPressed: () async {
-                                          final confirmed =
-                                              await showGeneralDialog<bool>(
-                                                context: context,
-                                                barrierColor: Colors.black
-                                                    .withValues(alpha: 0.42),
-                                                barrierDismissible: true,
-                                                barrierLabel:
-                                                    'Close restore confirmation',
-                                                transitionDuration:
-                                                    const Duration(
-                                                      milliseconds: 120,
-                                                    ),
-                                                pageBuilder: (_, _, _) =>
-                                                    ActionConfirmSheet(
-                                                      p: p,
-                                                      title:
-                                                          'Restore All Moments?',
-                                                      message:
-                                                          'This will return all items currently in the trash to your history.',
-                                                      confirmLabel:
-                                                          'Restore All',
-                                                      icon:
-                                                          Icons.restore_rounded,
-                                                    ),
-                                              );
-                                          if (confirmed == true) {
-                                            await widget.onRestoreAllTrash();
-                                          }
-                                        },
-                                        icon: const Icon(
-                                          Icons.restore_rounded,
-                                          size: 18,
-                                        ),
-                                        label: const Text(
-                                          'Restore All',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: p.text2,
-                                          side: BorderSide(color: p.border),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              999,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
-                                          ),
-                                        ),
-                                        onPressed: () async {
-                                          final confirmed =
-                                              await showGeneralDialog<bool>(
-                                                context: context,
-                                                barrierColor: Colors.black
-                                                    .withValues(alpha: 0.42),
-                                                barrierDismissible: true,
-                                                barrierLabel:
-                                                    'Close empty confirmation',
-                                                transitionDuration:
-                                                    const Duration(
-                                                      milliseconds: 120,
-                                                    ),
-                                                pageBuilder: (_, _, _) =>
-                                                    ActionConfirmSheet(
-                                                      p: p,
-                                                      title: 'Empty Trash?',
-                                                      message:
-                                                          'Permanently delete all trash? This cannot be undone.',
-                                                      confirmLabel: 'Empty',
-                                                      isDestructive: true,
-                                                      icon: Icons
-                                                          .delete_forever_rounded,
-                                                    ),
-                                              );
-                                          if (confirmed == true) {
-                                            await widget.onClearTrash();
-                                          }
-                                        },
-                                        icon: const Icon(
-                                          Icons.delete_forever_rounded,
-                                          size: 18,
-                                        ),
-                                        label: const Text(
-                                          'Empty Trash',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ...() {
-                            if (_trash.isEmpty) {
-                              return [
-                                SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: HIGEmptyState(
-                                    p: p,
-                                    icon: Icons.delete_outline_rounded,
-                                    title: 'Trash is Empty',
-                                    message:
-                                        'Deleted moments will appear here for 30 days.',
-                                  ),
-                                ),
-                              ];
-                            }
-
-                            return [
-                              SliverList(
-                                delegate: SliverChildBuilderDelegate((
-                                  context,
-                                  index,
-                                ) {
-                                  final moment = _trash[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: p.surface2,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                        border: Border.all(
-                                          color: p.border.withValues(
-                                            alpha: 0.6,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 36,
-                                            height: 36,
-                                            decoration: BoxDecoration(
-                                              color: momentColor(
-                                                p,
-                                                moment.type,
-                                              ).withValues(alpha: 0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
-                                            ),
-                                            child: Icon(
-                                              momentIcon(moment.type),
-                                              color: momentColor(
-                                                p,
-                                                moment.type,
-                                              ),
-                                              size: 18,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      timeOnly(
-                                                        moment.timestamp,
-                                                      ),
-                                                      style: TextStyle(
-                                                        color: p.text,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      moment.date,
-                                                      style: TextStyle(
-                                                        color: p.text3,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                if (moment.note.isNotEmpty) ...[
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    moment.note,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      color: p.text2,
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ],
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.restore_rounded,
-                                              color: p.text2,
-                                              size: 20,
-                                            ),
-                                            onPressed: () async {
-                                              await widget.onRestoreTrashMoment(
-                                                moment.id,
-                                              );
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.delete_forever_rounded,
-                                              color: p.text2,
-                                              size: 20,
-                                            ),
-                                            onPressed: () async {
-                                              final confirmed = await showGeneralDialog<bool>(
-                                                context: context,
-                                                barrierColor: Colors.black
-                                                    .withValues(alpha: 0.42),
-                                                barrierDismissible: true,
-                                                barrierLabel:
-                                                    'Close delete confirmation',
-                                                transitionDuration:
-                                                    const Duration(
-                                                      milliseconds: 120,
-                                                    ),
-                                                pageBuilder: (_, _, _) =>
-                                                    ActionConfirmSheet(
-                                                      p: p,
-                                                      title:
-                                                          'Delete Permanently?',
-                                                      message:
-                                                          'This moment will be erased forever.',
-                                                      confirmLabel: 'Delete',
-                                                      isDestructive: true,
-                                                      icon: Icons
-                                                          .delete_forever_rounded,
-                                                    ),
-                                              );
-                                              if (confirmed == true) {
-                                                await widget
-                                                    .onDeleteTrashPermanent(
-                                                      moment.id,
-                                                    );
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }, childCount: _trash.length),
-                              ),
-                            ];
-                          }(),
-                          const SliverPadding(
-                            padding: EdgeInsets.only(bottom: 48),
+                          ...TrashBinSettingsPage.buildSlivers(
+                            context: context,
+                            p: p,
+                            trash: _trash,
+                            onRestoreAllTrash: () async {
+                              await widget.onRestoreAllTrash();
+                            },
+                            onClearTrash: () async {
+                              await widget.onClearTrash();
+                            },
+                            onRestoreTrashMoment: (id) async {
+                              await widget.onRestoreTrashMoment(id);
+                            },
+                            onDeleteTrashPermanent: (id) async {
+                              await widget.onDeleteTrashPermanent(id);
+                            },
                           ),
                         ],
                         if (show('Changelog'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                ChangelogSettingsPage(p: p, latestOnly: false),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: FeedbackChangelogSettingsPage(
+                              p: p,
+                              subCategory: 'Changelog',
+                              onOpenGithubIssue: _openGithubIssue,
                             ),
                           ),
                       ],
