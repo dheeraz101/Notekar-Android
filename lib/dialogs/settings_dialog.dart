@@ -35,6 +35,7 @@ import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
+import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -4822,77 +4823,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
                         ],
                         if (show('Personalization'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.dark_mode_outlined,
-                                    title: 'Display',
-                                    status:
-                                        theme[0].toUpperCase() +
-                                        theme.substring(1),
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Display',
-                                      parent: 'Personalization',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.color_lens_outlined,
-                                    title: 'Accent Color',
-                                    status:
-                                        accentColor[0].toUpperCase() +
-                                        accentColor.substring(1),
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Accent Color',
-                                      parent: 'Personalization',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.apps_rounded,
-                                    title: 'App Icons',
-                                    status:
-                                        appIconStyle[0].toUpperCase() +
-                                        appIconStyle.substring(1),
-                                    color: p.orange,
-                                    onTap: () => _openCategory(
-                                      'App Icons',
-                                      parent: 'Personalization',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.language_rounded,
-                                    title: 'Language',
-                                    status: switch (currentLocale) {
-                                      'en' => 'English',
-                                      'hi' => 'हिन्दी',
-                                      'es' => 'Español',
-                                      _ => 'System Default',
-                                    },
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Language',
-                                      parent: 'Personalization',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'These settings refine the interface aesthetic and do not modify your saved data.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: PersonalizationSettingsPage(
+                              p: p,
+                              subCategory: 'Personalization',
+                              theme: theme,
+                              accentColor: accentColor,
+                              appIconStyle: appIconStyle,
+                              currentLocale: currentLocale,
+                              reduceMotion: reduceMotion,
+                              enableTranslucency: enableTranslucency,
+                              onLocaleChanged: (value) {
+                                setState(() => currentLocale = value);
+                                widget.onLocaleChanged(value);
+                              },
+                              onAccentColorChanged: (value) {
+                                setState(() => accentColor = value);
+                                widget.onAccentColor(value);
+                              },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Display'))
                           SliverToBoxAdapter(
@@ -4953,86 +4905,52 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ),
                           ),
                         if (show('Language'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  for (final entry in [
-                                    (code: 'system', name: 'System Default'),
-                                    (code: 'en', name: 'English'),
-                                    (code: 'hi', name: 'हिन्दी (Hindi)'),
-                                    (code: 'es', name: 'Español (Spanish)'),
-                                  ])
-                                    SettingsRow(
-                                      p: p,
-                                      title: entry.name,
-                                      trailing: currentLocale == entry.code
-                                          ? Icon(
-                                              Icons.check_rounded,
-                                              color: p.accent,
-                                              size: 20,
-                                            )
-                                          : const SizedBox.shrink(),
-                                      onTap: () {
-                                        if (currentLocale == entry.code) return;
-                                        HapticFeedback.selectionClick();
-                                        setState(
-                                          () => currentLocale = entry.code,
-                                        );
-                                        widget.onLocaleChanged(entry.code);
-                                      },
-                                    ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Select your preferred language for the application.'
-                                        .localized(context),
-                              ),
-                              SettingsBetaNote(
-                                p: p,
-                                text:
-                                    'The current features on this page are under Beta stage.'
-                                        .localized(context),
-                                onLearnMore: () => _showBetaInfoPopup(p),
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: PersonalizationSettingsPage(
+                              p: p,
+                              subCategory: 'Language',
+                              theme: theme,
+                              accentColor: accentColor,
+                              appIconStyle: appIconStyle,
+                              currentLocale: currentLocale,
+                              reduceMotion: reduceMotion,
+                              enableTranslucency: enableTranslucency,
+                              onLocaleChanged: (value) {
+                                setState(() => currentLocale = value);
+                                widget.onLocaleChanged(value);
+                              },
+                              onAccentColorChanged: (value) {
+                                setState(() => accentColor = value);
+                                widget.onAccentColor(value);
+                              },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('Accent Color'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                showDividers: false,
-                                children: [
-                                  ColorChoiceSetting(
-                                    p: p,
-                                    value: accentColor,
-                                    blur:
-                                        !reduceMotion &&
-                                        enableTranslucency &&
-                                        AdaptiveEngine().supportsBlur,
-                                    onChanged: (value) {
-                                      if (value == accentColor) return;
-                                      HapticFeedback.selectionClick();
-                                      setState(() => accentColor = value);
-                                      widget.onAccentColor(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Select an accent color for buttons and fluid interface highlights.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: PersonalizationSettingsPage(
+                              p: p,
+                              subCategory: 'Accent Color',
+                              theme: theme,
+                              accentColor: accentColor,
+                              appIconStyle: appIconStyle,
+                              currentLocale: currentLocale,
+                              reduceMotion: reduceMotion,
+                              enableTranslucency: enableTranslucency,
+                              onLocaleChanged: (value) {
+                                setState(() => currentLocale = value);
+                                widget.onLocaleChanged(value);
+                              },
+                              onAccentColorChanged: (value) {
+                                setState(() => accentColor = value);
+                                widget.onAccentColor(value);
+                              },
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
                           ),
                         if (show('App Icons'))
                           SliverToBoxAdapter(
