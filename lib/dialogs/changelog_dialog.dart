@@ -24,6 +24,23 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.6',
+      date: 'July 29, 2026',
+      highlights: [
+        'Align home streak card and integrate onboarding walkthrough',
+        'Implement iOS-style date-time picker and clean copy text',
+        'Add 21 research-backed milestones, 10 psychological themes, custom start date picker, and pill progress card redesign',
+      ],
+      items: [
+        'Added more language support to the app',
+        'Align home streak card and integrate onboarding walkthrough',
+        'Implement iOS-style date-time picker and clean copy text',
+        'Refine Solo Leveling milestone progression hierarchy',
+        'Add 21 research-backed milestones, 10 psychological themes, custom start date picker, and pill progress card redesign',
+        '- Wired up the "Note on Click" setting to open the note compose dialog on single taps instead of executing a direct instant log.',
+      ],
+    ),
+    (
       version: '5.1.5',
       date: 'July 29, 2026',
       highlights: ['Beta testing and feedback build.'],

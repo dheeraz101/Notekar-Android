@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.6] - 2026-07-29 (versionCode 26) [BR]
+
+### What's New
+
+- Align home streak card and integrate onboarding walkthrough
+- Implement iOS-style date-time picker and clean copy text
+- Add 21 research-backed milestones, 10 psychological themes, custom start date picker, and pill
+  progress card redesign
+
+### Improvements
+
+- Added more language support to the app
+- Refine Solo Leveling milestone progression hierarchy
+-
+    - Wired up the "Note on Click" setting to open the note compose dialog on single taps instead of
+      executing a direct instant log.
+
 ## [5.1.5] - 2026-07-29 (versionCode 25) [BR]
 
 ### Improvements

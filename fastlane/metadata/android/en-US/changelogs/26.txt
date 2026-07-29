@@ -1,0 +1,7 @@
+Update to 5.1.6 (build 26):
+- New: Align home streak card and integrate onboarding walkthrough
+- New: Implement iOS-style date-time picker and clean copy text
+- New: Add 21 research-backed milestones, 10 psychological themes, custom start date picker, and pill progress card redesign
+- Added more language support to the app
+- Refine Solo Leveling milestone progression hierarchy
+- - Wired up the "Note on Click" setting to open the note compose dialog on single taps instead of executing a direct instant log.
