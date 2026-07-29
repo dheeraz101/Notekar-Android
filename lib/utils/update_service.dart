@@ -322,6 +322,20 @@ class UpdateService {
     }
   }
 
+  String _getDeviceSuffix() {
+    final abis = AdaptiveEngine().supportedAbis;
+    if (abis.isEmpty) return 'universal';
+    final primary = abis.first.toLowerCase();
+    if (primary.contains('arm64')) {
+      return 'arm64-v8a';
+    } else if (primary.contains('armeabi') || primary.contains('armv7')) {
+      return 'armeabi-v7a';
+    } else if (primary.contains('x86_64')) {
+      return 'x86_64';
+    }
+    return 'universal';
+  }
+
   Future<String?> downloadApk(
     AppUpdateInfo info,
     void Function(double progress) onProgress,
@@ -329,19 +343,7 @@ class UpdateService {
     final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
     if (cacheDir == null) return null;
 
-    final abis = AdaptiveEngine().supportedAbis;
-    String suffix = 'universal';
-    if (abis.isNotEmpty) {
-      final primary = abis.first.toLowerCase();
-      if (primary.contains('arm64')) {
-        suffix = 'arm64-v8a';
-      } else if (primary.contains('armeabi') || primary.contains('armv7')) {
-        suffix = 'armeabi-v7a';
-      } else if (primary.contains('x86_64')) {
-        suffix = 'x86_64';
-      }
-    }
-
+    String suffix = _getDeviceSuffix();
     final cleanVersion = info.version.split('-').first;
     final url =
         'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
@@ -594,7 +596,9 @@ class UpdateService {
       });
       if (localHash == null || localHash.isEmpty) return false;
 
-      // Extract hash of universal apk from manifest text
+      final localFilename = apkFilePath.split('/').last.split('\\').last;
+
+      // Extract hash of localFilename from manifest text
       final lines = manifestText.split('\n');
       for (final line in lines) {
         final trimmed = line.trim();
@@ -602,8 +606,8 @@ class UpdateService {
         final parts = trimmed.split(RegExp(r'\s+'));
         if (parts.length >= 2) {
           final hash = parts[0].trim().toLowerCase();
-          final filename = parts[1].trim();
-          if (filename.contains('universal') &&
+          final filename = parts[1].trim().toLowerCase();
+          if (filename == localFilename.toLowerCase() &&
               hash == localHash.toLowerCase()) {
             _logger.info('Checksum matches target: $hash');
             return true;
@@ -625,9 +629,16 @@ class UpdateService {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
       if (cacheDir == null) return null;
       final cleanVersion = version.split('-').first;
-      final file = File('$cacheDir/notekar-$cleanVersion-universal.apk');
+      final suffix = _getDeviceSuffix();
+      var file = File('$cacheDir/notekar-$cleanVersion-$suffix.apk');
       if (await file.exists()) {
         return file.path;
+      }
+      if (suffix != 'universal') {
+        file = File('$cacheDir/notekar-$cleanVersion-universal.apk');
+        if (await file.exists()) {
+          return file.path;
+        }
       }
     } catch (_) {}
     return null;
@@ -660,24 +671,36 @@ class UpdateService {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
       final cleanVersion = info.version.split('-').first;
-      final url =
-          'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
+      final suffix = _getDeviceSuffix();
 
-      final request = await client.getUrl(Uri.parse(url));
+      var url =
+          'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
+      var request = await client.getUrl(Uri.parse(url));
       request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
       request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+      var response = await request.close();
 
-      final response = await request.close();
+      if (response.statusCode == 404 && suffix != 'universal') {
+        await response.drain();
+        url =
+            'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-universal.apk';
+        request = await client.getUrl(Uri.parse(url));
+        request.headers.set(HttpHeaders.userAgentHeader, 'NoteKar/$appVersion');
+        request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-0');
+        response = await request.close();
+      }
+
       final contentRange = response.headers.value(
         HttpHeaders.contentRangeHeader,
       );
+      final statusCode = response.statusCode;
       await response.drain();
 
       // Log this size metadata query
       await NetworkLogger.log(
         url: url,
         method: 'HEAD',
-        statusCode: response.statusCode,
+        statusCode: statusCode,
         purpose: 'Query Update Package Size',
         size: '0.1 KB',
       );
