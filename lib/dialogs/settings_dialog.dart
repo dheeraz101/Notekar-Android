@@ -15,6 +15,7 @@ import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
+import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
@@ -275,7 +276,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late String currentLocale;
   List<NetworkLogEntry> _networkLogs = [];
   bool _loadingNetworkLogs = false;
-  int? _expandedNetworkLogIndex;
 
   String? _editingReminderType;
   final TextEditingController _reminderMessageController =
@@ -3155,442 +3155,6 @@ ${stackTrace ?? 'No stack trace provided.'}
     );
   }
 
-  Widget _networkMonitorHeader(Palette p) {
-    double totalKb = 0;
-    for (final entry in _networkLogs) {
-      final sizeStr = entry.size.toLowerCase();
-      if (sizeStr.contains('kb')) {
-        totalKb += double.tryParse(sizeStr.replaceAll('kb', '').trim()) ?? 0.0;
-      } else if (sizeStr.contains('mb')) {
-        totalKb +=
-            (double.tryParse(sizeStr.replaceAll('mb', '').trim()) ?? 0.0) *
-            1024.0;
-      }
-    }
-    String totalData = '';
-    if (totalKb > 1024) {
-      totalData = '${(totalKb / 1024).toStringAsFixed(2)} MB';
-    } else {
-      totalData = '${totalKb.toStringAsFixed(1)} KB';
-    }
-
-    final useTranslucency =
-        !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: useTranslucency ? p.surface2.withValues(alpha: 0.8) : p.surface2,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: p.border.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Data Consumed'.localized(context).toUpperCase(),
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    totalData,
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Total Requests'.localized(context).toUpperCase(),
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${_networkLogs.length} reqs',
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Divider(color: p.border.withValues(alpha: 0.3), height: 1),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Offline Privacy Log'.localized(context),
-                style: TextStyle(
-                  color: p.text2,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              PressableScale(
-                onTap: _clearNetworkLogs,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: p.red.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(99),
-                    border: Border.all(
-                      color: p.red.withValues(alpha: 0.25),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    'Clear'.localized(context),
-                    style: TextStyle(
-                      color: p.red,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _networkMonitorLogsList(Palette p) {
-    if (_loadingNetworkLogs) {
-      return [
-        const SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ];
-    }
-    if (_networkLogs.isEmpty) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: HIGEmptyState(
-            p: p,
-            icon: Icons.wifi_tethering_off_rounded,
-            title: 'No Network Traffic',
-            message:
-                'All network activities made by NoteKar are audited and recorded here.',
-            compact: true,
-          ),
-        ),
-      ];
-    }
-
-    final useTranslucency =
-        !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur;
-
-    return [
-      SliverList(
-        delegate: SliverChildBuilderDelegate((context, index) {
-          final entry = _networkLogs[index];
-          final isExpanded = _expandedNetworkLogIndex == index;
-          final timeStr =
-              '${entry.timestamp.hour.toString().padLeft(2, '0')}:${entry.timestamp.minute.toString().padLeft(2, '0')}:${entry.timestamp.second.toString().padLeft(2, '0')}';
-          final dateStr =
-              '${entry.timestamp.year}-${entry.timestamp.month.toString().padLeft(2, '0')}-${entry.timestamp.day.toString().padLeft(2, '0')}';
-
-          Color statusColor = p.green;
-          if (entry.statusCode < 200 || entry.statusCode >= 300) {
-            statusColor = p.red;
-          }
-
-          Color methodBg = p.accent.withValues(alpha: 0.1);
-          Color methodText = p.accent;
-          if (entry.method == 'HEAD') {
-            methodBg = p.text2.withValues(alpha: 0.1);
-            methodText = p.text2;
-          }
-
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              color: useTranslucency
-                  ? p.surface.withValues(alpha: 0.4)
-                  : p.surface2,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: p.border.withValues(alpha: 0.2)),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(24),
-              onTap: () {
-                HapticFeedback.selectionClick();
-                setState(() {
-                  _expandedNetworkLogIndex = isExpanded ? null : index;
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: methodBg,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            entry.method,
-                            style: TextStyle(
-                              color: methodText,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            entry.purpose.localized(context),
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          entry.size,
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: statusColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Status ${entry.statusCode}',
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          '$dateStr • $timeStr',
-                          style: TextStyle(color: p.text3, fontSize: 10.5),
-                        ),
-                      ],
-                    ),
-                    if (isExpanded) ...[
-                      const SizedBox(height: 12),
-                      Divider(
-                        color: p.border.withValues(alpha: 0.2),
-                        height: 1,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'ENDPOINT URL'.localized(context),
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      SelectableText(
-                        entry.url,
-                        style: TextStyle(
-                          color: p.accent,
-                          fontFamily: 'monospace',
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          );
-        }, childCount: _networkLogs.length),
-      ),
-    ];
-  }
-
-  Widget _deviceHealthPage(Palette p) {
-    final engine = AdaptiveEngine();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (engine.isLowEnd || engine.tier == PerformanceTier.low) ...[
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: p.orange.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: p.orange.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.warning_amber_rounded, color: p.orange, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Optimized Performance Mode',
-                        style: TextStyle(
-                          color: p.orange,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'NoteKar has automatically scaled back live animations and blur effects to preserve battery and maintain maximum responsiveness on your device hardware.',
-                        style: TextStyle(
-                          color: p.text2,
-                          fontSize: 12,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        SettingsGroup(
-          p: p,
-          title: 'Adaptive Engine Overview',
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.memory_rounded, color: p.accent, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Real-time Hardware Tuning',
-                        style: TextStyle(
-                          color: p.text,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'The Adaptive Engine analyzes system RAM capacity, CPU core count, and GPU tier at launch to tune visual effects for optimum 60 FPS performance without heating or lag.',
-                    style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SettingsGroup(
-          p: p,
-          title: 'Hardware Diagnostics',
-          children: [
-            DiagnosticRow(
-              p: p,
-              label: 'Performance Tier',
-              value: engine.tier.name.toUpperCase(),
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'RAM Capacity',
-              value: '${engine.ramGb} GB',
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'CPU Cores',
-              value: '${engine.processors} Cores',
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'System Blur',
-              value: engine.supportsBlur ? 'Supported' : 'Hardware Limited',
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'Live Animations',
-              value: engine.supportsAdvancedAnimations
-                  ? 'High Performance'
-                  : 'Optimized',
-            ),
-          ],
-        ),
-
-        SettingsPageDescription(
-          p: p,
-          text: 'Technical stats about your device and the Adaptive Engine.',
-        ),
-      ],
-    );
-  }
-
   Widget _licensesPage(Palette p) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3830,116 +3394,6 @@ ${stackTrace ?? 'No stack trace provided.'}
         const SizedBox(height: spacing32),
       ],
     );
-  }
-
-  Widget _diagnosticsPage(Palette p, List<Moment> entries, int todayCount) {
-    final latest = entries.isEmpty
-        ? 'No moments yet'
-        : relativeAge(entries.map((entry) => entry.timestamp).reduce(math.max));
-    final lastChecked = widget.lastUpdateCheckedAt == null
-        ? 'Not checked yet'
-        : relativeAge(widget.lastUpdateCheckedAt!);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SettingsGroup(
-          p: p,
-          children: [
-            DiagnosticRow(
-              p: p,
-              label: 'App Version',
-              value: 'v$appVersion ($appBuildNumber)',
-            ),
-            DiagnosticRow(p: p, label: 'Build Date', value: appBuildDate),
-            DiagnosticRow(p: p, label: 'Build Date', value: appBuildDate),
-            DiagnosticRow(
-              p: p,
-              label: 'Moments',
-              value: '${entries.length} total - $todayCount today',
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'Storage',
-              value: 'Saved privately on this device',
-            ),
-            DiagnosticRow(
-              p: p,
-              label: 'Android Backup',
-              value: 'Enabled for system transfer and Google backup',
-            ),
-            DiagnosticRow(p: p, label: 'Updates', value: _updateSubtitle),
-            DiagnosticRow(p: p, label: 'Last Update Check', value: lastChecked),
-            DiagnosticRow(
-              p: p,
-              label: 'App Notices',
-              value: remoteNotices ? 'Enabled' : 'Disabled',
-            ),
-            DiagnosticRow(p: p, label: 'Last Moment', value: latest),
-          ],
-        ),
-        const SizedBox(height: 20),
-        PressableScale(
-          onTap: () {
-            Clipboard.setData(
-              ClipboardData(
-                text: _diagnosticsText(entries, todayCount, latest),
-              ),
-            );
-            widget.onFeedback('Diagnostics copied');
-          },
-          child: Container(
-            width: double.infinity,
-            height: 52,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: p.accent,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.content_copy_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  'Copy Diagnostics',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Diagnostics help in troubleshooting. Copying them does not send any data automatically.',
-        ),
-      ],
-    );
-  }
-
-  String _diagnosticsText(List<Moment> entries, int todayCount, String latest) {
-    final logs = AppLogger().diagnosticLogs;
-    return [
-      'NoteKar diagnostics',
-      'Version: v$appVersion ($appBuildNumber)',
-      'Build date: $appBuildDate',
-      'Moments: ${entries.length} total, $todayCount today',
-      'Storage: local offline storage',
-      'Android backup: configured',
-      'Updates: $_updateSubtitle',
-      'Last update check: ${widget.lastUpdateCheckedAt == null ? 'Not checked yet' : relativeAge(widget.lastUpdateCheckedAt!)}',
-      'App notices: ${remoteNotices ? 'Enabled' : 'Disabled'}',
-      'Last moment: $latest',
-      '',
-      'Internal Logs:',
-      logs.isEmpty ? 'No internal logs available' : logs,
-    ].join('\n');
   }
 
   Widget _appIconsPage(Palette p) {
@@ -6698,39 +6152,73 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
                         if (show('Diagnostics'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _diagnosticsPage(p, entries, todayCount),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: DiagnosticsSettingsPage(
+                              p: p,
+                              subCategory: 'Diagnostics',
+                              entries: entries,
+                              todayCount: todayCount,
+                              appVersion: appVersion,
+                              appBuildNumber: appBuildNumber,
+                              appBuildDate: appBuildDate,
+                              updateSubtitle: _updateSubtitle,
+                              lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
+                              remoteNotices: remoteNotices,
+                              onCopyDiagnosticsFeedback: (msg) {
+                                widget.onFeedback(msg);
+                              },
+                              reduceMotion: reduceMotion,
+                              enableTranslucency: enableTranslucency,
+                              networkLogs: _networkLogs,
+                              loadingNetworkLogs: _loadingNetworkLogs,
+                              onClearNetworkLogs: _clearNetworkLogs,
                             ),
                           ),
                         if (show('Device Health'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _deviceHealthPage(p),
-                                const SizedBox(height: spacing48),
-                              ],
+                            child: DiagnosticsSettingsPage(
+                              p: p,
+                              subCategory: 'Device Health',
+                              entries: entries,
+                              todayCount: todayCount,
+                              appVersion: appVersion,
+                              appBuildNumber: appBuildNumber,
+                              appBuildDate: appBuildDate,
+                              updateSubtitle: _updateSubtitle,
+                              lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
+                              remoteNotices: remoteNotices,
+                              onCopyDiagnosticsFeedback: (msg) {
+                                widget.onFeedback(msg);
+                              },
+                              reduceMotion: reduceMotion,
+                              enableTranslucency: enableTranslucency,
+                              networkLogs: _networkLogs,
+                              loadingNetworkLogs: _loadingNetworkLogs,
+                              onClearNetworkLogs: _clearNetworkLogs,
                             ),
                           ),
-                        if (show('Network Monitor')) ...[
+                        if (show('Network Monitor'))
                           SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                _networkMonitorHeader(p),
-                                const SizedBox(height: 12),
-                              ],
+                            child: DiagnosticsSettingsPage(
+                              p: p,
+                              subCategory: 'Network Monitor',
+                              entries: entries,
+                              todayCount: todayCount,
+                              appVersion: appVersion,
+                              appBuildNumber: appBuildNumber,
+                              appBuildDate: appBuildDate,
+                              updateSubtitle: _updateSubtitle,
+                              lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
+                              remoteNotices: remoteNotices,
+                              onCopyDiagnosticsFeedback: (msg) {
+                                widget.onFeedback(msg);
+                              },
+                              reduceMotion: reduceMotion,
+                              enableTranslucency: enableTranslucency,
+                              networkLogs: _networkLogs,
+                              loadingNetworkLogs: _loadingNetworkLogs,
+                              onClearNetworkLogs: _clearNetworkLogs,
                             ),
                           ),
-                          ..._networkMonitorLogsList(p),
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: spacing48),
-                          ),
-                        ],
                         if (show('Privacy Policy'))
                           SliverToBoxAdapter(child: _privacyPolicyPage(p)),
                         if (show('Terms of Use'))
