@@ -33,6 +33,7 @@ import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
+import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({
@@ -7629,252 +7630,121 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ]),
                           ),
                         if (show('Advanced'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.accessibility_new_rounded,
-                                    title: 'Accessibility',
-                                    status:
-                                        hapticStyle[0].toUpperCase() +
-                                        hapticStyle.substring(1),
-                                    color: p.orange,
-                                    onTap: () => _openCategory(
-                                      'Accessibility',
-                                      parent: 'Advanced',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.bug_report_outlined,
-                                    title: 'Diagnostics',
-                                    status: 'View',
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Diagnostics',
-                                      parent: 'Advanced',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.memory_rounded,
-                                    title: 'Device Health',
-                                    status: AdaptiveEngine().healthStatus,
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Device Health',
-                                      parent: 'Advanced',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.network_check_rounded,
-                                    title: 'Network Monitor',
-                                    status: 'View',
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Network Monitor',
-                                      parent: 'Advanced',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.restart_alt_rounded,
-                                    title: 'Reset',
-                                    status: 'Wipe',
-                                    color: p.red,
-                                    onTap: () => _openCategory(
-                                      'Reset',
-                                      parent: 'Advanced',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'These tools are intended for system maintenance and troubleshooting.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: AdvancedSettingsPage(
+                              p: p,
+                              subCategory: 'Advanced',
+                              hapticStyle: hapticStyle,
+                              reduceMotion: reduceMotion,
+                              largeText: largeText,
+                              highContrast: highContrast,
+                              healthStatus: AdaptiveEngine().healthStatus,
+                              onHapticStyleChanged: (value) {
+                                setState(() => hapticStyle = value);
+                                widget.onHapticStyle(value);
+                              },
+                              onReduceMotionChanged: (value) {
+                                setState(() {
+                                  reduceMotion = value;
+                                  if (value) homeMenuAnimations = false;
+                                });
+                                widget.onReduceMotion(value);
+                              },
+                              onLargeTextChanged: (value) {
+                                setState(() => largeText = value);
+                                widget.onLargeText(value);
+                              },
+                              onHighContrastChanged: (value) {
+                                setState(() => highContrast = value);
+                                widget.onHighContrast(value);
+                              },
+                              onResetSettings: () =>
+                                  unawaited(_confirmResetSettings()),
+                              onResetAllData: () =>
+                                  unawaited(_confirmResetAll(p)),
+                              onFactoryReset: () =>
+                                  unawaited(_confirmFactoryReset(p)),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
                           ),
                         if (show('Accessibility'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                title: 'Haptic Style',
-                                children: [
-                                  for (final style in [
-                                    'off',
-                                    'light',
-                                    'standard',
-                                  ])
-                                    SettingsRow(
-                                      p: p,
-                                      title:
-                                          style[0].toUpperCase() +
-                                          style.substring(1),
-                                      trailing: hapticStyle == style
-                                          ? Icon(
-                                              Icons.check_rounded,
-                                              color: p.accent,
-                                              size: 20,
-                                            )
-                                          : const SizedBox.shrink(),
-                                      onTap: () {
-                                        if (hapticStyle == style) return;
-                                        HapticFeedback.selectionClick();
-                                        setState(() => hapticStyle = style);
-                                        widget.onHapticStyle(style);
-                                      },
-                                    ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Configure the intensity of vibration feedback during taps and saves.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Reduced Motion',
-                                    color: p.green,
-                                    value: reduceMotion,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        reduceMotion = value;
-                                        if (value) homeMenuAnimations = false;
-                                      });
-                                      widget.onReduceMotion(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Disables fluid physics and parallax effects to improve performance and stability.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'Larger Text',
-                                    color: p.orange,
-                                    value: largeText,
-                                    onChanged: (value) {
-                                      setState(() => largeText = value);
-                                      widget.onLargeText(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Increases the global font scale for improved legibility across all interfaces.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsSwitchRow(
-                                    p: p,
-                                    title: 'High Contrast',
-                                    color: p.green,
-                                    value: highContrast,
-                                    onChanged: (value) {
-                                      setState(() => highContrast = value);
-                                      widget.onHighContrast(value);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Enhances visibility by using pure black backgrounds and high-intensity accent colors.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: AdvancedSettingsPage(
+                              p: p,
+                              subCategory: 'Accessibility',
+                              hapticStyle: hapticStyle,
+                              reduceMotion: reduceMotion,
+                              largeText: largeText,
+                              highContrast: highContrast,
+                              healthStatus: AdaptiveEngine().healthStatus,
+                              onHapticStyleChanged: (value) {
+                                setState(() => hapticStyle = value);
+                                widget.onHapticStyle(value);
+                              },
+                              onReduceMotionChanged: (value) {
+                                setState(() {
+                                  reduceMotion = value;
+                                  if (value) homeMenuAnimations = false;
+                                });
+                                widget.onReduceMotion(value);
+                              },
+                              onLargeTextChanged: (value) {
+                                setState(() => largeText = value);
+                                widget.onLargeText(value);
+                              },
+                              onHighContrastChanged: (value) {
+                                setState(() => highContrast = value);
+                                widget.onHighContrast(value);
+                              },
+                              onResetSettings: () =>
+                                  unawaited(_confirmResetSettings()),
+                              onResetAllData: () =>
+                                  unawaited(_confirmResetAll(p)),
+                              onFactoryReset: () =>
+                                  unawaited(_confirmFactoryReset(p)),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
                           ),
                         if (show('Reset'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.restore_rounded,
-                                    title: 'Reset Settings Only',
-                                    color: p.orange,
-                                    rowKind: 'popup',
-                                    onTap: () =>
-                                        unawaited(_confirmResetSettings()),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Restores all settings options to their factory defaults. Your saved moments and notes are kept intact.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.delete_forever_rounded,
-                                    title: 'Reset All Data',
-                                    color: p.red,
-                                    rowKind: 'popup',
-                                    onTap: () => unawaited(_confirmResetAll(p)),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Permanently deletes all saved timestamps and notes from this device. Preferences remain unchanged.',
-                              ),
-
-                              SettingsGroup(
-                                p: p,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.restart_alt_rounded,
-                                    title: 'Factory Reset',
-                                    color: p.red,
-                                    rowKind: 'popup',
-                                    onTap: () =>
-                                        unawaited(_confirmFactoryReset(p)),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Completely clears all saved data and resets all settings to original fresh state.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
+                          SliverToBoxAdapter(
+                            child: AdvancedSettingsPage(
+                              p: p,
+                              subCategory: 'Reset',
+                              hapticStyle: hapticStyle,
+                              reduceMotion: reduceMotion,
+                              largeText: largeText,
+                              highContrast: highContrast,
+                              healthStatus: AdaptiveEngine().healthStatus,
+                              onHapticStyleChanged: (value) {
+                                setState(() => hapticStyle = value);
+                                widget.onHapticStyle(value);
+                              },
+                              onReduceMotionChanged: (value) {
+                                setState(() {
+                                  reduceMotion = value;
+                                  if (value) homeMenuAnimations = false;
+                                });
+                                widget.onReduceMotion(value);
+                              },
+                              onLargeTextChanged: (value) {
+                                setState(() => largeText = value);
+                                widget.onLargeText(value);
+                              },
+                              onHighContrastChanged: (value) {
+                                setState(() => highContrast = value);
+                                widget.onHighContrast(value);
+                              },
+                              onResetSettings: () =>
+                                  unawaited(_confirmResetSettings()),
+                              onResetAllData: () =>
+                                  unawaited(_confirmResetAll(p)),
+                              onFactoryReset: () =>
+                                  unawaited(_confirmFactoryReset(p)),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
                           ),
                         if (show('Diagnostics'))
                           SliverToBoxAdapter(
