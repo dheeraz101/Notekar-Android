@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
@@ -44,6 +46,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   bool _batteryExempt = false;
   bool _installGranted = false;
 
+  SharedPreferences? _prefs;
+  bool _enableSobrietyMode = false;
+  String _sobrietyMilestoneTheme = 'science';
+
   static const _fileChannel = MethodChannel('notekar/files');
 
   @override
@@ -56,6 +62,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
     WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
+    _loadSobrietyPrefs();
+  }
+
+  Future<void> _loadSobrietyPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
+      _sobrietyMilestoneTheme =
+          _prefs?.getString('sobriety_milestone_theme') ?? 'science';
+    });
   }
 
   @override
@@ -98,6 +114,196 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     setState(() {
       _currentPage = index;
     });
+  }
+
+  Widget _buildSobrietyPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: p.orange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: p.orange.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.self_improvement_rounded,
+                color: p.orange,
+                size: 38,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'Sobriety Companion',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'A privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 32),
+          SettingsGroup(
+            p: p,
+            children: [
+              SettingsSwitchRow(
+                p: p,
+                icon: Icons.self_improvement_rounded,
+                title: 'Enable Sobriety Mode',
+                subtitle:
+                    'Adds a clean streak progress bar widget to your home screen.',
+                color: p.orange,
+                value: _enableSobrietyMode,
+                onChanged: (value) async {
+                  if (_prefs != null) {
+                    await _prefs!.setBool('enable_sobriety_mode', value);
+                  }
+                  setState(() => _enableSobrietyMode = value);
+                },
+              ),
+              if (_enableSobrietyMode) ...[
+                SettingsRow(
+                  p: p,
+                  icon: Icons.palette_rounded,
+                  title: 'Milestone Theme',
+                  subtitle: () {
+                    final t = kMilestoneThemes.firstWhere(
+                      (t) => t.id == _sobrietyMilestoneTheme,
+                      orElse: () => kMilestoneThemes.first,
+                    );
+                    return '${t.emoji} ${t.name}: ${t.description}';
+                  }(),
+                  color: p.orange,
+                  onTap: () => _showOnboardingThemePicker(context, p),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          SettingsPageDescription(
+            p: p,
+            text:
+                'Your data is 100% private and stays offline on this device. Enabling this does not alter any existing logs.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOnboardingThemePicker(BuildContext context, Palette p) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: p.surface.withValues(alpha: 0.85),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(
+              color: p.accent.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Glass(
+              p: p,
+              radius: 32,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: p.text3.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Choose Milestone Theme',
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final theme in kMilestoneThemes)
+                            SettingsRow(
+                              p: p,
+                              title: '${theme.emoji} ${theme.name}',
+                              subtitle: theme.description,
+                              color: p.orange,
+                              trailing: _sobrietyMilestoneTheme == theme.id
+                                  ? Icon(
+                                      Icons.check_circle_rounded,
+                                      color: p.orange,
+                                      size: 20,
+                                    )
+                                  : Icon(
+                                      Icons.circle_outlined,
+                                      color: p.text3,
+                                      size: 20,
+                                    ),
+                              onTap: () async {
+                                if (_prefs != null) {
+                                  await _prefs!.setString(
+                                    'sobriety_milestone_theme',
+                                    theme.id,
+                                  );
+                                }
+                                setState(
+                                  () => _sobrietyMilestoneTheme = theme.id,
+                                );
+                                if (context.mounted) Navigator.pop(context);
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildWelcomePage(Palette p) {
@@ -1055,6 +1261,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'network-monitor') {
                     return _buildNetworkMonitorPage(p);
+                  }
+                  if (key == 'sobriety') {
+                    return _buildSobrietyPage(p);
                   }
                   return const SizedBox.shrink();
                 }).toList(),

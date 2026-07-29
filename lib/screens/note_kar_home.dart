@@ -752,6 +752,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
     final networkWalkthroughSeen =
         prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
+    final sobrietyWalkthroughSeen =
+        prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
 
     if (!welcomeSeen) {
       if (!mounted) return;
@@ -783,6 +785,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               'updates-permission',
               'reminders',
               'network-monitor',
+              'sobriety',
             ],
           ),
         ),
@@ -791,6 +794,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.remindersWalkthroughSeen', true);
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
+      await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
     } else if (!securityWalkthroughSeen) {
       if (!mounted) return;
       await Navigator.of(context).push(
@@ -872,6 +876,33 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
       );
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
+    } else if (!sobrietyWalkthroughSeen) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => WelcomeScreen(
+            p: p,
+            theme: _theme,
+            defaultMode: _defaultMode,
+            currentLocale: _locale,
+            onLocaleChanged: (value) {
+              NoteKarApp.of(context)?.setLocale(value);
+              setState(() => _locale = value);
+            },
+            onTheme: (value) {
+              setState(() => _theme = value);
+              _saveSetting('m-theme', value);
+              _applySystemUiStyle();
+            },
+            onDefaultMode: (value) {
+              setState(() => _defaultMode = value);
+              _saveSetting('m-default-mode', value);
+            },
+            pages: const ['sobriety'],
+          ),
+        ),
+      );
+      await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
     }
   }
 
@@ -2891,85 +2922,80 @@ class _NoteKarHomeState extends State<NoteKarHome>
         // Open the Sobriety Companion settings page
         _openSettings(initialCategory: 'Sobriety Companion');
       },
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 380),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: Stack(
-              children: [
-                // Background track
-                Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: palette.surface2,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: palette.border, width: 1),
-                  ),
-                ),
-                // Progress fill
-                FractionallySizedBox(
-                  widthFactor: progress.clamp(0.05, 1.0),
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: fillColor.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-                // Text content
-                SizedBox(
-                  height: 60,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (smallLabel.isNotEmpty)
-                                Text(
-                                  smallLabel,
-                                  style: TextStyle(
-                                    color: palette.text2,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.3,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              Text(
-                                bigLabel,
-                                style: TextStyle(
-                                  color: palette.text,
-                                  fontSize: smallLabel.isEmpty ? 20 : 17,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.3,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: palette.text3,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: Stack(
+          children: [
+            // Background track
+            Container(
+              height: 60,
+              decoration: BoxDecoration(
+                color: palette.surface2,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: palette.border, width: 1),
+              ),
             ),
-          ),
+            // Progress fill
+            FractionallySizedBox(
+              widthFactor: progress.clamp(0.05, 1.0),
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  color: fillColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            // Text content
+            SizedBox(
+              height: 60,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (smallLabel.isNotEmpty)
+                            Text(
+                              smallLabel,
+                              style: TextStyle(
+                                color: palette.text2,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          Text(
+                            bigLabel,
+                            style: TextStyle(
+                              color: palette.text,
+                              fontSize: smallLabel.isEmpty ? 20 : 17,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.3,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: palette.text3,
+                      size: 18,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -3238,9 +3264,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
           ),
           if (_enableSobrietyMode)
             Positioned(
-              top: MediaQuery.paddingOf(context).top + 64,
-              left: spacing24,
-              right: spacing24,
+              top: spacing16 + MediaQuery.paddingOf(context).top,
+              left: spacing16,
+              right: spacing16,
               child: _buildSobrietyStreakCard(palette),
             ),
           if (lastSaved && _showLastSavedHint)
