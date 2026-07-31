@@ -109,7 +109,7 @@ class _NoteDialogState extends State<NoteDialog> {
             ),
             const SizedBox(height: spacing12),
             SizedBox(
-              height: keyboardHeight > 0 ? 80 : 130,
+              height: 130,
               child: TextField(
                 controller: _controller,
                 scrollController: _scrollController,
