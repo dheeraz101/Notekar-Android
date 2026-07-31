@@ -24,6 +24,25 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.0',
+      date: 'July 31, 2026',
+      highlights: [
+        'Duolingo-Style Milestone Map: vertical progress trail with interactive peak details.',
+        'Local Backups Manager: restored, deleted, or saved local database files.',
+        'Streak Shields: protect your habit streak on relapse.',
+        'Hardware Security: hardware-backed AES-256 encryption and App Lock.',
+        'Apple HIG Style: iOS emojis, speech-bubble tooltips, and aligned toolbar buttons.',
+      ],
+      items: [
+        'Duolingo-Style Milestone Map: vertical progress trail with interactive peak details.',
+        'Local Backups Manager: restored, deleted, or saved local database files.',
+        'Streak Shields: protect your habit streak on relapse.',
+        'Hardware Security: hardware-backed AES-256 encryption and App Lock.',
+        'Apple HIG Style: iOS emojis, speech-bubble tooltips, and aligned toolbar buttons.',
+        'Bug Fixes: Resolved certificate validation errors on GitHub commits fetch, keyboard-overlap styling in note compose dialog, and home-screen flicker during factory reset.',
+      ],
+    ),
+    (
       version: '5.1.9',
       date: 'July 31, 2026',
       highlights: [

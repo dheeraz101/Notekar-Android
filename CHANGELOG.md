@@ -7,6 +7,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.0] - 2026-07-31 (versionCode 30) [SB]
+
+### What's New
+
+- **Duolingo-Style Milestone Map**: A vertical progress trail showing milestone peaks that light up
+  as progress advances. Tap peaks to read neuroscience recovery details.
+- **Local Backups Manager**: A dashboard inside settings allowing instant backup restoration, local
+  file management, swipe-to-delete, and quick local backups.
+- **Streak Shields (Streak Freeze)**: Safety-net mechanic preventing binary reset frustration by
+  allowing users to protect their progress.
+- **Hardware Encryption**: Hardware-backed database encryption using AES-256 keys inside Android
+  Keystore.
+- **Apple HIG Visuals**: Floating speech-bubble onboarding tooltip, high-resolution iOS emoji
+  parsing, native Cupertino chevrons/icons, and aligned bottom navigation bar button heights.
+- **Device Security**: App-switcher content obfuscation, screenshot blocking, and in-app App Lock.
+- **Insights Dashboard**: Success rate percentages, active streak shield counts, and trigger
+  breakdown metrics.
+
+### Bug Fixes
+
+- Resolved certificate validation errors on GitHub commits fetch, keyboard-overlap styling in note
+  compose dialog, and home-screen flicker during factory reset.
+
 ## [5.1.9] - 2026-07-31 (versionCode 29) [BR]
 
 ### What's New

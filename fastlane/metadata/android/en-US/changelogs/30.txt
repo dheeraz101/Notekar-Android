@@ -1,0 +1,7 @@
+Update to 6.0.0 (build 30):
+- New: Vertical milestones progress path trail (Duolingo-Style).
+- New: One-Click Local Backups manager (restore/delete/quick backup saves).
+- New: Streak Freeze Shields safety-net on relapses.
+- New: Hardware AES-256 database encryption and App Lock security.
+- New: iOS emoji text rendering and speech-bubble onboarding tooltips.
+- Fix: Network issues on updates check, note compose editor viewport active keyboard constraints, and reset flashes.
