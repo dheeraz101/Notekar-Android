@@ -7,6 +7,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [5.1.9] - 2026-07-31 (versionCode 29) [BR]
+
+### What's New
+
+- Add onboarding coachmark, streak freeze shields, and success rate dashboard
+- Implement loss-aversion copy, iOS emoji parser, and Cupertino icons
+- Overhaul settings search, sobriety theme icons, and resolve network issues
+- Implement search note history, Apple HIG cards, CupertinoIcons navigation, and gamified streak
+  indicators
+
+### Improvements
+
+- Constrain note dialog viewport when keyboard is active to push relapse switch below fold
+- Constrain note dialog keyboard-height and preserve static input height
+- Refine note dialog dynamic height and match settings switch toggle
+- Optimize keyboard focus times and redesign note editor dialog
+- Fix readme formatting
+
 ## [5.1.8] - 2026-07-30 (versionCode 28) [BR]
 
 ### What's New

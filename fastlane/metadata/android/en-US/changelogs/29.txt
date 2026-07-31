@@ -1,0 +1,10 @@
+Update to 5.1.9 (build 29):
+- New: Add onboarding coachmark, streak freeze shields, and success rate dashboard
+- New: Implement loss-aversion copy, iOS emoji parser, and Cupertino icons
+- New: Overhaul settings search, sobriety theme icons, and resolve network issues
+- New: Implement search note history, Apple HIG cards, CupertinoIcons navigation, and gamified streak indicators
+- Constrain note dialog viewport when keyboard is active to push relapse switch below fold
+- Constrain note dialog keyboard-height and preserve static input height
+- Refine note dialog dynamic height and match settings switch toggle
+- Optimize keyboard focus times and redesign note editor dialog
+- Fix readme formatting

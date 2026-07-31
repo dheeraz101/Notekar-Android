@@ -24,6 +24,27 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '5.1.9',
+      date: 'July 31, 2026',
+      highlights: [
+        'Add onboarding coachmark, streak freeze shields, and success rate dashboard',
+        'Implement loss-aversion copy, iOS emoji parser, and Cupertino icons',
+        'Overhaul settings search, sobriety theme icons, and resolve network issues',
+        'Implement search note history, Apple HIG cards, CupertinoIcons navigation, and gamified streak indicators',
+      ],
+      items: [
+        'Add onboarding coachmark, streak freeze shields, and success rate dashboard',
+        'Constrain note dialog viewport when keyboard is active to push relapse switch below fold',
+        'Constrain note dialog keyboard-height and preserve static input height',
+        'Refine note dialog dynamic height and match settings switch toggle',
+        'Implement loss-aversion copy, iOS emoji parser, and Cupertino icons',
+        'Optimize keyboard focus times and redesign note editor dialog',
+        'Overhaul settings search, sobriety theme icons, and resolve network issues',
+        'Implement search note history, Apple HIG cards, CupertinoIcons navigation, and gamified streak indicators',
+        'Fix readme formatting',
+      ],
+    ),
+    (
       version: '5.1.8',
       date: 'July 30, 2026',
       highlights: ['Redesign sobriety widget'],
