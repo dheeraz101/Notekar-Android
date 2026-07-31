@@ -150,15 +150,12 @@ class SettingsDashboardPage extends StatelessWidget {
     final successRateString = '${successRate.toStringAsFixed(1)}%';
 
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: spacing16,
-        vertical: spacing8,
-      ),
-      padding: const EdgeInsets.all(spacing16),
+      margin: const EdgeInsets.only(top: 8, bottom: 0),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: p.accent.withValues(alpha: 0.12), width: 1.0),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: p.border.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

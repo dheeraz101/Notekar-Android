@@ -4,7 +4,6 @@ import 'dart:developer' as developer;
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -31,6 +30,7 @@ import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
 import 'package:quick_actions/quick_actions.dart';
@@ -1189,10 +1189,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _lastDeletedPreview = null;
       _inout = 'in';
       _sessionStart = null;
+      _sobrietyCustomStart = null;
+      _streakShields = 1;
     });
 
     await _prefs?.remove('m-inout');
     await _prefs?.remove('m-ses');
+    await _prefs?.remove('sobriety_custom_start_ms');
+    await _prefs?.setInt('streak_shields', 1);
+    await _prefs?.setInt('last_shield_granted_threshold', 0);
     await _repository.clearAll();
     await _repository.clearTrash();
     _trashNotifier.value = [];
@@ -1251,6 +1256,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _updateStatus = 'v$appVersion - Check for available updates';
       _lastUpdateCheckedAt = null;
       _nextId = 1;
+      _enableSobrietyMode = false;
+      _sobrietyResetType = 'any';
+      _sobrietyCustomStart = null;
+      _sobrietyMilestoneTheme = 'science';
+      _streakShields = 0;
     });
     _applySystemUiStyle();
 
@@ -1285,6 +1295,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'notekar.nextId',
         _welcomeSeenKey,
         _lastSeenVersionKey,
+        'enable_sobriety_mode',
+        'sobriety_reset_type',
+        'sobriety_custom_start_ms',
+        'sobriety_milestone_theme',
+        'streak_shields',
+        'last_shield_granted_threshold',
+        'notekar.sobrietyWalkthroughSeen_v6',
         'm-locale',
         'm-theme',
         'm-default-mode',
@@ -1370,15 +1387,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _finishFactoryResetOverlay() async {
     final prefs = _factoryResetWelcomePrefs;
-    setState(() {
-      _locale = 'system';
-      _factoryResetVisible = false;
-    });
     if (mounted) {
       NoteKarApp.of(context)?.setLocale('system');
     }
-    await Future<void>.delayed(const Duration(milliseconds: 220));
-    if (mounted && prefs != null) await _showWelcomeIfNeeded(prefs);
+    if (mounted && prefs != null) {
+      unawaited(_showWelcomeIfNeeded(prefs));
+    }
+    // Delay setting overlay visibility to false by 50ms so navigation transaction has started
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    if (mounted) {
+      setState(() {
+        _locale = 'system';
+        _factoryResetVisible = false;
+      });
+    }
   }
 
   Future<void> _resetSettingsOnly() async {
@@ -1413,7 +1435,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _minimalMomentOptions = false;
       _privacyLockDelayMinutes = 0;
       _locale = 'system';
+      _enableSobrietyMode = false;
+      _sobrietyResetType = 'any';
+      _sobrietyCustomStart = null;
+      _sobrietyMilestoneTheme = 'science';
+      _streakShields = 0;
     });
+    await _prefs?.setBool('enable_sobriety_mode', _enableSobrietyMode);
+    await _prefs?.setString('sobriety_reset_type', _sobrietyResetType);
+    await _prefs?.remove('sobriety_custom_start_ms');
+    await _prefs?.setString(
+      'sobriety_milestone_theme',
+      _sobrietyMilestoneTheme,
+    );
+    await _prefs?.setInt('streak_shields', 0);
+    await _prefs?.setInt('last_shield_granted_threshold', 0);
+    await _prefs?.remove('notekar.sobrietyWalkthroughSeen_v6');
     await _prefs?.setString('m-theme', _theme);
     await _prefs?.setString('m-default-mode', _defaultMode);
     await _prefs?.setInt('m-delay', _tapDelay);
@@ -3306,9 +3343,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       ),
                       if (_entries.isEmpty)
                         Positioned(
-                          top: -60,
-                          // Position it elegantly just above the clock face circle
-                          child: _AnimatedCoachmark(p: palette),
+                          bottom: -65,
+                          // Positioned elegantly below the clock face
+                          child: _CoachmarkPill(p: palette),
                         ),
                     ],
                   ),
@@ -4244,74 +4281,41 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
   }
 }
 
-class _AnimatedCoachmark extends StatefulWidget {
-  const _AnimatedCoachmark({required this.p});
+class _CoachmarkPill extends StatelessWidget {
+  const _CoachmarkPill({required this.p});
 
   final Palette p;
 
   @override
-  State<_AnimatedCoachmark> createState() => _AnimatedCoachmarkState();
-}
-
-class _AnimatedCoachmarkState extends State<_AnimatedCoachmark>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
-    _animation = Tween<double>(
-      begin: 0.88,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _animation,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: widget.p.accent.withValues(alpha: 0.95),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: widget.p.accent.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: p.accent.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(999), // Capsule radius 999
+        boxShadow: [
+          BoxShadow(
+            color: p.accent.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const IosEmojiText('👆', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Text(
+            'Tap the clock face to record your first moment'.localized(context),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.1,
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(CupertinoIcons.sparkles, color: Colors.white, size: 15),
-            const SizedBox(width: 8),
-            Text(
-              'Tap the clock face to record your first moment'.localized(
-                context,
-              ),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.1,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

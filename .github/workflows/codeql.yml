@@ -63,6 +63,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.language == 'actions' && 'none' || 'manual' }}
 
       ####################################################
       # Build Flutter project
