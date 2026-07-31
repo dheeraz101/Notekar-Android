@@ -86,11 +86,11 @@ class _NoteDialogState extends State<NoteDialog> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
-    // Calculate a dynamic max height for scrollable content so it never overflows with keyboard open
-    final maxScrollHeight = (screenHeight - keyboardHeight - 210).clamp(
-      100.0,
-      double.infinity,
-    );
+    // When keyboard is open, limit scrollable height to 205px to push the relapse switch and tags below the fold.
+    // When keyboard is closed, expand to full available height.
+    final maxScrollHeight = keyboardHeight > 0
+        ? 205.0
+        : (screenHeight - 210).clamp(100.0, double.infinity);
     Widget scrollableContent = ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxScrollHeight),
       child: SingleChildScrollView(
