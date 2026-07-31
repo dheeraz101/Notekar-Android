@@ -82,9 +82,9 @@ class SettingsDashboardPage extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(spacing16),
         decoration: BoxDecoration(
-          color: p.surface2,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: p.border),
+          color: p.accent.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: p.accent.withValues(alpha: 0.15)),
         ),
         child: Column(
           children: [
@@ -181,23 +181,23 @@ class SettingsDashboardPage extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(spacing16),
       decoration: BoxDecoration(
-        color: p.surface2,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: p.border),
+        color: p.accent.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: p.accent.withValues(alpha: 0.12), width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.analytics_rounded, color: p.orange, size: 20),
+              Icon(Icons.analytics_rounded, color: p.accent, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Sobriety Trigger Analysis'.localized(context),
                 style: TextStyle(
                   color: p.text,
                   fontWeight: FontWeight.w900,
-                  fontSize: 14,
+                  fontSize: 14.5,
                 ),
               ),
             ],
@@ -243,9 +243,9 @@ class SettingsDashboardPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: p.surface3,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: p.border),
+        color: p.surface.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: p.border.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +253,7 @@ class SettingsDashboardPage extends StatelessWidget {
           Text(
             title.localized(context).toUpperCase(),
             style: TextStyle(
-              color: p.text2,
+              color: p.text3,
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.0,

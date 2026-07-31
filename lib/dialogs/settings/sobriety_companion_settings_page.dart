@@ -497,12 +497,8 @@ class MilestoneThemePage extends StatelessWidget {
                 subtitle: theme.description,
                 color: p.orange,
                 trailing: sobrietyMilestoneTheme == theme.id
-                    ? Icon(
-                        Icons.check_circle_rounded,
-                        color: p.orange,
-                        size: 20,
-                      )
-                    : Icon(Icons.circle_outlined, color: p.text3, size: 20),
+                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    : null,
                 onTap: () => onThemeChanged(theme.id),
               ),
           ],

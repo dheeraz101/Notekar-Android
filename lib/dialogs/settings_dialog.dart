@@ -831,6 +831,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   final FocusNode _settingsSearchFocusNode = FocusNode();
   String _settingsQuery = '';
   List<String> _recentSearches = [];
+  List<String> _recentNoteSearches = [];
 
   @override
   void initState() {
@@ -879,6 +880,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     checkingUpdates = widget.checkingUpdates;
 
     _loadRecentSearches();
+    _loadRecentNoteSearches();
     _loadRemindersSettings();
 
     _settingsSearchFocusNode.addListener(() {
@@ -1064,6 +1066,24 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ].take(5).toList();
     await prefs.setStringList('recent_settings_searches', updated);
     setState(() => _recentSearches = updated);
+  }
+
+  Future<void> _loadRecentNoteSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _recentNoteSearches = prefs.getStringList('recent_note_searches') ?? [];
+    });
+  }
+
+  Future<void> _saveRecentNoteSearch(String term) async {
+    if (term.trim().isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final updated = [
+      term,
+      ..._recentNoteSearches.where((t) => t != term),
+    ].take(5).toList();
+    await prefs.setStringList('recent_note_searches', updated);
+    setState(() => _recentNoteSearches = updated);
   }
 
   void _openCategory(String name, {String? parent}) {
@@ -2958,7 +2978,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.brush_rounded,
+                                    icon: CupertinoIcons.paintbrush,
                                     title: 'Personalization',
                                     status:
                                         theme[0].toUpperCase() +
@@ -2969,7 +2989,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.bolt_rounded,
+                                    icon: CupertinoIcons.bolt,
                                     title: 'Logging',
                                     status: defaultMode == 'single'
                                         ? 'Single'
@@ -2979,7 +2999,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.verified_user_rounded,
+                                    icon: CupertinoIcons.shield,
                                     title: 'Privacy & Security',
                                     status: privacyLock ? 'On' : 'Off',
                                     color: p.green,
@@ -2988,7 +3008,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.storage_rounded,
+                                    icon: CupertinoIcons.folder,
                                     title: 'Data & Backup'.localized(context),
                                     status:
                                         '${entries.length} ${'Logs'.localized(context)}',
@@ -2997,7 +3017,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.update_rounded,
+                                    icon: CupertinoIcons.arrow_2_circlepath,
                                     title: 'Updates & Notices',
                                     status: _betaTrack ? 'Beta' : 'Stable',
                                     color: p.accent,
@@ -3006,7 +3026,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.auto_stories_rounded,
+                                    icon: CupertinoIcons.book,
                                     title: 'Help & Guides',
                                     status: 'Docs',
                                     color: p.accent,
@@ -3014,7 +3034,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.settings_suggest_rounded,
+                                    icon: CupertinoIcons.slider_horizontal_3,
                                     title: 'Advanced',
                                     status: 'Tools',
                                     color: p.orange,
@@ -4061,6 +4081,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                             compactHistory: compactHistory,
                             reduceMotion: reduceMotion,
                             enableTranslucency: enableTranslucency,
+                            recentSearches: _recentNoteSearches,
+                            onSaveRecentSearch: _saveRecentNoteSearch,
+                            onClearRecentSearches: () async {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.remove('recent_note_searches');
+                              setState(() => _recentNoteSearches = []);
+                            },
                           ),
                         if (show('Guides'))
                           SliverList(

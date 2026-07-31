@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -59,7 +61,7 @@ class Toolbar extends StatelessWidget {
                 child: TextToolButton(
                   p: p,
                   label: showHistoryText ? 'History' : '',
-                  icon: showHistoryText ? null : Icons.history_rounded,
+                  icon: showHistoryText ? null : CupertinoIcons.clock,
                   blur: blur,
                   onTap: onHistory,
                 ),
@@ -116,7 +118,7 @@ class Toolbar extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AnimatedHomeIcon(
-                          icon: Icons.history_rounded,
+                          icon: CupertinoIcons.clock,
                           color: p.text,
                           size: 20,
                           motionX: animateIcons ? motionX : 0,
@@ -137,7 +139,7 @@ class Toolbar extends StatelessWidget {
                       width: largeControls ? 64 : 56,
                       height: largeControls ? 32 : 24,
                       child: AnimatedHomeIcon(
-                        icon: Icons.history_rounded,
+                        icon: CupertinoIcons.clock,
                         color: p.text,
                         size: 21,
                         motionX: animateIcons ? motionX : 0,
@@ -149,7 +151,7 @@ class Toolbar extends StatelessWidget {
           const SizedBox(width: spacing8),
           CircleToolButton(
             p: p,
-            icon: Icons.settings_rounded,
+            icon: CupertinoIcons.settings,
             color: p.text,
             label: showLabels ? 'Settings' : null,
             size: largeControls ? 64 : 56,
@@ -199,9 +201,11 @@ enum HomeIconAnimationKind { spin, sway, breathe }
 class HomeIconAnimation {
   const HomeIconAnimation.spin({required this.turns, required this.durationMs})
     : kind = HomeIconAnimationKind.spin;
+
   const HomeIconAnimation.sway({required this.durationMs})
     : kind = HomeIconAnimationKind.sway,
       turns = 0.035;
+
   const HomeIconAnimation.breathe({required this.durationMs})
     : kind = HomeIconAnimationKind.breathe,
       turns = 0;
@@ -448,8 +452,8 @@ class ModeToolButton extends StatelessWidget {
               ),
               child: AnimatedHomeIcon(
                 icon: single
-                    ? Icons.arrow_upward_rounded
-                    : Icons.swap_vert_rounded,
+                    ? CupertinoIcons.arrow_up
+                    : CupertinoIcons.arrow_up_down,
                 color: color,
                 size: large ? 21 : 19,
                 motionX: motionX,

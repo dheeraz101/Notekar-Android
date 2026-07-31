@@ -2928,7 +2928,26 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final String smallLabel = milestoneResult.remainingLabel;
     final double progress = milestoneResult.progress;
 
-    final Color fillColor = palette.orange;
+    final Color progressColor;
+    if (milestoneResult.current == null) {
+      progressColor = palette.orange;
+    } else {
+      final days = milestoneResult.current!.days;
+      if (days < 7) {
+        progressColor = palette.green;
+      } else if (days < 30) {
+        progressColor = palette.accent;
+      } else if (days < 90) {
+        progressColor = const Color(0xFFC77DFF);
+      } else {
+        progressColor = const Color(0xFFFFB703);
+      }
+    }
+
+    final String flameText = duration.inDays > 0
+        ? ' 🔥 ${duration.inDays}d'
+        : '';
+    final String displayLabel = '$bigLabel$flameText';
 
     return GestureDetector(
       onTap: () {
@@ -2946,6 +2965,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 color: palette.surface2,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(color: palette.border, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: progressColor.withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
             ),
             // Progress fill
@@ -2954,7 +2980,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               child: Container(
                 height: 60,
                 decoration: BoxDecoration(
-                  color: fillColor.withValues(alpha: 0.18),
+                  color: progressColor.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -2986,7 +3012,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                               overflow: TextOverflow.ellipsis,
                             ),
                           Text(
-                            bigLabel,
+                            displayLabel,
                             style: TextStyle(
                               color: palette.text,
                               fontSize: smallLabel.isEmpty ? 20 : 17,
