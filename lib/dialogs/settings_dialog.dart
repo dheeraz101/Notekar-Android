@@ -1151,10 +1151,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       String? status,
     })
   >
-  get _settingsSearchResults {
-    final query = _settingsQuery.trim().toLowerCase();
-    if (query.isEmpty) return [];
-
+  _allSettingsOptions() {
     final String deletedSubtitle =
         (widget.lastDeletedPreview != null &&
             widget.lastDeletedPreview!.isNotEmpty)
@@ -1194,7 +1191,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       status: status,
     );
 
-    final all = [
+    return [
       item(
         title: 'App Version',
         subtitle: 'The current software version installed',
@@ -2311,6 +2308,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
     ];
+  }
+
+  List<
+    ({
+      String title,
+      String subtitle,
+      String category,
+      IconData icon,
+      List<String> keywords,
+      String kind,
+      bool? boolValue,
+      ValueChanged<bool>? onBoolChanged,
+      String? status,
+    })
+  >
+  get _settingsSearchResults {
+    final query = _settingsQuery.trim().toLowerCase();
+    if (query.isEmpty) return [];
+
+    final all = _allSettingsOptions();
 
     return all.where((item) {
       final title = item.title.toLowerCase();
@@ -3295,20 +3312,192 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     insetDividers: true,
                                     children: [
                                       for (final term in _recentSearches)
-                                        SettingsRow(
-                                          p: p,
-                                          icon: Icons.history_rounded,
-                                          title: term,
-                                          color: p.text3,
-                                          onTap: () {
-                                            _settingsSearchController.text =
-                                                term;
-                                            setState(
-                                              () => _settingsQuery = term,
-                                            );
-                                            _saveRecentSearch(term);
-                                          },
-                                        ),
+                                        ...() {
+                                          final matched = _allSettingsOptions()
+                                              .where(
+                                                (item) =>
+                                                    item.title == term ||
+                                                    item.title.localized(
+                                                          context,
+                                                        ) ==
+                                                        term,
+                                              )
+                                              .toList();
+                                          if (matched.isNotEmpty) {
+                                            final result = matched.first;
+                                            if (result.kind == 'switch') {
+                                              return [
+                                                SettingsSwitchRow(
+                                                  p: p,
+                                                  icon: result.icon,
+                                                  title: result.title,
+                                                  subtitle: result.subtitle,
+                                                  value: result.boolValue!,
+                                                  onChanged: (val) {
+                                                    _saveRecentSearch(
+                                                      result.title,
+                                                    );
+                                                    result.onBoolChanged!(val);
+                                                  },
+                                                  color:
+                                                      result.title ==
+                                                          'Confirm Delete'
+                                                      ? p.red
+                                                      : p.accent,
+                                                ),
+                                              ];
+                                            } else {
+                                              return [
+                                                SettingsRow(
+                                                  p: p,
+                                                  icon: result.icon,
+                                                  title: result.title,
+                                                  subtitle: result.subtitle,
+                                                  status: result.status,
+                                                  color:
+                                                      (result.title ==
+                                                              'Reset All Data' ||
+                                                          result.title ==
+                                                              'Factory Reset')
+                                                      ? p.red
+                                                      : p.accent,
+                                                  onTap: () {
+                                                    _saveRecentSearch(
+                                                      result.title,
+                                                    );
+                                                    if (result.title ==
+                                                        'App Version') {
+                                                      showGeneralDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            true,
+                                                        barrierLabel:
+                                                            'Changelog',
+                                                        pageBuilder:
+                                                            (context, _, _) =>
+                                                                ChangelogDialog(
+                                                                  p: widget.p,
+                                                                ),
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Release Date') {
+                                                      _openCategory(
+                                                        'Update Center',
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Developer & Creator') {
+                                                      const MethodChannel(
+                                                        'notekar/files',
+                                                      ).invokeMethod<
+                                                        void
+                                                      >('openUrl', {
+                                                        'url':
+                                                            'https://github.com/dheeraz101',
+                                                      });
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Open Source Codebase') {
+                                                      const MethodChannel(
+                                                        'notekar/files',
+                                                      ).invokeMethod<
+                                                        void
+                                                      >('openUrl', {
+                                                        'url':
+                                                            'https://github.com/dheeraz101/Notekar-Android',
+                                                      });
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Security & Integrity') {
+                                                      showSecurityDetailsSheet(
+                                                        context: context,
+                                                        p: p,
+                                                        reduceMotion:
+                                                            reduceMotion,
+                                                        enableTranslucency:
+                                                            enableTranslucency,
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Privacy & Local Storage') {
+                                                      showPrivacyDetailsSheet(
+                                                        context: context,
+                                                        p: p,
+                                                        reduceMotion:
+                                                            reduceMotion,
+                                                        enableTranslucency:
+                                                            enableTranslucency,
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Network Monitor') {
+                                                      _openCategory(
+                                                        'Network Monitor',
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Reset All Data') {
+                                                      unawaited(
+                                                        _confirmResetAll(p),
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Factory Reset') {
+                                                      unawaited(
+                                                        _confirmFactoryReset(p),
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Reset Settings Only') {
+                                                      unawaited(
+                                                        _confirmResetSettings(),
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
+                                                        'Recently Deleted') {
+                                                      if (widget.onOpenTrash !=
+                                                          null) {
+                                                        widget.onOpenTrash!();
+                                                      }
+                                                      return;
+                                                    }
+                                                    _openCategory(
+                                                      result.category,
+                                                    );
+                                                  },
+                                                ),
+                                              ];
+                                            }
+                                          }
+                                          // Fallback to text query history item
+                                          return [
+                                            SettingsRow(
+                                              p: p,
+                                              icon: Icons.history_rounded,
+                                              title: term,
+                                              color: p.text3,
+                                              onTap: () {
+                                                _settingsSearchController.text =
+                                                    term;
+                                                setState(
+                                                  () => _settingsQuery = term,
+                                                );
+                                                _saveRecentSearch(term);
+                                              },
+                                            ),
+                                          ];
+                                        }(),
                                     ],
                                   ),
                                 ],
@@ -3325,7 +3514,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                                           title: result.title,
                                           subtitle: result.subtitle,
                                           value: result.boolValue!,
-                                          onChanged: result.onBoolChanged!,
+                                          onChanged: (val) {
+                                            _saveRecentSearch(result.title);
+                                            result.onBoolChanged!(val);
+                                          },
                                           color:
                                               result.title == 'Confirm Delete'
                                               ? p.red

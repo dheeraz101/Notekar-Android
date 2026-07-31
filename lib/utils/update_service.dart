@@ -54,11 +54,18 @@ class UpdateService {
   final _logger = AppLogger();
   static const _channel = MethodChannel('notekar/files');
 
+  HttpClient _createHttpClient({
+    Duration timeout = const Duration(seconds: 10),
+  }) {
+    return HttpClient()
+      ..connectionTimeout = timeout
+      ..badCertificateCallback = (cert, host, port) => true;
+  }
+
   Future<Map<String, dynamic>?> fetchCurrentVirusTotalInfo({
     bool trackBeta = false,
   }) async {
-    final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10);
+    final client = _createHttpClient(timeout: const Duration(seconds: 10));
     try {
       final trackSuffix = trackBeta ? '-beta' : '';
       final url =
@@ -127,8 +134,7 @@ class UpdateService {
   }
 
   Future<AppUpdateInfo?> fetchLatestVersion({bool trackBeta = false}) async {
-    final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10);
+    final client = _createHttpClient(timeout: const Duration(seconds: 10));
     try {
       final request = await client.getUrl(
         Uri.parse(
@@ -264,8 +270,7 @@ class UpdateService {
   }
 
   Future<List<Map<String, dynamic>>?> fetchRecentCommits() async {
-    final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10);
+    final client = _createHttpClient(timeout: const Duration(seconds: 10));
     try {
       final request = await client.getUrl(
         Uri.parse(
@@ -349,8 +354,7 @@ class UpdateService {
         'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
     final savePath = '$cacheDir/notekar-$cleanVersion-$suffix.apk';
 
-    final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 15);
+    final client = _createHttpClient(timeout: const Duration(seconds: 15));
     try {
       var testRequest = await client.getUrl(Uri.parse(url));
       testRequest.headers.set(
@@ -570,8 +574,7 @@ class UpdateService {
   }
 
   Future<bool> verifyApkHash(AppUpdateInfo info, String apkFilePath) async {
-    final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10);
+    final client = _createHttpClient(timeout: const Duration(seconds: 10));
     try {
       final url =
           'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/sha256.txt';
@@ -668,7 +671,7 @@ class UpdateService {
   }
 
   Future<double?> getApkSizeMb(AppUpdateInfo info) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
+    final client = _createHttpClient(timeout: const Duration(seconds: 5));
     try {
       final cleanVersion = info.version.split('-').first;
       final suffix = _getDeviceSuffix();

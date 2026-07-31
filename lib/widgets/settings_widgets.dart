@@ -1024,16 +1024,18 @@ class SettingsSearchBox extends StatelessWidget {
           prefixIconConstraints: const BoxConstraints(minWidth: 32),
           suffixIcon: controller.text.isEmpty
               ? null
-              : IconButton(
-                  onPressed: onClear,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
+              : GestureDetector(
+                  onTap: onClear,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(Icons.close_rounded, color: p.text3, size: 18),
                   ),
-                  icon: Icon(Icons.close_rounded, color: p.text3, size: 18),
                 ),
-          suffixIconConstraints: const BoxConstraints(minWidth: 40),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
           hintText: 'Search settings',
           hintStyle: TextStyle(color: p.text3),
           border: InputBorder.none,

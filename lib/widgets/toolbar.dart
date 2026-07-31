@@ -453,7 +453,7 @@ class ModeToolButton extends StatelessWidget {
               child: AnimatedHomeIcon(
                 icon: single
                     ? CupertinoIcons.arrow_up
-                    : CupertinoIcons.arrow_up_down,
+                    : CupertinoIcons.arrow_up_arrow_down,
                 color: color,
                 size: large ? 21 : 19,
                 motionX: motionX,

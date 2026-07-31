@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -475,6 +476,34 @@ class MilestoneThemePage extends StatelessWidget {
   final String sobrietyMilestoneTheme;
   final ValueChanged<String> onThemeChanged;
 
+  IconData _getThemeIcon(String id) {
+    return switch (id) {
+      'science' => CupertinoIcons.lab_flask,
+      'warrior' => CupertinoIcons.shield,
+      'navy' => CupertinoIcons.compass,
+      'clan' => CupertinoIcons.flag,
+      'ancient' => CupertinoIcons.calendar,
+      'samurai' => CupertinoIcons.shield_fill,
+      'space' => CupertinoIcons.paperplane,
+      'kingdom' => CupertinoIcons.person_2,
+      'monk' => CupertinoIcons.person,
+      'phoenix' => CupertinoIcons.flame,
+      'animals' => CupertinoIcons.paw,
+      'pokemon' || 'jjk' => CupertinoIcons.bolt,
+      'onepiece' || 'bleach' => CupertinoIcons.exclamationmark_shield,
+      'naruto' || 'vinland' || 'demonslayer' => CupertinoIcons.waveform,
+      'ben10' => CupertinoIcons.time,
+      'aot' => CupertinoIcons.square_grid_2x2,
+      'mha' || 'fma' || 'dbz' => CupertinoIcons.infinite,
+      'codegeass' || 'deathnote' => CupertinoIcons.eye,
+      'gintama' || 'hxh' => CupertinoIcons.sportscourt,
+      'sololeveling' || 'starwars' => CupertinoIcons.sparkles,
+      'rpg' || 'tech' => CupertinoIcons.hammer,
+      'chess' => CupertinoIcons.gamecontroller,
+      _ => CupertinoIcons.star,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -493,12 +522,13 @@ class MilestoneThemePage extends StatelessWidget {
             for (final theme in kMilestoneThemes)
               SettingsRow(
                 p: p,
-                title: '${theme.emoji} ${theme.name}',
+                icon: _getThemeIcon(theme.id),
+                title: theme.name,
                 subtitle: theme.description,
                 color: p.orange,
                 trailing: sobrietyMilestoneTheme == theme.id
                     ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                    : null,
+                    : const SizedBox.shrink(),
                 onTap: () => onThemeChanged(theme.id),
               ),
           ],

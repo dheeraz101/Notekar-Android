@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -235,9 +236,9 @@ Color momentColor(Palette p, String type) {
 }
 
 IconData momentIcon(String type) {
-  if (type == 'in') return Icons.south_west_rounded;
-  if (type == 'out') return Icons.north_east_rounded;
-  return Icons.arrow_upward_rounded;
+  if (type == 'in') return CupertinoIcons.arrow_down_left;
+  if (type == 'out') return CupertinoIcons.arrow_up_right;
+  return CupertinoIcons.arrow_up;
 }
 
 class NotekarHaptics {
