@@ -1095,6 +1095,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
       if (category != null) _categoryStack.add(category!);
       category = name;
     });
+    if (name == 'Search' || name == 'Search Notes') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _settingsSearchFocusNode.requestFocus();
+      });
+    }
   }
 
   void _popCategory() {
@@ -4270,6 +4275,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               _settingsQuery = '';
                             }),
                             settingsSearchController: _settingsSearchController,
+                            settingsSearchFocusNode: _settingsSearchFocusNode,
                             compactHistory: compactHistory,
                             reduceMotion: reduceMotion,
                             enableTranslucency: enableTranslucency,

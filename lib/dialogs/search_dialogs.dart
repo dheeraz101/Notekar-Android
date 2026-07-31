@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/moment.dart';
@@ -83,6 +84,7 @@ class _NoteSearchRow {
 class _NoteSearchContentState extends State<NoteSearchContent> {
   static const _pageSize = 100;
   final _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   int _visibleCount = _pageSize;
   String _query = '';
   late List<_NoteSearchRow> _searchRows;
@@ -91,6 +93,9 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   void initState() {
     super.initState();
     _searchRows = _buildSearchRows(widget.entries);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
 
   @override
@@ -104,15 +109,16 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   List<Moment> get _matches {
-    final q = _query.trim().toLowerCase();
-    if (q.isEmpty) return _searchRows.map((row) => row.entry).toList();
+    if (_query.trim().isEmpty) return widget.entries;
+    final q = _query.toLowerCase();
     return _searchRows
-        .where((row) => row.searchText.contains(q))
-        .map((row) => row.entry)
+        .where((r) => r.searchText.contains(q))
+        .map((r) => r.entry)
         .toList();
   }
 
@@ -143,6 +149,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
         SearchNotesBox(
           p: widget.p,
           controller: _controller,
+          focusNode: _focusNode,
           onChanged: (value) => setState(() {
             _query = value;
             _visibleCount = _pageSize;
@@ -332,12 +339,14 @@ class SearchNotesBox extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onClear,
+    this.focusNode,
   });
 
   final Palette p;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -350,6 +359,7 @@ class SearchNotesBox extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         autofocus: true,
         onChanged: onChanged,
         style: TextStyle(color: p.text, fontSize: 14),

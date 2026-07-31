@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -32,6 +33,7 @@ class NoteDialog extends StatefulWidget {
 class _NoteDialogState extends State<NoteDialog> {
   late final TextEditingController _controller;
   final _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
   bool _showWarning = false;
 
   bool _sobrietyMode = false;
@@ -49,6 +51,10 @@ class _NoteDialogState extends State<NoteDialog> {
     if (widget.initialNote.contains('#relapse')) {
       _relapseSelected = true;
     }
+    // Instant keyboard focus!
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
 
   Future<void> _loadSobrietyMode() async {
@@ -72,11 +78,253 @@ class _NoteDialogState extends State<NoteDialog> {
     _controller.removeListener(_scrollToBottom);
     _controller.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+    // Calculate a dynamic max height for scrollable content so it never overflows with keyboard open
+    final maxScrollHeight = (screenHeight - keyboardHeight - 190).clamp(
+      120.0,
+      double.infinity,
+    );
+
+    Widget scrollableContent = ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxScrollHeight),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.initialNote.isEmpty
+                  ? 'Add a short detail to this moment.'
+                  : 'Update the note attached to this moment.',
+              style: TextStyle(
+                color: widget.p.text2,
+                fontSize: 12,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: spacing12),
+            SizedBox(
+              height: 130,
+              child: TextField(
+                controller: _controller,
+                scrollController: _scrollController,
+                focusNode: _focusNode,
+                autofocus: true,
+                maxLength: maxNoteLength,
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                scrollPadding: const EdgeInsets.all(spacing64),
+                style: TextStyle(color: widget.p.text),
+                decoration: InputDecoration(
+                  counterText: '',
+                  hintText: 'What should this moment remember?',
+                  hintStyle: TextStyle(color: widget.p.text3),
+                  filled: true,
+                  fillColor: widget.p.surface3,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _showWarning ? widget.p.red : widget.p.border,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _showWarning ? widget.p.red : widget.p.border,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: _showWarning ? widget.p.red : widget.p.accent,
+                    ),
+                  ),
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    _showWarning = false;
+                  });
+                },
+                onSubmitted: (_) => _saveNote(),
+              ),
+            ),
+            const SizedBox(height: spacing12),
+            _LinearCharacterIndicator(
+              p: widget.p,
+              count: _controller.text.length,
+              max: maxNoteLength,
+            ),
+            if (_sobrietyMode) ...[
+              const SizedBox(height: 14),
+              // Compact iOS Switch row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.exclamationmark_shield,
+                        color: widget.p.orange,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Mark as Relapse / Reset',
+                        style: TextStyle(
+                          color: widget.p.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      NotekarHaptics.selection('standard');
+                      setState(() => _relapseSelected = !_relapseSelected);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      width: 51,
+                      height: 31,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: _relapseSelected
+                            ? widget.p.orange
+                            : widget.p.surface3,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: _relapseSelected
+                              ? widget.p.orange
+                              : widget.p.border,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          AnimatedAlign(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            alignment: _relapseSelected
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                              width: 25,
+                              height: 25,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 1,
+                                    spreadRadius: 0.5,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Compact Mood Selection row
+              Row(
+                children: [
+                  Icon(CupertinoIcons.smiley, color: widget.p.accent, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children:
+                            [
+                              'Bored',
+                              'Anxious',
+                              'Fatigue',
+                              'Stressed',
+                              'Lonely',
+                            ].map((mood) {
+                              final isSelected =
+                                  _selectedMood == mood.toLowerCase();
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: _buildTagChip(mood, isSelected, () {
+                                  NotekarHaptics.selection('standard');
+                                  setState(() {
+                                    _selectedMood = isSelected
+                                        ? null
+                                        : mood.toLowerCase();
+                                  });
+                                }, widget.p.accent),
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Compact Trigger Selection row
+              Row(
+                children: [
+                  Icon(
+                    CupertinoIcons.bolt_horizontal,
+                    color: widget.p.orange,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children:
+                            [
+                              'Social Media',
+                              'Video',
+                              'Alone',
+                              'Late Night',
+                              'Fatigue',
+                            ].map((trigger) {
+                              final triggerKey = trigger
+                                  .toLowerCase()
+                                  .replaceAll(' ', '_');
+                              final isSelected = _selectedTrigger == triggerKey;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: _buildTagChip(trigger, isSelected, () {
+                                  NotekarHaptics.selection('standard');
+                                  setState(() {
+                                    _selectedTrigger = isSelected
+                                        ? null
+                                        : triggerKey;
+                                  });
+                                }, widget.p.orange),
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
     return AppSheet(
       p: widget.p,
       title: widget.title,
@@ -86,158 +334,7 @@ class _NoteDialogState extends State<NoteDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.initialNote.isEmpty
-                ? 'Add a short detail to this moment.'
-                : 'Update the note attached to this moment.',
-            style: TextStyle(color: widget.p.text2, fontSize: 12, height: 1.35),
-          ),
-          const SizedBox(height: spacing12),
-          SizedBox(
-            height: 160,
-            child: TextField(
-              controller: _controller,
-              scrollController: _scrollController,
-              autofocus: true,
-              maxLength: maxNoteLength,
-              maxLines: null,
-              expands: true,
-              textAlignVertical: TextAlignVertical.top,
-              keyboardType: TextInputType.multiline,
-              textInputAction: TextInputAction.newline,
-              scrollPadding: const EdgeInsets.all(spacing64),
-              style: TextStyle(color: widget.p.text),
-              decoration: InputDecoration(
-                counterText: '',
-                hintText: 'What should this moment remember?',
-                hintStyle: TextStyle(color: widget.p.text3),
-                filled: true,
-                fillColor: widget.p.surface3,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: _showWarning ? widget.p.red : widget.p.border,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: _showWarning ? widget.p.red : widget.p.border,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: _showWarning ? widget.p.red : widget.p.accent,
-                  ),
-                ),
-              ),
-              onChanged: (text) {
-                setState(() {
-                  _showWarning = false;
-                });
-              },
-              onSubmitted: (_) => _saveNote(),
-            ),
-          ),
-          const SizedBox(height: spacing12),
-          _LinearCharacterIndicator(
-            p: widget.p,
-            count: _controller.text.length,
-            max: maxNoteLength,
-          ),
-          if (_sobrietyMode) ...[
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Mark as Relapse / Reset',
-                  style: TextStyle(
-                    color: widget.p.text,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Switch.adaptive(
-                  value: _relapseSelected,
-                  activeTrackColor: widget.p.orange,
-                  onChanged: (value) {
-                    setState(() => _relapseSelected = value);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'MOOD TAG',
-              style: TextStyle(
-                color: widget.p.text2,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: ['Bored', 'Anxious', 'Fatigue', 'Stressed', 'Lonely']
-                    .map((mood) {
-                      final isSelected = _selectedMood == mood.toLowerCase();
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _buildTagChip(mood, isSelected, () {
-                          setState(() {
-                            _selectedMood = isSelected
-                                ? null
-                                : mood.toLowerCase();
-                          });
-                        }, widget.p.accent),
-                      );
-                    })
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'TRIGGER TAG',
-              style: TextStyle(
-                color: widget.p.text2,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children:
-                    [
-                      'Social Media',
-                      'Video',
-                      'Alone',
-                      'Late Night',
-                      'Fatigue',
-                    ].map((trigger) {
-                      final triggerKey = trigger.toLowerCase().replaceAll(
-                        ' ',
-                        '_',
-                      );
-                      final isSelected = _selectedTrigger == triggerKey;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _buildTagChip(trigger, isSelected, () {
-                          setState(() {
-                            _selectedTrigger = isSelected ? null : triggerKey;
-                          });
-                        }, widget.p.orange),
-                      );
-                    }).toList(),
-              ),
-            ),
-          ],
+          scrollableContent,
           if (_showWarning)
             Padding(
               padding: const EdgeInsets.only(top: spacing8),
@@ -295,12 +392,12 @@ class _NoteDialogState extends State<NoteDialog> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
               ? activeColor.withValues(alpha: 0.15)
               : widget.p.surface3,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected ? activeColor : widget.p.border,
             width: 1,

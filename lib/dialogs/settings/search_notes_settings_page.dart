@@ -19,6 +19,7 @@ class SearchNotesSettingsPage {
     required ValueChanged<String> onQueryChanged,
     required VoidCallback onClearQuery,
     required TextEditingController settingsSearchController,
+    required FocusNode settingsSearchFocusNode,
     required bool compactHistory,
     required bool reduceMotion,
     required bool enableTranslucency,
@@ -49,6 +50,7 @@ class SearchNotesSettingsPage {
             child: SearchNotesBox(
               p: p,
               controller: settingsSearchController,
+              focusNode: settingsSearchFocusNode,
               onChanged: onQueryChanged,
               onClear: onClearQuery,
             ),
