@@ -87,11 +87,10 @@ class _NoteDialogState extends State<NoteDialog> {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
     // Calculate a dynamic max height for scrollable content so it never overflows with keyboard open
-    final maxScrollHeight = (screenHeight - keyboardHeight - 190).clamp(
-      120.0,
+    final maxScrollHeight = (screenHeight - keyboardHeight - 210).clamp(
+      100.0,
       double.infinity,
     );
-
     Widget scrollableContent = ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxScrollHeight),
       child: SingleChildScrollView(
@@ -110,7 +109,7 @@ class _NoteDialogState extends State<NoteDialog> {
             ),
             const SizedBox(height: spacing12),
             SizedBox(
-              height: 130,
+              height: keyboardHeight > 0 ? 80 : 130,
               child: TextField(
                 controller: _controller,
                 scrollController: _scrollController,
@@ -187,55 +186,12 @@ class _NoteDialogState extends State<NoteDialog> {
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      NotekarHaptics.selection('standard');
-                      setState(() => _relapseSelected = !_relapseSelected);
+                  _IosStyleSwitch(
+                    p: widget.p,
+                    value: _relapseSelected,
+                    onChanged: (value) {
+                      setState(() => _relapseSelected = value);
                     },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      width: 51,
-                      height: 31,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: _relapseSelected
-                            ? widget.p.orange
-                            : widget.p.surface3,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: _relapseSelected
-                              ? widget.p.orange
-                              : widget.p.border,
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          AnimatedAlign(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            alignment: _relapseSelected
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            child: Container(
-                              width: 25,
-                              height: 25,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 1,
-                                    spreadRadius: 0.5,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -518,6 +474,122 @@ class _LinearCharacterIndicator extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _IosStyleSwitch extends StatefulWidget {
+  const _IosStyleSwitch({
+    required this.p,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final Palette p;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<_IosStyleSwitch> createState() => _IosStyleSwitchState();
+}
+
+class _IosStyleSwitchState extends State<_IosStyleSwitch>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _stretchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _stretchController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+  }
+
+  @override
+  void dispose() {
+    _stretchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final switchColor = widget.p.orange;
+    final value = widget.value;
+
+    return GestureDetector(
+      onTapDown: (_) {
+        _stretchController.forward();
+      },
+      onTapUp: (_) {
+        _stretchController.reverse();
+      },
+      onTapCancel: () {
+        _stretchController.reverse();
+      },
+      onTap: () {
+        widget.onChanged(!value);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        width: 62,
+        height: 32,
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          color: value ? switchColor : widget.p.surface3,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: value ? switchColor : widget.p.border),
+        ),
+        child: RepaintBoundary(
+          child: Stack(
+            children: [
+              // "On" Indicator (Accessibility style)
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: value ? 1.0 : 0.0,
+                child: Align(
+                  alignment: const Alignment(-0.55, 0),
+                  child: Container(
+                    width: 1.8,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedAlign(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                child: AnimatedBuilder(
+                  animation: _stretchController,
+                  builder: (context, child) {
+                    final stretch = _stretchController.value * 10;
+                    return Container(
+                      width: 34 + stretch, // Exact same base thumb width 34
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
