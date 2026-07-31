@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -103,6 +104,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   DateTime? _sobrietyCustomStart;
   String _sobrietyMilestoneTheme = 'science';
   bool _showHistoryText = true;
+  int _streakShields = 0;
   bool _showLastSavedHint = true;
   bool _requireLongPressNote = false;
   int _privacyLockDelayMinutes = 0;
@@ -159,6 +161,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _entriesNotifier.addListener(_updateStreakShields);
     _load();
   }
 
@@ -171,6 +174,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _motionSub?.cancel();
     _motion.dispose();
     _updateStatusResetTimer?.cancel();
+    _entriesNotifier.removeListener(_updateStreakShields);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -557,6 +561,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _nextId = nextId;
         _startupComplete = true; // DB operations ready
       });
+      unawaited(_updateStreakShields());
 
       // Run quick actions and notifications check
       _initQuickActions();
@@ -2018,6 +2023,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             _prefs?.getString('sobriety_milestone_theme') ?? 'science';
       });
       unawaited(_updateAndroidWidget());
+      unawaited(_updateStreakShields());
     }
 
     if (result == 'log') {
@@ -2849,7 +2855,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   DateTime? _getLatestRelapseTime() {
     if (_entries.isEmpty) return null;
     if (_sobrietyResetType == 'relapse') {
-      final relapseMoments = _entries.where((e) => e.note.contains('#relapse'));
+      final relapseMoments = _entries.where(
+        (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
+      );
       if (relapseMoments.isEmpty) {
         final minTimestamp = _entries.map((e) => e.timestamp).reduce(math.min);
         return DateTime.fromMillisecondsSinceEpoch(minTimestamp);
@@ -2861,6 +2869,49 @@ class _NoteKarHomeState extends State<NoteKarHome>
     } else {
       final maxTimestamp = _entries.map((e) => e.timestamp).reduce(math.max);
       return DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+    }
+  }
+
+  Future<void> _updateStreakShields() async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    final duration = _getSobrietyDuration();
+    final streakDays = duration.inDays;
+
+    // Default 1 shield when shields are uninitialized!
+    if (!prefs.containsKey('streak_shields')) {
+      await prefs.setInt('streak_shields', 1);
+      await prefs.setInt('last_shield_granted_threshold', 0);
+    }
+
+    final currentShields = prefs.getInt('streak_shields') ?? 1;
+    final lastGrantedThreshold =
+        prefs.getInt('last_shield_granted_threshold') ?? 0;
+
+    // Reset granted threshold on reset
+    if (streakDays == 0 && lastGrantedThreshold > 0) {
+      await prefs.setInt('last_shield_granted_threshold', 0);
+    }
+
+    // Earn 1 shield for every 30 days of streak!
+    final earnedShieldsCount = (streakDays / 30).floor();
+
+    if (earnedShieldsCount > lastGrantedThreshold) {
+      final newShieldsCount =
+          currentShields + (earnedShieldsCount - lastGrantedThreshold);
+      await prefs.setInt('streak_shields', newShieldsCount);
+      await prefs.setInt('last_shield_granted_threshold', earnedShieldsCount);
+
+      // Sensory feedback double-pulse and toast!
+      NotekarHaptics.successDouble(_hapticStyle);
+      _showToast(
+        '🛡️ Shield Earned! You got a Streak Shield for protecting your progress.',
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _streakShields = prefs.getInt('streak_shields') ?? 1;
+      });
     }
   }
 
@@ -2936,14 +2987,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     final String smallLabel;
+    final String shieldText = _streakShields > 0
+        ? ' • 🛡️ $_streakShields active'
+        : '';
     if (duration.inDays == 0) {
       final hours = duration.inHours;
       smallLabel =
-          'Protecting progress: $hours ${hours == 1 ? 'hour' : 'hours'} • $milestoneDaysLeftText';
+          'Protecting progress: $hours ${hours == 1 ? 'hour' : 'hours'}$shieldText • $milestoneDaysLeftText';
     } else {
       final days = duration.inDays;
       smallLabel =
-          'Protected for $days ${days == 1 ? 'day' : 'days'} • $milestoneDaysLeftText';
+          'Protected for $days ${days == 1 ? 'day' : 'days'}$shieldText • $milestoneDaysLeftText';
     }
     final double progress = milestoneResult.progress;
 
@@ -3239,12 +3293,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     right: spacing24,
                     bottom: 104 + bottomInset,
                   ),
-                  child: LiveClockFace(
-                    p: palette,
-                    pulseToken: _savedPulseToken,
-                    pulseType: _lastSavedType,
-                    showSeconds: _showSeconds,
-                    highlightSeconds: _highlightSeconds,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      LiveClockFace(
+                        p: palette,
+                        pulseToken: _savedPulseToken,
+                        pulseType: _lastSavedType,
+                        showSeconds: _showSeconds,
+                        highlightSeconds: _highlightSeconds,
+                      ),
+                      if (_entries.isEmpty)
+                        Positioned(
+                          top: -60,
+                          // Position it elegantly just above the clock face circle
+                          child: _AnimatedCoachmark(p: palette),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -4173,6 +4239,79 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedCoachmark extends StatefulWidget {
+  const _AnimatedCoachmark({required this.p});
+
+  final Palette p;
+
+  @override
+  State<_AnimatedCoachmark> createState() => _AnimatedCoachmarkState();
+}
+
+class _AnimatedCoachmarkState extends State<_AnimatedCoachmark>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(
+      begin: 0.88,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _animation,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.p.accent.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: widget.p.accent.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.sparkles, color: Colors.white, size: 15),
+            const SizedBox(width: 8),
+            Text(
+              'Tap the clock face to record your first moment'.localized(
+                context,
+              ),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.1,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

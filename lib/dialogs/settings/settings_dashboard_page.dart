@@ -5,6 +5,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsDashboardPage extends StatelessWidget {
   const SettingsDashboardPage({
@@ -74,39 +75,6 @@ class SettingsDashboardPage extends StatelessWidget {
     final relapseMoments = entries
         .where((e) => e.note.contains('#relapse'))
         .toList();
-    if (relapseMoments.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: spacing16,
-          vertical: spacing8,
-        ),
-        padding: const EdgeInsets.all(spacing16),
-        decoration: BoxDecoration(
-          color: p.accent.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: p.accent.withValues(alpha: 0.15)),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.spa_rounded, color: p.accent, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              'No relapses recorded yet!'.localized(context),
-              style: TextStyle(
-                color: p.text,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Your clean streak is active and running.'.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 12),
-            ),
-          ],
-        ),
-      );
-    }
 
     final Map<String, int> triggerCounts = {};
     final Map<String, int> moodCounts = {};
@@ -165,7 +133,7 @@ class SettingsDashboardPage extends StatelessWidget {
       }
     });
 
-    String peakTimeRange = 'Night';
+    String peakTimeRange = 'None';
     int maxRangeCount = 0;
     rangeCounts.forEach((k, v) {
       if (v > maxRangeCount) {
@@ -173,6 +141,13 @@ class SettingsDashboardPage extends StatelessWidget {
         peakTimeRange = k;
       }
     });
+
+    final totalRelapses = relapseMoments.length;
+    final totalEntries = entries.length;
+    final double successRate = totalEntries == 0
+        ? 100.0
+        : ((totalEntries - totalRelapses) / totalEntries) * 100;
+    final successRateString = '${successRate.toStringAsFixed(1)}%';
 
     return Container(
       margin: const EdgeInsets.symmetric(
@@ -210,7 +185,7 @@ class SettingsDashboardPage extends StatelessWidget {
                 child: _buildMetricTile(
                   context,
                   'Total Relapses',
-                  '${relapseMoments.length}',
+                  '$totalRelapses',
                 ),
               ),
               const SizedBox(width: 8),
@@ -230,6 +205,35 @@ class SettingsDashboardPage extends StatelessWidget {
                   context,
                   'Peak Risk Window',
                   peakTimeRange,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildMetricTile(
+                  context,
+                  'Overall Success',
+                  successRateString,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FutureBuilder<int>(
+                  future: SharedPreferences.getInstance().then(
+                    (prefs) => prefs.getInt('streak_shields') ?? 1,
+                  ),
+                  builder: (context, snapshot) {
+                    final shields = snapshot.data ?? 0;
+                    return _buildMetricTile(
+                      context,
+                      'Streak Shields',
+                      shields > 0 ? '$shields Active' : 'None',
+                    );
+                  },
                 ),
               ),
             ],

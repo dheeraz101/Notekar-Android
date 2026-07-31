@@ -40,6 +40,8 @@ class _NoteDialogState extends State<NoteDialog> {
   String? _selectedMood;
   String? _selectedTrigger;
   bool _relapseSelected = false;
+  int _availableShields = 0;
+  bool _shieldActivated = false;
 
   @override
   void initState() {
@@ -51,6 +53,9 @@ class _NoteDialogState extends State<NoteDialog> {
     if (widget.initialNote.contains('#relapse')) {
       _relapseSelected = true;
     }
+    if (widget.initialNote.contains('#shielded')) {
+      _shieldActivated = true;
+    }
     // Instant keyboard focus!
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -61,6 +66,7 @@ class _NoteDialogState extends State<NoteDialog> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _sobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
+      _availableShields = prefs.getInt('streak_shields') ?? 1;
     });
   }
 
@@ -190,11 +196,48 @@ class _NoteDialogState extends State<NoteDialog> {
                     p: widget.p,
                     value: _relapseSelected,
                     onChanged: (value) {
-                      setState(() => _relapseSelected = value);
+                      setState(() {
+                        _relapseSelected = value;
+                        if (!value) _shieldActivated = false;
+                      });
                     },
                   ),
                 ],
               ),
+              if (_relapseSelected && _availableShields > 0) ...[
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.shield_fill,
+                          color: widget.p.green,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Use Streak Shield ($_availableShields available)',
+                          style: TextStyle(
+                            color: widget.p.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    _IosStyleSwitch(
+                      p: widget.p,
+                      value: _shieldActivated,
+                      activeColor: widget.p.green,
+                      onChanged: (value) {
+                        setState(() => _shieldActivated = value);
+                      },
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
               // Compact Mood Selection row
               Row(
@@ -378,6 +421,13 @@ class _NoteDialogState extends State<NoteDialog> {
       final List<String> tags = [];
       if (_relapseSelected) {
         tags.add('#relapse');
+        if (_shieldActivated) {
+          tags.add('#shielded');
+          SharedPreferences.getInstance().then((prefs) {
+            final count = prefs.getInt('streak_shields') ?? 1;
+            prefs.setInt('streak_shields', (count - 1).clamp(0, 99));
+          });
+        }
       }
       if (_selectedMood != null) {
         tags.add('#mood:$_selectedMood');
@@ -393,6 +443,7 @@ class _NoteDialogState extends State<NoteDialog> {
         } else {
           var cleanNote = note;
           cleanNote = cleanNote.replaceAll('#relapse', '').trim();
+          cleanNote = cleanNote.replaceAll('#shielded', '').trim();
           cleanNote = cleanNote.replaceAll(RegExp(r'#mood:\w+'), '').trim();
           cleanNote = cleanNote.replaceAll(RegExp(r'#trigger:\w+'), '').trim();
           note = cleanNote.isEmpty ? tagsString : '$cleanNote $tagsString';
@@ -483,11 +534,13 @@ class _IosStyleSwitch extends StatefulWidget {
     required this.p,
     required this.value,
     required this.onChanged,
+    this.activeColor,
   });
 
   final Palette p;
   final bool value;
   final ValueChanged<bool> onChanged;
+  final Color? activeColor;
 
   @override
   State<_IosStyleSwitch> createState() => _IosStyleSwitchState();
@@ -514,7 +567,7 @@ class _IosStyleSwitchState extends State<_IosStyleSwitch>
 
   @override
   Widget build(BuildContext context) {
-    final switchColor = widget.p.orange;
+    final switchColor = widget.activeColor ?? widget.p.orange;
     final value = widget.value;
 
     return GestureDetector(

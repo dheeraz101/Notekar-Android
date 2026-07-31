@@ -285,6 +285,23 @@ class NotekarHaptics {
     if (style == 'off') return;
     HapticFeedback.vibrate();
   }
+
+  static void successDouble(String style) {
+    if (style == 'off') return;
+    if (style == 'light') {
+      HapticFeedback.selectionClick().then((_) {
+        Future.delayed(const Duration(milliseconds: 60), () {
+          HapticFeedback.selectionClick();
+        });
+      });
+      return;
+    }
+    HapticFeedback.mediumImpact().then((_) {
+      Future.delayed(const Duration(milliseconds: 80), () {
+        HapticFeedback.lightImpact();
+      });
+    });
+  }
 }
 
 MediaQueryData largerTextQuery(BuildContext context) {
