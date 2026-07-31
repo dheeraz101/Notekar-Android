@@ -110,42 +110,42 @@ class Toolbar extends StatelessWidget {
               blur: blur,
               radius: 999,
               padding: EdgeInsets.symmetric(
-                horizontal: showHistoryText ? spacing24 : 0,
-                vertical: largeControls ? spacing16 : spacing12,
+                horizontal: showHistoryText ? spacing24 : 16,
               ),
-              child: showHistoryText
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedHomeIcon(
+              child: SizedBox(
+                height: largeControls ? 56 : 48,
+                child: showHistoryText
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedHomeIcon(
+                            icon: CupertinoIcons.clock,
+                            color: p.text,
+                            size: 20,
+                            motionX: animateIcons ? motionX : 0,
+                            motionY: animateIcons ? motionY : 0,
+                          ),
+                          const SizedBox(width: spacing8),
+                          Text(
+                            'History',
+                            style: TextStyle(
+                              color: p.text,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Center(
+                        child: AnimatedHomeIcon(
                           icon: CupertinoIcons.clock,
                           color: p.text,
-                          size: 20,
+                          size: 21,
                           motionX: animateIcons ? motionX : 0,
                           motionY: animateIcons ? motionY : 0,
                         ),
-                        const SizedBox(width: spacing8),
-                        Text(
-                          'History',
-                          style: TextStyle(
-                            color: p.text,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    )
-                  : SizedBox(
-                      width: largeControls ? 64 : 56,
-                      height: largeControls ? 32 : 24,
-                      child: AnimatedHomeIcon(
-                        icon: CupertinoIcons.clock,
-                        color: p.text,
-                        size: 21,
-                        motionX: animateIcons ? motionX : 0,
-                        motionY: animateIcons ? motionY : 0,
                       ),
-                    ),
+              ),
             ),
           ),
           const SizedBox(width: spacing8),
@@ -154,7 +154,7 @@ class Toolbar extends StatelessWidget {
             icon: CupertinoIcons.settings,
             color: p.text,
             label: showLabels ? 'Settings' : null,
-            size: largeControls ? 64 : 56,
+            size: largeControls ? 56 : 48,
             blur: blur,
             motionX: animateIcons ? motionX : 0,
             motionY: animateIcons ? motionY : 0,
@@ -438,29 +438,32 @@ class ModeToolButton extends StatelessWidget {
         p: p,
         blur: blur,
         radius: 999,
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: large ? 11 : 9),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: large ? 36 : 32,
-              height: large ? 36 : 32,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: p.surface3,
-                shape: BoxShape.circle,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: SizedBox(
+          height: large ? 56 : 48,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: large ? 36 : 32,
+                height: large ? 36 : 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: p.surface3,
+                  shape: BoxShape.circle,
+                ),
+                child: AnimatedHomeIcon(
+                  icon: single
+                      ? CupertinoIcons.arrow_up
+                      : CupertinoIcons.arrow_up_arrow_down,
+                  color: color,
+                  size: large ? 20 : 18,
+                  motionX: motionX,
+                  motionY: motionY,
+                ),
               ),
-              child: AnimatedHomeIcon(
-                icon: single
-                    ? CupertinoIcons.arrow_up
-                    : CupertinoIcons.arrow_up_arrow_down,
-                color: color,
-                size: large ? 21 : 19,
-                motionX: motionX,
-                motionY: motionY,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

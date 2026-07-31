@@ -3390,9 +3390,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       ),
                       if (_entries.isEmpty)
                         Positioned(
-                          bottom: -65,
-                          // Positioned elegantly below the clock face
-                          child: _CoachmarkPill(p: palette),
+                          bottom: -72,
+                          // Positioned elegantly below the clock face with arrow pointing up
+                          child: _CoachmarkTooltip(p: palette),
                         ),
                     ],
                   ),
@@ -4328,42 +4328,104 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
   }
 }
 
-class _CoachmarkPill extends StatelessWidget {
-  const _CoachmarkPill({required this.p});
+class _CoachmarkTooltip extends StatelessWidget {
+  const _CoachmarkTooltip({required this.p});
 
   final Palette p;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: p.accent.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(999), // Capsule radius 999
-        boxShadow: [
-          BoxShadow(
-            color: p.accent.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const IosEmojiText('👆', style: TextStyle(fontSize: 16)),
-          const SizedBox(width: 8),
-          Text(
-            'Tap the clock face to record your first moment'.localized(context),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.1,
+    return PhysicalShape(
+      clipper: _TooltipBubbleClipper(),
+      color: p.accent.withValues(alpha: 0.96),
+      elevation: 8,
+      shadowColor: p.accent.withValues(alpha: 0.4),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: 18,
+          right: 18,
+          top: 18, // Extra top padding to offset contents below the arrow tip
+          bottom: 10,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const IosEmojiText('👆', style: TextStyle(fontSize: 16)),
+            const SizedBox(width: 8),
+            Text(
+              'Tap the clock face to record your first moment'.localized(
+                context,
+              ),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.15,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
+
+class _TooltipBubbleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    const arrowWidth = 14.0;
+    const arrowHeight = 8.0;
+    const radius = 16.0;
+
+    final arrowLeft = (size.width - arrowWidth) / 2;
+    final arrowRight = arrowLeft + arrowWidth;
+
+    path.moveTo(radius, arrowHeight);
+
+    // Top edge with arrow pointing up
+    path.lineTo(arrowLeft, arrowHeight);
+    path.lineTo(size.width / 2, 0); // Tip of arrow
+    path.lineTo(arrowRight, arrowHeight);
+    path.lineTo(size.width - radius, arrowHeight);
+
+    // Top-right corner
+    path.arcToPoint(
+      Offset(size.width, arrowHeight + radius),
+      radius: const Radius.circular(radius),
+    );
+
+    // Right edge
+    path.lineTo(size.width, size.height - radius);
+
+    // Bottom-right corner
+    path.arcToPoint(
+      Offset(size.width - radius, size.height),
+      radius: const Radius.circular(radius),
+    );
+
+    // Bottom edge
+    path.lineTo(radius, size.height);
+
+    // Bottom-left corner
+    path.arcToPoint(
+      Offset(0, size.height - radius),
+      radius: const Radius.circular(radius),
+    );
+
+    // Left edge
+    path.lineTo(0, arrowHeight + radius);
+
+    // Top-left corner
+    path.arcToPoint(
+      Offset(radius, arrowHeight),
+      radius: const Radius.circular(radius),
+    );
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

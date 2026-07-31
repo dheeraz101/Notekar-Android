@@ -208,7 +208,7 @@ class DataBackupSettingsPage extends StatelessWidget {
             SettingsRow(
               p: p,
               icon: Icons.folder_zip_outlined,
-              title: 'Local Backups Manager'.localized(context),
+              title: 'Local Backups'.localized(context),
               status: 'Manage'.localized(context),
               color: p.accent,
               onTap: () =>
