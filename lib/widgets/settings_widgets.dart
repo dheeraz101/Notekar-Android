@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
@@ -5,6 +6,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class SettingsGroup extends StatelessWidget {
@@ -127,21 +129,21 @@ class SettingsRow extends StatelessWidget {
       switch (rowKind) {
         case 'link':
           trailingIndicator = Icon(
-            Icons.open_in_new_rounded,
+            CupertinoIcons.arrow_up_right,
             color: p.text3,
-            size: 16,
+            size: 14,
           );
         case 'popup':
           trailingIndicator = Icon(
-            Icons.info_outline_rounded,
+            CupertinoIcons.info,
             color: p.text3,
-            size: 18,
+            size: 16,
           );
         default:
           trailingIndicator = Icon(
-            Icons.chevron_right_rounded,
+            CupertinoIcons.chevron_right,
             color: p.text3,
-            size: 20,
+            size: 15,
           );
       }
     }
@@ -200,7 +202,7 @@ class SettingsRow extends StatelessWidget {
                   ),
                   if (hasSubtitle) ...[
                     const SizedBox(height: 2),
-                    Text(
+                    IosEmojiText(
                       subtitle!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

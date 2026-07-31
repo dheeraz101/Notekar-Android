@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 
 class MomentTile extends StatelessWidget {
   const MomentTile({
@@ -66,7 +67,7 @@ class MomentTile extends StatelessWidget {
               if (entry.note.isNotEmpty) ...[
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
+                  child: IosEmojiText(
                     entry.note,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -145,7 +146,7 @@ class MomentTile extends StatelessWidget {
                   ),
                   if (!compact || entry.note.isNotEmpty) ...[
                     const SizedBox(height: 3),
-                    Text(
+                    IosEmojiText(
                       '${datePretty(entry.timestamp)}'
                       '${entry.note.isEmpty ? '' : ' - ${entry.note}'}',
                       maxLines: 1,

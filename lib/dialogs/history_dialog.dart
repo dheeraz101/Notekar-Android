@@ -12,6 +12,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -997,7 +998,7 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                     border: Border.all(color: p.border),
                   ),
                   child: SingleChildScrollView(
-                    child: Text(
+                    child: IosEmojiText(
                       entry.note,
                       style: TextStyle(color: p.text, height: 1.45),
                     ),
@@ -1080,7 +1081,7 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                   border: Border.all(color: p.border),
                 ),
                 child: SingleChildScrollView(
-                  child: Text(
+                  child: IosEmojiText(
                     entry.note,
                     style: TextStyle(color: p.text, height: 1.45),
                   ),

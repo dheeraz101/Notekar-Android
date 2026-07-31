@@ -2925,7 +2925,26 @@ class _NoteKarHomeState extends State<NoteKarHome>
           : 'Oh Clean';
     }
 
-    final String smallLabel = milestoneResult.remainingLabel;
+    final String milestoneDaysLeftText;
+    if (milestoneResult.next != null) {
+      final hoursLeft = (milestoneResult.next!.days * 24) - duration.inHours;
+      milestoneDaysLeftText = hoursLeft >= 24
+          ? 'Next in ${(hoursLeft / 24).ceil()}d'
+          : 'Next in ${hoursLeft}h';
+    } else {
+      milestoneDaysLeftText = 'Mastery achieved';
+    }
+
+    final String smallLabel;
+    if (duration.inDays == 0) {
+      final hours = duration.inHours;
+      smallLabel =
+          'Protecting progress: $hours ${hours == 1 ? 'hour' : 'hours'} • $milestoneDaysLeftText';
+    } else {
+      final days = duration.inDays;
+      smallLabel =
+          'Protected for $days ${days == 1 ? 'day' : 'days'} • $milestoneDaysLeftText';
+    }
     final double progress = milestoneResult.progress;
 
     final Color progressColor;

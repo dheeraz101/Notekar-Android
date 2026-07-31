@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class NoteSearchDialog extends StatefulWidget {
@@ -305,7 +306,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            Text(
+                            IosEmojiText(
                               entry.note,
                               style: TextStyle(
                                 color: widget.p.text,

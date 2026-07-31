@@ -5,6 +5,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 
 class TrashBinSettingsPage {
   static List<Widget> buildSlivers({
@@ -178,7 +179,7 @@ class TrashBinSettingsPage {
                             ),
                             if (moment.note.isNotEmpty) ...[
                               const SizedBox(height: 2),
-                              Text(
+                              IosEmojiText(
                                 moment.note,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,

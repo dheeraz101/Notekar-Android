@@ -7,6 +7,7 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -252,7 +253,7 @@ class SearchNotesSettingsPage {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            Text(
+                            IosEmojiText(
                               entry.note,
                               style: TextStyle(
                                 color: p.text,
