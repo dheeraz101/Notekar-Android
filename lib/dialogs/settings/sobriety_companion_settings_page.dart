@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
@@ -544,13 +545,189 @@ class MilestonesPage extends StatelessWidget {
     super.key,
     required this.p,
     required this.sobrietyMilestoneTheme,
+    required this.entries,
+    required this.sobrietyCustomStartMs,
+    required this.sobrietyResetType,
   });
 
   final Palette p;
   final String sobrietyMilestoneTheme;
+  final List<Moment> entries;
+  final int? sobrietyCustomStartMs;
+  final String sobrietyResetType;
+
+  Duration _getSobrietyDuration() {
+    if (sobrietyCustomStartMs != null) {
+      final diff = DateTime.now().difference(
+        DateTime.fromMillisecondsSinceEpoch(sobrietyCustomStartMs!),
+      );
+      return diff.isNegative ? Duration.zero : diff;
+    }
+    if (entries.isEmpty) return Duration.zero;
+    DateTime? resetTime;
+    if (sobrietyResetType == 'relapse') {
+      final relapseMoments = entries.where(
+        (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
+      );
+      if (relapseMoments.isEmpty) {
+        final minTimestamp = entries
+            .map((e) => e.timestamp)
+            .reduce((a, b) => a < b ? a : b);
+        resetTime = DateTime.fromMillisecondsSinceEpoch(minTimestamp);
+      } else {
+        final maxTimestamp = relapseMoments
+            .map((e) => e.timestamp)
+            .reduce((a, b) => a > b ? a : b);
+        resetTime = DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+      }
+    } else {
+      final maxTimestamp = entries
+          .map((e) => e.timestamp)
+          .reduce((a, b) => a > b ? a : b);
+      resetTime = DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+    }
+    final diff = DateTime.now().difference(resetTime);
+    return diff.isNegative ? Duration.zero : diff;
+  }
+
+  void _showMilestoneDetails(
+    BuildContext context,
+    SobrietyMilestoneEntry milestone,
+  ) {
+    final theme = sobrietyMilestoneTheme;
+    final name = getMilestoneName(milestone, theme);
+    final flavor = getMilestoneFlavor(milestone, theme);
+
+    showGeneralDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close details',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => AppSheet(
+        p: p,
+        title: 'Milestone Peak'.localized(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: p.orange.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.terrain_rounded, color: p.orange, size: 28),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Target: ${milestone.dayLabel}'.localized(context),
+                        style: TextStyle(
+                          color: p.orange,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Neuroscience & Growth'.localized(context),
+              style: TextStyle(
+                color: p.text2,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              milestone.whyItMatters.localized(context),
+              style: TextStyle(color: p.text, fontSize: 13, height: 1.45),
+            ),
+            if (flavor.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Theme Description'.localized(context),
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                flavor.localized(context),
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  height: 1.45,
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: p.accent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Dismiss'.localized(context),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final duration = _getSobrietyDuration();
+    final unlockedCount = kSobrietyMilestones
+        .where((m) => duration.inDays >= m.days)
+        .length;
+
+    double getCenterX(int index, double width) {
+      final rem = index % 3;
+      if (rem == 0) return width / 2;
+      if (rem == 1) return width * 0.25;
+      return width * 0.75;
+    }
+
+    double getCenterY(int index) {
+      return index * 130.0 + 64.0;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -558,100 +735,198 @@ class MilestonesPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'All 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. Names shown in your current theme.'
+              'Climb the sobriety mountain peaks. Tap any peak to discover its physical growth timeline and psychological rewards.'
                   .localized(context),
         ),
-        SettingsGroup(
-          p: p,
-          children: [
-            for (final milestone in kSobrietyMilestones)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: spacing16,
-                  vertical: spacing12,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 52,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: p.orange.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            milestone.days.toString(),
-                            style: TextStyle(
-                              color: p.orange,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            'DAYS',
-                            style: TextStyle(
-                              color: p.orange.withValues(alpha: 0.7),
-                              fontSize: 8,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+        const SizedBox(height: spacing12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final totalHeight = kSobrietyMilestones.length * 130.0 + 80.0;
+            return SizedBox(
+              height: totalHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _TrailConnectorPainter(
+                        p: p,
+                        count: kSobrietyMilestones.length,
+                        unlockedCount: unlockedCount,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            getMilestoneName(milestone, sobrietyMilestoneTheme),
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                            ),
+                  ),
+                  for (int i = 0; i < kSobrietyMilestones.length; i++) ...[
+                    (() {
+                      final milestone = kSobrietyMilestones[i];
+                      final unlocked = duration.inDays >= milestone.days;
+                      final isCurrentNext = i == unlockedCount;
+                      final cx = getCenterX(i, width);
+                      final cy = getCenterY(i);
+                      final nodeWidth = isCurrentNext ? 76.0 : 64.0;
+
+                      return Positioned(
+                        left: cx - 60.0,
+                        top: cy - nodeWidth / 2,
+                        child: Container(
+                          width: 120,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              GestureDetector(
+                                onTap: () =>
+                                    _showMilestoneDetails(context, milestone),
+                                child: Container(
+                                  width: nodeWidth,
+                                  height: nodeWidth,
+                                  decoration: BoxDecoration(
+                                    color: unlocked ? p.orange : p.surface3,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isCurrentNext
+                                          ? p.orange
+                                          : (unlocked ? p.orange : p.border),
+                                      width: isCurrentNext ? 4 : 2,
+                                    ),
+                                    boxShadow: unlocked
+                                        ? [
+                                            BoxShadow(
+                                              color: p.orange.withValues(
+                                                alpha: 0.35,
+                                              ),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: unlocked
+                                      ? Text(
+                                          milestone.days >= 365
+                                              ? '${(milestone.days / 365).round()}Y'
+                                              : '${milestone.days}d',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 12,
+                                          ),
+                                        )
+                                      : (isCurrentNext
+                                            ? Icon(
+                                                Icons.star_rounded,
+                                                color: p.orange,
+                                                size: 24,
+                                              )
+                                            : Icon(
+                                                Icons.lock_rounded,
+                                                color: p.text3,
+                                                size: 18,
+                                              )),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 100,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: p.surface2.withValues(alpha: 0.85),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: p.border.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  getMilestoneName(
+                                    milestone,
+                                    sobrietyMilestoneTheme,
+                                  ),
+                                  style: TextStyle(
+                                    color: unlocked ? p.text : p.text3,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            milestone.whyItMatters,
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 11,
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            getMilestoneFlavor(
-                              milestone,
-                              sobrietyMilestoneTheme,
-                            ),
-                            style: TextStyle(
-                              color: p.orange.withValues(alpha: 0.8),
-                              fontSize: 10,
-                              fontStyle: FontStyle.italic,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    }()),
                   ],
-                ),
+                ],
               ),
-          ],
+            );
+          },
         ),
         const SizedBox(height: spacing48),
       ],
     );
   }
+}
+
+class _TrailConnectorPainter extends CustomPainter {
+  _TrailConnectorPainter({
+    required this.p,
+    required this.count,
+    required this.unlockedCount,
+  });
+
+  final Palette p;
+  final int count;
+  final int unlockedCount;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintActive = Paint()
+      ..color = p.orange
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+
+    final paintInactive = Paint()
+      ..color = p.border.withValues(alpha: 0.6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    double getCenterX(int index, double width) {
+      final rem = index % 3;
+      if (rem == 0) return width / 2;
+      if (rem == 1) return width * 0.25;
+      return width * 0.75;
+    }
+
+    double getCenterY(int index) {
+      return index * 130.0 + 64.0;
+    }
+
+    for (int i = 0; i < count - 1; i++) {
+      final x1 = getCenterX(i, size.width);
+      final y1 = getCenterY(i);
+      final x2 = getCenterX(i + 1, size.width);
+      final y2 = getCenterY(i + 1);
+
+      final path = Path()
+        ..moveTo(x1, y1)
+        ..cubicTo(x1, (y1 + y2) / 2, x2, (y1 + y2) / 2, x2, y2);
+
+      final active = i < unlockedCount - 1;
+      canvas.drawPath(path, active ? paintActive : paintInactive);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrailConnectorPainter oldDelegate) =>
+      oldDelegate.unlockedCount != unlockedCount || oldDelegate.p != p;
 }

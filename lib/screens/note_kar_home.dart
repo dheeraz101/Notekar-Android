@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
@@ -1997,6 +1998,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
         onExportBackup: _exportBackupFile,
         onImportBackup: _importBackupFile,
+        onRestoreBackupFromString: _restoreBackupFromString,
+        onSaveQuickBackup: _createQuickLocalBackup,
         onCheckUpdates: _checkForUpdates,
         onOpenLink: _openExternalLink,
         onShowChangelog: (latestOnly) => showGeneralDialog<void>(
@@ -2334,10 +2337,48 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
+  Future<Directory> _getLocalBackupDir() async {
+    const channel = MethodChannel('notekar/files');
+    final dataDir = await channel.invokeMethod<String>('appDataDir');
+    final path = dataDir ?? Directory.systemTemp.path;
+    final dir = Directory('$path/local_backups');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return dir;
+  }
+
+  Future<void> _saveLocalBackup(String content) async {
+    try {
+      final dir = await _getLocalBackupDir();
+      final dateStr = exportDateStamp();
+      final file = File('${dir.path}/notekar-backup-$dateStr.json');
+      await file.writeAsString(content);
+    } catch (e) {
+      developer.log('Error saving local backup: $e');
+    }
+  }
+
+  Future<void> _createQuickLocalBackup() async {
+    try {
+      final content = _backupExport();
+      await _saveLocalBackup(content);
+      _showToast('Quick local backup created');
+      final now = DateTime.now().millisecondsSinceEpoch;
+      setState(() => _lastBackupAt = now);
+      await _prefs?.setInt('m-last-backup-at', now);
+    } catch (_) {
+      _showToast('Failed to create local backup', warning: true);
+    }
+  }
+
   Future<void> _exportBackupFile() async {
+    final content = _backupExport();
+    await _saveLocalBackup(content);
+
     final ok = await _exportFile(
       fileName: 'notekar-backup-${exportDateStamp()}.json',
-      content: _backupExport(),
+      content: content,
       mimeType: 'application/json',
     );
 
@@ -2668,17 +2709,21 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
 
+    await _restoreBackupFromString(content);
+  }
+
+  Future<bool> _restoreBackupFromString(String content) async {
     try {
       final importTask = developer.TimelineTask()
         ..start('notekar.backup_import');
       final validation = developer.Timeline.timeSync(
         'notekar.backup_import.validate',
-        () => validateNoteKarBackupContent(content!),
+        () => validateNoteKarBackupContent(content),
       );
       if (!validation.isValid) {
         importTask.finish();
         _showToast(validation.error ?? 'Invalid backup file', warning: true);
-        return;
+        return false;
       }
 
       final imported = validation.entries;
@@ -2693,14 +2738,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
         } else {
           _showToast('This backup contains no moments', warning: true);
         }
-        return;
+        return false;
       }
 
       final confirmed = await _confirmBackupImport(dryRun);
       if (confirmed != true) {
         importTask.finish();
         _showToast('Import cancelled');
-        return;
+        return false;
       }
 
       final settings = validation.settings;
@@ -2813,7 +2858,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           'Import stopped safely. Your current data was not changed.',
           warning: true,
         );
-        return;
+        return false;
       } finally {
         persistTask.finish();
       }
@@ -2862,11 +2907,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
       );
       importTask.finish();
       unawaited(_updateAndroidWidget());
+      return true;
     } catch (_) {
       _showToast(
         'Import failed. The backup file looks damaged.',
         warning: true,
       );
+      return false;
     }
   }
 

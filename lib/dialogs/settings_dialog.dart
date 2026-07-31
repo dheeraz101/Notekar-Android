@@ -123,6 +123,8 @@ class SettingsDialog extends StatefulWidget {
     required this.onExportJson,
     required this.onExportBackup,
     required this.onImportBackup,
+    required this.onRestoreBackupFromString,
+    required this.onSaveQuickBackup,
     required this.onCheckUpdates,
     required this.onOpenLink,
     required this.onShowChangelog,
@@ -221,6 +223,8 @@ class SettingsDialog extends StatefulWidget {
   final Future<void> Function() onExportJson;
   final Future<void> Function() onExportBackup;
   final Future<void> Function() onImportBackup;
+  final Future<bool> Function(String content) onRestoreBackupFromString;
+  final Future<void> Function() onSaveQuickBackup;
   final Future<({String status, AppUpdateInfo? info})> Function()
   onCheckUpdates;
   final ValueChanged<String> onOpenLink;
@@ -4260,6 +4264,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                             child: MilestonesPage(
                               p: p,
                               sobrietyMilestoneTheme: sobrietyMilestoneTheme,
+                              entries: entries,
+                              sobrietyCustomStartMs: sobrietyCustomStartMs,
+                              sobrietyResetType: sobrietyResetType,
                             ),
                           ),
                         if (show('Search Notes'))
@@ -4686,6 +4693,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 _runExport('Backup', widget.onExportBackup),
                               ),
                               onImportBackup: () => unawaited(_runImport()),
+                              onRestoreBackupFromString:
+                                  widget.onRestoreBackupFromString,
+                              onSaveQuickBackup: widget.onSaveQuickBackup,
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
@@ -4719,6 +4729,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 _runExport('Backup', widget.onExportBackup),
                               ),
                               onImportBackup: () => unawaited(_runImport()),
+                              onRestoreBackupFromString:
+                                  widget.onRestoreBackupFromString,
+                              onSaveQuickBackup: widget.onSaveQuickBackup,
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
@@ -4752,9 +4765,20 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 _runExport('Backup', widget.onExportBackup),
                               ),
                               onImportBackup: () => unawaited(_runImport()),
+                              onRestoreBackupFromString:
+                                  widget.onRestoreBackupFromString,
+                              onSaveQuickBackup: widget.onSaveQuickBackup,
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
+                          ),
+                        if (show('Local Backups'))
+                          SliverToBoxAdapter(
+                            child: LocalBackupsPage(
+                              p: p,
+                              onRestore: widget.onRestoreBackupFromString,
+                              onCreateQuickBackup: widget.onSaveQuickBackup,
                             ),
                           ),
                         if (show('Privacy & Security'))

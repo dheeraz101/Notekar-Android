@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/widgets/settings_widgets.dart';
-import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 class DataBackupSettingsPage extends StatelessWidget {
   const DataBackupSettingsPage({
@@ -18,6 +21,8 @@ class DataBackupSettingsPage extends StatelessWidget {
     required this.onExportJson,
     required this.onExportBackup,
     required this.onImportBackup,
+    required this.onRestoreBackupFromString,
+    required this.onSaveQuickBackup,
     required this.onOpenCategory,
     required this.onLearnMoreBeta,
   });
@@ -34,6 +39,8 @@ class DataBackupSettingsPage extends StatelessWidget {
   final VoidCallback onExportJson;
   final VoidCallback onExportBackup;
   final VoidCallback onImportBackup;
+  final Future<bool> Function(String content) onRestoreBackupFromString;
+  final VoidCallback onSaveQuickBackup;
   final void Function(String category, {required String parent}) onOpenCategory;
   final VoidCallback onLearnMoreBeta;
 
@@ -198,6 +205,15 @@ class DataBackupSettingsPage extends StatelessWidget {
               rowKind: 'link',
               onTap: onImportBackup,
             ),
+            SettingsRow(
+              p: p,
+              icon: Icons.folder_zip_outlined,
+              title: 'Local Backups Manager'.localized(context),
+              status: 'Manage'.localized(context),
+              color: p.accent,
+              onTap: () =>
+                  onOpenCategory('Local Backups', parent: 'Data & Backup'),
+            ),
           ],
         ),
         SettingsPageDescription(
@@ -279,6 +295,267 @@ class DataBackupSettingsPage extends StatelessWidget {
         ),
         const SizedBox(height: spacing48),
       ],
+    );
+  }
+}
+
+class LocalBackupsPage extends StatefulWidget {
+  const LocalBackupsPage({
+    super.key,
+    required this.p,
+    required this.onRestore,
+    required this.onCreateQuickBackup,
+  });
+
+  final Palette p;
+  final Future<bool> Function(String content) onRestore;
+  final VoidCallback onCreateQuickBackup;
+
+  @override
+  State<LocalBackupsPage> createState() => _LocalBackupsPageState();
+}
+
+class _LocalBackupsPageState extends State<LocalBackupsPage> {
+  List<File> _backupFiles = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBackups();
+  }
+
+  Future<void> _loadBackups() async {
+    setState(() => _loading = true);
+    try {
+      const channel = MethodChannel('notekar/files');
+      final dataDir = await channel.invokeMethod<String>('appDataDir');
+      if (dataDir == null) {
+        setState(() {
+          _backupFiles = [];
+          _loading = false;
+        });
+        return;
+      }
+      final dir = Directory('$dataDir/local_backups');
+      if (await dir.exists()) {
+        final List<FileSystemEntity> entities = await dir.list().toList();
+        final List<File> files = entities
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.json'))
+            .toList();
+        files.sort((a, b) {
+          final aTime = a.lastModifiedSync();
+          final bTime = b.lastModifiedSync();
+          return bTime.compareTo(aTime);
+        });
+        setState(() {
+          _backupFiles = files;
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _backupFiles = [];
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        _backupFiles = [];
+        _loading = false;
+      });
+    }
+  }
+
+  String _formatSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  String _formatDate(DateTime dt) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+    final period = dt.hour >= 12 ? 'PM' : 'AM';
+    final minuteStr = dt.minute.toString().padLeft(2, '0');
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year} - $hour:$minuteStr $period';
+  }
+
+  Future<void> _deleteBackup(File file) async {
+    try {
+      await file.delete();
+      await _loadBackups();
+    } catch (_) {}
+  }
+
+  Future<void> _restoreFile(File file) async {
+    try {
+      final content = await file.readAsString();
+      final success = await widget.onRestore(content);
+      if (success) {
+        // Success toast is shown in note_kar_home, reload backups just in case
+        await _loadBackups();
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to read local backup file')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: spacing8),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Restore previous database states locally with a single tap. Backups here are stored securely inside your local app sandbox.'
+                  .localized(context),
+        ),
+        const SizedBox(height: spacing12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: spacing16),
+          child: SizedBox(
+            height: 46,
+            width: double.infinity,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: p.accent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () async {
+                widget.onCreateQuickBackup();
+                await Future<void>.delayed(const Duration(milliseconds: 300));
+                await _loadBackups();
+              },
+              icon: const Icon(Icons.add_to_photos_outlined, size: 18),
+              label: Text(
+                'Create Quick Local Backup'.localized(context),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: spacing16),
+        if (_loading)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(spacing32),
+              child: CircularProgressIndicator(color: p.accent),
+            ),
+          )
+        else if (_backupFiles.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(spacing32),
+              child: Text(
+                'No local backups found.'.localized(context),
+                style: TextStyle(color: p.text3, fontSize: 13),
+              ),
+            ),
+          )
+        else
+          SettingsGroup(
+            p: p,
+            title: 'Backup History',
+            insetDividers: true,
+            children: [for (final file in _backupFiles) _buildBackupRow(file)],
+          ),
+        const SizedBox(height: spacing48),
+      ],
+    );
+  }
+
+  Widget _buildBackupRow(File file) {
+    final p = widget.p;
+    final stat = file.statSync();
+    final dateFormatted = _formatDate(stat.modified);
+    final sizeFormatted = _formatSize(stat.size);
+
+    return Dismissible(
+      key: Key(file.path),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: p.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+      ),
+      onDismissed: (direction) => _deleteBackup(file),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _restoreFile(file),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: spacing16,
+              vertical: spacing12,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.folder_zip_outlined,
+                    color: p.accent,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dateFormatted,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        sizeFormatted,
+                        style: TextStyle(color: p.text3, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.restore_rounded, color: p.orange, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
