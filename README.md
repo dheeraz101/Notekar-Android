@@ -19,10 +19,10 @@
 > **This repository is the official home for all new NoteKar version releases, Android APK
 > downloads, and active app development.**
 >
-> 📥 To download the latest stable Android APK release, visit the *
-*[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
+> 📥 To download the latest stable Android APK release,
+> visit: **[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
 >
-> 🌐 Old Notekar Site Repo **[Github](https://github.com/dheeraz101/Notekar)**.
+> 🌐 Website/PWA Notekar Repo **[Github](https://github.com/dheeraz101/Notekar)**.
 
 ---
 
