@@ -22,7 +22,7 @@
 > 📥 To download the latest stable Android APK release, visit the *
 *[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
 >
-> 🌐 Old Notekar Site Repo **[Github](https://github.com/dheeraz101/Notekar)**.
+> 🌐 Website/PWA Notekar Repo **[Github](https://github.com/dheeraz101/Notekar)**.
 
 ---
 
