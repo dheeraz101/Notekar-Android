@@ -24,6 +24,17 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.1',
+      date: 'August 10, 2026',
+      highlights: [
+        '3-phase major update with urge surfing, risk radar, apple hig & gamification',
+      ],
+      items: [
+        '3-phase major update with urge surfing, risk radar, apple hig & gamification',
+        'Readme file formatting fixed',
+      ],
+    ),
+    (
       version: '6.0.0',
       date: 'July 31, 2026',
       highlights: [
