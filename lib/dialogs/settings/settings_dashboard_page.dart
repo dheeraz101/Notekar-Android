@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/daily_wisdom_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/risk_radar_service.dart';
+import 'package:notekar/utils/user_rank_service.dart';
+import 'package:notekar/widgets/activity_heatmap_widget.dart';
 import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,9 +49,11 @@ class SettingsDashboardPage extends StatelessWidget {
                     )
                     .inHours >=
                 48)
-          const SizedBox(height: 6),
+          _buildDailyWisdomCard(context),
         if (enableSobrietyMode) ...[
+          _buildUserRankCard(context),
           _buildSobrietyAnalyticsCard(context),
+          _buildRiskRadarCard(context),
           const SizedBox(height: 6),
         ],
         _buildDashboardSectionHeader('Real-time Metrics'),
@@ -55,6 +61,8 @@ class SettingsDashboardPage extends StatelessWidget {
         const SizedBox(height: 8),
         _buildDashboardSectionHeader('Habit Frequency & Trends'),
         ActivityTrendsCard(p: p, entries: entries),
+        const SizedBox(height: 6),
+        ActivityHeatmapWidget(p: p, entries: entries),
         const SizedBox(height: 6),
         ActivityHeatmapCard(p: p, entries: entries),
         const SizedBox(height: 8),
@@ -238,6 +246,232 @@ class SettingsDashboardPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildRiskRadarCard(BuildContext context) {
+    final radar = RiskRadarService.analyze(entries);
+    final isHigh = radar.riskLevel == 'High';
+    final cardColor = isHigh
+        ? p.red.withValues(alpha: 0.08)
+        : p.orange.withValues(alpha: 0.08);
+    final accentColor = isHigh ? p.red : p.orange;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12, bottom: 0),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: accentColor.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.radar_rounded, color: accentColor, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Intelligent Risk Radar'.localized(context),
+                style: TextStyle(
+                  color: p.text,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14.5,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${radar.riskLevel} Risk (${radar.riskScore}%)',
+                  style: TextStyle(
+                    color: accentColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            radar.alertMessage.localized(context),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserRankCard(BuildContext context) {
+    final streakDays = _calculateStreakDays();
+    final rank = UserRankService.calculateRank(streakDays, entries.length);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 4),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [p.accent.withValues(alpha: 0.12), p.surface2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.workspace_premium_rounded,
+                  color: p.accent,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rank Level ${rank.rankLevel}'.toUpperCase(),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      rank.rankTitle,
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${rank.currentXp} XP',
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: rank.progressPercent,
+              minHeight: 6,
+              backgroundColor: p.surface3,
+              color: p.accent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailyWisdomCard(BuildContext context) {
+    final wisdom = DailyWisdomService.getTodayWisdom();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome_rounded, color: p.orange, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'Daily Neuroscience Insight'.localized(context),
+                style: TextStyle(
+                  color: p.orange,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '"${wisdom.quote}"',
+            style: TextStyle(
+              color: p.text,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              fontStyle: FontStyle.italic,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '— ${wisdom.author} (${wisdom.category})',
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _calculateStreakDays() {
+    if (entries.isEmpty) return 0;
+    final relapseMoments = entries.where(
+      (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
+    );
+    DateTime? resetTime;
+    if (relapseMoments.isEmpty) {
+      final minTimestamp = entries
+          .map((e) => e.timestamp)
+          .reduce((a, b) => a < b ? a : b);
+      resetTime = DateTime.fromMillisecondsSinceEpoch(minTimestamp);
+    } else {
+      final maxTimestamp = relapseMoments
+          .map((e) => e.timestamp)
+          .reduce((a, b) => a > b ? a : b);
+      resetTime = DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+    }
+    final diff = DateTime.now().difference(resetTime);
+    return diff.isNegative ? 0 : diff.inDays;
   }
 
   Widget _buildMetricTile(BuildContext context, String title, String value) {

@@ -28,6 +28,19 @@ const yabpSite =
 const privacyPolicyUrl = 'https://notekarapp.vercel.app/privacy.html';
 const termsUrl = 'https://notekarapp.vercel.app/terms.html';
 const githubRepo = 'https://github.com/dheeraz101/Notekar-Android';
+
+class AppHaptics {
+  static void light() => HapticFeedback.lightImpact();
+
+  static void medium() => HapticFeedback.mediumImpact();
+
+  static void heavy() => HapticFeedback.heavyImpact();
+
+  static void heavyImpact() => HapticFeedback.heavyImpact();
+
+  static void selection() => HapticFeedback.selectionClick();
+}
+
 const githubIssues = 'https://github.com/dheeraz101/Notekar-Android/issues';
 const coffeeLink = 'https://buymeacoffee.com/dheeraz';
 const githubReleases = 'https://github.com/dheeraz101/Notekar-Android/releases';
