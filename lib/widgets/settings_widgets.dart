@@ -39,9 +39,9 @@ class SettingsGroup extends StatelessWidget {
               title!.localized(context).toUpperCase(),
               style: TextStyle(
                 color: p.text3,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.2,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
               ),
             ),
           ),

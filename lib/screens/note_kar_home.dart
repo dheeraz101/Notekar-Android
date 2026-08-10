@@ -16,6 +16,7 @@ import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
+import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -1779,6 +1780,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (mounted) setState(() {});
   }
 
+  Future<void> _openUrgeSurfing() async {
+    showGeneralDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Urge Surfing',
+      transitionDuration: const Duration(milliseconds: 150),
+      pageBuilder: (_, _, _) => UrgeSurfingDialog(p: p),
+    );
+  }
+
   Future<void> _openSettings({String? initialCategory}) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
@@ -3182,6 +3194,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         ],
                       ),
                     ),
+                    GestureDetector(
+                      onTap: _openUrgeSurfing,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: palette.accent.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.air_rounded,
+                          color: palette.accent,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                     Icon(
                       Icons.chevron_right_rounded,
                       color: palette.text3,

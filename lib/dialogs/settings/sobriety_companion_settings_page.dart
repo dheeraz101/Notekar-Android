@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
@@ -686,23 +687,70 @@ class MilestonesPage extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: p.accent,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: p.text,
+                        side: BorderSide(color: p.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        showGeneralDialog<void>(
+                          context: context,
+                          barrierColor: Colors.black.withValues(alpha: 0.42),
+                          barrierDismissible: true,
+                          barrierLabel: 'Share Milestone',
+                          transitionDuration: const Duration(milliseconds: 150),
+                          pageBuilder: (_, _, _) => ShareableMilestoneSheet(
+                            p: p,
+                            milestoneTitle: name,
+                            dayLabel: milestone.dayLabel,
+                            streakDays: _getSobrietyDuration().inDays,
+                          ),
+                        );
+                      },
+                      icon: const Icon(CupertinoIcons.share, size: 16),
+                      label: Text(
+                        'Share Card'.localized(context),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Dismiss'.localized(context),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: p.accent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Dismiss'.localized(context),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

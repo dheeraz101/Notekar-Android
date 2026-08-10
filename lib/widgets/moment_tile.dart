@@ -29,8 +29,14 @@ class MomentTile extends StatelessWidget {
     final color = momentColor(p, entry.type);
     if (compact) {
       return GestureDetector(
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: () {
+          AppHaptics.light();
+          onTap?.call();
+        },
+        onLongPress: () {
+          AppHaptics.medium();
+          onLongPress?.call();
+        },
         child: Container(
           constraints: const BoxConstraints(minHeight: 22),
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
@@ -83,7 +89,10 @@ class MomentTile extends StatelessWidget {
                   height: 22,
                 ),
                 padding: EdgeInsets.zero,
-                onPressed: onDelete,
+                onPressed: () {
+                  AppHaptics.medium();
+                  onDelete();
+                },
                 icon: Icon(Icons.close_rounded, color: p.text3, size: 12),
               ),
             ],
@@ -92,8 +101,14 @@ class MomentTile extends StatelessWidget {
       );
     }
     return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
+      onTap: () {
+        AppHaptics.light();
+        onTap?.call();
+      },
+      onLongPress: () {
+        AppHaptics.medium();
+        onLongPress?.call();
+      },
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: compact ? 8 : 12,
@@ -166,7 +181,10 @@ class MomentTile extends StatelessWidget {
                 height: compact ? 32 : 40,
               ),
               padding: EdgeInsets.zero,
-              onPressed: onDelete,
+              onPressed: () {
+                AppHaptics.medium();
+                onDelete();
+              },
               icon: Icon(
                 Icons.close_rounded,
                 color: p.text3,
