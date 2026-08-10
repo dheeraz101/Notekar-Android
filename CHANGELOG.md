@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.1] - 2026-08-10 (versionCode 31) [BR]
+
+### What's New
+
+- 3-phase major update with urge surfing, risk radar, apple hig & gamification
+
+### Improvements
+
+- Readme file formatting fixed
+
 ## [6.0.0] - 2026-07-31 (versionCode 30) [SB]
 
 ### What's New
