@@ -7,6 +7,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.2] - 2026-08-11 (versionCode 32) [BR]
+
+### What's New
+
+- Code uprgade In
+
+### Improvements
+
+- Fix(network)
+- Align empty state labels with Apple HIG punctuation guidelines
+- Apply apple HIG visual squircle badges and punctuation minimalism
+- Industry-standard performance, security, storage & accessibility audit upgrades
+
+### Bug Fixes
+
+- Eliminate 5ms coachmark tooltip flash on app launch
+- High-contrast settings icons, apple spring callout tooltip & instant sobriety toggle
+- Dynamic upgrade walkthrough cards for existing users
+
 ## [6.0.1] - 2026-08-10 (versionCode 31) [BR]
 
 ### What's New

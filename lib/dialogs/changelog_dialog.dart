@@ -24,6 +24,21 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.2',
+      date: 'August 11, 2026',
+      highlights: ['Code uprgade In'],
+      items: [
+        'Eliminate 5ms coachmark tooltip flash on app launch',
+        'Fix(network)',
+        'High-contrast settings icons, apple spring callout tooltip & instant sobriety toggle',
+        'Align empty state labels with Apple HIG punctuation guidelines',
+        'Dynamic upgrade walkthrough cards for existing users',
+        'Apply apple HIG visual squircle badges and punctuation minimalism',
+        'Industry-standard performance, security, storage & accessibility audit upgrades',
+        'Code uprgade In',
+      ],
+    ),
+    (
       version: '6.0.1',
       date: 'August 10, 2026',
       highlights: [
