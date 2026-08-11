@@ -168,14 +168,22 @@ class SettingsRow extends StatelessWidget {
           children: [
             if (hasIcon) ...[
               Container(
-                width: 29,
-                height: 29,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  color: rowColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(7),
+                  color: color != null
+                      ? rowColor
+                      : rowColor.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
-                child: customIcon ?? Icon(icon!, color: rowColor, size: 18),
+                child:
+                    customIcon ??
+                    Icon(
+                      icon!,
+                      color: color != null ? Colors.white : rowColor,
+                      size: 17,
+                    ),
               ),
               const SizedBox(width: 12),
             ],

@@ -2488,7 +2488,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       });
       await _prefs?.setString('m-privacy-lock-type', 'system');
       if (!mounted) return false;
-      _showToast('System Lock enabled.'.localized(context));
+      _showToast('System Lock enabled'.localized(context));
       return true;
     } else {
       final customPinSet = await _showSetupCustomPinDialog();
