@@ -17,7 +17,7 @@ class SettingsGroup extends StatelessWidget {
     this.title,
     this.description,
     this.showDividers = true,
-    this.insetDividers = false,
+    this.insetDividers = true,
   });
 
   final Palette p;

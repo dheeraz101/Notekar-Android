@@ -352,6 +352,15 @@ class NotekarHaptics {
       });
     });
   }
+
+  static void heavy(String style) {
+    if (style == 'off') return;
+    if (style == 'light') {
+      HapticFeedback.mediumImpact();
+    } else {
+      HapticFeedback.heavyImpact();
+    }
+  }
 }
 
 MediaQueryData largerTextQuery(BuildContext context) {

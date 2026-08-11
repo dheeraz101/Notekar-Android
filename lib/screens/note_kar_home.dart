@@ -3171,6 +3171,29 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: CustomPaint(
+                        painter: _IosActivityRingPainter(
+                          progress: progress,
+                          color: progressColor,
+                          backgroundColor: palette.surface3,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${(progress * 100).toInt()}%',
+                            style: TextStyle(
+                              color: palette.text,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: _openUrgeSurfing,
                       child: Container(
@@ -4457,4 +4480,49 @@ class _TooltipArrowPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _TooltipArrowPainter oldDelegate) =>
       oldDelegate.color != color;
+}
+
+class _IosActivityRingPainter extends CustomPainter {
+  _IosActivityRingPainter({
+    required this.progress,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  final double progress;
+  final Color color;
+  final Color backgroundColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (math.min(size.width, size.height) - 4) / 2;
+
+    final bgPaint = Paint()
+      ..color = color.withValues(alpha: 0.18)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5;
+
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final progressPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+
+    final sweepAngle = 2 * math.pi * progress.clamp(0.01, 1.0);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      sweepAngle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _IosActivityRingPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
 }
