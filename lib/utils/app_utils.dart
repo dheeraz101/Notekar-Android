@@ -9,6 +9,43 @@ const appVersion = '6.0.2';
 const appBuildNumber = '32';
 const appBuildDate = '2026-08-11';
 
+String formatInstalledDate(String buildDateStr) {
+  try {
+    final DateTime? buildDate = DateTime.tryParse(buildDateStr);
+    if (buildDate == null) {
+      return 'Installed $buildDateStr';
+    }
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateOnly = DateTime(buildDate.year, buildDate.month, buildDate.day);
+
+    if (dateOnly == today) {
+      return 'Installed Today';
+    } else if (dateOnly == yesterday) {
+      return 'Installed Yesterday';
+    } else {
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      return 'Installed ${buildDate.day} ${months[buildDate.month - 1]} ${buildDate.year}';
+    }
+  } catch (_) {
+    return 'Installed $buildDateStr';
+  }
+}
+
 // 8pt Grid Constants
 const double spacing4 = 4.0;
 const double spacing8 = 8.0;

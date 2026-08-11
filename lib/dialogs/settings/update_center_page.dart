@@ -249,19 +249,30 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       child: Row(
                         children: [
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Checkbox(
-                              value: dontShowCheckbox,
-                              activeColor: p.accent,
-                              checkColor: Colors.white,
-                              onChanged: (val) {
-                                setDialogState(() {
-                                  dontShowCheckbox = val ?? false;
-                                });
-                              },
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            curve: Curves.easeOutCubic,
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: dontShowCheckbox
+                                  ? p.accent
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: dontShowCheckbox
+                                    ? p.accent
+                                    : p.text3.withValues(alpha: 0.4),
+                                width: 2,
+                              ),
                             ),
+                            child: dontShowCheckbox
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    size: 14,
+                                    color: Colors.white,
+                                  )
+                                : null,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -552,7 +563,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Build Date: $appBuildDate',
+                formatInstalledDate(appBuildDate).localized(context),
                 style: TextStyle(
                   color: p.text3,
                   fontSize: 14,
@@ -696,7 +707,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               const SizedBox(height: 8),
             ],
             Text(
-              'Currently on v$appVersion ($appBuildNumber)'.localized(context),
+              'v$appVersion ($appBuildNumber) • ${formatInstalledDate(appBuildDate)}'
+                  .localized(context),
               style: TextStyle(color: p.text3, fontSize: 13),
             ),
             const SizedBox(height: 16),
