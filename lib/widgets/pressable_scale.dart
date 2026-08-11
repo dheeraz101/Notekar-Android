@@ -33,9 +33,9 @@ class _PressableScaleState extends State<PressableScale> {
       onTap: enabled ? widget.onTap : null,
       onLongPress: enabled ? widget.onLongPress : null,
       child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOutCubic,
+        scale: _pressed ? 0.96 : 1.0,
+        duration: Duration(milliseconds: _pressed ? 80 : 140),
+        curve: _pressed ? Curves.easeOutQuad : Curves.easeOutCubic,
         child: widget.child,
       ),
     );

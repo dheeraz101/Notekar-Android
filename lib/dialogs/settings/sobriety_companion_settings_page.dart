@@ -565,29 +565,27 @@ class MilestonesPage extends StatelessWidget {
       return diff.isNegative ? Duration.zero : diff;
     }
     if (entries.isEmpty) return Duration.zero;
-    DateTime? resetTime;
-    if (sobrietyResetType == 'relapse') {
-      final relapseMoments = entries.where(
-        (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
-      );
-      if (relapseMoments.isEmpty) {
-        final minTimestamp = entries
-            .map((e) => e.timestamp)
-            .reduce((a, b) => a < b ? a : b);
-        resetTime = DateTime.fromMillisecondsSinceEpoch(minTimestamp);
-      } else {
-        final maxTimestamp = relapseMoments
-            .map((e) => e.timestamp)
-            .reduce((a, b) => a > b ? a : b);
-        resetTime = DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+
+    int minTs = entries.first.timestamp;
+    int maxTs = entries.first.timestamp;
+    int? maxRelapseTs;
+
+    for (final e in entries) {
+      if (e.timestamp < minTs) minTs = e.timestamp;
+      if (e.timestamp > maxTs) maxTs = e.timestamp;
+      if (e.note.contains('#relapse') && !e.note.contains('#shielded')) {
+        if (maxRelapseTs == null || e.timestamp > maxRelapseTs) {
+          maxRelapseTs = e.timestamp;
+        }
       }
-    } else {
-      final maxTimestamp = entries
-          .map((e) => e.timestamp)
-          .reduce((a, b) => a > b ? a : b);
-      resetTime = DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
     }
-    final diff = DateTime.now().difference(resetTime);
+
+    final int targetTs = sobrietyResetType == 'relapse'
+        ? (maxRelapseTs ?? minTs)
+        : maxTs;
+    final diff = DateTime.now().difference(
+      DateTime.fromMillisecondsSinceEpoch(targetTs),
+    );
     return diff.isNegative ? Duration.zero : diff;
   }
 

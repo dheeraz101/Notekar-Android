@@ -60,14 +60,22 @@ class SettingsDashboardPage extends StatelessWidget {
         ActivitySummaryCard(p: p, entries: entries),
         const SizedBox(height: 8),
         _buildDashboardSectionHeader('Habit Frequency & Trends'),
-        ActivityTrendsCard(p: p, entries: entries),
+        RepaintBoundary(
+          child: ActivityTrendsCard(p: p, entries: entries),
+        ),
         const SizedBox(height: 6),
-        ActivityHeatmapWidget(p: p, entries: entries),
+        RepaintBoundary(
+          child: ActivityHeatmapWidget(p: p, entries: entries),
+        ),
         const SizedBox(height: 6),
-        ActivityHeatmapCard(p: p, entries: entries),
+        RepaintBoundary(
+          child: ActivityHeatmapCard(p: p, entries: entries),
+        ),
         const SizedBox(height: 8),
         _buildDashboardSectionHeader('Correlation Intelligence'),
-        IntelligentInsightsCard(p: p, entries: entries),
+        RepaintBoundary(
+          child: IntelligentInsightsCard(p: p, entries: entries),
+        ),
         SettingsBetaNote(
           p: p,
           text: 'The current features on this page are under Beta stage.'
@@ -455,21 +463,21 @@ class SettingsDashboardPage extends StatelessWidget {
 
   int _calculateStreakDays() {
     if (entries.isEmpty) return 0;
-    final relapseMoments = entries.where(
-      (e) => e.note.contains('#relapse') && !e.note.contains('#shielded'),
-    );
-    DateTime? resetTime;
-    if (relapseMoments.isEmpty) {
-      final minTimestamp = entries
-          .map((e) => e.timestamp)
-          .reduce((a, b) => a < b ? a : b);
-      resetTime = DateTime.fromMillisecondsSinceEpoch(minTimestamp);
-    } else {
-      final maxTimestamp = relapseMoments
-          .map((e) => e.timestamp)
-          .reduce((a, b) => a > b ? a : b);
-      resetTime = DateTime.fromMillisecondsSinceEpoch(maxTimestamp);
+    int? maxRelapseTs;
+    int minTs = entries.first.timestamp;
+
+    for (final e in entries) {
+      if (e.timestamp < minTs) minTs = e.timestamp;
+      if (e.note.contains('#relapse') && !e.note.contains('#shielded')) {
+        if (maxRelapseTs == null || e.timestamp > maxRelapseTs) {
+          maxRelapseTs = e.timestamp;
+        }
+      }
     }
+
+    final resetTime = DateTime.fromMillisecondsSinceEpoch(
+      maxRelapseTs ?? minTs,
+    );
     final diff = DateTime.now().difference(resetTime);
     return diff.isNegative ? 0 : diff.inDays;
   }

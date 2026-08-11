@@ -16,6 +16,9 @@ class IosEmojiText extends StatelessWidget {
   final TextOverflow overflow;
   final TextAlign textAlign;
 
+  static final Map<String, List<InlineSpan>> _spanCache = {};
+  static const int _maxCacheEntries = 200;
+
   bool _isEmoji(int rune) {
     return (rune >= 0x1F300 &&
             rune <= 0x1FADF) || // Emoticons, Pictographs, Food, etc.
@@ -25,10 +28,12 @@ class IosEmojiText extends StatelessWidget {
         (rune == 0xFE0F); // Variation selector
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final baseStyle = style ?? DefaultTextStyle.of(context).style;
-    final fontSize = baseStyle.fontSize ?? 14.0;
+  List<InlineSpan> _buildSpans(TextStyle baseStyle, double fontSize) {
+    final cacheKey =
+        '$text-${fontSize.toStringAsFixed(1)}-${baseStyle.color?.toARGB32()}';
+    if (_spanCache.containsKey(cacheKey)) {
+      return _spanCache[cacheKey]!;
+    }
 
     final List<InlineSpan> spans = [];
     final runes = text.runes.toList();
@@ -52,9 +57,7 @@ class IosEmojiText extends StatelessWidget {
         }
 
         final hexList = emojiSequence
-            .where(
-              (r) => r != 0xFE0F,
-            ) // Skip selector for URL matching compatibility
+            .where((r) => r != 0xFE0F)
             .map((r) => r.toRadixString(16).toLowerCase())
             .toList();
 
@@ -64,6 +67,7 @@ class IosEmojiText extends StatelessWidget {
         if (hexStr.isNotEmpty) {
           final cdnUrl =
               'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-64/$hexStr.png';
+          final targetDimension = (fontSize * 2.2).round().clamp(20, 64);
 
           spans.add(
             WidgetSpan(
@@ -72,6 +76,8 @@ class IosEmojiText extends StatelessWidget {
                 cdnUrl,
                 width: fontSize * 1.3,
                 height: fontSize * 1.3,
+                cacheWidth: targetDimension,
+                cacheHeight: targetDimension,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Text(
@@ -94,6 +100,20 @@ class IosEmojiText extends StatelessWidget {
     if (buffer.isNotEmpty) {
       spans.add(TextSpan(text: buffer.toString(), style: baseStyle));
     }
+
+    if (_spanCache.length >= _maxCacheEntries) {
+      _spanCache.remove(_spanCache.keys.first);
+    }
+    _spanCache[cacheKey] = spans;
+
+    return spans;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final baseStyle = style ?? DefaultTextStyle.of(context).style;
+    final fontSize = baseStyle.fontSize ?? 14.0;
+    final spans = _buildSpans(baseStyle, fontSize);
 
     return RichText(
       text: TextSpan(children: spans),
