@@ -1,0 +1,4 @@
+Update to 6.0.3 (build 33):
+- New: Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades
+- New: Apple HIG inset hairline dividers, activity ring & heavy taptic feedback
+- Circular Checkbox in Network Warning Dialog, System Update Date Formatting

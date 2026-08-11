@@ -24,6 +24,19 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.3',
+      date: 'August 12, 2026',
+      highlights: [
+        'Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades',
+        'Apple HIG inset hairline dividers, activity ring & heavy taptic feedback',
+      ],
+      items: [
+        'Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades',
+        'Apple HIG inset hairline dividers, activity ring & heavy taptic feedback',
+        'Circular Checkbox in Network Warning Dialog, System Update Date Formatting',
+      ],
+    ),
+    (
       version: '6.0.2',
       date: 'August 11, 2026',
       highlights: ['Code uprgade In'],

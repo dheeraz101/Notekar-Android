@@ -7,6 +7,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.3] - 2026-08-12 (versionCode 33) [BR]
+
+### What's New
+
+- Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades
+- Apple HIG inset hairline dividers, activity ring & heavy taptic feedback
+
+### Improvements
+
+- Circular Checkbox in Network Warning Dialog, System Update Date Formatting
+
 ## [6.0.2] - 2026-08-11 (versionCode 32) [BR]
 
 ### What's New
