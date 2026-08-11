@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -123,37 +124,45 @@ class _ClockFaceState extends State<ClockFace> {
         ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)
         : widget.p.clock;
     final secondsColor = widget.highlightSeconds ? widget.p.text3 : clockColor;
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Text(
-            hm,
-            style: TextStyle(
-              color: clockColor,
-              fontSize: 116,
-              fontWeight: FontWeight.w200,
-              height: 1,
-              letterSpacing: -4,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          if (!widget.minimal && widget.showSeconds)
+    final mediaQuery = MediaQuery.of(context);
+    final clampedScaler = mediaQuery.textScaler.clamp(
+      minScaleFactor: 0.85,
+      maxScaleFactor: 1.25,
+    );
+    return MediaQuery(
+      data: mediaQuery.copyWith(textScaler: clampedScaler),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
             Text(
-              sec,
+              hm,
               style: TextStyle(
-                color: _bright
-                    ? actionColor.withValues(alpha: 0.75)
-                    : secondsColor,
-                fontSize: 42,
+                color: clockColor,
+                fontSize: 116,
                 fontWeight: FontWeight.w200,
                 height: 1,
+                letterSpacing: -4,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
-        ],
+            if (!widget.minimal && widget.showSeconds)
+              Text(
+                sec,
+                style: TextStyle(
+                  color: _bright
+                      ? actionColor.withValues(alpha: 0.75)
+                      : secondsColor,
+                  fontSize: 42,
+                  fontWeight: FontWeight.w200,
+                  height: 1,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

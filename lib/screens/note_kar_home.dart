@@ -359,7 +359,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
       if (_isPrivacyAuthGraceActive()) return;
 
-      if (_privacyLock && _privacyLockDelayMinutes == 0) {
+      if (_privacyLock) {
         if (mounted) {
           setState(() => _privacyUnlocked = false);
         } else {
@@ -2364,8 +2364,33 @@ class _NoteKarHomeState extends State<NoteKarHome>
     try {
       final dir = await _getLocalBackupDir();
       final dateStr = exportDateStamp();
-      final file = File('${dir.path}/notekar-backup-$dateStr.json');
-      await file.writeAsString(content);
+      final targetPath = '${dir.path}/notekar-backup-$dateStr.json';
+      final tempFile = File('$targetPath.tmp');
+
+      // 1. Atomic write to temporary file first
+      await tempFile.writeAsString(content, flush: true);
+      await tempFile.rename(targetPath);
+
+      // 2. Automated retention pruning (keep latest 15 local backups)
+      final List<FileSystemEntity> entities = await dir.list().toList();
+      final List<File> backupFiles = entities
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.json'))
+          .toList();
+
+      if (backupFiles.length > 15) {
+        backupFiles.sort((a, b) {
+          final aTime = a.lastModifiedSync();
+          final bTime = b.lastModifiedSync();
+          return bTime.compareTo(aTime);
+        });
+
+        for (int i = 15; i < backupFiles.length; i++) {
+          try {
+            await backupFiles[i].delete();
+          } catch (_) {}
+        }
+      }
     } catch (e) {
       developer.log('Error saving local backup: $e');
     }
