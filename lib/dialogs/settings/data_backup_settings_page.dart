@@ -473,7 +473,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
             child: Padding(
               padding: const EdgeInsets.all(spacing32),
               child: Text(
-                'No local backups found.'.localized(context),
+                'No Local Backups Found'.localized(context),
                 style: TextStyle(color: p.text3, fontSize: 13),
               ),
             ),
