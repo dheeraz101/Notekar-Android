@@ -98,6 +98,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _extendedDuration = false;
   bool _minimalMomentOptions = false;
   bool _startupComplete = false;
+  bool _hasTappedBefore = false;
   Map<String, dynamic>? _pendingTap;
   bool _enableNoteOnClick = false;
   bool _enableSobrietyMode = false;
@@ -447,6 +448,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     // Phase 1: Load non-DB settings instantly so the UI can paint immediately
     setState(() {
       _prefs = prefs;
+      _hasTappedBefore = prefs.getBool('notekar.has_tapped_before') ?? false;
       _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
       _enableSobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
       _sobrietyResetType = prefs.getString('sobriety_reset_type') ?? 'any';
@@ -557,6 +559,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _logger.info(
           'Merging ${migrated.length} migrated entries into active list',
         );
+      }
+
+      if (entries.isNotEmpty) {
+        _hasTappedBefore = true;
+        unawaited(prefs.setBool('notekar.has_tapped_before', true));
       }
 
       setState(() {
@@ -923,6 +930,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       date: dateKey(now),
       note: note?.trim() ?? '',
     );
+
+    _hasTappedBefore = true;
+    unawaited(_prefs?.setBool('notekar.has_tapped_before', true));
 
     // Optimistic UI Update
     setState(() {
@@ -3383,7 +3393,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         showSeconds: _showSeconds,
                         highlightSeconds: _highlightSeconds,
                       ),
-                      if (_entries.isEmpty)
+                      if (_startupComplete &&
+                          _entries.isEmpty &&
+                          !_hasTappedBefore)
                         Positioned(
                           bottom: -72,
                           // Positioned elegantly below the clock face with arrow pointing up
