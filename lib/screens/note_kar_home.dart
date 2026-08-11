@@ -32,7 +32,6 @@ import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
-import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
 import 'package:quick_actions/quick_actions.dart';
@@ -1998,6 +1997,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onLocaleChanged: (value) {
           NoteKarApp.of(context)?.setLocale(value);
           setState(() => _locale = value);
+        },
+        onSobrietyModeChanged: (value) {
+          setState(() => _enableSobrietyMode = value);
         },
       ),
     );
@@ -4321,104 +4323,126 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
   }
 }
 
-class _CoachmarkTooltip extends StatelessWidget {
+class _CoachmarkTooltip extends StatefulWidget {
   const _CoachmarkTooltip({required this.p});
 
   final Palette p;
 
   @override
+  State<_CoachmarkTooltip> createState() => _CoachmarkTooltipState();
+}
+
+class _CoachmarkTooltipState extends State<_CoachmarkTooltip>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _bounceAnimation = Tween<double>(begin: 0.0, end: 6.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return PhysicalShape(
-      clipper: _TooltipBubbleClipper(),
-      color: p.accent.withValues(alpha: 0.96),
-      elevation: 8,
-      shadowColor: p.accent.withValues(alpha: 0.4),
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: 18,
-          right: 18,
-          top: 18, // Extra top padding to offset contents below the arrow tip
-          bottom: 10,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const IosEmojiText('👆', style: TextStyle(fontSize: 16)),
-            const SizedBox(width: 8),
-            Text(
-              'Tap the clock face to record your first moment'.localized(
-                context,
-              ),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.15,
-              ),
+    final p = widget.p;
+    return AnimatedBuilder(
+      animation: _bounceAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, -_bounceAnimation.value),
+          child: child,
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomPaint(
+            size: const Size(14, 8),
+            painter: _TooltipArrowPainter(color: p.accent),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: p.accent,
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: [
+                BoxShadow(
+                  color: p.accent.withValues(alpha: 0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.white24,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.touch_app_rounded,
+                    color: Colors.white,
+                    size: 15,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Tap clock face to record your first moment'.localized(
+                    context,
+                  ),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TooltipBubbleClipper extends CustomClipper<Path> {
+class _TooltipArrowPainter extends CustomPainter {
+  _TooltipArrowPainter({required this.color});
+
+  final Color color;
+
   @override
-  Path getClip(Size size) {
-    final path = Path();
-    const arrowWidth = 14.0;
-    const arrowHeight = 8.0;
-    const radius = 16.0;
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
 
-    final arrowLeft = (size.width - arrowWidth) / 2;
-    final arrowRight = arrowLeft + arrowWidth;
+    final path = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..close();
 
-    path.moveTo(radius, arrowHeight);
-
-    // Top edge with arrow pointing up
-    path.lineTo(arrowLeft, arrowHeight);
-    path.lineTo(size.width / 2, 0); // Tip of arrow
-    path.lineTo(arrowRight, arrowHeight);
-    path.lineTo(size.width - radius, arrowHeight);
-
-    // Top-right corner
-    path.arcToPoint(
-      Offset(size.width, arrowHeight + radius),
-      radius: const Radius.circular(radius),
-    );
-
-    // Right edge
-    path.lineTo(size.width, size.height - radius);
-
-    // Bottom-right corner
-    path.arcToPoint(
-      Offset(size.width - radius, size.height),
-      radius: const Radius.circular(radius),
-    );
-
-    // Bottom edge
-    path.lineTo(radius, size.height);
-
-    // Bottom-left corner
-    path.arcToPoint(
-      Offset(0, size.height - radius),
-      radius: const Radius.circular(radius),
-    );
-
-    // Left edge
-    path.lineTo(0, arrowHeight + radius);
-
-    // Top-left corner
-    path.arcToPoint(
-      Offset(radius, arrowHeight),
-      radius: const Radius.circular(radius),
-    );
-
-    path.close();
-    return path;
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldRepaint(covariant _TooltipArrowPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

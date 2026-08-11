@@ -117,6 +117,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onExtendedDuration,
     required this.onMinimalMomentOptions,
     required this.onTranslucency,
+    this.onSobrietyModeChanged,
     required this.onPrivacyLockDelay,
     required this.onExportCsv,
     required this.onExportRecentCsv,
@@ -217,6 +218,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<bool> onExtendedDuration;
   final ValueChanged<bool> onMinimalMomentOptions;
   final ValueChanged<bool> onTranslucency;
+  final ValueChanged<bool>? onSobrietyModeChanged;
   final ValueChanged<int> onPrivacyLockDelay;
   final Future<void> Function() onExportCsv;
   final Future<void> Function() onExportRecentCsv;
@@ -4210,6 +4212,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   );
                                 }
                                 setState(() => enableSobrietyMode = value);
+                                widget.onSobrietyModeChanged?.call(value);
                               },
                               onSobrietyResetTypeChanged: (value) async {
                                 if (_prefs != null) {

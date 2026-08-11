@@ -167,24 +167,33 @@ class SettingsRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (hasIcon) ...[
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: color != null
-                      ? rowColor
-                      : rowColor.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child:
-                    customIcon ??
-                    Icon(
-                      icon!,
-                      color: color != null ? Colors.white : rowColor,
-                      size: 17,
-                    ),
-              ),
+              (() {
+                final isLightColor =
+                    color != null && color!.computeLuminance() > 0.45;
+                final isNearWhite =
+                    color != null &&
+                    (color == Colors.white || color!.toARGB32() == 0xFFFFFFFF);
+                final bgColor = color != null
+                    ? (isNearWhite ? p.surface3 : color!)
+                    : rowColor.withValues(alpha: 0.16);
+                final glyphColor = color != null
+                    ? (isNearWhite
+                          ? p.text
+                          : (isLightColor ? Colors.black87 : Colors.white))
+                    : rowColor;
+
+                return Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: isNearWhite ? Border.all(color: p.border) : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: customIcon ?? Icon(icon!, color: glyphColor, size: 17),
+                );
+              }()),
               const SizedBox(width: 12),
             ],
             Expanded(
