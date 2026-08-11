@@ -2957,7 +2957,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                   : CustomScrollView(
                       key: ValueKey('scroll-${category ?? 'root'}'),
                       controller: category == null ? _activeController : null,
-                      physics: const AlwaysScrollableScrollPhysics(),
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
                       slivers: [
                         if (category == null) ...[
                           SliverToBoxAdapter(

@@ -157,6 +157,7 @@ class MomentTile extends StatelessWidget {
                       color: p.text,
                       fontWeight: FontWeight.w800,
                       fontSize: compact ? 13 : 15,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                   if (!compact || entry.note.isNotEmpty) ...[

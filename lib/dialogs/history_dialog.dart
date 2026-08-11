@@ -259,7 +259,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
           children: [
             CustomScrollView(
               controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: spacing16),
