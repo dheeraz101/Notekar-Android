@@ -532,11 +532,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
           prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
       final networkWalkthroughSeen =
           prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
+      final sobrietyWalkthroughSeen =
+          prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
 
       if (!welcomeSeen ||
           !remindersWalkthroughSeen ||
           !securityWalkthroughSeen ||
-          !networkWalkthroughSeen) {
+          !networkWalkthroughSeen ||
+          !sobrietyWalkthroughSeen) {
         if (mounted) {
           _showWelcomeIfNeeded(prefs);
         }
@@ -763,6 +766,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
 
     if (!welcomeSeen) {
+      // 1. New Users: Show full onboarding flow with all pages
       if (!mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -802,114 +806,50 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
-    } else if (!securityWalkthroughSeen) {
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => WelcomeScreen(
-            p: p,
-            theme: _theme,
-            defaultMode: _defaultMode,
-            currentLocale: _locale,
-            onLocaleChanged: (value) {
-              NoteKarApp.of(context)?.setLocale(value);
-              setState(() => _locale = value);
-            },
-            onTheme: (value) {
-              setState(() => _theme = value);
-              _saveSetting('m-theme', value);
-              _applySystemUiStyle();
-            },
-            onDefaultMode: (value) {
-              setState(() => _defaultMode = value);
-              _saveSetting('m-default-mode', value);
-            },
-            pages: const ['security'],
+    } else {
+      // 2. Upgraded Users: Dynamically compile ONLY newly introduced feature cards
+      final List<String> upgradePages = [];
+      if (!securityWalkthroughSeen) upgradePages.add('security');
+      if (!remindersWalkthroughSeen) {
+        upgradePages.add('repo-move');
+        upgradePages.add('reminders');
+      }
+      if (!networkWalkthroughSeen) upgradePages.add('network-monitor');
+      if (!sobrietyWalkthroughSeen) upgradePages.add('sobriety');
+
+      if (upgradePages.isNotEmpty) {
+        if (!mounted) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => WelcomeScreen(
+              p: p,
+              theme: _theme,
+              defaultMode: _defaultMode,
+              currentLocale: _locale,
+              onLocaleChanged: (value) {
+                NoteKarApp.of(context)?.setLocale(value);
+                setState(() => _locale = value);
+              },
+              onTheme: (value) {
+                setState(() => _theme = value);
+                _saveSetting('m-theme', value);
+                _applySystemUiStyle();
+              },
+              onDefaultMode: (value) {
+                setState(() => _defaultMode = value);
+                _saveSetting('m-default-mode', value);
+              },
+              pages: upgradePages,
+            ),
           ),
-        ),
-      );
-      await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
-    } else if (!remindersWalkthroughSeen) {
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => WelcomeScreen(
-            p: p,
-            theme: _theme,
-            defaultMode: _defaultMode,
-            currentLocale: _locale,
-            onLocaleChanged: (value) {
-              NoteKarApp.of(context)?.setLocale(value);
-              setState(() => _locale = value);
-            },
-            onTheme: (value) {
-              setState(() => _theme = value);
-              _saveSetting('m-theme', value);
-              _applySystemUiStyle();
-            },
-            onDefaultMode: (value) {
-              setState(() => _defaultMode = value);
-              _saveSetting('m-default-mode', value);
-            },
-            pages: const ['repo-move', 'reminders'],
-          ),
-        ),
-      );
-      await prefs.setBool('notekar.remindersWalkthroughSeen', true);
-    } else if (!networkWalkthroughSeen) {
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => WelcomeScreen(
-            p: p,
-            theme: _theme,
-            defaultMode: _defaultMode,
-            currentLocale: _locale,
-            onLocaleChanged: (value) {
-              NoteKarApp.of(context)?.setLocale(value);
-              setState(() => _locale = value);
-            },
-            onTheme: (value) {
-              setState(() => _theme = value);
-              _saveSetting('m-theme', value);
-              _applySystemUiStyle();
-            },
-            onDefaultMode: (value) {
-              setState(() => _defaultMode = value);
-              _saveSetting('m-default-mode', value);
-            },
-            pages: const ['network-monitor'],
-          ),
-        ),
-      );
-      await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
-    } else if (!sobrietyWalkthroughSeen) {
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => WelcomeScreen(
-            p: p,
-            theme: _theme,
-            defaultMode: _defaultMode,
-            currentLocale: _locale,
-            onLocaleChanged: (value) {
-              NoteKarApp.of(context)?.setLocale(value);
-              setState(() => _locale = value);
-            },
-            onTheme: (value) {
-              setState(() => _theme = value);
-              _saveSetting('m-theme', value);
-              _applySystemUiStyle();
-            },
-            onDefaultMode: (value) {
-              setState(() => _defaultMode = value);
-              _saveSetting('m-default-mode', value);
-            },
-            pages: const ['sobriety'],
-          ),
-        ),
-      );
-      await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
+        );
+
+        // Mark all shown upgrade cards as seen (won't be shown again until factory reset)
+        await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
+        await prefs.setBool('notekar.remindersWalkthroughSeen', true);
+        await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
+        await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
+      }
     }
   }
 
