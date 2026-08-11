@@ -400,7 +400,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
       }
     } catch (_) {}
     _loadCachedVirusTotalInfo();
-    _fetchLatestVirusTotalInfo();
+    final lastVtFetchedVersion = _prefs?.getString(
+      'notekar.vt_last_fetched_version',
+    );
+    if (lastVtFetchedVersion != appVersion) {
+      _fetchLatestVirusTotalInfo();
+    }
   }
 
   void _loadCachedVirusTotalInfo() {
@@ -472,6 +477,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           await _prefs!.setString('notekar.vt_scandate', scanDateStr);
           await _prefs!.setString('notekar.current_virustotal_url', url);
           await _prefs!.setString('notekar.current_build_channel', channel);
+          await _prefs!.setString(
+            'notekar.vt_last_fetched_version',
+            appVersion,
+          );
         }
       }
     } catch (_) {}

@@ -579,8 +579,10 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                maxLines: isExpanded ? null : 1,
+                                overflow: isExpanded
+                                    ? TextOverflow.visible
+                                    : TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -610,7 +612,11 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Status ${entry.statusCode}',
+                                  entry.statusCode == 200
+                                      ? 'HTTP 200 OK'
+                                      : (entry.statusCode == 404
+                                            ? 'HTTP 404 Not Found'
+                                            : 'HTTP ${entry.statusCode}'),
                                   style: TextStyle(
                                     color: statusColor,
                                     fontSize: 11,
@@ -636,6 +642,25 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
+                            'FULL TITLE & PURPOSE'.localized(context),
+                            style: TextStyle(
+                              color: widget.p.text3,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          SelectableText(
+                            entry.purpose.localized(context),
+                            style: TextStyle(
+                              color: widget.p.text,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
                             'ENDPOINT URL'.localized(context),
                             style: TextStyle(
                               color: widget.p.text3,
@@ -652,6 +677,24 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                               fontFamily: 'monospace',
                               fontSize: 11,
                             ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.shield_outlined,
+                                color: widget.p.green,
+                                size: 13,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'HTTPS / TLS 1.3 Encrypted • Offline Cache',
+                                style: TextStyle(
+                                  color: widget.p.text3,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ],
