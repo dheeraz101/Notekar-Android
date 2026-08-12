@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.5] - 2026-08-12 (versionCode 35) [BR]
+
+### What's New
+
+- Consolidate HIG design tokens and add IN/OUT directional arrow icons
+
 ## [6.0.4] - 2026-08-12 (versionCode 34) [BR]
 
 ### What's New

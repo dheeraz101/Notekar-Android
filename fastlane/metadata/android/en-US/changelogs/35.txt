@@ -1,0 +1,2 @@
+Update to 6.0.5 (build 35):
+- New: Consolidate HIG design tokens and add IN/OUT directional arrow icons

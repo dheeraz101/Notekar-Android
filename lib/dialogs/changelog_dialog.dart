@@ -24,6 +24,16 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.5',
+      date: 'August 12, 2026',
+      highlights: [
+        'Consolidate HIG design tokens and add IN/OUT directional arrow icons',
+      ],
+      items: [
+        'Consolidate HIG design tokens and add IN/OUT directional arrow icons',
+      ],
+    ),
+    (
       version: '6.0.4',
       date: 'August 12, 2026',
       highlights: [
