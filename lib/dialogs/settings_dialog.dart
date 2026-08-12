@@ -292,6 +292,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       TextEditingController();
   final FocusNode _reminderMessageFocusNode = FocusNode();
   bool _autoStartCardDismissed = false;
+  bool _batteryOptimizationCardDismissed = false;
 
   // Reminders Settings
   bool _dailyReminderEnabled = false;
@@ -346,6 +347,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           _prefs?.getString('sobriety_milestone_theme') ?? 'science';
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
+      _batteryOptimizationCardDismissed =
+          _prefs?.getBool('notekar.batteryOptimizationCardDismissed') ?? false;
       _dailyReminderEnabled =
           _prefs?.getBool('reminder_daily_enabled') ?? false;
       _dailyReminderTime = TimeOfDay(
@@ -3833,6 +3836,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                               enableSobrietyMode: enableSobrietyMode,
                               showPersistentNotification:
                                   showPersistentNotification,
+                              showTrashBin: widget.onOpenTrash != null,
+                              trash: _trash,
                               onShowPersistentNotificationChanged:
                                   (value) async {
                                     if (_prefs != null) {
@@ -3948,6 +3953,18 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       );
                                     }
                                   },
+                              batteryOptimizationCardDismissed:
+                                  _batteryOptimizationCardDismissed,
+                              onDismissBatteryOptimizationCard: () async {
+                                setState(
+                                  () =>
+                                      _batteryOptimizationCardDismissed = true,
+                                );
+                                await _prefs?.setBool(
+                                  'notekar.batteryOptimizationCardDismissed',
+                                  true,
+                                );
+                              },
                               onDismissAutoStartCard: () async {
                                 setState(() => _autoStartCardDismissed = true);
                                 await _prefs?.setBool(

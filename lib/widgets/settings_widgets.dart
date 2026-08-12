@@ -62,20 +62,38 @@ class SettingsGroup extends StatelessWidget {
                 ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8)
                 : null,
           ),
-          child: Column(
-            children: [
-              for (int i = 0; i < children.length; i++) ...[
-                children[i],
-                if (showDividers && i < children.length - 1)
-                  Divider(
-                    height: 0.5,
-                    color: p.border,
-                    indent: insetDividers
-                        ? 57
-                        : 0, // Inset to align right after squircle icon
-                  ),
-              ],
-            ],
+          child: Builder(
+            builder: (context) {
+              bool hasAnyIcon = false;
+              for (final child in children) {
+                if (child is SettingsRow &&
+                    (child.icon != null || child.customIcon != null)) {
+                  hasAnyIcon = true;
+                  break;
+                }
+                if (child is SettingsSwitchRow && child.icon != null) {
+                  hasAnyIcon = true;
+                  break;
+                }
+              }
+              final effectiveIndent = (insetDividers && hasAnyIcon)
+                  ? 57.0
+                  : 0.0;
+
+              return Column(
+                children: [
+                  for (int i = 0; i < children.length; i++) ...[
+                    children[i],
+                    if (showDividers && i < children.length - 1)
+                      Divider(
+                        height: 0.5,
+                        color: p.border,
+                        indent: effectiveIndent,
+                      ),
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ],

@@ -1205,7 +1205,10 @@ class MomentOptionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PressableScale(
-      onTap: onTap,
+      onTap: () {
+        NotekarHaptics.selection('standard');
+        onTap();
+      },
       child: Container(
         width: fullWidth ? double.infinity : null,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

@@ -123,7 +123,9 @@ class _ClockFaceState extends State<ClockFace> {
     final clockColor = _bright
         ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)
         : widget.p.clock;
-    final secondsColor = widget.highlightSeconds ? widget.p.text3 : clockColor;
+    final secondsColor = widget.highlightSeconds
+        ? clockColor
+        : clockColor.withValues(alpha: 0.38);
     final mediaQuery = MediaQuery.of(context);
     final clampedScaler = mediaQuery.textScaler.clamp(
       minScaleFactor: 0.85,

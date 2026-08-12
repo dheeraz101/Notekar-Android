@@ -235,7 +235,10 @@ class _HeaderCircleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PressableScale(
-      onTap: onTap,
+      onTap: () {
+        NotekarHaptics.selection('standard');
+        onTap();
+      },
       child: SizedBox(
         width: 44,
         height: 44,

@@ -492,7 +492,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _confirmDelete = prefs.getBool('m-confirm-delete') ?? false;
       _showSeconds = prefs.getBool('m-show-seconds') ?? true;
       _highlightSeconds = prefs.getBool('m-highlight-seconds') ?? true;
-      _buttonLabels = prefs.getBool('m-button-labels') ?? true;
+      _buttonLabels = prefs.getBool('m-button-labels') ?? false;
       _largeControls = prefs.getBool('m-large-controls') ?? false;
       _homeMenuPill = prefs.getBool('m-home-menu-pill') ?? true;
       _homeMenuAnimations = prefs.getBool('m-home-menu-animations') ?? false;

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
@@ -89,23 +90,23 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
     return [];
   }
 
-  Future<void> _fetchCommits() async {
+  Future<void> _fetchCommits({bool isManualRefresh = false}) async {
     if (mounted) {
       setState(() {
         _loadingCommits = true;
-        _commitsError = null;
       });
     }
     try {
       final list = await _updateService.fetchRecentCommits();
       if (mounted) {
         setState(() {
-          if (list != null) {
+          if (list != null && list.isNotEmpty) {
             _commits = list;
-          } else {
-            _commitsError = 'Failed to load repository activity'.localized(
-              context,
-            );
+            _commitsError = null;
+          } else if (_commits == null || _commits!.isEmpty) {
+            _commitsError =
+                'No internet connection. Connect to load latest activity.'
+                    .localized(context);
           }
           _loadingCommits = false;
         });
@@ -116,15 +117,44 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
           'notekar.cached_commits',
           _serializeCommits(cacheList),
         );
+      } else if (isManualRefresh && mounted) {
+        HapticFeedback.heavyImpact();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'No Internet Connection. Showing cached preview.'.localized(
+                context,
+              ),
+            ),
+            backgroundColor: widget.p.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _commitsError = 'Failed to load repository activity'.localized(
-            context,
-          );
+          if (_commits == null || _commits!.isEmpty) {
+            _commitsError =
+                'No internet connection. Connect to load latest activity.'
+                    .localized(context);
+          }
           _loadingCommits = false;
         });
+        if (isManualRefresh) {
+          HapticFeedback.heavyImpact();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'No Internet Connection. Showing cached preview.'.localized(
+                  context,
+                ),
+              ),
+              backgroundColor: widget.p.red,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
     }
   }
@@ -133,7 +163,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
     setState(() {
       _visibleCount = 10;
     });
-    _fetchCommits();
+    _fetchCommits(isManualRefresh: true);
   }
 
   @override

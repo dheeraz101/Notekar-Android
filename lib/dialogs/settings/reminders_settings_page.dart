@@ -12,6 +12,7 @@ class RemindersSettingsPage extends StatelessWidget {
     required this.p,
     required this.hasExactAlarmPermission,
     required this.ignoresBatteryOptimizations,
+    this.batteryOptimizationCardDismissed = false,
     required this.autoStartCardDismissed,
     required this.dailyReminderEnabled,
     required this.dailyReminderTime,
@@ -28,6 +29,7 @@ class RemindersSettingsPage extends StatelessWidget {
     required this.monthlyReminderBody,
     required this.onRequestExactAlarmPermission,
     required this.onRequestIgnoreBatteryOptimizations,
+    this.onDismissBatteryOptimizationCard,
     required this.onDismissAutoStartCard,
     required this.onOpenAutoStartSettings,
     required this.onToggleDailyReminder,
@@ -48,6 +50,7 @@ class RemindersSettingsPage extends StatelessWidget {
   final Palette p;
   final bool hasExactAlarmPermission;
   final bool ignoresBatteryOptimizations;
+  final bool batteryOptimizationCardDismissed;
   final bool autoStartCardDismissed;
 
   final bool dailyReminderEnabled;
@@ -69,6 +72,7 @@ class RemindersSettingsPage extends StatelessWidget {
 
   final ValueChanged<bool> onRequestExactAlarmPermission;
   final ValueChanged<bool> onRequestIgnoreBatteryOptimizations;
+  final VoidCallback? onDismissBatteryOptimizationCard;
   final VoidCallback onDismissAutoStartCard;
   final VoidCallback onOpenAutoStartSettings;
 
@@ -148,7 +152,7 @@ class RemindersSettingsPage extends StatelessWidget {
             ),
           ),
 
-        if (!ignoresBatteryOptimizations)
+        if (!ignoresBatteryOptimizations && !batteryOptimizationCardDismissed)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Glass(
@@ -176,6 +180,15 @@ class RemindersSettingsPage extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (onDismissBatteryOptimizationCard != null)
+                        IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: p.text3,
+                            size: 20,
+                          ),
+                          onPressed: onDismissBatteryOptimizationCard,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -13,6 +14,8 @@ class LoggingSettingsPage extends StatelessWidget {
     required this.remindersStatus,
     required this.enableSobrietyMode,
     required this.showPersistentNotification,
+    this.showTrashBin = false,
+    this.trash = const [],
     required this.onShowPersistentNotificationChanged,
     required this.onOpenCategory,
   });
@@ -23,6 +26,8 @@ class LoggingSettingsPage extends StatelessWidget {
   final String remindersStatus;
   final bool enableSobrietyMode;
   final bool showPersistentNotification;
+  final bool showTrashBin;
+  final List<Moment> trash;
   final ValueChanged<bool> onShowPersistentNotificationChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
 
@@ -87,14 +92,6 @@ class LoggingSettingsPage extends StatelessWidget {
               color: p.green,
               onTap: () => onOpenCategory('Backup & Export', parent: 'Logging'),
             ),
-            SettingsRow(
-              p: p,
-              icon: Icons.delete_outline_rounded,
-              title: 'Trash Bin'.localized(context),
-              status: 'Manage'.localized(context),
-              color: p.red,
-              onTap: () => onOpenCategory('Trash Bin', parent: 'Logging'),
-            ),
           ],
         ),
         SettingsPageDescription(
@@ -103,6 +100,78 @@ class LoggingSettingsPage extends StatelessWidget {
               'These settings define how moments are recorded and prepared for export.'
                   .localized(context),
         ),
+        if (showTrashBin) ...[
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'RECENTLY DELETED'.localized(context),
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          ),
+          Column(
+            children: [
+              Container(
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: Column(
+                  children: [
+                    SettingsRow(
+                      p: p,
+                      icon: Icons.delete_outline_rounded,
+                      title: 'Trash Bin'.localized(context),
+                      status:
+                          '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
+                      color: p.orange,
+                      onTap: () =>
+                          onOpenCategory('Trash Bin', parent: 'Logging'),
+                    ),
+                    Divider(height: 0.5, color: p.border),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3.withValues(alpha: 0.35),
+                      ),
+                      child: Text(
+                        trash.isEmpty
+                            ? 'Restore or permanently remove deleted moments'
+                                  .localized(context)
+                            : '${trash.first.date} • ${trash.first.note.isEmpty ? 'No note'.localized(context) : trash.first.note}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SettingsPageDescription(
+            p: p,
+            text: 'View and restore moments deleted within the last 30 days.'
+                .localized(context),
+          ),
+        ],
         const SizedBox(height: 12),
         SettingsGroup(
           p: p,
