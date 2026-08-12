@@ -96,9 +96,9 @@ class _AppSheetState extends State<AppSheet> {
       child: Glass(
         p: p,
         blur: widget.blur,
-        radius: widget.docked ? 24 : 24,
+        radius: widget.docked ? 38 : 32,
         borderRadius: widget.docked
-            ? const BorderRadius.vertical(top: Radius.circular(24))
+            ? const BorderRadius.vertical(top: Radius.circular(38))
             : null,
         padding: EdgeInsets.fromLTRB(
           spacing16,

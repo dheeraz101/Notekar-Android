@@ -31,6 +31,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/home_activity_ring_painter.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
@@ -62,7 +63,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   SharedPreferences? _prefs;
   Timer? _undoTimer;
-  Timer? _toastTimer;
 
   Timer? _updateStatusResetTimer;
 
@@ -138,9 +138,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   final ValueNotifier<List<Moment>> _trashNotifier = ValueNotifier([]);
-  String? _toast;
-  bool _toastVisible = false;
-  bool _toastWarning = false;
   bool _factoryResetVisible = false;
   bool _factoryResetComplete = false;
   double _factoryResetProgress = 0;
@@ -173,7 +170,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
   @override
   void dispose() {
     _undoTimer?.cancel();
-    _toastTimer?.cancel();
     _privacyOverlayEntry?.remove();
     _privacyOverlayEntry = null;
     _motionSub?.cancel();
@@ -1044,24 +1040,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _showToast(String text, {bool warning = false}) {
-    _toastTimer?.cancel();
-    setState(() {
-      _toast = text;
-      _toastVisible = true;
-      _toastWarning = warning;
-    });
-    _toastTimer = Timer(const Duration(milliseconds: 1900), () {
-      if (!mounted) return;
-      setState(() => _toastVisible = false);
-      _toastTimer = Timer(const Duration(milliseconds: 180), () {
-        if (mounted && !_toastVisible) {
-          setState(() {
-            _toast = null;
-            _toastWarning = false;
-          });
-        }
-      });
-    });
+    if (warning) {
+      HapticFeedback.heavyImpact();
+    } else {
+      HapticFeedback.mediumImpact();
+    }
+    showIosPillToast(
+      context: context,
+      p: p,
+      message: text,
+      icon: warning ? Icons.warning_amber_rounded : Icons.check_circle_rounded,
+    );
   }
 
   void _showUndo() {
@@ -3498,58 +3487,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 ],
               ),
             ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            top: MediaQuery.paddingOf(context).top + spacing16,
-            left: spacing16,
-            right: spacing16,
-            child: IgnorePointer(
-              child: AnimatedOpacity(
-                opacity: _toastVisible ? 1 : 0,
-                duration: Duration(milliseconds: _toastVisible ? 120 : 170),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 11,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _toastWarning ? palette.red : palette.surface,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: _toastWarning ? palette.red : palette.border,
-                        ),
-                        boxShadow: palette.name == 'amoled'
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.22),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                      ),
-                      child: Text(
-                        _toast ?? '',
-                        textAlign: TextAlign.center,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: _toastWarning ? Colors.white : palette.text,
-                          fontWeight: FontWeight.w800,
-                          height: 1.25,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+
           if (_enableSobrietyMode)
             Positioned(
               top: spacing16 + MediaQuery.paddingOf(context).top,

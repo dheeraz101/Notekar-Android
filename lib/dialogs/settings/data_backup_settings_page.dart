@@ -6,6 +6,7 @@ import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class DataBackupSettingsPage extends StatelessWidget {
@@ -412,8 +413,11 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
       }
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to read local backup file')),
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: 'Failed to read local backup file'.localized(context),
+        icon: Icons.warning_amber_rounded,
       );
     }
   }
