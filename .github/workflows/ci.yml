@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-pub-
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get || (sleep 5 && flutter pub get)
 
       - name: Check outdated dependencies
         run: dart pub outdated
