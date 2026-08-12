@@ -7,6 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.6] - 2026-08-12 (versionCode 36) [BR]
+
+### What's New
+
+- Complete Apple HIG & iOS UI/UX redesign upgrade
+- Add iOS dynamic pill toast notification for note copy action
+- Display all notes in full length by default in Search Notes page
+- Instant trash bin updates, milestone share menu, What's New hero card & backup options
+
+### Bug Fixes
+
+- Isolate search notes navigation, instant trash updates & milestone share menu
+
 ## [6.0.5] - 2026-08-12 (versionCode 35) [BR]
 
 ### What's New

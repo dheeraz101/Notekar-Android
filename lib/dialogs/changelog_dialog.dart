@@ -25,6 +25,23 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.6',
+      date: 'August 12, 2026',
+      highlights: [
+        'Complete Apple HIG & iOS UI/UX redesign upgrade',
+        'Add iOS dynamic pill toast notification for note copy action',
+        'Display all notes in full length by default in Search Notes page',
+        "Instant trash bin updates, milestone share menu, What's New hero card & backup options",
+      ],
+      items: [
+        'Complete Apple HIG & iOS UI/UX redesign upgrade',
+        'Add iOS dynamic pill toast notification for note copy action',
+        'Display all notes in full length by default in Search Notes page',
+        'Isolate search notes navigation, instant trash updates & milestone share menu',
+        "Instant trash bin updates, milestone share menu, What's New hero card & backup options",
+      ],
+    ),
+    (
       version: '6.0.5',
       date: 'August 12, 2026',
       highlights: [
