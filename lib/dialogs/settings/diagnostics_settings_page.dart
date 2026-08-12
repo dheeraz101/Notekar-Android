@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
@@ -484,9 +485,14 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
         ),
         const SizedBox(height: 12),
         if (widget.loadingNetworkLogs)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32.0),
-            child: Center(child: CircularProgressIndicator()),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32.0),
+            child: Center(
+              child: CupertinoActivityIndicator(
+                radius: 12,
+                color: widget.p.accent,
+              ),
+            ),
           )
         else if (widget.networkLogs.isEmpty)
           Padding(

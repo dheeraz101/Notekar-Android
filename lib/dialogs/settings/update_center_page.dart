@@ -55,6 +55,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   // Download & verification state
   double _downloadProgress = 0.0;
   bool _downloading = false;
+  bool _fetchingApkSize = false;
   String? _downloadedApkPath;
   String _verificationStatus = 'idle'; // idle, verifying, verified, failed
 
@@ -122,44 +123,25 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   }
 
   Future<void> _checkBeforeDownload() async {
-    if (widget.updateInfo == null) return;
+    if (widget.updateInfo == null || _fetchingApkSize) return;
 
     final prefs = await SharedPreferences.getInstance();
-    final dontShowAgain = prefs.getBool('dont_show_update_warning') ?? false;
+    final dontShowWarning = prefs.getBool('dont_show_update_warning') ?? false;
 
-    if (dontShowAgain) {
-      unawaited(_startDownload());
+    if (dontShowWarning) {
+      await _startDownload();
       return;
     }
 
-    if (!mounted) return;
+    setState(() => _fetchingApkSize = true);
 
-    final navigator = Navigator.of(context);
-
-    // Show a loading dialog while fetching size
-    unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: widget.p.surface,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: CircularProgressIndicator(color: widget.p.accent),
-          ),
-        ),
-      ),
-    );
-
-    double? fetchedSizeMb = await _updateService.getApkSizeMb(
-      widget.updateInfo!,
-    );
+    double? fetchedSizeMb;
+    try {
+      fetchedSizeMb = await _updateService.getApkSizeMb(widget.updateInfo!);
+    } catch (_) {}
 
     if (mounted) {
-      navigator.pop(); // Close loading dialog using captured navigator
+      setState(() => _fetchingApkSize = false);
     }
 
     String sizeText = '';
@@ -931,7 +913,6 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                 ),
               ],
             ),
-          ] else ...[
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: p.accent,
@@ -941,13 +922,18 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              onPressed: _checkBeforeDownload,
-              child: Text(
-                _verificationStatus == 'failed'
-                    ? 'Retry Download'.localized(context)
-                    : 'Download & Install'.localized(context),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              onPressed: _fetchingApkSize ? null : _checkBeforeDownload,
+              child: _fetchingApkSize
+                  ? const CupertinoActivityIndicator(
+                      radius: 9,
+                      color: Colors.white,
+                    )
+                  : Text(
+                      _verificationStatus == 'failed'
+                          ? 'Retry Download'.localized(context)
+                          : 'Download & Install'.localized(context),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
             ),
             const SizedBox(height: 8),
             FilledButton(

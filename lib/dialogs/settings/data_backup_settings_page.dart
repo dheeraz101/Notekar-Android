@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -470,7 +471,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
           Center(
             child: Padding(
               padding: const EdgeInsets.all(spacing32),
-              child: CircularProgressIndicator(color: p.accent),
+              child: CupertinoActivityIndicator(radius: 12, color: p.accent),
             ),
           )
         else if (_backupFiles.isEmpty)
