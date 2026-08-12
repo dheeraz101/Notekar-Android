@@ -209,14 +209,13 @@ class SearchNotesSettingsPage {
                 child: PressableScale(
                   onTap: () {
                     if (q.isNotEmpty) onSaveRecentSearch(q);
+                    HapticFeedback.mediumImpact();
                     Clipboard.setData(ClipboardData(text: entry.note));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Note copied to clipboard'.localized(context),
-                        ),
-                        duration: const Duration(seconds: 2),
-                      ),
+                    showIosPillToast(
+                      context: context,
+                      p: p,
+                      message: 'Note copied to clipboard'.localized(context),
+                      icon: Icons.copy_rounded,
                     );
                   },
                   child: Container(

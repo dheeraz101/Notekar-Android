@@ -450,3 +450,166 @@ class _HIGShimmerLoaderState extends State<HIGShimmerLoader>
     );
   }
 }
+
+/// Shows an Apple iOS-style Dynamic Pill Toast Notification floating at the top of the screen.
+void showIosPillToast({
+  required BuildContext context,
+  required Palette p,
+  required String message,
+  IconData icon = Icons.check_circle_rounded,
+  Duration duration = const Duration(milliseconds: 2000),
+}) {
+  final overlay = Overlay.of(context, rootOverlay: true);
+  late final OverlayEntry entry;
+
+  entry = OverlayEntry(
+    builder: (context) {
+      return _IosPillToastWidget(
+        p: p,
+        message: message,
+        icon: icon,
+        onDismiss: () => entry.remove(),
+        duration: duration,
+      );
+    },
+  );
+
+  overlay.insert(entry);
+}
+
+class _IosPillToastWidget extends StatefulWidget {
+  const _IosPillToastWidget({
+    required this.p,
+    required this.message,
+    required this.icon,
+    required this.onDismiss,
+    required this.duration,
+  });
+
+  final Palette p;
+  final String message;
+  final IconData icon;
+  final VoidCallback onDismiss;
+  final Duration duration;
+
+  @override
+  State<_IosPillToastWidget> createState() => _IosPillToastWidgetState();
+}
+
+class _IosPillToastWidgetState extends State<_IosPillToastWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -0.4),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+    _controller.forward();
+
+    Future.delayed(widget.duration, () async {
+      if (mounted) {
+        await _controller.reverse();
+        widget.onDismiss();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    final p = widget.p;
+
+    return Positioned(
+      top: topInset + 12,
+      left: 20,
+      right: 20,
+      child: IgnorePointer(
+        child: Material(
+          color: Colors.transparent,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 11,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.name == 'amoled'
+                          ? Colors.black
+                          : (p.name == 'light'
+                                ? const Color(0xF01C1C1E)
+                                : p.surface2),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        width: 0.8,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.35),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(widget.icon, color: p.accent, size: 18),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            widget.message,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
