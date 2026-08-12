@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -171,11 +172,9 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
     final p = widget.p;
 
     if (_loadingCommits && (_commits == null || _commits!.isEmpty)) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(48),
-          child: const CupertinoActivityIndicator(radius: 14),
-        ),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: HIGShimmerLoader(p: p, count: 4, height: 68, radius: 999),
       );
     }
     if (_commits == null || _commits!.isEmpty) {

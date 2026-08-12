@@ -58,6 +58,7 @@ class ChipButton extends StatelessWidget {
 
 class SectionLabel extends StatelessWidget {
   const SectionLabel({super.key, required this.p, required this.text});
+
   final Palette p;
   final String text;
 
@@ -344,6 +345,7 @@ class SliverStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get minExtent => height;
+
   @override
   double get maxExtent => height;
 
@@ -359,5 +361,75 @@ class SliverStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant SliverStickyHeaderDelegate oldDelegate) {
     return oldDelegate.child != child || oldDelegate.height != height;
+  }
+}
+
+class HIGShimmerLoader extends StatefulWidget {
+  const HIGShimmerLoader({
+    super.key,
+    required this.p,
+    this.height = 60,
+    this.count = 3,
+    this.radius = 24,
+  });
+
+  final Palette p;
+  final double height;
+  final int count;
+  final double radius;
+
+  @override
+  State<HIGShimmerLoader> createState() => _HIGShimmerLoaderState();
+}
+
+class _HIGShimmerLoaderState extends State<HIGShimmerLoader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(
+      begin: 0.20,
+      end: 0.55,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Column(
+          children: [
+            for (int i = 0; i < widget.count; i++) ...[
+              Container(
+                height: widget.height,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3.withValues(alpha: _animation.value),
+                  borderRadius: BorderRadius.circular(widget.radius),
+                  border: Border.all(
+                    color: widget.p.border.withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+              if (i < widget.count - 1) const SizedBox(height: 10),
+            ],
+          ],
+        );
+      },
+    );
   }
 }

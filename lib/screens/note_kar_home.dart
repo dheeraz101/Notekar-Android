@@ -977,6 +977,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       unawaited(_updateAndroidWidget());
       _showUndo();
+
+      if (_enableSobrietyMode && (note?.contains('#relapse') ?? false)) {
+        if (_streakShields > 0) {
+          HapticFeedback.heavyImpact();
+          await Future<void>.delayed(const Duration(milliseconds: 120));
+          HapticFeedback.heavyImpact();
+          _showToast('🛡️ Streak Shield Deployed! Clean streak protected.');
+          final newShields = math.max(0, _streakShields - 1);
+          await _prefs?.setInt('streak_shields', newShields);
+          if (mounted) setState(() => _streakShields = newShields);
+        }
+      }
     } catch (e, stack) {
       _logger.error('Failed to log entry', e, stack);
       // Rollback
@@ -3170,16 +3182,37 @@ class _NoteKarHomeState extends State<NoteKarHome>
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                          Text(
-                            displayLabel,
-                            style: TextStyle(
-                              color: palette.text,
-                              fontSize: smallLabel.isEmpty ? 20 : 17,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.3,
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 450),
+                            transitionBuilder: (child, animation) {
+                              return ScaleTransition(
+                                scale: Tween<double>(begin: 0.80, end: 1.0)
+                                    .animate(
+                                      CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.elasticOut,
+                                      ),
+                                    ),
+                                child: FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Text(
+                              displayLabel,
+                              key: ValueKey(
+                                'streak-${duration.inDays}-$displayLabel',
+                              ),
+                              style: TextStyle(
+                                color: palette.text,
+                                fontSize: smallLabel.isEmpty ? 20 : 17,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
