@@ -315,7 +315,7 @@ Update-TextFile -Path $localPropertiesPath -Update {
 Update-TextFile -Path $appUtilsPath -Update {
     param($text)
     $text = [regex]::Replace($text, "const appVersion = '[^']+';", "const appVersion = '$Version';")
-    $text = [regex]::Replace($text, "const appBuildNumber = '[^']+';", "const appBuildNumber = '$BuildNumber';")
+    $text = [regex]::Replace($text, "const kAppBuildNumber = '[^']+';", "const kAppBuildNumber = '$BuildNumber';")
     $text = [regex]::Replace($text, "const appBuildDate = '[^']+';", "const appBuildDate = '$BuildDate';")
     $text
 }

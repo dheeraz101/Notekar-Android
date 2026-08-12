@@ -1203,7 +1203,7 @@ class SettingsAboutBlock extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Version $appVersion ($appBuildNumber)',
+            'Version $appVersion ($kAppBuildNumber)',
             style: TextStyle(
               color: p.text3.withValues(alpha: 0.5),
               fontSize: 10,

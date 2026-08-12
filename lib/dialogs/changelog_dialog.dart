@@ -1344,7 +1344,7 @@ class WhatsNewHeroCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      '$date • Build $appBuildNumber',
+                      '$date • Build $kAppBuildNumber',
                       style: TextStyle(
                         color: p.text2,
                         fontSize: 12,

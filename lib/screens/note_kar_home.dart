@@ -3381,7 +3381,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       'app': 'NoteKar',
       'kind': 'backup',
       'version': appVersion,
-      'build': appBuildNumber,
+      'build': kAppBuildNumber,
       'exportedAt': DateTime.now().toIso8601String(),
       'settings': {
         'theme': _theme,

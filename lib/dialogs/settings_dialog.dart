@@ -1248,7 +1248,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
-        status: '$appVersion ($appBuildNumber)',
+        status: '$appVersion ($kAppBuildNumber)',
       ),
       item(
         title: 'Release Date',
@@ -2742,7 +2742,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   void _submitAutoCrashReport(dynamic error, dynamic stackTrace, Palette p) {
     final engine = AdaptiveEngine();
-    final appVer = '$appVersion ($appBuildNumber)';
+    final appVer = '$appVersion ($kAppBuildNumber)';
     final title = Uri.encodeComponent('[CRASH]: Automated Error Report');
     final body = Uri.encodeComponent('''
 ### Automated Crash Report
@@ -2776,7 +2776,7 @@ ${stackTrace ?? 'No stack trace provided.'}
   }
 
   void _openGithubIssue(String type) {
-    final appVer = '$appVersion ($appBuildNumber)';
+    final appVer = '$appVersion ($kAppBuildNumber)';
     final deviceModel = AdaptiveEngine().model;
     final osVer = AdaptiveEngine().osVersion;
     final perfTier = AdaptiveEngine().tier.toString().split('.').last;
@@ -5170,7 +5170,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               entries: entries,
                               todayCount: todayCount,
                               appVersion: appVersion,
-                              appBuildNumber: appBuildNumber,
+                              appBuildNumber: kAppBuildNumber,
                               appBuildDate: appBuildDate,
                               updateSubtitle: _updateSubtitle,
                               lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
@@ -5194,7 +5194,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               entries: entries,
                               todayCount: todayCount,
                               appVersion: appVersion,
-                              appBuildNumber: appBuildNumber,
+                              appBuildNumber: kAppBuildNumber,
                               appBuildDate: appBuildDate,
                               updateSubtitle: _updateSubtitle,
                               lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
@@ -5218,7 +5218,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               entries: entries,
                               todayCount: todayCount,
                               appVersion: appVersion,
-                              appBuildNumber: appBuildNumber,
+                              appBuildNumber: kAppBuildNumber,
                               appBuildDate: appBuildDate,
                               updateSubtitle: _updateSubtitle,
                               lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
