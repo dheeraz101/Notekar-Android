@@ -1,0 +1,5 @@
+Update to 6.0.4 (build 34):
+- New: Add streak counter spring animation, HIG shimmer loader, and shield activation moment
+- New: Implement Apple-level UX/UI audit redesign & home refactor
+- Fix: Remove trash bin icon from Recently Deleted card on logging page
+- Fix: Dynamic dividers, offline commits cache, haptics & trash bin relocation

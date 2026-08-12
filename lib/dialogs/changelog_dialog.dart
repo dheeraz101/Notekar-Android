@@ -24,6 +24,20 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.4',
+      date: 'August 12, 2026',
+      highlights: [
+        'Add streak counter spring animation, HIG shimmer loader, and shield activation moment',
+        'Implement Apple-level UX/UI audit redesign & home refactor',
+      ],
+      items: [
+        'Add streak counter spring animation, HIG shimmer loader, and shield activation moment',
+        'Remove trash bin icon from Recently Deleted card on logging page',
+        'Dynamic dividers, offline commits cache, haptics & trash bin relocation',
+        'Implement Apple-level UX/UI audit redesign & home refactor',
+      ],
+    ),
+    (
       version: '6.0.3',
       date: 'August 12, 2026',
       highlights: [

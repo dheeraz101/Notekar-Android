@@ -7,6 +7,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.4] - 2026-08-12 (versionCode 34) [BR]
+
+### What's New
+
+- Add streak counter spring animation, HIG shimmer loader, and shield activation moment
+- Implement Apple-level UX/UI audit redesign & home refactor
+
+### Bug Fixes
+
+- Remove trash bin icon from Recently Deleted card on logging page
+- Dynamic dividers, offline commits cache, haptics & trash bin relocation
+
 ## [6.0.3] - 2026-08-12 (versionCode 33) [BR]
 
 ### What's New
