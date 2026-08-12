@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.7] - 2026-08-13 (versionCode 37) [BR]
+
+### Improvements
+
+- Replace all CircularProgressIndicator spinners with CupertinoActivityIndicator
+
 ## [6.0.6] - 2026-08-12 (versionCode 36) [BR]
 
 ### What's New

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
-const appVersion = '6.0.6';
-const appBuildNumber = '36';
-const appBuildDate = '2026-08-12';
+const appVersion = '6.0.7';
+const appBuildNumber = '37';
+const appBuildDate = '2026-08-13';
 
 String formatInstalledDate(String buildDateStr) {
   try {

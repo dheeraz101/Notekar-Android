@@ -1,0 +1,2 @@
+Update to 6.0.7 (build 37):
+- Replace all CircularProgressIndicator spinners with CupertinoActivityIndicator

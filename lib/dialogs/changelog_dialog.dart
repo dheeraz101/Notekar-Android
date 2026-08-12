@@ -25,6 +25,14 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.7',
+      date: 'August 13, 2026',
+      highlights: ['Beta testing and feedback build.'],
+      items: [
+        'Replace all CircularProgressIndicator spinners with CupertinoActivityIndicator',
+      ],
+    ),
+    (
       version: '6.0.6',
       date: 'August 12, 2026',
       highlights: [
