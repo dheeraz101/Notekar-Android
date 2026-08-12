@@ -140,7 +140,7 @@ class ActivitySummaryCard extends StatelessWidget {
                   label: 'Avg Interval',
                   value: avgIntervalMinutes > 0
                       ? '${avgIntervalMinutes}m'
-                      : '--',
+                      : 'No data',
                   sub: 'between taps',
                 ),
               ),
@@ -384,13 +384,13 @@ class ActivityTrendsCard extends StatelessWidget {
 
   static String _weekdayShort(int w) {
     return switch (w) {
-      DateTime.monday => 'M',
-      DateTime.tuesday => 'T',
-      DateTime.wednesday => 'W',
-      DateTime.thursday => 'T',
-      DateTime.friday => 'F',
-      DateTime.saturday => 'S',
-      DateTime.sunday => 'S',
+      DateTime.monday => 'Mo',
+      DateTime.tuesday => 'Tu',
+      DateTime.wednesday => 'We',
+      DateTime.thursday => 'Th',
+      DateTime.friday => 'Fr',
+      DateTime.saturday => 'Sa',
+      DateTime.sunday => 'Su',
       _ => '',
     };
   }

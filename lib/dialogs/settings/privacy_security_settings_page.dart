@@ -1,10 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/widgets/glass.dart';
-import 'package:notekar/widgets/settings_widgets.dart';
-import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 class PrivacySecuritySettingsPage extends StatelessWidget {
   const PrivacySecuritySettingsPage({
@@ -39,371 +39,124 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: spacing8),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Glass(
-            p: p,
-            radius: 32,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: p.green.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.verified_user_rounded,
-                        color: p.green,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'VirusTotal Safety Scan'.localized(context),
-                            style: TextStyle(
-                              color: p.text,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Verified clean of malicious activity'.localized(
-                              context,
-                            ),
-                            style: TextStyle(color: p.text3, fontSize: 11.5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // 2x2 Metric Table
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 52,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        alignment: Alignment.centerLeft,
-                        decoration: BoxDecoration(
-                          color: p.surface3.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: p.border.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: p.green,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Ratio'.localized(context),
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    vtRatio.localized(context),
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        height: 52,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        alignment: Alignment.centerLeft,
-                        decoration: BoxDecoration(
-                          color: p.surface3.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: p.border.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.shield_outlined,
-                              color: p.green,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Status'.localized(context),
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    vtStatus.localized(context),
-                                    style: TextStyle(
-                                      color: vtStatus == 'Detected'
-                                          ? p.red
-                                          : p.green,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 52,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        alignment: Alignment.centerLeft,
-                        decoration: BoxDecoration(
-                          color: p.surface3.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: p.border.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              color: p.text3,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Last Scan'.localized(context),
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    vtScanDate.localized(context),
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        height: 52,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        alignment: Alignment.centerLeft,
-                        decoration: BoxDecoration(
-                          color: p.surface3.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: p.border.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.lock_outline_rounded,
-                              color: p.text3,
-                              size: 15,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Signature'.localized(context),
-                                    style: TextStyle(
-                                      color: p.text3,
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Developer Key'.localized(context),
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'NoteKar builds undergo automated CodeQL scanner compilation and local VirusTotal scans. Binaries are signed with our official certificate to ensure absolute integrity.'
-                      .localized(context),
-                  style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          try {
-                            await _fileChannel.invokeMethod<void>('openUrl', {
-                              'url': vtUrl,
-                            });
-                          } catch (_) {}
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: p.green.withValues(alpha: 0.15),
-                          foregroundColor: p.green,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.security_rounded, size: 14),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                'VT Report'.localized(context),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          try {
-                            await _fileChannel.invokeMethod<void>('openUrl', {
-                              'url':
-                                  'https://github.com/dheeraz101/Notekar-Android/releases/latest',
-                            });
-                          } catch (_) {}
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: p.text2,
-                          side: BorderSide(color: p.border),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.fingerprint_rounded, size: 14),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                'SHA-256 Hashes'.localized(context),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.checkmark_shield_fill,
+              title: 'Safety Verified',
+              subtitle: 'Verified clean of malicious activity',
+              color: p.green,
+              status: vtStatus,
+              onTap: () async {
+                try {
+                  await _fileChannel.invokeMethod<void>('openUrl', {
+                    'url': vtUrl,
+                  });
+                } catch (_) {}
+              },
             ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await _fileChannel.invokeMethod<void>('openUrl', {
+                        'url': vtUrl,
+                      });
+                    } catch (_) {}
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: p.green.withValues(alpha: 0.15),
+                    foregroundColor: p.green,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.security_rounded, size: 14),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'VT Report'.localized(context),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    try {
+                      await _fileChannel.invokeMethod<void>('openUrl', {
+                        'url':
+                            'https://github.com/dheeraz101/Notekar-Android/releases/latest',
+                      });
+                    } catch (_) {}
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: p.text2,
+                    side: BorderSide(color: p.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.fingerprint_rounded, size: 14),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'SHA-256 Hashes'.localized(context),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: 16),
         SettingsGroup(
           p: p,
           title: 'Data & Privacy',

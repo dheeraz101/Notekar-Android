@@ -1311,15 +1311,6 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               onTap: () =>
                   onOpenCategory('Changelog', parent: 'Updates & Notices'),
             ),
-            SettingsRow(
-              p: p,
-              icon: Icons.history_rounded,
-              title: 'Commits',
-              color: p.accent,
-              status: 'Activity'.localized(context),
-              onTap: () =>
-                  onOpenCategory('Commits', parent: 'Updates & Notices'),
-            ),
           ],
         ),
         SettingsPageDescription(

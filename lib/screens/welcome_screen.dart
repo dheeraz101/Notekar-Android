@@ -584,7 +584,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'Premium Features'.localized(context),
+              'Essential Features'.localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text,
@@ -597,7 +597,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 6),
           Center(
             child: Text(
-              'Everything is stored locally and private to your device.'
+              'Everything is stored locally and private to your device'
                   .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: p.text2, fontSize: 14),
@@ -1288,8 +1288,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: active ? 20 : 6,
-                          height: 6,
+                          width: active ? 24 : 8,
+                          height: 8,
                           decoration: BoxDecoration(
                             color: active
                                 ? p.accent

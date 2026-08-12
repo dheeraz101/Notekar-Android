@@ -74,28 +74,12 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.bug_report_outlined,
-              title: 'Diagnostics'.localized(context),
-              status: 'View'.localized(context),
-              color: p.accent,
-              onTap: () => onOpenCategory('Diagnostics', parent: 'Advanced'),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.memory_rounded,
-              title: 'Device Health'.localized(context),
-              status: healthStatus.localized(context),
-              color: p.accent,
-              onTap: () => onOpenCategory('Device Health', parent: 'Advanced'),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.network_check_rounded,
-              title: 'Network Monitor'.localized(context),
-              status: 'View'.localized(context),
+              icon: Icons.developer_mode_rounded,
+              title: 'Developer Options'.localized(context),
+              status: 'Tools'.localized(context),
               color: p.accent,
               onTap: () =>
-                  onOpenCategory('Network Monitor', parent: 'Advanced'),
+                  onOpenCategory('Developer Options', parent: 'Advanced'),
             ),
             SettingsRow(
               p: p,

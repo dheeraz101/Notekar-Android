@@ -308,7 +308,7 @@ class RemindersSettingsPage extends StatelessWidget {
             SettingsSwitchRow(
               p: p,
               title: 'inactivity reminder'.localized(context),
-              color: p.orange,
+              color: p.accent,
               value: inactivityReminderEnabled,
               onChanged: onToggleInactivityReminder,
             ),
@@ -368,7 +368,7 @@ class RemindersSettingsPage extends StatelessWidget {
             SettingsSwitchRow(
               p: p,
               title: 'weekly reminder'.localized(context),
-              color: p.green,
+              color: p.accent,
               value: weeklyReminderEnabled,
               onChanged: onToggleWeeklyReminder,
             ),
@@ -488,7 +488,7 @@ class RemindersSettingsPage extends StatelessWidget {
             SettingsSwitchRow(
               p: p,
               title: 'monthly reminder'.localized(context),
-              color: p.red,
+              color: p.accent,
               value: monthlyReminderEnabled,
               onChanged: onToggleMonthlyReminder,
             ),

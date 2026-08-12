@@ -82,7 +82,9 @@ Palette paletteFor(
     text3: highContrast
         ? const Color(0xFFBDBDBD)
         : const Color(0xFFEBEBF5).withValues(alpha: 0.3),
-    clock: amoled ? const Color(0xFF1F1F1F) : const Color(0xFF303030),
+    clock: amoled
+        ? (highContrast ? const Color(0xFF636366) : const Color(0xFF3A3A3C))
+        : (highContrast ? const Color(0xFF7C7C80) : const Color(0xFF48484A)),
     accent: accent,
     green: amoled ? const Color(0xFF30D158) : const Color(0xFF34C759),
     orange: amoled ? const Color(0xFFFF9F0A) : const Color(0xFFFF9500),

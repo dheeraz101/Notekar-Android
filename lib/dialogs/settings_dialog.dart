@@ -1721,7 +1721,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       item(
         title: 'Trash Bin',
         subtitle: deletedSubtitle,
-        category: 'Trash Bin',
+        category: 'Logging',
         icon: Icons.delete_outline_rounded,
         keywords: ['trash', 'deleted', 'restore', 'remove', 'history', 'bin'],
         kind: 'nav',
@@ -1803,9 +1803,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
       item(
         title: 'Offline Commits Cache',
         subtitle: 'View downloaded update commits feed offline',
-        category: 'Updates & Notices',
+        category: 'Developer Options',
         icon: Icons.history_rounded,
-        keywords: ['commits', 'cache', 'github', 'history', 'feed', 'offline'],
+        keywords: [
+          'commits',
+          'cache',
+          'github',
+          'history',
+          'feed',
+          'offline',
+          'developer',
+        ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
@@ -1817,7 +1825,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         title: 'Backup & Export',
         subtitle:
             'CSV, JSON, download, restore, import, file, reminder, health',
-        category: 'Backup & Export',
+        category: 'Logging',
         icon: Icons.import_export_rounded,
         keywords: [
           'csv',
@@ -1838,7 +1846,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       item(
         title: 'Backup Status',
         subtitle: 'Android backup, health, encryption, and Drive plans',
-        category: 'Backup Status',
+        category: 'Logging',
         icon: Icons.cloud_done_rounded,
         keywords: [
           'android backup',
@@ -3018,7 +3026,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.paintbrush,
-                                    title: 'Personalization',
+                                    title: 'Appearance',
                                     status:
                                         theme[0].toUpperCase() +
                                         theme.substring(1),
@@ -3045,15 +3053,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     onTap: () =>
                                         _openCategory('Privacy & Security'),
                                   ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.folder,
-                                    title: 'Data & Backup'.localized(context),
-                                    status:
-                                        '${entries.length} ${'Logs'.localized(context)}',
-                                    color: p.green,
-                                    onTap: () => _openCategory('Data & Backup'),
-                                  ),
+                                  // SettingsRow(
+                                  //   p: p,
+                                  //   icon: CupertinoIcons.folder,
+                                  //   title: 'Data & Backup'.localized(context),
+                                  //   status:
+                                  //       '${entries.length} ${'Logs'.localized(context)}',
+                                  //   color: p.green,
+                                  //   onTap: () => _openCategory('Data & Backup'),
+                                  // ),
                                   SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.arrow_2_circlepath,
@@ -3066,7 +3074,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.book,
-                                    title: 'Help & Guides',
+                                    title: 'About',
                                     status: 'Docs',
                                     color: p.accent,
                                     onTap: () => _openCategory('Help & Guides'),
@@ -4646,6 +4654,74 @@ ${stackTrace ?? 'No stack trace provided.'}
                               betaTrack: _betaTrack,
                               onSaveTrackPreference: _saveTrackPreference,
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
+                          ),
+                        if (show('Developer Options'))
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: spacing8),
+                                SettingsGroup(
+                                  p: p,
+                                  insetDividers: true,
+                                  children: [
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.bug_report_outlined,
+                                      title: 'Diagnostics'.localized(context),
+                                      status: 'View'.localized(context),
+                                      color: p.accent,
+                                      onTap: () => _openCategory(
+                                        'Diagnostics',
+                                        parent: 'Developer Options',
+                                      ),
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.memory_rounded,
+                                      title: 'Device Health'.localized(context),
+                                      status: AdaptiveEngine().healthStatus
+                                          .localized(context),
+                                      color: p.accent,
+                                      onTap: () => _openCategory(
+                                        'Device Health',
+                                        parent: 'Developer Options',
+                                      ),
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.network_check_rounded,
+                                      title: 'Network Monitor'.localized(
+                                        context,
+                                      ),
+                                      status: 'View'.localized(context),
+                                      color: p.accent,
+                                      onTap: () => _openCategory(
+                                        'Network Monitor',
+                                        parent: 'Developer Options',
+                                      ),
+                                    ),
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.history_rounded,
+                                      title: 'Commits'.localized(context),
+                                      status: 'Activity'.localized(context),
+                                      color: p.accent,
+                                      onTap: () => _openCategory(
+                                        'Commits',
+                                        parent: 'Developer Options',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SettingsPageDescription(
+                                  p: p,
+                                  text:
+                                      'Developer tools and system debugging utilities.'
+                                          .localized(context),
+                                ),
+                                const SizedBox(height: spacing48),
+                              ],
                             ),
                           ),
                         if (show('Commits'))

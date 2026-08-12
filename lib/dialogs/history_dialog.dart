@@ -246,7 +246,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 ),
                 child: Icon(
                   Icons.delete_outline_rounded,
-                  color: widget.p.red,
+                  color: widget.p.text3,
                   size: 20,
                 ),
               ),
@@ -367,28 +367,35 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 ),
                               ),
                               const SizedBox(width: spacing8),
-                              PressableScale(
-                                onTap: () {
-                                  if (!_scrollController.hasClients) return;
-                                  _scrollController.animateTo(
-                                    0,
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeOutCubic,
-                                  );
-                                },
-                                child: Container(
-                                  width: 36,
-                                  height: 36,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: widget.p.surface2,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: widget.p.border),
-                                  ),
-                                  child: Icon(
-                                    Icons.keyboard_double_arrow_up_rounded,
-                                    color: widget.p.text2,
-                                    size: 19,
+                              Tooltip(
+                                message: 'Scroll to top',
+                                child: PressableScale(
+                                  onTap: () {
+                                    if (!_scrollController.hasClients) return;
+                                    _scrollController.animateTo(
+                                      0,
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: widget.p.surface2,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: widget.p.border,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.keyboard_double_arrow_up_rounded,
+                                      color: widget.p.text2,
+                                      size: 19,
+                                    ),
                                   ),
                                 ),
                               ),

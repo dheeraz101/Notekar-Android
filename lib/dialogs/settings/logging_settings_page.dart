@@ -79,6 +79,22 @@ class LoggingSettingsPage extends StatelessWidget {
               color: p.accent,
               onTap: () => onOpenCategory('Reminders', parent: 'Logging'),
             ),
+            SettingsRow(
+              p: p,
+              icon: Icons.import_export_rounded,
+              title: 'Backup & Export'.localized(context),
+              status: 'Data'.localized(context),
+              color: p.green,
+              onTap: () => onOpenCategory('Backup & Export', parent: 'Logging'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.delete_outline_rounded,
+              title: 'Trash Bin'.localized(context),
+              status: 'Manage'.localized(context),
+              color: p.red,
+              onTap: () => onOpenCategory('Trash Bin', parent: 'Logging'),
+            ),
           ],
         ),
         SettingsPageDescription(
