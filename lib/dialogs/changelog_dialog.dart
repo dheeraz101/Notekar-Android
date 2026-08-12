@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -1088,69 +1089,7 @@ class _WhatsNewPanel extends StatelessWidget {
       primary: false,
       physics: const BouncingScrollPhysics(),
       children: [
-        // iOS 26 Hero Header Card
-        Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: p.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.auto_awesome_rounded,
-                  color: p.accent,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "What's New in NoteKar".localized(context),
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        SettingsStatusPill(
-                          p: p,
-                          label: 'v${release.version}',
-                          color: p.accent,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          release.date,
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        WhatsNewHeroCard(p: p, version: release.version, date: release.date),
 
         // iOS 26 Feature Cards List
         SettingsGroup(
@@ -1250,4 +1189,188 @@ class _WhatsNewPanel extends StatelessWidget {
       ],
     );
   }
+}
+
+class WhatsNewHeroCard extends StatelessWidget {
+  const WhatsNewHeroCard({
+    super.key,
+    required this.p,
+    required this.version,
+    required this.date,
+  });
+
+  final Palette p;
+  final String version;
+  final String date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: p.border),
+        boxShadow: [
+          BoxShadow(
+            color: p.accent.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Background Gradient + Geometric Pattern
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    p.surface2,
+                    p.accent.withValues(alpha: 0.25),
+                    p.orange.withValues(alpha: 0.15),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _GeometricPatternPainter(color: p.accent),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.auto_awesome_rounded,
+                          color: p.accent,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "What's New in NoteKar".localized(context),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'NoteKar App • Native Experience',
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.accent,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        'v$version',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '$date • Build $appBuildNumber',
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GeometricPatternPainter extends CustomPainter {
+  _GeometricPatternPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    final fillPaint = Paint()
+      ..color = color.withValues(alpha: 0.04)
+      ..style = PaintingStyle.fill;
+
+    final path1 = Path()
+      ..moveTo(size.width * 0.6, 0)
+      ..lineTo(size.width, size.height * 0.4)
+      ..lineTo(size.width * 0.7, size.height)
+      ..close();
+
+    final path2 = Path()
+      ..moveTo(size.width * 0.2, size.height)
+      ..lineTo(size.width * 0.8, size.height * 0.2)
+      ..lineTo(size.width, size.height * 0.8)
+      ..close();
+
+    canvas.drawPath(path1, fillPaint);
+    canvas.drawPath(path1, paint);
+    canvas.drawPath(path2, fillPaint);
+    canvas.drawPath(path2, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

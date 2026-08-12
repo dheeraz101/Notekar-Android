@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -490,6 +491,29 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
     );
   }
 
+  Future<void> _confirmDeleteBackup(File file) async {
+    final confirmed = await showGeneralDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close delete confirmation',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => ActionConfirmSheet(
+        p: widget.p,
+        title: 'Delete Backup?'.localized(context),
+        message: 'This local backup file will be erased permanently.'.localized(
+          context,
+        ),
+        confirmLabel: 'Delete'.localized(context),
+        isDestructive: true,
+        icon: Icons.delete_forever_rounded,
+      ),
+    );
+    if (confirmed == true) {
+      await _deleteBackup(file);
+    }
+  }
+
   Widget _buildBackupRow(File file) {
     final p = widget.p;
     final stat = file.statSync();
@@ -508,51 +532,61 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
       onDismissed: (direction) => _deleteBackup(file),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _restoreFile(file),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: spacing16,
-              vertical: spacing12,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: p.accent.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.folder_zip_outlined,
-                    color: p.accent,
-                    size: 20,
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: spacing16,
+            vertical: spacing8,
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        dateFormatted,
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        sizeFormatted,
-                        style: TextStyle(color: p.text3, fontSize: 11),
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  Icons.folder_zip_outlined,
+                  color: p.accent,
+                  size: 20,
                 ),
-                Icon(Icons.restore_rounded, color: p.orange, size: 20),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dateFormatted,
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      sizeFormatted,
+                      style: TextStyle(color: p.text3, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Restore Backup',
+                icon: Icon(Icons.restore_rounded, color: p.accent, size: 20),
+                onPressed: () => _restoreFile(file),
+              ),
+              IconButton(
+                tooltip: 'Delete Backup',
+                icon: Icon(
+                  Icons.delete_forever_rounded,
+                  color: p.red.withValues(alpha: 0.8),
+                  size: 20,
+                ),
+                onPressed: () => _confirmDeleteBackup(file),
+              ),
+            ],
           ),
         ),
       ),

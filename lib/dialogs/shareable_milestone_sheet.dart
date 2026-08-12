@@ -1,8 +1,5 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
@@ -34,22 +31,29 @@ class _ShareableMilestoneSheetState extends State<ShareableMilestoneSheet> {
   Future<void> _exportCard() async {
     setState(() => _isExporting = true);
     try {
-      final boundary =
-          _repaintKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-      if (boundary == null) return;
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
-
       HapticFeedback.heavyImpact();
+      final shareContent =
+          '🎉 ${widget.milestoneTitle}\n'
+          'Target: ${widget.dayLabel} • ${widget.streakDays} Days Strong\n\n'
+          'Logged with NoteKar — 100% Private, Zero Backend.';
+
+      try {
+        await const MethodChannel('notekar/files').invokeMethod<void>(
+          'shareText',
+          {'title': 'Share Milestone Peak', 'text': shareContent},
+        );
+      } catch (_) {
+        await Clipboard.setData(ClipboardData(text: shareContent));
+      }
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Milestone card rendered cleanly to memory!'.localized(context),
+            'Milestone ready! Share menu launched.'.localized(context),
           ),
           backgroundColor: widget.p.accent,
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (_) {

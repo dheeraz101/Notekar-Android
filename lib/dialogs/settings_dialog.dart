@@ -1121,7 +1121,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _popCategory() {
-    if (category == 'Search') {
+    if (category == 'Search' || category == 'Search Notes') {
       setState(() {
         _settingsQuery = '';
         _settingsSearchController.clear();
@@ -3080,7 +3080,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     title: 'About',
                                     status: 'Docs',
                                     color: p.accent,
-                                    onTap: () => _openCategory('Help & Guides'),
+                                    onTap: () => _openCategory('About'),
                                   ),
                                   SettingsRow(
                                     p: p,
@@ -5020,7 +5020,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
-                        if (show('Help & Guides'))
+                        if (show('About') || show('Help & Guides'))
                           SliverToBoxAdapter(
                             child: HelpGuidesSettingsPage(
                               p: p,
@@ -5274,15 +5274,19 @@ ${stackTrace ?? 'No stack trace provided.'}
                             trash: _trash,
                             onRestoreAllTrash: () async {
                               await widget.onRestoreAllTrash();
+                              if (mounted) setState(() {});
                             },
                             onClearTrash: () async {
                               await widget.onClearTrash();
+                              if (mounted) setState(() {});
                             },
                             onRestoreTrashMoment: (id) async {
                               await widget.onRestoreTrashMoment(id);
+                              if (mounted) setState(() {});
                             },
                             onDeleteTrashPermanent: (id) async {
                               await widget.onDeleteTrashPermanent(id);
+                              if (mounted) setState(() {});
                             },
                           ),
                         ],

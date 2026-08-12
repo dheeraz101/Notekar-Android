@@ -300,6 +300,25 @@ class MainActivity : FlutterActivity() {
                     )
                 }
 
+                "shareText" -> {
+                    val text = call.argument<String>("text") ?: ""
+                    val titleText = call.argument<String>("title") ?: "Share Milestone"
+                    try {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, text)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, titleText).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(shareIntent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("SHARE_FAILED", e.message, null)
+                    }
+                }
+
                 "canInstallPackages" -> {
                     result.success(canInstallPackages())
                 }
