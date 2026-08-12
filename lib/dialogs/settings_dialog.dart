@@ -848,6 +848,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
       TextEditingController();
   final FocusNode _settingsSearchFocusNode = FocusNode();
   String _settingsQuery = '';
+
+  final TextEditingController _noteSearchController = TextEditingController();
+  final FocusNode _noteSearchFocusNode = FocusNode();
+  String _noteQuery = '';
+
   List<String> _recentSearches = [];
   List<String> _recentNoteSearches = [];
 
@@ -931,6 +936,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _activeController.dispose();
     _settingsSearchController.dispose();
     _settingsSearchFocusNode.dispose();
+    _noteSearchController.dispose();
+    _noteSearchFocusNode.dispose();
     _reminderMessageController.dispose();
     _reminderMessageFocusNode.dispose();
 
@@ -1113,20 +1120,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
       if (category != null) _categoryStack.add(category!);
       category = name;
     });
-    if (name == 'Search' || name == 'Search Notes') {
+    if (name == 'Search') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _settingsSearchFocusNode.requestFocus();
+      });
+    } else if (name == 'Search Notes') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _noteSearchFocusNode.requestFocus();
       });
     }
   }
 
   void _popCategory() {
-    if (category == 'Search' || category == 'Search Notes') {
+    if (category == 'Search') {
       setState(() {
         _settingsQuery = '';
         _settingsSearchController.clear();
       });
       _settingsSearchFocusNode.unfocus();
+    } else if (category == 'Search Notes') {
+      setState(() {
+        _noteQuery = '';
+        _noteSearchController.clear();
+      });
+      _noteSearchFocusNode.unfocus();
     }
     if (_categoryStack.isEmpty) {
       if (category == null) {
@@ -4313,15 +4330,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                             context: context,
                             p: p,
                             entries: entries,
-                            settingsQuery: _settingsQuery,
+                            settingsQuery: _noteQuery,
                             onQueryChanged: (value) =>
-                                setState(() => _settingsQuery = value),
+                                setState(() => _noteQuery = value),
                             onClearQuery: () => setState(() {
-                              _settingsSearchController.clear();
-                              _settingsQuery = '';
+                              _noteSearchController.clear();
+                              _noteQuery = '';
                             }),
-                            settingsSearchController: _settingsSearchController,
-                            settingsSearchFocusNode: _settingsSearchFocusNode,
+                            settingsSearchController: _noteSearchController,
+                            settingsSearchFocusNode: _noteSearchFocusNode,
                             compactHistory: compactHistory,
                             reduceMotion: reduceMotion,
                             enableTranslucency: enableTranslucency,
