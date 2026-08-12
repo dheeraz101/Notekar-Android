@@ -129,7 +129,6 @@ class LoggingSettingsPage extends StatelessWidget {
                   children: [
                     SettingsRow(
                       p: p,
-                      icon: Icons.delete_outline_rounded,
                       title: 'Trash Bin'.localized(context),
                       status:
                           '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
