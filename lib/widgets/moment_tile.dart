@@ -131,20 +131,15 @@ class MomentTile extends StatelessWidget {
                 color: color.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
               ),
-              child: entry.type == 'single'
-                  ? Icon(
-                      Icons.arrow_upward_rounded,
-                      color: color,
-                      size: compact ? 16 : 18,
-                    )
-                  : Text(
-                      entry.type.toUpperCase(),
-                      style: TextStyle(
-                        color: color,
-                        fontSize: compact ? 10 : 11,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
+              child: Icon(
+                entry.type == 'in'
+                    ? Icons.south_west_rounded
+                    : (entry.type == 'out'
+                          ? Icons.north_east_rounded
+                          : Icons.bolt_rounded),
+                color: color,
+                size: compact ? 16 : 18,
+              ),
             ),
             SizedBox(width: compact ? 8 : 12),
             Expanded(

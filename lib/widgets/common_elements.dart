@@ -137,20 +137,37 @@ class SettingsStatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String cleanLabel = label.trim().toUpperCase();
+    IconData? typeIcon;
+    if (cleanLabel == 'IN') {
+      typeIcon = Icons.south_west_rounded;
+    } else if (cleanLabel == 'OUT') {
+      typeIcon = Icons.north_east_rounded;
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withValues(alpha: 0.24)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w900,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (typeIcon != null) ...[
+            Icon(typeIcon, color: color, size: 12),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }

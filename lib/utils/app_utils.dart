@@ -57,6 +57,12 @@ const double spacing32 = 32.0;
 const double spacing48 = 48.0;
 const double spacing64 = 64.0;
 
+// Standardized Corner Radius Tokens (HIG Design System)
+const double radiusSm = 8.0;
+const double radiusMd = 12.0;
+const double radiusLg = 16.0;
+const double radiusFull = 999.0;
+
 const int maxNoteLength = 500;
 
 const officialSite = 'https://notekarapp.vercel.app';
