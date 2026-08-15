@@ -18,12 +18,8 @@ Future<void> showMilestoneUnlockDialog({
   required int streakDays,
   required int streakShields,
 }) async {
-  // Trigger tactile haptic pattern
+  // Fire tactile celebration haptic immediately
   HapticFeedback.heavyImpact();
-  await Future.delayed(const Duration(milliseconds: 100));
-  HapticFeedback.mediumImpact();
-
-  if (!context.mounted) return;
 
   final title = getMilestoneName(milestone, themeId);
   final flavor = getMilestoneFlavor(milestone, themeId);
@@ -33,11 +29,11 @@ Future<void> showMilestoneUnlockDialog({
     barrierDismissible: true,
     barrierLabel: 'Milestone Celebration',
     barrierColor: Colors.black.withValues(alpha: 0.75),
-    transitionDuration: const Duration(milliseconds: 300),
+    transitionDuration: const Duration(milliseconds: 220),
     transitionBuilder: (context, anim1, anim2, child) {
-      final curved = Curves.easeOutBack.transform(anim1.value);
+      final curved = Curves.easeOutCubic.transform(anim1.value);
       return Transform.scale(
-        scale: 0.85 + (curved * 0.15),
+        scale: 0.90 + (curved * 0.10),
         child: Opacity(opacity: anim1.value.clamp(0.0, 1.0), child: child),
       );
     },
@@ -148,63 +144,64 @@ Future<void> showMilestoneUnlockDialog({
                       Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
+                            child: SizedBox(
+                              height: 48,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(color: p.border),
+                                  foregroundColor: p.text,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
                                 ),
-                                side: BorderSide(color: p.border),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                showGeneralDialog(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  barrierLabel: 'Share Milestone',
-                                  pageBuilder: (context, anim1, anim2) =>
-                                      ShareableMilestoneSheet(
-                                        p: p,
-                                        milestoneTitle: title,
-                                        dayLabel: milestone.dayLabel,
-                                        streakDays: streakDays,
-                                      ),
-                                );
-                              },
-                              icon: Icon(
-                                CupertinoIcons.share,
-                                size: 16,
-                                color: p.text,
-                              ),
-                              label: Text(
-                                'Share'.localized(context),
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontWeight: FontWeight.w700,
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.check_rounded, size: 20),
+                                label: Text(
+                                  'Keep Going'.localized(context),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: p.accent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
+                            child: SizedBox(
+                              height: 48,
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: p.orange,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(999),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  showModalBottomSheet<void>(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (context) {
+                                      return ShareableMilestoneSheet(
+                                        p: p,
+                                        milestoneTitle: title,
+                                        dayLabel: milestone.dayLabel,
+                                        streakDays: streakDays,
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(
+                                  CupertinoIcons.share,
+                                  size: 18,
                                 ),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(
-                                'Continue'.localized(context),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
+                                label: Text(
+                                  'Share Peak'.localized(context),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -255,33 +252,29 @@ class _AnimatedTrophyBadgeState extends State<_AnimatedTrophyBadge>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final scale = 1.0 + (_controller.value * 0.08);
-        final glow = 12.0 + (_controller.value * 12.0);
-        return Transform.scale(
-          scale: scale,
-          child: Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFFB703), Color(0xFFFF8000)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+        final glow = _controller.value;
+        return Container(
+          width: 88,
+          height: 88,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF9E00), Color(0xFFFF5400)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(
+                  0xFFFF6D00,
+                ).withValues(alpha: 0.35 + (glow * 0.35)),
+                blurRadius: 20 + (glow * 12),
+                spreadRadius: 2 + (glow * 4),
               ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFFB703).withValues(alpha: 0.5),
-                  blurRadius: glow,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.workspace_premium_rounded,
-              color: Colors.white,
-              size: 38,
-            ),
+            ],
+          ),
+          child: const Center(
+            child: Icon(Icons.terrain_rounded, color: Colors.white, size: 46),
           ),
         );
       },
@@ -289,7 +282,7 @@ class _AnimatedTrophyBadgeState extends State<_AnimatedTrophyBadge>
   }
 }
 
-/// Lightweight Particle Confetti Overlay
+/// Research-based festive confetti overlay (85 particles, layered sizes, 3D paper flutter)
 class ConfettiParticleOverlay extends StatefulWidget {
   const ConfettiParticleOverlay({super.key});
 
@@ -307,30 +300,45 @@ class _ConfettiParticleOverlayState extends State<ConfettiParticleOverlay>
   void initState() {
     super.initState();
     final random = math.Random();
-    _particles = List.generate(55, (index) {
+    // 85 particles: 35 micro glitter, 35 standard ribbon pieces, 15 hero streamers
+    _particles = List.generate(85, (index) {
+      final isCircle = index % 3 == 0;
+      final double size;
+      if (index < 35) {
+        size = 5.0 + random.nextDouble() * 4.0; // Small glitter (5-9px)
+      } else if (index < 70) {
+        size = 10.0 + random.nextDouble() * 6.0; // Medium paper chips (10-16px)
+      } else {
+        size =
+            16.0 + random.nextDouble() * 8.0; // Large hero streamers (16-24px)
+      }
+
       return _Particle(
         x: random.nextDouble(),
-        startY: -0.30 - random.nextDouble() * 0.50,
-        speedY: 1.40 + random.nextDouble() * 0.75,
-        speedX: (random.nextDouble() - 0.5) * 0.35,
-        size: 9.0 + random.nextDouble() * 11.0,
+        startY: -0.15 - random.nextDouble() * 0.65,
+        speedY: 1.30 + random.nextDouble() * 0.70,
+        speedX: (random.nextDouble() - 0.5) * 0.40,
+        size: size,
+        isCircle: isCircle,
         color: [
-          const Color(0xFFFFB703),
-          const Color(0xFF0A84FF),
-          const Color(0xFF30D158),
-          const Color(0xFFFF453A),
-          const Color(0xFFBF5AF2),
-          const Color(0xFFFF2D55),
-          const Color(0xFF5AC8FA),
-        ][random.nextInt(7)],
+          const Color(0xFFFFD166), // Festive Warm Gold
+          const Color(0xFFFFB703), // Sunny Amber
+          const Color(0xFF06D6A0), // Emerald Green
+          const Color(0xFF30D158), // Vibrant Mint
+          const Color(0xFF0A84FF), // Electric Blue
+          const Color(0xFF5AC8FA), // Sky Cyan
+          const Color(0xFFFF2D55), // Vibrant Coral
+          const Color(0xFFFF5C8D), // Hot Pink
+          const Color(0xFFBF5AF2), // Royal Purple
+        ][random.nextInt(9)],
         rotation: random.nextDouble() * math.pi * 2,
-        rotationSpeed: (random.nextDouble() - 0.5) * 8.0,
+        rotationSpeed: (random.nextDouble() - 0.5) * 10.0,
       );
     });
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3500),
+      duration: const Duration(milliseconds: 3200),
     )..forward();
   }
 
@@ -360,6 +368,7 @@ class _Particle {
     required this.speedY,
     required this.speedX,
     required this.size,
+    required this.isCircle,
     required this.color,
     required this.rotation,
     required this.rotationSpeed,
@@ -370,6 +379,7 @@ class _Particle {
   final double speedY;
   final double speedX;
   final double size;
+  final bool isCircle;
   final Color color;
   final double rotation;
   final double rotationSpeed;
@@ -383,7 +393,7 @@ class _ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Fade out smoothly towards the end of the one-shot animation
+    // Fade out smoothly during the final 20% of the celebration animation
     final globalAlpha = progress > 0.80
         ? (1.0 - ((progress - 0.80) / 0.20)).clamp(0.0, 1.0)
         : 1.0;
@@ -391,8 +401,13 @@ class _ParticlePainter extends CustomPainter {
     if (globalAlpha <= 0.0) return;
 
     for (final p in particles) {
+      // Natural gravity with subtle sinusoidal air resistance drift
       final currentY = p.startY + (p.speedY * progress);
-      final currentX = (p.x + (p.speedX * progress)) % 1.0;
+      final currentX =
+          (p.x +
+              (p.speedX * progress) +
+              (0.04 * math.sin((progress * 8) + p.rotation))) %
+          1.0;
 
       if (currentY < -0.1 || currentY > 1.2) continue;
 
@@ -400,28 +415,33 @@ class _ParticlePainter extends CustomPainter {
       final dy = currentY * size.height;
 
       final paint = Paint()
-        ..color = p.color.withValues(alpha: 0.92 * globalAlpha)
+        ..color = p.color.withValues(alpha: 0.94 * globalAlpha)
         ..style = PaintingStyle.fill;
 
       canvas.save();
       canvas.translate(dx, dy);
-      canvas.rotate(p.rotation + (progress * p.rotationSpeed));
 
-      // Flutter effect: scale width sinusoidally for 3D paper spin
-      final flutterScale = math.sin(progress * 10 + p.rotation);
-      canvas.scale(flutterScale.abs().clamp(0.2, 1.0), 1.0);
+      if (p.isCircle) {
+        canvas.drawCircle(Offset.zero, p.size * 0.45, paint);
+      } else {
+        canvas.rotate(p.rotation + (progress * p.rotationSpeed));
 
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromCenter(
-            center: Offset.zero,
-            width: p.size,
-            height: p.size * 0.55,
+        // 3D paper flutter effect
+        final flutterScale = math.sin((progress * 12) + p.rotation);
+        canvas.scale(flutterScale.abs().clamp(0.15, 1.0), 1.0);
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(
+              center: Offset.zero,
+              width: p.size,
+              height: p.size * 0.55,
+            ),
+            const Radius.circular(2.5),
           ),
-          const Radius.circular(2),
-        ),
-        paint,
-      );
+          paint,
+        );
+      }
       canvas.restore();
     }
   }

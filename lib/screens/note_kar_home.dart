@@ -36,6 +36,7 @@ import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -3159,7 +3160,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         : '';
     final String displayLabel = '$bigLabel$flameText';
 
-    return GestureDetector(
+    return PressableScale(
       onTap: () {
         if (milestoneResult.current != null) {
           showMilestoneUnlockDialog(
