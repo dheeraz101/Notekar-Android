@@ -34,24 +34,36 @@ jobs:
         with:
           fetch-depth: 0
 
-      # ── 2. Read version from pubspec.yaml ────────────────────────────────
+      # ── 2. Read version from pubspec.yaml & app_utils.dart ────────────────
       - name: Extract version from pubspec.yaml
         id: version
         run: |
           FULL=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' \r')
           VER=$(echo "$FULL" | cut -d'+' -f1)
-          BUILD=$(echo "$FULL" | cut -d'+' -f2)
-          
+          CODE=$(echo "$FULL" | cut -d'+' -f2)
+
+          # Extract alphanumeric build number (e.g. 26BE0815a) from app_utils.dart
+          APP_BUILD=$(grep 'const kAppBuildNumber' lib/utils/app_utils.dart | sed "s/.*= '//;s/';//" | tr -d ' \r')
+          if [ -z "$APP_BUILD" ]; then
+            APP_BUILD="$CODE"
+          fi
+
+          # Ensure versionCode passed to Android Gradle is a valid 32-bit positive integer
+          if ! [[ "$CODE" =~ ^[0-9]+$ ]]; then
+            CODE=$(date +"%y%m%d01")
+          fi
+
           if [ "${{ github.ref_name }}" = "beta" ]; then
             TAG="v${VER}-beta"
           else
             TAG="v${VER}"
           fi
-          
-          echo "version=$VER"       >> $GITHUB_OUTPUT
-          echo "build_number=$BUILD" >> $GITHUB_OUTPUT
-          echo "tag=$TAG"            >> $GITHUB_OUTPUT
-          echo "📦 Version: $VER+$BUILD (Tag: $TAG)"
+
+          echo "version=$VER"              >> $GITHUB_OUTPUT
+          echo "version_code=$CODE"        >> $GITHUB_OUTPUT
+          echo "app_build=$APP_BUILD"      >> $GITHUB_OUTPUT
+          echo "tag=$TAG"                  >> $GITHUB_OUTPUT
+          echo "📦 Version: $VER+$CODE (Build: $APP_BUILD, Tag: $TAG)"
 
       # ── 3. Environment ───────────────────────────────────────────────────
       - name: Set up Java 21
@@ -112,7 +124,7 @@ jobs:
         run: |
           flutter build apk --release \
             --build-name ${{ steps.version.outputs.version }} \
-            --build-number ${{ steps.version.outputs.build_number }}
+            --build-number ${{ steps.version.outputs.version_code }}
           echo "✅ Universal APK built"
 
       # ── 6. Build — Split-per-ABI APKs (arm64, armeabi-v7a, x86_64) ──────
@@ -120,7 +132,7 @@ jobs:
         run: |
           flutter build apk --release --split-per-abi \
             --build-name ${{ steps.version.outputs.version }} \
-            --build-number ${{ steps.version.outputs.build_number }}
+            --build-number ${{ steps.version.outputs.version_code }}
           echo "✅ Split APKs built"
 
       # ── 7. Rename all APKs with version + arch ───────────────────────────
@@ -158,7 +170,8 @@ jobs:
         run: |
           APK_DIR=build/app/outputs/flutter-apk
           VER=${{ steps.version.outputs.version }}
-          BUILD=${{ steps.version.outputs.build_number }}
+          CODE=${{ steps.version.outputs.version_code }}
+          APP_BUILD="${{ steps.version.outputs.app_build }}"
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
           APKS=()
@@ -171,8 +184,8 @@ jobs:
 
           APKS_JSON=$(printf '%s,' "${APKS[@]}" | sed 's/,$//')
 
-          printf '{\n  "version": "%s",\n  "buildNumber": %s,\n  "generatedAt": "%s",\n  "apks": [%s]\n}\n' \
-            "$VER" "$BUILD" "$NOW" "$APKS_JSON" > "$APK_DIR/version.json"
+          printf '{\n  "version": "%s",\n  "buildNumber": "%s",\n  "versionCode": %s,\n  "generatedAt": "%s",\n  "apks": [%s]\n}\n' \
+            "$VER" "$APP_BUILD" "$CODE" "$NOW" "$APKS_JSON" > "$APK_DIR/version.json"
 
           echo "✅ version.json:"
           cat "$APK_DIR/version.json"

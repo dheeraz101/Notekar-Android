@@ -76,6 +76,13 @@ $currentMinor = [int]$versionMatch.Groups[2].Value
 $currentPatch = [int]$versionMatch.Groups[3].Value
 $currentBuild = $versionMatch.Groups[4].Value
 
+$appUtilsText = Get-Content -LiteralPath $appUtilsPath -Raw
+$buildMatch = [regex]::Match($appUtilsText, "const kAppBuildNumber = '([^']+)';")
+if ($buildMatch.Success)
+{
+    $currentBuild = $buildMatch.Groups[1].Value
+}
+
 $nextMajor = $currentMajor
 $nextMinor = $currentMinor
 $nextPatch = $currentPatch
@@ -340,7 +347,7 @@ $fastlaneCommits = $fastlaneBullets -join "`r`n"
 # 1. Update version across core config files
 Update-TextFile -Path $pubspecPath -Update {
     param($text)
-    [regex]::Replace($text, '(?m)^version:\s*\d+\.\d+\.\d+(?:\+[A-Za-z0-9\.\-]+)?\s*$', "version: $Version+$BuildNumber")
+    [regex]::Replace($text, '(?m)^version:\s*\d+\.\d+\.\d+(?:\+[A-Za-z0-9\.\-]+)?\s*$', "version: $Version+$androidVersionCode")
 }
 
 Update-TextFile -Path $localPropertiesPath -Update {

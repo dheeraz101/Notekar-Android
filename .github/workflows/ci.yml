@@ -1,20 +1,20 @@
-name: CI — Analyze, Test & Format
+name: CI — Analyze, Test, Format & Build Verification
 
 on:
   push:
-    branches: [main, release]
+    branches: [ main, dev, release, beta, security ]
   pull_request:
-    branches: [main, release]
+    branches: [ main, dev, release, beta, security ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  analyze-test-format:
-    name: Analyze · Test · Format
+  analyze-test-format-build:
+    name: Analyze · Test · Format · Build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -40,11 +40,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Install dependencies
         run: flutter pub get || (sleep 5 && flutter pub get)
-
-      - name: Check outdated dependencies
-        run: dart pub outdated
 
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .
@@ -54,3 +54,6 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+      - name: Verify Android Build Compilation
+        run: flutter build apk --debug --no-pub

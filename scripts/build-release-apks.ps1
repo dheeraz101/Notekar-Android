@@ -18,12 +18,14 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 Set-Location $repoRoot
 
-function Read-PubspecVersion {
+function Read-PubspecVersion
+{
     $pubspecPath = Join-Path $repoRoot 'pubspec.yaml'
     $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
     $match = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+)(?:\+([A-Za-z0-9\.\-]+))?\s*$')
 
-    if (-not $match.Success) {
+    if (-not $match.Success)
+    {
         throw 'Could not read version from pubspec.yaml. Expected a line like: version: 6.0.7+26BE0815'
     }
 
@@ -33,18 +35,22 @@ function Read-PubspecVersion {
     }
 }
 
-function Find-Flutter {
+function Find-Flutter
+{
     $localPropertiesPath = Join-Path $repoRoot 'android/local.properties'
-    if (Test-Path -LiteralPath $localPropertiesPath) {
+    if (Test-Path -LiteralPath $localPropertiesPath)
+    {
         $flutterSdkLine = Get-Content -LiteralPath $localPropertiesPath |
-            Where-Object { $_ -match '^flutter\.sdk=' } |
-            Select-Object -First 1
+                Where-Object { $_ -match '^flutter\.sdk=' } |
+                Select-Object -First 1
 
-        if ($flutterSdkLine) {
+        if ($flutterSdkLine)
+        {
             $flutterSdk = ($flutterSdkLine -replace '^flutter\.sdk=', '').Trim()
             $flutterSdk = $flutterSdk -replace '\\\\', '\'
             $flutterBat = Join-Path $flutterSdk 'bin/flutter.bat'
-            if (Test-Path -LiteralPath $flutterBat) {
+            if (Test-Path -LiteralPath $flutterBat)
+            {
                 return $flutterBat
             }
         }
@@ -53,36 +59,44 @@ function Find-Flutter {
     return 'flutter'
 }
 
-function Require-ReleaseSigning {
+function Require-ReleaseSigning
+{
     $keyPropertiesPath = Join-Path $repoRoot 'android/key.properties'
-    if (-not (Test-Path -LiteralPath $keyPropertiesPath)) {
+    if (-not (Test-Path -LiteralPath $keyPropertiesPath))
+    {
         throw 'android/key.properties is missing. Add release signing properties before building signed release APKs.'
     }
 
-    $properties = @{}
+    $properties = @{ }
     Get-Content -LiteralPath $keyPropertiesPath | ForEach-Object {
-        if ($_ -match '^\s*([^#][^=]+?)\s*=\s*(.*?)\s*$') {
+        if ($_ -match '^\s*([^#][^=]+?)\s*=\s*(.*?)\s*$')
+        {
             $properties[$matches[1].Trim()] = $matches[2].Trim()
         }
     }
 
-    foreach ($key in @('storeFile', 'storePassword', 'keyAlias', 'keyPassword')) {
-        if (-not $properties.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($properties[$key])) {
+    foreach ($key in @('storeFile', 'storePassword', 'keyAlias', 'keyPassword'))
+    {
+        if (-not $properties.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($properties[$key]))
+        {
             throw "android/key.properties is missing '$key'."
         }
     }
 
     $storeFile = $properties['storeFile']
-    if (-not [System.IO.Path]::IsPathRooted($storeFile)) {
+    if (-not [System.IO.Path]::IsPathRooted($storeFile))
+    {
         $storeFile = Join-Path (Join-Path $repoRoot 'android') $storeFile
     }
 
-    if (-not (Test-Path -LiteralPath $storeFile)) {
+    if (-not (Test-Path -LiteralPath $storeFile))
+    {
         throw "Release keystore was not found: $storeFile"
     }
 }
 
-function Copy-Apk {
+function Copy-Apk
+{
     param(
         [Parameter(Mandatory = $true)]
         [string]$Source,
@@ -91,7 +105,8 @@ function Copy-Apk {
         [string]$Destination
     )
 
-    if (-not (Test-Path -LiteralPath $Source)) {
+    if (-not (Test-Path -LiteralPath $Source))
+    {
         throw "Expected APK was not created: $Source"
     }
 
@@ -99,7 +114,8 @@ function Copy-Apk {
     Write-Host "Copied: $Destination"
 }
 
-function Write-HashFiles {
+function Write-HashFiles
+{
     param(
         [Parameter(Mandatory = $true)]
         [string[]]$ApkPaths,
@@ -108,12 +124,14 @@ function Write-HashFiles {
         [string[]]$HashFilePaths
     )
 
-    $hashLines = foreach ($apkPath in ($ApkPaths | Sort-Object)) {
+    $hashLines = foreach ($apkPath in ($ApkPaths | Sort-Object))
+    {
         $hash = (Get-FileHash -LiteralPath $apkPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        "$hash  $(Split-Path -Leaf $apkPath)"
+        "$hash  $( Split-Path -Leaf $apkPath )"
     }
 
-    foreach ($hashFilePath in $HashFilePaths) {
+    foreach ($hashFilePath in $HashFilePaths)
+    {
         $hashText = ($hashLines -join [Environment]::NewLine) + [Environment]::NewLine
         Set-Content -LiteralPath $hashFilePath -Value $hashText -NoNewline
         Write-Host "Wrote: $hashFilePath"
@@ -122,7 +140,8 @@ function Write-HashFiles {
     $hashLines
 }
 
-function Write-VersionManifest {
+function Write-VersionManifest
+{
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path,
@@ -137,7 +156,8 @@ function Write-VersionManifest {
         [string[]]$ApkPaths
     )
 
-    $apkEntries = foreach ($apkPath in ($ApkPaths | Sort-Object)) {
+    $apkEntries = foreach ($apkPath in ($ApkPaths | Sort-Object))
+    {
         [pscustomobject]@{
             file = Split-Path -Leaf $apkPath
             sha256 = (Get-FileHash -LiteralPath $apkPath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -156,7 +176,8 @@ function Write-VersionManifest {
     Write-Host "Wrote: $Path"
 }
 
-function Write-GitHubRelease {
+function Write-GitHubRelease
+{
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path,
@@ -190,36 +211,49 @@ $downloads
 
 ${fence}text
 $shaBlock
-$fence
+    $fence
 "@
 
-    if (Test-Path -LiteralPath $Path) {
+    if (Test-Path -LiteralPath $Path)
+    {
         $releaseText = Get-Content -LiteralPath $Path -Raw
 
         # Try to replace ### Assets or ## Downloads
-        if ($releaseText -match '(?ms)^### Assets\s+') {
+        if ($releaseText -match '(?ms)^### Assets\s+')
+        {
             $releaseText = [regex]::Replace($releaseText, '(?ms)^### Assets\s+.*?(?=^### |^## |\z)', $assetsSection.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
-        } elseif ($releaseText -match '(?ms)^## Downloads\s+') {
+        }
+        elseif ($releaseText -match '(?ms)^## Downloads\s+')
+        {
             $releaseText = [regex]::Replace($releaseText, '(?ms)^## Downloads\s+.*?(?=^## |^### |\z)', "## Assets" + [Environment]::NewLine + [Environment]::NewLine + $downloads.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine)
-        } else {
+        }
+        else
+        {
             $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $assetsSection.TrimEnd() + [Environment]::NewLine
         }
 
         # Try to replace ### SHA256 or ## SHA256
-        if ($releaseText -match '(?ms)^### SHA256\s+') {
+        if ($releaseText -match '(?ms)^### SHA256\s+')
+        {
             $releaseText = [regex]::Replace($releaseText, '(?ms)^### SHA256\s+.*?(?=^### |^## |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
-        } elseif ($releaseText -match '(?ms)^## SHA256\s+') {
+        }
+        elseif ($releaseText -match '(?ms)^## SHA256\s+')
+        {
             $releaseText = [regex]::Replace($releaseText, '(?ms)^## SHA256\s+.*?(?=^## |^### |\z)', $shaSection.TrimEnd() + [Environment]::NewLine)
-        } else {
+        }
+        else
+        {
             $releaseText = $releaseText.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $shaSection.TrimEnd() + [Environment]::NewLine
         }
-    } else {
+    }
+    else
+    {
         $releaseText = @"
 # NoteKar $Version
 
-$($assetsSection.TrimEnd())
+        $($assetsSection.TrimEnd() )
 
-$($shaSection.TrimEnd())
+        $($shaSection.TrimEnd() )
 "@
     }
 
@@ -228,27 +262,65 @@ $($shaSection.TrimEnd())
 }
 
 $pubspecVersion = Read-PubspecVersion
-if (-not $Version) {
+if (-not $Version)
+{
     $Version = $pubspecVersion.Version
 }
 
-if (-not $BuildNumber) {
-    $BuildNumber = $pubspecVersion.BuildNumber
+$appBuild = $BuildNumber
+$appUtilsPath = Join-Path $repoRoot 'lib/utils/app_utils.dart'
+if (Test-Path -LiteralPath $appUtilsPath)
+{
+    $appUtilsText = Get-Content -LiteralPath $appUtilsPath -Raw
+    $match = [regex]::Match($appUtilsText, "const kAppBuildNumber = '([^']+)';")
+    if ($match.Success)
+    {
+        $appBuild = $match.Groups[1].Value
+    }
+}
+if (-not $appBuild)
+{
+    $appBuild = $pubspecVersion.BuildNumber
+}
+
+# Determine integer versionCode for Android build toolchain
+$versionCode = $pubspecVersion.BuildNumber
+if ($versionCode -notmatch '^\d+$')
+{
+    $localPropertiesPath = Join-Path $repoRoot 'android/local.properties'
+    if (Test-Path -LiteralPath $localPropertiesPath)
+    {
+        $codeLine = Get-Content -LiteralPath $localPropertiesPath | Where-Object { $_ -match '^flutter\.versionCode=(\d+)' } | Select-Object -First 1
+        if ($codeLine -match '^flutter\.versionCode=(\d+)')
+        {
+            $versionCode = $matches[1]
+        }
+    }
+}
+if ($versionCode -notmatch '^\d+$')
+{
+    $versionCode = (Get-Date -Format 'yyMMdd01')
 }
 
 # Pre-flight Release Checks
-try {
-    $gitStatus = (git status --porcelain) 2>$null
-    if ($gitStatus) {
+try
+{
+    $gitStatus = (git status --porcelain) 2> $null
+    if ($gitStatus)
+    {
         Write-Warning "You have uncommitted changes in your git workspace. It is highly recommended to commit all changes before generating release builds."
     }
-} catch {}
+}
+catch
+{
+}
 
 $flutter = Find-Flutter
 
 Write-Host "🔍 Running pre-flight static analysis..."
 & $flutter analyze
-if ($LASTEXITCODE -ne 0) {
+if ($LASTEXITCODE -ne 0)
+{
     throw "Static analysis failed. Please fix code quality issues before building release APKs."
 }
 Write-Host "✅ Static analysis passed."
@@ -261,18 +333,20 @@ $apkOutputDir = Join-Path $repoRoot 'build/app/outputs/flutter-apk'
 
 New-Item -ItemType Directory -Force -Path $releaseDir, $versionsDir | Out-Null
 
-if (-not $SkipClean) {
+if (-not $SkipClean)
+{
     & $flutter clean
 }
 
 $extraFlags = @()
-if ($NoTreeShake) {
+if ($NoTreeShake)
+{
     $extraFlags += '--no-tree-shake-icons'
 }
 
 & $flutter pub get
-& $flutter build apk --release --build-name $Version --build-number $BuildNumber @extraFlags
-& $flutter build apk --release --split-per-abi --build-name $Version --build-number $BuildNumber @extraFlags
+& $flutter build apk --release --build-name $Version --build-number $versionCode @extraFlags
+& $flutter build apk --release --split-per-abi --build-name $Version --build-number $versionCode @extraFlags
 
 $apkMap = @(
     @{ Source = 'app-arm64-v8a-release.apk'; Destination = "notekar-$Version-arm64-v8a.apk" }
@@ -281,7 +355,8 @@ $apkMap = @(
     @{ Source = 'app-x86_64-release.apk'; Destination = "notekar-$Version-x86_64.apk" }
 )
 
-$releaseApks = foreach ($apk in $apkMap) {
+$releaseApks = foreach ($apk in $apkMap)
+{
     $source = Join-Path $apkOutputDir $apk.Source
     $destination = Join-Path $releaseDir $apk.Destination
     Copy-Apk -Source $source -Destination $destination
@@ -294,7 +369,7 @@ $hashLines = Write-HashFiles -ApkPaths $releaseApks -HashFilePaths @(
     (Join-Path $repoRoot 'sha256.txt')
 )
 
-Write-VersionManifest -Path (Join-Path $versionsDir 'version.json') -Version $Version -BuildNumber $BuildNumber -ApkPaths $releaseApks
+Write-VersionManifest -Path (Join-Path $versionsDir 'version.json') -Version $Version -BuildNumber $appBuild -ApkPaths $releaseApks
 Write-GitHubRelease -Path (Join-Path $releaseDir 'GITHUB_RELEASE.md') -Version $Version -HashLines $hashLines
 
 Write-Host ''
