@@ -157,10 +157,12 @@ Future<void> showMilestoneUnlockDialog({
                                 onPressed: () => Navigator.pop(context),
                                 icon: const Icon(Icons.check_rounded, size: 20),
                                 label: Text(
-                                  'Keep Going'.localized(context),
+                                  'Continue'.localized(context),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
@@ -198,10 +200,12 @@ Future<void> showMilestoneUnlockDialog({
                                   size: 18,
                                 ),
                                 label: Text(
-                                  'Share Peak'.localized(context),
+                                  'Share'.localized(context),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
