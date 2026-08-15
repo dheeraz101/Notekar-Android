@@ -902,17 +902,20 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                 ),
               ],
             ),
-          ] else if (_verificationStatus == 'verifying') ...[
-            Row(
-              children: [
-                CupertinoActivityIndicator(radius: 7, color: p.accent),
-                const SizedBox(width: 8),
-                Text(
-                  'Verifying integrity checksum...'.localized(context),
-                  style: TextStyle(color: p.text2, fontSize: 13),
-                ),
-              ],
-            ),
+          ] else ...[
+            if (_verificationStatus == 'verifying') ...[
+              Row(
+                children: [
+                  CupertinoActivityIndicator(radius: 7, color: p.accent),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Verifying integrity checksum...'.localized(context),
+                    style: TextStyle(color: p.text2, fontSize: 13),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: p.accent,
