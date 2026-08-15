@@ -82,9 +82,17 @@ class PersonalizationSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.apps_rounded,
               title: 'App Icons'.localized(context),
-              status: appIconStyle.isEmpty
-                  ? ''
-                  : appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
+              status: switch (appIconStyle) {
+                'default' => 'Aurora',
+                'black' => 'Midnight',
+                'blue' => 'Sapphire',
+                'gold' => 'Imperial',
+                'green' => 'Emerald',
+                'orange' => 'Sunset',
+                'red' => 'Crimson',
+                'purple' => 'Amethyst',
+                _ => 'Aurora',
+              }.localized(context),
               color: p.orange,
               onTap: () =>
                   onOpenCategory('App Icons', parent: 'Personalization'),
