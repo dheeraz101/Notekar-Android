@@ -12,7 +12,7 @@ param(
     [string]$Version,
 
     [Parameter(Mandatory = $false)]
-    [int]$BuildNumber,
+    [string]$BuildNumber,
 
     [Parameter(Mandatory = $false)]
     [string]$BuildDate = (Get-Date -Format 'yyyy-MM-dd')
@@ -65,7 +65,7 @@ if (-not (Test-Path -LiteralPath $appUtilsPath))
 
 # Read and parse current version from pubspec.yaml
 $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
-$versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)\s*$')
+$versionMatch = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+)\.(\d+)\.(\d+)(?:\+([A-Za-z0-9\.\-]+))?\s*$')
 if (-not $versionMatch.Success)
 {
     throw "Could not parse current version from pubspec.yaml."
@@ -74,12 +74,13 @@ if (-not $versionMatch.Success)
 $currentMajor = [int]$versionMatch.Groups[1].Value
 $currentMinor = [int]$versionMatch.Groups[2].Value
 $currentPatch = [int]$versionMatch.Groups[3].Value
-$currentBuild = [int]$versionMatch.Groups[4].Value
+$currentBuild = $versionMatch.Groups[4].Value
 
 $nextMajor = $currentMajor
 $nextMinor = $currentMinor
 $nextPatch = $currentPatch
 $releaseTypeLabel = "Custom"
+$channelCode = "BE"
 
 if ($stable)
 {
@@ -87,17 +88,20 @@ if ($stable)
     $nextMinor = 0
     $nextPatch = 0
     $releaseTypeLabel = "Stable Feature Release"
+    $channelCode = "ST"
 }
 elseif ($security)
 {
     $nextMinor = $currentMinor + 1
     $nextPatch = 0
     $releaseTypeLabel = "Security & Quality Release"
+    $channelCode = "SE"
 }
 elseif ($beta)
 {
     $nextPatch = $currentPatch + 1
     $releaseTypeLabel = "Beta Build"
+    $channelCode = "BE"
 }
 else
 {
@@ -112,10 +116,45 @@ if (-not $Version)
     $Version = "$nextMajor.$nextMinor.$nextPatch"
 }
 
+$parsedBuildDate = [DateTime]::Parse($BuildDate)
+$yearCode = $parsedBuildDate.ToString('yy')
+$monthDayCode = $parsedBuildDate.ToString('MMdd')
+$baseBuildNumber = "$yearCode$channelCode$monthDayCode"
+
 if (-not $BuildNumber)
 {
-    $BuildNumber = $currentBuild + 1
+    # Automatically add suffix if building multiple times on the same day and channel
+    if ($currentBuild -match "^$baseBuildNumber([a-z])?$")
+    {
+        $currentSuffix = $matches[1]
+        if (-not $currentSuffix)
+        {
+            # First build of the day exists without suffix -> second build gets 'a'
+            $BuildNumber = "${baseBuildNumber}a"
+        }
+        else
+        {
+            # Increment suffix letter: 'a' -> 'b', 'b' -> 'c', etc.
+            $nextChar = [char]([int][char]$currentSuffix + 1)
+            $BuildNumber = "$baseBuildNumber$nextChar"
+        }
+    }
+    else
+    {
+        # First build of the day -> clean build without suffix
+        $BuildNumber = $baseBuildNumber
+    }
 }
+
+# Derive sequential Android integer versionCode: YYMMDDXX (e.g. 26081501, 26081502 for 'a', 26081503 for 'b')
+$subIndex = 1
+if ($BuildNumber -match "^$baseBuildNumber([a-z])$")
+{
+    $letter = $matches[1]
+    $subIndex = ([int][char]$letter - [int][char]'a') + 2
+}
+$subIndexStr = $subIndex.ToString('00')
+$androidVersionCode = [int]("$yearCode$monthDayCode$subIndexStr")
 
 # Parse and clean git log since last version commit to auto-populate user-facing changelogs
 $cleanCommits = @()
@@ -301,14 +340,14 @@ $fastlaneCommits = $fastlaneBullets -join "`r`n"
 # 1. Update version across core config files
 Update-TextFile -Path $pubspecPath -Update {
     param($text)
-    [regex]::Replace($text, '(?m)^version:\s*\d+\.\d+\.\d+\+\d+\s*$', "version: $Version+$BuildNumber")
+    [regex]::Replace($text, '(?m)^version:\s*\d+\.\d+\.\d+(?:\+[A-Za-z0-9\.\-]+)?\s*$', "version: $Version+$BuildNumber")
 }
 
 Update-TextFile -Path $localPropertiesPath -Update {
     param($text)
     $text = [regex]::Replace($text, '(?m)^flutter\.buildMode=.*$', 'flutter.buildMode=release')
     $text = [regex]::Replace($text, '(?m)^flutter\.versionName=.*$', "flutter.versionName=$Version")
-    $text = [regex]::Replace($text, '(?m)^flutter\.versionCode=.*$', "flutter.versionCode=$BuildNumber")
+    $text = [regex]::Replace($text, '(?m)^flutter\.versionCode=.*$', "flutter.versionCode=$androidVersionCode")
     $text
 }
 
@@ -326,7 +365,7 @@ if (-not (Test-Path -LiteralPath $fastlaneDir))
 {
     New-Item -ItemType Directory -Path $fastlaneDir -Force | Out-Null
 }
-$fastlaneFile = Join-Path $fastlaneDir "$BuildNumber.txt"
+$fastlaneFile = Join-Path $fastlaneDir "$androidVersionCode.txt"
 $fastlaneContent = "Update to $Version (build $BuildNumber):`r`n$fastlaneCommits"
 Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
 Write-Host "Created/Updated F-Droid changelog: $fastlaneFile"

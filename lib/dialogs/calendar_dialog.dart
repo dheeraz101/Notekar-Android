@@ -117,14 +117,26 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                   final selected = key == dateKey(widget.initialDate);
 
                   // iOS Calendar Styling:
-                  // 1. Today is highlighted with a solid iOS red circle (#FF3B30) and bold white text.
-                  // 2. Selected (if not today) uses the theme accent circle with bold white text.
-                  // 3. No dot is shown inside the circle for Today or Selected dates.
-                  // 4. Other available event days show a subtle event dot below the date number.
-                  final isHighlighted = isToday || selected;
-                  final Color circleColor = isToday
-                      ? const Color(0xFFFF3B30) // iOS Calendar System Red
-                      : (selected ? widget.p.accent : Colors.transparent);
+                  // 1. The currently selected date gets the solid iOS Red circle (#FF3B30) with bold white text.
+                  // 2. When any other date is selected, the red circle moves to that selected date.
+                  // 3. Non-selected dates (including today) have no circle, and if they contain moments, show a small event dot below.
+                  final isSelected = selected;
+                  final Color circleColor = isSelected
+                      ? const Color(
+                          0xFFFF3B30,
+                        ) // iOS Calendar System Red selection circle
+                      : Colors.transparent;
+
+                  Color textColor;
+                  if (isSelected) {
+                    textColor = Colors.white;
+                  } else if (isToday) {
+                    textColor = const Color(0xFFFF3B30);
+                  } else if (available) {
+                    textColor = widget.p.text;
+                  } else {
+                    textColor = widget.p.text3.withValues(alpha: 0.28);
+                  }
 
                   return Padding(
                     padding: const EdgeInsets.all(3),
@@ -142,7 +154,7 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                         decoration: BoxDecoration(
                           color: circleColor,
                           shape: BoxShape.circle,
-                          boxShadow: isHighlighted
+                          boxShadow: isSelected
                               ? [
                                   BoxShadow(
                                     color: circleColor.withValues(alpha: 0.30),
@@ -158,28 +170,24 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                             Text(
                               '$day',
                               style: TextStyle(
-                                color: isHighlighted
-                                    ? Colors.white
-                                    : (available
-                                          ? widget.p.text
-                                          : widget.p.text3.withValues(
-                                              alpha: 0.28,
-                                            )),
+                                color: textColor,
                                 fontSize: 14.5,
-                                fontWeight: isHighlighted
+                                fontWeight: isSelected
                                     ? FontWeight.w800
-                                    : (available
+                                    : (isToday || available
                                           ? FontWeight.w700
                                           : FontWeight.w500),
                               ),
                             ),
-                            if (!isHighlighted && available) ...[
+                            if (!isSelected && available) ...[
                               const SizedBox(height: 2),
                               Container(
                                 width: 4,
                                 height: 4,
                                 decoration: BoxDecoration(
-                                  color: widget.p.accent,
+                                  color: isToday
+                                      ? const Color(0xFFFF3B30)
+                                      : widget.p.accent,
                                   shape: BoxShape.circle,
                                 ),
                               ),

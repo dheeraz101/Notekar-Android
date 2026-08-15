@@ -4,8 +4,7 @@ param(
     [string]$Version,
 
     [Parameter(Mandatory = $false)]
-    [ValidateRange(1, 2100000000)]
-    [int]$BuildNumber,
+    [string]$BuildNumber,
 
     [Parameter(Mandatory = $false)]
     [switch]$SkipClean,
@@ -22,15 +21,15 @@ Set-Location $repoRoot
 function Read-PubspecVersion {
     $pubspecPath = Join-Path $repoRoot 'pubspec.yaml'
     $pubspecText = Get-Content -LiteralPath $pubspecPath -Raw
-    $match = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$')
+    $match = [regex]::Match($pubspecText, '(?m)^version:\s*(\d+\.\d+\.\d+)(?:\+([A-Za-z0-9\.\-]+))?\s*$')
 
     if (-not $match.Success) {
-        throw 'Could not read version from pubspec.yaml. Expected a line like: version: 4.0.4+13'
+        throw 'Could not read version from pubspec.yaml. Expected a line like: version: 6.0.7+26BE0815'
     }
 
     [pscustomobject]@{
         Version = $match.Groups[1].Value
-        BuildNumber = [int]$match.Groups[2].Value
+        BuildNumber = $match.Groups[2].Value
     }
 }
 
@@ -132,7 +131,7 @@ function Write-VersionManifest {
         [string]$Version,
 
         [Parameter(Mandatory = $true)]
-        [int]$BuildNumber,
+        [string]$BuildNumber,
 
         [Parameter(Mandatory = $true)]
         [string[]]$ApkPaths

@@ -11,6 +11,7 @@ class LoggingSettingsPage extends StatelessWidget {
     required this.p,
     required this.defaultMode,
     required this.entriesCount,
+    this.notesCount = 0,
     required this.remindersStatus,
     required this.enableSobrietyMode,
     required this.showPersistentNotification,
@@ -23,6 +24,7 @@ class LoggingSettingsPage extends StatelessWidget {
   final Palette p;
   final String defaultMode;
   final int entriesCount;
+  final int notesCount;
   final String remindersStatus;
   final bool enableSobrietyMode;
   final bool showPersistentNotification;
@@ -43,6 +45,7 @@ class LoggingSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.dashboard_customize_outlined,
               title: 'Dashboard',
+              status: '$entriesCount ${'Moments'.localized(context)}',
               color: p.accent,
               onTap: () => onOpenCategory('Dashboard', parent: 'Logging'),
             ),
@@ -72,7 +75,7 @@ class LoggingSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.history_rounded,
               title: 'Moments'.localized(context),
-              status: '$entriesCount ${'Logs'.localized(context)}',
+              status: '$notesCount ${'Notes'.localized(context)}',
               color: p.orange,
               onTap: () => onOpenCategory('Moments', parent: 'Logging'),
             ),

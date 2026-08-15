@@ -3936,6 +3936,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               defaultMode: defaultMode,
                               entriesCount: entries.length,
+                              notesCount: entries
+                                  .where((e) => e.note.isNotEmpty)
+                                  .length,
                               remindersStatus: _getRemindersStatus(),
                               enableSobrietyMode: enableSobrietyMode,
                               showPersistentNotification:

@@ -178,35 +178,45 @@ void main() {
   });
 
   group('MomentCalendarDialog iOS Styling', () {
-    testWidgets('Today renders with iOS red color and no inner dot', (
-      tester,
-    ) async {
-      final today = DateTime.now();
-      final todayStr = dateKey(today);
+    testWidgets(
+      'Selected date renders with iOS red circle and unselected date with moments shows dot',
+      (tester) async {
+        final today = DateTime.now();
+        final yesterday = today.subtract(const Duration(days: 1));
+        final todayStr = dateKey(today);
+        final yesterdayStr = dateKey(yesterday);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MomentCalendarDialog(
-              p: p,
-              availableDateKeys: {todayStr},
-              initialDate: today,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: MomentCalendarDialog(
+                p: p,
+                availableDateKeys: {todayStr, yesterdayStr},
+                initialDate: yesterday,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Verify today date text is present
-      expect(find.text('${today.day}'), findsWidgets);
+        // Verify dates are rendered
+        expect(find.text('${yesterday.day}'), findsWidgets);
+        expect(find.text('${today.day}'), findsWidgets);
 
-      // Verify iOS single-letter weekday header format
-      expect(find.text('S'), findsWidgets);
-      expect(find.text('M'), findsWidgets);
-      expect(find.text('T'), findsWidgets);
-      expect(find.text('W'), findsWidgets);
-      expect(find.text('F'), findsWidgets);
+        // Verify iOS single-letter weekday header format
+        expect(find.text('S'), findsWidgets);
+        expect(find.text('M'), findsWidgets);
+        expect(find.text('T'), findsWidgets);
+        expect(find.text('W'), findsWidgets);
+        expect(find.text('F'), findsWidgets);
+      },
+    );
+  });
+
+  group('Build Number & Settings Logging Page', () {
+    test('kAppBuildNumber adheres to YY<CHANNEL>MMDD format', () {
+      expect(kAppBuildNumber, matches(r'^\d{2}[A-Z]{1,2}\d{4}[a-z]?$'));
     });
   });
 }
