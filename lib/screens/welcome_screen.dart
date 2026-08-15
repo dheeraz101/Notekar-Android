@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
@@ -17,6 +18,8 @@ class WelcomeScreen extends StatefulWidget {
     required this.onLocaleChanged,
     required this.onTheme,
     required this.onDefaultMode,
+    this.appIconStyle = 'default',
+    this.onAppIconStyle,
     required this.pages,
   });
 
@@ -27,6 +30,8 @@ class WelcomeScreen extends StatefulWidget {
   final ValueChanged<String> onLocaleChanged;
   final ValueChanged<String> onTheme;
   final ValueChanged<String> onDefaultMode;
+  final String appIconStyle;
+  final ValueChanged<String>? onAppIconStyle;
   final List<String> pages;
 
   @override
@@ -52,6 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   bool _useNumbersInSingle = false;
   bool _resetSingleDaily = false;
   bool _countOnSave = false;
+  String _appIconStyle = 'default';
 
   static const _fileChannel = MethodChannel('notekar/files');
 
@@ -62,6 +68,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     theme = widget.theme;
     defaultMode = widget.defaultMode;
     currentLocale = widget.currentLocale;
+    _appIconStyle = widget.appIconStyle;
 
     WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
@@ -77,6 +84,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       _useNumbersInSingle = _prefs?.getBool('m-use-numbers-in-single') ?? false;
       _resetSingleDaily = _prefs?.getBool('m-reset-single-daily') ?? false;
       _countOnSave = _prefs?.getBool('m-count-on-save') ?? false;
+      _appIconStyle =
+          _prefs?.getString('m-app-icon-style') ?? widget.appIconStyle;
     });
   }
 
@@ -646,6 +655,183 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ],
           ),
           const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppIconsPage(Palette p) {
+    const icons = {
+      'default': ('Default', 'icon-maskable-512.png'),
+      'black': ('Midnight', 'app_icons/black.png'),
+      'blue': ('Sapphire', 'app_icons/blue.png'),
+      'gold': ('Imperial', 'app_icons/gold.png'),
+      'green': ('Emerald', 'app_icons/green.png'),
+      'orange': ('Sunset', 'app_icons/orange.png'),
+      'red': ('Crimson', 'app_icons/red.png'),
+      'purple': ('Amethyst', 'app_icons/purple.png'),
+    };
+
+    final currentAsset = icons[_appIconStyle]?.$2 ?? 'icon-maskable-512.png';
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 84,
+              height: 84,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: p.accent.withValues(alpha: 0.25),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image.asset(currentAsset, fit: BoxFit.cover),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Personalized App Icons'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Choose your favorite handcrafted luxury icon edition for your home screen.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 24),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: icons.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.74,
+            ),
+            itemBuilder: (context, index) {
+              final entry = icons.entries.elementAt(index);
+              final isSelected = _appIconStyle == entry.key;
+              return GestureDetector(
+                onTap: () async {
+                  if (_appIconStyle == entry.key) return;
+                  NotekarHaptics.selection('standard');
+                  setState(() => _appIconStyle = entry.key);
+                  if (_prefs != null) {
+                    await _prefs!.setString('m-app-icon-style', entry.key);
+                  }
+                  widget.onAppIconStyle?.call(entry.key);
+                  try {
+                    await _fileChannel.invokeMethod<void>('setAppIconStyle', {
+                      'style': entry.key,
+                    });
+                  } catch (_) {}
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? p.accent.withValues(alpha: 0.12)
+                        : p.surface2,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected ? p.accent : p.border,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              entry.value.$2,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          if (isSelected)
+                            Positioned(
+                              right: -4,
+                              bottom: -4,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: p.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  color: Colors.white,
+                                  size: 11,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        entry.value.$1.localized(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: isSelected ? p.accent : p.text,
+                          fontSize: 11.5,
+                          fontWeight: isSelected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          SettingsPageDescription(
+            p: p,
+            showIcon: true,
+            text:
+                'You can always switch your app icon anytime in Settings → Personalization.'
+                    .localized(context),
+          ),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -1382,6 +1568,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'features') {
                     return _buildFeaturesPage(p);
+                  }
+                  if (key == 'app-icons') {
+                    return _buildAppIconsPage(p);
                   }
                   if (key == 'numbered-singles') {
                     return _buildNumberedSinglesPage(p);

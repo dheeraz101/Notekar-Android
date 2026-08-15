@@ -778,6 +778,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
     final singleNumberingWalkthroughSeen =
         prefs.getBool('notekar.singleNumberingWalkthroughSeen_v7') ?? false;
+    final appIconsWalkthroughSeen =
+        prefs.getBool('notekar.appIconsWalkthroughSeen_v8') ?? false;
 
     if (!welcomeSeen) {
       // 1. New Users: Show full onboarding flow with all pages
@@ -789,6 +791,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
             theme: _theme,
             defaultMode: _defaultMode,
             currentLocale: _locale,
+            appIconStyle: _appIconStyle,
+            onAppIconStyle: (value) async {
+              setState(() => _appIconStyle = value);
+              await _setAppIconStyle(value, showToast: false);
+            },
             onLocaleChanged: (value) {
               NoteKarApp.of(context)?.setLocale(value);
               setState(() => _locale = value);
@@ -804,6 +811,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             },
             pages: const [
               'welcome',
+              'app-icons',
               'security',
               'features',
               'numbered-singles',
@@ -822,9 +830,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
       await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
+      await prefs.setBool('notekar.appIconsWalkthroughSeen_v8', true);
     } else {
       // 2. Upgraded Users: Dynamically compile ONLY newly introduced feature cards
       final List<String> upgradePages = [];
+      if (!appIconsWalkthroughSeen) upgradePages.add('app-icons');
       if (!securityWalkthroughSeen) upgradePages.add('security');
       if (!remindersWalkthroughSeen) {
         upgradePages.add('repo-move');
@@ -843,6 +853,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
               theme: _theme,
               defaultMode: _defaultMode,
               currentLocale: _locale,
+              appIconStyle: _appIconStyle,
+              onAppIconStyle: (value) async {
+                setState(() => _appIconStyle = value);
+                await _setAppIconStyle(value, showToast: false);
+              },
               onLocaleChanged: (value) {
                 NoteKarApp.of(context)?.setLocale(value);
                 setState(() => _locale = value);
@@ -862,6 +877,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         );
 
         // Mark all shown upgrade cards as seen (won't be shown again until factory reset)
+        await prefs.setBool('notekar.appIconsWalkthroughSeen_v8', true);
         await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
         await prefs.setBool('notekar.remindersWalkthroughSeen', true);
         await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
