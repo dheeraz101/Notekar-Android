@@ -49,6 +49,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   SharedPreferences? _prefs;
   bool _enableSobrietyMode = false;
   String _sobrietyMilestoneTheme = 'science';
+  bool _useNumbersInSingle = false;
+  bool _resetSingleDaily = false;
+  bool _countOnSave = false;
 
   static const _fileChannel = MethodChannel('notekar/files');
 
@@ -71,6 +74,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
       _sobrietyMilestoneTheme =
           _prefs?.getString('sobriety_milestone_theme') ?? 'science';
+      _useNumbersInSingle = _prefs?.getBool('m-use-numbers-in-single') ?? false;
+      _resetSingleDaily = _prefs?.getBool('m-reset-single-daily') ?? false;
+      _countOnSave = _prefs?.getBool('m-count-on-save') ?? false;
     });
   }
 
@@ -638,6 +644,129 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     .localized(context),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumberedSinglesPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                '00',
+                style: TextStyle(
+                  color: p.accent,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'Numbered Single Moments'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Transform your history with sequential 2-digit counters (00–99), daily midnight resets, and an iOS style calendar.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 32),
+          SettingsGroup(
+            p: p,
+            children: [
+              SettingsSwitchRow(
+                p: p,
+                icon: Icons.pin_outlined,
+                title: 'Use Numbers in Single'.localized(context),
+                subtitle:
+                    'Shows 00–99 counters instead of static icons in history.'
+                        .localized(context),
+                color: p.accent,
+                value: _useNumbersInSingle,
+                onChanged: (value) async {
+                  if (_prefs != null) {
+                    await _prefs!.setBool('m-use-numbers-in-single', value);
+                  }
+                  setState(() => _useNumbersInSingle = value);
+                },
+              ),
+              if (_useNumbersInSingle) ...[
+                SettingsSwitchRow(
+                  p: p,
+                  icon: Icons.restart_alt_rounded,
+                  title: 'Reset Daily'.localized(context),
+                  subtitle:
+                      'Restarts count at 00 every midnight while keeping past history intact.'
+                          .localized(context),
+                  color: p.accent,
+                  value: _resetSingleDaily,
+                  onChanged: (value) async {
+                    if (_prefs != null) {
+                      await _prefs!.setBool('m-reset-single-daily', value);
+                    }
+                    setState(() => _resetSingleDaily = value);
+                  },
+                ),
+                SettingsSwitchRow(
+                  p: p,
+                  icon: Icons.touch_app_outlined,
+                  title: 'Enable Count on Save'.localized(context),
+                  subtitle:
+                      'Shows sequential numbers (00, 01...) on the tap pulse animation.'
+                          .localized(context),
+                  color: p.accent,
+                  value: _countOnSave,
+                  onChanged: (value) async {
+                    if (_prefs != null) {
+                      await _prefs!.setBool('m-count-on-save', value);
+                    }
+                    setState(() => _countOnSave = value);
+                  },
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          SettingsPageDescription(
+            p: p,
+            text:
+                '00 is the starting point. Moments count up to 99 and then restart at 00. You can customize these anytime in Settings > Moments.'
+                    .localized(context),
           ),
           const SizedBox(height: 16),
         ],
@@ -1253,6 +1382,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'features') {
                     return _buildFeaturesPage(p);
+                  }
+                  if (key == 'numbered-singles') {
+                    return _buildNumberedSinglesPage(p);
                   }
                   if (key == 'repo-move') {
                     return _buildRepoMovePage(p);

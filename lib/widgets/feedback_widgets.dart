@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
-import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/l10n/app_localizations.dart';
+import 'package:notekar/widgets/glass.dart';
 
 class Ripple extends StatefulWidget {
   const Ripple({super.key, required this.origin, required this.color});
+
   final Offset origin;
   final Color color;
 
@@ -180,11 +181,13 @@ class SavedPulse extends StatefulWidget {
     required this.origin,
     required this.p,
     required this.type,
+    this.pulseCount,
   });
 
   final Offset origin;
   final Palette p;
   final String type;
+  final String? pulseCount;
 
   @override
   State<SavedPulse> createState() => _SavedPulseState();
@@ -239,7 +242,11 @@ class _SavedPulseState extends State<SavedPulse>
                     border: Border.all(color: color.withValues(alpha: 0.24)),
                   ),
                   child: Text(
-                    _pulseLabel(widget.type, context),
+                    _pulseLabel(
+                      widget.type,
+                      context,
+                      pulseCount: widget.pulseCount,
+                    ),
                     maxLines: 1,
                     softWrap: false,
                     style: TextStyle(
@@ -258,10 +265,16 @@ class _SavedPulseState extends State<SavedPulse>
   }
 }
 
-String _pulseLabel(String type, BuildContext context) {
+String _pulseLabel(String type, BuildContext context, {String? pulseCount}) {
   final l10n = AppLocalizations.of(context);
   final isEs = l10n?.localeName == 'es';
   final isHi = l10n?.localeName == 'hi';
+
+  if (type == 'single' && pulseCount != null) {
+    return isEs
+        ? '$pulseCount guardado'
+        : (isHi ? '$pulseCount सहेजा गया' : '$pulseCount saved');
+  }
 
   return switch (type) {
     'in' => isEs ? 'IN guardado' : (isHi ? 'IN सहेजा गया' : 'IN saved'),

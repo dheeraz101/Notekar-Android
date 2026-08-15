@@ -100,6 +100,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _enableTranslucency = false;
   bool _extendedDuration = false;
   bool _minimalMomentOptions = false;
+  bool _useNumbersInSingle = false;
+  bool _resetSingleDaily = false;
+  bool _countOnSave = false;
+  String? _lastSingleCount;
   bool _startupComplete = false;
   bool _hasTappedBefore = false;
   Map<String, dynamic>? _pendingTap;
@@ -496,6 +500,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _extendedDuration = prefs.getBool('m-extended-duration') ?? false;
       _minimalMomentOptions =
           prefs.getBool('m-minimal-moment-options') ?? false;
+      _useNumbersInSingle = prefs.getBool('m-use-numbers-in-single') ?? false;
+      _resetSingleDaily = prefs.getBool('m-reset-single-daily') ?? false;
+      _countOnSave = prefs.getBool('m-count-on-save') ?? false;
       _showHistoryText = prefs.getBool('m-show-history-text') ?? true;
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
       _requireLongPressNote =
@@ -769,6 +776,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
     final sobrietyWalkthroughSeen =
         prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
+    final singleNumberingWalkthroughSeen =
+        prefs.getBool('notekar.singleNumberingWalkthroughSeen_v7') ?? false;
 
     if (!welcomeSeen) {
       // 1. New Users: Show full onboarding flow with all pages
@@ -797,6 +806,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               'welcome',
               'security',
               'features',
+              'numbered-singles',
               'repo-move',
               'updates-permission',
               'reminders',
@@ -811,6 +821,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
+      await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
     } else {
       // 2. Upgraded Users: Dynamically compile ONLY newly introduced feature cards
       final List<String> upgradePages = [];
@@ -821,6 +832,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       if (!networkWalkthroughSeen) upgradePages.add('network-monitor');
       if (!sobrietyWalkthroughSeen) upgradePages.add('sobriety');
+      if (!singleNumberingWalkthroughSeen) upgradePages.add('numbered-singles');
 
       if (upgradePages.isNotEmpty) {
         if (!mounted) return;
@@ -854,6 +866,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         await prefs.setBool('notekar.remindersWalkthroughSeen', true);
         await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
         await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
+        await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
       }
     }
   }
@@ -895,6 +908,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
     }
 
+    String? singleCount;
+    if (_countOnSave && type == 'single') {
+      int count = 0;
+      if (_resetSingleDaily) {
+        final todayKey = dateKey(now);
+        count = _entries
+            .where((e) => e.type == 'single' && e.date == todayKey)
+            .length;
+      } else {
+        count = _entries.where((e) => e.type == 'single').length;
+      }
+      singleCount = (count % 100).toString().padLeft(2, '0');
+    }
+
     // Save to queue if DB is not ready yet
     if (!_startupComplete) {
       // Trigger optimistic UI animations (ripple and pulse) immediately
@@ -902,6 +929,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _lastTapTime = now.millisecondsSinceEpoch;
         _lastTapPosition = position;
         _lastSavedType = type;
+        _lastSingleCount = singleCount;
         _rippleToken++;
         _savedPulseToken++;
       });
@@ -942,6 +970,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _lastTapTime = now.millisecondsSinceEpoch;
       _lastTapPosition = position;
       _lastSavedType = type;
+      _lastSingleCount = singleCount;
       _rippleToken++;
       _savedPulseToken++;
     });
@@ -1207,6 +1236,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _extendedDuration = false;
       _enableTranslucency = true;
       _minimalMomentOptions = false;
+      _useNumbersInSingle = false;
+      _resetSingleDaily = false;
+      _countOnSave = false;
       _privacyLockDelayMinutes = 0;
       _updateStatus = 'v$appVersion - Check for available updates';
       _lastUpdateCheckedAt = null;
@@ -1388,6 +1420,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _extendedDuration = false;
       _enableTranslucency = true;
       _minimalMomentOptions = false;
+      _useNumbersInSingle = false;
+      _resetSingleDaily = false;
+      _countOnSave = false;
       _privacyLockDelayMinutes = 0;
       _locale = 'system';
       _enableSobrietyMode = false;
@@ -1434,6 +1469,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-require-long-press-note', _requireLongPressNote);
     await _prefs?.setBool('m-extended-duration', _extendedDuration);
     await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
+    await _prefs?.setBool('m-use-numbers-in-single', _useNumbersInSingle);
+    await _prefs?.setBool('m-reset-single-daily', _resetSingleDaily);
+    await _prefs?.setBool('m-count-on-save', _countOnSave);
     await _prefs?.setBool('m-translucency', _enableTranslucency);
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
     await _prefs?.setString('m-locale', _locale);
@@ -1480,6 +1518,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
       _minimalMomentOptions =
           snapshot['minimalMomentOptions'] as bool? ?? false;
+      _useNumbersInSingle = snapshot['useNumbersInSingle'] as bool? ?? false;
+      _resetSingleDaily = snapshot['resetSingleDaily'] as bool? ?? false;
+      _countOnSave = snapshot['countOnSave'] as bool? ?? false;
       _privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
     });
     await _prefs?.setString('m-theme', _theme);
@@ -1510,6 +1551,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-require-long-press-note', _requireLongPressNote);
     await _prefs?.setBool('m-extended-duration', _extendedDuration);
     await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
+    await _prefs?.setBool('m-use-numbers-in-single', _useNumbersInSingle);
+    await _prefs?.setBool('m-reset-single-daily', _resetSingleDaily);
+    await _prefs?.setBool('m-count-on-save', _countOnSave);
     await _prefs?.setBool('m-translucency', _enableTranslucency);
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
     _applySystemUiStyle();
@@ -1672,6 +1716,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         compactRows: _compactHistory,
         largeText: _largeText,
         minimalMomentOptions: _minimalMomentOptions,
+        useNumbersInSingle: _useNumbersInSingle,
+        resetSingleDaily: _resetSingleDaily,
         blur:
             _enableTranslucency &&
             AdaptiveEngine().supportsBlur &&
@@ -1797,6 +1843,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         extendedDuration: _extendedDuration,
         enableTranslucency: _enableTranslucency,
         minimalMomentOptions: _minimalMomentOptions,
+        useNumbersInSingle: _useNumbersInSingle,
+        resetSingleDaily: _resetSingleDaily,
+        countOnSave: _countOnSave,
         privacyLockDelayMinutes: _privacyLockDelayMinutes,
         isSystemLockAvailable: _systemLockAvailable,
         privacyLockType: _privacyLockType,
@@ -1931,6 +1980,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onMinimalMomentOptions: (value) {
           setState(() => _minimalMomentOptions = value);
           _prefs?.setBool('m-minimal-moment-options', value);
+        },
+        onUseNumbersInSingle: (value) {
+          setState(() => _useNumbersInSingle = value);
+          _prefs?.setBool('m-use-numbers-in-single', value);
+        },
+        onResetSingleDaily: (value) {
+          setState(() => _resetSingleDaily = value);
+          _prefs?.setBool('m-reset-single-daily', value);
+        },
+        onCountOnSave: (value) {
+          setState(() => _countOnSave = value);
+          _prefs?.setBool('m-count-on-save', value);
         },
         onExtendedDuration: (value) {
           setState(() => _extendedDuration = value);
@@ -3483,6 +3544,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     origin: _lastTapPosition!,
                     p: palette,
                     type: _lastSavedType,
+                    pulseCount: _countOnSave && _lastSavedType == 'single'
+                        ? _lastSingleCount
+                        : null,
                   ),
                 ],
               ),

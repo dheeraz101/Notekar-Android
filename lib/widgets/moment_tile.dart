@@ -14,6 +14,7 @@ class MomentTile extends StatelessWidget {
     required this.onTap,
     required this.onLongPress,
     required this.onDelete,
+    this.singleNumber,
   });
 
   final Palette p;
@@ -23,6 +24,7 @@ class MomentTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback onDelete;
+  final String? singleNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +53,34 @@ class MomentTile extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 4), // iOS Inset look
-                child: Container(
-                  width: 8, // Prominent iOS HIG style
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                child: entry.type == 'single' && singleNumber != null
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 0.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          singleNumber!,
+                          style: TextStyle(
+                            color: color,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 9.5,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        width: 8, // Prominent iOS HIG style
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
               ),
               const SizedBox(width: 8),
               Text(
@@ -131,15 +153,26 @@ class MomentTile extends StatelessWidget {
                 color: color.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                entry.type == 'in'
-                    ? Icons.south_west_rounded
-                    : (entry.type == 'out'
-                          ? Icons.north_east_rounded
-                          : Icons.bolt_rounded),
-                color: color,
-                size: compact ? 16 : 18,
-              ),
+              child: entry.type == 'single' && singleNumber != null
+                  ? Text(
+                      singleNumber!,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w900,
+                        fontSize: compact ? 12 : 14,
+                        letterSpacing: -0.2,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    )
+                  : Icon(
+                      entry.type == 'in'
+                          ? Icons.south_west_rounded
+                          : (entry.type == 'out'
+                                ? Icons.north_east_rounded
+                                : Icons.bolt_rounded),
+                      color: color,
+                      size: compact ? 16 : 18,
+                    ),
             ),
             SizedBox(width: compact ? 8 : 12),
             Expanded(

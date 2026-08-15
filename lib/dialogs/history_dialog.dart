@@ -33,6 +33,8 @@ class HistoryDialog extends StatefulWidget {
     this.onOpenTrash,
     this.onClearAll,
     this.blur = false,
+    this.useNumbersInSingle = false,
+    this.resetSingleDaily = false,
   });
 
   final Palette p;
@@ -48,6 +50,8 @@ class HistoryDialog extends StatefulWidget {
   final VoidCallback? onOpenTrash;
   final Future<void> Function()? onClearAll;
   final bool blur;
+  final bool useNumbersInSingle;
+  final bool resetSingleDaily;
 
   @override
   State<HistoryDialog> createState() => _HistoryDialogState();
@@ -68,9 +72,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
   final _scrollController = ScrollController();
   bool _enableNoteOnClick = false;
 
-  // Memoized lists
+  // Memoized lists & number maps
   List<Moment> _filteredEntries = [];
   List<HistoryListItem> _listItems = [];
+  Map<int, String> _singleNumberMap = {};
 
   @override
   void initState() {
@@ -90,7 +95,37 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
+  void _rebuildSingleNumberMap() {
+    if (!widget.useNumbersInSingle) {
+      _singleNumberMap = {};
+      return;
+    }
+    final map = <int, String>{};
+    final singles = _entries.where((e) => e.type == 'single').toList()
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    if (widget.resetSingleDaily) {
+      final Map<String, List<Moment>> grouped = {};
+      for (final e in singles) {
+        grouped.putIfAbsent(e.date, () => []).add(e);
+      }
+      for (final dayEntries in grouped.values) {
+        for (int i = 0; i < dayEntries.length; i++) {
+          final count = (i % 100).toString().padLeft(2, '0');
+          map[dayEntries[i].id] = count;
+        }
+      }
+    } else {
+      for (int i = 0; i < singles.length; i++) {
+        final count = (i % 100).toString().padLeft(2, '0');
+        map[singles[i].id] = count;
+      }
+    }
+    _singleNumberMap = map;
+  }
+
   void _rebuildMemoizedLists() {
+    _rebuildSingleNumberMap();
     final today = dateKey(DateTime.now());
     final weekAgo = DateTime.now().subtract(const Duration(days: 7));
 
@@ -589,6 +624,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                       entry: entry,
                                       selected: selected,
                                       compact: widget.compactRows,
+                                      singleNumber: _singleNumberMap[entry.id],
                                       onLongPress: _enableNoteOnClick
                                           ? () => _handleSelection(
                                               entry,

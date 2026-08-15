@@ -17,12 +17,18 @@ class MomentsSettingsPage extends StatelessWidget {
     required this.extendedDuration,
     required this.minimalMomentOptions,
     required this.notesCount,
+    this.useNumbersInSingle = false,
+    this.resetSingleDaily = false,
+    this.countOnSave = false,
     required this.onCompactHistoryChanged,
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
     required this.onEnableNoteOnClickChanged,
     required this.onExtendedDurationChanged,
     required this.onMinimalMomentOptionsChanged,
+    required this.onUseNumbersInSingleChanged,
+    required this.onResetSingleDailyChanged,
+    required this.onCountOnSaveChanged,
     required this.onOpenCategory,
   });
 
@@ -35,6 +41,9 @@ class MomentsSettingsPage extends StatelessWidget {
   final bool extendedDuration;
   final bool minimalMomentOptions;
   final int notesCount;
+  final bool useNumbersInSingle;
+  final bool resetSingleDaily;
+  final bool countOnSave;
 
   final ValueChanged<bool> onCompactHistoryChanged;
   final ValueChanged<String> onHistoryDensityChanged;
@@ -42,6 +51,9 @@ class MomentsSettingsPage extends StatelessWidget {
   final ValueChanged<bool> onEnableNoteOnClickChanged;
   final ValueChanged<bool> onExtendedDurationChanged;
   final ValueChanged<bool> onMinimalMomentOptionsChanged;
+  final ValueChanged<bool> onUseNumbersInSingleChanged;
+  final ValueChanged<bool> onResetSingleDailyChanged;
+  final ValueChanged<bool> onCountOnSaveChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
 
   @override
@@ -83,10 +95,45 @@ class MomentsSettingsPage extends StatelessWidget {
             ),
           ],
         ),
+        SettingsGroup(
+          p: p,
+          title: 'Single Moment Numbering',
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Use Numbers in Single',
+              subtitle:
+                  'Display sequential 2-digit numbers (00–99) instead of icons in single history moments.',
+              color: p.accent,
+              value: useNumbersInSingle,
+              onChanged: onUseNumbersInSingleChanged,
+            ),
+            if (useNumbersInSingle) ...[
+              SettingsSwitchRow(
+                p: p,
+                title: 'Reset Daily',
+                subtitle:
+                    'Restart single count from 00 every calendar day while preserving past history.',
+                color: p.accent,
+                value: resetSingleDaily,
+                onChanged: onResetSingleDailyChanged,
+              ),
+              SettingsSwitchRow(
+                p: p,
+                title: 'Enable Count on Save',
+                subtitle:
+                    'Show the 2-digit count on the tap pulse animation instead of "SINGLE saved".',
+                color: p.accent,
+                value: countOnSave,
+                onChanged: onCountOnSaveChanged,
+              ),
+            ],
+          ],
+        ),
         SettingsPageDescription(
           p: p,
           text:
-              'Controls log spacing density, tap actions, and delete confirmations for history moments.'
+              '00 is the starting point. Moments count up to 99 and then restart at 00. If Reset Daily is enabled, today\'s single count restarts from 00 the next day while preserving all past history. If disabled, counting continues across days until 99 and then restarts from 00.'
                   .localized(context),
         ),
 

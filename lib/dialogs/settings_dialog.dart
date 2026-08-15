@@ -116,6 +116,12 @@ class SettingsDialog extends StatefulWidget {
     required this.onRequireLongPressNote,
     required this.onExtendedDuration,
     required this.onMinimalMomentOptions,
+    this.useNumbersInSingle = false,
+    this.resetSingleDaily = false,
+    this.countOnSave = false,
+    this.onUseNumbersInSingle,
+    this.onResetSingleDaily,
+    this.onCountOnSave,
     required this.onTranslucency,
     this.onSobrietyModeChanged,
     required this.onPrivacyLockDelay,
@@ -178,6 +184,12 @@ class SettingsDialog extends StatefulWidget {
   final bool requireLongPressNote;
   final bool extendedDuration;
   final bool minimalMomentOptions;
+  final bool useNumbersInSingle;
+  final bool resetSingleDaily;
+  final bool countOnSave;
+  final ValueChanged<bool>? onUseNumbersInSingle;
+  final ValueChanged<bool>? onResetSingleDaily;
+  final ValueChanged<bool>? onCountOnSave;
   final bool enableTranslucency;
   final int privacyLockDelayMinutes;
   final bool isSystemLockAvailable;
@@ -280,6 +292,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool requireLongPressNote;
   late bool extendedDuration;
   late bool minimalMomentOptions;
+  late bool useNumbersInSingle;
+  late bool resetSingleDaily;
+  late bool countOnSave;
   late bool enableTranslucency;
   late int privacyLockDelayMinutes;
   late String privacyLockType;
@@ -885,6 +900,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
     requireLongPressNote = widget.requireLongPressNote;
     extendedDuration = widget.extendedDuration;
     minimalMomentOptions = widget.minimalMomentOptions;
+    useNumbersInSingle = widget.useNumbersInSingle;
+    resetSingleDaily = widget.resetSingleDaily;
+    countOnSave = widget.countOnSave;
     enableTranslucency = widget.enableTranslucency;
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
     privacyLockType = widget.privacyLockType;
@@ -1735,6 +1753,75 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: (bool value) {
           setState(() => minimalMomentOptions = value);
           widget.onMinimalMomentOptions(value);
+        },
+        status: null,
+      ),
+      item(
+        title: 'Use Numbers in Single',
+        subtitle:
+            'Display sequential 2-digit numbers (00–99) instead of icons in single history moments',
+        category: 'Moments',
+        icon: Icons.pin_outlined,
+        keywords: [
+          'single',
+          'numbers',
+          'counter',
+          'digits',
+          'history',
+          'moments',
+          '00',
+        ],
+        kind: 'switch',
+        boolValue: useNumbersInSingle,
+        onBoolChanged: (bool value) {
+          setState(() => useNumbersInSingle = value);
+          widget.onUseNumbersInSingle?.call(value);
+        },
+        status: null,
+      ),
+      item(
+        title: 'Reset Daily',
+        subtitle:
+            'Restart single count from 00 every calendar day while preserving past history',
+        category: 'Moments',
+        icon: Icons.restart_alt_rounded,
+        keywords: [
+          'reset',
+          'daily',
+          'midnight',
+          'single',
+          'counter',
+          'day',
+          'history',
+        ],
+        kind: 'switch',
+        boolValue: resetSingleDaily,
+        onBoolChanged: (bool value) {
+          setState(() => resetSingleDaily = value);
+          widget.onResetSingleDaily?.call(value);
+        },
+        status: null,
+      ),
+      item(
+        title: 'Enable Count on Save',
+        subtitle:
+            'Show the 2-digit count on the tap pulse animation instead of "SINGLE saved"',
+        category: 'Moments',
+        icon: Icons.touch_app_outlined,
+        keywords: [
+          'save',
+          'count',
+          'timer',
+          'pulse',
+          'single',
+          'feedback',
+          'tap',
+        ],
+        kind: 'switch',
+        boolValue: countOnSave,
+        onBoolChanged: (bool value) {
+          setState(() => countOnSave = value);
+          widget.onCountOnSave?.call(value);
         },
         status: null,
       ),
@@ -4213,6 +4300,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                               enableNoteOnClick: enableNoteOnClick,
                               extendedDuration: extendedDuration,
                               minimalMomentOptions: minimalMomentOptions,
+                              useNumbersInSingle: useNumbersInSingle,
+                              resetSingleDaily: resetSingleDaily,
+                              countOnSave: countOnSave,
                               notesCount: entries
                                   .where((e) => e.note.isNotEmpty)
                                   .length,
@@ -4244,6 +4334,18 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onMinimalMomentOptionsChanged: (value) {
                                 setState(() => minimalMomentOptions = value);
                                 widget.onMinimalMomentOptions(value);
+                              },
+                              onUseNumbersInSingleChanged: (value) {
+                                setState(() => useNumbersInSingle = value);
+                                widget.onUseNumbersInSingle?.call(value);
+                              },
+                              onResetSingleDailyChanged: (value) {
+                                setState(() => resetSingleDaily = value);
+                                widget.onResetSingleDaily?.call(value);
+                              },
+                              onCountOnSaveChanged: (value) {
+                                setState(() => countOnSave = value);
+                                widget.onCountOnSave?.call(value);
                               },
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),

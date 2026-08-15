@@ -37,6 +37,7 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
     final days = DateTime(_month.year, _month.month + 1, 0).day;
     final cells = leading + days;
     final rowCount = (cells / 7).ceil();
+    final todayKey = dateKey(DateTime.now());
 
     return AppSheet(
       p: widget.p,
@@ -62,6 +63,8 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                     style: TextStyle(
                       color: widget.p.text,
                       fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      letterSpacing: -0.2,
                     ),
                   ),
                 ),
@@ -76,25 +79,18 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                 ),
               ],
             ),
+            const SizedBox(height: 4),
             Row(
               children: [
-                for (final label in const [
-                  'Su',
-                  'Mo',
-                  'Tu',
-                  'We',
-                  'Th',
-                  'Fr',
-                  'Sa',
-                ])
+                for (final label in const ['S', 'M', 'T', 'W', 'T', 'F', 'S'])
                   Expanded(
                     child: Text(
                       label,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: widget.p.text3,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -116,14 +112,25 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                   if (day < 1 || day > days) return const SizedBox.shrink();
                   final date = DateTime(_month.year, _month.month, day);
                   final key = dateKey(date);
+                  final isToday = key == todayKey;
                   final available = widget.availableDateKeys.contains(key);
                   final selected = key == dateKey(widget.initialDate);
+
+                  // iOS Calendar Styling:
+                  // 1. Today is highlighted with a solid iOS red circle (#FF3B30) and bold white text.
+                  // 2. Selected (if not today) uses the theme accent circle with bold white text.
+                  // 3. No dot is shown inside the circle for Today or Selected dates.
+                  // 4. Other available event days show a subtle event dot below the date number.
+                  final isHighlighted = isToday || selected;
+                  final Color circleColor = isToday
+                      ? const Color(0xFFFF3B30) // iOS Calendar System Red
+                      : (selected ? widget.p.accent : Colors.transparent);
 
                   return Padding(
                     padding: const EdgeInsets.all(3),
                     child: PressableScale(
-                      enabled: available,
-                      onTap: available
+                      enabled: available || isToday,
+                      onTap: available || isToday
                           ? () {
                               HapticFeedback.mediumImpact();
                               Navigator.pop(context, date);
@@ -133,18 +140,14 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                         duration: const Duration(milliseconds: 140),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected
-                              ? widget.p.accent
-                              : Colors.transparent,
+                          color: circleColor,
                           shape: BoxShape.circle,
-                          boxShadow: selected
+                          boxShadow: isHighlighted
                               ? [
                                   BoxShadow(
-                                    color: widget.p.accent.withValues(
-                                      alpha: 0.3,
-                                    ),
+                                    color: circleColor.withValues(alpha: 0.30),
                                     blurRadius: 8,
-                                    offset: const Offset(0, 4),
+                                    offset: const Offset(0, 3),
                                   ),
                                 ]
                               : null,
@@ -155,32 +158,32 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                             Text(
                               '$day',
                               style: TextStyle(
-                                color: selected
+                                color: isHighlighted
                                     ? Colors.white
-                                    : available
-                                    ? widget.p.text
-                                    : widget.p.text3.withValues(alpha: 0.25),
-                                fontSize: 14,
-                                fontWeight: selected
+                                    : (available
+                                          ? widget.p.text
+                                          : widget.p.text3.withValues(
+                                              alpha: 0.28,
+                                            )),
+                                fontSize: 14.5,
+                                fontWeight: isHighlighted
                                     ? FontWeight.w800
                                     : (available
                                           ? FontWeight.w700
                                           : FontWeight.w500),
                               ),
                             ),
-                            const SizedBox(height: 3),
-                            Container(
-                              width: 4,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? Colors.white
-                                    : available
-                                    ? widget.p.accent
-                                    : Colors.transparent,
-                                shape: BoxShape.circle,
+                            if (!isHighlighted && available) ...[
+                              const SizedBox(height: 2),
+                              Container(
+                                width: 4,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: widget.p.accent,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
