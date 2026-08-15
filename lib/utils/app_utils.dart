@@ -124,6 +124,7 @@ bool isAppIconStyle(String? value) {
     'green',
     'orange',
     'red',
+    'purple',
   }.contains(value);
 }
 

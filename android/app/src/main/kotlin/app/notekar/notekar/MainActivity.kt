@@ -605,7 +605,8 @@ class MainActivity : FlutterActivity() {
             "gold" to "app.notekar.notekar.IconGoldAlias",
             "green" to "app.notekar.notekar.IconGreenAlias",
             "orange" to "app.notekar.notekar.IconOrangeAlias",
-            "red" to "app.notekar.notekar.IconRedAlias"
+            "red" to "app.notekar.notekar.IconRedAlias",
+            "purple" to "app.notekar.notekar.IconPurpleAlias"
         )
         val selected = aliases[style] ?: aliases.getValue("default")
         aliases.values.forEach { aliasName ->

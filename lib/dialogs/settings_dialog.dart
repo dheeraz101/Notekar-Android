@@ -1088,6 +1088,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       'app_icons/green.png',
       'app_icons/orange.png',
       'app_icons/red.png',
+      'app_icons/purple.png',
     ]) {
       precacheImage(AssetImage(path), context);
     }

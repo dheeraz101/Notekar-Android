@@ -26,6 +26,7 @@ class AppIconsSettingsPage extends StatelessWidget {
       'green': ('Green', 'app_icons/green.png'),
       'orange': ('Orange', 'app_icons/orange.png'),
       'red': ('Red', 'app_icons/red.png'),
+      'purple': ('Amethyst', 'app_icons/purple.png'),
     };
 
     return Column(
