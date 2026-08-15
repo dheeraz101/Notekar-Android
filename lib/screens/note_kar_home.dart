@@ -33,7 +33,6 @@ import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
-import 'package:notekar/widgets/home_activity_ring_painter.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
@@ -3126,16 +3125,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     final String smallLabel;
     final String shieldText = _streakShields > 0
-        ? ' • 🛡️ $_streakShields active'
+        ? ' • $_streakShields active'
         : '';
     if (duration.inDays == 0) {
       final hours = duration.inHours;
       smallLabel =
-          'Protecting progress: $hours ${hours == 1 ? 'hour' : 'hours'}$shieldText • $milestoneDaysLeftText';
+          '$hours ${hours == 1 ? 'hr' : 'hrs'} clean$shieldText • $milestoneDaysLeftText';
     } else {
       final days = duration.inDays;
       smallLabel =
-          'Protected for $days ${days == 1 ? 'day' : 'days'}$shieldText • $milestoneDaysLeftText';
+          '$days ${days == 1 ? 'day' : 'days'} clean$shieldText • $milestoneDaysLeftText';
     }
     final double progress = milestoneResult.progress;
 
@@ -3210,7 +3209,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             SizedBox(
               height: 60,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -3225,9 +3224,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                               smallLabel,
                               style: TextStyle(
                                 color: palette.text2,
-                                fontSize: 10,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
+                                letterSpacing: 0.2,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -3268,28 +3267,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       ),
                     ),
                     const SizedBox(width: 8),
-                    SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: CustomPaint(
-                        painter: IosActivityRingPainter(
-                          progress: progress,
-                          color: progressColor,
-                          backgroundColor: palette.surface3,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${(progress * 100).toInt()}%',
-                            style: TextStyle(
-                              color: palette.text,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: _openUrgeSurfing,
                       child: Container(
@@ -3305,7 +3282,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Icon(
                       Icons.chevron_right_rounded,
                       color: palette.text3,

@@ -45,7 +45,7 @@ class LoggingSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.dashboard_customize_outlined,
               title: 'Dashboard',
-              status: '$entriesCount ${'Moments'.localized(context)}',
+              status: '$entriesCount ${'Logs'.localized(context)}',
               color: p.accent,
               onTap: () => onOpenCategory('Dashboard', parent: 'Logging'),
             ),

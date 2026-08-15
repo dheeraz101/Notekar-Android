@@ -307,28 +307,31 @@ class _ConfettiParticleOverlayState extends State<ConfettiParticleOverlay>
   void initState() {
     super.initState();
     final random = math.Random();
-    _particles = List.generate(40, (index) {
+    _particles = List.generate(55, (index) {
       return _Particle(
         x: random.nextDouble(),
-        y: random.nextDouble() * 0.5 - 0.2,
-        speedY: 0.15 + random.nextDouble() * 0.25,
-        speedX: (random.nextDouble() - 0.5) * 0.2,
-        size: 4.0 + random.nextDouble() * 6.0,
+        startY: -0.30 - random.nextDouble() * 0.50,
+        speedY: 1.40 + random.nextDouble() * 0.75,
+        speedX: (random.nextDouble() - 0.5) * 0.35,
+        size: 9.0 + random.nextDouble() * 11.0,
         color: [
           const Color(0xFFFFB703),
           const Color(0xFF0A84FF),
           const Color(0xFF30D158),
           const Color(0xFFFF453A),
           const Color(0xFFBF5AF2),
-        ][random.nextInt(5)],
+          const Color(0xFFFF2D55),
+          const Color(0xFF5AC8FA),
+        ][random.nextInt(7)],
         rotation: random.nextDouble() * math.pi * 2,
+        rotationSpeed: (random.nextDouble() - 0.5) * 8.0,
       );
     });
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat();
+      duration: const Duration(milliseconds: 3500),
+    )..forward();
   }
 
   @override
@@ -353,21 +356,23 @@ class _ConfettiParticleOverlayState extends State<ConfettiParticleOverlay>
 class _Particle {
   _Particle({
     required this.x,
-    required this.y,
+    required this.startY,
     required this.speedY,
     required this.speedX,
     required this.size,
     required this.color,
     required this.rotation,
+    required this.rotationSpeed,
   });
 
-  double x;
-  double y;
+  final double x;
+  final double startY;
   final double speedY;
   final double speedX;
   final double size;
   final Color color;
   final double rotation;
+  final double rotationSpeed;
 }
 
 class _ParticlePainter extends CustomPainter {
@@ -378,27 +383,42 @@ class _ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Fade out smoothly towards the end of the one-shot animation
+    final globalAlpha = progress > 0.80
+        ? (1.0 - ((progress - 0.80) / 0.20)).clamp(0.0, 1.0)
+        : 1.0;
+
+    if (globalAlpha <= 0.0) return;
+
     for (final p in particles) {
-      final currentY = (p.y + (p.speedY * progress)) % 1.2;
+      final currentY = p.startY + (p.speedY * progress);
       final currentX = (p.x + (p.speedX * progress)) % 1.0;
+
+      if (currentY < -0.1 || currentY > 1.2) continue;
 
       final dx = currentX * size.width;
       final dy = currentY * size.height;
 
       final paint = Paint()
-        ..color = p.color.withValues(
-          alpha: (1.0 - (currentY / 1.2)).clamp(0.2, 0.9),
-        )
+        ..color = p.color.withValues(alpha: 0.92 * globalAlpha)
         ..style = PaintingStyle.fill;
 
       canvas.save();
       canvas.translate(dx, dy);
-      canvas.rotate(p.rotation + (progress * math.pi * 2));
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: Offset.zero,
-          width: p.size,
-          height: p.size * 0.6,
+      canvas.rotate(p.rotation + (progress * p.rotationSpeed));
+
+      // Flutter effect: scale width sinusoidally for 3D paper spin
+      final flutterScale = math.sin(progress * 10 + p.rotation);
+      canvas.scale(flutterScale.abs().clamp(0.2, 1.0), 1.0);
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: p.size,
+            height: p.size * 0.55,
+          ),
+          const Radius.circular(2),
         ),
         paint,
       );
@@ -407,5 +427,6 @@ class _ParticlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
+  bool shouldRepaint(covariant _ParticlePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

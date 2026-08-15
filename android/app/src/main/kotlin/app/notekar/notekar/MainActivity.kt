@@ -319,6 +319,44 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "shareImageBytes" -> {
+                    val bytes = call.argument<ByteArray>("bytes")
+                    val fileName = call.argument<String>("fileName") ?: "milestone-card.png"
+                    val titleText = call.argument<String>("title") ?: "Share Milestone Peak"
+                    val text = call.argument<String>("text") ?: ""
+                    if (bytes != null) {
+                        try {
+                            val cacheFolder =
+                                File(applicationContext.cacheDir, "milestones").apply { mkdirs() }
+                            val imageFile = File(cacheFolder, fileName)
+                            imageFile.writeBytes(bytes)
+                            val imageUri = FileProvider.getUriForFile(
+                                applicationContext,
+                                "${packageName}.fileprovider",
+                                imageFile
+                            )
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_STREAM, imageUri)
+                                if (text.isNotBlank()) {
+                                    putExtra(Intent.EXTRA_TEXT, text)
+                                }
+                                type = "image/png"
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, titleText).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(shareIntent)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            result.error("SHARE_IMAGE_FAILED", e.message, null)
+                        }
+                    } else {
+                        result.error("INVALID_ARGS", "Image bytes are missing", null)
+                    }
+                }
+
                 "canInstallPackages" -> {
                     result.success(canInstallPackages())
                 }
