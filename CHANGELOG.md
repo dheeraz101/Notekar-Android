@@ -7,6 +7,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.9] - 2026-08-16 (versionCode 26BE0816) [BR]
+
+### What's New
+
+- Redesign App Icons page and introduce branded edition names
+- Add App Icons selection page and standalone upgrade card
+- Modernize app icon suite and add Amethyst Nebula bonus edition
+
+### Improvements
+
+- Update guides, search index, reset routines, and diagnostics telemetry
+- Remove tick icon overlay from selected app logo options
+- Fixed v6.0.8(26BE0815a) BR
+
+### Bug Fixes
+
+- Polish app icon applying modal and adopt enlarged icon-only gallery grid
+- Restore Download & Install and action buttons in Update Center
+
 ## [6.0.8] - 2026-08-15 (versionCode 26BE0815a) [BR]
 
 ### What's New

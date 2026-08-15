@@ -2,7 +2,7 @@ name: notekar
 description: "Native Android rewrite of the NoteKar timestamp logger."
 publish_to: 'none'
 
-version: 6.0.8+26081501
+version: 6.0.9+26081601
 environment:
   sdk: ^3.12.0
 

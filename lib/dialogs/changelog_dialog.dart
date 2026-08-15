@@ -25,6 +25,25 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.9',
+      date: 'August 16, 2026',
+      highlights: [
+        'Redesign App Icons page and introduce branded edition names',
+        'Add App Icons selection page and standalone upgrade card',
+        'Modernize app icon suite and add Amethyst Nebula bonus edition',
+      ],
+      items: [
+        'Update guides, search index, reset routines, and diagnostics telemetry',
+        'Remove tick icon overlay from selected app logo options',
+        'Polish app icon applying modal and adopt enlarged icon-only gallery grid',
+        'Redesign App Icons page and introduce branded edition names',
+        'Add App Icons selection page and standalone upgrade card',
+        'Restore Download & Install and action buttons in Update Center',
+        'Modernize app icon suite and add Amethyst Nebula bonus edition',
+        'Fixed v6.0.8(26BE0815a) BR',
+      ],
+    ),
+    (
       version: '6.0.8',
       date: 'August 15, 2026',
       highlights: [
