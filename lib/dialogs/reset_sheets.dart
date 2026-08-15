@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -281,10 +281,10 @@ class AppIconApplyingDialog extends StatelessWidget {
         color: Colors.transparent,
         child: Container(
           width: 250,
-          padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
           decoration: BoxDecoration(
             color: p.surface,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(color: p.border),
             boxShadow: [
               BoxShadow(
@@ -297,30 +297,22 @@ class AppIconApplyingDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: 54,
-                height: 54,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CupertinoActivityIndicator(radius: 16, color: p.accent),
-                    Icon(Icons.apps_rounded, color: p.accent, size: 23),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
+              CupertinoActivityIndicator(radius: 16, color: p.accent),
+              const SizedBox(height: 18),
               Text(
-                'Applying app icon',
+                'Applying app icon'.localized(context),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: p.text,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: 6),
               Text(
-                'Please wait while Android refreshes NoteKar.',
+                'Please wait while Android refreshes NoteKar.'.localized(
+                  context,
+                ),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: p.text2, fontSize: 13, height: 1.35),
               ),

@@ -105,21 +105,21 @@ class AppIconsSettingsPage extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 72,
-                height: 72,
-                padding: const EdgeInsets.all(3),
+                width: 80,
+                height: 80,
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(
-                      color: p.accent.withValues(alpha: 0.22),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+                      color: p.accent.withValues(alpha: 0.28),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(17),
+                  borderRadius: BorderRadius.circular(18),
                   child: Image.asset(currentIcon.asset, fit: BoxFit.cover),
                 ),
               ),
@@ -151,13 +151,13 @@ class AppIconsSettingsPage extends StatelessWidget {
                       '${currentIcon.title.localized(context)} • ${currentIcon.subtitle.localized(context)}',
                       style: TextStyle(
                         color: p.text,
-                        fontSize: 16,
+                        fontSize: 16.5,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
-                      '8 Handcrafted Editions'.localized(context),
+                      'Tap any icon below to switch style'.localized(context),
                       style: TextStyle(color: p.text3, fontSize: 12.5),
                     ),
                   ],
@@ -169,7 +169,7 @@ class AppIconsSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing20),
 
-        // 2-Column Luxury Grid of 8 Icon Editions
+        // 4-Column Icon-Only Grid with Large App Logos
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: spacing16),
           child: GridView.builder(
@@ -177,10 +177,10 @@ class AppIconsSettingsPage extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: kAppIconOptions.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 2.15,
+              crossAxisCount: 4,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.0,
             ),
             itemBuilder: (context, index) {
               final item = kAppIconOptions[index];
@@ -194,71 +194,64 @@ class AppIconsSettingsPage extends StatelessWidget {
                     NotekarHaptics.selection('standard');
                     onAppIconStyleChanged(item.key);
                   },
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(20),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     curve: Curves.easeOutCubic,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? p.accent.withValues(alpha: 0.12)
+                          ? p.accent.withValues(alpha: 0.14)
                           : p.surface2,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected ? p.accent : p.border,
-                        width: isSelected ? 2 : 1,
+                        width: isSelected ? 2.5 : 1,
                       ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: p.accent.withValues(alpha: 0.20),
+                                blurRadius: 14,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
                     ),
-                    child: Row(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                           child: Image.asset(
                             item.asset,
-                            width: 44,
-                            height: 44,
                             fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                item.title.localized(context),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: isSelected ? p.accent : p.text,
-                                  fontSize: 14,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w800
-                                      : FontWeight.w700,
+                        if (isSelected)
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: p.accent,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: p.surface,
+                                  width: 1.5,
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                item.subtitle.localized(context),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: p.text3, fontSize: 11),
+                              child: const Icon(
+                                Icons.check_rounded,
+                                color: Colors.white,
+                                size: 12,
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                        if (isSelected) ...[
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.check_circle_rounded,
-                            color: p.accent,
-                            size: 18,
-                          ),
-                        ],
                       ],
                     ),
                   ),

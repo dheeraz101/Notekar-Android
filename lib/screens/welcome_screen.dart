@@ -672,7 +672,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       'purple': ('Amethyst', 'app_icons/purple.png'),
     };
 
-    final currentAsset = icons[_appIconStyle]?.$2 ?? 'icon-maskable-512.png';
+    final currentEntry = icons[_appIconStyle];
+    final currentAsset = currentEntry?.$2 ?? 'icon-maskable-512.png';
+    final currentTitle = currentEntry?.$1 ?? 'Aurora';
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -690,7 +692,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: p.accent.withValues(alpha: 0.25),
+                    color: p.accent.withValues(alpha: 0.28),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -715,16 +717,25 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Center(
-            child: Text(
-              'Choose your favorite handcrafted luxury icon edition for your home screen.'
-                  .localized(context),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                'Selected: $currentTitle'.localized(context),
+                style: TextStyle(
+                  color: p.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -733,7 +744,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               crossAxisCount: 4,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 0.74,
+              childAspectRatio: 1.0,
             ),
             itemBuilder: (context, index) {
               final entry = icons.entries.elementAt(index);
@@ -756,67 +767,57 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 4,
-                  ),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? p.accent.withValues(alpha: 0.12)
+                        ? p.accent.withValues(alpha: 0.14)
                         : p.surface2,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected ? p.accent : p.border,
-                      width: isSelected ? 2 : 1,
+                      width: isSelected ? 2.5 : 1,
                     ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: p.accent.withValues(alpha: 0.20),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : null,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
                     children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              entry.value.$2,
-                              width: 44,
-                              height: 44,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          if (isSelected)
-                            Positioned(
-                              right: -4,
-                              bottom: -4,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: p.accent,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check_rounded,
-                                  color: Colors.white,
-                                  size: 11,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        entry.value.$1.localized(context),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: isSelected ? p.accent : p.text,
-                          fontSize: 11.5,
-                          fontWeight: isSelected
-                              ? FontWeight.w800
-                              : FontWeight.w600,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          entry.value.$2,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
                         ),
                       ),
+                      if (isSelected)
+                        Positioned(
+                          right: -2,
+                          bottom: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: p.accent,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: p.surface, width: 1.5),
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: Colors.white,
+                              size: 12,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
