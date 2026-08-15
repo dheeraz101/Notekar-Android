@@ -205,16 +205,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _showStartupContent(SharedPreferences prefs) async {
-    final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-
-    if (!welcomeSeen) {
-      // Welcome sheet is now triggered directly in _load() for speed.
-      await prefs.setString(_lastSeenVersionKey, appVersion);
-      return;
-    }
-
-    // Do not show whatsnew popup automatically anymore.
-    await prefs.setString(_lastSeenVersionKey, appVersion);
+    // Startup content/walkthrough check is now deferred to postFrameCallback in _load()
   }
 
   Future<bool> _canUseMotionSensor() async {
@@ -530,23 +521,21 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     _applySystemUiStyle();
 
-    // Phase 2: Deferred loading after the first frame has painted
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-      final remindersWalkthroughSeen =
-          prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
-      final securityWalkthroughSeen =
-          prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
-      final networkWalkthroughSeen =
-          prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
-      final sobrietyWalkthroughSeen =
-          prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
+      final lastSeenVersion = prefs.getString(_lastSeenVersionKey) ?? '';
+      final appIconsWalkthroughSeen =
+          prefs.getBool('notekar.appIconsWalkthroughSeen_v9') ?? false;
+      final singleNumberingWalkthroughSeen =
+          prefs.getBool('notekar.singleNumberingWalkthroughSeen_v7') ?? false;
+
+      final isVersionUpgrade =
+          lastSeenVersion.isNotEmpty && lastSeenVersion != appVersion;
 
       if (!welcomeSeen ||
-          !remindersWalkthroughSeen ||
-          !securityWalkthroughSeen ||
-          !networkWalkthroughSeen ||
-          !sobrietyWalkthroughSeen) {
+          isVersionUpgrade ||
+          !appIconsWalkthroughSeen ||
+          !singleNumberingWalkthroughSeen) {
         if (mounted) {
           _showWelcomeIfNeeded(prefs);
         }
@@ -768,6 +757,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
+    final lastSeenVersion = prefs.getString(_lastSeenVersionKey) ?? '';
     final remindersWalkthroughSeen =
         prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
     final securityWalkthroughSeen =
@@ -779,7 +769,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final singleNumberingWalkthroughSeen =
         prefs.getBool('notekar.singleNumberingWalkthroughSeen_v7') ?? false;
     final appIconsWalkthroughSeen =
-        prefs.getBool('notekar.appIconsWalkthroughSeen_v8') ?? false;
+        prefs.getBool('notekar.appIconsWalkthroughSeen_v9') ?? false;
+
+    final isNewVersion =
+        lastSeenVersion.isNotEmpty && lastSeenVersion != appVersion;
 
     if (!welcomeSeen) {
       // 1. New Users: Show full onboarding flow with all pages
@@ -825,12 +818,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
       );
       await prefs.setBool(_welcomeSeenKey, true);
+      await prefs.setString(_lastSeenVersionKey, appVersion);
       await prefs.setBool('notekar.remindersWalkthroughSeen', true);
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
       await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
-      await prefs.setBool('notekar.appIconsWalkthroughSeen_v8', true);
+      await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
     } else {
       // 2. Upgraded Users: Dynamically compile ONLY newly introduced feature cards
       final List<String> upgradePages = [];
@@ -875,15 +869,34 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ),
           ),
         );
-
-        // Mark all shown upgrade cards as seen (won't be shown again until factory reset)
-        await prefs.setBool('notekar.appIconsWalkthroughSeen_v8', true);
-        await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
-        await prefs.setBool('notekar.remindersWalkthroughSeen', true);
-        await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
-        await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
-        await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
+      } else if (isNewVersion) {
+        // If version updated but standalone feature cards were already seen, show the What's New Hero sheet
+        if (!mounted) return;
+        await showGeneralDialog<void>(
+          context: context,
+          barrierColor: Colors.black.withValues(alpha: 0.42),
+          barrierDismissible: true,
+          barrierLabel: 'Close What\'s New',
+          transitionDuration: const Duration(milliseconds: 180),
+          pageBuilder: (_, _, _) => ChangelogDialog(
+            p: p,
+            latestOnly: true,
+            blur:
+                !_reduceMotion &&
+                _enableTranslucency &&
+                AdaptiveEngine().supportsBlur,
+          ),
+        );
       }
+
+      // Mark version & walkthroughs as seen for this version
+      await prefs.setString(_lastSeenVersionKey, appVersion);
+      await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
+      await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
+      await prefs.setBool('notekar.remindersWalkthroughSeen', true);
+      await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
+      await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
+      await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
     }
   }
 
