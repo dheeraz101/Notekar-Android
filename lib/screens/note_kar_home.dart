@@ -1305,6 +1305,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'streak_shields',
         'last_shield_granted_threshold',
         'notekar.sobrietyWalkthroughSeen_v6',
+        'notekar.singleNumberingWalkthroughSeen_v7',
+        'notekar.appIconsWalkthroughSeen_v8',
+        'notekar.securityWalkthroughSeen_v5',
+        'notekar.networkWalkthroughSeen_v5',
+        'notekar.remindersWalkthroughSeen',
+        'notekar.autoStartCardDismissed',
         'm-locale',
         'm-theme',
         'm-default-mode',
@@ -1317,6 +1323,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-haptic-style',
         'm-history-density',
         'm-privacy-lock',
+        'm-privacy-lock-type',
         'm-backup-reminder-days',
         'm-last-backup-at',
         'm-last-backup-reminder-day',
@@ -1340,15 +1347,28 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-extended-duration',
         'm-translucency',
         'm-minimal-moment-options',
+        'm-use-numbers-in-single',
+        'm-reset-single-daily',
+        'm-count-on-save',
         'm-privacy-lock-delay',
         'm-update-status',
         'm-last-update-check',
-        'notekar.remindersWalkthroughSeen',
-        'notekar.autoStartCardDismissed',
+        'reminder_daily_enabled',
+        'reminder_inactivity_enabled',
+        'reminder_weekly_enabled',
+        'reminder_monthly_enabled',
+        'enable_note_on_click',
+        'obfuscate_in_recents',
+        'show_persistent_notification',
+        'recent_settings_searches',
+        'recent_note_searches',
+        'notekar.commits_cache',
+        'notekar.commits_cache_time',
       ]) {
         await prefs.remove(key);
       }
     }
+    await _setAppIconStyle('default', showToast: false);
     await Future<void>.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
     setState(() {
@@ -1457,6 +1477,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setInt('streak_shields', 0);
     await _prefs?.setInt('last_shield_granted_threshold', 0);
     await _prefs?.remove('notekar.sobrietyWalkthroughSeen_v6');
+    await _prefs?.remove('notekar.singleNumberingWalkthroughSeen_v7');
+    await _prefs?.remove('notekar.appIconsWalkthroughSeen_v8');
     await _prefs?.setString('m-theme', _theme);
     await _prefs?.setString('m-default-mode', _defaultMode);
     await _prefs?.setInt('m-delay', _tapDelay);
@@ -1491,6 +1513,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-translucency', _enableTranslucency);
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
     await _prefs?.setString('m-locale', _locale);
+    await _prefs?.remove('reminder_daily_enabled');
+    await _prefs?.remove('reminder_inactivity_enabled');
+    await _prefs?.remove('reminder_weekly_enabled');
+    await _prefs?.remove('reminder_monthly_enabled');
+    await _prefs?.remove('recent_settings_searches');
+    await _prefs?.remove('recent_note_searches');
+    await _setAppIconStyle('default', showToast: false);
     if (mounted) {
       NoteKarApp.of(context)?.setLocale(_locale);
     }

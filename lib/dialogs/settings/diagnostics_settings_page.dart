@@ -93,12 +93,12 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             DiagnosticRow(
               p: widget.p,
               label: 'App Version',
-              value: 'v${widget.appVersion} (${widget.appBuildNumber})',
+              value: 'v${widget.appVersion}',
             ),
             DiagnosticRow(
               p: widget.p,
-              label: 'Build Date',
-              value: widget.appBuildDate,
+              label: 'Build Number',
+              value: widget.appBuildNumber,
             ),
             DiagnosticRow(
               p: widget.p,
@@ -193,7 +193,8 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
     final logs = AppLogger().diagnosticLogs;
     return [
       'NoteKar diagnostics',
-      'Version: v${widget.appVersion} (${widget.appBuildNumber})',
+      'Version: v${widget.appVersion}',
+      'Build number: ${widget.appBuildNumber}',
       'Build date: ${widget.appBuildDate}',
       'Moments: ${entries.length} total, $todayCount today',
       'Storage: local offline storage',
@@ -306,18 +307,35 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
           children: [
             DiagnosticRow(
               p: widget.p,
+              label: 'Device Model',
+              value: engine.model,
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'OS Version',
+              value: engine.osVersion,
+            ),
+            DiagnosticRow(
+              p: widget.p,
               label: 'Performance Tier',
               value: engine.tier.name.toUpperCase(),
             ),
             DiagnosticRow(
               p: widget.p,
               label: 'RAM Capacity',
-              value: '${engine.ramGb} GB',
+              value: engine.ramGb > 0 ? '${engine.ramGb} GB' : 'Dynamic',
             ),
             DiagnosticRow(
               p: widget.p,
               label: 'CPU Cores',
               value: '${engine.processors} Cores',
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Architecture',
+              value: engine.supportedAbis.isNotEmpty
+                  ? engine.supportedAbis.first
+                  : 'arm64-v8a',
             ),
             DiagnosticRow(
               p: widget.p,

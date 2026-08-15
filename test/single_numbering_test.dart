@@ -218,5 +218,22 @@ void main() {
     test('kAppBuildNumber adheres to YY<CHANNEL>MMDD format', () {
       expect(kAppBuildNumber, matches(r'^\d{2}[A-Z]{1,2}\d{4}[a-z]?$'));
     });
+
+    test('isAppIconStyle supports all 8 handcrafted luxury editions', () {
+      final styles = [
+        'default',
+        'black',
+        'blue',
+        'gold',
+        'green',
+        'orange',
+        'red',
+        'purple',
+      ];
+      for (final style in styles) {
+        expect(isAppIconStyle(style), isTrue);
+      }
+      expect(isAppIconStyle('unknown_style'), isFalse);
+    });
   });
 }

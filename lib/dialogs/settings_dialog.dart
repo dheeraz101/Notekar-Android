@@ -1267,7 +1267,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
-        status: '$appVersion ($kAppBuildNumber)',
+        status: 'v$appVersion',
+      ),
+      item(
+        title: 'Build Number',
+        subtitle: 'The compiled internal build identifier',
+        category: 'Advanced',
+        icon: Icons.tag_rounded,
+        keywords: [
+          'build number',
+          'build id',
+          'build identifier',
+          'compilation',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: kAppBuildNumber,
       ),
       item(
         title: 'Release Date',
@@ -1570,14 +1586,80 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
       item(
         title: 'App Icons',
-        subtitle: 'Change the Android launcher icon',
+        subtitle: 'Personalize with 8 handcrafted luxury editions',
         category: 'App Icons',
         icon: Icons.apps_rounded,
-        keywords: ['icon', 'launcher', 'home screen', 'app icon'],
+        keywords: [
+          'icon',
+          'launcher',
+          'home screen',
+          'app icon',
+          'aurora',
+          'midnight',
+          'sapphire',
+          'imperial',
+          'emerald',
+          'sunset',
+          'crimson',
+          'amethyst',
+          'logo',
+        ],
         kind: 'selector',
         boolValue: null,
         onBoolChanged: null,
-        status: appIconStyle[0].toUpperCase() + appIconStyle.substring(1),
+        status: switch (appIconStyle) {
+          'default' => 'Aurora',
+          'black' => 'Midnight',
+          'blue' => 'Sapphire',
+          'gold' => 'Imperial',
+          'green' => 'Emerald',
+          'orange' => 'Sunset',
+          'red' => 'Crimson',
+          'purple' => 'Amethyst',
+          _ => 'Aurora',
+        },
+      ),
+      item(
+        title: 'Developer Options',
+        subtitle: 'Diagnostics, device health, network monitor, and commits',
+        category: 'Developer Options',
+        icon: Icons.developer_mode_rounded,
+        keywords: [
+          'developer',
+          'options',
+          'debug',
+          'commits',
+          'diagnostics',
+          'device health',
+          'network monitor',
+          'logs',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'View',
+      ),
+      item(
+        title: 'Sobriety Tracker',
+        subtitle: 'Track recovery streak, milestone badges, and export cards',
+        category: 'Sobriety',
+        icon: Icons.spa_rounded,
+        keywords: [
+          'sobriety',
+          'tracker',
+          'days sober',
+          'milestones',
+          'streak',
+          'badges',
+          'celebration',
+          'pledge',
+          'clean',
+          'recovery',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: enableSobrietyMode ? 'Active' : 'Off',
       ),
       item(
         title: 'Dashboard',
@@ -4591,6 +4673,49 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     text:
                                         'Enable in Settings > Logging to show a low-priority, sticky control notification in the system drawer for instant checking IN/OUT from the lock screen.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.pin_outlined,
+                                    title:
+                                        'Sequential Single Numbering (00–99)',
+                                    text:
+                                        'Enable "Use Numbers in Single" under Settings > Logging > Moments to show clean 2-digit sequential counters (00 to 99) on standalone moments. Enable "Reset Daily" to automatically restart from 00 every midnight.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.touch_app_outlined,
+                                    title: 'Count on Save Pulse',
+                                    text:
+                                        'Turn on "Enable Count on Save" in Settings > Logging > Moments to display your updated 2-digit sequential count directly inside the glowing ripple pulse on the home screen when tapping.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.apps_rounded,
+                                    title: '8 Luxury App Icon Editions',
+                                    text:
+                                        'Personalize your home screen with 8 handcrafted launcher styles under Settings > Personalization > App Icons: Aurora (Default), Midnight (Onyx), Sapphire (Ocean), Imperial (Gold), Emerald (Forest), Sunset (Coral), Crimson (Velvet), and Amethyst (Nebula).',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.spa_rounded,
+                                    title: 'Sobriety Tracker & Milestone Cards',
+                                    text:
+                                        'Track your recovery journey with live streak counters, unlock 10 milestone badges with confetti celebrations, and generate high-res shareable PNG cards under Settings > Personalization > Sobriety Tracker.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.calendar_month_rounded,
+                                    title: 'iOS Calendar & Date Navigation',
+                                    text:
+                                        'Tap any date in the History screen to launch the fluid calendar picker with month controls, highlighted log days, and instant jump to Today.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.developer_mode_rounded,
+                                    title: 'Developer Options & Telemetry',
+                                    text:
+                                        'Inspect internal diagnostics, device hardware health metrics, real-time network request audits, and GitHub commits cache under Settings > Advanced > Developer Options.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -4759,6 +4884,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         'How do I log directly from the lock screen?',
                                     answer:
                                         'Turn on "Persistent Control" in Settings > Logging. A sticky, low-priority control card will appear in your notification drawer with quick actions to log IN, OUT, or write a quick note instantly.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How does Sequential Single Numbering work?',
+                                    answer:
+                                        'When "Use Numbers in Single" is enabled, single moments are tagged with 00 to 99 sequence badges. If "Reset Daily" is enabled, the count restarts at 00 every midnight while keeping past days intact.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Where are Diagnostics and Network Monitor?',
+                                    answer:
+                                        'Advanced tools and telemetry are organized under Settings > Advanced > Developer Options, including real-time hardware health, diagnostics logs, network audits, and cached commit feeds.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I export my Sobriety Milestones?',
+                                    answer:
+                                        'Open Settings > Personalization > Sobriety Tracker, tap on any unlocked milestone badge in the milestones gallery, and tap "Export Milestone Card" to share a high-res image directly.',
                                   ),
                                 ],
                               ),
