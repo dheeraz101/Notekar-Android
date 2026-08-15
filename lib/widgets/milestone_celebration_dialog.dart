@@ -157,7 +157,7 @@ Future<void> showMilestoneUnlockDialog({
                                 onPressed: () => Navigator.pop(context),
                                 icon: const Icon(Icons.check_rounded, size: 20),
                                 label: Text(
-                                  'Continue'.localized(context),
+                                  'Done'.localized(context),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                   ),

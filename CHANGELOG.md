@@ -7,11 +7,31 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [6.0.7] - 2026-08-13 (versionCode 37) [BR]
+## [6.0.7] - 2026-08-15 (Build 26BE0815) [BR]
 
-### Improvements
+### What's New
 
-- Replace all CircularProgressIndicator spinners with CupertinoActivityIndicator
+- **2-Digit Single Moment Numbering (`00`–`99`)**: Sequential number badge for single moments with
+  automatic rollover back to `00`.
+- **Daily Reset for Single Moments**: Optional setting to automatically reset sequence counting back
+  to `00` each new calendar day while preserving full history.
+- **Count on Save Pulse Feedback**: Real-time main screen indicator displaying saved moment count (
+  `00 saved`, `01 saved`...).
+- **Dynamic iOS-Style Calendar Picker**: Calendar date selector with iOS Red selected date
+  highlight, event dots for days with logs, and single-letter weekday headers.
+- **Milestone Peak Card Image Export**: High-resolution PNG image generation with native Android
+  `FileProvider` and centered `CupertinoActivityIndicator` spinner.
+- **Research-Calibrated Celebration Confetti**: 85-particle multi-tier celebration explosion (
+  glitter, ribbons, hero streamers) with 3D paper flutter and gravity dynamics.
+- **Meaningful Build Numbers Scheme**: Standardized `YY<CHANNEL>MMDD[suffix]` build format with
+  automated same-day suffix incrementing.
+
+### Improvements & Polish
+
+- Streamline Home Sobriety Streak Card layout to prevent text truncation across all screen sizes.
+- Optimize Milestone Unlock celebration dialog launch with zero perceptible lag (220ms
+  easeOutCubic).
+- Replace all legacy `CircularProgressIndicator` instances with native `CupertinoActivityIndicator`.
 
 ## [6.0.6] - 2026-08-12 (versionCode 36) [BR]
 

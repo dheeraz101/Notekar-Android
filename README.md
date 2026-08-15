@@ -63,20 +63,32 @@ with minimal interaction.
 
 ## 🎯 Features & Highlights
 
-- **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly.
+- **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly with
+  tactile haptics.
 - **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for
   work/study) and **Single mode** (one-shot timestamp logging).
-- **Rich Local Storage**: Fast, persistent local storage powered
-  by [Hive](https://pub.dev/packages/hive) & `SharedPreferences`.
-- **Android OS Auto-Backup Support**: Supports standard Android system auto-backup (Google Drive
-  system backup), ensuring your data can be restored when switching Android devices.
-- **Transparent & Minimal Permissions**:
-    - `INTERNET`: Exclusively used to check for software releases and fetch bug fix announcements.
-    - `POST_NOTIFICATIONS`: Used locally for update alerts and timestamp reminders.
-- **Zero Backend / Zero Analytics**: No cloud databases, no user accounts, no tracking scripts, no
-  third-party ads.
-- **Data Control & Export**: Export all timestamp entries into standard CSV or JSON formats at any
-  time.
+- **2-Digit Single Moments Numbering**: Clean sequence counter from `00` to `99` with automatic
+  rollover back to `00`, optional daily reset, and "Count on Save" pulse badges (`00 saved`,
+  `01 saved`...).
+- **Sobriety Companion & Milestone Map**:
+    - **21 Neuroscience-Backed Milestones**: Track sobriety with 34 narrative themes (Science,
+      Warrior, Samurai, Anime, Cyberpunk, etc.).
+    - **Shareable Milestone Peak Card**: High-resolution PNG image rendering and sharing via Android
+      native share sheet.
+    - **Research-Backed Confetti**: 85-particle celebration explosion with 3D paper flutter and
+      gravity dynamics.
+    - **Urge Surfing Breathing Guide**: Interactive 4-7-8 breathing circle for impulse control.
+    - **Streak Shields**: Safety-net mechanics preventing frustrating streak breaks.
+- **Dynamic iOS-Style Calendar Picker**: Calendar with iOS Red selected date circle, event dots for
+  days with logs, and single-letter weekday headers.
+- **Hardware-Backed Privacy & Security**:
+    - Encrypted local Hive storage with AES-256 Android Keystore keys.
+    - Biometric authentication & custom SHA-256 encrypted PIN lock.
+    - Recent app switcher obfuscation (`FLAG_SECURE`).
+- **Android 2x2 Interactive App Widget**: Log moments and monitor sobriety progress directly from
+  your Android home screen.
+- **Zero Backend / Zero Analytics**: 100% offline-first, no accounts, no ads, no trackers. Full
+  local JSON/CSV backup and restore.
 
 ---
 
@@ -84,15 +96,14 @@ with minimal interaction.
 
 NoteKar is built using modern, performance-oriented technologies:
 
-| Component            | Technology                                                                    |
-|:---------------------|:------------------------------------------------------------------------------|
-| **Language**         | [Dart](https://dart.dev/)                                                     |
-| **Framework**        | [Flutter](https://flutter.dev/) (SDK 3.12.0+)                                 |
-| **Local Database**   | [Hive](https://pub.dev/packages/hive) (NoSQL, lightning-fast key-value store) |
-| **State Management** | [Provider](https://pub.dev/packages/provider)                                 |
-| **Architecture**     | Clean Architecture                                                            |
-| **UI & Design**      | Custom Apple-inspired design system with AMOLED dark mode support.            |
-| **Platform Support** | Android 5.0 (API 21+) and above                                               |
+| Component            | Technology                                                                      |
+|:---------------------|:--------------------------------------------------------------------------------|
+| **Language**         | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/)                   |
+| **Framework**        | [Flutter](https://flutter.dev/) (SDK 3.12.0+)                                   |
+| **Local Database**   | [Hive](https://pub.dev/packages/hive) (AES-256 encrypted NoSQL key-value store) |
+| **State Management** | [Provider](https://pub.dev/packages/provider)                                   |
+| **Design System**    | Custom Apple HIG & iOS-inspired design system with AMOLED dark mode support.    |
+| **Platform Support** | Android 5.0 (API 21+) and above                                                 |
 
 ---
 
@@ -129,30 +140,19 @@ If NoteKar helps you, you can support the project here:
 
 Your support helps keep NoteKar free, offline-first, and actively maintained.
 
-## 🚀 Version Release Scheme
-
-NoteKar uses shortcodes in version tags to differentiate build stability:
-
-- **BR (Beta Release)**: Early access, pre-release builds featuring experimental UI changes and
-  active feature development.
-- **SR (Security Release)**: Critical maintenance updates, library upgrades, security patches, and
-  hotfixes.
-- **SB (Stable Build)**: Production-ready public builds that have passed thorough quality assurance
-  and stability tests.
-
 ---
 
-## 🔮 Upcoming Development Roadmap
+## 🚀 Version Release Scheme & Build Numbers
 
-We are planning to build the following features in upcoming updates:
+NoteKar uses a structured build numbering scheme: `YY<CHANNEL>MMDD[suffix]`
 
-- **Sobriety (Relapse / Nofap) Streaks & Day Counter**:
-    - **Dynamic Streak Widget**: Dynamic day counter card with milestone awards and streak progress
-      tracks.
-    - **Relapse Trigger Log**: Privacy-focused triggers diary to analyze mood, location, or time
-      patterns offline.
-    - **AMOLED Lockscreen Overlay**: Fast checking from home widgets to keep the user accountable
-      without opening the app.
+- **Channel Codes**:
+    - `BE` (Beta / Development Release): Active feature experimentation.
+    - `ST` (Stable Release): Production-tested releases.
+    - `SE` (Security / Patch Release): Critical hotfixes and library upgrades.
+- **Format Example**: `26BE0815` (Year 2026, Beta Channel, August 15). Multiple builds on the same
+  date automatically increment suffixes: `26BE0815a`, `26BE0815b`.
+- **Android versionCode**: Internally mapped to unique sequential integers (e.g. `26081501`).
 
 ---
 
@@ -172,28 +172,36 @@ NoteKar Android meets all official F-Droid inclusion requirements:
 
 ```
 Notekar - Flutter/
-├── android/                # Android native project files & Gradle build scripts
-├── assets/                 # App fonts (Inter) and icon resources
-├── fastlane/               # F-Droid Fastlane metadata & graphics
-│   └── metadata/android/en-US/
+├── android/                        # Android native project files & FileProvider config
+├── assets/                         # App fonts (Inter) and icon resources
+├── fastlane/                       # F-Droid Fastlane metadata & graphics
 ├── lib/
-│   ├── main.dart           # App entry point, Hive DB init, and theme setup
-│   ├── dialogs/            # Settings, confirmation & note dialogs
-│   ├── models/             # Data models for timestamp entries
-│   ├── screens/            # Home screen & history views
-│   ├── utils/              # Database wrappers & helper functions
-│   └── widgets/            # Custom UI components & interactive buttons
-├── screenshot/             # GitHub banner graphic (notekar_banner.png)
-├── CHANGELOG.md            # Version release history
-├── CONTRIBUTING.md         # Developer contribution guidelines
-├── CODE_OF_CONDUCT.md      # Community Code of Conduct
-├── SECURITY.md            # Security policy & vulnerability reporting
-├── PRIVACY_POLICY.md       # Privacy policy reference
-├── TERMS.md                # Terms of use reference
-├── pubspec.yaml            # Project dependencies & asset configuration
-├── README.md               # App documentation
-├── LICENSE                 # MIT License
-└── .github/                # Funding & GitHub Issue/PR templates
+│   ├── main.dart                   # App entry point, Hive DB init, and theme setup
+│   ├── dialogs/                    # Modals, bottom sheets & settings views
+│   │   ├── settings/               # Modular settings pages (Logging, Moments, Sobriety, Privacy, etc.)
+│   │   ├── calendar_dialog.dart    # Dynamic iOS-style calendar date picker
+│   │   ├── shareable_milestone_sheet.dart # High-res milestone card PNG export
+│   │   └── urge_surfing_dialog.dart# 4-7-8 breathing exercise companion
+│   ├── models/                     # Data models (Moments, Sobriety Milestones, Palette, Backup)
+│   ├── screens/                    # Home screen, History view, and Welcome onboarding
+│   ├── utils/                      # Database repositories, App utils, Update service, L10n
+│   └── widgets/                    # Custom UI components, Confetti overlay, PressableScale
+├── scripts/
+│   ├── build-release-apks.ps1      # Automated multi-architecture release APK build script
+│   └── update-version.ps1          # Automated version bump and build number updater
+├── test/
+│   ├── backup_import_test.dart     # Backup parsing and JSON normalization tests
+│   ├── home_screen_test.dart       # Palette & settings controller tests
+│   └── single_numbering_test.dart  # 2-digit sequence rollover and daily reset unit tests
+├── CHANGELOG.md                    # Detailed version history
+├── CONTRIBUTING.md                 # Developer contribution guidelines
+├── CODE_OF_CONDUCT.md              # Community Code of Conduct
+├── SECURITY.md                     # Security policy & vulnerability reporting
+├── PRIVACY_POLICY.md               # Privacy policy reference
+├── TERMS.md                        # Terms of use reference
+├── pubspec.yaml                    # Project dependencies & asset configuration
+├── README.md                       # App documentation
+└── LICENSE                         # MIT License
 ```
 
 ---
