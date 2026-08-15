@@ -1,9 +1,7 @@
-Update to 6.0.9 (build 26BE0816):
-- New: Redesign App Icons page and introduce branded edition names
-- New: Add App Icons selection page and standalone upgrade card
-- New: Modernize app icon suite and add Amethyst Nebula bonus edition
-- Update guides, search index, reset routines, and diagnostics telemetry
-- Remove tick icon overlay from selected app logo options
-- Fixed v6.0.8(26BE0815a) BR
-- Fix: Polish app icon applying modal and adopt enlarged icon-only gallery grid
-- Fix: Restore Download & Install and action buttons in Update Center
+Notekar v7.0.0 Major Release:
+• Apple HIG & iOS UI Redesign: Dynamic Island top pill toasts, 38pt sheet corner radiuses, and Cupertino activity spinners
+• Modernized App Icon Suite: 6 branded logo editions including Amethyst Nebula & Midnight Glass
+• Sobriety Milestones & Share Sheet: Export milestone cards with native Android share & confetti celebration
+• Full-Length Search Notes: Complete note preview with isolated search navigation
+• 2-Digit Single Numbering & Directional IN/OUT badges
+• Complete Local Backups Manager with instant restore & delete

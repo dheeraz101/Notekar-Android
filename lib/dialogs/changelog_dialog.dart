@@ -25,6 +25,28 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '7.0.0',
+      date: 'August 16, 2026',
+      highlights: [
+        'Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
+        'Modernized App Icon suite featuring 6 custom branded logo editions',
+        'Sobriety milestones card exporter with native Android share sheet & confetti',
+        'Full-length notes display in Search Notes with isolated search navigation',
+      ],
+      items: [
+        'Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
+        'Modernized App Icon suite featuring 6 custom branded logo editions',
+        'Sobriety milestones card exporter with native Android share sheet & confetti',
+        'Full-length notes display in Search Notes with isolated search navigation',
+        '2-digit single numbering mode (01, 02...), daily reset, and IN/OUT directional badges',
+        'Complete local database backup manager with individual Restore and Delete options',
+        'Grouped Developer Options (Diagnostics, Device Health, Network Monitor, Commits) under Advanced',
+        'Standardized CupertinoActivityIndicator spinners across Backup, Diagnostics, and Update Center',
+        'Apple Health IosActivityRingPainter circular glowing activity arcs for sobriety counters',
+        'Resolved version upgrade trigger for standalone welcome cards and Whats New sheet',
+      ],
+    ),
+    (
       version: '6.0.9',
       date: 'August 16, 2026',
       highlights: [

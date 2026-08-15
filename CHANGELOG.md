@@ -7,6 +7,44 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.0.0] - 2026-08-16 (versionCode 26ST0816) [SB]
+
+### What's New
+
+- **Apple HIG & iOS UI Redesign**: Replaced bottom SnackBars with top-floating iOS Dynamic Island
+  capsule pill notifications paired with tactile haptics.
+- **Modernized App Icon Suite**: 6 custom branded logo editions (*Default Classic*, *Amethyst
+  Nebula*, *Midnight Glass*, *Solar Emerald*, *Nordic Frost*, *Sunset Gold*) with enlarged icon
+  gallery grid.
+- **Sobriety Milestones & Native Share Sheet**: Export milestone cards directly to native Android
+  share chooser with one-shot celebration confetti particles and zero-delay sheet mechanics.
+- **Full-Length Search Notes**: Display complete recorded notes by default in Search Notes (sorted
+  newest first) with isolated search navigation.
+- **2-Digit Single Numbering & Directional Badges**: Added 2-digit numbering mode (`01`, `02`...),
+  daily reset, and `IN`/`OUT` directional indicator badges.
+- **Local Backups Manager**: Added complete local database backup manager with individual Restore
+  and Delete options.
+- **Grouped Developer Options**: Consolidated Diagnostics, Device Health, Network Monitor, and
+  Commits under Advanced settings.
+
+### Improvements
+
+- Applied Apple HIG 38pt sheet top corner radiuses (`radius: 38`), drag grabber handles (`36x5pt`),
+  and rubberband spring dismiss physics across modal sheets.
+- Standardized all loading spinners with high-fidelity `CupertinoActivityIndicator` spinners (in
+  Backup, Diagnostics, and inline inside Update Center action buttons).
+- Added Apple Health `IosActivityRingPainter` circular glowing activity progress arcs for sobriety
+  counters.
+- Standardized tactile haptic feedback (`selectionClick`, `mediumImpact`, `heavyImpact`) across all
+  interactive cards, switches, chips, and buttons.
+
+### Bug Fixes
+
+- Resolved version upgrade trigger for standalone welcome cards and What's New hero sheet.
+- Fixed search notes navigation collisions and isolated header search routing.
+- Fixed Android Share Sheet image preview rendering and removed export SnackBars.
+- Fixed VirusTotal safety report caching and network monitor title expansion.
+
 ## [6.0.9] - 2026-08-16 (versionCode 26BE0816) [BR]
 
 ### What's New
