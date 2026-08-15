@@ -25,6 +25,23 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '6.0.8',
+      date: 'August 15, 2026',
+      highlights: [
+        'Export milestone card image, one-shot confetti, and home card layout polish',
+        'Dynamic iOS calendar selection, logging card counts, and channel-based build numbers',
+        'Add 2-digit single numbering, daily reset, count on save, and iOS calendar style',
+      ],
+      items: [
+        'Simplify milestone celebration button labels',
+        'Eliminate milestone dialog open delay and upgrade confetti dynamics',
+        'Fix android sharesheet image preview and remove export snackbar',
+        'Export milestone card image, one-shot confetti, and home card layout polish',
+        'Dynamic iOS calendar selection, logging card counts, and channel-based build numbers',
+        'Add 2-digit single numbering, daily reset, count on save, and iOS calendar style',
+      ],
+    ),
+    (
       version: '6.0.7',
       date: 'August 13, 2026',
       highlights: ['Beta testing and feedback build.'],

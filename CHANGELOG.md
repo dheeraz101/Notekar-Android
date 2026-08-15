@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [6.0.8] - 2026-08-15 (versionCode 26BE0815a) [BR]
+
+### What's New
+
+- Export milestone card image, one-shot confetti, and home card layout polish
+- Dynamic iOS calendar selection, logging card counts, and channel-based build numbers
+- Add 2-digit single numbering, daily reset, count on save, and iOS calendar style
+
+### Improvements
+
+- Simplify milestone celebration button labels
+- Eliminate milestone dialog open delay and upgrade confetti dynamics
+
+### Bug Fixes
+
+- Fix android sharesheet image preview and remove export snackbar
+
 ## [6.0.7] - 2026-08-15 (Build 26BE0815) [BR]
 
 ### What's New

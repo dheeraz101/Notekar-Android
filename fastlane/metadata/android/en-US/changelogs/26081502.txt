@@ -1,0 +1,7 @@
+Update to 6.0.8 (build 26BE0815a):
+- New: Export milestone card image, one-shot confetti, and home card layout polish
+- New: Dynamic iOS calendar selection, logging card counts, and channel-based build numbers
+- New: Add 2-digit single numbering, daily reset, count on save, and iOS calendar style
+- Simplify milestone celebration button labels
+- Eliminate milestone dialog open delay and upgrade confetti dynamics
+- Fix: Fix android sharesheet image preview and remove export snackbar
