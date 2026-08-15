@@ -218,41 +218,14 @@ class AppIconsSettingsPage extends StatelessWidget {
                             ]
                           : null,
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: Image.asset(
-                            item.asset,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-                        if (isSelected)
-                          Positioned(
-                            right: -2,
-                            bottom: -2,
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                color: p.accent,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: p.surface,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.check_rounded,
-                                color: Colors.white,
-                                size: 12,
-                              ),
-                            ),
-                          ),
-                      ],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.asset(
+                        item.asset,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
                     ),
                   ),
                 ),
