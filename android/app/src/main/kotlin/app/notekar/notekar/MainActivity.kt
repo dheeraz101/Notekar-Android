@@ -6,6 +6,7 @@ import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ClipData
 import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Context
@@ -335,17 +336,18 @@ class MainActivity : FlutterActivity() {
                                 "${packageName}.fileprovider",
                                 imageFile
                             )
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
+                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
                                 putExtra(Intent.EXTRA_STREAM, imageUri)
                                 if (text.isNotBlank()) {
                                     putExtra(Intent.EXTRA_TEXT, text)
                                 }
-                                type = "image/png"
+                                clipData = ClipData.newRawUri("Milestone Card", imageUri)
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
                             val shareIntent = Intent.createChooser(sendIntent, titleText).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
                             startActivity(shareIntent)
                             result.success(true)

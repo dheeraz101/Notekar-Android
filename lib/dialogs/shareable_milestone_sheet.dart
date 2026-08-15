@@ -81,17 +81,6 @@ class _ShareableMilestoneSheetState extends State<ShareableMilestoneSheet> {
           {'title': 'Share Milestone Peak', 'text': shareContent},
         );
       }
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Milestone ready! Share menu launched.'.localized(context),
-          ),
-          backgroundColor: widget.p.accent,
-          duration: const Duration(seconds: 2),
-        ),
-      );
     } catch (_) {
     } finally {
       if (mounted) setState(() => _isExporting = false);
