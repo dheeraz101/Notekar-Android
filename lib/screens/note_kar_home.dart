@@ -785,6 +785,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
             defaultMode: _defaultMode,
             currentLocale: _locale,
             appIconStyle: _appIconStyle,
+            useNumbersInSingle: _useNumbersInSingle,
+            resetSingleDaily: _resetSingleDaily,
+            countOnSave: _countOnSave,
+            enableSobrietyMode: _enableSobrietyMode,
+            sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
+            compactHistory: _compactHistory,
             onAppIconStyle: (value) async {
               setState(() => _appIconStyle = value);
               await _setAppIconStyle(value, showToast: false);
@@ -802,6 +808,34 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _defaultMode = value);
               _saveSetting('m-default-mode', value);
             },
+            onUseNumbersInSingle: (value) {
+              setState(() => _useNumbersInSingle = value);
+              _saveSetting('m-use-numbers-in-single', value);
+            },
+            onResetSingleDaily: (value) {
+              setState(() => _resetSingleDaily = value);
+              _saveSetting('m-reset-single-daily', value);
+            },
+            onCountOnSave: (value) {
+              setState(() => _countOnSave = value);
+              _saveSetting('m-count-on-save', value);
+            },
+            onSobrietyMode: (value) {
+              setState(() => _enableSobrietyMode = value);
+              _prefs?.setBool('enable_sobriety_mode', value);
+            },
+            onSobrietyMilestoneTheme: (value) {
+              setState(() => _sobrietyMilestoneTheme = value);
+              _prefs?.setString('sobriety_milestone_theme', value);
+            },
+            onCompactHistory: (value) {
+              setState(() {
+                _compactHistory = value;
+                _historyDensity = value ? 'compact' : 'comfortable';
+              });
+              _saveSetting('m-compact-history', value);
+              _saveSetting('m-history-density', _historyDensity);
+            },
             pages: const [
               'welcome',
               'app-icons',
@@ -817,6 +851,25 @@ class _NoteKarHomeState extends State<NoteKarHome>
           ),
         ),
       );
+      if (mounted) {
+        setState(() {
+          _useNumbersInSingle =
+              prefs.getBool('m-use-numbers-in-single') ?? _useNumbersInSingle;
+          _resetSingleDaily =
+              prefs.getBool('m-reset-single-daily') ?? _resetSingleDaily;
+          _countOnSave = prefs.getBool('m-count-on-save') ?? _countOnSave;
+          _enableSobrietyMode =
+              prefs.getBool('enable_sobriety_mode') ?? _enableSobrietyMode;
+          _sobrietyMilestoneTheme =
+              prefs.getString('sobriety_milestone_theme') ??
+              _sobrietyMilestoneTheme;
+          _compactHistory =
+              prefs.getBool('m-compact-history') ?? _compactHistory;
+          _historyDensity =
+              prefs.getString('m-history-density') ?? _historyDensity;
+          _appIconStyle = prefs.getString('m-app-icon-style') ?? _appIconStyle;
+        });
+      }
       await prefs.setBool(_welcomeSeenKey, true);
       await prefs.setString(_lastSeenVersionKey, appVersion);
       await prefs.setBool('notekar.remindersWalkthroughSeen', true);
@@ -848,6 +901,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
               defaultMode: _defaultMode,
               currentLocale: _locale,
               appIconStyle: _appIconStyle,
+              useNumbersInSingle: _useNumbersInSingle,
+              resetSingleDaily: _resetSingleDaily,
+              countOnSave: _countOnSave,
+              enableSobrietyMode: _enableSobrietyMode,
+              sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
+              compactHistory: _compactHistory,
               onAppIconStyle: (value) async {
                 setState(() => _appIconStyle = value);
                 await _setAppIconStyle(value, showToast: false);
@@ -865,10 +924,58 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 setState(() => _defaultMode = value);
                 _saveSetting('m-default-mode', value);
               },
+              onUseNumbersInSingle: (value) {
+                setState(() => _useNumbersInSingle = value);
+                _saveSetting('m-use-numbers-in-single', value);
+              },
+              onResetSingleDaily: (value) {
+                setState(() => _resetSingleDaily = value);
+                _saveSetting('m-reset-single-daily', value);
+              },
+              onCountOnSave: (value) {
+                setState(() => _countOnSave = value);
+                _saveSetting('m-count-on-save', value);
+              },
+              onSobrietyMode: (value) {
+                setState(() => _enableSobrietyMode = value);
+                _prefs?.setBool('enable_sobriety_mode', value);
+              },
+              onSobrietyMilestoneTheme: (value) {
+                setState(() => _sobrietyMilestoneTheme = value);
+                _prefs?.setString('sobriety_milestone_theme', value);
+              },
+              onCompactHistory: (value) {
+                setState(() {
+                  _compactHistory = value;
+                  _historyDensity = value ? 'compact' : 'comfortable';
+                });
+                _saveSetting('m-compact-history', value);
+                _saveSetting('m-history-density', _historyDensity);
+              },
               pages: upgradePages,
             ),
           ),
         );
+        if (mounted) {
+          setState(() {
+            _useNumbersInSingle =
+                prefs.getBool('m-use-numbers-in-single') ?? _useNumbersInSingle;
+            _resetSingleDaily =
+                prefs.getBool('m-reset-single-daily') ?? _resetSingleDaily;
+            _countOnSave = prefs.getBool('m-count-on-save') ?? _countOnSave;
+            _enableSobrietyMode =
+                prefs.getBool('enable_sobriety_mode') ?? _enableSobrietyMode;
+            _sobrietyMilestoneTheme =
+                prefs.getString('sobriety_milestone_theme') ??
+                _sobrietyMilestoneTheme;
+            _compactHistory =
+                prefs.getBool('m-compact-history') ?? _compactHistory;
+            _historyDensity =
+                prefs.getString('m-history-density') ?? _historyDensity;
+            _appIconStyle =
+                prefs.getString('m-app-icon-style') ?? _appIconStyle;
+          });
+        }
       } else if (isNewVersion) {
         // If version updated but standalone feature cards were already seen, show the What's New Hero sheet
         if (!mounted) return;

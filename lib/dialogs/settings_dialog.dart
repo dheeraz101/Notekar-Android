@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
+import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
@@ -1217,6 +1218,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ? widget.lastDeletedPreview!
         : 'Restore or permanently remove deleted moments';
 
+    final p = paletteFor(
+      theme,
+      highContrast: highContrast,
+      accentName: accentColor,
+    );
+
     ({
       String title,
       String subtitle,
@@ -1754,7 +1761,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
         keywords: ['compact', 'history', 'density', 'list', 'rows'],
         kind: 'switch',
         boolValue: compactHistory,
-        onBoolChanged: (bool value) {
+        onBoolChanged: (bool value) async {
+          if (value && useNumbersInSingle) {
+            final confirmed = await showFeatureConflictDialog(
+              context,
+              p: p,
+              title: 'Turn Off Single Numbers?',
+              message:
+                  'Compact History cannot be enabled while Single Moment Numbering is active. Disable Single Numbers to use compact rows.',
+              confirmLabel: 'Turn Off & Enable',
+              icon: Icons.compress_rounded,
+              iconColor: p.accent,
+            );
+            if (!confirmed) return;
+            setState(() => useNumbersInSingle = false);
+            widget.onUseNumbersInSingle?.call(false);
+          }
           setState(() {
             compactHistory = value;
             historyDensity = value ? 'compact' : 'comfortable';
@@ -1856,7 +1878,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ],
         kind: 'switch',
         boolValue: useNumbersInSingle,
-        onBoolChanged: (bool value) {
+        onBoolChanged: (bool value) async {
+          if (value && compactHistory) {
+            final confirmed = await showFeatureConflictDialog(
+              context,
+              p: p,
+              title: 'Disable Compact History?',
+              message:
+                  'Sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. Turn off Compact History to enable numbers in single mode.',
+              confirmLabel: 'Turn Off & Enable',
+              icon: Icons.pin_outlined,
+              iconColor: p.accent,
+            );
+            if (!confirmed) return;
+            setState(() {
+              compactHistory = false;
+              historyDensity = 'comfortable';
+            });
+            widget.onCompactHistory(false);
+            widget.onHistoryDensity('comfortable');
+          }
           setState(() => useNumbersInSingle = value);
           widget.onUseNumbersInSingle?.call(value);
         },

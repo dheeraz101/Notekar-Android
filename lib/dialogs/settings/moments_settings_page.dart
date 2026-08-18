@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -71,7 +72,21 @@ class MomentsSettingsPage extends StatelessWidget {
               title: 'Compact History',
               color: p.accent,
               value: compactHistory,
-              onChanged: (value) {
+              onChanged: (value) async {
+                if (value && useNumbersInSingle) {
+                  final confirmed = await showFeatureConflictDialog(
+                    context,
+                    p: p,
+                    title: 'Turn Off Single Numbers?',
+                    message:
+                        'Compact History cannot be enabled while Single Moment Numbering is active. Disable Single Numbers to use compact rows.',
+                    confirmLabel: 'Turn Off & Enable',
+                    icon: Icons.compress_rounded,
+                    iconColor: p.accent,
+                  );
+                  if (!confirmed) return;
+                  onUseNumbersInSingleChanged(false);
+                }
                 final density = value ? 'compact' : 'comfortable';
                 onCompactHistoryChanged(value);
                 onHistoryDensityChanged(density);
@@ -106,7 +121,24 @@ class MomentsSettingsPage extends StatelessWidget {
                   'Display sequential 2-digit numbers (00–99) instead of icons in single history moments.',
               color: p.accent,
               value: useNumbersInSingle,
-              onChanged: onUseNumbersInSingleChanged,
+              onChanged: (value) async {
+                if (value && compactHistory) {
+                  final confirmed = await showFeatureConflictDialog(
+                    context,
+                    p: p,
+                    title: 'Disable Compact History?',
+                    message:
+                        'Sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. Turn off Compact History to enable numbers in single mode.',
+                    confirmLabel: 'Turn Off & Enable',
+                    icon: Icons.pin_outlined,
+                    iconColor: p.accent,
+                  );
+                  if (!confirmed) return;
+                  onCompactHistoryChanged(false);
+                  onHistoryDensityChanged('comfortable');
+                }
+                onUseNumbersInSingleChanged(value);
+              },
             ),
             if (useNumbersInSingle) ...[
               SettingsSwitchRow(

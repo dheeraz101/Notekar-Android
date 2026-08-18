@@ -238,7 +238,7 @@ class SettingsRow extends StatelessWidget {
                   if (hasSubtitle) ...[
                     const SizedBox(height: 2),
                     IosEmojiText(
-                      subtitle!,
+                      subtitle!.localized(context),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -317,7 +317,7 @@ class SegmentedSetting extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      title.localized(context),
                       style: TextStyle(
                         color: p.text,
                         fontWeight: FontWeight.w800,
@@ -327,7 +327,7 @@ class SegmentedSetting extends StatelessWidget {
                     if (hasSubtitle) ...[
                       const SizedBox(height: 3),
                       Text(
-                        subtitle!,
+                        subtitle!.localized(context),
                         style: TextStyle(color: p.text2, fontSize: 12),
                       ),
                     ],
@@ -521,7 +521,7 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                   if (hasSubtitle) ...[
                     const SizedBox(height: 3),
                     Text(
-                      widget.subtitle!,
+                      widget.subtitle!.localized(context),
                       style: TextStyle(
                         color: enabled ? p.text2 : p.text3,
                         fontSize: 12,

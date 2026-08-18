@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -20,6 +21,18 @@ class WelcomeScreen extends StatefulWidget {
     required this.onDefaultMode,
     this.appIconStyle = 'default',
     this.onAppIconStyle,
+    this.useNumbersInSingle = false,
+    this.onUseNumbersInSingle,
+    this.resetSingleDaily = false,
+    this.onResetSingleDaily,
+    this.countOnSave = false,
+    this.onCountOnSave,
+    this.enableSobrietyMode = false,
+    this.onSobrietyMode,
+    this.sobrietyMilestoneTheme = 'science',
+    this.onSobrietyMilestoneTheme,
+    this.compactHistory = false,
+    this.onCompactHistory,
     required this.pages,
   });
 
@@ -32,6 +45,18 @@ class WelcomeScreen extends StatefulWidget {
   final ValueChanged<String> onDefaultMode;
   final String appIconStyle;
   final ValueChanged<String>? onAppIconStyle;
+  final bool useNumbersInSingle;
+  final ValueChanged<bool>? onUseNumbersInSingle;
+  final bool resetSingleDaily;
+  final ValueChanged<bool>? onResetSingleDaily;
+  final bool countOnSave;
+  final ValueChanged<bool>? onCountOnSave;
+  final bool enableSobrietyMode;
+  final ValueChanged<bool>? onSobrietyMode;
+  final String sobrietyMilestoneTheme;
+  final ValueChanged<String>? onSobrietyMilestoneTheme;
+  final bool compactHistory;
+  final ValueChanged<bool>? onCompactHistory;
   final List<String> pages;
 
   @override
@@ -69,6 +94,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     defaultMode = widget.defaultMode;
     currentLocale = widget.currentLocale;
     _appIconStyle = widget.appIconStyle;
+    _useNumbersInSingle = widget.useNumbersInSingle;
+    _resetSingleDaily = widget.resetSingleDaily;
+    _countOnSave = widget.countOnSave;
+    _enableSobrietyMode = widget.enableSobrietyMode;
+    _sobrietyMilestoneTheme = widget.sobrietyMilestoneTheme;
 
     WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
@@ -78,12 +108,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Future<void> _loadSobrietyPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
-      _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
+      _enableSobrietyMode =
+          _prefs?.getBool('enable_sobriety_mode') ?? widget.enableSobrietyMode;
       _sobrietyMilestoneTheme =
-          _prefs?.getString('sobriety_milestone_theme') ?? 'science';
-      _useNumbersInSingle = _prefs?.getBool('m-use-numbers-in-single') ?? false;
-      _resetSingleDaily = _prefs?.getBool('m-reset-single-daily') ?? false;
-      _countOnSave = _prefs?.getBool('m-count-on-save') ?? false;
+          _prefs?.getString('sobriety_milestone_theme') ??
+          widget.sobrietyMilestoneTheme;
+      _useNumbersInSingle =
+          _prefs?.getBool('m-use-numbers-in-single') ??
+          widget.useNumbersInSingle;
+      _resetSingleDaily =
+          _prefs?.getBool('m-reset-single-daily') ?? widget.resetSingleDaily;
+      _countOnSave = _prefs?.getBool('m-count-on-save') ?? widget.countOnSave;
       _appIconStyle =
           _prefs?.getString('m-app-icon-style') ?? widget.appIconStyle;
     });
@@ -199,6 +234,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     await _prefs!.setBool('enable_sobriety_mode', value);
                   }
                   setState(() => _enableSobrietyMode = value);
+                  widget.onSobrietyMode?.call(value);
                 },
               ),
               if (_enableSobrietyMode) ...[
@@ -309,6 +345,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 setState(
                                   () => _sobrietyMilestoneTheme = theme.id,
                                 );
+                                widget.onSobrietyMilestoneTheme?.call(theme.id);
                                 if (context.mounted) Navigator.pop(context);
                               },
                             ),
@@ -410,6 +447,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               'en': 'English',
               'hi': 'हिन्दी',
               'es': 'Español',
+              'de': 'Deutsch',
+              'ja': '日本語',
+              'ru': 'Русский',
             },
             onChanged: (value) {
               setState(() => currentLocale = value);
@@ -882,10 +922,37 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 color: p.accent,
                 value: _useNumbersInSingle,
                 onChanged: (value) async {
+                  if (value) {
+                    final isCompact =
+                        _prefs?.getBool('m-compact-history') ??
+                        widget.compactHistory;
+                    if (isCompact) {
+                      final confirmed = await showFeatureConflictDialog(
+                        context,
+                        p: p,
+                        title: 'Disable Compact History?',
+                        message:
+                            'Sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. Turn off Compact History to enable numbers in single mode.',
+                        confirmLabel: 'Turn Off & Enable',
+                        icon: Icons.pin_outlined,
+                        iconColor: p.accent,
+                      );
+                      if (!confirmed) return;
+                      if (_prefs != null) {
+                        await _prefs!.setBool('m-compact-history', false);
+                        await _prefs!.setString(
+                          'm-history-density',
+                          'comfortable',
+                        );
+                      }
+                      widget.onCompactHistory?.call(false);
+                    }
+                  }
                   if (_prefs != null) {
                     await _prefs!.setBool('m-use-numbers-in-single', value);
                   }
                   setState(() => _useNumbersInSingle = value);
+                  widget.onUseNumbersInSingle?.call(value);
                 },
               ),
               if (_useNumbersInSingle) ...[
@@ -903,6 +970,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       await _prefs!.setBool('m-reset-single-daily', value);
                     }
                     setState(() => _resetSingleDaily = value);
+                    widget.onResetSingleDaily?.call(value);
                   },
                 ),
                 SettingsSwitchRow(
@@ -919,6 +987,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       await _prefs!.setBool('m-count-on-save', value);
                     }
                     setState(() => _countOnSave = value);
+                    widget.onCountOnSave?.call(value);
                   },
                 ),
               ],

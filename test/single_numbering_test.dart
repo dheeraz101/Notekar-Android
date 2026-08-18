@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/calendar_dialog.dart';
+import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 
@@ -235,5 +237,56 @@ void main() {
       }
       expect(isAppIconStyle('unknown_style'), isFalse);
     });
+  });
+
+  group('Multilingual Support (DE, JA, RU)', () {
+    testWidgets('AppLocalizations supports en, es, hi, de, ja, ru', (
+      tester,
+    ) async {
+      final localeCodes = AppLocalizations.supportedLocales
+          .map((l) => l.languageCode)
+          .toSet();
+      expect(localeCodes, containsAll(['en', 'es', 'hi', 'de', 'ja', 'ru']));
+    });
+
+    testWidgets(
+      'German, Japanese, and Russian translations resolve correctly',
+      (tester) async {
+        for (final code in ['de', 'ja', 'ru']) {
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: Locale(code),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Builder(
+                builder: (context) {
+                  final settingsText = 'Settings'.localized(context);
+                  final cancelText = 'Cancel'.localized(context);
+                  final conflictTitle = 'Disable Compact History?'.localized(
+                    context,
+                  );
+
+                  if (code == 'de') {
+                    expect(settingsText, 'Einstellungen');
+                    expect(cancelText, 'Abbrechen');
+                    expect(conflictTitle, 'Kompakten Verlauf deaktivieren?');
+                  } else if (code == 'ja') {
+                    expect(settingsText, '設定');
+                    expect(cancelText, 'キャンセル');
+                    expect(conflictTitle, 'コンパクト履歴を無効にしますか？');
+                  } else if (code == 'ru') {
+                    expect(settingsText, 'Настройки');
+                    expect(cancelText, 'Отмена');
+                    expect(conflictTitle, 'Отключить компактную историю?');
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+      },
+    );
   });
 }

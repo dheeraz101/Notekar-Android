@@ -105,6 +105,9 @@ class PersonalizationSettingsPage extends StatelessWidget {
                 'en' => 'English',
                 'hi' => 'हिन्दी',
                 'es' => 'Español',
+                'de' => 'Deutsch',
+                'ja' => '日本語',
+                'ru' => 'Русский',
                 _ => 'System Default',
               },
               color: p.accent,
@@ -136,6 +139,9 @@ class PersonalizationSettingsPage extends StatelessWidget {
               (code: 'en', name: 'English'),
               (code: 'hi', name: 'हिन्दी (Hindi)'),
               (code: 'es', name: 'Español (Spanish)'),
+              (code: 'de', name: 'Deutsch (German)'),
+              (code: 'ja', name: '日本語 (Japanese)'),
+              (code: 'ru', name: 'Русский (Russian)'),
             ])
               SettingsRow(
                 p: p,
