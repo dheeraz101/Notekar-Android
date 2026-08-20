@@ -132,6 +132,8 @@ extension LocalizedString on String {
       };
     }
 
+    if (l10n.localeName == 'en') return this;
+
     // Check language maps for German, Japanese, and Russian
     if (l10n.localeName == 'fr') {
       final fr = _frTranslations[normKey];
@@ -151,103 +153,103 @@ extension LocalizedString on String {
       'whatsnewtitle' => switch (l10n.localeName) {
         'es' => 'Novedades',
         'hi' => 'नया क्या है',
-        _ => "What's New",
+        _ => this,
       },
 
       'okay' => switch (l10n.localeName) {
         'es' => 'De acuerdo',
         'hi' => 'ठीक है',
-        _ => 'Okay',
+        _ => this,
       },
 
       'deleted in moment' => switch (l10n.localeName) {
         'es' => 'Momento IN eliminado',
         'hi' => 'हटाया गया IN क्षण',
-        _ => 'Deleted IN moment',
+        _ => this,
       },
 
       'deleted out moment' => switch (l10n.localeName) {
         'es' => 'Momento OUT eliminado',
         'hi' => 'हटाया गया OUT क्षण',
-        _ => 'Deleted OUT moment',
+        _ => this,
       },
 
       'deleted single moment' => switch (l10n.localeName) {
         'es' => 'Momento SINGLE eliminado',
         'hi' => 'हटाया गया SINGLE क्षण',
-        _ => 'Deleted SINGLE moment',
+        _ => this,
       },
 
       'sobriety companion' => switch (l10n.localeName) {
         'es' => 'Compañero de Sobriedad',
         'hi' => 'संयम साथी',
-        _ => 'Sobriety Companion',
+        _ => this,
       },
 
       'trigger analysis' => switch (l10n.localeName) {
         'es' => 'Análisis de Disparadores',
         'hi' => 'उकसाने वाले कारणों का विश्लेषण',
-        _ => 'Trigger Analysis',
+        _ => this,
       },
 
       'milestones' => switch (l10n.localeName) {
         'es' => 'Hitos',
         'hi' => 'मील के पत्थर',
-        _ => 'Milestones',
+        _ => this,
       },
 
       'milestone theme' => switch (l10n.localeName) {
         'es' => 'Tema de Hitos',
         'hi' => 'मील का पत्थर थीम',
-        _ => 'Milestone Theme',
+        _ => this,
       },
 
       'theme style' => switch (l10n.localeName) {
         'es' => 'Estilo de Tema',
         'hi' => 'थीम शैली',
-        _ => 'Theme Style',
+        _ => this,
       },
 
       'view all milestones' => switch (l10n.localeName) {
         'es' => 'Ver todos los hitos',
         'hi' => 'सभी मील के पत्थर देखें',
-        _ => 'View All Milestones',
+        _ => this,
       },
 
       'custom start date' => switch (l10n.localeName) {
         'es' => 'Fecha de Inicio Personalizada',
         'hi' => 'कस्टम प्रारंभ तिथि',
-        _ => 'Custom Start Date',
+        _ => this,
       },
 
       'set sobriety start date' => switch (l10n.localeName) {
         'es' => 'Establecer Fecha de Inicio',
         'hi' => 'संयम की प्रारंभ तिथि सेट करें',
-        _ => 'Set Sobriety Start Date',
+        _ => this,
       },
 
       'enable sobriety mode' => switch (l10n.localeName) {
         'es' => 'Activar Modo de Sobriedad',
         'hi' => 'संयम मोड सक्षम करें',
-        _ => 'Enable Sobriety Mode',
+        _ => this,
       },
 
       'select date and time' => switch (l10n.localeName) {
         'es' => 'Seleccionar Fecha y Hora',
         'hi' => 'दिनांक और समय चुनें',
-        _ => 'Select Date and Time',
+        _ => this,
       },
 
       'choose milestone theme' => switch (l10n.localeName) {
         'es' => 'Elegir Tema de Hito',
         'hi' => 'मील का पत्थर थीम चुनें',
-        _ => 'Choose Milestone Theme',
+        _ => this,
       },
 
       'not set: using last log or relapse tag' => switch (l10n.localeName) {
         'es' => 'No establecido: usando último registro o etiqueta de recaída',
         'hi' => 'सेट नहीं है: अंतिम लॉग या रिलैप्स टैग का उपयोग करना',
-        _ => 'Not set: using last log or relapse tag',
+        _ => this,
       },
 
       'were you already clean before installing? set your actual start date here. this overrides automatic detection from your logs.' =>
@@ -256,14 +258,13 @@ extension LocalizedString on String {
             '¿Ya estabas limpio antes de instalar? Establece tu fecha de inicio real aquí. Esto anula la detección automática de tus registros.',
           'hi' =>
             'क्या आप इंस्टॉल करने से पहले ही संयम में थे? अपनी वास्तविक प्रारंभ तिथि यहाँ सेट करें। यह आपके लॉग से स्वचालित पहचान को अधिलेखित कर देता है।',
-          _ =>
-            'Were you already clean before installing? Set your actual start date here. This overrides automatic detection from your logs.',
+          _ => this,
         },
 
       'reset on relapse tag only' => switch (l10n.localeName) {
         'es' => 'Restablecer solo con etiqueta de recaída',
         'hi' => 'केवल रिलैप्स टैग पर रीसेट करें',
-        _ => 'Reset on Relapse Tag Only',
+        _ => this,
       },
 
       'only moments tagged #relapse reset the streak. turn off to reset on any new log.' =>
@@ -272,8 +273,7 @@ extension LocalizedString on String {
             'Solo los momentos etiquetados como #recaida restablecen la racha. Apáguelo para restablecer con cualquier nuevo registro.',
           'hi' =>
             'केवल #relapse टैग किए गए क्षण ही संयम को रीसेट करते हैं। किसी भी नए लॉग पर रीसेट करने के लिए इसे बंद करें।',
-          _ =>
-            'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.',
+          _ => this,
         },
 
       'choose the narrative style for your milestone names. each theme is psychologically curated to match a different self-image and motivation style.' =>
@@ -282,8 +282,7 @@ extension LocalizedString on String {
             'Elige el estilo de narrativa para tus hitos. Cada tema está seleccionado psicológicamente para coincidir con una autoimagen y estilo de motivación diferentes.',
           'hi' =>
             'अपने मील के पत्थर के नामों के लिए कथा शैली चुनें। प्रत्येक थीम को एक अलग आत्म-छवि और प्रेरणा शैली से मेल खाने के लिए मनोवैज्ञानिक रूप से तैयार किया गया है।',
-          _ =>
-            'Choose the narrative style for your milestone names. Each theme is psychologically curated to match a different self-image and motivation style.',
+          _ => this,
         },
 
       'all 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. names shown in your current theme.' =>
@@ -292,8 +291,7 @@ extension LocalizedString on String {
             'Los 21 hitos desde 1 día hasta 10 años, en la neurociencia y psicología del comportamiento. Nombres mostrados en tu tema actual.',
           'hi' =>
             'तंत्रिका विज्ञान, लत सुधार अनुसंधान और व्यवहार मनोविज्ञान में निहित 1 दिन से 10 वर्ष तक के सभी 21 मील के पत्थर। आपकी वर्तमान थीम में नाम दिखाए गए हैं।',
-          _ =>
-            'All 21 milestones from 1 day to 10 years, rooted in neuroscience, addiction recovery research, and behavioural psychology. Names shown in your current theme.',
+          _ => this,
         },
 
       'privacy-first streak tracking and relapse diary. all data stays on your device. existing logs are never altered.' =>
@@ -302,8 +300,7 @@ extension LocalizedString on String {
             'Seguimiento de racha y diario de recaídas privado. Todos los datos permanecen en tu dispositivo. Los registros existentes nunca se alteran.',
           'hi' =>
             'गोपनीयता-प्रथम संयम ट्रैकिंग और रिलैप्स डायरी। सारा डेटा आपके डिवाइस पर रहता है। मौजूदा लॉग कभी भी नहीं बदले जाते।',
-          _ =>
-            'Privacy-first streak tracking and relapse diary. All data stays on your device. Existing logs are never altered.',
+          _ => this,
         },
 
       'your home screen will show a live streak card with milestone badges. the home widget will adapt to show reset and diary buttons.' =>
@@ -312,26 +309,25 @@ extension LocalizedString on String {
             'Tu pantalla de inicio mostrará una tarjeta de racha en vivo con insignias de hitos. El widget de inicio se adaptará para mostrar botones de reinicio y diario.',
           'hi' =>
             'आपकी होम स्क्रीन मील के पत्थर के बैज के साथ एक लाइव संयम कार्ड दिखाएगी। होम विजेट रीसेट और डायरी बटन दिखाने के लिए अनुकूलित हो जाएगा।',
-          _ =>
-            'Your home screen will show a live streak card with milestone badges. The home widget will adapt to show reset and diary buttons.',
+          _ => this,
         },
 
       'trigger diary' => switch (l10n.localeName) {
         'es' => 'Diario de Disparadores',
         'hi' => 'ट्रिगर डायरी',
-        _ => 'Trigger Diary',
+        _ => this,
       },
 
       'streak reset logic' => switch (l10n.localeName) {
         'es' => 'Lógica de Reinicio de Racha',
         'hi' => 'संयम रीसेट तर्क',
-        _ => 'Streak Reset Logic',
+        _ => this,
       },
 
       'streak mode' => switch (l10n.localeName) {
         'es' => 'Modo de Racha',
         'hi' => 'संयम मोड',
-        _ => 'Streak Mode',
+        _ => this,
       },
 
       'adds a clean streak card to your home screen and adapts home screen widgets.' =>
@@ -340,8 +336,7 @@ extension LocalizedString on String {
             'Añade una tarjeta de racha limpia a tu pantalla de inicio y adapta los widgets.',
           'hi' =>
             'आपकी होम स्क्रीन पर एक संयम कार्ड जोड़ता है और होम स्क्रीन विजेट को अनुकूलित करता है।',
-          _ =>
-            'Adds a clean streak card to your home screen and adapts home screen widgets.',
+          _ => this,
         },
 
       'view your relapse pattern insights, top moods, and peak vulnerability windows.' =>
@@ -350,8 +345,7 @@ extension LocalizedString on String {
             'Ver información de patrones de recaída, estados de ánimo principales y ventanas de vulnerabilidad máxima.',
           'hi' =>
             'अपने रिलैप्स पैटर्न अंतर्दृष्टि, शीर्ष मूड और चरम संवेदनशीलता विंडो देखें।',
-          _ =>
-            'View your relapse pattern insights, top moods, and peak vulnerability windows.',
+          _ => this,
         },
 
       'when logging a moment with sobriety mode on, you can tag mood (bored, anxious, lonely...) and trigger (social media, late night...). these are stored as hashtags in the note for full backwards compatibility.' =>
@@ -360,8 +354,7 @@ extension LocalizedString on String {
             'Al registrar un momento con el Modo de Sobriedad activado, puedes etiquetar el estado de ánimo (Aburrido, Ansioso, Solitario...) y el disparador (Redes Sociales, Tarde en la Noche...). Se guardan como hashtags en la nota para compatibilidad total.',
           'hi' =>
             'संयम मोड चालू होने पर क्षण लॉग करते समय, आप मूड (बोर, चिंतित, अकेला...) और ट्रिगर (सोशल मीडिया, देर रात...) को टैग कर सकते हैं। ये पूर्ण संगतता के लिए नोट में हैशटैग के रूप में सहेजे जाते हैं।',
-          _ =>
-            'When logging a moment with Sobriety Mode on, you can tag mood (Bored, Anxious, Lonely...) and trigger (Social Media, Late Night...). These are stored as hashtags in the note for full backwards compatibility.',
+          _ => this,
         },
 
       'a privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.' =>
@@ -370,8 +363,7 @@ extension LocalizedString on String {
             'Un rastreador de racha y diario de recaídas privado y sin conexión creado para potenciar tu viaje de recuperación.',
           'hi' =>
             'आपकी सुधार यात्रा को सशक्त बनाने के लिए बनाया गया एक गोपनीयता-प्रथम, ऑफ़लाइन संयम ट्रैकिंग और रिलैप्स डायरी।',
-          _ =>
-            'A privacy-first, offline clean streak tracker and relapse diary built to empower your recovery journey.',
+          _ => this,
         },
 
       'your data is 100% private and stays offline on this device. enabling this does not alter any existing logs.' =>
@@ -380,50 +372,49 @@ extension LocalizedString on String {
             'Tus datos son 100% privados y permanecen sin conexión en este dispositivo. Activar esto no altera los registros existentes.',
           'hi' =>
             'आपका डेटा 100% निजी है और इस डिवाइस पर ऑफ़लाइन रहता है। इसे सक्षम करने से कोई भी मौजूदा लॉग नहीं बदलता है।',
-          _ =>
-            'Your data is 100% private and stays offline on this device. Enabling this does not alter any existing logs.',
+          _ => this,
         },
 
       'sobriety trigger analysis' => switch (l10n.localeName) {
         'es' => 'Análisis de Disparadores de Sobriedad',
         'hi' => 'संयम ट्रिगर विश्लेषण',
-        _ => 'Sobriety Trigger Analysis',
+        _ => this,
       },
 
       'total relapses' => switch (l10n.localeName) {
         'es' => 'Total de Recaídas',
         'hi' => 'कुल रिलैप्स',
-        _ => 'Total Relapses',
+        _ => this,
       },
 
       'top trigger' => switch (l10n.localeName) {
         'es' => 'Disparador Principal',
         'hi' => 'मुख्य ट्रिगर',
-        _ => 'Top Trigger',
+        _ => this,
       },
 
       'top mood' => switch (l10n.localeName) {
         'es' => 'Estado de Ánimo Principal',
         'hi' => 'मुख्य मूड',
-        _ => 'Top Mood',
+        _ => this,
       },
 
       'peak risk window' => switch (l10n.localeName) {
         'es' => 'Ventana de Mayor Riesgo',
         'hi' => 'चरम जोखिम समय',
-        _ => 'Peak Risk Window',
+        _ => this,
       },
 
       'no relapses recorded yet!' => switch (l10n.localeName) {
         'es' => '¡Aún no hay recaídas registradas!',
         'hi' => 'अभी तक कोई रिलैप्स दर्ज नहीं किया गया है!',
-        _ => 'No relapses recorded yet!',
+        _ => this,
       },
 
       'your clean streak is active and running.' => switch (l10n.localeName) {
         'es' => 'Tu racha limpia está activa y en marcha.',
         'hi' => 'आपकी संयम यात्रा सक्रिय रूप से चल रही है।',
-        _ => 'Your clean streak is active and running.',
+        _ => this,
       },
 
       'offline analysis of your logged relapse moments. no data leaves your device.' =>
@@ -432,355 +423,354 @@ extension LocalizedString on String {
             'Análisis local de tus momentos de recaída registrados. Ningún dato sale de tu dispositivo.',
           'hi' =>
             'आपके दर्ज किए गए रिलैप्स क्षणों का ऑफ़लाइन विश्लेषण। कोई भी डेटा आपके डिवाइस से बाहर नहीं जाता है।',
-          _ =>
-            'Offline analysis of your logged relapse moments. No data leaves your device.',
+          _ => this,
         },
 
       'bored' => switch (l10n.localeName) {
         'es' => 'Aburrido',
         'hi' => 'ऊबा हुआ',
-        _ => 'Bored',
+        _ => this,
       },
 
       'anxious' => switch (l10n.localeName) {
         'es' => 'Ansioso',
         'hi' => 'चिंतित',
-        _ => 'Anxious',
+        _ => this,
       },
 
       'lonely' => switch (l10n.localeName) {
         'es' => 'Solitario',
         'hi' => 'अकेला',
-        _ => 'Lonely',
+        _ => this,
       },
 
       'tired' => switch (l10n.localeName) {
         'es' => 'Cansado',
         'hi' => 'थका हुआ',
-        _ => 'Tired',
+        _ => this,
       },
 
       'stressed' => switch (l10n.localeName) {
         'es' => 'Estresado',
         'hi' => 'तनावग्रस्त',
-        _ => 'Stressed',
+        _ => this,
       },
 
       'angry' => switch (l10n.localeName) {
         'es' => 'Enojado',
         'hi' => 'क्रोधित',
-        _ => 'Angry',
+        _ => this,
       },
 
       'sad' => switch (l10n.localeName) {
         'es' => 'Triste',
         'hi' => 'उदास',
-        _ => 'Sad',
+        _ => this,
       },
 
       'happy' => switch (l10n.localeName) {
         'es' => 'Feliz',
         'hi' => 'खुश',
-        _ => 'Happy',
+        _ => this,
       },
       'social media' => switch (l10n.localeName) {
         'es' => 'Redes Sociales',
         'hi' => 'सोशल मीडिया',
-        _ => 'Social Media',
+        _ => this,
       },
       'late night' => switch (l10n.localeName) {
         'es' => 'Tarde en la Noche',
         'hi' => 'देर रात',
-        _ => 'Late Night',
+        _ => this,
       },
 
       'stress' => switch (l10n.localeName) {
         'es' => 'Estrés',
         'hi' => 'तनाव',
-        _ => 'Stress',
+        _ => this,
       },
 
       'boredom' => switch (l10n.localeName) {
         'es' => 'Aburrimiento',
         'hi' => 'ऊब',
-        _ => 'Boredom',
+        _ => this,
       },
 
       'loneliness' => switch (l10n.localeName) {
         'es' => 'Soledad',
         'hi' => 'अकेलापन',
-        _ => 'Loneliness',
+        _ => this,
       },
 
       'fatigue' => switch (l10n.localeName) {
         'es' => 'Fatiga',
         'hi' => 'थकान',
-        _ => 'Fatigue',
+        _ => this,
       },
 
       'friends' => switch (l10n.localeName) {
         'es' => 'Amigos',
         'hi' => 'मित्र',
-        _ => 'Friends',
+        _ => this,
       },
 
       'location' => switch (l10n.localeName) {
         'es' => 'Ubicación',
         'hi' => 'स्थान',
-        _ => 'Location',
+        _ => this,
       },
 
       'none' => switch (l10n.localeName) {
         'es' => 'Ninguno',
         'hi' => 'कोई नहीं',
-        _ => 'None',
+        _ => this,
       },
 
       'morning' => switch (l10n.localeName) {
         'es' => 'Mañana',
         'hi' => 'सुबह',
-        _ => 'Morning',
+        _ => this,
       },
 
       'afternoon' => switch (l10n.localeName) {
         'es' => 'Tarde',
         'hi' => 'दोपहर',
-        _ => 'Afternoon',
+        _ => this,
       },
 
       'evening' => switch (l10n.localeName) {
         'es' => 'Tarde/Noche',
         'hi' => 'शाम',
-        _ => 'Evening',
+        _ => this,
       },
 
       'night' => switch (l10n.localeName) {
         'es' => 'Noche',
         'hi' => 'रात',
-        _ => 'Night',
+        _ => this,
       },
 
       'from' => switch (l10n.localeName) {
         'es' => 'Desde',
         'hi' => 'से',
-        _ => 'From',
+        _ => this,
       },
 
       'at' => switch (l10n.localeName) {
         'es' => 'a las',
         'hi' => 'बजे',
-        _ => 'at',
+        _ => this,
       },
 
       'science' => switch (l10n.localeName) {
         'es' => 'Ciencia',
         'hi' => 'विज्ञान',
-        _ => 'Science',
+        _ => this,
       },
 
       'warrior' => switch (l10n.localeName) {
         'es' => 'Guerrero',
         'hi' => 'योद्धा',
-        _ => 'Warrior',
+        _ => this,
       },
 
       'navy' => switch (l10n.localeName) {
         'es' => 'Armada',
         'hi' => 'नौसेना',
-        _ => 'Navy',
+        _ => this,
       },
 
       'clan' => switch (l10n.localeName) {
         'es' => 'Clan',
         'hi' => 'कबीला',
-        _ => 'Clan',
+        _ => this,
       },
 
       'ancient' => switch (l10n.localeName) {
         'es' => 'Antiguo',
         'hi' => 'प्राचीन',
-        _ => 'Ancient',
+        _ => this,
       },
 
       'samurai' => switch (l10n.localeName) {
         'es' => 'Samurái',
         'hi' => 'समुराई',
-        _ => 'Samurai',
+        _ => this,
       },
 
       'space' => switch (l10n.localeName) {
         'es' => 'Espacio',
         'hi' => 'अंतरिक्ष',
-        _ => 'Space',
+        _ => this,
       },
 
       'kingdom' => switch (l10n.localeName) {
         'es' => 'Reino',
         'hi' => 'साम्राज्य',
-        _ => 'Kingdom',
+        _ => this,
       },
 
       'monk' => switch (l10n.localeName) {
         'es' => 'Monje',
         'hi' => 'साधु',
-        _ => 'Monk',
+        _ => this,
       },
 
       'phoenix' => switch (l10n.localeName) {
         'es' => 'Fénix',
         'hi' => 'फ़ीनिक्स',
-        _ => 'Phoenix',
+        _ => this,
       },
 
       'animal kingdom' => switch (l10n.localeName) {
         'es' => 'Reino Animal',
         'hi' => 'पशु साम्राज्य',
-        _ => 'Animal Kingdom',
+        _ => this,
       },
 
       'pokemon' => switch (l10n.localeName) {
         'es' => 'Pokémon',
         'hi' => 'पोकेमॉन',
-        _ => 'Pokemon',
+        _ => this,
       },
 
       'jujutsu kaisen' => switch (l10n.localeName) {
         'es' => 'Jujutsu Kaisen',
         'hi' => 'जुजुत्सु कैसेन',
-        _ => 'Jujutsu Kaisen',
+        _ => this,
       },
 
       'one piece' => switch (l10n.localeName) {
         'es' => 'One Piece',
         'hi' => 'वन पीस',
-        _ => 'One Piece',
+        _ => this,
       },
 
       'naruto' => switch (l10n.localeName) {
         'es' => 'Naruto',
         'hi' => 'नारुतो',
-        _ => 'Naruto',
+        _ => this,
       },
 
       'ben 10' => switch (l10n.localeName) {
         'es' => 'Ben 10',
         'hi' => 'बेन 10',
-        _ => 'Ben 10',
+        _ => this,
       },
 
       'attack on titan' => switch (l10n.localeName) {
         'es' => 'Ataque a los Titanes',
         'hi' => 'अटैक ऑन टाइटन',
-        _ => 'Attack on Titan',
+        _ => this,
       },
 
       'bleach' => switch (l10n.localeName) {
         'es' => 'Bleach',
         'hi' => 'ब्लीच',
-        _ => 'Bleach',
+        _ => this,
       },
 
       'my hero academia' => switch (l10n.localeName) {
         'es' => 'My Hero Academia',
         'hi' => 'माय हीरो एकेडेमिया',
-        _ => 'My Hero Academia',
+        _ => this,
       },
 
       'vinland saga' => switch (l10n.localeName) {
         'es' => 'Vinland Saga',
         'hi' => 'विनलैंड सागा',
-        _ => 'Vinland Saga',
+        _ => this,
       },
 
       'demon slayer' => switch (l10n.localeName) {
         'es' => 'Guardianes de la Noche (Demon Slayer)',
         'hi' => 'डिमोन स्लेयर',
-        _ => 'Demon Slayer',
+        _ => this,
       },
 
       'fullmetal alchemist' => switch (l10n.localeName) {
         'es' => 'Fullmetal Alchemist',
         'hi' => 'फुलमेटल अल्केमिस्ट',
-        _ => 'Fullmetal Alchemist',
+        _ => this,
       },
 
       'dragon ball' => switch (l10n.localeName) {
         'es' => 'Dragon Ball',
         'hi' => 'ड्रैगन बॉल',
-        _ => 'Dragon Ball',
+        _ => this,
       },
 
       'code geass' => switch (l10n.localeName) {
         'es' => 'Code Geass',
         'hi' => 'कोड गियास',
-        _ => 'Code Geass',
+        _ => this,
       },
 
       'death note' => switch (l10n.localeName) {
         'es' => 'Death Note',
         'hi' => 'डेथ नोट',
-        _ => 'Death Note',
+        _ => this,
       },
 
       'gintama' => switch (l10n.localeName) {
         'es' => 'Gintama',
         'hi' => 'गिंटामा',
-        _ => 'Gintama',
+        _ => this,
       },
 
       'hunter x hunter' => switch (l10n.localeName) {
         'es' => 'Hunter x Hunter',
         'hi' => 'हंटर एक्स हंटर',
-        _ => 'Hunter x Hunter',
+        _ => this,
       },
 
       'solo leveling' => switch (l10n.localeName) {
         'es' => 'Solo Leveling',
         'hi' => 'सोलो लेवलिंग',
-        _ => 'Solo Leveling',
+        _ => this,
       },
 
       'rpg / minecraft' => switch (l10n.localeName) {
         'es' => 'RPG / Minecraft',
         'hi' => 'आरपीजी / माइनक्राफ्ट',
-        _ => 'RPG / Minecraft',
+        _ => this,
       },
 
       'tech career' => switch (l10n.localeName) {
         'es' => 'Carrera Tecnológica',
         'hi' => 'टेक करियर',
-        _ => 'Tech Career',
+        _ => this,
       },
 
       'chess mastery' => switch (l10n.localeName) {
         'es' => 'Maestría en Ajedrez',
         'hi' => 'शतरंज महारत',
-        _ => 'Chess Mastery',
+        _ => this,
       },
 
       'star wars' => switch (l10n.localeName) {
         'es' => 'Star Wars',
         'hi' => 'स्टार वॉर्स',
-        _ => 'Star Wars',
+        _ => this,
       },
 
       'harry potter' => switch (l10n.localeName) {
         'es' => 'Harry Potter',
         'hi' => 'हैरी पॉटर',
-        _ => 'Harry Potter',
+        _ => this,
       },
 
       'marvel universe' => switch (l10n.localeName) {
         'es' => 'Universo Marvel',
         'hi' => 'मार्वल यूनिवर्स',
-        _ => 'Marvel Universe',
+        _ => this,
       },
 
       'army elite. every clean day is a battle fought and won.' =>
         switch (l10n.localeName) {
           'es' => 'Élite militar. Cada día limpio es una batalla ganada.',
           'hi' => 'सेना के जवान। हर एक संयमित दिन जीती हुई जंग है।',
-          _ => 'Army elite. Every clean day is a battle fought and won.',
+          _ => this,
         },
 
       'seafaring odyssey. chart new waters and never look back.' =>
@@ -788,150 +778,150 @@ extension LocalizedString on String {
           'es' => 'Odisea marítima. Explora nuevas aguas y nunca mires atrás.',
           'hi' =>
             'समुद्री यात्रा। नए रास्तों पर चलें और कभी पीछे मुड़कर न देखें।',
-          _ => 'Seafaring odyssey. Chart new waters and never look back.',
+          _ => this,
         },
 
       'bushido code. master of the self.' => switch (l10n.localeName) {
         'es' => 'Código Bushido. Dueño de uno mismo.',
         'hi' => 'बुशीडो कोड। स्वयं पर नियंत्रण।',
-        _ => 'Bushido code. Master of the self.',
+        _ => this,
       },
 
       'cosmic exploration. every clean day is light-years gained.' =>
         switch (l10n.localeName) {
           'es' => 'Exploración cósmica. Cada día limpio son años luz ganados.',
           'hi' => 'अंतरिक्ष अन्वेषण। हर एक संयमित दिन प्रकाश वर्ष के समान है।',
-          _ => 'Cosmic exploration. Every clean day is light-years gained.',
+          _ => this,
         },
 
       'medieval royalty. rise from serf to sovereign.' =>
         switch (l10n.localeName) {
           'es' => 'Realeza medieval. Asciende de siervo a soberano.',
           'hi' => 'मध्यकालीन राजघराना। दास से शासक बनें।',
-          _ => 'Medieval royalty. Rise from serf to sovereign.',
+          _ => this,
         },
 
       'monastic journey. silence, stillness, and vows.' =>
         switch (l10n.localeName) {
           'es' => 'Viaje monástico. Silencio, quietud y votos.',
           'hi' => 'मठवासी यात्रा। मौन, स्थिरता और प्रतिज्ञाएं।',
-          _ => 'Monastic journey. Silence, stillness, and vows.',
+          _ => this,
         },
 
       'magikarp to the creator god arceus.' => switch (l10n.localeName) {
         'es' => 'De Magikarp al dios creador Arceus.',
         'hi' => 'मैजिकारप से निर्माता भगवान आर्सियस तक।',
-        _ => 'Magikarp to the creator god Arceus.',
+        _ => this,
       },
 
       'cursed spirit to satoru gojo.' => switch (l10n.localeName) {
         'es' => 'De espíritu maldito a Satoru Gojo.',
         'hi' => 'शापित आत्मा से सटोरू गोजो तक।',
-        _ => 'Cursed spirit to Satoru Gojo.',
+        _ => this,
       },
 
       'east blue coby to the pirate king gol d. roger.' =>
         switch (l10n.localeName) {
           'es' => 'De Coby del East Blue al Rey de los Piratas Gol D. Roger.',
           'hi' => 'ईस्ट ब्लू कोबी से समुद्री डाकू राजा गोल डी. रोजर तक।',
-          _ => 'East Blue Coby to the Pirate King Gol D. Roger.',
+          _ => this,
         },
 
       'konohamaru to the sage of six paths.' => switch (l10n.localeName) {
         'es' => 'De Konohamaru al Sabio de los Seis Caminos.',
         'hi' => 'कोनोहामारू से छह पथों के ऋषि तक।',
-        _ => 'Konohamaru to the Sage of Six Paths.',
+        _ => this,
       },
 
       'grey matter to alien x.' => switch (l10n.localeName) {
         'es' => 'De Materia Gris a Alien X.',
         'hi' => 'ग्रे मैटर से एलियन एक्स तक।',
-        _ => 'Grey Matter to Alien X.',
+        _ => this,
       },
 
       'pure titan to the founder ymir fritz.' => switch (l10n.localeName) {
         'es' => 'De Titán puro a la Fundadora Ymir Fritz.',
         'hi' => 'शुद्ध टाइटन से संस्थापक यमिर फ्रिट्ज तक।',
-        _ => 'Pure Titan to the Founder Ymir Fritz.',
+        _ => this,
       },
 
       'teddy bear kon to yhwach the almighty.' => switch (l10n.localeName) {
         'es' => 'Del peluche Kon a Yhwach el Todopoderoso.',
         'hi' => 'टेडी बियर कॉन से सर्वशक्तिमान इहवाच तक।',
-        _ => 'Teddy bear Kon to Yhwach the Almighty.',
+        _ => this,
       },
 
       'mineta to all might prime.' => switch (l10n.localeName) {
         'es' => 'De Mineta a All Might Prime.',
         'hi' => 'मिनेटा से ऑल माइट प्राइम तक।',
-        _ => 'Mineta to All Might Prime.',
+        _ => this,
       },
 
       'priest willibald to thors the troll of jom.' =>
         switch (l10n.localeName) {
           'es' => 'Del sacerdote Willibald a Thors el Trol de Jom.',
           'hi' => 'पुजारी विलीबाल्ड से थोरस द ट्रोल ऑफ जोम तक।',
-          _ => 'Priest Willibald to Thors the Troll of Jom.',
+          _ => this,
         },
 
       'murata to yoriichi tsugikuni.' => switch (l10n.localeName) {
         'es' => 'De Murata a Yoriichi Tsugikuni.',
         'hi' => 'मुराता से योरीइची सुगिकुनी तक।',
-        _ => 'Murata to Yoriichi Tsugikuni.',
+        _ => this,
       },
 
       'yoki to the ultimate truth.' => switch (l10n.localeName) {
         'es' => 'De Yoki a la Verdad última.',
         'hi' => 'योकी से परम सत्य तक।',
-        _ => 'Yoki to the ultimate Truth.',
+        _ => this,
       },
 
       'yamcha to the omni-king zeno.' => switch (l10n.localeName) {
         'es' => 'De Yamcha al Rey de Todo Zeno.',
         'hi' => 'यामचा से ओम्नी-किंग ज़ेनो तक।',
-        _ => 'Yamcha to the Omni-King Zeno.',
+        _ => this,
       },
 
       'shirley to emperor lelouch vi britannia.' => switch (l10n.localeName) {
         'es' => 'De Shirley al Emperador Lelouch vi Britannia.',
         'hi' => 'शर्ली से सम्राट लेलौच वी ब्रिटानिया तक।',
-        _ => 'Shirley to Emperor Lelouch vi Britannia.',
+        _ => this,
       },
 
       'matsuda to the shinigami king.' => switch (l10n.localeName) {
         'es' => 'De Matsuda al Rey Shinigami.',
         'hi' => 'मात्सुदा से शिनिगामी किंग तक।',
-        _ => 'Matsuda to the Shinigami King.',
+        _ => this,
       },
 
       'shinpachi to utsuro.' => switch (l10n.localeName) {
         'es' => 'De Shinpachi a Utsuro.',
         'hi' => 'शिनपाची से उत्सुरो तक।',
-        _ => 'Shinpachi to Utsuro.',
+        _ => this,
       },
 
       'tonpa to adult gon.' => switch (l10n.localeName) {
         'es' => 'De Tonpa a Gon adulto.',
         'hi' => 'टोंपा से वयस्क गॉन तक।',
-        _ => 'Tonpa to Adult Gon.',
+        _ => this,
       },
 
       'e-rank sung jinwoo to shadow monarch.' => switch (l10n.localeName) {
         'es' => 'De Sung Jinwoo de rango E al Monarca de las Sombras.',
         'hi' => 'ई-रैंक सुंग जिनवू से शैडो मोनार्क तक।',
-        _ => 'E-Rank Sung Jinwoo to Shadow Monarch.',
+        _ => this,
       },
 
       'wooden shovel to creative mode god.' => switch (l10n.localeName) {
         'es' => 'De pala de madera a dios del modo creativo.',
         'hi' => 'लकड़ी के बेलचे से क्रिएटिव मोड गॉड तक।',
-        _ => 'Wooden Shovel to Creative Mode God.',
+        _ => this,
       },
 
       'html editor to turing award winner.' => switch (l10n.localeName) {
         'es' => 'De editor HTML a ganador del Premio Turing.',
         'hi' => 'HTML संपादक से ट्यूरिंग पुरस्कार विजेता तक।',
-        _ => 'HTML editor to Turing Award Winner.',
+        _ => this,
       },
       's mate victim to magnus carlsen.' => switch (l10n.localeName) {
         'es' => 'De víctima del mate del pastor a Magnus Carlsen.',
@@ -942,31 +932,31 @@ extension LocalizedString on String {
       'moisture farmer to the chosen one.' => switch (l10n.localeName) {
         'es' => 'De granjero de humedad al Elegido.',
         'hi' => 'नमी किसान से चुने गए व्यक्ति (द चूज़न वन) तक।',
-        _ => 'Moisture farmer to the Chosen One.',
+        _ => this,
       },
 
       'muggle to merlin.' => switch (l10n.localeName) {
         'es' => 'De Muggle a Merlín.',
         'hi' => 'मगल से मर्लिन तक।',
-        _ => 'Muggle to Merlin.',
+        _ => this,
       },
 
       'civilian to the one above all.' => switch (l10n.localeName) {
         'es' => 'De civil a El que está por encima de todo.',
         'hi' => 'नागरिक से द वन एबोव ऑल (परमेश्वर) तक।',
-        _ => 'Civilian to The One Above All.',
+        _ => this,
       },
 
       'welcome' => switch (l10n.localeName) {
         'es' => 'Bienvenido',
         'hi' => 'स्वागत',
-        _ => 'Welcome',
+        _ => this,
       },
 
       'welcome to notekar' => switch (l10n.localeName) {
         'es' => 'Bienvenido a NoteKar',
         'hi' => 'NoteKar में आपका स्वागत है',
-        _ => 'Welcome to NoteKar',
+        _ => this,
       },
 
       'a quiet, offline-first way to mark moments the second they happen.' =>
@@ -975,165 +965,164 @@ extension LocalizedString on String {
             'Una forma silenciosa y local de registrar momentos al instante.',
           'hi' =>
             'क्षणों को तुरंत रिकॉर्ड करने का एक शांत, ऑफ़लाइन-पहला तरीका।',
-          _ =>
-            'A quiet, offline-first way to mark moments the second they happen.',
+          _ => this,
         },
 
       'app theme' => switch (l10n.localeName) {
         'es' => 'Tema de la aplicación',
         'hi' => 'ऐप थीम',
-        _ => 'App Theme',
+        _ => this,
       },
 
       'theme mode' => switch (l10n.localeName) {
         'es' => 'Modo de tema',
         'hi' => 'थीम मोड',
-        _ => 'Theme Mode',
+        _ => this,
       },
 
       'get started' => switch (l10n.localeName) {
         'es' => 'Comenzar',
         'hi' => 'शुरू करें',
-        _ => 'Get Started',
+        _ => this,
       },
 
       'start logging' => switch (l10n.localeName) {
         'es' => 'Comenzar',
         'hi' => 'लॉगिंग शुरू करें',
-        _ => 'Start Logging',
+        _ => this,
       },
 
       'save a moment' => switch (l10n.localeName) {
         'es' => 'Guardar un momento',
         'hi' => 'एक पल सहेजें',
-        _ => 'Save a Moment',
+        _ => this,
       },
 
       'two-way mode' => switch (l10n.localeName) {
         'es' => 'Modo de dos vías',
         'hi' => 'टू-वे मोड',
-        _ => 'Two-Way Mode',
+        _ => this,
       },
 
       'single mode' => switch (l10n.localeName) {
         'es' => 'Modo único',
         'hi' => 'सिंगल मोड',
-        _ => 'Single Mode',
+        _ => this,
       },
 
       'add a note' => switch (l10n.localeName) {
         'es' => 'Añadir una nota',
         'hi' => 'एक नोट जोड़ें',
-        _ => 'Add a Note',
+        _ => this,
       },
 
       'review history' => switch (l10n.localeName) {
         'es' => 'Revisar historial',
         'hi' => 'इतिहास की समीक्षा करें',
-        _ => 'Review History',
+        _ => this,
       },
 
       'search notes' => switch (l10n.localeName) {
         'es' => 'Buscar notas',
         'hi' => 'नोट्स खोजें',
-        _ => 'Search Notes',
+        _ => this,
       },
 
       'time between moments' => switch (l10n.localeName) {
         'es' => 'Tiempo entre momentos',
         'hi' => 'क्षणों के बीच का समय',
-        _ => 'Time Between Moments',
+        _ => this,
       },
 
       'manage moment notes' => switch (l10n.localeName) {
         'es' => 'Gestionar notas de momentos',
         'hi' => 'क्षण नोट्स प्रबंधित करें',
-        _ => 'Manage Moment Notes',
+        _ => this,
       },
 
       'app lock timing' => switch (l10n.localeName) {
         'es' => 'Tiempo de bloqueo de app',
         'hi' => 'ऐप लॉक समय',
-        _ => 'App Lock Timing',
+        _ => this,
       },
 
       'minimal moment options' => switch (l10n.localeName) {
         'es' => 'Opciones mínimas de momentos',
         'hi' => 'न्यूनतम क्षण विकल्प',
-        _ => 'Minimal Moment Options',
+        _ => this,
       },
 
       'adaptive engine' => switch (l10n.localeName) {
         'es' => 'Motor adaptativo',
         'hi' => 'अनुकूलन योग्य इंजन',
-        _ => 'Adaptive Engine',
+        _ => this,
       },
 
       'restore deleted moments' => switch (l10n.localeName) {
         'es' => 'Restaurar momentos eliminados',
         'hi' => 'हटाए गए मोमेंट्स पुनर्स्थापित करें',
-        _ => 'Restore Deleted Moments',
+        _ => this,
       },
 
       'back up data' => switch (l10n.localeName) {
         'es' => 'Copia de seguridad de datos',
         'hi' => 'डेटा का बैकअप लें',
-        _ => 'Back Up Data',
+        _ => this,
       },
 
       'can i restore deleted moments?' => switch (l10n.localeName) {
         'es' => '¿Puedo restaurar momentos eliminados?',
         'hi' => 'क्या मैं हटाए गए क्षणों को पुनर्स्थापित कर सकता हूँ?',
-        _ => 'Can I restore deleted moments?',
+        _ => this,
       },
 
       'update check failed' => switch (l10n.localeName) {
         'es' => 'Fallo al comprobar actualizaciones',
         'hi' => 'अपडेट जांच विफल रही',
-        _ => 'Update check failed',
+        _ => this,
       },
 
       'app notices are not appearing' => switch (l10n.localeName) {
         'es' => 'Los avisos de la app no aparecen',
         'hi' => 'ऐप सूचनाएं नहीं आ रही हैं',
-        _ => 'App Notices are not appearing',
+        _ => this,
       },
 
       'notekar is offline' => switch (l10n.localeName) {
         'es' => 'NoteKar está sin conexión',
         'hi' => 'NoteKar ऑफ़लाइन है',
-        _ => 'NoteKar is offline',
+        _ => this,
       },
 
       'backup import found no new moments' => switch (l10n.localeName) {
         'es' =>
           'La importación de copia de seguridad no encontró nuevos momentos',
         'hi' => 'बैकअप आयात में कोई नया क्षण नहीं मिला',
-        _ => 'Backup import found no new moments',
+        _ => this,
       },
 
       'backup import failed' => switch (l10n.localeName) {
         'es' => 'Fallo al importar copia de seguridad',
         'hi' => 'बैकअप आयात विफल रहा',
-        _ => 'Backup import failed',
+        _ => this,
       },
 
       'live icon motion will not turn on' => switch (l10n.localeName) {
         'es' => 'El movimiento de icono en vivo no se activa',
         'hi' => 'लाइव आइकन मोशन चालू नहीं होगा',
-        _ => 'Live Icon Motion will not turn on',
+        _ => this,
       },
 
       'live icon motion looks slow or delayed' => switch (l10n.localeName) {
         'es' => 'El movimiento de icono en vivo parece lento o retrasado',
         'hi' => 'लाइव आइकन मोशन धीमा या विलंबित दिखता है',
-        _ => 'Live Icon Motion looks slow or delayed',
+        _ => this,
       },
 
       'app lock will not turn on' => switch (l10n.localeName) {
         'es' => 'El bloqueo de app no se activa',
         'hi' => 'ऐप लॉक चालू नहीं होगा',
-        _ => 'App Lock will not turn on',
+        _ => this,
       },
 
       'notekar stores moments privately on this device. backups are files you control.' =>
@@ -1142,130 +1131,129 @@ extension LocalizedString on String {
             'NoteKar guarda momentos de forma privada en este dispositivo. Las copias de seguridad son archivos que tú controlas.',
           'hi' =>
             'NoteKar इस डिवाइस पर क्षणों को निजी रूप से संग्रहीत करता है। बैकअप वे फाइलें हैं जिन्हें आप नियंत्रित करते हैं।',
-          _ =>
-            'NoteKar stores moments privately on this device. Backups are files you control.',
+          _ => this,
         },
 
       'select your preferred language for the application.' =>
         switch (l10n.localeName) {
           'es' => 'Selecciona tu idioma preferido para la aplicación.',
           'hi' => 'एप्लिकेशन के लिए अपनी पसंदीदा भाषा चुनें।',
-          _ => 'Select your preferred language for the application.',
+          _ => this,
         },
 
       'the current features on this page are under beta stage.' =>
         switch (l10n.localeName) {
           'es' => 'Las funciones actuales de esta página están en fase Beta.',
           'hi' => 'इस पृष्ठ की वर्तमान विशेषताएं बीटा चरण में हैं।',
-          _ => 'The current features on this page are under Beta stage.',
+          _ => this,
         },
 
       'reminders' => switch (l10n.localeName) {
         'es' => 'Recordatorios',
         'hi' => 'अनुस्मारक',
-        _ => 'Reminders',
+        _ => this,
       },
 
       'logging reminder' => switch (l10n.localeName) {
         'es' => 'Recordatorio de registro',
         'hi' => 'लॉगिंग अनुस्मारक',
-        _ => 'Logging Reminder',
+        _ => this,
       },
 
       'time to log a moment!' => switch (l10n.localeName) {
         'es' => '¡Hora de registrar un momento!',
         'hi' => 'क्षण लॉग करने का समय!',
-        _ => 'Time to log a moment!',
+        _ => this,
       },
 
       'daily reminder' => switch (l10n.localeName) {
         'es' => 'Recordatorio diario',
         'hi' => 'दैनिक अनुस्मारक',
-        _ => 'Daily Reminder',
+        _ => this,
       },
 
       'inactivity reminder' => switch (l10n.localeName) {
         'es' => 'Recordatorio de inactividad',
         'hi' => 'निष्क्रियता अनुस्मारक',
-        _ => 'Inactivity Reminder',
+        _ => this,
       },
 
       'weekly reminder' => switch (l10n.localeName) {
         'es' => 'Recordatorio semanal',
         'hi' => 'साप्ताहिक अनुस्मारक',
-        _ => 'Weekly Reminder',
+        _ => this,
       },
 
       'monthly reminder' => switch (l10n.localeName) {
         'es' => 'Recordatorio mensual',
         'hi' => 'मासिक अनुस्मारक',
-        _ => 'Monthly Reminder',
+        _ => this,
       },
 
       'remind if inactive for' => switch (l10n.localeName) {
         'es' => 'Recordar si está inactivo por',
         'hi' => 'निष्क्रिय होने पर याद दिलाएं',
-        _ => 'Remind if inactive for',
+        _ => this,
       },
 
       'days of week' => switch (l10n.localeName) {
         'es' => 'Días de la semana',
         'hi' => 'सप्ताह के दिन',
-        _ => 'Days of week',
+        _ => this,
       },
 
       'day of month' => switch (l10n.localeName) {
         'es' => 'Día del mes',
         'hi' => 'महीने का दिन',
-        _ => 'Day of month',
+        _ => this,
       },
 
       'trash bin' => switch (l10n.localeName) {
         'es' => 'Papelera',
         'hi' => 'कचरा पात्र',
-        _ => 'Trash Bin',
+        _ => this,
       },
 
       'current message' => switch (l10n.localeName) {
         'es' => 'Mensaje actual',
         'hi' => 'वर्तमान संदेश',
-        _ => 'Current Message',
+        _ => this,
       },
 
       'recent messages' => switch (l10n.localeName) {
         'es' => 'Mensajes recientes',
         'hi' => 'हाल के संदेश',
-        _ => 'Recent Messages',
+        _ => this,
       },
 
       'edit message' => switch (l10n.localeName) {
         'es' => 'Editar mensaje',
         'hi' => 'संदेश संपादित करें',
-        _ => 'Edit Message',
+        _ => this,
       },
 
       'daily reminder message' => switch (l10n.localeName) {
         'es' => 'Mensaje de recordatorio diario',
         'hi' => 'दैनिक अनुस्मारक संदेश',
-        _ => 'Daily Reminder Message',
+        _ => this,
       },
 
       'weekly reminder message' => switch (l10n.localeName) {
         'es' => 'Mensaje de recordatorio semanal',
         'hi' => 'साप्ताहिक अनुस्मारक संदेश',
-        _ => 'Weekly Reminder Message',
+        _ => this,
       },
 
       'monthly reminder message' => switch (l10n.localeName) {
         'es' => 'Mensaje de recordatorio mensual',
         'hi' => 'मासिक अनुस्मारक संदेश',
-        _ => 'Monthly Reminder Message',
+        _ => this,
       },
 
       'restore all moments?' => switch (l10n.localeName) {
         'es' => '¿Restaurar todos los momentos?',
         'hi' => 'सभी क्षण पुनर्स्थापित करें?',
-        _ => 'Restore All Moments?',
+        _ => this,
       },
 
       'this will return all items currently in the trash to your history.' =>
@@ -1274,20 +1262,19 @@ extension LocalizedString on String {
             'Esto devolverá todos los elementos actualmente en la papelera a su historial.',
           'hi' =>
             'यह वर्तमान में कचरा पात्र में मौजूद सभी वस्तुओं को आपके इतिहास में वापस कर देगा।',
-          _ =>
-            'This will return all items currently in the trash to your history.',
+          _ => this,
         },
 
       'restore all' => switch (l10n.localeName) {
         'es' => 'Restaurar todo',
         'hi' => 'सभी को पुनर्स्थापित करें',
-        _ => 'Restore All',
+        _ => this,
       },
 
       'empty trash?' => switch (l10n.localeName) {
         'es' => '¿Vaciar papelera?',
         'hi' => 'कचरा पात्र खाली करें?',
-        _ => 'Empty Trash?',
+        _ => this,
       },
 
       'this will permanently delete all moments in the trash. this action cannot be undone.' =>
@@ -1296,62 +1283,61 @@ extension LocalizedString on String {
             'Esto eliminará permanentemente todos los momentos de la papelera. Esta acción no se puede deshacer.',
           'hi' =>
             'यह कचरा पात्र के सभी क्षणों को स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।',
-          _ =>
-            'This will permanently delete all moments in the trash. This action cannot be undone.',
+          _ => this,
         },
 
       'delete permanently?' => switch (l10n.localeName) {
         'es' => '¿Eliminar permanentemente?',
         'hi' => 'स्थायी रूप से हटाएं?',
-        _ => 'Delete Permanently?',
+        _ => this,
       },
 
       'this moment will be erased forever.' => switch (l10n.localeName) {
         'es' => 'Este momento se borrará para siempre.',
         'hi' => 'यह क्षण हमेशा के लिए मिटा दिया जाएगा।',
-        _ => 'This moment will be erased forever.',
+        _ => this,
       },
 
       'item' => switch (l10n.localeName) {
         'es' => 'elemento',
         'hi' => 'वस्तु',
-        _ => 'item',
+        _ => this,
       },
 
       'items' => switch (l10n.localeName) {
         'es' => 'elementos',
         'hi' => 'वस्तुओं',
-        _ => 'items',
+        _ => this,
       },
 
       'no note' => switch (l10n.localeName) {
         'es' => 'Sin nota',
         'hi' => 'कोई नोट नहीं',
-        _ => 'No note',
+        _ => this,
       },
 
       'recently deleted' => switch (l10n.localeName) {
         'es' => 'ELIMINADO RECIENTEMENTE',
         'hi' => 'हाल ही में हटाया गया',
-        _ => 'RECENTLY DELETED',
+        _ => this,
       },
 
       'logs' => switch (l10n.localeName) {
         'es' => 'Registros',
         'hi' => 'लॉग्स',
-        _ => 'Logs',
+        _ => this,
       },
 
       'notes' => switch (l10n.localeName) {
         'es' => 'Notas',
         'hi' => 'नोट्स',
-        _ => 'Notes',
+        _ => this,
       },
 
       'alarms permission required' => switch (l10n.localeName) {
         'es' => 'Permiso de alarmas requerido',
         'hi' => 'अलार्म अनुमति आवश्यक है',
-        _ => 'Alarms Permission Required',
+        _ => this,
       },
 
       'to trigger reminders precisely when the app is closed, notekar requires the "alarms & reminders" permission.' =>
@@ -1360,20 +1346,19 @@ extension LocalizedString on String {
             'Para activar recordatorios con precisión cuando la aplicación está cerrada, NoteKar requiere el permiso de "Alarmas y recordatorios".',
           'hi' =>
             'ऐप बंद होने पर सटीक रूप से अनुस्मारक ट्रिगर करने के लिए, NoteKar को "अलार्म और अनुस्मारक" अनुमति की आवश्यकता होती है।',
-          _ =>
-            'To trigger reminders precisely when the app is closed, NoteKar requires the "Alarms & Reminders" permission.',
+          _ => this,
         },
 
       'grant permission' => switch (l10n.localeName) {
         'es' => 'Conceder permiso',
         'hi' => 'अनुमति दें',
-        _ => 'Grant Permission',
+        _ => this,
       },
 
       'battery optimization active' => switch (l10n.localeName) {
         'es' => 'Optimización de batería activa',
         'hi' => 'बैटरी ऑप्टिमाइज़ेशन सक्रिय',
-        _ => 'Battery Optimization Active',
+        _ => this,
       },
 
       'aggressive battery cleaners on low-end devices can kill notekar in the background. disable battery optimization to guarantee reminders fire 100% of the time.' =>
@@ -1382,146 +1367,145 @@ extension LocalizedString on String {
             'Los limpiadores de batería agresivos en dispositivos de gama baja pueden cerrar NoteKar en segundo plano. Desactiva la optimización de batería para garantizar que los recordatorios se activen siempre.',
           'hi' =>
             'कम-एंड डिवाइस पर आक्रामक बैटरी क्लीनर बैकग्राउंड में NoteKar को बंद कर सकते हैं। यह सुनिश्चित करने के लिए कि अनुस्मारक हमेशा समय पर मिलें, बैटरी ऑप्टिमाइज़ेशन को अक्षम करें।',
-          _ =>
-            'Aggressive battery cleaners on low-end devices can kill NoteKar in the background. Disable battery optimization to guarantee reminders fire 100% of the time.',
+          _ => this,
         },
 
       'disable battery optimization' => switch (l10n.localeName) {
         'es' => 'Desactivar optimización de batería',
         'hi' => 'बैटरी ऑप्टिमाइज़ेशन अक्षम करें',
-        _ => 'Disable Battery Optimization',
+        _ => this,
       },
 
       'sun' => switch (l10n.localeName) {
         'es' => 'Dom',
         'hi' => 'रवि',
-        _ => 'Sun',
+        _ => this,
       },
 
       'mon' => switch (l10n.localeName) {
         'es' => 'Lun',
         'hi' => 'सोम',
-        _ => 'Mon',
+        _ => this,
       },
 
       'tue' => switch (l10n.localeName) {
         'es' => 'Mar',
         'hi' => 'मंगल',
-        _ => 'Tue',
+        _ => this,
       },
 
       'wed' => switch (l10n.localeName) {
         'es' => 'Mié',
         'hi' => 'बुध',
-        _ => 'Wed',
+        _ => this,
       },
 
       'thu' => switch (l10n.localeName) {
         'es' => 'Jue',
         'hi' => 'गुरु',
-        _ => 'Thu',
+        _ => this,
       },
 
       'fri' => switch (l10n.localeName) {
         'es' => 'Vie',
         'hi' => 'शुक्र',
-        _ => 'Fri',
+        _ => this,
       },
 
       'sat' => switch (l10n.localeName) {
         'es' => 'Sáb',
         'hi' => 'शनि',
-        _ => 'Sat',
+        _ => this,
       },
 
       'sunday' => switch (l10n.localeName) {
         'es' => 'Domingo',
         'hi' => 'रविवार',
-        _ => 'Sunday',
+        _ => this,
       },
 
       'monday' => switch (l10n.localeName) {
         'es' => 'Lunes',
         'hi' => 'सोमवार',
-        _ => 'Monday',
+        _ => this,
       },
 
       'tuesday' => switch (l10n.localeName) {
         'es' => 'Martes',
         'hi' => 'मंगलवार',
-        _ => 'Tuesday',
+        _ => this,
       },
 
       'wednesday' => switch (l10n.localeName) {
         'es' => 'Miércoles',
         'hi' => 'बुधवार',
-        _ => 'Wednesday',
+        _ => this,
       },
 
       'thursday' => switch (l10n.localeName) {
         'es' => 'Jueves',
         'hi' => 'गुरुवार',
-        _ => 'Thursday',
+        _ => this,
       },
 
       'friday' => switch (l10n.localeName) {
         'es' => 'Viernes',
         'hi' => 'शुक्रवार',
-        _ => 'Friday',
+        _ => this,
       },
 
       'saturday' => switch (l10n.localeName) {
         'es' => 'Sábado',
         'hi' => 'शनिवार',
-        _ => 'Saturday',
+        _ => this,
       },
 
       'time' => switch (l10n.localeName) {
         'es' => 'Hora',
         'hi' => 'समय',
-        _ => 'Time',
+        _ => this,
       },
 
       'message' => switch (l10n.localeName) {
         'es' => 'Mensaje',
         'hi' => 'संदेश',
-        _ => 'Message',
+        _ => this,
       },
 
       'empty' => switch (l10n.localeName) {
         'es' => 'Vacío',
         'hi' => 'खाली',
-        _ => 'Empty',
+        _ => this,
       },
 
       'set' => switch (l10n.localeName) {
         'es' => 'Establecido',
         'hi' => 'सेट',
-        _ => 'Set',
+        _ => this,
       },
 
       'hour' => switch (l10n.localeName) {
         'es' => 'hora',
         'hi' => 'घंटा',
-        _ => 'hour',
+        _ => this,
       },
 
       'hours' => switch (l10n.localeName) {
         'es' => 'horas',
         'hi' => 'घंटे',
-        _ => 'hours',
+        _ => this,
       },
 
       'enter reminder message...' => switch (l10n.localeName) {
         'es' => 'Ingresar mensaje de recordatorio...',
         'hi' => 'अनुस्मारक संदेश दर्ज करें...',
-        _ => 'Enter reminder message...',
+        _ => this,
       },
 
       'official repository moved' => switch (l10n.localeName) {
         'es' => 'Repositorio oficial movido',
         'hi' => 'आधिकारिक रिपॉजिटरी बदली',
-        _ => 'Official Repository Moved',
+        _ => this,
       },
 
       'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:' =>
@@ -1530,14 +1514,13 @@ extension LocalizedString on String {
             'Hemos migrado oficialmente nuestro código base a un nuevo hogar. Todos los lanzamientos, actualizaciones y problemas futuros se gestionarán aquí:',
           'hi' =>
             'हमने आधिकारिक तौर पर अपने कोडबेस को एक नए घर में स्थानांतरित कर दिया है। सभी भविष्य के रिलीज, अपडेट और मुद्दे यहां प्रबंधित किए जाएंगे:',
-          _ =>
-            'We have officially migrated our codebase to a new home. All future releases, updates, and issues will be managed here:',
+          _ => this,
         },
 
       'smaller, optimized apks' => switch (l10n.localeName) {
         'es' => 'APKs más pequeñas y optimizadas',
         'hi' => 'छोटे, अनुकूलित एपीके',
-        _ => 'Smaller, Optimized APKs',
+        _ => this,
       },
 
       'access split-per-abi optimized binaries and google play appbundles directly from the release page.' =>
@@ -1546,14 +1529,13 @@ extension LocalizedString on String {
             'Acceda a binarios optimizados por ABI y Google Play AppBundles directamente desde la página de lanzamiento.',
           'hi' =>
             'रिलीज़ पेज से सीधे स्प्लिट-प्रति-एबीआई अनुकूलित बायनेरिज़ और गूगल प्ले ऐपबंडल प्राप्त करें।',
-          _ =>
-            'Access split-per-ABI optimized binaries and Google Play AppBundles directly from the release page.',
+          _ => this,
         },
 
       'active issue tracking' => switch (l10n.localeName) {
         'es' => 'Seguimiento de problemas activo',
         'hi' => 'सक्रिय समस्या ट्रैकिंग',
-        _ => 'Active Issue Tracking',
+        _ => this,
       },
 
       'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.' =>
@@ -1562,14 +1544,13 @@ extension LocalizedString on String {
             'Envíe informes de errores, solicitudes de funciones y siga los cambios de código directamente en el nuevo rastreador de problemas.',
           'hi' =>
             'सीधे नए रिपॉजिटरी इशू ट्रैकर में बग रिपोर्ट, फीचर अनुरोध सबमिट करें और कोड परिवर्तनों का पालन करें।',
-          _ =>
-            'Submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.',
+          _ => this,
         },
 
       'automated security scans' => switch (l10n.localeName) {
         'es' => 'Escaneos de seguridad automáticos',
         'hi' => 'स्वचालित सुरक्षा स्कैन',
-        _ => 'Automated Security Scans',
+        _ => this,
       },
 
       'all builds now undergo automated codeql scans and virustotal checks to ensure verification and safety.' =>
@@ -1578,68 +1559,67 @@ extension LocalizedString on String {
             'Todas las compilaciones ahora se someten a escaneos automáticos de CodeQL y comprobaciones de VirusTotal para garantizar la verificación y la seguridad.',
           'hi' =>
             'सत्यापन और सुरक्षा सुनिश्चित करने के लिए सभी निर्माण अब स्वचालित CodeQL स्कैन और VirusTotal जांच से गुजरते हैं।',
-          _ =>
-            'All builds now undergo automated CodeQL scans and VirusTotal checks to ensure verification and safety.',
+          _ => this,
         },
 
       'virustotal safety scan' => switch (l10n.localeName) {
         'es' => 'Escaneo de seguridad de VirusTotal',
         'hi' => 'VirusTotal सुरक्षा स्कैन',
-        _ => 'VirusTotal Safety Scan',
+        _ => this,
       },
 
       'verified clean of malicious activity' => switch (l10n.localeName) {
         'es' => 'Verificado limpio de actividad maliciosa',
         'hi' => 'दुर्भावनापूर्ण गतिविधि से मुक्त सत्यापित',
-        _ => 'Verified clean of malicious activity',
+        _ => this,
       },
 
       'ratio' => switch (l10n.localeName) {
         'es' => 'Proporción',
         'hi' => 'अनुपात',
-        _ => 'Ratio',
+        _ => this,
       },
 
       '0 / 68 clean' => switch (l10n.localeName) {
         'es' => '0 / 68 limpio',
         'hi' => '0 / 68 स्वच्छ',
-        _ => '0 / 68 clean',
+        _ => this,
       },
 
       'status' => switch (l10n.localeName) {
         'es' => 'Estado',
         'hi' => 'स्थिति',
-        _ => 'Status',
+        _ => this,
       },
 
       'undetected' => switch (l10n.localeName) {
         'es' => 'No detectado',
         'hi' => 'अपरिचित (सुरक्षित)',
-        _ => 'Undetected',
+        _ => this,
       },
 
       'last scan' => switch (l10n.localeName) {
         'es' => 'Último escaneo',
         'hi' => 'अंतिम स्कैन',
-        _ => 'Last Scan',
+        _ => this,
       },
 
       'july 2026' => switch (l10n.localeName) {
         'es' => 'Julio de 2026',
         'hi' => 'जुलाई २०२६',
-        _ => 'July 2026',
+        _ => this,
       },
 
       'signature' => switch (l10n.localeName) {
         'es' => 'Firma',
         'hi' => 'हस्ताक्षर',
-        _ => 'Signature',
+        _ => this,
       },
 
       'developer key' => switch (l10n.localeName) {
         'es' => 'Clave del desarrollador',
         'hi' => 'डेवलपर कुंजी',
-        _ => 'Developer Key',
+        _ => this,
       },
 
       'notekar builds undergo automated codeql scanner compilation and local virustotal scans. binaries are signed with our official certificate to ensure absolute integrity.' =>
@@ -1648,26 +1628,25 @@ extension LocalizedString on String {
             'Las compilaciones de NoteKar se someten a compilación automatizada del escáner CodeQL y escaneos locales de VirusTotal. Los binarios están firmados con nuestro certificado oficial para garantizar una integridad absoluta.',
           'hi' =>
             'NoteKar का प्रत्येक संकलन स्वचालित CodeQL स्कैनर संकलन और स्थानीय VirusTotal स्कैन से गुजरता है। पूर्ण अखंडता सुनिश्चित करने के लिए बाइनरी को हमारे आधिकारिक प्रमाणपत्र के साथ हस्ताक्षरित किया गया है।',
-          _ =>
-            'NoteKar builds undergo automated CodeQL scanner compilation and local VirusTotal scans. Binaries are signed with our official certificate to ensure absolute integrity.',
+          _ => this,
         },
 
       'vt report' => switch (l10n.localeName) {
         'es' => 'Informe de VT',
         'hi' => 'VT रिपोर्ट',
-        _ => 'VT Report',
+        _ => this,
       },
 
       'sha-256 hashes' => switch (l10n.localeName) {
         'es' => 'Hashes SHA-256',
         'hi' => 'SHA-256 हैश',
-        _ => 'SHA-256 Hashes',
+        _ => this,
       },
 
       'is notekar safe to use?' => switch (l10n.localeName) {
         'es' => '¿Es seguro usar NoteKar?',
         'hi' => 'क्या NoteKar उपयोग करने के लिए सुरक्षित है?',
-        _ => 'Is NoteKar safe to use?',
+        _ => this,
       },
 
       'absolutely. notekar is open-source and offline-first. to guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via virustotal. you can inspect the live scan report under privacy & security.' =>
@@ -1676,44 +1655,43 @@ extension LocalizedString on String {
             'Absolutamente. NoteKar es de código abierto y local primero. Para garantizar la máxima confianza y seguridad, cada versión compilada se carga automáticamente y se verifica limpia por más de 60 motores de seguridad a través de VirusTotal. Puede inspeccionar el informe de escaneo en vivo en Privacidad y seguridad.',
           'hi' =>
             'बिल्कुल। NoteKar ओपन-सोर्स और ऑफलाइन-फर्स्ट है। अधिकतम विश्वास और सुरक्षा की गारंटी के लिए, प्रत्येक संकलित रिलीज़ को स्वचालित रूप से अपलोड किया जाता है और VirusTotal के माध्यम से 60+ सुरक्षा इंजनों द्वारा स्वच्छ सत्यापित किया जाता है। आप गोपनीयता और सुरक्षा के तहत लाइव स्कैन रिपोर्ट का निरीक्षण कर सकते हैं।',
-          _ =>
-            'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Privacy & Security.',
+          _ => this,
         },
 
       'open link' => switch (l10n.localeName) {
         'es' => 'Abrir enlace',
         'hi' => 'लिंक खोलें',
-        _ => 'Open Link',
+        _ => this,
       },
 
       'copy' => switch (l10n.localeName) {
         'es' => 'Copiar',
         'hi' => 'कॉपी',
-        _ => 'Copy',
+        _ => this,
       },
 
       'repository link copied to clipboard' => switch (l10n.localeName) {
         'es' => 'Enlace del repositorio copiado al portapapeles',
         'hi' => 'रिपॉजिटरी लिंक क्लिपबोर्ड पर कॉपी किया गया',
-        _ => 'Repository link copied to clipboard',
+        _ => this,
       },
 
       'disable compact history?' => switch (l10n.localeName) {
         'es' => '¿Desactivar historial compacto?',
         'hi' => 'कॉम्पैक्ट इतिहास अक्षम करें?',
-        _ => 'Disable Compact History?',
+        _ => this,
       },
 
       'turn off single numbers?' => switch (l10n.localeName) {
         'es' => '¿Desactivar números individuales?',
         'hi' => 'सिंगल नंबर बंद करें?',
-        _ => 'Turn Off Single Numbers?',
+        _ => this,
       },
 
       'turn off & enable' => switch (l10n.localeName) {
         'es' => 'Desactivar y activar',
         'hi' => 'अक्षम करें और सक्रिय करें',
-        _ => 'Turn Off & Enable',
+        _ => this,
       },
 
       'sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. turn off compact history to enable numbers in single mode.' =>
@@ -1722,8 +1700,7 @@ extension LocalizedString on String {
             'La numeración secuencial (00–99) requiere espaciado estándar para mostrar insignias de 2 dígitos. Desactive el historial compacto para habilitar números.',
           'hi' =>
             'अनुक्रमिक एकल क्रमांकन (00–99) को 2-अंकीय बैज प्रदर्शित करने के लिए मानक पंक्ति रिक्ति की आवश्यकता होती है। सिंगल मोड में संख्याओं को सक्षम करने के लिए कॉम्पैक्ट इतिहास को बंद करें।',
-          _ =>
-            'Sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. Turn off Compact History to enable numbers in single mode.',
+          _ => this,
         },
 
       'compact history cannot be enabled while single moment numbering is active. disable single numbers to use compact rows.' =>
@@ -1732,32 +1709,31 @@ extension LocalizedString on String {
             'El historial compacto no se puede activar mientras la numeración de momentos individuales esté activa. Desactive los números para usar filas compactas.',
           'hi' =>
             'सिंगल मोमेंट नंबरिंग सक्रिय होने पर कॉम्पैक्ट इतिहास को सक्षम नहीं किया जा सकता है। कॉम्पैक्ट पंक्तियों का उपयोग करने के लिए सिंगल नंबर को बंद करें।',
-          _ =>
-            'Compact History cannot be enabled while Single Moment Numbering is active. Disable Single Numbers to use compact rows.',
+          _ => this,
         },
 
       'numbered single moments' => switch (l10n.localeName) {
         'es' => 'Momentos individuales numerados',
         'hi' => 'क्रमांकित एकल क्षण',
-        _ => 'Numbered Single Moments',
+        _ => this,
       },
 
       'use numbers in single' => switch (l10n.localeName) {
         'es' => 'Usar números en individual',
         'hi' => 'सिंगल में नंबर का उपयोग करें',
-        _ => 'Use Numbers in Single',
+        _ => this,
       },
 
       'reset daily' => switch (l10n.localeName) {
         'es' => 'Restablecer diariamente',
         'hi' => 'प्रतिदिन रीसेट करें',
-        _ => 'Reset Daily',
+        _ => this,
       },
 
       'enable count on save' => switch (l10n.localeName) {
         'es' => 'Activar conteo al guardar',
         'hi' => 'सहेजने पर गिनती सक्षम करें',
-        _ => 'Enable Count on Save',
+        _ => this,
       },
 
       'transform your history with sequential 2-digit counters (00–99), daily midnight resets, and an ios style calendar.' =>
@@ -1766,8 +1742,7 @@ extension LocalizedString on String {
             'Transforma tu historial con contadores secuenciales de 2 dígitos (00–99), reinicios diarios y un calendario estilo iOS.',
           'hi' =>
             'अनुक्रमिक 2-अंकीय काउंटरों (00–99), दैनिक मध्यरात्रि रीसेट और iOS शैली कैलेंडर के साथ अपने इतिहास को बदलें।',
-          _ =>
-            'Transform your history with sequential 2-digit counters (00–99), daily midnight resets, and an iOS style calendar.',
+          _ => this,
         },
 
       'restarts count at 00 every midnight while keeping past history intact.' =>
@@ -1776,8 +1751,7 @@ extension LocalizedString on String {
             'Reinicia el conteo en 00 cada medianoche manteniendo el historial anterior.',
           'hi' =>
             'पिछले इतिहास को बरकरार रखते हुए हर मध्यरात्रि को 00 पर गिनती फिर से शुरू करता है।',
-          _ =>
-            'Restarts count at 00 every midnight while keeping past history intact.',
+          _ => this,
         },
 
       'shows sequential numbers (00, 01...) on the tap pulse animation.' =>
@@ -1786,166 +1760,165 @@ extension LocalizedString on String {
             'Muestra números secuenciales (00, 01...) en la animación de pulsación.',
           'hi' =>
             'टैप पल्स एनिमेशन पर अनुक्रमिक संख्याएं (00, 01...) दिखाता है।',
-          _ =>
-            'Shows sequential numbers (00, 01...) on the tap pulse animation.',
+          _ => this,
         },
 
       'moment saved' => switch (l10n.localeName) {
         'es' => 'Momento guardado',
         'hi' => 'क्षण सहेजा गया',
-        _ => 'moment saved',
+        _ => this,
       },
 
       'undo' => switch (l10n.localeName) {
         'es' => 'Deshacer',
         'hi' => 'पूर्ववत करें',
-        _ => 'undo',
+        _ => this,
       },
 
       'settings restored' => switch (l10n.localeName) {
         'es' => 'Ajustes restaurados',
         'hi' => 'सेटिंग्स बहाल की गईं',
-        _ => 'settings restored',
+        _ => this,
       },
 
       'loading database...' => switch (l10n.localeName) {
         'es' => 'Cargando base de datos...',
         'hi' => 'डेटाबेस लोड हो रहा है...',
-        _ => 'loading database...',
+        _ => this,
       },
 
       'add a note to save' => switch (l10n.localeName) {
         'es' => 'Agrega una nota para guardar',
         'hi' => 'सहेजने के लिए एक नोट जोड़ें',
-        _ => 'add a note to save',
+        _ => this,
       },
 
       'enable show seconds first' => switch (l10n.localeName) {
         'es' => 'Activa Mostrar segundos primero',
         'hi' => 'पहले सेकंड दिखाना सक्षम करें',
-        _ => 'enable show seconds first',
+        _ => this,
       },
 
       'link copied' => switch (l10n.localeName) {
         'es' => 'Enlace copiado',
         'hi' => 'लिंक कॉपी किया गया',
-        _ => 'link copied',
+        _ => this,
       },
 
       'notification permission needed' => switch (l10n.localeName) {
         'es' => 'Permiso de notificación requerido',
         'hi' => 'सूचना अनुमति आवश्यक है',
-        _ => 'notification permission needed',
+        _ => this,
       },
 
       'export saved to downloads' => switch (l10n.localeName) {
         'es' => 'Exportación guardada en Descargas',
         'hi' => 'निर्यात डाउनलोड में सहेजा गया',
-        _ => 'export saved to downloads',
+        _ => this,
       },
 
       'export failed. try again.' => switch (l10n.localeName) {
         'es' => 'Error al exportar. Inténtalo de nuevo.',
         'hi' => 'निर्यात विफल रहा। पुन: प्रयास करें।',
-        _ => 'export failed. try again.',
+        _ => this,
       },
 
       'quick local backup created' => switch (l10n.localeName) {
         'es' => 'Copia de seguridad local creada',
         'hi' => 'त्वरित स्थानीय बैकअप बनाया गया',
-        _ => 'quick local backup created',
+        _ => this,
       },
 
       'failed to create local backup' => switch (l10n.localeName) {
         'es' => 'Error al crear copia local',
         'hi' => 'स्थानीय बैकअप बनाने में विफल',
-        _ => 'failed to create local backup',
+        _ => this,
       },
 
       'in-app pin set successfully.' => switch (l10n.localeName) {
         'es' => 'PIN en la aplicación configurado con éxito.',
         'hi' => 'इन-ऐप पिन सफलतापूर्वक सेट किया गया।',
-        _ => 'in-app pin set successfully.',
+        _ => this,
       },
 
       'system lock enabled' => switch (l10n.localeName) {
         'es' => 'Bloqueo del sistema activado',
         'hi' => 'सिस्टम लॉक सक्षम किया गया',
-        _ => 'system lock enabled',
+        _ => this,
       },
 
       'app icon could not be changed' => switch (l10n.localeName) {
         'es' => 'No se pudo cambiar el icono de la aplicación',
         'hi' => 'ऐप आइकन बदला नहीं जा सका',
-        _ => 'app icon could not be changed',
+        _ => this,
       },
 
       'could not open backup file' => switch (l10n.localeName) {
         'es' => 'No se pudo abrir el archivo de respaldo',
         'hi' => 'बैकअप फ़ाइल नहीं खोली जा सकी',
-        _ => 'could not open backup file',
+        _ => this,
       },
 
       'import cancelled' => switch (l10n.localeName) {
         'es' => 'Importación cancelada',
         'hi' => 'आयात रद्द किया गया',
-        _ => 'import cancelled',
+        _ => this,
       },
 
       'invalid backup file' => switch (l10n.localeName) {
         'es' => 'Archivo de respaldo no válido',
         'hi' => 'अमान्य बैकअप फ़ाइल',
-        _ => 'invalid backup file',
+        _ => this,
       },
 
       'backup has no new moments' => switch (l10n.localeName) {
         'es' => 'El respaldo no tiene nuevos momentos',
         'hi' => 'बैकअप में कोई नया क्षण नहीं है',
-        _ => 'backup has no new moments',
+        _ => this,
       },
 
       'this backup contains no moments' => switch (l10n.localeName) {
         'es' => 'Este respaldo no contiene momentos',
         'hi' => 'इस बैकअप में कोई क्षण नहीं है',
-        _ => 'this backup contains no moments',
+        _ => this,
       },
 
       'turn off reduced motion first' => switch (l10n.localeName) {
         'es' => 'Desactiva Reducir movimiento primero',
         'hi' => 'पहले कम गति बंद करें',
-        _ => 'turn off reduced motion first',
+        _ => this,
       },
 
       'motion sensor unavailable' => switch (l10n.localeName) {
         'es' => 'Sensor de movimiento no disponible',
         'hi' => 'गति संवेदक अनुपलब्ध',
-        _ => 'motion sensor unavailable',
+        _ => this,
       },
 
       'backup reminder: export a fresh backup soon' =>
         switch (l10n.localeName) {
           'es' => 'Recordatorio de respaldo: exporta una copia pronto',
           'hi' => 'बैकअप अनुस्मारक: जल्द ही एक नया बैकअप निर्यात करें',
-          _ => 'backup reminder: export a fresh backup soon',
+          _ => this,
         },
 
       'streak shield deployed! clean streak protected.' =>
         switch (l10n.localeName) {
           'es' => '¡Escudo de racha desplegado! Racha protegida.',
           'hi' => 'संयम ढाल तैनात! संयम सुरक्षित।',
-          _ => 'streak shield deployed! clean streak protected.',
+          _ => this,
         },
 
       'storage error: moment not saved' => switch (l10n.localeName) {
         'es' => 'Error de almacenamiento: momento no guardado',
         'hi' => 'स्टोरेज त्रुटि: क्षण सहेजा नहीं गया',
-        _ => 'storage error: moment not saved',
+        _ => this,
       },
 
       'beta feature' => switch (l10n.localeName) {
         'es' => 'Función Beta',
         'hi' => 'बीटा सुविधा',
-        _ => 'beta feature',
+        _ => this,
       },
 
       'this feature is currently in active development. while fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. all calculations, data, and security policies remain entirely local to your device.' =>
@@ -1954,80 +1927,79 @@ extension LocalizedString on String {
             'Esta función se encuentra en desarrollo activo. Aunque es totalmente funcional y segura, es posible que note ajustes menores en el diseño. Todos los cálculos y datos permanecen en su dispositivo.',
           'hi' =>
             'यह सुविधा वर्तमान में सक्रिय विकास में है। हालांकि यह पूरी तरह कार्यात्मक और सुरक्षित है। सभी गणना और डेटा आपके डिवाइस पर स्थानीय रहते हैं।',
-          _ =>
-            'this feature is currently in active development. while fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. all calculations, data, and security policies remain entirely local to your device.',
+          _ => this,
         },
 
       'have suggestions or found a bug?' => switch (l10n.localeName) {
         'es' => '¿Tienes sugerencias o encontraste un error?',
         'hi' => 'क्या आपके पास सुझाव हैं या कोई बग मिला?',
-        _ => 'have suggestions or found a bug?',
+        _ => this,
       },
 
       '* have suggestions or found a bug? ' => switch (l10n.localeName) {
         'es' => '* ¿Tienes sugerencias o encontraste un error? ',
         'hi' => '* क्या आपके पास सुझाव हैं या कोई बग मिला? ',
-        _ => '* have suggestions or found a bug? ',
+        _ => this,
       },
 
       'give feedback' => switch (l10n.localeName) {
         'es' => 'Dar opinión',
         'hi' => 'प्रतिक्रिया दें',
-        _ => 'give feedback',
+        _ => this,
       },
 
       'got it' => switch (l10n.localeName) {
         'es' => 'Entendido',
         'hi' => 'समझ गया',
-        _ => 'got it',
+        _ => this,
       },
 
       'learn more' => switch (l10n.localeName) {
         'es' => 'Más información',
         'hi' => 'और जानें',
-        _ => 'learn more',
+        _ => this,
       },
 
       'tools' => switch (l10n.localeName) {
         'es' => 'Herramientas',
         'hi' => 'उपकरण',
-        _ => 'tools',
+        _ => this,
       },
 
       'wipe' => switch (l10n.localeName) {
         'es' => 'Borrar',
         'hi' => 'मिटाएं',
-        _ => 'wipe',
+        _ => this,
       },
 
       'active' => switch (l10n.localeName) {
         'es' => 'Activo',
         'hi' => 'सक्रिय',
-        _ => 'active',
+        _ => this,
       },
 
       'inactive' => switch (l10n.localeName) {
         'es' => 'Inactivo',
         'hi' => 'निष्क्रिय',
-        _ => 'inactive',
+        _ => this,
       },
 
       'startup mode' => switch (l10n.localeName) {
         'es' => 'Modo de inicio',
         'hi' => 'स्टार्टअप मोड',
-        _ => 'startup mode',
+        _ => this,
       },
 
       'choose how notekar starts when you open it' => switch (l10n.localeName) {
         'es' => 'Elige cómo inicia NoteKar al abrirlo',
         'hi' => 'चुनें कि NoteKar खोलने पर कैसे शुरू हो',
-        _ => 'choose how notekar starts when you open it',
+        _ => this,
       },
 
       'choose language' => switch (l10n.localeName) {
         'es' => 'Elegir idioma',
         'hi' => 'भाषा चुनें',
-        _ => 'choose language',
+        _ => this,
       },
 
       'select your preferred interface language. you can change this anytime in settings.' =>
@@ -2036,86 +2008,85 @@ extension LocalizedString on String {
             'Selecciona tu idioma preferido. Puedes cambiarlo en cualquier momento en Ajustes.',
           'hi' =>
             'अपनी पसंदीदा भाषा चुनें। आप इसे सेटिंग्स में कभी भी बदल सकते हैं।',
-          _ =>
-            'select your preferred interface language. you can change this anytime in settings.',
+          _ => this,
         },
 
       'no moments logged yet' => switch (l10n.localeName) {
         'es' => 'Aún no hay momentos registrados',
         'hi' => 'अभी तक कोई क्षण दर्ज नहीं किया गया है',
-        _ => 'no moments logged yet',
+        _ => this,
       },
 
       'no moments' => switch (l10n.localeName) {
         'es' => 'Sin momentos',
         'hi' => 'कोई क्षण नहीं',
-        _ => 'no moments',
+        _ => this,
       },
 
       'no notes found' => switch (l10n.localeName) {
         'es' => 'No se encontraron notas',
         'hi' => 'कोई नोट नहीं मिला',
-        _ => 'no notes found',
+        _ => this,
       },
 
       'no search results found' => switch (l10n.localeName) {
         'es' => 'No se encontraron resultados',
         'hi' => 'कोई खोज परिणाम नहीं मिला',
-        _ => 'no search results found',
+        _ => this,
       },
 
       'try another keyword' => switch (l10n.localeName) {
         'es' => 'Prueba con otra palabra clave',
         'hi' => 'कोई अन्य कीवर्ड आज़माएं',
-        _ => 'try another keyword',
+        _ => this,
       },
 
       'trash is empty' => switch (l10n.localeName) {
         'es' => 'La papelera está vacía',
         'hi' => 'कचरा खाली है',
-        _ => 'trash is empty',
+        _ => this,
       },
 
       'moment options' => switch (l10n.localeName) {
         'es' => 'Opciones del momento',
         'hi' => 'क्षण विकल्प',
-        _ => 'moment options',
+        _ => this,
       },
 
       'copy moment' => switch (l10n.localeName) {
         'es' => 'Copiar momento',
         'hi' => 'क्षण कॉपी करें',
-        _ => 'copy moment',
+        _ => this,
       },
 
       'edit note' => switch (l10n.localeName) {
         'es' => 'Editar nota',
         'hi' => 'नोट संपादित करें',
-        _ => 'edit note',
+        _ => this,
       },
 
       'delete moment' => switch (l10n.localeName) {
         'es' => 'Eliminar momento',
         'hi' => 'क्षण हटाएं',
-        _ => 'delete moment',
+        _ => this,
       },
 
       'select for duration' => switch (l10n.localeName) {
         'es' => 'Seleccionar para duración',
         'hi' => 'अवधि के लिए चुनें',
-        _ => 'select for duration',
+        _ => this,
       },
 
       'view note' => switch (l10n.localeName) {
         'es' => 'Ver nota',
         'hi' => 'नोट देखें',
-        _ => 'view note',
+        _ => this,
       },
 
       'delete all moments?' => switch (l10n.localeName) {
         'es' => '¿Eliminar todos los momentos?',
         'hi' => 'क्या सभी क्षण हटाएं?',
-        _ => 'delete all moments?',
+        _ => this,
       },
 
       'this will permanently delete all moments. this action cannot be undone.' =>
@@ -2124,62 +2095,61 @@ extension LocalizedString on String {
             'Esto eliminará permanentemente todos los momentos. Esta acción no se puede deshacer.',
           'hi' =>
             'यह सभी क्षणों को स्थायी रूप से हटा देगा। इस क्रिया को पूर्ववत नहीं किया जा सकता है।',
-          _ =>
-            'this will permanently delete all moments. this action cannot be undone.',
+          _ => this,
         },
 
       'type to search your notes...' => switch (l10n.localeName) {
         'es' => 'Escribe para buscar tus notas...',
         'hi' => 'अपने नोट्स खोजने के लिए टाइप करें...',
-        _ => 'type to search your notes...',
+        _ => this,
       },
 
       'no matching notes' => switch (l10n.localeName) {
         'es' => 'No hay notas coincidentes',
         'hi' => 'कोई मेल खाते नोट नहीं मिले',
-        _ => 'no matching notes',
+        _ => this,
       },
 
       'enter passcode' => switch (l10n.localeName) {
         'es' => 'Ingresar código de acceso',
         'hi' => 'पासकोड दर्ज करें',
-        _ => 'enter passcode',
+        _ => this,
       },
 
       'set passcode' => switch (l10n.localeName) {
         'es' => 'Establecer código de acceso',
         'hi' => 'पासकोड सेट करें',
-        _ => 'set passcode',
+        _ => this,
       },
 
       'confirm passcode' => switch (l10n.localeName) {
         'es' => 'Confirmar código de acceso',
         'hi' => 'पासकोड की पुष्टि करें',
-        _ => 'confirm passcode',
+        _ => this,
       },
 
       'passcodes do not match' => switch (l10n.localeName) {
         'es' => 'Los códigos de acceso no coinciden',
         'hi' => 'पासकोड मेल नहीं खाते',
-        _ => 'passcodes do not match',
+        _ => this,
       },
 
       'incorrect passcode' => switch (l10n.localeName) {
         'es' => 'Código de acceso incorrecto',
         'hi' => 'गलत पासकोड',
-        _ => 'incorrect passcode',
+        _ => this,
       },
 
       'try again in seconds' => switch (l10n.localeName) {
         'es' => 'Inténtalo de nuevo en unos segundos',
         'hi' => 'कुछ सेकंड में पुन: प्रयास करें',
-        _ => 'try again in seconds',
+        _ => this,
       },
 
       'biometrics not available' => switch (l10n.localeName) {
         'es' => 'Biometría no disponible',
         'hi' => 'बायोमेट्रिक्स उपलब्ध नहीं है',
-        _ => 'biometrics not available',
+        _ => this,
       },
 
       'these settings refine the interface aesthetic and do not modify your saved data.' =>
@@ -2188,8 +2158,7 @@ extension LocalizedString on String {
             'Estos ajustes refinan la estética de la interfaz y no modifican tus datos guardados.',
           'hi' =>
             'ये सेटिंग्स इंटरफ़ेस सौंदर्य को परिष्कृत करती हैं और आपके सहेजे गए डेटा को संशोधित नहीं करती हैं।',
-          _ =>
-            'these settings refine the interface aesthetic and do not modify your saved data.',
+          _ => this,
         },
 
       'export, import, and manage your data backups.' =>
@@ -2197,7 +2166,7 @@ extension LocalizedString on String {
           'es' =>
             'Exporta, importa y administra tus copias de seguridad de datos.',
           'hi' => 'अपना डेटा बैकअप निर्यात, आयात और प्रबंधित करें।',
-          _ => 'export, import, and manage your data backups.',
+          _ => this,
         },
 
       'diagnostics and internal engine settings for developers.' =>
@@ -2205,931 +2174,931 @@ extension LocalizedString on String {
           'es' =>
             'Diagnósticos y ajustes del motor interno para desarrolladores.',
           'hi' => 'डेवलपर्स के लिए निदान और आंतरिक इंजन सेटिंग्स।',
-          _ => 'diagnostics and internal engine settings for developers.',
+          _ => this,
         },
 
       '100% offline integrity' => switch (l10n.localeName) {
         'es' => 'Integridad 100% sin conexión',
         'hi' => '100% ऑफलाइन अखंडता',
-        _ => '100% offline integrity',
+        _ => this,
       },
 
       '16-week habit activity grid' => switch (l10n.localeName) {
         'es' => 'Cuadrícula de actividad de hábitos de 16 semanas',
         'hi' => '16-सप्ताह की आदत गतिविधि ग्रिड',
-        _ => '16-week habit activity grid',
+        _ => this,
       },
 
       '5-4-3-2-1 grounding' => switch (l10n.localeName) {
         'es' => 'Técnica de anclaje 5-4-3-2-1',
         'hi' => '5-4-3-2-1 ग्राउंडिंग तकनीक',
-        _ => '5-4-3-2-1 grounding',
+        _ => this,
       },
 
       'accept' => switch (l10n.localeName) {
         'es' => 'Aceptar',
         'hi' => 'स्वीकार करें',
-        _ => 'accept',
+        _ => this,
       },
 
       'active launcher icon' => switch (l10n.localeName) {
         'es' => 'Icono de inicio activo',
         'hi' => 'सक्रिय लॉन्चर आइकन',
-        _ => 'active launcher icon',
+        _ => this,
       },
 
       'activity' => switch (l10n.localeName) {
         'es' => 'Actividad',
         'hi' => 'गतिविधि',
-        _ => 'activity',
+        _ => this,
       },
 
       'allow app installation' => switch (l10n.localeName) {
         'es' => 'Permitir instalación de apps',
         'hi' => 'ऐप स्थापना की अनुमति दें',
-        _ => 'allow app installation',
+        _ => this,
       },
 
       'allow auto-start settings' => switch (l10n.localeName) {
         'es' => 'Permitir inicio automático',
         'hi' => 'ऑटो-स्टार्ट सेटिंग्स की अनुमति दें',
-        _ => 'allow auto-start settings',
+        _ => this,
       },
 
       'android backup' => switch (l10n.localeName) {
         'es' => 'Copia de seguridad de Android',
         'hi' => 'एंड्रॉइड बैकअप',
-        _ => 'android backup',
+        _ => this,
       },
 
       'app lock needs a device screen lock' => switch (l10n.localeName) {
         'es' => 'El bloqueo de app necesita un bloqueo de pantalla',
         'hi' => 'ऐप लॉक के लिए डिवाइस स्क्रीन लॉक आवश्यक है',
-        _ => 'app lock needs a device screen lock',
+        _ => this,
       },
 
       'app switcher obfuscation' => switch (l10n.localeName) {
         'es' => 'Ocultación en cambio de app',
         'hi' => 'ऐप स्विचर में छुपाना',
-        _ => 'app switcher obfuscation',
+        _ => this,
       },
 
       'app usage' => switch (l10n.localeName) {
         'es' => 'Uso de la aplicación',
         'hi' => 'ऐप का उपयोग',
-        _ => 'app usage',
+        _ => this,
       },
 
       'applying app icon' => switch (l10n.localeName) {
         'es' => 'Aplicando icono de app',
         'hi' => 'ऐप आइकन लागू हो रहा है',
-        _ => 'applying app icon',
+        _ => this,
       },
 
       'auto-start & background activity' => switch (l10n.localeName) {
         'es' => 'Inicio automático y actividad en segundo plano',
         'hi' => 'ऑटो-स्टार्ट और बैकग्राउंड गतिविधि',
-        _ => 'auto-start & background activity',
+        _ => this,
       },
 
       'back' => switch (l10n.localeName) {
         'es' => 'Atrás',
         'hi' => 'पीछे',
-        _ => 'back',
+        _ => this,
       },
 
       'backup status' => switch (l10n.localeName) {
         'es' => 'Estado de la copia',
         'hi' => 'बैकअप स्थिति',
-        _ => 'backup status',
+        _ => this,
       },
 
       'beta' => switch (l10n.localeName) {
         'es' => 'Beta',
         'hi' => 'बीटा',
-        _ => 'beta',
+        _ => this,
       },
 
       'box breathing' => switch (l10n.localeName) {
         'es' => 'Respiración cuadrada',
         'hi' => 'बॉक्स ब्रीदिंग',
-        _ => 'box breathing',
+        _ => this,
       },
 
       'build cache cleared' => switch (l10n.localeName) {
         'es' => 'Caché de compilación borrada',
         'hi' => 'बिल्ड कैश साफ़ किया गया',
-        _ => 'build cache cleared',
+        _ => this,
       },
 
       'build cache size' => switch (l10n.localeName) {
         'es' => 'Tamaño de caché de compilación',
         'hi' => 'बिल्ड कैश आकार',
-        _ => 'build cache size',
+        _ => this,
       },
 
       'check again' => switch (l10n.localeName) {
         'es' => 'Comprobar de nuevo',
         'hi' => 'पुनः जांचें',
-        _ => 'check again',
+        _ => this,
       },
 
       'check for updates' => switch (l10n.localeName) {
         'es' => 'Buscar actualizaciones',
         'hi' => 'अपडेट के लिए जांचें',
-        _ => 'check for updates',
+        _ => this,
       },
 
       'checking for updates...' => switch (l10n.localeName) {
         'es' => 'Buscando actualizaciones...',
         'hi' => 'अपडेट की जांच हो रही है...',
-        _ => 'checking for updates...',
+        _ => this,
       },
 
       'clear' => switch (l10n.localeName) {
         'es' => 'Borrar',
         'hi' => 'साफ़ करें',
-        _ => 'clear',
+        _ => this,
       },
 
       'commits' => switch (l10n.localeName) {
         'es' => 'Commits',
         'hi' => 'कमिट्स',
-        _ => 'commits',
+        _ => this,
       },
 
       'continue' => switch (l10n.localeName) {
         'es' => 'Continuar',
         'hi' => 'जारी रखें',
-        _ => 'continue',
+        _ => this,
       },
 
       'create quick local backup' => switch (l10n.localeName) {
         'es' => 'Crear copia de seguridad local rápida',
         'hi' => 'त्वरित स्थानीय बैकअप बनाएं',
-        _ => 'create quick local backup',
+        _ => this,
       },
 
       'daily neuroscience insight' => switch (l10n.localeName) {
         'es' => 'Información diaria de neurociencia',
         'hi' => 'दैनिक न्यूरोसाइंस अंतर्दृष्टि',
-        _ => 'daily neuroscience insight',
+        _ => this,
       },
 
       'data' => switch (l10n.localeName) {
         'es' => 'Datos',
         'hi' => 'डेटा',
-        _ => 'data',
+        _ => this,
       },
 
       'data consumed' => switch (l10n.localeName) {
         'es' => 'Datos consumidos',
         'hi' => 'डेटा खपत',
-        _ => 'data consumed',
+        _ => this,
       },
 
       'data health' => switch (l10n.localeName) {
         'es' => 'Salud de datos',
         'hi' => 'डेटा स्वास्थ्य',
-        _ => 'data health',
+        _ => this,
       },
 
       'delete backup?' => switch (l10n.localeName) {
         'es' => '¿Eliminar copia de seguridad?',
         'hi' => 'क्या बैकअप हटाएं?',
-        _ => 'delete backup?',
+        _ => this,
       },
 
       'delete cache' => switch (l10n.localeName) {
         'es' => 'Eliminar caché',
         'hi' => 'कैश हटाएं',
-        _ => 'delete cache',
+        _ => this,
       },
 
       'delete permanently' => switch (l10n.localeName) {
         'es' => 'Eliminar permanentemente',
         'hi' => 'स्थायी रूप से हटाएं',
-        _ => 'delete permanently',
+        _ => this,
       },
 
       'deleting cache...' => switch (l10n.localeName) {
         'es' => 'Eliminando caché...',
         'hi' => 'कैश हटाया जा रहा है...',
-        _ => 'deleting cache...',
+        _ => this,
       },
 
       'dev' => switch (l10n.localeName) {
         'es' => 'Desarrollo',
         'hi' => 'डेव',
-        _ => 'dev',
+        _ => this,
       },
 
       'device health' => switch (l10n.localeName) {
         'es' => 'Salud del dispositivo',
         'hi' => 'डिवाइस स्वास्थ्य',
-        _ => 'device health',
+        _ => this,
       },
 
       'disabled' => switch (l10n.localeName) {
         'es' => 'Desactivado',
         'hi' => 'अक्षम',
-        _ => 'disabled',
+        _ => this,
       },
 
       'dismiss' => switch (l10n.localeName) {
         'es' => 'Descartar',
         'hi' => 'खारिज करें',
-        _ => 'dismiss',
+        _ => this,
       },
 
       'download' => switch (l10n.localeName) {
         'es' => 'Descargar',
         'hi' => 'डाउनलोड',
-        _ => 'download',
+        _ => this,
       },
 
       'download & install' => switch (l10n.localeName) {
         'es' => 'Descargar e instalar',
         'hi' => 'डाउनलोड और इंस्टॉल करें',
-        _ => 'download & install',
+        _ => this,
       },
 
       'download failed' => switch (l10n.localeName) {
         'es' => 'Descarga fallida',
         'hi' => 'डाउनलोड विफल',
-        _ => 'download failed',
+        _ => this,
       },
 
       'download from github' => switch (l10n.localeName) {
         'es' => 'Descargar desde GitHub',
         'hi' => 'GitHub से डाउनलोड करें',
-        _ => 'download from github',
+        _ => this,
       },
 
       'download size:' => switch (l10n.localeName) {
         'es' => 'Tamaño de descarga:',
         'hi' => 'डाउनलोड आकार:',
-        _ => 'download size:',
+        _ => this,
       },
 
       'downloading update...' => switch (l10n.localeName) {
         'es' => 'Descargando actualización...',
         'hi' => 'अपडेट डाउनलोड हो रहा है...',
-        _ => 'downloading update...',
+        _ => this,
       },
 
       'empty trash' => switch (l10n.localeName) {
         'es' => 'Vaciar papelera',
         'hi' => 'कचरा खाली करें',
-        _ => 'empty trash',
+        _ => this,
       },
 
       'encrypted backup' => switch (l10n.localeName) {
         'es' => 'Copia cifrada',
         'hi' => 'एन्क्रिप्टेड बैकअप',
-        _ => 'encrypted backup',
+        _ => this,
       },
 
       'endpoint url' => switch (l10n.localeName) {
         'es' => 'URL del endpoint',
         'hi' => 'एंडपॉइंट URL',
-        _ => 'endpoint url',
+        _ => this,
       },
 
       'essential features' => switch (l10n.localeName) {
         'es' => 'Funciones esenciales',
         'hi' => 'आवश्यक सुविधाएं',
-        _ => 'essential features',
+        _ => this,
       },
 
       'export backup' => switch (l10n.localeName) {
         'es' => 'Exportar copia',
         'hi' => 'बैकअप निर्यात करें',
-        _ => 'export backup',
+        _ => this,
       },
 
       'export csv' => switch (l10n.localeName) {
         'es' => 'Exportar CSV',
         'hi' => 'CSV निर्यात करें',
-        _ => 'export csv',
+        _ => this,
       },
 
       'export json' => switch (l10n.localeName) {
         'es' => 'Exportar JSON',
         'hi' => 'JSON निर्यात करें',
-        _ => 'export json',
+        _ => this,
       },
 
       'export last 7 days' => switch (l10n.localeName) {
         'es' => 'Exportar últimos 7 días',
         'hi' => 'पिछले 7 दिनों का निर्यात करें',
-        _ => 'export last 7 days',
+        _ => this,
       },
 
       'export milestone card' => switch (l10n.localeName) {
         'es' => 'Exportar tarjeta de hito',
         'hi' => 'मील का पत्थर कार्ड निर्यात करें',
-        _ => 'export milestone card',
+        _ => this,
       },
 
       'external navigation' => switch (l10n.localeName) {
         'es' => 'Navegación externa',
         'hi' => 'बाहरी नेविगेशन',
-        _ => 'external navigation',
+        _ => this,
       },
 
       'factory reset' => switch (l10n.localeName) {
         'es' => 'Restablecimiento de fábrica',
         'hi' => 'फ़ैक्टरी रीसेट',
-        _ => 'factory reset',
+        _ => this,
       },
 
       'failed to read local backup file' => switch (l10n.localeName) {
         'es' => 'Error al leer archivo de respaldo local',
         'hi' => 'स्थानीय बैकअप फ़ाइल पढ़ने में विफल',
-        _ => 'failed to read local backup file',
+        _ => this,
       },
 
       'faq' => switch (l10n.localeName) {
         'es' => 'Preguntas frecuentes',
         'hi' => 'अक्सर पूछे जाने वाले प्रश्न',
-        _ => 'faq',
+        _ => this,
       },
 
       'full' => switch (l10n.localeName) {
         'es' => 'Completo',
         'hi' => 'पूर्ण',
-        _ => 'full',
+        _ => this,
       },
 
       'full online policy' => switch (l10n.localeName) {
         'es' => 'Política online completa',
         'hi' => 'पूर्ण ऑनलाइन नीति',
-        _ => 'full online policy',
+        _ => this,
       },
 
       'full online terms' => switch (l10n.localeName) {
         'es' => 'Términos online completos',
         'hi' => 'पूर्ण ऑनलाइन शर्तें',
-        _ => 'full online terms',
+        _ => this,
       },
 
       'full title & purpose' => switch (l10n.localeName) {
         'es' => 'Título completo y propósito',
         'hi' => 'पूरा शीर्षक और उद्देश्य',
-        _ => 'full title & purpose',
+        _ => this,
       },
 
       'google drive backup' => switch (l10n.localeName) {
         'es' => 'Copia de Google Drive',
         'hi' => 'गूगल ड्राइव बैकअप',
-        _ => 'google drive backup',
+        _ => this,
       },
 
       'guides' => switch (l10n.localeName) {
         'es' => 'Guías',
         'hi' => 'गाइड',
-        _ => 'guides',
+        _ => this,
       },
 
       'hardware-backed encryption' => switch (l10n.localeName) {
         'es' => 'Cifrado por hardware',
         'hi' => 'हार्डवेयर-समर्थित एन्क्रिप्शन',
-        _ => 'hardware-backed encryption',
+        _ => this,
       },
 
       'help' => switch (l10n.localeName) {
         'es' => 'Ayuda',
         'hi' => 'सहायता',
-        _ => 'help',
+        _ => this,
       },
 
       'hold for notes' => switch (l10n.localeName) {
         'es' => 'Mantener para notas',
         'hi' => 'नोट्स के लिए दबाए रखें',
-        _ => 'hold for notes',
+        _ => this,
       },
 
       'import backup' => switch (l10n.localeName) {
         'es' => 'Importar copia',
         'hi' => 'बैकअप आयात करें',
-        _ => 'import backup',
+        _ => this,
       },
 
       'important notice' => switch (l10n.localeName) {
         'es' => 'Aviso importante',
         'hi' => 'महत्वपूर्ण सूचना',
-        _ => 'important notice',
+        _ => this,
       },
 
       'in-app ota updates' => switch (l10n.localeName) {
         'es' => 'Actualizaciones OTA integradas',
         'hi' => 'इन-ऐप ओटीए अपडेट',
-        _ => 'in-app ota updates',
+        _ => this,
       },
 
       'in-app pin' => switch (l10n.localeName) {
         'es' => 'PIN de la aplicación',
         'hi' => 'इन-ऐप पिन',
-        _ => 'in-app pin',
+        _ => this,
       },
 
       'in-app update setup' => switch (l10n.localeName) {
         'es' => 'Configuración de actualizaciones',
         'hi' => 'इन-ऐप अपडेट सेटअप',
-        _ => 'in-app update setup',
+        _ => this,
       },
 
       'install now' => switch (l10n.localeName) {
         'es' => 'Instalar ahora',
         'hi' => 'अभी स्थापित करें',
-        _ => 'install now',
+        _ => this,
       },
 
       'installation failed to start' => switch (l10n.localeName) {
         'es' => 'No se pudo iniciar la instalación',
         'hi' => 'स्थापना शुरू करने में विफल',
-        _ => 'installation failed to start',
+        _ => this,
       },
 
       'integrity check failed: checksum mismatch' => switch (l10n.localeName) {
         'es' => 'Fallo de integridad: suma de verificación no coincide',
         'hi' => 'अखंडता जांच विफल: चेकसम बेमेल',
-        _ => 'integrity check failed: checksum mismatch',
+        _ => this,
       },
 
       'intelligent risk radar' => switch (l10n.localeName) {
         'es' => 'Radar de riesgo inteligente',
         'hi' => 'इंटेलिजेंट रिस्क रडार',
-        _ => 'intelligent risk radar',
+        _ => this,
       },
 
       'is notekar private?' => switch (l10n.localeName) {
         'es' => '¿Es NoteKar privado?',
         'hi' => 'क्या NoteKar निजी है?',
-        _ => 'is notekar private?',
+        _ => this,
       },
 
       'less' => switch (l10n.localeName) {
         'es' => 'Menos',
         'hi' => 'कम',
-        _ => 'less',
+        _ => this,
       },
 
       'licenses' => switch (l10n.localeName) {
         'es' => 'Licencias',
         'hi' => 'लाइसेंस',
-        _ => 'licenses',
+        _ => this,
       },
 
       'limited connectivity' => switch (l10n.localeName) {
         'es' => 'Conectividad limitada',
         'hi' => 'सीमित कनेक्टिविटी',
-        _ => 'limited connectivity',
+        _ => this,
       },
 
       'local backups' => switch (l10n.localeName) {
         'es' => 'Copias locales',
         'hi' => 'स्थानीय बैकअप',
-        _ => 'local backups',
+        _ => this,
       },
 
       'local storage' => switch (l10n.localeName) {
         'es' => 'Almacenamiento local',
         'hi' => 'स्थानीय भंडारण',
-        _ => 'local storage',
+        _ => this,
       },
 
       'manage' => switch (l10n.localeName) {
         'es' => 'Administrar',
         'hi' => 'प्रबंधित करें',
-        _ => 'manage',
+        _ => this,
       },
 
       'milestone achieved' => switch (l10n.localeName) {
         'es' => 'Hito alcanzado',
         'hi' => 'मील का पत्थर हासिल किया',
-        _ => 'milestone achieved',
+        _ => this,
       },
 
       'milestone peak' => switch (l10n.localeName) {
         'es' => 'Cúspide de hito',
         'hi' => 'मील का पत्थर शिखर',
-        _ => 'milestone peak',
+        _ => this,
       },
 
       'milestone unlocked!' => switch (l10n.localeName) {
         'es' => '¡Hito desbloqueado!',
         'hi' => 'मील का पत्थर अनलॉक हुआ!',
-        _ => 'milestone unlocked!',
+        _ => this,
       },
 
       'mit' => switch (l10n.localeName) {
         'es' => 'MIT',
         'hi' => 'एमआईटी',
-        _ => 'mit',
+        _ => this,
       },
 
       'more' => switch (l10n.localeName) {
         'es' => 'Más',
         'hi' => 'अधिक',
-        _ => 'more',
+        _ => this,
       },
 
       'network & data transparency' => switch (l10n.localeName) {
         'es' => 'Transparencia de red y datos',
         'hi' => 'नेटवर्क और डेटा पारदर्शिता',
-        _ => 'network & data transparency',
+        _ => this,
       },
 
       'network warning' => switch (l10n.localeName) {
         'es' => 'Aviso de red',
         'hi' => 'नेटवर्क चेतावनी',
-        _ => 'network warning',
+        _ => this,
       },
 
       'neuroscience & growth' => switch (l10n.localeName) {
         'es' => 'Neurociencia y crecimiento',
         'hi' => 'न्यूरोसाइंस और विकास',
-        _ => 'neuroscience & growth',
+        _ => this,
       },
 
       'next' => switch (l10n.localeName) {
         'es' => 'Siguiente',
         'hi' => 'अगला',
-        _ => 'next',
+        _ => this,
       },
 
       'no local backups found' => switch (l10n.localeName) {
         'es' => 'No se encontraron copias locales',
         'hi' => 'कोई स्थानीय बैकअप नहीं मिला',
-        _ => 'no local backups found',
+        _ => this,
       },
 
       'no repository activity' => switch (l10n.localeName) {
         'es' => 'Sin actividad en el repositorio',
         'hi' => 'कोई रिपॉजिटरी गतिविधि नहीं',
-        _ => 'no repository activity',
+        _ => this,
       },
 
       'no tracking' => switch (l10n.localeName) {
         'es' => 'Sin rastreo',
         'hi' => 'कोई ट्रैकिंग नहीं',
-        _ => 'no tracking',
+        _ => this,
       },
 
       'note copied to clipboard' => switch (l10n.localeName) {
         'es' => 'Nota copiada al portapapeles',
         'hi' => 'नोट क्लिपबोर्ड पर कॉपी किया गया',
-        _ => 'note copied to clipboard',
+        _ => this,
       },
 
       'offline privacy log' => switch (l10n.localeName) {
         'es' => 'Registro de privacidad sin conexión',
         'hi' => 'ऑफलाइन गोपनीयता लॉग',
-        _ => 'offline privacy log',
+        _ => this,
       },
 
       'offline-first' => switch (l10n.localeName) {
         'es' => 'Sin conexión primero',
         'hi' => 'ऑफलाइन-प्रथम',
-        _ => 'offline-first',
+        _ => this,
       },
 
       'open source' => switch (l10n.localeName) {
         'es' => 'Código abierto',
         'hi' => 'ओपन सोर्स',
-        _ => 'open source',
+        _ => this,
       },
 
       'package verified & ready' => switch (l10n.localeName) {
         'es' => 'Paquete verificado y listo',
         'hi' => 'पैकेज सत्यापित और तैयार',
-        _ => 'package verified & ready',
+        _ => this,
       },
 
       'personalized app icons' => switch (l10n.localeName) {
         'es' => 'Iconos de app personalizados',
         'hi' => 'व्यक्तिगत ऐप आइकन',
-        _ => 'personalized app icons',
+        _ => this,
       },
 
       'planned' => switch (l10n.localeName) {
         'es' => 'Planeado',
         'hi' => 'नियोजित',
-        _ => 'planned',
+        _ => this,
       },
 
       'privacy & offline model' => switch (l10n.localeName) {
         'es' => 'Modelo de privacidad sin conexión',
         'hi' => 'गोपनीयता और ऑफ़लाइन मॉडल',
-        _ => 'privacy & offline model',
+        _ => this,
       },
 
       'privacy policy' => switch (l10n.localeName) {
         'es' => 'Política de privacidad',
         'hi' => 'गोपनीयता नीति',
-        _ => 'privacy policy',
+        _ => this,
       },
 
       'push alerts & notices' => switch (l10n.localeName) {
         'es' => 'Alertas y avisos push',
         'hi' => 'पुश अलर्ट और नोटिस',
-        _ => 'push alerts & notices',
+        _ => this,
       },
 
       'real-time traffic audit' => switch (l10n.localeName) {
         'es' => 'Auditoría de tráfico en tiempo real',
         'hi' => 'रीयल-टाइम ट्रैफ़िक ऑडिट',
-        _ => 'real-time traffic audit',
+        _ => this,
       },
 
       'recent' => switch (l10n.localeName) {
         'es' => 'Reciente',
         'hi' => 'हाल ही का',
-        _ => 'recent',
+        _ => this,
       },
 
       'recommended for standard users.' => switch (l10n.localeName) {
         'es' => 'Recomendado para usuarios estándar.',
         'hi' => 'मानक उपयोगकर्ताओं के लिए अनुशंसित।',
-        _ => 'recommended for standard users.',
+        _ => this,
       },
 
       'refresh activity' => switch (l10n.localeName) {
         'es' => 'Actualizar actividad',
         'hi' => 'गतिविधि ताज़ा करें',
-        _ => 'refresh activity',
+        _ => this,
       },
 
       'reminder message' => switch (l10n.localeName) {
         'es' => 'Mensaje de recordatorio',
         'hi' => 'अनुस्मारक संदेश',
-        _ => 'reminder message',
+        _ => this,
       },
 
       'report a bug' => switch (l10n.localeName) {
         'es' => 'Reportar un error',
         'hi' => 'एक बग की रिपोर्ट करें',
-        _ => 'report a bug',
+        _ => this,
       },
 
       'request a feature' => switch (l10n.localeName) {
         'es' => 'Solicitar una función',
         'hi' => 'एक सुविधा का अनुरोध करें',
-        _ => 'request a feature',
+        _ => this,
       },
 
       'required to show the logging alerts.' => switch (l10n.localeName) {
         'es' => 'Requerido para mostrar alertas de registro.',
         'hi' => 'लॉगिंग अलर्ट दिखाने के लिए आवश्यक।',
-        _ => 'required to show the logging alerts.',
+        _ => this,
       },
 
       'reset all data' => switch (l10n.localeName) {
         'es' => 'Restablecer todos los datos',
         'hi' => 'सभी डेटा रीसेट करें',
-        _ => 'reset all data',
+        _ => this,
       },
 
       'reset pin lock' => switch (l10n.localeName) {
         'es' => 'Restablecer bloqueo por PIN',
         'hi' => 'पिन लॉक रीसेट करें',
-        _ => 'reset pin lock',
+        _ => this,
       },
 
       'reset settings only' => switch (l10n.localeName) {
         'es' => 'Solo restablecer ajustes',
         'hi' => 'केवल सेटिंग्स रीसेट करें',
-        _ => 'reset settings only',
+        _ => this,
       },
 
       'restore' => switch (l10n.localeName) {
         'es' => 'Restaurar',
         'hi' => 'पुनर्स्थापित करें',
-        _ => 'restore',
+        _ => this,
       },
 
       'retry download' => switch (l10n.localeName) {
         'es' => 'Reintentar descarga',
         'hi' => 'डाउनलोड पुनः प्रयास करें',
-        _ => 'retry download',
+        _ => this,
       },
 
       'review and export' => switch (l10n.localeName) {
         'es' => 'Revisar y exportar',
         'hi' => 'समीक्षा और निर्यात',
-        _ => 'review and export',
+        _ => this,
       },
 
       'secure passcode protection' => switch (l10n.localeName) {
         'es' => 'Protección segura con código',
         'hi' => 'सुरक्षित पासकोड सुरक्षा',
-        _ => 'secure passcode protection',
+        _ => this,
       },
 
       'security & cryptographic upgrade' => switch (l10n.localeName) {
         'es' => 'Mejora de seguridad y criptografía',
         'hi' => 'सुरक्षा और क्रिप्टोग्राफ़िक अपग्रेड',
-        _ => 'security & cryptographic upgrade',
+        _ => this,
       },
 
       'security & integrity' => switch (l10n.localeName) {
         'es' => 'Seguridad e integridad',
         'hi' => 'सुरक्षा और अखंडता',
-        _ => 'security & integrity',
+        _ => this,
       },
 
       'select time' => switch (l10n.localeName) {
         'es' => 'Seleccionar hora',
         'hi' => 'समय चुनें',
-        _ => 'select time',
+        _ => this,
       },
 
       'set unrestricted' => switch (l10n.localeName) {
         'es' => 'Establecer sin restricciones',
         'hi' => 'अप्रतिबंधित सेट करें',
-        _ => 'set unrestricted',
+        _ => this,
       },
 
       'share' => switch (l10n.localeName) {
         'es' => 'Compartir',
         'hi' => 'साझा करें',
-        _ => 'share',
+        _ => this,
       },
 
       'share card' => switch (l10n.localeName) {
         'es' => 'Compartir tarjeta',
         'hi' => 'कार्ड साझा करें',
-        _ => 'share card',
+        _ => this,
       },
 
       'share milestone peak' => switch (l10n.localeName) {
         'es' => 'Compartir cúspide de hito',
         'hi' => 'मील का पत्थर शिखर साझा करें',
-        _ => 'share milestone peak',
+        _ => this,
       },
 
       'show more' => switch (l10n.localeName) {
         'es' => 'Mostrar más',
         'hi' => 'अधिक दिखाएं',
-        _ => 'show more',
+        _ => this,
       },
 
       'single' => switch (l10n.localeName) {
         'es' => 'Individual',
         'hi' => 'सिंगल',
-        _ => 'single',
+        _ => this,
       },
 
       'smart bandwidth saver' => switch (l10n.localeName) {
         'es' => 'Ahorro inteligente de datos',
         'hi' => 'स्मार्ट बैंडविड्थ सेवर',
-        _ => 'smart bandwidth saver',
+        _ => this,
       },
 
       'software licenses' => switch (l10n.localeName) {
         'es' => 'Licencias de software',
         'hi' => 'सॉफ़्टवेयर लाइसेंस',
-        _ => 'software licenses',
+        _ => this,
       },
 
       'stable' => switch (l10n.localeName) {
         'es' => 'Estable',
         'hi' => 'स्थिर',
-        _ => 'stable',
+        _ => this,
       },
 
       'suggest a new idea or improvement.' => switch (l10n.localeName) {
         'es' => 'Sugiere una nueva idea o mejora.',
         'hi' => 'एक नया विचार या सुधार सुझाएं।',
-        _ => 'suggest a new idea or improvement.',
+        _ => this,
       },
 
       'switching to beta build...' => switch (l10n.localeName) {
         'es' => 'Cambiando a versión Beta...',
         'hi' => 'बीटा बिल्ड पर स्विच हो रहा है...',
-        _ => 'switching to beta build...',
+        _ => this,
       },
 
       'switching to stable build...' => switch (l10n.localeName) {
         'es' => 'Cambiando a versión Estable...',
         'hi' => 'स्थिर बिल्ड पर स्विच हो रहा है...',
-        _ => 'switching to stable build...',
+        _ => this,
       },
 
       'system lock' => switch (l10n.localeName) {
         'es' => 'Bloqueo del sistema',
         'hi' => 'सिस्टम लॉक',
-        _ => 'system lock',
+        _ => this,
       },
 
       'table' => switch (l10n.localeName) {
         'es' => 'Tabla',
         'hi' => 'तालिका',
-        _ => 'table',
+        _ => this,
       },
 
       'tap any icon below to switch style' => switch (l10n.localeName) {
         'es' => 'Toca cualquier icono para cambiar el estilo',
         'hi' => 'शैली बदलने के लिए नीचे किसी भी आइकन पर टैप करें',
-        _ => 'tap any icon below to switch style',
+        _ => this,
       },
 
       'tap delay' => switch (l10n.localeName) {
         'es' => 'Demora de toque',
         'hi' => 'टैप विलंब',
-        _ => 'tap delay',
+        _ => this,
       },
 
       'tap to save' => switch (l10n.localeName) {
         'es' => 'Toca para guardar',
         'hi' => 'सहेजने के लिए टैप करें',
-        _ => 'tap to save',
+        _ => this,
       },
 
       'terms of use' => switch (l10n.localeName) {
         'es' => 'Términos de uso',
         'hi' => 'उपयोग की शर्तें',
-        _ => 'terms of use',
+        _ => this,
       },
 
       'theme description' => switch (l10n.localeName) {
         'es' => 'Descripción del tema',
         'hi' => 'थीम विवरण',
-        _ => 'theme description',
+        _ => this,
       },
 
       'total requests' => switch (l10n.localeName) {
         'es' => 'Solicitudes totales',
         'hi' => 'कुल अनुरोध',
-        _ => 'total requests',
+        _ => this,
       },
 
       'track starts and stops' => switch (l10n.localeName) {
         'es' => 'Registra inicios y paradas',
         'hi' => 'शुरुआत और ठहराव ट्रैक करें',
-        _ => 'track starts and stops',
+        _ => this,
       },
 
       'tutorials' => switch (l10n.localeName) {
         'es' => 'Tutoriales',
         'hi' => 'ट्यूटोरियल',
-        _ => 'tutorials',
+        _ => this,
       },
 
       'two-way' => switch (l10n.localeName) {
         'es' => 'Dos vías',
         'hi' => 'दो-तरफा',
-        _ => 'two-way',
+        _ => this,
       },
 
       'update available' => switch (l10n.localeName) {
         'es' => 'Actualización disponible',
         'hi' => 'अपडेट उपलब्ध है',
-        _ => 'update available',
+        _ => this,
       },
 
       'urge surfing & grounding' => switch (l10n.localeName) {
         'es' => 'Surfear el impulso y anclaje',
         'hi' => 'उर्ज सर्फिंग और ग्राउंडिंग',
-        _ => 'urge surfing & grounding',
+        _ => this,
       },
 
       'verifying integrity checksum...' => switch (l10n.localeName) {
         'es' => 'Verificando suma de comprobación...',
         'hi' => 'अखंडता चेकसम का सत्यापन हो रहा है...',
-        _ => 'verifying integrity checksum...',
+        _ => this,
       },
 
       'view full licenses' => switch (l10n.localeName) {
         'es' => 'Ver licencias completas',
         'hi' => 'पूर्ण लाइसेंस देखें',
-        _ => 'view full licenses',
+        _ => this,
       },
 
       'you are up to date' => switch (l10n.localeName) {
         'es' => 'Estás al día',
         'hi' => 'आप अप टू डेट हैं',
-        _ => 'you are up to date',
+        _ => this,
       },
 
       'your privacy matters' => switch (l10n.localeName) {
         'es' => 'Tu privacidad importa',
         'hi' => 'आपकी गोपनीयता मायने रखती है',
-        _ => 'your privacy matters',
+        _ => this,
       },
 
       'built by' => switch (l10n.localeName) {
         'es' => 'Creado por',
         'hi' => 'द्वारा निर्मित',
-        _ => 'built by',
+        _ => this,
       },
 
       'version' => switch (l10n.localeName) {
         'es' => 'Versión',
         'hi' => 'संस्करण',
-        _ => 'version',
+        _ => this,
       },
 
       'as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.' =>
@@ -3138,56 +3107,55 @@ extension LocalizedString on String {
             'como un registrador de marcas de tiempo pequeño y sin conexión para el trabajo real: toques rápidos, notas enfocadas y exportaciones auditables.',
           'hi' =>
             'वास्तविक कार्य के लिए एक छोटे, ऑफलाइन-प्रथम टाइमस्टैम्प लॉगर के रूप में: त्वरित टैप, केंद्रित नोट्स और निर्यात जिन्हें डेवलपर्स जांच सकते हैं।',
-          _ =>
-            'as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.',
+          _ => this,
         },
 
       '100% offline' => switch (l10n.localeName) {
         'es' => '100% Sin conexión',
         'hi' => '100% ऑफ़लाइन',
-        _ => '100% offline',
+        _ => this,
       },
 
       '100% offline database' => switch (l10n.localeName) {
         'es' => 'Base de datos 100% local y sin conexión',
         'hi' => '100% ऑफ़लाइन डेटाबेस',
-        _ => '100% offline database',
+        _ => this,
       },
 
       '8 luxury app icon editions' => switch (l10n.localeName) {
         'es' => '8 ediciones de iconos de lujo',
         'hi' => '8 लक्जरी ऐप आइकन संस्करण',
-        _ => '8 luxury app icon editions',
+        _ => this,
       },
 
       'amoled' => switch (l10n.localeName) {
         'es' => 'AMOLED',
         'hi' => 'AMOLED',
-        _ => 'amoled',
+        _ => this,
       },
 
       'about' => switch (l10n.localeName) {
         'es' => 'Acerca de',
         'hi' => 'के बारे में',
-        _ => 'about',
+        _ => this,
       },
 
       'active protection' => switch (l10n.localeName) {
         'es' => 'Protección activa',
         'hi' => 'सक्रिय सुरक्षा',
-        _ => 'active protection',
+        _ => this,
       },
 
       'adaptive engine overview' => switch (l10n.localeName) {
         'es' => 'Resumen del Motor Adaptativo',
         'hi' => 'एडेप्टिव इंजन अवलोकन',
-        _ => 'adaptive engine overview',
+        _ => this,
       },
 
       'adaptive engine and performance status' => switch (l10n.localeName) {
         'es' => 'Motor adaptativo y estado de rendimiento',
         'hi' => 'एडेप्टिव इंजन और प्रदर्शन स्थिति',
-        _ => 'adaptive engine and performance status',
+        _ => this,
       },
 
       'adds a subtle glass-like container behind the home toolbar.' =>
@@ -3195,7 +3163,7 @@ extension LocalizedString on String {
           'es' =>
             'Añade un contenedor sutil de efecto cristal detrás de la barra de inicio.',
           'hi' => 'होम टूलबार के पीछे एक सूक्ष्म ग्लास-समान कंटेनर जोड़ता है।',
-          _ => 'adds a subtle glass-like container behind the home toolbar.',
+          _ => this,
         },
 
       'all moments in the database will be permanently removed. this cannot be undone.' =>
@@ -3204,8 +3172,7 @@ extension LocalizedString on String {
             'Todos los momentos de la base de datos se eliminarán permanentemente. Esto no se puede deshacer.',
           'hi' =>
             'डेटाबेस के सभी क्षण स्थायी रूप से हटा दिए जाएंगे। इसे पूर्ववत नहीं किया जा सकता।',
-          _ =>
-            'all moments in the database will be permanently removed. this cannot be undone.',
+          _ => this,
         },
 
       'all settings will be restored to their initial factory defaults. your saved moments and notes will remain untouched.' =>
@@ -3214,14 +3181,13 @@ extension LocalizedString on String {
             'Todos los ajustes se restablecerán a los valores predeterminados de fábrica. Tus momentos y notas guardados permanecerán intactos.',
           'hi' =>
             'सभी सेटिंग्स को फ़ैक्टरी डिफ़ॉल्ट पर रीसेट कर दिया जाएगा। आपके सहेजे गए क्षण और नोट्स सुरक्षित रहेंगे।',
-          _ =>
-            'all settings will be restored to their initial factory defaults. your saved moments and notes will remain untouched.',
+          _ => this,
         },
 
       'all time' => switch (l10n.localeName) {
         'es' => 'Todo el tiempo',
         'hi' => 'सभी समय',
-        _ => 'all time',
+        _ => this,
       },
 
       'allows notekar to send logging reminders and update notifications.' =>
@@ -3230,68 +3196,67 @@ extension LocalizedString on String {
             'Permite que NoteKar envíe recordatorios de registro y avisos de actualización.',
           'hi' =>
             'NoteKar को लॉगिंग अनुस्मारक और अपडेट सूचनाएं भेजने की अनुमति देता है।',
-          _ =>
-            'allows notekar to send logging reminders and update notifications.',
+          _ => this,
         },
 
       'amethyst nebula' => switch (l10n.localeName) {
         'es' => 'Nebulosa Amatista',
         'hi' => 'एमेथिस्ट नेबुला',
-        _ => 'amethyst nebula',
+        _ => this,
       },
 
       'app icon' => switch (l10n.localeName) {
         'es' => 'Icono de la app',
         'hi' => 'ऐप आइकन',
-        _ => 'app icon',
+        _ => this,
       },
 
       'app lock' => switch (l10n.localeName) {
         'es' => 'Bloqueo de la app',
         'hi' => 'ऐप लॉक',
-        _ => 'app lock',
+        _ => this,
       },
 
       'app lock & security' => switch (l10n.localeName) {
         'es' => 'Bloqueo de app y seguridad',
         'hi' => 'ऐप लॉक और सुरक्षा',
-        _ => 'app lock & security',
+        _ => this,
       },
 
       'app lock & biometrics' => switch (l10n.localeName) {
         'es' => 'Bloqueo de app y biometría',
         'hi' => 'ऐप लॉक और बायोमेट्रिक्स',
-        _ => 'app lock & biometrics',
+        _ => this,
       },
 
       'app notices' => switch (l10n.localeName) {
         'es' => 'Avisos de la app',
         'hi' => 'ऐप सूचनाएं',
-        _ => 'app notices',
+        _ => this,
       },
 
       'app preferences and theme' => switch (l10n.localeName) {
         'es' => 'Preferencias de la app y tema',
         'hi' => 'ऐप प्राथमिकताएं और थीम',
-        _ => 'app preferences and theme',
+        _ => this,
       },
 
       'app version' => switch (l10n.localeName) {
         'es' => 'Versión de la app',
         'hi' => 'ऐप संस्करण',
-        _ => 'app version',
+        _ => this,
       },
 
       'appearance' => switch (l10n.localeName) {
         'es' => 'Apariencia',
         'hi' => 'दिखावट',
-        _ => 'appearance',
+        _ => this,
       },
 
       'application build identifier' => switch (l10n.localeName) {
         'es' => 'Identificador de compilación de la aplicación',
         'hi' => 'एप्लिकेशन बिल्ड पहचानकर्ता',
-        _ => 'application build identifier',
+        _ => this,
       },
 
       'apply a custom accent color across all fluid interface elements.' =>
@@ -3299,308 +3264,307 @@ extension LocalizedString on String {
           'es' =>
             'Aplica un color de acento personalizado en todos los elementos de la interfaz fluida.',
           'hi' => 'सभी इंटरफ़ेस तत्वों पर एक कस्टम रंग लागू करें।',
-          _ =>
-            'apply a custom accent color across all fluid interface elements.',
+          _ => this,
         },
 
       'aurora borealis' => switch (l10n.localeName) {
         'es' => 'Aurora Boreal',
         'hi' => 'ऑरोरा बोरियालिस',
-        _ => 'aurora borealis',
+        _ => this,
       },
 
       'automatic' => switch (l10n.localeName) {
         'es' => 'Automático',
         'hi' => 'स्वचालित',
-        _ => 'automatic',
+        _ => this,
       },
 
       'backup & export' => switch (l10n.localeName) {
         'es' => 'Copia de seguridad y exportación',
         'hi' => 'बैकअप और निर्यात',
-        _ => 'backup & export',
+        _ => this,
       },
 
       'backup filename preview' => switch (l10n.localeName) {
         'es' => 'Vista previa del nombre de archivo de respaldo',
         'hi' => 'बैकअप फ़ाइल नाम पूर्वावलोकन',
-        _ => 'backup filename preview',
+        _ => this,
       },
 
       'battery and performance status' => switch (l10n.localeName) {
         'es' => 'Estado de la batería y rendimiento',
         'hi' => 'बैटरी और प्रदर्शन स्थिति',
-        _ => 'battery and performance status',
+        _ => this,
       },
 
       'beta track' => switch (l10n.localeName) {
         'es' => 'Canal Beta',
         'hi' => 'बीटा ट्रैक',
-        _ => 'beta track',
+        _ => this,
       },
 
       'biometric lock' => switch (l10n.localeName) {
         'es' => 'Bloqueo biométrico',
         'hi' => 'बायोमेट्रिक लॉक',
-        _ => 'biometric lock',
+        _ => this,
       },
 
       'biometrics or system credentials' => switch (l10n.localeName) {
         'es' => 'Biometría o credenciales del sistema',
         'hi' => 'बायोमेट्रिक्स या सिस्टम क्रेडेंशियल',
-        _ => 'biometrics or system credentials',
+        _ => this,
       },
 
       'blur & translucency' => switch (l10n.localeName) {
         'es' => 'Desenfoque y translucidez',
         'hi' => 'धुंधलापन और पारदर्शिता',
-        _ => 'blur & translucency',
+        _ => this,
       },
 
       'build date' => switch (l10n.localeName) {
         'es' => 'Fecha de compilación',
         'hi' => 'बिल्ड तिथि',
-        _ => 'build date',
+        _ => this,
       },
 
       'build number' => switch (l10n.localeName) {
         'es' => 'Número de compilación',
         'hi' => 'बिल्ड संख्या',
-        _ => 'build number',
+        _ => this,
       },
 
       'buy me a coffee' => switch (l10n.localeName) {
         'es' => 'Invítame a un café',
         'hi' => 'एक कॉफ़ी प्रायोजित करें',
-        _ => 'buy me a coffee',
+        _ => this,
       },
 
       'capture cooldown' => switch (l10n.localeName) {
         'es' => 'Tiempo de enfriamiento de captura',
         'hi' => 'कैप्चर कूलडाउन',
-        _ => 'capture cooldown',
+        _ => this,
       },
 
       'capture delay & cooldown' => switch (l10n.localeName) {
         'es' => 'Retardo de captura y enfriamiento',
         'hi' => 'कैप्चर विलंब और कूलडाउन',
-        _ => 'capture delay & cooldown',
+        _ => this,
       },
 
       'changelog' => switch (l10n.localeName) {
         'es' => 'Registro de cambios',
         'hi' => 'परिवर्तन सूची (Changelog)',
-        _ => 'changelog',
+        _ => this,
       },
 
       'clear all moments' => switch (l10n.localeName) {
         'es' => 'Borrar todos los momentos',
         'hi' => 'सभी क्षण साफ़ करें',
-        _ => 'clear all moments',
+        _ => this,
       },
 
       'clear cache' => switch (l10n.localeName) {
         'es' => 'Limpiar caché',
         'hi' => 'कैश साफ़ करें',
-        _ => 'clear cache',
+        _ => this,
       },
 
       'clear trash' => switch (l10n.localeName) {
         'es' => 'Vaciar papelera',
         'hi' => 'ट्रैश खाली करें',
-        _ => 'clear trash',
+        _ => this,
       },
 
       'color accent' => switch (l10n.localeName) {
         'es' => 'Color de acento',
         'hi' => 'रंग उच्चारण',
-        _ => 'color accent',
+        _ => this,
       },
 
       'compact history' => switch (l10n.localeName) {
         'es' => 'Historial compacto',
         'hi' => 'कॉम्पैक्ट इतिहास',
-        _ => 'compact history',
+        _ => this,
       },
 
       'compact history mode' => switch (l10n.localeName) {
         'es' => 'Modo de historial compacto',
         'hi' => 'कॉम्पैक्ट इतिहास मोड',
-        _ => 'compact history mode',
+        _ => this,
       },
 
       'continuous' => switch (l10n.localeName) {
         'es' => 'Continuo',
         'hi' => 'निरंतर',
-        _ => 'continuous',
+        _ => this,
       },
 
       'cooldown period' => switch (l10n.localeName) {
         'es' => 'Período de enfriamiento',
         'hi' => 'कूलडाउन अवधि',
-        _ => 'cooldown period',
+        _ => this,
       },
 
       'correlation intelligence' => switch (l10n.localeName) {
         'es' => 'Inteligencia de correlación',
         'hi' => 'सहसंबंध बुद्धिमत्ता',
-        _ => 'correlation intelligence',
+        _ => this,
       },
 
       'count on save' => switch (l10n.localeName) {
         'es' => 'Contador al guardar',
         'hi' => 'सहेजने पर गिनती',
-        _ => 'count on save',
+        _ => this,
       },
 
       'daily logging reminder' => switch (l10n.localeName) {
         'es' => 'Recordatorio de registro diario',
         'hi' => 'दैनिक लॉगिंग अनुस्मारक',
-        _ => 'daily logging reminder',
+        _ => this,
       },
 
       'daily reminders' => switch (l10n.localeName) {
         'es' => 'Recordatorios diarios',
         'hi' => 'दैनिक अनुस्मारक',
-        _ => 'daily reminders',
+        _ => this,
       },
 
       'dark mode' => switch (l10n.localeName) {
         'es' => 'Modo oscuro',
         'hi' => 'डार्क मोड',
-        _ => 'dark mode',
+        _ => this,
       },
 
       'data & backup' => switch (l10n.localeName) {
         'es' => 'Datos y copia de seguridad',
         'hi' => 'डेटा और बैकअप',
-        _ => 'data & backup',
+        _ => this,
       },
 
       'database export' => switch (l10n.localeName) {
         'es' => 'Exportación de base de datos',
         'hi' => 'डेटाबेस निर्यात',
-        _ => 'database export',
+        _ => this,
       },
 
       'database integrity' => switch (l10n.localeName) {
         'es' => 'Integridad de la base de datos',
         'hi' => 'डेटाबेस अखंडता',
-        _ => 'database integrity',
+        _ => this,
       },
 
       'developer diagnostics' => switch (l10n.localeName) {
         'es' => 'Diagnósticos para desarrolladores',
         'hi' => 'डेवलपर डायग्नोस्टिक्स',
-        _ => 'developer diagnostics',
+        _ => this,
       },
 
       'diagnostics' => switch (l10n.localeName) {
         'es' => 'Diagnósticos',
         'hi' => 'निदान',
-        _ => 'diagnostics',
+        _ => this,
       },
 
       'disable use numbers in single?' => switch (l10n.localeName) {
         'es' => '¿Desactivar numeración en modo individual?',
         'hi' => 'क्या सिंगल में नंबर का उपयोग अक्षम करें?',
-        _ => 'disable use numbers in single?',
+        _ => this,
       },
 
       'display & typography' => switch (l10n.localeName) {
         'es' => 'Pantalla y tipografía',
         'hi' => 'प्रदर्शन और टाइपोग्राफी',
-        _ => 'display & typography',
+        _ => this,
       },
 
       'docs' => switch (l10n.localeName) {
         'es' => 'Documentación',
         'hi' => 'दस्तावेज़',
-        _ => 'docs',
+        _ => this,
       },
 
       'email support' => switch (l10n.localeName) {
         'es' => 'Soporte por correo',
         'hi' => 'ईमेल समर्थन',
-        _ => 'email support',
+        _ => this,
       },
 
       'emerald forest' => switch (l10n.localeName) {
         'es' => 'Bosque Esmeralda',
         'hi' => 'एमराल्ड वन',
-        _ => 'emerald forest',
+        _ => this,
       },
 
       'every 7 days' => switch (l10n.localeName) {
         'es' => 'Cada 7 días',
         'hi' => 'हर 7 दिन',
-        _ => 'every 7 days',
+        _ => this,
       },
 
       'every 14 days' => switch (l10n.localeName) {
         'es' => 'Cada 14 días',
         'hi' => 'हर 14 दिन',
-        _ => 'every 14 days',
+        _ => this,
       },
 
       'every 30 days' => switch (l10n.localeName) {
         'es' => 'Cada 30 días',
         'hi' => 'हर 30 दिन',
-        _ => 'every 30 days',
+        _ => this,
       },
 
       'feedback' => switch (l10n.localeName) {
         'es' => 'Comentarios',
         'hi' => 'प्रतिक्रिया',
-        _ => 'feedback',
+        _ => this,
       },
 
       'feedback & bug report' => switch (l10n.localeName) {
         'es' => 'Comentarios y reporte de errores',
         'hi' => 'प्रतिक्रिया और बग रिपोर्ट',
-        _ => 'feedback & bug report',
+        _ => this,
       },
 
       'github' => switch (l10n.localeName) {
         'es' => 'GitHub',
         'hi' => 'GitHub',
-        _ => 'github',
+        _ => this,
       },
 
       'hardware security' => switch (l10n.localeName) {
         'es' => 'Seguridad de hardware',
         'hi' => 'हार्डवेयर सुरक्षा',
-        _ => 'hardware security',
+        _ => this,
       },
 
       'help & user guides' => switch (l10n.localeName) {
         'es' => 'Ayuda y guías de usuario',
         'hi' => 'सहायता और उपयोगकर्ता मार्गदर्शिका',
-        _ => 'help & user guides',
+        _ => this,
       },
 
       'hide app content in recents' => switch (l10n.localeName) {
         'es' => 'Ocultar contenido de la app en recientes',
         'hi' => 'हाल के ऐप्स में सामग्री छिपाएं',
-        _ => 'hide app content in recents',
+        _ => this,
       },
 
       'imperial gold' => switch (l10n.localeName) {
         'es' => 'Oro Imperial',
         'hi' => 'इंपीरियल गोल्ड',
-        _ => 'imperial gold',
+        _ => this,
       },
 
       'inactivity alerts' => switch (l10n.localeName) {
         'es' => 'Alertas de inactividad',
         'hi' => 'निष्क्रियता अलर्ट',
-        _ => 'inactivity alerts',
+        _ => this,
       },
 
       'legal & open source notices' => switch (l10n.localeName) {
         'es' => 'Avisos legales y de código abierto',
         'hi' => 'कानूनी और ओपन सोर्स नोटिस',
-        _ => 'legal & open source notices',
+        _ => this,
       },
 
       'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.' =>
@@ -3609,44 +3573,43 @@ extension LocalizedString on String {
             'Panel de seguimiento de actividad en tiempo real con análisis de métricas, cuadrículas de hábitos, tendencias y correlación calculadas a partir de tus momentos.',
           'hi' =>
             'वास्तविक समय मीट्रिक विश्लेषण, आदत ट्रैकिंग ग्रिड, गतिविधि रुझान और सहसंबंध बुद्धिमत्ता की विशेषता वाला लाइव गतिविधि डैशबोर्ड।',
-          _ =>
-            'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.',
+          _ => this,
         },
 
       'logging' => switch (l10n.localeName) {
         'es' => 'Registro',
         'hi' => 'लॉगिंग',
-        _ => 'logging',
+        _ => this,
       },
 
       'logging reminders' => switch (l10n.localeName) {
         'es' => 'Recordatorios de registro',
         'hi' => 'लॉगिंग अनुस्मारक',
-        _ => 'logging reminders',
+        _ => this,
       },
 
       'midnight obsidian' => switch (l10n.localeName) {
         'es' => 'Obsidiana Medianoche',
         'hi' => 'मिडनाइट ओब्सीडियन',
-        _ => 'midnight obsidian',
+        _ => this,
       },
 
       'milestone badges' => switch (l10n.localeName) {
         'es' => 'Insignias de hitos',
         'hi' => 'मील के पत्थर के बैज',
-        _ => 'milestone badges',
+        _ => this,
       },
 
       'moments' => switch (l10n.localeName) {
         'es' => 'Momentos',
         'hi' => 'क्षण',
-        _ => 'moments',
+        _ => this,
       },
 
       'personalization' => switch (l10n.localeName) {
         'es' => 'Personalización',
         'hi' => 'निजीकरण',
-        _ => 'personalization',
+        _ => this,
       },
 
       'personalize and configure notekar to fit your specific workflow.' =>
@@ -3655,105 +3618,104 @@ extension LocalizedString on String {
             'Personaliza y configura NoteKar para que se adapte a tu flujo de trabajo específico.',
           'hi' =>
             'अपने विशिष्ट वर्कफ़्लो के अनुसार NoteKar को अनुकूलित और कॉन्फ़िगर करें।',
-          _ =>
-            'personalize and configure notekar to fit your specific workflow.',
+          _ => this,
         },
 
       'privacy & security' => switch (l10n.localeName) {
         'es' => 'Privacidad y seguridad',
         'hi' => 'गोपनीयता और सुरक्षा',
-        _ => 'privacy & security',
+        _ => this,
       },
 
       'real-time metrics' => switch (l10n.localeName) {
         'es' => 'Métricas en tiempo real',
         'hi' => 'रीयल-टाइम मेट्रिक्स',
-        _ => 'real-time metrics',
+        _ => this,
       },
 
       'reset data' => switch (l10n.localeName) {
         'es' => 'Restablecer datos',
         'hi' => 'डेटा रीसेट करें',
-        _ => 'reset data',
+        _ => this,
       },
 
       'reset settings' => switch (l10n.localeName) {
         'es' => 'Restablecer ajustes',
         'hi' => 'सेटिंग्स रीसेट करें',
-        _ => 'reset settings',
+        _ => this,
       },
 
       'search settings' => switch (l10n.localeName) {
         'es' => 'Buscar ajustes',
         'hi' => 'सेटिंग्स खोजें',
-        _ => 'search settings',
+        _ => this,
       },
 
       'search settings...' => switch (l10n.localeName) {
         'es' => 'Buscar en ajustes...',
         'hi' => 'सेटिंग्स खोजें...',
-        _ => 'search settings...',
+        _ => this,
       },
 
       'show seconds' => switch (l10n.localeName) {
         'es' => 'Mostrar segundos',
         'hi' => 'सेकंड दिखाएं',
-        _ => 'show seconds',
+        _ => this,
       },
 
       'single moment numbering' => switch (l10n.localeName) {
         'es' => 'Numeración de momentos individuales',
         'hi' => 'सिंगल मोमेंट नंबरिंग',
-        _ => 'single moment numbering',
+        _ => this,
       },
 
       'sobriety tracker' => switch (l10n.localeName) {
         'es' => 'Seguimiento de sobriedad',
         'hi' => 'संयम ट्रैकर',
-        _ => 'sobriety tracker',
+        _ => this,
       },
 
       'sobriety tracker & milestone cards' => switch (l10n.localeName) {
         'es' => 'Seguimiento de sobriedad y tarjetas de hitos',
         'hi' => 'संयम ट्रैकर और मील के पत्थर के कार्ड',
-        _ => 'sobriety tracker & milestone cards',
+        _ => this,
       },
 
       'software credits and open source legal notices' =>
         switch (l10n.localeName) {
           'es' => 'Créditos del software y avisos legales de código abierto',
           'hi' => 'सॉफ़्टवेयर क्रेडिट और ओपन सोर्स कानूनी नोटिस',
-          _ => 'software credits and open source legal notices',
+          _ => this,
         },
 
       'software update' => switch (l10n.localeName) {
         'es' => 'Actualización de software',
         'hi' => 'सॉफ़्टवेयर अपडेट',
-        _ => 'software update',
+        _ => this,
       },
 
       'software update, app notices, changelog' => switch (l10n.localeName) {
         'es' => 'Actualización de software, avisos y registro de cambios',
         'hi' => 'सॉफ़्टवेयर अपडेट, ऐप नोटिस, चेंजलॉग',
-        _ => 'software update, app notices, changelog',
+        _ => this,
       },
 
       'stable build' => switch (l10n.localeName) {
         'es' => 'Versión estable',
         'hi' => 'स्थिर संस्करण',
-        _ => 'stable build',
+        _ => this,
       },
 
       'support & community' => switch (l10n.localeName) {
         'es' => 'Soporte y comunidad',
         'hi' => 'समर्थन और समुदाय',
-        _ => 'support & community',
+        _ => this,
       },
 
       'system default' => switch (l10n.localeName) {
         'es' => 'Predeterminado del sistema',
         'hi' => 'सिस्टम डिफ़ॉल्ट',
-        _ => 'system default',
+        _ => this,
       },
 
       'technical stats about your device and the adaptive engine.' =>
@@ -3761,13 +3723,13 @@ extension LocalizedString on String {
           'es' =>
             'Estadísticas técnicas de tu dispositivo y el Motor Adaptativo.',
           'hi' => 'आपके डिवाइस और एडेप्टिव इंजन के बारे में तकनीकी आँकड़े।',
-          _ => 'technical stats about your device and the adaptive engine.',
+          _ => this,
         },
 
       'theme' => switch (l10n.localeName) {
         'es' => 'Tema',
         'hi' => 'थीम',
-        _ => 'theme',
+        _ => this,
       },
 
       'these settings define how moments are recorded and prepared for export.' =>
@@ -3776,8 +3738,7 @@ extension LocalizedString on String {
             'Estos ajustes definen cómo se registran los momentos y se preparan para exportar.',
           'hi' =>
             'ये सेटिंग्स परिभाषित करती हैं कि क्षणों को कैसे रिकॉर्ड किया जाता है और निर्यात के लिए तैयार किया जाता है।',
-          _ =>
-            'these settings define how moments are recorded and prepared for export.',
+          _ => this,
         },
 
       'these tools are intended for system maintenance and troubleshooting.' =>
@@ -3785,69 +3746,68 @@ extension LocalizedString on String {
           'es' =>
             'Estas herramientas están destinadas al mantenimiento y la solución de problemas del sistema.',
           'hi' => 'ये उपकरण सिस्टम रखरखाव और समस्या निवारण के लिए हैं।',
-          _ =>
-            'these tools are intended for system maintenance and troubleshooting.',
+          _ => this,
         },
 
       'update track' => switch (l10n.localeName) {
         'es' => 'Canal de actualización',
         'hi' => 'अपडेट ट्रैक',
-        _ => 'update track',
+        _ => this,
       },
 
       'updates & notices' => switch (l10n.localeName) {
         'es' => 'Actualizaciones y avisos',
         'hi' => 'अपडेट और सूचनाएं',
-        _ => 'updates & notices',
+        _ => this,
       },
 
       'verified safe' => switch (l10n.localeName) {
         'es' => 'Verificado Seguro',
         'hi' => 'सुरक्षित सत्यापित',
-        _ => 'verified safe',
+        _ => this,
       },
 
       'virustotal scan' => switch (l10n.localeName) {
         'es' => 'Análisis de VirusTotal',
         'hi' => 'VirusTotal स्कैन',
-        _ => 'virustotal scan',
+        _ => this,
       },
 
       'zero telemetry & offline integrity' => switch (l10n.localeName) {
         'es' => 'Cero telemetría e integridad sin conexión',
         'hi' => 'शून्य टेलीमेट्री और ऑफ़लाइन अखंडता',
-        _ => 'zero telemetry & offline integrity',
+        _ => this,
       },
 
       'attach context without slowing the app down.' =>
         switch (l10n.localeName) {
           'es' => 'Añade contexto sin ralentizar la aplicación.',
           'hi' => 'ऐप को धीमा किए बिना संदर्भ जोड़ें।',
-          _ => 'attach context without slowing the app down.',
+          _ => this,
         },
 
       'change your secure in-app passcode.' => switch (l10n.localeName) {
         'es' => 'Cambia tu código de acceso seguro en la app.',
         'hi' => 'अपना सुरक्षित इन-ऐप पासकोड बदलें।',
-        _ => 'change your secure in-app passcode.',
+        _ => this,
       },
 
       'configure a dedicated 4-digit passcode.' => switch (l10n.localeName) {
         'es' => 'Configura un código de acceso dedicado de 4 dígitos.',
         'hi' => 'एक समर्पित 4-अंकीय पासकोड कॉन्फ़िगर करें।',
-        _ => 'configure a dedicated 4-digit passcode.',
+        _ => this,
       },
 
       'disable reduce motion first' => switch (l10n.localeName) {
         'es' => 'Desactiva Reducir movimiento primero',
         'hi' => 'पहले रिड्यूस मोशन अक्षम करें',
-        _ => 'disable reduce motion first',
+        _ => this,
       },
 
       'network monitor' => switch (l10n.localeName) {
         'es' => 'Monitor de red',
         'hi' => 'नेटवर्क मॉनिटर',
-        _ => 'network monitor',
+        _ => this,
       },
 
       'no internet connection. showing cached preview.' =>
@@ -3855,13 +3815,13 @@ extension LocalizedString on String {
           'es' => 'Sin conexión a internet. Mostrando vista previa en caché.',
           'hi' =>
             'कोई इंटरनेट कनेक्शन नहीं है। कैश्ड पूर्वावलोकन दिखाया जा रहा है।',
-          _ => 'no internet connection. showing cached preview.',
+          _ => this,
         },
 
       'ok' => switch (l10n.localeName) {
         'es' => 'Aceptar',
         'hi' => 'ठीक है',
-        _ => 'ok',
+        _ => this,
       },
 
       'please wait while android refreshes notekar.' =>
@@ -3869,67 +3829,67 @@ extension LocalizedString on String {
           'es' => 'Por favor espera mientras Android actualiza NoteKar.',
           'hi' =>
             'कृपया प्रतीक्षा करें जब तक Android NoteKar को रीफ्रेश करता है।',
-          _ => 'please wait while android refreshes notekar.',
+          _ => this,
         },
 
       'select a theme that best suits your environment.' =>
         switch (l10n.localeName) {
           'es' => 'Selecciona el tema que mejor se adapte a tu entorno.',
           'hi' => 'वह थीम चुनें जो आपके परिवेश के लिए सबसे उपयुक्त हो।',
-          _ => 'select a theme that best suits your environment.',
+          _ => this,
         },
 
       'sessions are recorded as in and out pairs.' => switch (l10n.localeName) {
         'es' => 'Las sesiones se registran como pares de ENTRADA y SALIDA.',
         'hi' => 'सत्र IN और OUT जोड़े के रूप में रिकॉर्ड किए जाते हैं।',
-        _ => 'sessions are recorded as in and out pairs.',
+        _ => this,
       },
 
       'this local backup file will be erased permanently.' =>
         switch (l10n.localeName) {
           'es' => 'Este archivo de respaldo local se borrará permanentemente.',
           'hi' => 'यह स्थानीय बैकअप फ़ाइल स्थायी रूप से मिटा दी जाएगी।',
-          _ => 'this local backup file will be erased permanently.',
+          _ => this,
         },
 
       'triggers reminders on specific days of the week.' =>
         switch (l10n.localeName) {
           'es' => 'Activa recordatorios en días específicos de la semana.',
           'hi' => 'सप्ताह के विशिष्ट दिनों पर अनुस्मारक ट्रिगर करता है।',
-          _ => 'triggers reminders on specific days of the week.',
+          _ => this,
         },
 
       'use fingerprint, face, or system pin.' => switch (l10n.localeName) {
         'es' => 'Usa huella digital, rostro o PIN del sistema.',
         'hi' => 'फ़िंगरप्रिंट, चेहरा या सिस्टम पिन का उपयोग करें।',
-        _ => 'use fingerprint, face, or system pin.',
+        _ => this,
       },
 
       '* have suggestions or found a bug?' => switch (l10n.localeName) {
         'es' => '* ¿Tienes sugerencias o encontraste un error?',
         'hi' => '* क्या आपके पास सुझाव हैं या कोई बग मिला?',
-        _ => '* have suggestions or found a bug?',
+        _ => this,
       },
 
       'every tap records a standalone moment.' => switch (l10n.localeName) {
         'es' => 'Cada toque registra un momento independiente.',
         'hi' => 'प्रत्येक टैप एक स्वतंत्र क्षण रिकॉर्ड करता है।',
-        _ => 'Every tap records a standalone moment.',
+        _ => this,
       },
       'available languages' => switch (l10n.localeName) {
         'es' => 'Idiomas disponibles',
         'hi' => 'उपलब्ध भाषाएँ',
-        _ => 'Available Languages',
+        _ => this,
       },
       'upcoming languages' => switch (l10n.localeName) {
         'es' => 'Próximos idiomas',
         'hi' => 'आगामी भाषाएँ',
-        _ => 'Upcoming Languages',
+        _ => this,
       },
       'upcoming' => switch (l10n.localeName) {
         'es' => 'Próximamente',
         'hi' => 'आगामी',
-        _ => 'Upcoming',
+        _ => this,
       },
       'these languages are planned for future releases. help translate notekar on github.' =>
         switch (l10n.localeName) {
@@ -3937,8 +3897,7 @@ extension LocalizedString on String {
             'Estos idiomas están planificados para futuras versiones. Ayuda a traducir NoteKar en GitHub.',
           'hi' =>
             'ये भाषाएँ भविष्य के संस्करणों के लिए नियोजित हैं। GitHub पर NoteKar का अनुवाद करने में मदद करें।',
-          _ =>
-            'These languages are planned for future releases. Help translate NoteKar on GitHub.',
+          _ => this,
         },
       'this language is currently under development. you can help translate notekar into your native language by contributing on github.' =>
         switch (l10n.localeName) {
@@ -3946,13 +3905,12 @@ extension LocalizedString on String {
             'Este idioma está actualmente en desarrollo. Puedes ayudar a traducir NoteKar a tu idioma nativo colaborando en GitHub.',
           'hi' =>
             'यह भाषा वर्तमान में विकास में है। आप GitHub पर योगदान देकर NoteKar को अपनी मूल भाषा में अनुवाद करने में मदद कर सकते हैं।',
-          _ =>
-            'This language is currently under development. You can help translate NoteKar into your native language by contributing on GitHub.',
+          _ => this,
         },
       'contribute on github' => switch (l10n.localeName) {
         'es' => 'Contribuir en GitHub',
         'hi' => 'GitHub पर योगदान करें',
-        _ => 'Contribute on GitHub',
+        _ => this,
       },
       _ => this,
     };

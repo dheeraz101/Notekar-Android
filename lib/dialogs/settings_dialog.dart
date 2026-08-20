@@ -3406,7 +3406,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   SettingsRow(
                                     p: p,
                                     icon: Icons.coffee_rounded,
-                                    title: 'Buy me a Coffee',
+                                    title: 'Buy Me a Coffee',
                                     color: const Color(0xFFFFDD00),
                                     rowKind: 'link',
                                     onTap: () => widget.onOpenLink(coffeeLink),

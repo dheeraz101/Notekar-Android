@@ -380,5 +380,49 @@ void main() {
         await tester.pumpAndSettle();
       }
     });
+
+    testWidgets(
+      'English and System Default retain pristine title and sentence casing',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Builder(
+              builder: (context) {
+                expect('Appearance'.localized(context), 'Appearance');
+                expect('Logging'.localized(context), 'Logging');
+                expect(
+                  'Privacy & Security'.localized(context),
+                  'Privacy & Security',
+                );
+                expect(
+                  'Updates & Notices'.localized(context),
+                  'Updates & Notices',
+                );
+                expect('About'.localized(context), 'About');
+                expect('Advanced'.localized(context), 'Advanced');
+                expect(
+                  'Available Languages'.localized(context),
+                  'Available Languages',
+                );
+                expect(
+                  'Upcoming Languages'.localized(context),
+                  'Upcoming Languages',
+                );
+                expect(
+                  'Personalize and configure NoteKar to fit your specific workflow.'
+                      .localized(context),
+                  'Personalize and configure NoteKar to fit your specific workflow.',
+                );
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      },
+    );
   });
 }
