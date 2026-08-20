@@ -13,7 +13,7 @@ String formatInstalledDate(String buildDateStr) {
   try {
     final DateTime? buildDate = DateTime.tryParse(buildDateStr);
     if (buildDate == null) {
-      return 'Installed $buildDateStr';
+      return 'Installed on $buildDateStr';
     }
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -39,10 +39,10 @@ String formatInstalledDate(String buildDateStr) {
         'Nov',
         'Dec',
       ];
-      return 'Installed ${buildDate.day} ${months[buildDate.month - 1]} ${buildDate.year}';
+      return 'Installed on ${buildDate.day} ${months[buildDate.month - 1]} ${buildDate.year}';
     }
   } catch (_) {
-    return 'Installed $buildDateStr';
+    return 'Installed on $buildDateStr';
   }
 }
 

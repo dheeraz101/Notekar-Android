@@ -689,8 +689,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               const SizedBox(height: 8),
             ],
             Text(
-              'v$appVersion ($kAppBuildNumber) • ${formatInstalledDate(appBuildDate)}'
-                  .localized(context),
+              'v$appVersion ($kAppBuildNumber)',
               style: TextStyle(color: p.text3, fontSize: 13),
             ),
             const SizedBox(height: 16),
