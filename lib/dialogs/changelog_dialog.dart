@@ -25,6 +25,23 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '7.1.0',
+      date: 'August 21, 2026',
+      highlights: [
+        'Security and stability improvements.',
+        'Add localized numerals, currency symbols & redesign upcoming language sheet',
+        'Add French localization, dynamic pattern translation & upcoming languages catalog',
+      ],
+      items: [
+        'Refine version card and installation date formatting',
+        'Preserve Apple HIG typography in English and normalize home toolbar buttons',
+        'Standardize toolbar button icon containers & fix settings description placement',
+        'Add localized numerals, currency symbols & redesign upcoming language sheet',
+        'Add French localization, dynamic pattern translation & upcoming languages catalog',
+        'Fixed issues and added complete language support',
+      ],
+    ),
+    (
       version: '7.0.0',
       date: 'August 16, 2026',
       highlights: [

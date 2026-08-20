@@ -1,0 +1,7 @@
+Update to 7.1.0 (build 26SE0821):
+- New: Add localized numerals, currency symbols & redesign upcoming language sheet
+- New: Add French localization, dynamic pattern translation & upcoming languages catalog
+- Refine version card and installation date formatting
+- Standardize toolbar button icon containers & fix settings description placement
+- Fixed issues and added complete language support
+- Fix: Preserve Apple HIG typography in English and normalize home toolbar buttons

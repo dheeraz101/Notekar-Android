@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.1.0] - 2026-08-21 (versionCode 26SE0821) [SR]
+
+### What's New
+
+- Add localized numerals, currency symbols & redesign upcoming language sheet
+- Add French localization, dynamic pattern translation & upcoming languages catalog
+
+### Improvements
+
+- Refine version card and installation date formatting
+- Standardize toolbar button icon containers & fix settings description placement
+- Fixed issues and added complete language support
+
+### Bug Fixes
+
+- Preserve Apple HIG typography in English and normalize home toolbar buttons
+
 ## [7.0.0] - 2026-08-16 (versionCode 26ST0816) [SB]
 
 ### What's New
