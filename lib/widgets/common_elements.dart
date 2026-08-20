@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class ChipButton extends StatelessWidget {
@@ -680,107 +681,184 @@ const List<({String code, String name, String native})> kUpcomingLanguages = [
   (code: 'ka', name: 'Georgian', native: 'ქართული (Georgian)'),
 ];
 
-/// Shows a dialog informing the user that translation for [languageName] is upcoming,
-/// inviting community contributions on GitHub.
+/// Shows a sleek Apple-style bottom sheet informing the user that translation for [languageName]
+/// is upcoming, inviting community contributions on GitHub.
 Future<void> showUpcomingLanguageNotice(
   BuildContext context,
   Palette p,
-  String languageName,
-) async {
+  String languageName, {
+  void Function(String url)? onOpenLink,
+}) async {
   HapticFeedback.selectionClick();
-  await showGeneralDialog<void>(
+  const translationsGuideUrl =
+      'https://github.com/dheeraz101/Notekar-Android/blob/main/TRANSLATIONS.md';
+  const MethodChannel fileChannel = MethodChannel(
+    'com.project.yabp.notekar/files',
+  );
+
+  await showModalBottomSheet<void>(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.45),
-    barrierDismissible: true,
-    barrierLabel: 'Close',
-    transitionDuration: const Duration(milliseconds: 150),
-    pageBuilder: (ctx, anim1, anim2) => ScaleTransition(
-      scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
-      child: Dialog(
-        backgroundColor: p.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: p.border, width: 1),
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.55),
+    isScrollControlled: true,
+    builder: (ctx) {
+      return Container(
+        decoration: BoxDecoration(
+          color: p.surface.withValues(alpha: 0.95),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(
+            color: p.accent.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
         ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.translate_rounded, color: p.accent, size: 30),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                languageName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: p.orange.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Upcoming'.localized(context),
-                  style: TextStyle(
-                    color: p.orange,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          child: Glass(
+            p: p,
+            radius: 32,
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: p.text3.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'This language is currently under development. You can help translate NoteKar into your native language by contributing on GitHub.'
-                    .localized(context),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text(
-                        'OK'.localized(context),
-                        style: TextStyle(
-                          color: p.text,
-                          fontWeight: FontWeight.w700,
+                const SizedBox(height: 24),
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: p.accent.withValues(alpha: 0.25),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.translate_rounded,
+                    color: p.accent,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  languageName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.orange.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: p.orange.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'Upcoming'.localized(context),
+                    style: TextStyle(
+                      color: p.orange,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'This language is currently under development. You can help translate NoteKar into your native language by contributing on GitHub.'
+                      .localized(context),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: PressableScale(
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          if (onOpenLink != null) {
+                            onOpenLink(translationsGuideUrl);
+                          } else {
+                            try {
+                              await fileChannel.invokeMethod<void>('openUrl', {
+                                'url': translationsGuideUrl,
+                              });
+                            } catch (_) {
+                              await Clipboard.setData(
+                                const ClipboardData(text: translationsGuideUrl),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: p.accent,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.favorite_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Contribute on GitHub'.localized(context),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'Dismiss'.localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 

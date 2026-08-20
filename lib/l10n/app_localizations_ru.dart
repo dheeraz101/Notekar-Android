@@ -74,4 +74,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get delete => 'Удалить';
+
+  @override
+  String get currencySymbol => '₽';
+
+  @override
+  String get currencyCode => 'RUB';
 }

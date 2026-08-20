@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 
 class MomentTile extends StatelessWidget {
@@ -64,7 +65,7 @@ class MomentTile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          singleNumber!,
+                          singleNumber!.localizedDigits(context),
                           style: TextStyle(
                             color: color,
                             fontWeight: FontWeight.w900,
@@ -155,7 +156,7 @@ class MomentTile extends StatelessWidget {
               ),
               child: entry.type == 'single' && singleNumber != null
                   ? Text(
-                      singleNumber!,
+                      singleNumber!.localizedDigits(context),
                       style: TextStyle(
                         color: color,
                         fontWeight: FontWeight.w900,

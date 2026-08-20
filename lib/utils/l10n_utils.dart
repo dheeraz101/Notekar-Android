@@ -1,6 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:notekar/l10n/app_localizations.dart';
 
+extension LocalizedDigitsExtension on String {
+  String localizedDigits(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = l10n?.localeName ?? 'en';
+    if (locale == 'hi') {
+      const devanagariDigits = [
+        '०',
+        '१',
+        '२',
+        '३',
+        '४',
+        '५',
+        '६',
+        '७',
+        '८',
+        '९',
+      ];
+      final buffer = StringBuffer();
+      for (int i = 0; i < length; i++) {
+        final codeUnit = codeUnitAt(i);
+        if (codeUnit >= 48 && codeUnit <= 57) {
+          buffer.write(devanagariDigits[codeUnit - 48]);
+        } else {
+          buffer.writeCharCode(codeUnit);
+        }
+      }
+      return buffer.toString();
+    }
+    return this;
+  }
+}
+
+extension LocalizedIntDigits on int {
+  String localizedDigits(BuildContext context) {
+    return toString().localizedDigits(context);
+  }
+}
+
 extension LocalizedString on String {
   String localized(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -3911,6 +3949,11 @@ extension LocalizedString on String {
           _ =>
             'This language is currently under development. You can help translate NoteKar into your native language by contributing on GitHub.',
         },
+      'contribute on github' => switch (l10n.localeName) {
+        'es' => 'Contribuir en GitHub',
+        'hi' => 'GitHub पर योगदान करें',
+        _ => 'Contribute on GitHub',
+      },
       _ => this,
     };
   }
@@ -4106,6 +4149,7 @@ const Map<String, String> _frTranslations = {
   'confirm passcode': 'Code bestätigen',
   'continue': 'Weiter',
   'continuous': 'Continu',
+  'contribute on github': 'Contribuer sur GitHub',
   'cooldown period': 'Période de temps de recharge',
   'copy': 'Kopieren',
   'copy moment': 'Moment kopieren',
@@ -4155,10 +4199,11 @@ const Map<String, String> _frTranslations = {
   'diagnosticscategory': 'Diagnostics',
   'disable battery optimization': 'Akku-Optimierung deaktivieren',
   'disable compact history?': 'Désactiver l\'historique compact ?',
+  'disable count on save?': 'Désactiver le comptage à l\'enregistrement ?',
   'disable reduce motion first': '最初に「視覚効果を減らす」を無効にしてください',
   'disable use numbers in single?': 'Désactiver la numérotation unique ?',
   'disabled': 'Désactivé',
-  'dismiss': 'Verwerfen',
+  'dismiss': 'Ignorer',
   'display': 'Affichage',
   'display & typography': 'Affichage et typographie',
   'displaycategory': 'Affichage',
@@ -4720,15 +4765,6 @@ const Map<String, String> _frTranslations = {
 };
 
 const Map<String, String> _deTranslations = {
-  'this language is currently under development. you can help translate notekar into your native language by contributing on github.':
-      'Diese Sprache befindet sich derzeit in Entwicklung. Sie können helfen, NoteKar in Ihre Muttersprache zu übersetzen, indem Sie auf GitHub beitragen.',
-  'these languages are planned for future releases. help translate notekar on github.':
-      'Diese Sprachen sind für zukünftige Versionen geplant. Helfen Sie mit bei der Übersetzung auf GitHub.',
-  'upcoming': 'Demnächst',
-  'upcoming languages': 'Kommende Sprachen',
-  'available languages': 'Verfügbare Sprachen',
-  'every tap records a standalone moment.':
-      'Jedes Antippen zeichnet einen eigenständigen Moment auf.',
   '* have suggestions or found a bug?':
       '* Haben Sie Vorschläge oder einen Fehler gefunden?',
   '* have suggestions or found a bug? ':
@@ -4835,6 +4871,7 @@ const Map<String, String> _deTranslations = {
   'auto-start & background activity': 'Autostart & Hintergrundaktivität',
   'automated security scans': 'Automatisierte Sicherheits-Scans',
   'automatic': 'Automatisch',
+  'available languages': 'Verfügbare Sprachen',
   'back': 'Zurück',
   'back up data': 'Daten sichern',
   'backup & export': 'Sicherung & Export',
@@ -4919,6 +4956,7 @@ const Map<String, String> _deTranslations = {
   'confirm passcode': 'Code bestätigen',
   'continue': 'Weiter',
   'continuous': 'Fortlaufend',
+  'contribute on github': 'Auf GitHub beitragen',
   'cooldown period': 'Abklingzeit',
   'copy': 'Kopieren',
   'copy moment': 'Moment kopieren',
@@ -4973,7 +5011,7 @@ const Map<String, String> _deTranslations = {
   'disable reduce motion first': '最初に「視覚効果を減らす」を無効にしてください',
   'disable use numbers in single?': 'Nummerierung im Einzelmodus deaktivieren?',
   'disabled': 'Deaktiviert',
-  'dismiss': 'Verwerfen',
+  'dismiss': 'Schließen',
   'display': 'Anzeige',
   'display & typography': 'Anzeige & Typografie',
   'displaycategory': 'Anzeige',
@@ -5012,6 +5050,8 @@ const Map<String, String> _deTranslations = {
   'every 14 days': 'Alle 14 Tage',
   'every 30 days': 'Alle 30 Tage',
   'every 7 days': 'Alle 7 Tage',
+  'every tap records a standalone moment.':
+      'Jedes Antippen zeichnet einen eigenständigen Moment auf.',
   'export backup': 'Sicherung exportieren',
   'export csv': 'CSV exportieren',
   'export failed. try again.': 'Export fehlgeschlagen. Erneut versuchen.',
@@ -5407,6 +5447,8 @@ const Map<String, String> _deTranslations = {
   'theme description': 'Themenbeschreibung',
   'theme mode': 'Design-Modus',
   'theme style': 'Design-Stil',
+  'these languages are planned for future releases. help translate notekar on github.':
+      'Diese Sprachen sind für zukünftige Versionen geplant. Helfen Sie mit bei der Übersetzung auf GitHub.',
   'these settings define how moments are recorded and prepared for export.':
       'Diese Einstellungen bestimmen, wie Momente erfasst und exportiert werden.',
   'these settings refine the interface aesthetic and do not modify your saved data.':
@@ -5416,6 +5458,8 @@ const Map<String, String> _deTranslations = {
   'this backup contains no moments': 'Diese Sicherung enthält keine Momente',
   'this feature is currently in active development. while fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. all calculations, data, and security policies remain entirely local to your device.':
       'Diese Funktion befindet sich in aktiver Entwicklung. Sie ist voll funktionsfähig und sicher. Alle Berechnungen und Daten bleiben lokal auf Ihrem Gerät.',
+  'this language is currently under development. you can help translate notekar into your native language by contributing on github.':
+      'Diese Sprache befindet sich derzeit in Entwicklung. Sie können helfen, NoteKar in Ihre Muttersprache zu übersetzen, indem Sie auf GitHub beitragen.',
   'this local backup file will be erased permanently.':
       'Diese lokale Sicherungsdatei wird dauerhaft gelöscht.',
   'this moment will be erased forever.':
@@ -5464,6 +5508,8 @@ const Map<String, String> _deTranslations = {
   'type to search your notes...': 'Tippen, um Notizen zu durchsuchen...',
   'undetected': 'Nicht erkannt (Sauber)',
   'undo': 'Rückgängig',
+  'upcoming': 'Demnächst',
+  'upcoming languages': 'Kommende Sprachen',
   'update available': 'Update verfügbar',
   'update check failed': 'Update-Prüfung fehlgeschlagen',
   'update track': 'Update-Kanal',
@@ -5517,14 +5563,6 @@ const Map<String, String> _deTranslations = {
 };
 
 const Map<String, String> _jaTranslations = {
-  'this language is currently under development. you can help translate notekar into your native language by contributing on github.':
-      'この言語は現在開発中です。GitHubでNoteKarをあなたの母国語に翻訳する協力ができます。',
-  'these languages are planned for future releases. help translate notekar on github.':
-      'これらの言語は今後のリリースで予定されています。GitHubでの翻訳にご協力ください。',
-  'upcoming': '準備中',
-  'upcoming languages': '今後追加予定の言語',
-  'available languages': '利用可能な言語',
-  'every tap records a standalone moment.': 'タップするごとに独立したモーメントを記録します。',
   '* have suggestions or found a bug?': '* ご提案や不具合の報告はこちら：',
   '* have suggestions or found a bug? ': '* ご意見やバグの報告がありますか？ ',
   '0 / 68 clean': '0 / 68 安全',
@@ -5626,6 +5664,7 @@ const Map<String, String> _jaTranslations = {
   'auto-start & background activity': '自動起動とバックグラウンド動作',
   'automated security scans': '自動セキュリティスキャン',
   'automatic': '自動',
+  'available languages': '利用可能な言語',
   'back': '戻る',
   'back up data': 'データをバックアップ',
   'backup & export': 'バックアップとエクスポート',
@@ -5702,6 +5741,7 @@ const Map<String, String> _jaTranslations = {
   'confirm passcode': 'パスコードを再入力',
   'continue': '続ける',
   'continuous': '連続',
+  'contribute on github': 'GitHubで貢献する',
   'cooldown period': 'クールダウン期間',
   'copy': 'コピー',
   'copy moment': 'モーメントをコピー',
@@ -5794,6 +5834,7 @@ const Map<String, String> _jaTranslations = {
   'every 14 days': '14日ごと',
   'every 30 days': '30日ごと',
   'every 7 days': '7日ごと',
+  'every tap records a standalone moment.': 'タップするごとに独立したモーメントを記録します。',
   'export backup': 'バックアップをエクスポート',
   'export csv': 'CSVエクスポート',
   'export failed. try again.': 'エクスポートに失敗しました。再試行してください。',
@@ -6158,6 +6199,8 @@ const Map<String, String> _jaTranslations = {
   'theme description': 'テーマの説明',
   'theme mode': 'テーマモード',
   'theme style': 'テーマのスタイル',
+  'these languages are planned for future releases. help translate notekar on github.':
+      'これらの言語は今後のリリースで予定されています。GitHubでの翻訳にご協力ください。',
   'these settings define how moments are recorded and prepared for export.':
       'モーメントの記録方法およびエクスポート形式を設定します。',
   'these settings refine the interface aesthetic and do not modify your saved data.':
@@ -6167,6 +6210,8 @@ const Map<String, String> _jaTranslations = {
   'this backup contains no moments': 'このバックアップにはモーメントが含まれていません',
   'this feature is currently in active development. while fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. all calculations, data, and security policies remain entirely local to your device.':
       'この機能は現在開発中です。完全に機能し安全ですが、今後レイアウト等の微調整が行われる場合があります。すべてのデータは端末内に留まります。',
+  'this language is currently under development. you can help translate notekar into your native language by contributing on github.':
+      'この言語は現在開発中です。GitHubでNoteKarをあなたの母国語に翻訳する協力ができます。',
   'this local backup file will be erased permanently.':
       'このローカルバックアップファイルは完全に削除されます。',
   'this moment will be erased forever.': 'このモーメントは完全に消去されます。',
@@ -6213,6 +6258,8 @@ const Map<String, String> _jaTranslations = {
   'type to search your notes...': '検索するキーワードを入力...',
   'undetected': '脅威なし (安全)',
   'undo': '元に戻す',
+  'upcoming': '準備中',
+  'upcoming languages': '今後追加予定の言語',
   'update available': 'アップデート利用可能',
   'update check failed': 'アップデート確認に失敗しました',
   'update track': '更新チャンネル',
@@ -6263,15 +6310,6 @@ const Map<String, String> _jaTranslations = {
 };
 
 const Map<String, String> _ruTranslations = {
-  'this language is currently under development. you can help translate notekar into your native language by contributing on github.':
-      'Этот язык находится в разработке. Вы можете помочь перевести NoteKar на ваш родной язык, внеся свой вклад на GitHub.',
-  'these languages are planned for future releases. help translate notekar on github.':
-      'Эти языки запланированы для будущих версий. Помогите перевести NoteKar на GitHub.',
-  'upcoming': 'Скоро',
-  'upcoming languages': 'Скоро доступные языки',
-  'available languages': 'Доступные языки',
-  'every tap records a standalone moment.':
-      'Каждое нажатие фиксирует отдельный момент.',
   '* have suggestions or found a bug?': '* Есть предложения или нашли ошибку?',
   '* have suggestions or found a bug? ':
       '* Есть предложения или нашли ошибку? ',
@@ -6378,6 +6416,7 @@ const Map<String, String> _ruTranslations = {
   'auto-start & background activity': 'Автозапуск и фоновая активность',
   'automated security scans': 'Автоматические проверки безопасности',
   'automatic': 'Автоматически',
+  'available languages': 'Доступные языки',
   'back': 'Назад',
   'back up data': 'Резервное копирование',
   'backup & export': 'Резервное копирование и экспорт',
@@ -6461,6 +6500,7 @@ const Map<String, String> _ruTranslations = {
   'confirm passcode': 'Подтвердите код доступа',
   'continue': 'Продолжить',
   'continuous': 'Непрерывно',
+  'contribute on github': 'Внести вклад на GitHub',
   'cooldown period': 'Период задержки',
   'copy': 'Копировать',
   'copy moment': 'Копировать момент',
@@ -6554,6 +6594,8 @@ const Map<String, String> _ruTranslations = {
   'every 14 days': 'Каждые 14 дн.',
   'every 30 days': 'Каждые 30 дн.',
   'every 7 days': 'Каждые 7 дн.',
+  'every tap records a standalone moment.':
+      'Каждое нажатие фиксирует отдельный момент.',
   'export backup': 'Экспорт копии',
   'export csv': 'Экспорт CSV',
   'export failed. try again.': 'Ошибка экспорта. Повторите попытку.',
@@ -6946,6 +6988,8 @@ const Map<String, String> _ruTranslations = {
   'theme description': 'Описание темы',
   'theme mode': 'Режим оформления',
   'theme style': 'Стиль темы',
+  'these languages are planned for future releases. help translate notekar on github.':
+      'Эти языки запланированы для будущих версий. Помогите перевести NoteKar на GitHub.',
   'these settings define how moments are recorded and prepared for export.':
       'Эти параметры определяют правила записи моментов и их экспорт.',
   'these settings refine the interface aesthetic and do not modify your saved data.':
@@ -6955,6 +6999,8 @@ const Map<String, String> _ruTranslations = {
   'this backup contains no moments': 'В этой резервной копии нет моментов',
   'this feature is currently in active development. while fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. all calculations, data, and security policies remain entirely local to your device.':
       'Эта функция находится в активной разработке. Она полностью функциональна и безопасна. Все вычисления и данные остаются на вашем устройстве.',
+  'this language is currently under development. you can help translate notekar into your native language by contributing on github.':
+      'Этот язык находится в разработке. Вы можете помочь перевести NoteKar на ваш родной язык, внеся свой вклад на GitHub.',
   'this local backup file will be erased permanently.':
       'Этот локальный файл резервной копии будет удален навсегда.',
   'this moment will be erased forever.': 'Этот момент будет удален навсегда.',
@@ -7002,6 +7048,8 @@ const Map<String, String> _ruTranslations = {
   'type to search your notes...': 'Введите текст для поиска...',
   'undetected': 'Угроз не обнаружено (Чисто)',
   'undo': 'Отменить',
+  'upcoming': 'Скоро',
+  'upcoming languages': 'Скоро доступные языки',
   'update available': 'Доступно обновление',
   'update check failed': 'Не удалось проверить обновления',
   'update track': 'Канал обновлений',

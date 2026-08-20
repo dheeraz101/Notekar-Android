@@ -270,14 +270,15 @@ String _pulseLabel(String type, BuildContext context, {String? pulseCount}) {
   final locale = l10n?.localeName ?? 'en';
 
   if (type == 'single' && pulseCount != null) {
+    final localizedCount = pulseCount.localizedDigits(context);
     return switch (locale) {
-      'fr' => '$pulseCount enregistré',
-      'es' => '$pulseCount guardado',
-      'hi' => '$pulseCount सहेजा गया',
-      'de' => '$pulseCount gespeichert',
-      'ja' => '$pulseCount 保存完了',
-      'ru' => '$pulseCount сохранен',
-      _ => '$pulseCount saved',
+      'fr' => '$localizedCount enregistré',
+      'es' => '$localizedCount guardado',
+      'hi' => '$localizedCount सहेजा गया',
+      'de' => '$localizedCount gespeichert',
+      'ja' => '$localizedCount 保存完了',
+      'ru' => '$localizedCount сохранен',
+      _ => '$localizedCount saved',
     };
   }
 

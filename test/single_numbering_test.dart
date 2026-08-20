@@ -335,5 +335,50 @@ void main() {
         }
       },
     );
+
+    testWidgets('Native numeral system and currency symbols localize cleanly', (
+      tester,
+    ) async {
+      for (final code in ['en', 'fr', 'es', 'hi', 'de', 'ja', 'ru']) {
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(code),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context)!;
+                final num00 = '00'.localizedDigits(context);
+                final num01 = '01'.localizedDigits(context);
+                final num42 = '42'.localizedDigits(context);
+
+                if (code == 'hi') {
+                  expect(num00, '००');
+                  expect(num01, '०१');
+                  expect(num42, '४२');
+                  expect(l10n.currencySymbol, '₹');
+                  expect(l10n.currencyCode, 'INR');
+                } else {
+                  expect(num00, '00');
+                  expect(num01, '01');
+                  expect(num42, '42');
+                  if (code == 'en') {
+                    expect(l10n.currencySymbol, '\$');
+                  } else if (code == 'ja') {
+                    expect(l10n.currencySymbol, '¥');
+                  } else if (code == 'ru') {
+                    expect(l10n.currencySymbol, '₽');
+                  } else {
+                    expect(l10n.currencySymbol, '€');
+                  }
+                }
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+    });
   });
 }

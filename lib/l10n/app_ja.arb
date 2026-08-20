@@ -21,5 +21,7 @@
   "cancel": "キャンセル",
   "save": "保存",
   "confirm": "確認",
-  "delete": "削除"
+  "delete": "削除",
+  "currencySymbol": "¥",
+  "currencyCode": "JPY"
 }

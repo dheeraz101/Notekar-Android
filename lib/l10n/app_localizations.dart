@@ -239,6 +239,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
+
+  /// No description provided for @currencySymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'\$'**
+  String get currencySymbol;
+
+  /// No description provided for @currencyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'USD'**
+  String get currencyCode;
 }
 
 class _AppLocalizationsDelegate

@@ -21,5 +21,7 @@
   "cancel": "Cancel",
   "save": "Save",
   "confirm": "Confirm",
-  "delete": "Delete"
+  "delete": "Delete",
+  "currencySymbol": "$",
+  "currencyCode": "USD"
 }

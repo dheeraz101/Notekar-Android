@@ -21,5 +21,7 @@
   "cancel": "Отмена",
   "save": "Сохранить",
   "confirm": "Подтвердить",
-  "delete": "Удалить"
+  "delete": "Удалить",
+  "currencySymbol": "₽",
+  "currencyCode": "RUB"
 }

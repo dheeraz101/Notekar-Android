@@ -21,5 +21,7 @@
   "cancel": "रद्द करें",
   "save": "सहेजें",
   "confirm": "पुष्टि करें",
-  "delete": "हटाएं"
+  "delete": "हटाएं",
+  "currencySymbol": "₹",
+  "currencyCode": "INR"
 }

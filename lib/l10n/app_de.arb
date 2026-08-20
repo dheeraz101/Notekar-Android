@@ -21,5 +21,7 @@
   "cancel": "Abbrechen",
   "save": "Speichern",
   "confirm": "Bestätigen",
-  "delete": "Löschen"
+  "delete": "Löschen",
+  "currencySymbol": "€",
+  "currencyCode": "EUR"
 }
