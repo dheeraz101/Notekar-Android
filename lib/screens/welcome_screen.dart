@@ -5,6 +5,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -434,29 +435,109 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               widget.onDefaultMode(value);
             },
           ),
-          const SizedBox(height: 24),
-          SegmentedSetting(
-            p: p,
-            title: 'App Language'.localized(context),
-            subtitle: 'Choose your preferred interface language'.localized(
-              context,
-            ),
-            value: currentLocale,
-            values: const {
-              'system': 'System',
-              'en': 'English',
-              'hi': 'हिन्दी',
-              'es': 'Español',
-              'de': 'Deutsch',
-              'ja': '日本語',
-              'ru': 'Русский',
-            },
-            onChanged: (value) {
-              setState(() => currentLocale = value);
-              widget.onLocaleChanged(value);
-            },
-          ),
           const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguagePage(Palette p) {
+    final availableLanguages = [
+      (code: 'system', name: 'System Default', native: 'System Default'),
+      (code: 'en', name: 'English', native: 'English'),
+      (code: 'fr', name: 'French', native: 'Français (French)'),
+      (code: 'hi', name: 'Hindi', native: 'हिन्दी (Hindi)'),
+      (code: 'es', name: 'Spanish', native: 'Español (Spanish)'),
+      (code: 'de', name: 'German', native: 'Deutsch (German)'),
+      (code: 'ja', name: 'Japanese', native: '日本語 (Japanese)'),
+      (code: 'ru', name: 'Russian', native: 'Русский (Russian)'),
+    ];
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(Icons.language_rounded, color: p.accent, size: 38),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'Choose Language'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.6,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Select your preferred interface language. You can change this anytime in Settings.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 28),
+          SettingsGroup(
+            p: p,
+            title: 'Available Languages'.localized(context),
+            children: [
+              for (final lang in availableLanguages)
+                SettingsRow(
+                  p: p,
+                  title: lang.native,
+                  trailing: currentLocale == lang.code
+                      ? Icon(Icons.check_rounded, color: p.accent, size: 22)
+                      : const SizedBox.shrink(),
+                  onTap: () {
+                    if (currentLocale == lang.code) return;
+                    HapticFeedback.selectionClick();
+                    setState(() => currentLocale = lang.code);
+                    widget.onLocaleChanged(lang.code);
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SettingsGroup(
+            p: p,
+            title: 'Upcoming Languages'.localized(context),
+            description:
+                'These languages are planned for future releases. Help translate NoteKar on GitHub.'
+                    .localized(context),
+            children: [
+              for (final lang in kUpcomingLanguages)
+                SettingsRow(
+                  p: p,
+                  title: lang.native,
+                  trailing: UpcomingBadge(p: p),
+                  onTap: () =>
+                      showUpcomingLanguageNotice(context, p, lang.native),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -1608,6 +1689,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 children: widget.pages.map((key) {
                   if (key == 'welcome') {
                     return _buildWelcomePage(p);
+                  }
+                  if (key == 'language') {
+                    return _buildLanguagePage(p);
                   }
                   if (key == 'security') {
                     return _buildSecurityPage(p);

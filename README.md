@@ -70,6 +70,11 @@ with minimal interaction.
 - **2-Digit Single Moments Numbering**: Clean sequence counter from `00` to `99` with automatic
   rollover back to `00`, optional daily reset, and "Count on Save" pulse badges (`00 saved`,
   `01 saved`...).
+- **Full Multilingual & Global Support**:
+    - **7 Live Officially Supported Languages**: 🇬🇧 English, 🇫🇷 French (Français), 🇪🇸 Spanish (
+      Español), 🇮🇳 Hindi (हिन्दी), 🇩🇪 German (Deutsch), 🇯🇵 Japanese (日本語), 🇷🇺 Russian (Русский).
+    - **50+ Upcoming Languages Initiative**: Dedicated onboarding and in-app language picker
+      supporting worldwide community localization.
 - **Sobriety Companion & Milestone Map**:
     - **21 Neuroscience-Backed Milestones**: Track sobriety with 34 narrative themes (Science,
       Warrior, Samurai, Anime, Cyberpunk, etc.).
@@ -109,11 +114,29 @@ NoteKar is built using modern, performance-oriented technologies:
 
 ## 🌐 Community Translations
 
-Help make NoteKar available in your native language! We welcome translation contributions for any
-language.
+Help make NoteKar accessible to everyone in their native language! NoteKar is committed to being
+100% community-friendly and localization-ready.
 
-- 📖 Read the **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a simple 3-step
-  walkthrough on creating or updating `.arb` files.
+### 🌟 Currently Supported (7 Languages)
+
+| Language      | Code | Native Name | Status |
+|:--------------|:----:|:------------|:------:|
+| 🇬🇧 English  | `en` | English     | ✅ Live |
+| 🇫🇷 French   | `fr` | Français    | ✅ Live |
+| 🇪🇸 Spanish  | `es` | Español     | ✅ Live |
+| 🇮🇳 Hindi    | `hi` | हिन्दी      | ✅ Live |
+| 🇩🇪 German   | `de` | Deutsch     | ✅ Live |
+| 🇯🇵 Japanese | `ja` | 日本語         | ✅ Live |
+| 🇷🇺 Russian  | `ru` | Русский     | ✅ Live |
+
+### 🚀 50+ Upcoming Target Languages
+
+We are actively seeking community contributions for **Arabic, Portuguese, Italian, Chinese, Korean,
+Turkish, Dutch, Polish, Swedish, Indonesian, Vietnamese, Thai, Ukrainian, Greek, Bengali, Marathi,
+Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and many more!
+
+- 📖 Read our **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a 3-step guide on adding
+  or improving translations for NoteKar.
 
 ---
 

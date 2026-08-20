@@ -838,6 +838,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             },
             pages: const [
               'welcome',
+              'language',
               'app-icons',
               'security',
               'features',
@@ -1019,8 +1020,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final now = timestamp != null
         ? DateTime.fromMillisecondsSinceEpoch(timestamp)
         : DateTime.now();
-    final reminderTitle = 'logging reminder'.localized(context);
-    final reminderBody = 'time to log a moment!'.localized(context);
+    final reminderTitle = 'Logging Reminder'.localized(context);
+    final reminderBody = 'Time to log a moment!'.localized(context);
     var type = forcedType ?? 'single';
     final oldInOut = _inout;
     final oldSessionStart = _sessionStart;
@@ -1213,7 +1214,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     showIosPillToast(
       context: context,
       p: p,
-      message: text,
+      message: text.localized(context),
       icon: warning ? Icons.warning_amber_rounded : Icons.check_circle_rounded,
     );
   }

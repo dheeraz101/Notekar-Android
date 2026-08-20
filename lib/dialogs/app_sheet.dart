@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -157,7 +158,7 @@ class _AppSheetState extends State<AppSheet> {
                                 key: ValueKey<String>(widget.title),
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  widget.title,
+                                  widget.title.localized(context),
                                   maxLines: 1,
                                   softWrap: false,
                                   textAlign: TextAlign.center,

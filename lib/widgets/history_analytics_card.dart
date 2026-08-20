@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 
 class ActivitySummaryCard extends StatelessWidget {
   const ActivitySummaryCard({
@@ -589,12 +590,18 @@ class ActivityHeatmapCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('Less ', style: TextStyle(color: p.text3, fontSize: 10)),
+              Text(
+                '${'Less'.localized(context)} ',
+                style: TextStyle(color: p.text3, fontSize: 10),
+              ),
               _buildLegendCell(p.border.withValues(alpha: 0.15), p),
               _buildLegendCell(p.accent.withValues(alpha: 0.25), p),
               _buildLegendCell(p.accent.withValues(alpha: 0.55), p),
               _buildLegendCell(p.accent, p),
-              Text(' More', style: TextStyle(color: p.text3, fontSize: 10)),
+              Text(
+                ' ${'More'.localized(context)}',
+                style: TextStyle(color: p.text3, fontSize: 10),
+              ),
             ],
           ),
         ],

@@ -267,20 +267,56 @@ class _SavedPulseState extends State<SavedPulse>
 
 String _pulseLabel(String type, BuildContext context, {String? pulseCount}) {
   final l10n = AppLocalizations.of(context);
-  final isEs = l10n?.localeName == 'es';
-  final isHi = l10n?.localeName == 'hi';
+  final locale = l10n?.localeName ?? 'en';
 
   if (type == 'single' && pulseCount != null) {
-    return isEs
-        ? '$pulseCount guardado'
-        : (isHi ? '$pulseCount सहेजा गया' : '$pulseCount saved');
+    return switch (locale) {
+      'fr' => '$pulseCount enregistré',
+      'es' => '$pulseCount guardado',
+      'hi' => '$pulseCount सहेजा गया',
+      'de' => '$pulseCount gespeichert',
+      'ja' => '$pulseCount 保存完了',
+      'ru' => '$pulseCount сохранен',
+      _ => '$pulseCount saved',
+    };
   }
 
   return switch (type) {
-    'in' => isEs ? 'IN guardado' : (isHi ? 'IN सहेजा गया' : 'IN saved'),
-    'out' => isEs ? 'OUT guardado' : (isHi ? 'OUT सहेजा गया' : 'OUT saved'),
-    'single' =>
-      isEs ? 'SINGLE guardado' : (isHi ? 'SINGLE सहेजा गया' : 'SINGLE saved'),
-    _ => isEs ? 'Guardado' : (isHi ? 'सहेजा गया' : 'Saved'),
+    'in' => switch (locale) {
+      'fr' => 'IN enregistré',
+      'es' => 'IN guardado',
+      'hi' => 'IN सहेजा गया',
+      'de' => 'IN gespeichert',
+      'ja' => 'IN 保存完了',
+      'ru' => 'IN сохранен',
+      _ => 'IN saved',
+    },
+    'out' => switch (locale) {
+      'fr' => 'OUT enregistré',
+      'es' => 'OUT guardado',
+      'hi' => 'OUT सहेजा गया',
+      'de' => 'OUT gespeichert',
+      'ja' => 'OUT 保存完了',
+      'ru' => 'OUT сохранен',
+      _ => 'OUT saved',
+    },
+    'single' => switch (locale) {
+      'fr' => 'SINGLE enregistré',
+      'es' => 'SINGLE guardado',
+      'hi' => 'SINGLE सहेजा गया',
+      'de' => 'SINGLE gespeichert',
+      'ja' => 'SINGLE 保存完了',
+      'ru' => 'SINGLE сохранен',
+      _ => 'SINGLE saved',
+    },
+    _ => switch (locale) {
+      'fr' => 'Enregistré',
+      'es' => 'Guardado',
+      'hi' => 'सहेजा गया',
+      'de' => 'Gespeichert',
+      'ja' => '保存完了',
+      'ru' => 'Сохранено',
+      _ => 'Saved',
+    },
   };
 }

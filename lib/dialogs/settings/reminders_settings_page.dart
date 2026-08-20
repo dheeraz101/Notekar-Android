@@ -278,11 +278,11 @@ class RemindersSettingsPage extends StatelessWidget {
         // Daily reminder group
         SettingsGroup(
           p: p,
-          title: 'daily reminder'.localized(context).toUpperCase(),
+          title: 'Daily Reminder'.localized(context).toUpperCase(),
           children: [
             SettingsSwitchRow(
               p: p,
-              title: 'daily reminder'.localized(context),
+              title: 'Daily Reminder'.localized(context),
               color: p.accent,
               value: dailyReminderEnabled,
               onChanged: onToggleDailyReminder,
@@ -316,11 +316,11 @@ class RemindersSettingsPage extends StatelessWidget {
         // Inactivity reminder group
         SettingsGroup(
           p: p,
-          title: 'inactivity reminder'.localized(context).toUpperCase(),
+          title: 'Inactivity Reminder'.localized(context).toUpperCase(),
           children: [
             SettingsSwitchRow(
               p: p,
-              title: 'inactivity reminder'.localized(context),
+              title: 'Inactivity Reminder'.localized(context),
               color: p.accent,
               value: inactivityReminderEnabled,
               onChanged: onToggleInactivityReminder,
@@ -328,9 +328,9 @@ class RemindersSettingsPage extends StatelessWidget {
             if (inactivityReminderEnabled)
               SettingsRow(
                 p: p,
-                title: 'remind if inactive for'.localized(context),
+                title: 'Remind If Inactive For'.localized(context),
                 status:
-                    '${inactivityIntervalMins ~/ 60} ${inactivityIntervalMins == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
+                    '${inactivityIntervalMins ~/ 60} ${inactivityIntervalMins == 60 ? 'Hour'.localized(context) : 'Hours'.localized(context)}',
                 color: p.orange,
                 onTap: () async {
                   HapticFeedback.selectionClick();
@@ -339,7 +339,7 @@ class RemindersSettingsPage extends StatelessWidget {
                     builder: (context) {
                       return SimpleDialog(
                         title: Text(
-                          'remind if inactive for'.localized(context),
+                          'Remind If Inactive For'.localized(context),
                         ),
                         children: [
                           for (final interval in [60, 120, 240, 480, 720, 1440])
@@ -350,7 +350,7 @@ class RemindersSettingsPage extends StatelessWidget {
                                   vertical: 8.0,
                                 ),
                                 child: Text(
-                                  '${interval ~/ 60} ${interval == 60 ? 'hour'.localized(context) : 'hours'.localized(context)}',
+                                  '${interval ~/ 60} ${interval == 60 ? 'Hour'.localized(context) : 'Hours'.localized(context)}',
                                   style: TextStyle(color: p.text, fontSize: 16),
                                 ),
                               ),
@@ -376,11 +376,11 @@ class RemindersSettingsPage extends StatelessWidget {
         // Weekly reminder group
         SettingsGroup(
           p: p,
-          title: 'weekly reminder'.localized(context).toUpperCase(),
+          title: 'Weekly Reminder'.localized(context).toUpperCase(),
           children: [
             SettingsSwitchRow(
               p: p,
-              title: 'weekly reminder'.localized(context),
+              title: 'Weekly Reminder'.localized(context),
               color: p.accent,
               value: weeklyReminderEnabled,
               onChanged: onToggleWeeklyReminder,
@@ -388,7 +388,7 @@ class RemindersSettingsPage extends StatelessWidget {
             if (weeklyReminderEnabled) ...[
               SettingsRow(
                 p: p,
-                title: 'days of week'.localized(context),
+                title: 'Days of Week'.localized(context),
                 status: weeklyReminderDays
                     .map((d) {
                       return switch (d) {
@@ -414,7 +414,7 @@ class RemindersSettingsPage extends StatelessWidget {
                       return StatefulBuilder(
                         builder: (context, setDialogState) {
                           return AlertDialog(
-                            title: Text('days of week'.localized(context)),
+                            title: Text('Days of Week'.localized(context)),
                             content: SingleChildScrollView(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -454,7 +454,7 @@ class RemindersSettingsPage extends StatelessWidget {
                               TextButton(
                                 onPressed: () =>
                                     Navigator.pop(context, selectedDays),
-                                child: Text('okay'.localized(context)),
+                                child: Text('OK'.localized(context)),
                               ),
                             ],
                           );
@@ -496,11 +496,11 @@ class RemindersSettingsPage extends StatelessWidget {
         // Monthly reminder group
         SettingsGroup(
           p: p,
-          title: 'monthly reminder'.localized(context).toUpperCase(),
+          title: 'Monthly Reminder'.localized(context).toUpperCase(),
           children: [
             SettingsSwitchRow(
               p: p,
-              title: 'monthly reminder'.localized(context),
+              title: 'Monthly Reminder'.localized(context),
               color: p.accent,
               value: monthlyReminderEnabled,
               onChanged: onToggleMonthlyReminder,
@@ -508,7 +508,7 @@ class RemindersSettingsPage extends StatelessWidget {
             if (monthlyReminderEnabled) ...[
               SettingsRow(
                 p: p,
-                title: 'day of month'.localized(context),
+                title: 'Day of Month'.localized(context),
                 status: '$monthlyReminderDay',
                 color: p.red,
                 onTap: () async {
@@ -517,7 +517,7 @@ class RemindersSettingsPage extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return SimpleDialog(
-                        title: Text('day of month'.localized(context)),
+                        title: Text('Day of Month'.localized(context)),
                         children: [
                           for (int day = 1; day <= 28; day++)
                             SimpleDialogOption(

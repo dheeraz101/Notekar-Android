@@ -1261,7 +1261,7 @@ class MomentOptionPill extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                label,
+                label.localized(context),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

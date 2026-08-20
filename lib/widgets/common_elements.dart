@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class ChipButton extends StatelessWidget {
@@ -38,7 +40,7 @@ class ChipButton extends StatelessWidget {
         ),
         child: icon == null
             ? Text(
-                label ?? '',
+                (label ?? '').localized(context),
                 style: TextStyle(
                   color: active ? p.text : p.text2,
                   fontWeight: FontWeight.w800,
@@ -72,7 +74,7 @@ class SectionLabel extends StatelessWidget {
         spacing8,
       ),
       child: Text(
-        text,
+        text.localized(context),
         style: TextStyle(
           color: p.text3,
           fontSize: 12,
@@ -306,7 +308,7 @@ class HIGEmptyState extends StatelessWidget {
             ),
             SizedBox(height: compact ? 16 : 24),
             Text(
-              title,
+              title.localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text,
@@ -317,7 +319,7 @@ class HIGEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              message,
+              message.localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: p.text3,
@@ -342,7 +344,7 @@ class HIGEmptyState extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  actionLabel!,
+                  actionLabel!.localized(context),
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
@@ -608,6 +610,201 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 52+ worldwide target languages planned for community translation.
+const List<({String code, String name, String native})> kUpcomingLanguages = [
+  (code: 'ar', name: 'Arabic', native: 'العربية (Arabic)'),
+  (code: 'pt', name: 'Portuguese', native: 'Português (Portuguese)'),
+  (code: 'it', name: 'Italian', native: 'Italiano (Italian)'),
+  (
+    code: 'zh-CN',
+    name: 'Chinese (Simplified)',
+    native: '简体中文 (Chinese Simplified)',
+  ),
+  (
+    code: 'zh-TW',
+    name: 'Chinese (Traditional)',
+    native: '繁體中文 (Chinese Traditional)',
+  ),
+  (code: 'ko', name: 'Korean', native: '한국어 (Korean)'),
+  (code: 'tr', name: 'Turkish', native: 'Türkçe (Turkish)'),
+  (code: 'nl', name: 'Dutch', native: 'Nederlands (Dutch)'),
+  (code: 'pl', name: 'Polish', native: 'Polski (Polish)'),
+  (code: 'sv', name: 'Swedish', native: 'Svenska (Swedish)'),
+  (code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia'),
+  (code: 'vi', name: 'Vietnamese', native: 'Tiếng Việt (Vietnamese)'),
+  (code: 'th', name: 'Thai', native: 'ไทย (Thai)'),
+  (code: 'uk', name: 'Ukrainian', native: 'Українська (Ukrainian)'),
+  (code: 'el', name: 'Greek', native: 'Ελληνικά (Greek)'),
+  (code: 'cs', name: 'Czech', native: 'Čeština (Czech)'),
+  (code: 'ro', name: 'Romanian', native: 'Română (Romanian)'),
+  (code: 'hu', name: 'Hungarian', native: 'Magyar (Hungarian)'),
+  (code: 'da', name: 'Danish', native: 'Dansk (Danish)'),
+  (code: 'fi', name: 'Finnish', native: 'Suomi (Finnish)'),
+  (code: 'no', name: 'Norwegian', native: 'Norsk (Norwegian)'),
+  (code: 'he', name: 'Hebrew', native: 'עברית (Hebrew)'),
+  (code: 'bn', name: 'Bengali', native: 'বাংলা (Bengali)'),
+  (code: 'mr', name: 'Marathi', native: 'मराठी (Marathi)'),
+  (code: 'te', name: 'Telugu', native: 'తెలుగు (Telugu)'),
+  (code: 'ta', name: 'Tamil', native: 'தமிழ் (Tamil)'),
+  (code: 'gu', name: 'Gujarati', native: 'ગુજરાતી (Gujarati)'),
+  (code: 'ur', name: 'Urdu', native: 'اردو (Urdu)'),
+  (code: 'kn', name: 'Kannada', native: 'ಕನ್ನಡ (Kannada)'),
+  (code: 'ml', name: 'Malayalam', native: 'മലയാളം (Malayalam)'),
+  (code: 'pa', name: 'Punjabi', native: 'ਪੰਜਾਬੀ (Punjabi)'),
+  (code: 'sw', name: 'Swahili', native: 'Kiswahili (Swahili)'),
+  (code: 'fa', name: 'Persian', native: 'فارسی (Persian)'),
+  (code: 'ms', name: 'Malay', native: 'Bahasa Melayu'),
+  (code: 'tl', name: 'Tagalog', native: 'Filipino (Tagalog)'),
+  (code: 'sk', name: 'Slovak', native: 'Slovenčina (Slovak)'),
+  (code: 'bg', name: 'Bulgarian', native: 'Български (Bulgarian)'),
+  (code: 'hr', name: 'Croatian', native: 'Hrvatski (Croatian)'),
+  (code: 'sr', name: 'Serbian', native: 'Српски (Serbian)'),
+  (code: 'lt', name: 'Lithuanian', native: 'Lietuvių (Lithuanian)'),
+  (code: 'sl', name: 'Slovenian', native: 'Slovenščina (Slovenian)'),
+  (code: 'lv', name: 'Latvian', native: 'Latviešu (Latvian)'),
+  (code: 'et', name: 'Estonian', native: 'Eesti (Estonian)'),
+  (code: 'eu', name: 'Basque', native: 'Euskara (Basque)'),
+  (code: 'ca', name: 'Catalan', native: 'Català (Catalan)'),
+  (code: 'cy', name: 'Welsh', native: 'Cymraeg (Welsh)'),
+  (code: 'ga', name: 'Irish', native: 'Gaeilge (Irish)'),
+  (code: 'is', name: 'Icelandic', native: 'Íslenska (Icelandic)'),
+  (code: 'sq', name: 'Albanian', native: 'Shqip (Albanian)'),
+  (code: 'mk', name: 'Macedonian', native: 'Македонски (Macedonian)'),
+  (code: 'hy', name: 'Armenian', native: 'Հայերեն (Armenian)'),
+  (code: 'ka', name: 'Georgian', native: 'ქართული (Georgian)'),
+];
+
+/// Shows a dialog informing the user that translation for [languageName] is upcoming,
+/// inviting community contributions on GitHub.
+Future<void> showUpcomingLanguageNotice(
+  BuildContext context,
+  Palette p,
+  String languageName,
+) async {
+  HapticFeedback.selectionClick();
+  await showGeneralDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    barrierDismissible: true,
+    barrierLabel: 'Close',
+    transitionDuration: const Duration(milliseconds: 150),
+    pageBuilder: (ctx, anim1, anim2) => ScaleTransition(
+      scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
+      child: Dialog(
+        backgroundColor: p.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: p.border, width: 1),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.translate_rounded, color: p.accent, size: 30),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                languageName,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: p.orange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Upcoming'.localized(context),
+                  style: TextStyle(
+                    color: p.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'This language is currently under development. You can help translate NoteKar into your native language by contributing on GitHub.'
+                    .localized(context),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(
+                        'OK'.localized(context),
+                        style: TextStyle(
+                          color: p.text,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// A pill badge widget indicating 'Upcoming' status for non-live languages.
+class UpcomingBadge extends StatelessWidget {
+  const UpcomingBadge({super.key, required this.p});
+
+  final Palette p;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: p.orange.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: p.orange.withValues(alpha: 0.28), width: 0.8),
+      ),
+      child: Text(
+        'Upcoming'.localized(context),
+        style: TextStyle(
+          color: p.orange,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

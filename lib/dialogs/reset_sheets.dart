@@ -51,7 +51,7 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
           ),
           const SizedBox(height: 12),
           Text(
-            widget.message,
+            widget.message.localized(context),
             textAlign: TextAlign.center,
             style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
           ),
@@ -97,9 +97,9 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                    child: Text(
+                      'Cancel'.localized(context),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -119,9 +119,9 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
                     onPressed: _canReset
                         ? () => Navigator.pop(context, true)
                         : null,
-                    child: const Text(
-                      'Reset',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                    child: Text(
+                      'Reset'.localized(context),
+                      style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
@@ -366,7 +366,7 @@ class ActionConfirmSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            message,
+            message.localized(context),
             textAlign: TextAlign.center,
             style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
           ),
@@ -385,9 +385,9 @@ class ActionConfirmSheet extends StatelessWidget {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                    child: Text(
+                      'Cancel'.localized(context),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -406,7 +406,7 @@ class ActionConfirmSheet extends StatelessWidget {
                     ),
                     onPressed: () => Navigator.pop(context, true),
                     child: Text(
-                      confirmLabel,
+                      confirmLabel.localized(context),
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class PersonalizationSettingsPage extends StatelessWidget {
@@ -103,6 +104,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
               title: 'Language'.localized(context),
               status: switch (currentLocale) {
                 'en' => 'English',
+                'fr' => 'Français',
                 'hi' => 'हिन्दी',
                 'es' => 'Español',
                 'de' => 'Deutsch',
@@ -133,10 +135,12 @@ class PersonalizationSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         SettingsGroup(
           p: p,
+          title: 'Available Languages'.localized(context),
           children: [
             for (final entry in [
               (code: 'system', name: 'System Default'),
               (code: 'en', name: 'English'),
+              (code: 'fr', name: 'Français (French)'),
               (code: 'hi', name: 'हिन्दी (Hindi)'),
               (code: 'es', name: 'Español (Spanish)'),
               (code: 'de', name: 'Deutsch (German)'),
@@ -154,6 +158,24 @@ class PersonalizationSettingsPage extends StatelessWidget {
                   HapticFeedback.selectionClick();
                   onLocaleChanged(entry.code);
                 },
+              ),
+          ],
+        ),
+        const SizedBox(height: spacing12),
+        SettingsGroup(
+          p: p,
+          title: 'Upcoming Languages'.localized(context),
+          description:
+              'These languages are planned for future releases. Help translate NoteKar on GitHub.'
+                  .localized(context),
+          children: [
+            for (final lang in kUpcomingLanguages)
+              SettingsRow(
+                p: p,
+                title: lang.native,
+                trailing: UpcomingBadge(p: p),
+                onTap: () =>
+                    showUpcomingLanguageNotice(context, p, lang.native),
               ),
           ],
         ),

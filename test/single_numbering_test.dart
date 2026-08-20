@@ -239,20 +239,23 @@ void main() {
     });
   });
 
-  group('Multilingual Support (DE, JA, RU)', () {
-    testWidgets('AppLocalizations supports en, es, hi, de, ja, ru', (
+  group('Multilingual Support (FR, DE, JA, RU)', () {
+    testWidgets('AppLocalizations supports en, es, fr, hi, de, ja, ru', (
       tester,
     ) async {
       final localeCodes = AppLocalizations.supportedLocales
           .map((l) => l.languageCode)
           .toSet();
-      expect(localeCodes, containsAll(['en', 'es', 'hi', 'de', 'ja', 'ru']));
+      expect(
+        localeCodes,
+        containsAll(['en', 'es', 'fr', 'hi', 'de', 'ja', 'ru']),
+      );
     });
 
     testWidgets(
-      'German, Japanese, and Russian translations resolve correctly',
+      'French, German, Japanese, and Russian translations resolve correctly',
       (tester) async {
-        for (final code in ['de', 'ja', 'ru']) {
+        for (final code in ['fr', 'de', 'ja', 'ru']) {
           await tester.pumpWidget(
             MaterialApp(
               locale: Locale(code),
@@ -266,18 +269,62 @@ void main() {
                     context,
                   );
 
-                  if (code == 'de') {
+                  if (code == 'fr') {
+                    expect(settingsText, 'Paramètres');
+                    expect(cancelText, 'Annuler');
+                    expect(conflictTitle, 'Désactiver l\'historique compact ?');
+                    expect(
+                      'Every 7 Days'.localized(context),
+                      'Tous les 7 jours',
+                    );
+                  } else if (code == 'de') {
                     expect(settingsText, 'Einstellungen');
                     expect(cancelText, 'Abbrechen');
                     expect(conflictTitle, 'Kompakten Verlauf deaktivieren?');
+                    expect('Every 7 Days'.localized(context), 'Alle 7 Tage');
                   } else if (code == 'ja') {
                     expect(settingsText, '設定');
                     expect(cancelText, 'キャンセル');
                     expect(conflictTitle, 'コンパクト履歴を無効にしますか？');
+                    expect('Every 7 Days'.localized(context), '7日ごと');
                   } else if (code == 'ru') {
                     expect(settingsText, 'Настройки');
                     expect(cancelText, 'Отмена');
                     expect(conflictTitle, 'Отключить компактную историю?');
+                    expect('Every 7 Days'.localized(context), 'Каждые 7 дн.');
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+      },
+    );
+
+    testWidgets(
+      'Dynamic string patterns resolve in French, Spanish and Hindi properly',
+      (tester) async {
+        for (final code in ['fr', 'es', 'hi']) {
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: Locale(code),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Builder(
+                builder: (context) {
+                  final every7 = 'Every 7 Days'.localized(context);
+                  final tryAgain = 'Try again in 30 seconds'.localized(context);
+                  if (code == 'fr') {
+                    expect(every7, 'Tous les 7 jours');
+                    expect(tryAgain, 'Réessayez dans 30 secondes');
+                  } else if (code == 'es') {
+                    expect(every7, 'Cada 7 días');
+                    expect(tryAgain, 'Inténtalo de nuevo en 30 segundos');
+                  } else if (code == 'hi') {
+                    expect(every7, 'हर 7 दिन');
+                    expect(tryAgain, '30 सेकंड में पुन: प्रयास करें');
                   }
                   return const SizedBox();
                 },

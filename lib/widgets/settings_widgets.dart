@@ -49,7 +49,7 @@ class SettingsGroup extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Text(
-              description!,
+              description!.localized(context),
               style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
             ),
           ),
@@ -254,7 +254,7 @@ class SettingsRow extends StatelessWidget {
             if (status != null) ...[
               const SizedBox(width: 8),
               Text(
-                status!,
+                status!.localized(context),
                 style: TextStyle(
                   color: p.text2,
                   fontSize: hasSubtitle ? 14 : 15,
@@ -336,7 +336,7 @@ class SegmentedSetting extends StatelessWidget {
               ),
               if (status != null)
                 Text(
-                  status!,
+                  status!.localized(context),
                   style: TextStyle(
                     color: p.text2,
                     fontSize: 15,
@@ -376,7 +376,7 @@ class SegmentedSetting extends StatelessWidget {
                             : null,
                       ),
                       child: Text(
-                        e.value,
+                        e.value.localized(context),
                         style: TextStyle(
                           color: active ? p.text : p.text2,
                           fontSize: 13,
@@ -653,7 +653,7 @@ class ThemeChoice extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              label,
+              label.localized(context),
               style: TextStyle(
                 color: active ? p.text : p.text2,
                 fontSize: 12,
@@ -721,7 +721,7 @@ class AppIconChoice extends StatelessWidget {
           ),
           const SizedBox(height: 2), // Tight visual iOS spacing
           Text(
-            label,
+            label.localized(context),
             style: TextStyle(
               color: active ? p.text : p.text2,
               fontSize: 12,
@@ -905,7 +905,7 @@ class SettingsPageSubtitle extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: Text(
-        text,
+        text.localized(context),
         style: TextStyle(
           color: p.text2,
           fontSize: 15,
@@ -953,7 +953,7 @@ class SettingsPageDescription extends StatelessWidget {
           ],
           Expanded(
             child: Text(
-              text,
+              text.localized(context),
               style: TextStyle(
                 color: p.text3,
                 fontSize: 13,
@@ -1000,7 +1000,7 @@ class SettingsBetaNote extends StatelessWidget {
             letterSpacing: -0.05,
           ),
           children: [
-            TextSpan(text: '$text '),
+            TextSpan(text: '${text.localized(context)} '),
             TextSpan(
               text: 'Learn More'.localized(context),
               style: const TextStyle(
@@ -1164,7 +1164,7 @@ class SettingsAboutBlock extends StatelessWidget {
             TextSpan(
               style: TextStyle(color: p.text2, fontSize: 14, height: 1.5),
               children: [
-                const TextSpan(text: 'Built by '),
+                TextSpan(text: '${'Built by'.localized(context)} '),
                 TextSpan(
                   text: 'YABP',
                   style: TextStyle(
@@ -1176,9 +1176,9 @@ class SettingsAboutBlock extends StatelessWidget {
                   recognizer: TapGestureRecognizer()
                     ..onTap = () => onOpenLink(yabpSite),
                 ),
-                const TextSpan(
+                TextSpan(
                   text:
-                      ' as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.',
+                      ' ${'as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.'.localized(context)}',
                 ),
               ],
             ),
@@ -1203,7 +1203,7 @@ class SettingsAboutBlock extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Version $appVersion ($kAppBuildNumber)',
+            '${'Version'.localized(context)} $appVersion ($kAppBuildNumber)',
             style: TextStyle(
               color: p.text3.withValues(alpha: 0.5),
               fontSize: 10,
