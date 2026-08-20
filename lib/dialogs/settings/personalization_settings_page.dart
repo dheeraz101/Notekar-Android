@@ -161,6 +161,12 @@ class PersonalizationSettingsPage extends StatelessWidget {
               ),
           ],
         ),
+        SettingsPageDescription(
+          p: p,
+          text: 'Select your preferred language for the application.'.localized(
+            context,
+          ),
+        ),
         const SizedBox(height: spacing12),
         SettingsGroup(
           p: p,
@@ -178,12 +184,6 @@ class PersonalizationSettingsPage extends StatelessWidget {
                     showUpcomingLanguageNotice(context, p, lang.native),
               ),
           ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text: 'Select your preferred language for the application.'.localized(
-            context,
-          ),
         ),
         SettingsBetaNote(
           p: p,

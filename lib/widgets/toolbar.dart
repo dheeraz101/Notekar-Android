@@ -110,20 +110,30 @@ class Toolbar extends StatelessWidget {
               blur: blur,
               radius: 999,
               padding: EdgeInsets.symmetric(
-                horizontal: showHistoryText ? spacing24 : 16,
+                horizontal: showHistoryText ? spacing16 : 0,
               ),
               child: SizedBox(
+                width: showHistoryText ? null : (largeControls ? 56 : 48),
                 height: largeControls ? 56 : 48,
                 child: showHistoryText
                     ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          AnimatedHomeIcon(
-                            icon: CupertinoIcons.clock,
-                            color: p.text,
-                            size: 20,
-                            motionX: animateIcons ? motionX : 0,
-                            motionY: animateIcons ? motionY : 0,
+                          Container(
+                            width: largeControls ? 36 : 32,
+                            height: largeControls ? 36 : 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: p.surface3,
+                              shape: BoxShape.circle,
+                            ),
+                            child: AnimatedHomeIcon(
+                              icon: CupertinoIcons.clock,
+                              color: p.text,
+                              size: largeControls ? 20 : 18,
+                              motionX: animateIcons ? motionX : 0,
+                              motionY: animateIcons ? motionY : 0,
+                            ),
                           ),
                           const SizedBox(width: spacing8),
                           Text(
@@ -134,15 +144,25 @@ class Toolbar extends StatelessWidget {
                               fontSize: 15,
                             ),
                           ),
+                          const SizedBox(width: 4),
                         ],
                       )
                     : Center(
-                        child: AnimatedHomeIcon(
-                          icon: CupertinoIcons.clock,
-                          color: p.text,
-                          size: 21,
-                          motionX: animateIcons ? motionX : 0,
-                          motionY: animateIcons ? motionY : 0,
+                        child: Container(
+                          width: largeControls ? 36 : 32,
+                          height: largeControls ? 36 : 32,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: p.surface3,
+                            shape: BoxShape.circle,
+                          ),
+                          child: AnimatedHomeIcon(
+                            icon: CupertinoIcons.clock,
+                            color: p.text,
+                            size: largeControls ? 20 : 18,
+                            motionX: animateIcons ? motionX : 0,
+                            motionY: animateIcons ? motionY : 0,
+                          ),
                         ),
                       ),
               ),
@@ -340,7 +360,7 @@ class CircleToolButton extends StatelessWidget {
     required this.icon,
     required this.color,
     this.label,
-    this.size = 54,
+    this.size = 48,
     this.animation,
     this.motionX = 0,
     this.motionY = 0,
@@ -361,6 +381,8 @@ class CircleToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLarge = size >= 54;
+    final innerSize = isLarge ? 36.0 : 32.0;
     return PressableScale(
       onTap: onTap,
       child: Glass(
@@ -372,22 +394,42 @@ class CircleToolButton extends StatelessWidget {
           width: label == null ? size : size + 22,
           height: size,
           child: label == null
-              ? AnimatedHomeIcon(
-                  icon: icon,
-                  color: color,
-                  size: 23,
-                  motionX: motionX,
-                  motionY: motionY,
+              ? Center(
+                  child: Container(
+                    width: innerSize,
+                    height: innerSize,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: p.surface3,
+                      shape: BoxShape.circle,
+                    ),
+                    child: AnimatedHomeIcon(
+                      icon: icon,
+                      color: color,
+                      size: isLarge ? 20 : 18,
+                      motionX: motionX,
+                      motionY: motionY,
+                    ),
+                  ),
                 )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AnimatedHomeIcon(
-                      icon: icon,
-                      color: color,
-                      size: 21,
-                      motionX: motionX,
-                      motionY: motionY,
+                    Container(
+                      width: innerSize,
+                      height: innerSize,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        shape: BoxShape.circle,
+                      ),
+                      child: AnimatedHomeIcon(
+                        icon: icon,
+                        color: color,
+                        size: isLarge ? 20 : 18,
+                        motionX: motionX,
+                        motionY: motionY,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -432,37 +474,37 @@ class ModeToolButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final single = mode == 'single';
     final color = p.text;
+    final size = large ? 56.0 : 48.0;
+    final innerSize = large ? 36.0 : 32.0;
     return PressableScale(
       onTap: onTap,
       child: Glass(
         p: p,
         blur: blur,
         radius: 999,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.zero,
         child: SizedBox(
-          height: large ? 56 : 48,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: large ? 36 : 32,
-                height: large ? 36 : 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: p.surface3,
-                  shape: BoxShape.circle,
-                ),
-                child: AnimatedHomeIcon(
-                  icon: single
-                      ? CupertinoIcons.arrow_up
-                      : CupertinoIcons.arrow_up_arrow_down,
-                  color: color,
-                  size: large ? 20 : 18,
-                  motionX: motionX,
-                  motionY: motionY,
-                ),
+          width: size,
+          height: size,
+          child: Center(
+            child: Container(
+              width: innerSize,
+              height: innerSize,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: p.surface3,
+                shape: BoxShape.circle,
               ),
-            ],
+              child: AnimatedHomeIcon(
+                icon: single
+                    ? CupertinoIcons.arrow_up
+                    : CupertinoIcons.arrow_up_arrow_down,
+                color: color,
+                size: large ? 20 : 18,
+                motionX: motionX,
+                motionY: motionY,
+              ),
+            ),
           ),
         ),
       ),
