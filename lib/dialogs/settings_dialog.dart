@@ -33,6 +33,7 @@ import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/settings/time_reflection_settings_page.dart';
 import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
+import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -4610,6 +4611,17 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         'Mindful pause: Take 3 deep breaths and acknowledge this hour.',
                                   });
                                 } catch (_) {}
+                                await Future<void>.delayed(
+                                  const Duration(seconds: 3),
+                                );
+                                if (context.mounted) {
+                                  TimeReflectionSheet.show(
+                                    context,
+                                    p: p,
+                                    intervalMinutes:
+                                        _reflectionReminderIntervalMins,
+                                  );
+                                }
                               },
                             ),
                           ),

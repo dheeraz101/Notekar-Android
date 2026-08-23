@@ -4,6 +4,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class TimeReflectionSettingsPage extends StatelessWidget {
@@ -60,33 +61,23 @@ class TimeReflectionSettingsPage extends StatelessWidget {
       barrierColor: Colors.black.withValues(alpha: 0.5),
       isScrollControlled: true,
       builder: (ctx) {
-        return SafeArea(
-          child: Container(
-            margin: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: p.surface,
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: p.border.withValues(alpha: 0.5),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+        return Container(
+          decoration: BoxDecoration(
+            color: p.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(
+              color: p.border.withValues(alpha: 0.5),
+              width: 0.8,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: Glass(
-                p: p,
-                radius: 32,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 18,
-                ),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Glass(
+              p: p,
+              radius: 32,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: SafeArea(
+                top: false,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -94,15 +85,15 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                     // iOS Grab handle
                     Center(
                       child: Container(
-                        width: 40,
-                        height: 4.5,
+                        width: 44,
+                        height: 5,
                         decoration: BoxDecoration(
-                          color: p.text3.withValues(alpha: 0.4),
+                          color: p.text3.withValues(alpha: 0.35),
                           borderRadius: BorderRadius.circular(2.5),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -110,40 +101,34 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                           'Reminder Interval'.localized(context),
                           style: TextStyle(
                             color: p.text,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                        InkWell(
+                        PressableScale(
                           onTap: () => Navigator.pop(ctx),
-                          borderRadius: BorderRadius.circular(20),
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            width: 32,
+                            height: 32,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: p.surface2,
                             ),
                             child: Icon(
                               Icons.close_rounded,
-                              size: 16,
+                              size: 18,
                               color: p.text2,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     Container(
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         color: p.surface2,
                         borderRadius: BorderRadius.circular(24),
-                        border: p.name == 'amoled'
-                            ? Border.all(
-                                color: p.border.withValues(alpha: 0.5),
-                                width: 0.8,
-                              )
-                            : null,
                       ),
                       child: Column(
                         children: [
@@ -155,36 +140,30 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 14,
+                                  horizontal: 18,
+                                  vertical: 15,
                                 ),
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _fullIntervalLabel(
-                                              context,
-                                              intervals[i],
-                                            ),
-                                            style: TextStyle(
-                                              color:
-                                                  intervals[i] ==
-                                                      reflectionReminderIntervalMins
-                                                  ? p.accent
-                                                  : p.text,
-                                              fontSize: 15,
-                                              fontWeight:
-                                                  intervals[i] ==
-                                                      reflectionReminderIntervalMins
-                                                  ? FontWeight.w600
-                                                  : FontWeight.w400,
-                                            ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        _fullIntervalLabel(
+                                          context,
+                                          intervals[i],
+                                        ),
+                                        style: TextStyle(
+                                          color:
+                                              intervals[i] ==
+                                                  reflectionReminderIntervalMins
+                                              ? p.accent
+                                              : p.text,
+                                          fontSize: 15,
+                                          fontWeight:
+                                              intervals[i] ==
+                                                  reflectionReminderIntervalMins
+                                              ? FontWeight.w700
+                                              : FontWeight.w400,
+                                        ),
                                       ),
                                     ),
                                     if (intervals[i] ==
@@ -203,13 +182,12 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                                 height: 0.5,
                                 thickness: 0.5,
                                 color: p.border,
-                                indent: 16,
+                                indent: 18,
                               ),
                           ],
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -360,7 +338,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
               ),
               SettingsRow(
                 p: p,
-                title: 'Test Full-Screen Alarm Alert'.localized(context),
+                title: 'Test Alert'.localized(context),
                 status: 'Test (3s)'.localized(context),
                 color: p.accent,
                 onTap: onPreviewReflectionSheet,
