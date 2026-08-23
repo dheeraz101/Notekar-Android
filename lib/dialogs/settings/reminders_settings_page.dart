@@ -323,22 +323,21 @@ class RemindersSettingsPage extends StatelessWidget {
         // Dedicated Time Reflection Category Entry
         SettingsGroup(
           p: p,
-          title: 'Time Reflection & Mindfulness'
-              .localized(context)
-              .toUpperCase(),
+          title: 'Mindfulness'.localized(context).toUpperCase(),
           children: [
             SettingsRow(
               p: p,
-              title: 'Time Reflection & Hourly Mindfulness'.localized(context),
+              icon: Icons.self_improvement_rounded,
+              title: 'Mindfulness'.localized(context),
               status: reflectionReminderEnabled
-                  ? '${'Active'.localized(context)} · ${switch (reflectionReminderIntervalMins) {
-                      15 => 'Every 15 Minutes',
-                      30 => 'Every 30 Minutes',
-                      45 => 'Every 45 Minutes',
-                      60 => 'Every 1 Hour',
-                      120 => 'Every 2 Hours',
-                      _ => 'Every $reflectionReminderIntervalMins Minutes',
-                    }.localized(context)}'
+                  ? switch (reflectionReminderIntervalMins) {
+                      15 => '15 Mins',
+                      30 => '30 Mins',
+                      45 => '45 Mins',
+                      60 => '1 Hour',
+                      120 => '2 Hours',
+                      _ => '$reflectionReminderIntervalMins Mins',
+                    }.localized(context)
                   : 'Disabled'.localized(context),
               color: p.accent,
               onTap: onOpenTimeReflection,

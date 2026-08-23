@@ -132,7 +132,6 @@ void main() {
                   onToggleReflectionReminder: (_) {},
                   onTapReflectionInterval: (_) {},
                   onToggleReflectionSound: (_) {},
-                  onTestReflectionAlert: () {},
                   onPreviewReflectionSheet: () {},
                 ),
               ),
@@ -141,10 +140,10 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('Time Reflection & Mindfulness'), findsWidgets);
+        expect(find.text('Mindfulness'), findsWidgets);
         expect(find.text('Enable Time Reflection'), findsOneWidget);
-        expect(find.text('Why Time Reflection?'), findsOneWidget);
-        expect(find.text('How to Use It Effectively'), findsOneWidget);
+        expect(find.text('WHY TIME REFLECTION?'), findsOneWidget);
+        expect(find.text('HOW TO USE IT EFFECTIVELY'), findsOneWidget);
         expect(find.text('Take Three Deep Breaths'), findsOneWidget);
         expect(find.text('Acknowledge the Elapsed Hour'), findsOneWidget);
         expect(find.text('Set One Focus For Next Hour'), findsOneWidget);

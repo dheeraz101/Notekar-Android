@@ -4583,30 +4583,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   value,
                                 );
                               },
-                              onTestReflectionAlert: () async {
-                                HapticFeedback.heavyImpact();
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Test alert in 3s: Lock your phone to test full-screen alarm!'
-                                          .localized(context),
-                                    ),
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
-                                await Future<void>.delayed(
-                                  const Duration(seconds: 3),
-                                );
-                                if (context.mounted) {
-                                  TimeReflectionSheet.show(
-                                    context,
-                                    p: p,
-                                    intervalMinutes:
-                                        _reflectionReminderIntervalMins,
-                                  );
-                                }
-                              },
                               onPreviewReflectionSheet: () {
                                 TimeReflectionSheet.show(
                                   context,
