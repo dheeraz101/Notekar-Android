@@ -2,18 +2,87 @@ import os
 import re
 import json
 
+def to_camel_case(s):
+    # Strip leading/trailing symbols
+    s = s.strip()
+    
+    # Replace special symbols with words if meaningful
+    replacements = [
+        ('%', 'Percent'),
+        ('&', 'And'),
+        ('+', 'Plus'),
+        ('/', 'Slash'),
+        ('@', 'At'),
+        ('#', 'Hash'),
+        ('*', ''),
+        ('?', ''),
+        ('!', ''),
+        (':', ''),
+        (';', ''),
+        ('"', ''),
+        ("'", ''),
+        ('‘', ''),
+        ('’', ''),
+        ('“', ''),
+        ('”', ''),
+        ('(', ''),
+        (')', ''),
+        ('[', ''),
+        (']', ''),
+        ('{', ''),
+        ('}', ''),
+        ('.', ' '),
+        ('-', ' '),
+        ('_', ' '),
+        (',', ' '),
+        ('<', ' '),
+        ('>', ' '),
+        ('=', ' '),
+    ]
+    for orig, rep in replacements:
+        s = s.replace(orig, rep)
+    
+    # Split into alphanumeric words
+    words = re.findall(r'[a-zA-Z0-9]+', s)
+    if not words:
+        return "customKey"
+    
+    # Capitalize words after the first
+    first = words[0].lower()
+    if first and first[0].isdigit():
+        first = 'n' + first
+    
+    rest = [w.capitalize() for w in words[1:]]
+    camel = first + ''.join(rest)
+    
+    # Final check: must match ^[a-z][a-zA-Z0-9]*$
+    if not re.match(r'^[a-z][a-zA-Z0-9]*$', camel):
+        camel = 'k' + camel
+
+    dart_keywords = {
+        'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch', 'class', 'const',
+        'continue', 'covariant', 'default', 'deferred', 'do', 'dynamic', 'else', 'enum', 'export',
+        'extends', 'extension', 'external', 'factory', 'false', 'final', 'finally', 'for', 'function',
+        'get', 'hide', 'if', 'implements', 'import', 'in', 'interface', 'is', 'late', 'library',
+        'mixin', 'new', 'null', 'of', 'on', 'operator', 'part', 'required', 'rethrow', 'return',
+        'set', 'show', 'static', 'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef',
+        'var', 'void', 'while', 'with', 'yield', 'int', 'double', 'num', 'bool', 'string'
+    }
+    if camel.lower() in dart_keywords:
+        camel = 'action' + camel.capitalize()
+
+    return camel
+
 def parse_dart_map(map_body):
     """Accurately parse a Dart Map<String, String> body handling escaped quotes."""
     entries = {}
     i = 0
     n = len(map_body)
     while i < n:
-        # Skip whitespace and commas
         while i < n and map_body[i] in ' \t\r\n,':
             i += 1
         if i >= n:
             break
-        # Read key string
         quote_char = map_body[i]
         if quote_char not in ("'", '"'):
             if map_body[i:i+2] == '//':
@@ -48,7 +117,6 @@ def parse_dart_map(map_body):
                 i += 1
         key = "".join(key_chars)
 
-        # Look for colon ':'
         while i < n and map_body[i] in ' \t\r\n':
             i += 1
         if i < n and map_body[i] == ':':
@@ -56,7 +124,6 @@ def parse_dart_map(map_body):
         else:
             continue
 
-        # Look for value start
         while i < n and map_body[i] in ' \t\r\n':
             i += 1
         if i >= n:
@@ -94,7 +161,6 @@ def parse_dart_map(map_body):
 
 def parse_switch_cases(content):
     """Parse switch cases for es, hi, fr, de, ja, ru."""
-    # Find each case 'some key' => switch (l10n.localeName) { ... }
     pattern = r"['\"]([^'\"]+)['\"]\s*=>\s*switch\s*\([^\)]+\)\s*\{([^}]+)\}"
     matches = re.findall(pattern, content)
     cases = {}
@@ -102,11 +168,9 @@ def parse_switch_cases(content):
         norm_key = key.strip().lower()
         cases[norm_key] = {}
         for lang in ['fr', 'es', 'hi', 'de', 'ja', 'ru']:
-            # match 'lang' => 'val'
             m = re.search(rf"'{lang}'\s*=>\s*(?:'((?:[^'\\]|\\.)*)'|\"((?:[^\"\\]|\\.)*)\")", block)
             if m:
                 raw_val = m.group(1) if m.group(1) is not None else m.group(2)
-                # Unescape Dart string
                 val = raw_val.replace("\\'", "'").replace('\\"', '"').replace('\\n', '\n').replace('\\$', '$')
                 cases[norm_key][lang] = val
     return cases
@@ -121,6 +185,7 @@ def main():
 
     languages = ['en', 'fr', 'es', 'hi', 'de', 'ja', 'ru']
     translations = {lang: {} for lang in languages}
+    en_originals = {}
 
     # 1. Parse Maps
     for lang in ['fr', 'de', 'ja', 'ru']:
@@ -131,6 +196,7 @@ def main():
             for k in parsed:
                 if k not in translations['en']:
                     translations['en'][k] = k
+                    en_originals[k] = k
             print(f"Loaded {len(parsed)} keys from _{lang}Translations")
 
     # 2. Parse Switch Cases
@@ -139,27 +205,83 @@ def main():
     for norm_key, lang_vals in switch_cases.items():
         if norm_key not in translations['en']:
             translations['en'][norm_key] = norm_key
+            en_originals[norm_key] = norm_key
         for lang, val in lang_vals.items():
             translations[lang][norm_key] = val
 
-    all_keys = sorted(list(translations['en'].keys()))
-    print(f"Total unified keys: {len(all_keys)}")
-    for lang in languages:
-        print(f"Language '{lang}': {len(translations[lang])} translations")
+    # Convert all norm_keys to valid unique camelCase identifiers for ARB
+    key_to_camel = {}
+    used_camels = set()
+    
+    # Priority for existing standard ARB keys
+    priority_keys = {
+        'notekar': 'appTitle',
+        'settings': 'settingsTitle',
+        'history': 'historyTitle',
+        'what\'s new': 'whatsNewTitle',
+        'changelog': 'changelogTitle',
+        'display': 'displayCategory',
+        'accent color': 'accentColorCategory',
+        'app icons': 'appIconsCategory',
+        'capture': 'captureCategory',
+        'moments': 'momentsCategory',
+        'backup & export': 'backupExportCategory',
+        'privacy & security': 'privacySecurityCategory',
+        'accessibility': 'accessibilityCategory',
+        'reset': 'resetCategory',
+        'diagnostics': 'diagnosticsCategory',
+        'load older moments': 'loadOlderMoments',
+        'no results found': 'noResultsFound',
+        'clear search': 'clearSearch',
+        'cancel': 'cancel',
+        'save': 'save',
+        'confirm': 'confirm',
+        'delete': 'delete',
+        'currency symbol': 'currencySymbol',
+        'currency code': 'currencyCode',
+    }
 
-    # Write out ARB files
+    for norm_key in sorted(translations['en'].keys()):
+        if norm_key in priority_keys:
+            camel = priority_keys[norm_key]
+        else:
+            base_camel = to_camel_case(norm_key)
+            camel = base_camel
+            counter = 2
+            while camel in used_camels:
+                camel = f"{base_camel}{counter}"
+                counter += 1
+        used_camels.add(camel)
+        key_to_camel[norm_key] = camel
+
+    print(f"\nGenerated {len(key_to_camel)} unique camelCase ARB keys")
+
+    # Write out ARB files with camelCase keys
     for lang in languages:
         arb_path = os.path.join(l10n_dir, f"app_{lang}.arb")
         arb_dict = {"@@locale": lang}
-        for k in all_keys:
-            val = translations[lang].get(k, translations['en'].get(k, k))
-            arb_dict[k] = val
+        for norm_k, camel in key_to_camel.items():
+            val = translations[lang].get(norm_k, translations['en'].get(norm_k, norm_k))
+            arb_dict[camel] = val
+
+        currencies = {
+            'en': ('$', 'USD'),
+            'hi': ('₹', 'INR'),
+            'ja': ('¥', 'JPY'),
+            'ru': ('₽', 'RUB'),
+            'fr': ('€', 'EUR'),
+            'de': ('€', 'EUR'),
+            'es': ('€', 'EUR'),
+        }
+        sym, code_val = currencies.get(lang, ('$', 'USD'))
+        arb_dict['currencySymbol'] = sym
+        arb_dict['currencyCode'] = code_val
 
         with open(arb_path, "w", encoding="utf-8") as f:
             json.dump(arb_dict, f, ensure_ascii=False, indent=2)
         print(f"Wrote {arb_path} ({len(arb_dict) - 1} keys)")
 
-    # Generate lib/l10n/l10n_data.dart
+    # Generate lib/l10n/l10n_data.dart with normalized lowercase English keys
     l10n_data_path = os.path.join(l10n_dir, "l10n_data.dart")
     with open(l10n_data_path, "w", encoding="utf-8") as f:
         f.write("// Generated localization dictionary compiled from lib/l10n/*.arb files.\n")
@@ -167,16 +289,16 @@ def main():
         f.write("const Map<String, Map<String, String>> kL10nTranslations = {\n")
         for lang in ['fr', 'es', 'hi', 'de', 'ja', 'ru']:
             f.write(f"  '{lang}': {{\n")
-            for k in all_keys:
-                if k in translations[lang]:
-                    val = translations[lang][k].replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("$", "\\$")
-                    escaped_k = k.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("$", "\\$")
+            for norm_k in sorted(translations['en'].keys()):
+                if norm_k in translations[lang]:
+                    val = translations[lang][norm_k].replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("$", "\\$")
+                    escaped_k = norm_k.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("$", "\\$")
                     f.write(f"    '{escaped_k}': '{val}',\n")
             f.write("  },\n")
         f.write("};\n")
     print(f"Wrote {l10n_data_path}")
 
-    # Generate slim lib/utils/l10n_utils.dart (~95 lines)
+    # Generate slim lib/utils/l10n_utils.dart
     slim_l10n_utils = """import 'package:flutter/material.dart';
 import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/l10n/l10n_data.dart';
