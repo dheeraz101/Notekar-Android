@@ -150,6 +150,542 @@ extension LocalizedString on String {
     }
 
     return switch (normKey) {
+      'time reflection & mindfulness' => switch (l10n.localeName) {
+        'fr' => 'Réflexion temporelle et pleine conscience',
+        'es' => 'Reflexión del tiempo y atención plena',
+        'hi' => 'समय चिंतन और माइंडफुलनेस',
+        'de' => 'Zeitreflexion & Achtsamkeit',
+        'ja' => '時間の振り返りとマインドフルネス',
+        'ru' => 'Размышление о времени и осознанность',
+        _ => this,
+      },
+      'hourly mindfulness' => switch (l10n.localeName) {
+        'fr' => 'Pleine conscience horaire',
+        'es' => 'Atención plena horaria',
+        'hi' => 'प्रति घंटा माइंडफुलनेस',
+        'de' => 'Stündliche Achtsamkeit',
+        'ja' => '毎時のマインドフルネス',
+        'ru' => 'Ежечасная осознанность',
+        _ => this,
+      },
+      'enable time reflection' => switch (l10n.localeName) {
+        'fr' => 'Activer la réflexion temporelle',
+        'es' => 'Activar reflexión del tiempo',
+        'hi' => 'समय चिंतन सक्षम करें',
+        'de' => 'Zeitreflexion aktivieren',
+        'ja' => '時間の振り返りを有効にする',
+        'ru' => 'Включить размышление о времени',
+        _ => this,
+      },
+      'reminder interval' => switch (l10n.localeName) {
+        'fr' => 'Intervalle de rappel',
+        'es' => 'Intervalo de recordatorio',
+        'hi' => 'रिमाइंडर अंतराल',
+        'de' => 'Erinnerungsintervall',
+        'ja' => 'リマインダーの間隔',
+        'ru' => 'Интервал напоминания',
+        _ => this,
+      },
+      'test full-screen alarm alert' => switch (l10n.localeName) {
+        'fr' => "Tester l'alerte d'alarme plein écran",
+        'es' => 'Probar alerta de alarma en pantalla completa',
+        'hi' => 'पूर्ण-स्क्रीन अलार्म चेतावनी का परीक्षण करें',
+        'de' => 'Vollbild-Alarmton testen',
+        'ja' => '全画面アラーム通知をテスト',
+        'ru' => 'Проверить полноэкранный будильник',
+        _ => this,
+      },
+      'test now' => switch (l10n.localeName) {
+        'fr' => 'Tester maintenant',
+        'es' => 'Probar ahora',
+        'hi' => 'अभी परीक्षण करें',
+        'de' => 'Jetzt testen',
+        'ja' => '今すぐテスト',
+        'ru' => 'Проверить сейчас',
+        _ => this,
+      },
+      'configuration' => switch (l10n.localeName) {
+        'fr' => 'Configuration',
+        'es' => 'Configuración',
+        'hi' => 'कॉन्फ़िगरेशन',
+        'de' => 'Konfiguration',
+        'ja' => '設定',
+        'ru' => 'Конфигурация',
+        _ => this,
+      },
+      'preview in-app sheet' => switch (l10n.localeName) {
+        'fr' => 'Aperçu de la feuille intégrée',
+        'es' => 'Vista previa en la aplicación',
+        'hi' => 'ऐप-में शीट का पूर्वावलोकन',
+        'de' => 'In-App-Ansicht Vorschau',
+        'ja' => 'アプリ内シートのプレビュー',
+        'ru' => 'Предпросмотр в приложении',
+        _ => this,
+      },
+      'why time reflection?' => switch (l10n.localeName) {
+        'fr' => 'Pourquoi la réflexion temporelle ?',
+        'es' => '¿Por qué la reflexión del tiempo?',
+        'hi' => 'समय चिंतन क्यों?',
+        'de' => 'Warum Zeitreflexion?',
+        'ja' => 'なぜ時間の振り返りなのか？',
+        'ru' => 'Зачем нужно размышление о времени?',
+        _ => this,
+      },
+      'how to use it effectively' => switch (l10n.localeName) {
+        'fr' => "Comment l'utiliser efficacement",
+        'es' => 'Cómo usarlo eficazmente',
+        'hi' => 'इसे प्रभावी ढंग से कैसे उपयोग करें',
+        'de' => 'So nutzt du es effektiv',
+        'ja' => '効果的な活用法',
+        'ru' => 'Как использовать эффективно',
+        _ => this,
+      },
+      'take three deep breaths' => switch (l10n.localeName) {
+        'fr' => 'Prenez trois respirations profondes',
+        'es' => 'Toma tres respiraciones profundas',
+        'hi' => 'तीन गहरी सांसें लें',
+        'de' => 'Nimm drei tiefe Atemzüge',
+        'ja' => '3回深呼吸をする',
+        'ru' => 'Сделайте три глубоких вдоха',
+        _ => this,
+      },
+      'acknowledge the elapsed hour' => switch (l10n.localeName) {
+        'fr' => "Prenez conscience de l'heure écoulée",
+        'es' => 'Reconoce la hora transcurrida',
+        'hi' => 'बीते घंटे को स्वीकारें',
+        'de' => 'Vergangene Stunde anerkennen',
+        'ja' => '経過した1時間を振り返る',
+        'ru' => 'Осознайте прошедший час',
+        _ => this,
+      },
+      'set one focus for next hour' => switch (l10n.localeName) {
+        'fr' => "Fixez une priorité pour l'heure suivante",
+        'es' => 'Establece un enfoque para la próxima hora',
+        'hi' => 'अगले घंटे के लिए एक लक्ष्य तय करें',
+        'de' => 'Einen Fokus für die nächste Stunde setzen',
+        'ja' => '次の1時間の目標を1つ決める',
+        'ru' => 'Определите один фокус на следующий час',
+        _ => this,
+      },
+      'log a quick moment' => switch (l10n.localeName) {
+        'fr' => 'Enregistrer un moment rapide',
+        'es' => 'Registrar un momento rápido',
+        'hi' => 'एक त्वरित क्षण दर्ज करें',
+        'de' => 'Einen kurzen Moment erfassen',
+        'ja' => '簡単なモーメントを記録',
+        'ru' => 'Быстро записать момент',
+        _ => this,
+      },
+      'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Un rappel conscient plein écran qui transforme votre téléphone en point d'ancrage d'attention tout au long de la journée.",
+          'es' =>
+            'Un recordatorio consciente en pantalla completa que convierte tu teléfono en un ancla de atención durante el día.',
+          'hi' =>
+            'एक पूर्ण-स्क्रीन माइंडफुल रिमाइंडर जो आपके फ़ोन को दिन भर सचेत रहने का एक आधार बना देता है।',
+          'de' =>
+            'Eine achtsame Vollbild-Erinnerung, die dein Smartphone über den Tag in einen Anker für Aufmerksamkeit verwandelt.',
+          'ja' => 'スマホを日常の意識のアンカーへと変える、全画面のマインドフル・リマインダー。',
+          'ru' =>
+            'Полноэкранное напоминание, превращающее телефон в якорь осознанности в течение дня.',
+          _ => this,
+        },
+      'when active, your phone will wake up with a soothing alarm tone and present a full-screen reflection prompt at your chosen frequency even if the screen is locked.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Lorsqu'il est actif, votre téléphone s'allume avec une tonalité apaisante et affiche une invite plein écran à la fréquence choisie, même verrouillé.",
+          'es' =>
+            'Cuando está activo, tu teléfono se encenderá con un tono relajante y mostrará un aviso en pantalla completa con la frecuencia elegida, incluso bloqueado.',
+          'hi' =>
+            'सक्रिय होने पर, आपका फ़ोन एक शांत अलार्म टोन के साथ जागेगा और स्क्रीन लॉक होने पर भी चुनी गई आवृत्ति पर पूर्ण-स्क्रीन संकेत प्रस्तुत करेगा।',
+          'de' =>
+            'Wenn aktiv, weckt dein Telefon den Bildschirm mit einem sanften Alarmton und zeigt eine Vollbild-Reflexion auch bei Sperrbildschirm.',
+          'ja' => '有効にすると、画面がロックされていても、心地よいアラーム音とともに指定の間隔で全画面の振り返りが表示されます。',
+          'ru' =>
+            'При включении телефон будет просыпаться с мягким сигналом и показывать полноэкранное напоминание даже на заблокированном экране.',
+          _ => this,
+        },
+      'our phones are with us every single hour of the day. in the rush of daily life, hours frequently disappear into reactive multitasking and endless scrolling.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Nos téléphones nous accompagnent à chaque heure de la journée. Dans la course quotidienne, les heures disparaissent souvent dans le multitâche et le défilement infini.",
+          'es' =>
+            'Nuestros teléfonos están con nosotros a cada hora del día. En la prisa cotidiana, las horas suelen desvanecerse en la multitarea reactiva y el desplazamiento infinito.',
+          'hi' =>
+            'फ़ोन दिन के हर घंटे हमारे साथ रहता है। भागदौड़ भरी ज़िंदगी में, कई घंटे अंतहीन स्क्रॉलिंग और काम के दबाव में यूँ ही बीत जाते हैं।',
+          'de' =>
+            'Unsere Smartphones begleiten uns jede Stunde. In der Hektik des Alltags verfliegen Stunden oft unbemerkt durch Multitasking und endloses Scrollen.',
+          'ja' =>
+            'スマホは毎日常に手元にあります。忙しい日常の中で、時間は無意識のスクロールやタスクに追われてあっという間に過ぎ去ってしまいます。',
+          'ru' =>
+            'Наши телефоны с нами каждый час. В суете дня время часто бесследно растворяется в бесконечном скроллинге и реактивных делах.',
+          _ => this,
+        },
+      'time reflection interrupts autopilot living. an hourly chime transforms your phone from a source of distraction into a mindful ally, helping you feel the passage of time and regain conscious control of your day.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "La réflexion temporelle interrompt le pilotage automatique. Un carillon horaire transforme votre téléphone en allié conscient, vous aidant à ressentir le passage du temps et à reprendre le contrôle de votre journée.",
+          'es' =>
+            'La reflexión del tiempo interrumpe el piloto automático. Un timbre cada hora convierte tu teléfono en un aliado consciente, ayudándote a sentir el paso del tiempo y recuperar el control de tu día.',
+          'hi' =>
+            'समय चिंतन हमारे स्वचालित जीवन को रोकता है। हर घंटे बजने वाली झंकार आपके फ़ोन को भटकाव के बजाय एक मददगार साथी बनाती है, जिससे आप समय का अहसास कर अपने दिन का नियंत्रण वापस पा सकते हैं।',
+          'de' =>
+            'Zeitreflexion unterbricht den Autopiloten. Ein stündlicher Signalton macht dein Smartphone vom Ablenkungsfaktor zum achtsamen Begleiter für mehr Zeitkontrolle.',
+          'ja' =>
+            '時間の振り返りはオートパイロット状態を断ち切ります。毎時のチャイムにより、スマホが気晴らしの元からマインドフルな味方へと変わり、時間の流れを実感できます。',
+          'ru' =>
+            'Размышление о времени останавливает автопилот. Ежечасный сигнал превращает телефон из источника отвлечения в союзника, возвращая контроль над днем.',
+          _ => this,
+        },
+      'when the alert wakes your screen, pause whatever you are doing. inhale deeply, exhale slowly, and ground yourself in the present moment.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Lorsque l'alerte allume votre écran, arrêtez votre activité. Inspirez profondément, expirez lentement et ancrez-vous dans l'instant présent.",
+          'es' =>
+            'Cuando la alerta active tu pantalla, pausa lo que estés haciendo. Inhala profundamente, exhala despacio y concéntrate en el presente.',
+          'hi' =>
+            'जब चेतावनी आपकी स्क्रीन को जगाए, जो भी कर रहे हैं उसे रोकें। गहरी सांस लें, धीरे-धीरे छोड़ें, और वर्तमान क्षण में स्थिर हों।',
+          'de' =>
+            'Wenn der Alarm den Bildschirm einschaltet, halte kurz inne. Atme tief ein, langsam aus und verbinde dich mit dem gegenwärtigen Moment.',
+          'ja' => '画面が点灯したら作業を一旦止めます。深く吸ってゆっくり吐き、今この瞬間に意識を集中させましょう。',
+          'ru' =>
+            'Когда экран включится, отложите дела. Сделайте глубокий вдох, медленный выдох и вернитесь в настоящий момент.',
+          _ => this,
+        },
+      'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Revisitez les 60 dernières minutes avec bienveillance. Avez-vous agi avec intention ou le temps a-t-il filé ? La prise de conscience est la première étape vers la liberté.",
+          'es' =>
+            'Mira hacia atrás a los últimos 60 minutos con amabilidad. ¿Los viviste con intención o el tiempo se esfumó? La conciencia es el primer paso.',
+          'hi' =>
+            'पिछले 60 मिनट को बिना किसी पछतावे के देखें। क्या आपने समय का सही उपयोग किया, या वह बीत गया? जागरूकता ही स्वतंत्रता का पहला कदम है।',
+          'de' =>
+            'Blicke voller Güte auf die letzten 60 Minuten zurück. Hast du sie bewusst genutzt oder verging die Zeit? Bewusstsein ist der erste Schritt.',
+          'ja' => '直前の60分を優しく振り返りましょう。意図を持って過ごせましたか？ 気づきこそが時間の主導権を握る第一歩です。',
+          'ru' =>
+            'Оглянитесь на прошедшие 60 минут без самокритики. Провели ли вы их осознанно? Осознание — первый шаг к контролю времени.',
+          _ => this,
+        },
+      'choose a single primary intention for the upcoming hour before continuing your tasks.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Choisissez une intention principale claire pour l'heure à venir avant de reprendre vos activités.",
+          'es' =>
+            'Elige una intención principal para la próxima hora antes de continuar con tus actividades.',
+          'hi' =>
+            'अपने काम जारी रखने से पहले आने वाले घंटे के लिए एक मुख्य उद्देश्य चुनें।',
+          'de' =>
+            'Wähle ein klares Ziel für die nächste Stunde, bevor du mit deinen Aufgaben fortfährst.',
+          'ja' => '作業を再開する前に、次の1時間で注力する最優先事項を1つ決めましょう。',
+          'ru' =>
+            'Выберите одну главную цель на следующий час, прежде чем вернуться к делам.',
+          _ => this,
+        },
+      'tap "log current moment" to capture an insight, gratitude, or achievement directly into notekar.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Appuyez sur « Enregistrer le moment actuel » pour noter une idée, une gratitude ou une réussite directement dans NoteKar.",
+          'es' =>
+            'Toca "Registrar momento actual" para guardar una idea, gratitud o logro directamente en NoteKar.',
+          'hi' =>
+            'कोई विचार, आभार या उपलब्धि सीधे NoteKar में दर्ज करने के लिए "वर्तमान क्षण दर्ज करें" पर टैप करें।',
+          'de' =>
+            'Tippe auf „Aktuellen Moment protokollieren“, um eine Erkenntnis oder Dankbarkeit direkt in NoteKar zu speichern.',
+          'ja' => '「今の瞬間を記録」をタップして、ひらめきや感謝、成果をNoteKarに書き留めましょう。',
+          'ru' =>
+            'Нажмите «Записать текущий момент», чтобы сохранить мысль, благодарность или достижение в NoteKar.',
+          _ => this,
+        },
+      'test alert in 3s: lock your phone to test full-screen alarm!' => switch (l10n
+          .localeName) {
+        'fr' =>
+          "Alerte de test dans 3s : verrouillez votre téléphone pour tester l'alarme plein écran !",
+        'es' =>
+          'Alerta de prueba en 3s: ¡bloquea tu teléfono para probar la alarma en pantalla completa!',
+        'hi' =>
+          '3 सेकंड में परीक्षण चेतावनी: पूर्ण-स्क्रीन अलार्म का परीक्षण करने के लिए अपना फ़ोन लॉक करें!',
+        'de' =>
+          'Test-Alarm in 3s: Sperre dein Telefon, um den Vollbild-Alarm zu testen!',
+        'ja' => '3秒後にテスト通知: 画面をロックして全画面アラームをテストしてください！',
+        'ru' =>
+          'Тестовый сигнал через 3с: заблокируйте телефон для проверки полноэкранного будильника!',
+        _ => this,
+      },
+      'priority release' => switch (l10n.localeName) {
+        'fr' => 'Version prioritaire',
+        'es' => 'Lanzamiento prioritario',
+        'hi' => 'प्राथमिकता रिलीज़',
+        'de' => 'Prioritäts-Release',
+        'ja' => '優先リリース',
+        'ru' => 'Приоритетный релиз',
+        _ => this,
+      },
+      'priority build' => switch (l10n.localeName) {
+        'fr' => 'Version prioritaire',
+        'es' => 'Compilación prioritaria',
+        'hi' => 'प्राथमिकता बिल्ड',
+        'de' => 'Prioritäts-Build',
+        'ja' => '優先ビルド',
+        'ru' => 'Приоритетная сборка',
+        _ => this,
+      },
+      'time reflection' => switch (l10n.localeName) {
+        'fr' => 'Réflexion temporelle',
+        'es' => 'Reflexión del tiempo',
+        'hi' => 'समय चिंतन',
+        'de' => 'Zeitreflexion',
+        'ja' => '時間の振り返り',
+        'ru' => 'Размышление о времени',
+        _ => this,
+      },
+      'time reflection reminder' => switch (l10n.localeName) {
+        'fr' => 'Rappel de réflexion temporelle',
+        'es' => 'Recordatorio de reflexión del tiempo',
+        'hi' => 'समय चिंतन रिमाइंडर',
+        'de' => 'Zeitreflexions-Erinnerung',
+        'ja' => '時間の振り返りリマインダー',
+        'ru' => 'Напоминание о времени',
+        _ => this,
+      },
+      'time reflection & hourly mindfulness' => switch (l10n.localeName) {
+        'fr' => 'Réflexion temporelle et pleine conscience horaire',
+        'es' => 'Reflexión del tiempo y atención plena horaria',
+        'hi' => 'समय चिंतन और प्रति घंटा माइंडफुलनेस',
+        'de' => 'Zeitreflexion & stündliche Achtsamkeit',
+        'ja' => '時間の振り返りと毎時のマインドフルネス',
+        'ru' => 'Размышление о времени и ежечасная осознанность',
+        _ => this,
+      },
+      'time reflection interval' => switch (l10n.localeName) {
+        'fr' => 'Intervalle de réflexion temporelle',
+        'es' => 'Intervalo de reflexión del tiempo',
+        'hi' => 'समय चिंतन अंतराल',
+        'de' => 'Zeitreflexions-Intervall',
+        'ja' => '振り返りの間隔',
+        'ru' => 'Интервал размышления',
+        _ => this,
+      },
+      'frequency interval' => switch (l10n.localeName) {
+        'fr' => 'Intervalle de fréquence',
+        'es' => 'Intervalo de frecuencia',
+        'hi' => 'आवृत्ति अंतराल',
+        'de' => 'Häufigkeitsintervall',
+        'ja' => '頻度間隔',
+        'ru' => 'Интервал частоты',
+        _ => this,
+      },
+      'open' => switch (l10n.localeName) {
+        'fr' => 'Ouvrir',
+        'es' => 'Abrir',
+        'hi' => 'खोलें',
+        'de' => 'Öffnen',
+        'ja' => '開く',
+        'ru' => 'Открыть',
+        _ => this,
+      },
+      'sound & chime alert' => switch (l10n.localeName) {
+        'fr' => 'Alerte sonore et carillon',
+        'es' => 'Alerta de sonido y timbre',
+        'hi' => 'ध्वनि और झंकार चेतावनी',
+        'de' => 'Ton- & Signalton-Alarm',
+        'ja' => 'サウンド＆チャイム通知',
+        'ru' => 'Звуковой сигнал и перезвон',
+        _ => this,
+      },
+      'preview full-screen alert' => switch (l10n.localeName) {
+        'fr' => "Aperçu de l'alerte plein écran",
+        'es' => 'Vista previa de alerta en pantalla completa',
+        'hi' => 'पूर्ण-स्क्रीन चेतावनी का पूर्वावलोकन',
+        'de' => 'Vorschau des Vollbild-Alarms',
+        'ja' => '全画面通知のプレビュー',
+        'ru' => 'Предпросмотр полноэкранного экрана',
+        _ => this,
+      },
+      'take a mindful breath' => switch (l10n.localeName) {
+        'fr' => 'Prenez une respiration consciente',
+        'es' => 'Toma una respiración consciente',
+        'hi' => 'एक सचेत सांस लें',
+        'de' => 'Nimm einen achtsamen Atemzug',
+        'ja' => 'マインドフルな深呼吸を',
+        'ru' => 'Сделайте осознанный вдох',
+        _ => this,
+      },
+      'log current moment' => switch (l10n.localeName) {
+        'fr' => 'Enregistrer le moment actuel',
+        'es' => 'Registrar momento actual',
+        'hi' => 'वर्तमान क्षण दर्ज करें',
+        'de' => 'Aktuellen Moment protokollieren',
+        'ja' => '今の瞬間を記録',
+        'ru' => 'Записать текущий момент',
+        _ => this,
+      },
+      'continue mindfully' => switch (l10n.localeName) {
+        'fr' => 'Continuer en pleine conscience',
+        'es' => 'Continuar conscientemente',
+        'hi' => 'सचेत होकर जारी रखें',
+        'de' => 'Achtsam fortfahren',
+        'ja' => '意識して続ける',
+        'ru' => 'Продолжить осознанно',
+        _ => this,
+      },
+      'every 15 minutes' => switch (l10n.localeName) {
+        'fr' => 'Toutes les 15 minutes',
+        'es' => 'Cada 15 minutos',
+        'hi' => 'हर 15 मिनट',
+        'de' => 'Alle 15 Minuten',
+        'ja' => '15分ごと',
+        'ru' => 'Каждые 15 минут',
+        _ => this,
+      },
+      'every 30 minutes' => switch (l10n.localeName) {
+        'fr' => 'Toutes les 30 minutes',
+        'es' => 'Cada 30 minutos',
+        'hi' => 'हर 30 मिनट',
+        'de' => 'Alle 30 Minuten',
+        'ja' => '30分ごと',
+        'ru' => 'Каждые 30 минут',
+        _ => this,
+      },
+      'every 45 minutes' => switch (l10n.localeName) {
+        'fr' => 'Toutes les 45 minutes',
+        'es' => 'Cada 45 minutes',
+        'hi' => 'हर 45 मिनट',
+        'de' => 'Alle 45 Minuten',
+        'ja' => '45分ごと',
+        'ru' => 'Каждые 45 минут',
+        _ => this,
+      },
+      'every 1 hour' => switch (l10n.localeName) {
+        'fr' => 'Toutes les 1 heure',
+        'es' => 'Cada 1 hora',
+        'hi' => 'हर 1 घंटा',
+        'de' => 'Jede 1 Stunde',
+        'ja' => '1時間ごと',
+        'ru' => 'Каждый 1 час',
+        _ => this,
+      },
+      'every 1 hour (recommended)' => switch (l10n.localeName) {
+        'fr' => 'Toutes les 1 heure (Recommandé)',
+        'es' => 'Cada 1 hora (Recomendado)',
+        'hi' => 'हर 1 घंटा (अनुशंसित)',
+        'de' => 'Jede 1 Stunde (Empfohlen)',
+        'ja' => '1時間ごと（推奨）',
+        'ru' => 'Каждый 1 час (Рекомендуется)',
+        _ => this,
+      },
+      'every 2 hours' => switch (l10n.localeName) {
+        'fr' => 'Toutes les 2 heures',
+        'es' => 'Cada 2 horas',
+        'hi' => 'हर 2 घंटे',
+        'de' => 'Alle 2 Stunden',
+        'ja' => '2時間ごと',
+        'ru' => 'Каждые 2 часа',
+        _ => this,
+      },
+      '1 hour has passed' => switch (l10n.localeName) {
+        'fr' => "1 heure s'est écoulée",
+        'es' => 'Ha pasado 1 hora',
+        'hi' => '1 घंटा बीत चुका है',
+        'de' => '1 Stunde ist vergangen',
+        'ja' => '1時間が経過しました',
+        'ru' => 'Прошел 1 час',
+        _ => this,
+      },
+      'with your phone always with you, receive a mindful chime and full-screen reflection prompt every hour or chosen interval to reflect on passing time.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Avec votre téléphone toujours sur vous, recevez un carillon conscient et une invite de réflexion plein écran pour méditer sur le temps qui passe.",
+          'es' =>
+            'Con tu teléfono siempre contigo, recibe un timbre consciente y un aviso en pantalla completa para reflexionar sobre el paso del tiempo.',
+          'hi' =>
+            'फ़ोन हमेशा आपके पास रहने के कारण, बीतते समय पर चिंतन करने के लिए हर घंटे एक माइंडफुल झंकार और पूर्ण-स्क्रीन संकेत प्राप्त करें।',
+          'de' =>
+            'Mit deinem Smartphone immer dabei, erhältst du stündlich einen achtsamen Signalton und Vollbild-Hinweis zur Zeitreflexion.',
+          'ja' => 'スマホを常に手元に置く日常で、毎時心地よいチャイムと全画面の振り返りで時の流れを意識できます。',
+          'ru' =>
+            'Телефон всегда с вами — получайте осознанный сигнал и полноэкранное напоминание о проходящем времени.',
+          _ => this,
+        },
+      'with your phone always with you, pause for a moment. reflect on how you spent your last hour, and decide your focus for the next.' =>
+        switch (l10n.localeName) {
+          'fr' =>
+            "Avec votre téléphone toujours sur vous, faites une pause. Réfléchissez à l'heure passée et choisissez votre priorité pour la suivante.",
+          'es' =>
+            'Con tu teléfono siempre contigo, haz una pausa. Reflexiona sobre cómo pasaste la última hora y decide tu enfoque para la siguiente.',
+          'hi' =>
+            'फ़ोन हमेशा आपके पास रहने के कारण, एक पल के लिए रुकें। सोचें कि पिछला घंटा कैसे बीता, और अगले घंटे का ध्यान तय करें।',
+          'de' =>
+            'Halte kurz inne. Überlege, wie du die letzte Stunde verbracht hast und worauf du dich als Nächstes fokussierst.',
+          'ja' => '少し立ち止まり、直前の1時間の過ごし方を振り返り、次の1時間の目標を決めましょう。',
+          'ru' =>
+            'Сделайте паузу. Подумайте, как прошел последний час, и определите фокус на следующий.',
+          _ => this,
+        },
+      '"time is what we want most, but what we use worst."' => switch (l10n
+          .localeName) {
+        'fr' =>
+          "« Le temps est ce que nous voulons le plus, mais ce que nous utilisons le plus mal. »",
+        'es' => '«El tiempo es lo que más queremos, pero lo que peor usamos.»',
+        'hi' =>
+          '“समय वही है जो हम सबसे ज्यादा चाहते हैं, पर सबसे बुरा उपयोग करते हैं।”',
+        'de' =>
+          '„Zeit ist das, was wir am meisten wollen, aber am schlechtesten nutzen.“',
+        'ja' => '「時間とは私たちが最も求めるものであり、最も浪費するものである。」',
+        'ru' =>
+          '«Время — это то, чего мы больше всего хотим, но хуже всего используем.»',
+        _ => this,
+      },
+      "don't show this warning again" => switch (l10n.localeName) {
+        'fr' => 'Ne plus afficher cet avertissement',
+        'es' => 'No volver a mostrar esta advertencia',
+        'hi' => 'यह चेतावनी दोबारा न दिखाएं',
+        'de' => 'Diese Warnung nicht mehr anzeigen',
+        'ja' => '次回からこの警告を表示しない',
+        'ru' => 'Больше не показывать это предупреждение',
+        _ => this,
+      },
+      "something isn't working as expected." => switch (l10n.localeName) {
+        'fr' => 'Quelque chose ne fonctionne pas comme prévu.',
+        'es' => 'Algo no funciona como se esperaba.',
+        'hi' => 'कुछ अपेक्षित रूप से काम नहीं कर रहा है।',
+        'de' => 'Etwas funktioniert nicht wie erwartet.',
+        'ja' => '予期せぬ問題が発生しました。',
+        'ru' => 'Что-то работает не так, как ожидалось.',
+        _ => this,
+      },
+      "what's new in notekar" => switch (l10n.localeName) {
+        'fr' => 'Nouveautés de NoteKar',
+        'es' => 'Novedades en NoteKar',
+        'hi' => 'NoteKar में नया क्या है',
+        'de' => 'Neuigkeiten in NoteKar',
+        'ja' => 'NoteKarの新機能',
+        'ru' => 'Что нового в NoteKar',
+        _ => this,
+      },
+      "what's new:" => switch (l10n.localeName) {
+        'fr' => 'Nouveautés :',
+        'es' => 'Novedades:',
+        'hi' => 'नया क्या है:',
+        'de' => 'Neuigkeiten:',
+        'ja' => '新機能:',
+        'ru' => 'Что нового:',
+        _ => this,
+      },
+      'a new hour has passed. take a mindful pause and reflect.' => switch (l10n
+          .localeName) {
+        'fr' =>
+          "Une nouvelle heure s'est écoulée. Prenez une pause consciente et réfléchissez.",
+        'es' =>
+          'Ha pasado una nueva hora. Tómate una pausa consciente y reflexiona.',
+        'hi' => 'एक नया घंटा बीत गया है। सचेत होकर रुकें और चिंतन करें।',
+        'de' =>
+          'Eine neue Stunde ist vergangen. Halte achtsam inne und reflektiere.',
+        'ja' => '新しい1時間が経過しました。少し立ち止まり、振り返ってみましょう。',
+        'ru' => 'Прошел еще один час. Сделайте осознанную паузу и подумайте.',
+        _ => this,
+      },
       'whatsnewtitle' => switch (l10n.localeName) {
         'es' => 'Novedades',
         'hi' => 'नया क्या है',

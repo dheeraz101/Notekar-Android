@@ -600,18 +600,18 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         .map(int.parse)
         .toList();
     bool isInstalledBeta = widget.appVersion.toLowerCase().contains('beta');
-    bool isInstalledSecurity = false;
+    bool isInstalledPriority = false;
     if (!isInstalledBeta && versionParts.length >= 3) {
       final minor = versionParts[1];
       final patch = versionParts[2];
       if (minor > 0 && patch == 0) {
-        isInstalledSecurity = true;
+        isInstalledPriority = true;
       } else if (patch > 0) {
         isInstalledBeta = true;
       }
     }
-    final currentBuildChannel = isInstalledSecurity
-        ? 'security'
+    final currentBuildChannel = isInstalledPriority
+        ? 'priority'
         : (isInstalledBeta ? 'beta' : 'stable');
 
     if (widget.checkingUpdates) {
@@ -663,7 +663,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentBuildChannel == 'security'
+                  color: currentBuildChannel == 'priority'
                       ? p.red.withValues(alpha: 0.12)
                       : (currentBuildChannel == 'beta'
                             ? p.green.withValues(alpha: 0.12)
@@ -671,14 +671,14 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  (currentBuildChannel == 'security'
-                          ? 'Security Build'
+                  (currentBuildChannel == 'priority'
+                          ? 'Priority Release'
                           : (currentBuildChannel == 'beta'
-                                ? 'Beta Build'
-                                : 'Stable Build'))
+                                ? 'Beta Release'
+                                : 'Stable Release'))
                       .localized(context),
                   style: TextStyle(
-                    color: currentBuildChannel == 'security'
+                    color: currentBuildChannel == 'priority'
                         ? p.red
                         : (currentBuildChannel == 'beta' ? p.green : p.accent),
                     fontSize: 10.5,

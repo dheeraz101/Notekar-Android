@@ -4,7 +4,6 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class PersonalizationSettingsPage extends StatelessWidget {
@@ -25,7 +24,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
   });
 
   final Palette p;
-  final String subCategory; // 'Personalization', 'Language', 'Accent Color'
+  final String subCategory; // 'Personalization', 'Accent Color'
   final String theme;
   final String accentColor;
   final String appIconStyle;
@@ -42,8 +41,6 @@ class PersonalizationSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (subCategory == 'Personalization') {
       return _buildPersonalization(context);
-    } else if (subCategory == 'Language') {
-      return _buildLanguage(context);
     } else if (subCategory == 'Accent Color') {
       return _buildAccentColor(context);
     }
@@ -98,24 +95,6 @@ class PersonalizationSettingsPage extends StatelessWidget {
               onTap: () =>
                   onOpenCategory('App Icons', parent: 'Personalization'),
             ),
-            SettingsRow(
-              p: p,
-              icon: Icons.language_rounded,
-              title: 'Language'.localized(context),
-              status: switch (currentLocale) {
-                'en' => 'English',
-                'fr' => 'Français',
-                'hi' => 'हिन्दी',
-                'es' => 'Español',
-                'de' => 'Deutsch',
-                'ja' => '日本語',
-                'ru' => 'Русский',
-                _ => 'System Default',
-              },
-              color: p.accent,
-              onTap: () =>
-                  onOpenCategory('Language', parent: 'Personalization'),
-            ),
           ],
         ),
         SettingsPageDescription(
@@ -123,73 +102,6 @@ class PersonalizationSettingsPage extends StatelessWidget {
           text:
               'These settings refine the interface aesthetic and do not modify your saved data.'
                   .localized(context),
-        ),
-        const SizedBox(height: spacing48),
-      ],
-    );
-  }
-
-  Widget _buildLanguage(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: spacing8),
-        SettingsGroup(
-          p: p,
-          title: 'Available Languages'.localized(context),
-          children: [
-            for (final entry in [
-              (code: 'system', name: 'System Default'),
-              (code: 'en', name: 'English'),
-              (code: 'fr', name: 'Français (French)'),
-              (code: 'hi', name: 'हिन्दी (Hindi)'),
-              (code: 'es', name: 'Español (Spanish)'),
-              (code: 'de', name: 'Deutsch (German)'),
-              (code: 'ja', name: '日本語 (Japanese)'),
-              (code: 'ru', name: 'Русский (Russian)'),
-            ])
-              SettingsRow(
-                p: p,
-                title: entry.name,
-                trailing: currentLocale == entry.code
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                    : const SizedBox.shrink(),
-                onTap: () {
-                  if (currentLocale == entry.code) return;
-                  HapticFeedback.selectionClick();
-                  onLocaleChanged(entry.code);
-                },
-              ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text: 'Select your preferred language for the application.'.localized(
-            context,
-          ),
-        ),
-        const SizedBox(height: spacing12),
-        SettingsGroup(
-          p: p,
-          title: 'Upcoming Languages'.localized(context),
-          description:
-              'These languages are planned for future releases. Help translate NoteKar on GitHub.'
-                  .localized(context),
-          children: [
-            for (final lang in kUpcomingLanguages)
-              SettingsRow(
-                p: p,
-                title: lang.native,
-                trailing: UpcomingBadge(p: p),
-                onTap: () =>
-                    showUpcomingLanguageNotice(context, p, lang.native),
-              ),
-          ],
-        ),
-        SettingsBetaNote(
-          p: p,
-          text: 'The current features on this page are under Beta stage.'
-              .localized(context),
-          onLearnMore: onLearnMoreBeta,
         ),
         const SizedBox(height: spacing48),
       ],

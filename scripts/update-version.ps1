@@ -6,6 +6,9 @@ param(
     [switch]$beta,
 
     [Parameter(Mandatory = $false)]
+    [switch]$priority,
+
+    [Parameter(Mandatory = $false)]
     [switch]$security,
 
     [Parameter(Mandatory = $false)]
@@ -87,34 +90,34 @@ $nextMajor = $currentMajor
 $nextMinor = $currentMinor
 $nextPatch = $currentPatch
 $releaseTypeLabel = "Custom"
-$channelCode = "BE"
+$channelCode = "BR"
 
 if ($stable)
 {
     $nextMajor = $currentMajor + 1
     $nextMinor = 0
     $nextPatch = 0
-    $releaseTypeLabel = "Stable Feature Release"
-    $channelCode = "ST"
+    $releaseTypeLabel = "Stable Release"
+    $channelCode = "SR"
 }
-elseif ($security)
+elseif ($priority -or $security)
 {
     $nextMinor = $currentMinor + 1
     $nextPatch = 0
-    $releaseTypeLabel = "Security & Quality Release"
-    $channelCode = "SE"
+    $releaseTypeLabel = "Priority Release"
+    $channelCode = "PR"
 }
 elseif ($beta)
 {
     $nextPatch = $currentPatch + 1
-    $releaseTypeLabel = "Beta Build"
-    $channelCode = "BE"
+    $releaseTypeLabel = "Beta Release"
+    $channelCode = "BR"
 }
 else
 {
     if (-not $Version)
     {
-        throw "Please specify the release type parameter (-stable, -beta, -security) or pass -Version explicitly."
+        throw "Please specify the release type parameter (-stable, -beta, -priority) or pass -Version explicitly."
     }
 }
 
@@ -377,7 +380,7 @@ $fastlaneContent = "Update to $Version (build $BuildNumber):`r`n$fastlaneCommits
 Set-Content -LiteralPath $fastlaneFile -Value $fastlaneContent -NoNewline
 Write-Host "Created/Updated F-Droid changelog: $fastlaneFile"
 
-# 3. Automate GitHub Release notes template creation with optional Security Update prefix
+# 3. Automate GitHub Release notes template creation with optional Priority Update prefix
 $releaseNotesDir = Join-Path $repoRoot "releases/v$Version"
 if (-not (Test-Path -LiteralPath $releaseNotesDir))
 {
@@ -385,9 +388,9 @@ if (-not (Test-Path -LiteralPath $releaseNotesDir))
 }
 $releaseNotesFile = Join-Path $releaseNotesDir "RELEASE_NOTES.md"
 $prefix = ""
-if ($security)
+if ($priority -or $security)
 {
-    $prefix = "## 🛡️ Security Update`r`n`r`n"
+    $prefix = "## 🚨 Priority Release`r`n`r`n"
 }
 $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n$gitCommits`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
 Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
@@ -404,9 +407,9 @@ if (Test-Path -LiteralPath $changelogPath)
 
     # Highlights: use features list
     $hlList = @()
-    if ($security)
+    if ($priority -or $security)
     {
-        $hlList += "Security and stability improvements."
+        $hlList += "Priority maintenance and stability improvements."
     }
     foreach ($f in $features)
     {
@@ -454,13 +457,13 @@ if (Test-Path -LiteralPath $changelogMdPath)
     {
         $tagSuffix = " [BR]"
     }
-    elseif ($security)
+    elseif ($priority -or $security)
     {
-        $tagSuffix = " [SR]"
+        $tagSuffix = " [PR]"
     }
     elseif ($stable)
     {
-        $tagSuffix = " [SB]"
+        $tagSuffix = " [SR]"
     }
 
     $newChangelogEntry = "## [$Version] - $BuildDate (versionCode $BuildNumber)$tagSuffix`r`n`r`n$gitCommits`r`n`r`n"

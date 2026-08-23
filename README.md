@@ -28,22 +28,22 @@
 
 ## 📖 Table of Contents
 
-- [📸 Screenshots / UI Preview](#-screenshots--ui-preview)
-- [🎯 Features & Highlights](#-features--highlights)
-- [🛠️ Tech Stack](#-tech-stack)
-- [🌐 Community Translations](#-community-translations)
-- [🔒 Privacy & Legal Policy](#-privacy--legal-policy)
-- [☕ Support](#-support)
-- [🚀 Version Release Scheme](#-version-release-scheme)
-- [🔮 Upcoming Development Roadmap](#-upcoming-development-roadmap)
-- [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
-- [📦 Project Structure](#-project-structure)
-- [🛠️ Building & Running Locally](#-building--running-locally)
-- [🔑 Building Release APKs & Keystore Setup](#-building-release-apks--keystore-setup)
-- [📄 License & Attribution](#-license--attribution)
+- [📸 Screenshots / UI Preview](#screenshots)
+- [🎯 Features & Highlights](#features)
+- [🛠️ Tech Stack](#tech-stack)
+- [🌐 Community Translations](#translations)
+- [🔒 Privacy & Legal Policy](#privacy)
+- [☕ Support](#support)
+- [🚀 Version Release Scheme & Build Numbers](#version-scheme)
+- [🤖 F-Droid & Reproducible Build Compliance](#f-droid)
+- [📦 Project Structure](#project-structure)
+- [🛠️ Building & Running Locally](#building-locally)
+- [🔑 Building Release APKs & Keystore Setup](#release-apks)
+- [📄 License & Attribution](#license)
 
 ---
 
+<a id="screenshots"></a>
 ## 📸 Screenshots / UI Preview
 
 Designed for speed, simplicity, and privacy. Every screen is optimized for quick timestamp logging
@@ -61,6 +61,7 @@ with minimal interaction.
 
 ---
 
+<a id="features"></a>
 ## 🎯 Features & Highlights
 
 - **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly with
@@ -97,6 +98,7 @@ with minimal interaction.
 
 ---
 
+<a id="tech-stack"></a>
 ## 🛠️ Tech Stack
 
 NoteKar is built using modern, performance-oriented technologies:
@@ -112,6 +114,7 @@ NoteKar is built using modern, performance-oriented technologies:
 
 ---
 
+<a id="translations"></a>
 ## 🌐 Community Translations
 
 Help make NoteKar accessible to everyone in their native language! NoteKar is committed to being
@@ -140,6 +143,7 @@ Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and many 
 
 ---
 
+<a id="privacy"></a>
 ## 🔒 Privacy & Legal Policy
 
 NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain
@@ -154,6 +158,7 @@ stored locally on your device.
 
 ---
 
+<a id="support"></a>
 ## ☕ Support
 
 If NoteKar helps you, you can support the project here:
@@ -165,20 +170,24 @@ Your support helps keep NoteKar free, offline-first, and actively maintained.
 
 ---
 
+<a id="version-scheme"></a>
 ## 🚀 Version Release Scheme & Build Numbers
 
 NoteKar uses a structured build numbering scheme: `YY<CHANNEL>MMDD[suffix]`
 
 - **Channel Codes**:
-    - `BE` (Beta / Development Release): Active feature experimentation.
-    - `ST` (Stable Release): Production-tested releases.
-    - `SE` (Security / Patch Release): Critical hotfixes and library upgrades.
-- **Format Example**: `26BE0815` (Year 2026, Beta Channel, August 15). Multiple builds on the same
-  date automatically increment suffixes: `26BE0815a`, `26BE0815b`.
+    - `BR` (Beta Release): Active feature experimentation.
+    - `SR` (Stable Release): Production-tested releases.
+    - `PR` (Priority Release): Critical hotfixes, security patches, and library upgrades (Previously
+      Security Release).
+- **Format Example**: `26BR0815` (Year 2026, Beta Release, August 15), `26SR0816` (Stable Release),
+  `26PR0821` (Priority Release). Multiple builds on the same
+  date automatically increment suffixes: `26BR0815a`, `26BR0815b`.
 - **Android versionCode**: Internally mapped to unique sequential integers (e.g. `26081501`).
 
 ---
 
+<a id="f-droid"></a>
 ## 🤖 F-Droid & Reproducible Build Compliance
 
 NoteKar Android meets all official F-Droid inclusion requirements:
@@ -191,6 +200,7 @@ NoteKar Android meets all official F-Droid inclusion requirements:
 
 ---
 
+<a id="project-structure"></a>
 ## 📦 Project Structure
 
 ```
@@ -229,6 +239,7 @@ Notekar - Flutter/
 
 ---
 
+<a id="building-locally"></a>
 ## 🛠️ Building & Running Locally
 
 ### Prerequisites
@@ -259,6 +270,7 @@ Notekar - Flutter/
 
 ---
 
+<a id="release-apks"></a>
 ## 🔑 Building Release APKs & Keystore Setup
 
 > [!IMPORTANT]
@@ -290,6 +302,7 @@ To build a signed release APK or App Bundle (`.aab`):
 
 ---
 
+<a id="license"></a>
 ## 📄 License & Attribution
 
 - **License:** Open source under the **[MIT License](LICENSE)**.

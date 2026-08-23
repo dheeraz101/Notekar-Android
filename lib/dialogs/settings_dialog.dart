@@ -30,8 +30,10 @@ import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
 import 'package:notekar/dialogs/settings/security_privacy_details_sheets.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
+import 'package:notekar/dialogs/settings/time_reflection_settings_page.dart';
 import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
+import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -313,6 +315,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   // Reminders Settings
   bool _dailyReminderEnabled = false;
   TimeOfDay _dailyReminderTime = const TimeOfDay(hour: 21, minute: 0);
+  bool _reflectionReminderEnabled = false;
+  int _reflectionReminderIntervalMins = 60;
+  bool _reflectionReminderSound = true;
   bool _inactivityReminderEnabled = false;
   int _inactivityIntervalMins = 240;
   bool _weeklyReminderEnabled = false;
@@ -373,6 +378,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
       );
       _dailyReminderBody =
           _prefs?.getString('reminder_daily_body') ?? 'Time to log a moment!';
+
+      _reflectionReminderEnabled =
+          _prefs?.getBool('reminder_reflection_enabled') ?? false;
+      _reflectionReminderIntervalMins =
+          _prefs?.getInt('reminder_reflection_interval_mins') ?? 60;
+      _reflectionReminderSound =
+          _prefs?.getBool('reminder_reflection_sound') ?? true;
 
       _inactivityReminderEnabled =
           _prefs?.getBool('reminder_inactivity_enabled') ?? false;
@@ -532,6 +544,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
         } else {
           await _fileChannel.invokeMethod('cancelReminder', {
             'id': 'reminder_daily',
+          });
+        }
+      } else if (id == 'reflection') {
+        if (_reflectionReminderEnabled) {
+          await _fileChannel.invokeMethod('scheduleReminder', {
+            'id': 'reminder_reflection',
+            'type': 'reflection',
+            'intervalMinutes': _reflectionReminderIntervalMins,
+            'title': 'Time Reflection'.localized(context),
+            'body': 'A new hour has passed. Take a mindful pause and reflect.'
+                .localized(context),
+          });
+        } else {
+          await _fileChannel.invokeMethod('cancelReminder', {
+            'id': 'reminder_reflection',
           });
         }
       } else if (id == 'inactivity') {
@@ -2624,6 +2651,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
+        title: 'Time Reflection & Mindfulness',
+        subtitle:
+            'Full-screen hourly mindfulness prompts and time awareness alerts',
+        category: 'Time Reflection',
+        icon: Icons.self_improvement_rounded,
+        keywords: [
+          'reflection',
+          'mindfulness',
+          'hourly',
+          'time',
+          'breath',
+          'chime',
+          'alarm',
+          'alert',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: _reflectionReminderEnabled
+            ? 'Active · Every ${_reflectionReminderIntervalMins == 60 ? '1 Hour' : '$_reflectionReminderIntervalMins Mins'}'
+            : 'Disabled',
+      ),
+      item(
         title: 'Monthly Reminder',
         subtitle: 'Toggle monthly notification alerts',
         category: 'Reminders',
@@ -4067,30 +4117,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                               },
                             ),
                           ),
-                        if (show('Language'))
-                          SliverToBoxAdapter(
-                            child: PersonalizationSettingsPage(
-                              p: p,
-                              subCategory: 'Language',
-                              theme: theme,
-                              accentColor: accentColor,
-                              appIconStyle: appIconStyle,
-                              currentLocale: currentLocale,
-                              reduceMotion: reduceMotion,
-                              enableTranslucency: enableTranslucency,
-                              onLocaleChanged: (value) {
-                                setState(() => currentLocale = value);
-                                widget.onLocaleChanged(value);
-                              },
-                              onAccentColorChanged: (value) {
-                                setState(() => accentColor = value);
-                                widget.onAccentColor(value);
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
                         if (show('Accent Color'))
                           SliverToBoxAdapter(
                             child: PersonalizationSettingsPage(
@@ -4204,6 +4230,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                               ignoresBatteryOptimizations:
                                   _ignoresBatteryOptimizations,
                               autoStartCardDismissed: _autoStartCardDismissed,
+                              reflectionReminderEnabled:
+                                  _reflectionReminderEnabled,
+                              reflectionReminderIntervalMins:
+                                  _reflectionReminderIntervalMins,
+                              onOpenTimeReflection: () => _openCategory(
+                                'Time Reflection',
+                                parent: 'Reminders',
+                              ),
                               dailyReminderEnabled: _dailyReminderEnabled,
                               dailyReminderTime: _dailyReminderTime,
                               dailyReminderBody: _dailyReminderBody,
@@ -4486,6 +4520,101 @@ ${stackTrace ?? 'No stack trace provided.'}
                               },
                               onTapMonthlyMessage: () =>
                                   _openReminderMessageEditor('monthly'),
+                            ),
+                          ),
+                        if (show('Time Reflection'))
+                          SliverToBoxAdapter(
+                            child: TimeReflectionSettingsPage(
+                              p: p,
+                              reflectionReminderEnabled:
+                                  _reflectionReminderEnabled,
+                              reflectionReminderIntervalMins:
+                                  _reflectionReminderIntervalMins,
+                              reflectionReminderSound: _reflectionReminderSound,
+                              onToggleReflectionReminder: (value) async {
+                                HapticFeedback.selectionClick();
+                                if (value) {
+                                  final granted =
+                                      await _fileChannel.invokeMethod<bool>(
+                                        'requestNotificationPermission',
+                                      ) ??
+                                      true;
+                                  if (!context.mounted) return;
+                                  if (!granted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Notification permission needed'
+                                              .localized(context),
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                }
+                                setState(
+                                  () => _reflectionReminderEnabled = value,
+                                );
+                                await _prefs?.setBool(
+                                  'reminder_reflection_enabled',
+                                  value,
+                                );
+                                await _syncReminder('reflection');
+                              },
+                              onTapReflectionInterval: (value) async {
+                                setState(
+                                  () => _reflectionReminderIntervalMins = value,
+                                );
+                                await _prefs?.setInt(
+                                  'reminder_reflection_interval_mins',
+                                  value,
+                                );
+                                if (_reflectionReminderEnabled) {
+                                  await _syncReminder('reflection');
+                                }
+                              },
+                              onToggleReflectionSound: (value) async {
+                                HapticFeedback.selectionClick();
+                                setState(
+                                  () => _reflectionReminderSound = value,
+                                );
+                                await _prefs?.setBool(
+                                  'reminder_reflection_sound',
+                                  value,
+                                );
+                              },
+                              onTestReflectionAlert: () async {
+                                HapticFeedback.heavyImpact();
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Test alert in 3s: Lock your phone to test full-screen alarm!'
+                                          .localized(context),
+                                    ),
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                                await Future<void>.delayed(
+                                  const Duration(seconds: 3),
+                                );
+                                if (context.mounted) {
+                                  TimeReflectionSheet.show(
+                                    context,
+                                    p: p,
+                                    intervalMinutes:
+                                        _reflectionReminderIntervalMins,
+                                  );
+                                }
+                              },
+                              onPreviewReflectionSheet: () {
+                                TimeReflectionSheet.show(
+                                  context,
+                                  p: p,
+                                  intervalMinutes:
+                                      _reflectionReminderIntervalMins,
+                                );
+                              },
                             ),
                           ),
                         if (show('Moments'))
@@ -5415,6 +5544,57 @@ ${stackTrace ?? 'No stack trace provided.'}
                             child: AdvancedSettingsPage(
                               p: p,
                               subCategory: 'Advanced',
+                              currentLocale: currentLocale,
+                              onLocaleChanged: (value) {
+                                setState(() => currentLocale = value);
+                                widget.onLocaleChanged(value);
+                              },
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                              hapticStyle: hapticStyle,
+                              reduceMotion: reduceMotion,
+                              largeText: largeText,
+                              highContrast: highContrast,
+                              healthStatus: AdaptiveEngine().healthStatus,
+                              onHapticStyleChanged: (value) {
+                                setState(() => hapticStyle = value);
+                                widget.onHapticStyle(value);
+                              },
+                              onReduceMotionChanged: (value) {
+                                setState(() {
+                                  reduceMotion = value;
+                                  if (value) homeMenuAnimations = false;
+                                });
+                                widget.onReduceMotion(value);
+                              },
+                              onLargeTextChanged: (value) {
+                                setState(() => largeText = value);
+                                widget.onLargeText(value);
+                              },
+                              onHighContrastChanged: (value) {
+                                setState(() => highContrast = value);
+                                widget.onHighContrast(value);
+                              },
+                              onResetSettings: () =>
+                                  unawaited(_confirmResetSettings()),
+                              onResetAllData: () =>
+                                  unawaited(_confirmResetAll(p)),
+                              onFactoryReset: () =>
+                                  unawaited(_confirmFactoryReset(p)),
+                              onOpenCategory: (category, {required parent}) =>
+                                  _openCategory(category, parent: parent),
+                            ),
+                          ),
+                        if (show('Language'))
+                          SliverToBoxAdapter(
+                            child: AdvancedSettingsPage(
+                              p: p,
+                              subCategory: 'Language',
+                              currentLocale: currentLocale,
+                              onLocaleChanged: (value) {
+                                setState(() => currentLocale = value);
+                                widget.onLocaleChanged(value);
+                              },
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                               hapticStyle: hapticStyle,
                               reduceMotion: reduceMotion,
                               largeText: largeText,

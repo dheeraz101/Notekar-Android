@@ -7,7 +7,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [7.1.0] - 2026-08-21 (versionCode 26SE0821) [SR]
+## [7.1.0] - 2026-08-21 (versionCode 26PR0821) [PR]
 
 ### What's New
 
@@ -24,7 +24,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Preserve Apple HIG typography in English and normalize home toolbar buttons
 
-## [7.0.0] - 2026-08-16 (versionCode 26ST0816) [SB]
+## [7.0.0] - 2026-08-16 (versionCode 26SR0816) [SR]
 
 ### What's New
 
@@ -434,16 +434,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Windows-Style Update Classification System dividing updates into Feature, Security, and Beta
+- Windows-Style Update Classification System dividing updates into Feature, Priority, and Beta
   tracks with custom layouts.
-- Dynamic Build Channel Badges displaying local build channel track status (Stable Build, Beta
-  Build, or Security Build).
+- Dynamic Build Channel Badges displaying local build channel track status (Stable Release, Beta
+  Release, or Priority Release).
 - Dynamic editing suffix icon in the reminder message editor toggling between edit and checkmark
   controls.
 - 3-second transparent overlay modal with Cupertino Activity Indicators when switching release
   tracks.
 - Upgraded version management scripts supporting automatic calculation increments via `-stable`,
-  `-beta`, or `-security` switches.
+  `-beta`, or `-priority` switches.
 
 ## [4.0.7] - 2026-07-23 (versionCode 16)
 

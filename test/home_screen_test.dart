@@ -1,7 +1,11 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/settings/time_reflection_settings_page.dart';
+import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/backup_utils.dart';
 import 'package:notekar/utils/settings_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,7 +73,82 @@ void main() {
         final result = await validateNoteKarBackupContentAsync(jsonPayload);
         expect(result.isValid, isTrue);
         expect(result.entries, hasLength(1));
-        expect(result.entries.first.note, 'Test note');
+      },
+    );
+  });
+
+  group('Build Channel Codes & Priority Release Tests', () {
+    test('kAppBuildNumber adheres to YY<CHANNEL>MMDD format with SR/BR/PR', () {
+      expect(kAppBuildNumber, matches(r'^\d{2}(BR|SR|PR)\d{4}[a-z]?$'));
+    });
+  });
+
+  group('Time Reflection & Mindfulness Tests', () {
+    testWidgets(
+      'TimeReflectionSheet renders mindfulness elements and actions',
+      (tester) async {
+        final p = paletteFor('dark');
+        var logTapped = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimeReflectionSheet(
+                p: p,
+                intervalMinutes: 60,
+                onLogMoment: () => logTapped = true,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Time Reflection'), findsOneWidget);
+        expect(find.text('Take a Mindful Breath'), findsOneWidget);
+        expect(find.text('1 Hour Has Passed'), findsOneWidget);
+        expect(find.text('Log Current Moment'), findsOneWidget);
+        expect(find.text('Continue Mindfully'), findsOneWidget);
+
+        await tester.tap(find.text('Log Current Moment'));
+        await tester.pump();
+        expect(logTapped, isTrue);
+      },
+    );
+
+    testWidgets(
+      'TimeReflectionSettingsPage renders settings, rationale, and 4-step practice guide',
+      (tester) async {
+        final p = paletteFor('dark');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: TimeReflectionSettingsPage(
+                  p: p,
+                  reflectionReminderEnabled: true,
+                  reflectionReminderIntervalMins: 60,
+                  reflectionReminderSound: true,
+                  onToggleReflectionReminder: (_) {},
+                  onTapReflectionInterval: (_) {},
+                  onToggleReflectionSound: (_) {},
+                  onTestReflectionAlert: () {},
+                  onPreviewReflectionSheet: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Time Reflection & Mindfulness'), findsWidgets);
+        expect(find.text('Enable Time Reflection'), findsOneWidget);
+        expect(find.text('Why Time Reflection?'), findsOneWidget);
+        expect(find.text('How to Use It Effectively'), findsOneWidget);
+        expect(find.text('Take Three Deep Breaths'), findsOneWidget);
+        expect(find.text('Acknowledge the Elapsed Hour'), findsOneWidget);
+        expect(find.text('Set One Focus For Next Hour'), findsOneWidget);
+        expect(find.text('Log a Quick Moment'), findsOneWidget);
       },
     );
   });

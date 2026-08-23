@@ -32,7 +32,7 @@ class ReminderReceiver : BroadcastReceiver() {
         showNotification(context, id, title, body)
 
         // Reschedule next occurrence for repeating alarms
-        if (type == "daily" || type == "weekly" || type == "monthly") {
+        if (type == "daily" || type == "weekly" || type == "monthly" || type == "reflection") {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val jsonStr = prefs.getString(id, null)
             if (jsonStr != null) {
@@ -47,6 +47,7 @@ class ReminderReceiver : BroadcastReceiver() {
     companion object {
         const val PREFS_NAME = "notekar_reminders_prefs"
         const val CHANNEL_ID = "notekar_reminders"
+        const val REFLECTION_CHANNEL_ID = "notekar_reflection_alarms"
         const val NOTIFICATION_ID_BASE = 4000
         const val ACTION_TRIGGER = "app.notekar.notekar.TRIGGER_REMINDER"
 
@@ -148,7 +149,7 @@ class ReminderReceiver : BroadcastReceiver() {
             val now = Calendar.getInstance()
 
             when (type) {
-                "inactivity" -> {
+                "inactivity", "reflection" -> {
                     val intervalMinutes = json.optInt("intervalMinutes", 60)
                     calendar.timeInMillis = System.currentTimeMillis() + (intervalMinutes * 60L * 1000L)
                 }
@@ -255,15 +256,25 @@ class ReminderReceiver : BroadcastReceiver() {
 
         private fun showNotification(context: Context, reminderId: String, title: String, body: String) {
             val notificationManager = context.getSystemService(NotificationManager::class.java) ?: return
+            val isReflection = reminderId.contains("reflection")
+            val targetChannelId = if (isReflection) REFLECTION_CHANNEL_ID else CHANNEL_ID
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channelName = if (isReflection) "Time Reflection Alarms" else "Reminders"
+                val channelDesc =
+                    if (isReflection) "Full-screen hourly mindfulness & time reflection alerts" else "NoteKar logging reminders"
                 val channel = NotificationChannel(
-                    CHANNEL_ID,
-                    "Reminders",
+                    targetChannelId,
+                    channelName,
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "NoteKar logging reminders"
+                    description = channelDesc
                     enableLights(true)
                     enableVibration(true)
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                    if (isReflection) {
+                        setBypassDnd(true)
+                    }
                 }
                 notificationManager.createNotificationChannel(channel)
             }
@@ -271,8 +282,12 @@ class ReminderReceiver : BroadcastReceiver() {
             val notificationId = NOTIFICATION_ID_BASE + Math.abs(reminderId.hashCode() % 1000)
 
             val openIntent = Intent(context, MainActivity::class.java).apply {
-                putExtra(MainActivity.EXTRA_LAUNCH_ACTION, "moment")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(
+                    MainActivity.EXTRA_LAUNCH_ACTION,
+                    if (isReflection) "reflection" else "moment"
+                )
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
             val openPending = PendingIntent.getActivity(
                 context,
@@ -293,28 +308,40 @@ class ReminderReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            val builder = NotificationCompat.Builder(context, targetChannelId)
                 .setSmallIcon(R.drawable.ic_stat_notekar)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(openPending)
                 .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(if (isReflection) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+                .setCategory(if (isReflection) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .addAction(
+
+            if (isReflection) {
+                builder.setFullScreenIntent(openPending, true)
+                builder.addAction(
+                    android.R.drawable.ic_menu_view,
+                    "Reflect Now",
+                    openPending
+                )
+            } else {
+                builder.addAction(
                     android.R.drawable.ic_menu_edit,
                     "Log Now",
                     openPending
                 )
-                .addAction(
-                    android.R.drawable.ic_menu_close_clear_cancel,
-                    "Dismiss",
-                    dismissPending
-                )
-                .build()
+            }
 
-            notificationManager.notify(notificationId, notification)
+            builder.addAction(
+                android.R.drawable.ic_menu_close_clear_cancel,
+                "Dismiss",
+                dismissPending
+            )
+
+            notificationManager.notify(notificationId, builder.build())
         }
     }
 }

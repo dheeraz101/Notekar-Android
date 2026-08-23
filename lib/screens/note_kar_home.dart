@@ -16,6 +16,7 @@ import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
+import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
@@ -2349,10 +2350,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
           });
           unawaited(_logEntry());
         }
+      case 'reflection':
+        await _openTimeReflection();
       case 'updates':
       case 'releases':
         await _openExternalLink(githubReleases);
     }
+  }
+
+  Future<void> _openTimeReflection() async {
+    if (!mounted) return;
+    await TimeReflectionSheet.show(
+      context,
+      p: p,
+      intervalMinutes: 60,
+      onLogMoment: () {
+        if (!_isDelayBlocked()) unawaited(_logEntry());
+      },
+    );
   }
 
   Future<void> _openExternalLink(String url) async {

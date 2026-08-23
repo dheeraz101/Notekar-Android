@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class AdvancedSettingsPage extends StatelessWidget {
@@ -10,6 +11,9 @@ class AdvancedSettingsPage extends StatelessWidget {
     super.key,
     required this.p,
     required this.subCategory,
+    this.currentLocale = 'system',
+    this.onLocaleChanged,
+    this.onLearnMoreBeta,
     required this.hapticStyle,
     required this.reduceMotion,
     required this.largeText,
@@ -26,7 +30,10 @@ class AdvancedSettingsPage extends StatelessWidget {
   });
 
   final Palette p;
-  final String subCategory; // 'Advanced', 'Accessibility', 'Reset'
+  final String subCategory; // 'Advanced', 'Language', 'Accessibility', 'Reset'
+  final String currentLocale;
+  final ValueChanged<String>? onLocaleChanged;
+  final VoidCallback? onLearnMoreBeta;
   final String hapticStyle;
   final bool reduceMotion;
   final bool largeText;
@@ -46,6 +53,8 @@ class AdvancedSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (subCategory == 'Advanced') {
       return _buildAdvanced(context);
+    } else if (subCategory == 'Language') {
+      return _buildLanguage(context);
     } else if (subCategory == 'Accessibility') {
       return _buildAccessibility(context);
     } else if (subCategory == 'Reset') {
@@ -62,6 +71,23 @@ class AdvancedSettingsPage extends StatelessWidget {
           p: p,
           insetDividers: true,
           children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.translate_rounded,
+              title: 'Language'.localized(context),
+              status: switch (currentLocale) {
+                'en' => 'English',
+                'fr' => 'Français',
+                'hi' => 'हिन्दी',
+                'es' => 'Español',
+                'de' => 'Deutsch',
+                'ja' => '日本語',
+                'ru' => 'Русский',
+                _ => 'System Default',
+              },
+              color: p.accent,
+              onTap: () => onOpenCategory('Language', parent: 'Advanced'),
+            ),
             SettingsRow(
               p: p,
               icon: Icons.accessibility_new_rounded,
@@ -97,6 +123,74 @@ class AdvancedSettingsPage extends StatelessWidget {
               'These tools are intended for system maintenance and troubleshooting.'
                   .localized(context),
         ),
+        const SizedBox(height: spacing48),
+      ],
+    );
+  }
+
+  Widget _buildLanguage(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: spacing8),
+        SettingsGroup(
+          p: p,
+          title: 'Available Languages'.localized(context),
+          children: [
+            for (final entry in [
+              (code: 'system', name: 'System Default'),
+              (code: 'en', name: 'English'),
+              (code: 'fr', name: 'Français (French)'),
+              (code: 'hi', name: 'हिन्दी (Hindi)'),
+              (code: 'es', name: 'Español (Spanish)'),
+              (code: 'de', name: 'Deutsch (German)'),
+              (code: 'ja', name: '日本語 (Japanese)'),
+              (code: 'ru', name: 'Русский (Russian)'),
+            ])
+              SettingsRow(
+                p: p,
+                title: entry.name,
+                trailing: currentLocale == entry.code
+                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    : const SizedBox.shrink(),
+                onTap: () {
+                  if (currentLocale == entry.code) return;
+                  HapticFeedback.selectionClick();
+                  onLocaleChanged?.call(entry.code);
+                },
+              ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text: 'Select your preferred language for the application.'.localized(
+            context,
+          ),
+        ),
+        const SizedBox(height: spacing12),
+        SettingsGroup(
+          p: p,
+          title: 'Upcoming Languages'.localized(context),
+          description:
+              'These languages are planned for future releases. Help translate NoteKar on GitHub.'
+                  .localized(context),
+          children: [
+            for (final lang in kUpcomingLanguages)
+              SettingsRow(
+                p: p,
+                title: lang.native,
+                trailing: UpcomingBadge(p: p),
+                onTap: () =>
+                    showUpcomingLanguageNotice(context, p, lang.native),
+              ),
+          ],
+        ),
+        if (onLearnMoreBeta != null)
+          SettingsBetaNote(
+            p: p,
+            text: 'The current features on this page are under Beta stage.'
+                .localized(context),
+            onLearnMore: onLearnMoreBeta!,
+          ),
         const SizedBox(height: spacing48),
       ],
     );

@@ -41,7 +41,42 @@ class MainActivity : FlutterActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Failed to apply FLAG_SECURE early in onCreate", e)
         }
+        applyLockscreenAndWakeFlags(intent)
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        applyLockscreenAndWakeFlags(intent)
+        pendingLaunchAction = actionFromIntent(intent)
+    }
+
+    private fun applyLockscreenAndWakeFlags(intent: Intent?) {
+        val action = actionFromIntent(intent)
+        if (action == "reflection" || intent?.getStringExtra(EXTRA_LAUNCH_ACTION) == "reflection") {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(
+                    android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                            android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                            android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                            android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                )
+            }
+            try {
+                val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+                val wakeLock = powerManager?.newWakeLock(
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
+                    "notekar:TimeReflectionWakeLock"
+                )
+                wakeLock?.acquire(3000)
+            } catch (_: Exception) {
+            }
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -461,12 +496,6 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        pendingLaunchAction = actionFromIntent(intent)
     }
 
     override fun onRequestPermissionsResult(

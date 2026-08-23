@@ -14,6 +14,9 @@ class RemindersSettingsPage extends StatelessWidget {
     required this.ignoresBatteryOptimizations,
     this.batteryOptimizationCardDismissed = false,
     required this.autoStartCardDismissed,
+    this.reflectionReminderEnabled = false,
+    this.reflectionReminderIntervalMins = 60,
+    this.onOpenTimeReflection,
     required this.dailyReminderEnabled,
     required this.dailyReminderTime,
     required this.dailyReminderBody,
@@ -52,6 +55,10 @@ class RemindersSettingsPage extends StatelessWidget {
   final bool ignoresBatteryOptimizations;
   final bool batteryOptimizationCardDismissed;
   final bool autoStartCardDismissed;
+
+  final bool reflectionReminderEnabled;
+  final int reflectionReminderIntervalMins;
+  final VoidCallback? onOpenTimeReflection;
 
   final bool dailyReminderEnabled;
   final TimeOfDay dailyReminderTime;
@@ -311,6 +318,38 @@ class RemindersSettingsPage extends StatelessWidget {
           p: p,
           text: 'Triggers a daily logging reminder alert at your chosen time.'
               .localized(context),
+        ),
+
+        // Dedicated Time Reflection Category Entry
+        SettingsGroup(
+          p: p,
+          title: 'Time Reflection & Mindfulness'
+              .localized(context)
+              .toUpperCase(),
+          children: [
+            SettingsRow(
+              p: p,
+              title: 'Time Reflection & Hourly Mindfulness'.localized(context),
+              status: reflectionReminderEnabled
+                  ? '${'Active'.localized(context)} · ${switch (reflectionReminderIntervalMins) {
+                      15 => 'Every 15 Minutes',
+                      30 => 'Every 30 Minutes',
+                      45 => 'Every 45 Minutes',
+                      60 => 'Every 1 Hour',
+                      120 => 'Every 2 Hours',
+                      _ => 'Every $reflectionReminderIntervalMins Minutes',
+                    }.localized(context)}'
+                  : 'Disabled'.localized(context),
+              color: p.accent,
+              onTap: onOpenTimeReflection,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Full-screen hourly mindfulness prompts that turn your phone into an intentional time awareness companion.'
+                  .localized(context),
         ),
 
         // Inactivity reminder group

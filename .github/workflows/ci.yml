@@ -2,9 +2,9 @@ name: CI — Analyze, Test, Format & Build Verification
 
 on:
   push:
-    branches: [ main, dev, release, beta, security ]
+    branches: [ main, dev, release, beta, priority, security ]
   pull_request:
-    branches: [ main, dev, release, beta, security ]
+    branches: [ main, dev, release, beta, priority, security ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
