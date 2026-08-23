@@ -4620,32 +4620,46 @@ ${stackTrace ?? 'No stack trace provided.'}
                               },
                               reflectionStartTime: _reflectionStartTime,
                               reflectionEndTime: _reflectionEndTime,
-                              onSelectStartTime: (picked) async {
-                                setState(() => _reflectionStartTime = picked);
-                                await _prefs?.setInt(
-                                  'reminder_reflection_start_hour',
-                                  picked.hour,
+                              onTapStartTime: () async {
+                                HapticFeedback.selectionClick();
+                                final time = await _showIOSTimePicker(
+                                  context,
+                                  _reflectionStartTime,
                                 );
-                                await _prefs?.setInt(
-                                  'reminder_reflection_start_minute',
-                                  picked.minute,
-                                );
-                                if (_reflectionReminderEnabled) {
-                                  await _syncReminder('reflection');
+                                if (time != null) {
+                                  setState(() => _reflectionStartTime = time);
+                                  await _prefs?.setInt(
+                                    'reminder_reflection_start_hour',
+                                    time.hour,
+                                  );
+                                  await _prefs?.setInt(
+                                    'reminder_reflection_start_minute',
+                                    time.minute,
+                                  );
+                                  if (_reflectionReminderEnabled) {
+                                    await _syncReminder('reflection');
+                                  }
                                 }
                               },
-                              onSelectEndTime: (picked) async {
-                                setState(() => _reflectionEndTime = picked);
-                                await _prefs?.setInt(
-                                  'reminder_reflection_end_hour',
-                                  picked.hour,
+                              onTapEndTime: () async {
+                                HapticFeedback.selectionClick();
+                                final time = await _showIOSTimePicker(
+                                  context,
+                                  _reflectionEndTime,
                                 );
-                                await _prefs?.setInt(
-                                  'reminder_reflection_end_minute',
-                                  picked.minute,
-                                );
-                                if (_reflectionReminderEnabled) {
-                                  await _syncReminder('reflection');
+                                if (time != null) {
+                                  setState(() => _reflectionEndTime = time);
+                                  await _prefs?.setInt(
+                                    'reminder_reflection_end_hour',
+                                    time.hour,
+                                  );
+                                  await _prefs?.setInt(
+                                    'reminder_reflection_end_minute',
+                                    time.minute,
+                                  );
+                                  if (_reflectionReminderEnabled) {
+                                    await _syncReminder('reflection');
+                                  }
                                 }
                               },
                               onPreviewReflectionSheet: () async {

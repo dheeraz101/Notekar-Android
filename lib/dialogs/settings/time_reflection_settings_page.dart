@@ -21,8 +21,8 @@ class TimeReflectionSettingsPage extends StatelessWidget {
     required this.onTapReflectionInterval,
     required this.onToggleReflectionSound,
     this.onUpdateReflectionMessage,
-    this.onSelectStartTime,
-    this.onSelectEndTime,
+    this.onTapStartTime,
+    this.onTapEndTime,
     required this.onPreviewReflectionSheet,
   });
 
@@ -37,8 +37,8 @@ class TimeReflectionSettingsPage extends StatelessWidget {
   final ValueChanged<int> onTapReflectionInterval;
   final ValueChanged<bool> onToggleReflectionSound;
   final ValueChanged<String>? onUpdateReflectionMessage;
-  final ValueChanged<TimeOfDay>? onSelectStartTime;
-  final ValueChanged<TimeOfDay>? onSelectEndTime;
+  final VoidCallback? onTapStartTime;
+  final VoidCallback? onTapEndTime;
   final VoidCallback onPreviewReflectionSheet;
 
   String _shortInterval(BuildContext context, int minutes) {
@@ -217,12 +217,6 @@ class TimeReflectionSettingsPage extends StatelessWidget {
   Future<void> _openMessageEditor(BuildContext context) async {
     HapticFeedback.selectionClick();
     final controller = TextEditingController(text: reflectionReminderMessage);
-    final presets = [
-      'Pause. Breathe. Be present.',
-      'Take 3 deep breaths and reset.',
-      'Focus on what truly matters.',
-      'One mindful breath at a time.',
-    ];
 
     await showModalBottomSheet<void>(
       context: context,
@@ -278,7 +272,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Mindfulness Message'.localized(context),
+                                'Message'.localized(context),
                                 style: TextStyle(
                                   color: p.text,
                                   fontSize: 18,
@@ -308,6 +302,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                             controller: controller,
                             maxLength: 60,
                             maxLines: 2,
+                            autofocus: true,
                             onChanged: (_) => setModalState(() {}),
                             style: TextStyle(
                               color: p.text,
@@ -346,49 +341,6 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (final preset in presets)
-                                InkWell(
-                                  onTap: () {
-                                    HapticFeedback.selectionClick();
-                                    controller.text = preset;
-                                    setModalState(() {});
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: p.surface2,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: controller.text == preset
-                                            ? p.accent
-                                            : p.border.withValues(alpha: 0.4),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      preset.localized(context),
-                                      style: TextStyle(
-                                        color: controller.text == preset
-                                            ? p.accent
-                                            : p.text2,
-                                        fontSize: 12,
-                                        fontWeight: controller.text == preset
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
                           ),
                           const SizedBox(height: 20),
                           Row(
@@ -595,10 +547,10 @@ class TimeReflectionSettingsPage extends StatelessWidget {
               ),
               SettingsRow(
                 p: p,
-                title: 'Mindfulness Message'.localized(context),
+                title: 'Message'.localized(context),
                 status: reflectionReminderMessage.trim().isNotEmpty
-                    ? reflectionReminderMessage.trim()
-                    : 'Short motivational line'.localized(context),
+                    ? 'Custom'.localized(context)
+                    : 'Default'.localized(context),
                 color: p.accent,
                 onTap: () => _openMessageEditor(context),
               ),
@@ -623,30 +575,14 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                 title: 'Start Time'.localized(context),
                 status: reflectionStartTime.format(context),
                 color: p.accent,
-                onTap: () async {
-                  final picked = await showTimePicker(
-                    context: context,
-                    initialTime: reflectionStartTime,
-                  );
-                  if (picked != null) {
-                    onSelectStartTime?.call(picked);
-                  }
-                },
+                onTap: onTapStartTime,
               ),
               SettingsRow(
                 p: p,
                 title: 'End Time'.localized(context),
                 status: reflectionEndTime.format(context),
                 color: p.accent,
-                onTap: () async {
-                  final picked = await showTimePicker(
-                    context: context,
-                    initialTime: reflectionEndTime,
-                  );
-                  if (picked != null) {
-                    onSelectEndTime?.call(picked);
-                  }
-                },
+                onTap: onTapEndTime,
               ),
             ],
           ),
