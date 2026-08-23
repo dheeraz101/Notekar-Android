@@ -12,6 +12,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -465,6 +466,19 @@ class MainActivity : FlutterActivity() {
                     result.success(null)
                 }
 
+                "playReflectionSound" -> {
+                    try {
+                        val soundUri =
+                            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                        val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
+                        ringtone?.play()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
                 "scheduleReminder" -> {
                     val id = call.argument<String>("id") ?: ""
                     val type = call.argument<String>("type") ?: "daily"
@@ -474,6 +488,10 @@ class MainActivity : FlutterActivity() {
                     val dayOfMonth = call.argument<Int>("dayOfMonth")
                     val intervalMinutes = call.argument<Int>("intervalMinutes")
                     val delaySeconds = call.argument<Int>("delaySeconds")
+                    val startHour = call.argument<Int>("startHour")
+                    val startMinute = call.argument<Int>("startMinute")
+                    val endHour = call.argument<Int>("endHour")
+                    val endMinute = call.argument<Int>("endMinute")
                     val title = call.argument<String>("title") ?: "NoteKar Reminder"
                     val body = call.argument<String>("body") ?: "Time to log a moment!"
                     if (id.isNotBlank()) {
@@ -487,6 +505,10 @@ class MainActivity : FlutterActivity() {
                             dayOfMonth,
                             intervalMinutes,
                             delaySeconds,
+                            startHour,
+                            startMinute,
+                            endHour,
+                            endMinute,
                             title,
                             body
                         )

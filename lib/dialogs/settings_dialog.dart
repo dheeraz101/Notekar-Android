@@ -318,6 +318,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool _reflectionReminderEnabled = false;
   int _reflectionReminderIntervalMins = 60;
   bool _reflectionReminderSound = true;
+  TimeOfDay _reflectionStartTime = const TimeOfDay(hour: 9, minute: 0);
+  TimeOfDay _reflectionEndTime = const TimeOfDay(hour: 22, minute: 0);
   bool _inactivityReminderEnabled = false;
   int _inactivityIntervalMins = 240;
   bool _weeklyReminderEnabled = false;
@@ -329,6 +331,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _dailyReminderBody = 'Time to log a moment!';
   String _weeklyReminderBody = 'Time to log a moment!';
   String _monthlyReminderBody = 'Time to log a moment!';
+  String _reflectionReminderBody = '';
   bool _hasExactAlarmPermission = true;
   bool _ignoresBatteryOptimizations = true;
 
@@ -385,6 +388,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
           _prefs?.getInt('reminder_reflection_interval_mins') ?? 60;
       _reflectionReminderSound =
           _prefs?.getBool('reminder_reflection_sound') ?? true;
+      _reflectionReminderBody =
+          _prefs?.getString('reminder_reflection_body') ?? '';
+      _reflectionStartTime = TimeOfDay(
+        hour: _prefs?.getInt('reminder_reflection_start_hour') ?? 9,
+        minute: _prefs?.getInt('reminder_reflection_start_minute') ?? 0,
+      );
+      _reflectionEndTime = TimeOfDay(
+        hour: _prefs?.getInt('reminder_reflection_end_hour') ?? 22,
+        minute: _prefs?.getInt('reminder_reflection_end_minute') ?? 0,
+      );
 
       _inactivityReminderEnabled =
           _prefs?.getBool('reminder_inactivity_enabled') ?? false;
@@ -552,9 +565,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
             'id': 'reminder_reflection',
             'type': 'reflection',
             'intervalMinutes': _reflectionReminderIntervalMins,
+            'startHour': _reflectionStartTime.hour,
+            'startMinute': _reflectionStartTime.minute,
+            'endHour': _reflectionEndTime.hour,
+            'endMinute': _reflectionEndTime.minute,
             'title': 'Mindfulness'.localized(context),
-            'body': 'A new hour has passed. Take a mindful pause and reflect.'
-                .localized(context),
+            'body': _reflectionReminderBody.trim().isNotEmpty
+                ? _reflectionReminderBody.trim()
+                : 'Pause. Breathe. Be present in this moment.'.localized(
+                    context,
+                  ),
           });
         } else {
           await _fileChannel.invokeMethod('cancelReminder', {
@@ -4534,6 +4554,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                               reflectionReminderIntervalMins:
                                   _reflectionReminderIntervalMins,
                               reflectionReminderSound: _reflectionReminderSound,
+                              reflectionReminderMessage:
+                                  _reflectionReminderBody,
                               onToggleReflectionReminder: (value) async {
                                 HapticFeedback.selectionClick();
                                 if (value) {
@@ -4586,6 +4608,46 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   value,
                                 );
                               },
+                              onUpdateReflectionMessage: (value) async {
+                                setState(() => _reflectionReminderBody = value);
+                                await _prefs?.setString(
+                                  'reminder_reflection_body',
+                                  value,
+                                );
+                                if (_reflectionReminderEnabled) {
+                                  await _syncReminder('reflection');
+                                }
+                              },
+                              reflectionStartTime: _reflectionStartTime,
+                              reflectionEndTime: _reflectionEndTime,
+                              onSelectStartTime: (picked) async {
+                                setState(() => _reflectionStartTime = picked);
+                                await _prefs?.setInt(
+                                  'reminder_reflection_start_hour',
+                                  picked.hour,
+                                );
+                                await _prefs?.setInt(
+                                  'reminder_reflection_start_minute',
+                                  picked.minute,
+                                );
+                                if (_reflectionReminderEnabled) {
+                                  await _syncReminder('reflection');
+                                }
+                              },
+                              onSelectEndTime: (picked) async {
+                                setState(() => _reflectionEndTime = picked);
+                                await _prefs?.setInt(
+                                  'reminder_reflection_end_hour',
+                                  picked.hour,
+                                );
+                                await _prefs?.setInt(
+                                  'reminder_reflection_end_minute',
+                                  picked.minute,
+                                );
+                                if (_reflectionReminderEnabled) {
+                                  await _syncReminder('reflection');
+                                }
+                              },
                               onPreviewReflectionSheet: () async {
                                 HapticFeedback.heavyImpact();
                                 if (!context.mounted) return;
@@ -4608,7 +4670,11 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     'intervalMinutes': 0,
                                     'title': 'Mindfulness',
                                     'body':
-                                        'Mindful pause: Take 3 deep breaths and acknowledge this hour.',
+                                        _reflectionReminderBody
+                                            .trim()
+                                            .isNotEmpty
+                                        ? _reflectionReminderBody.trim()
+                                        : 'Pause. Breathe. Be present in this moment.',
                                   });
                                 } catch (_) {}
                                 await Future<void>.delayed(
@@ -4620,6 +4686,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     p: p,
                                     intervalMinutes:
                                         _reflectionReminderIntervalMins,
+                                    customMessage: _reflectionReminderBody,
                                   );
                                 }
                               },

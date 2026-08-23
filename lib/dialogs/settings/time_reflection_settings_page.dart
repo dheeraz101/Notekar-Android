@@ -14,9 +14,15 @@ class TimeReflectionSettingsPage extends StatelessWidget {
     required this.reflectionReminderEnabled,
     required this.reflectionReminderIntervalMins,
     required this.reflectionReminderSound,
+    this.reflectionReminderMessage = '',
+    this.reflectionStartTime = const TimeOfDay(hour: 9, minute: 0),
+    this.reflectionEndTime = const TimeOfDay(hour: 22, minute: 0),
     required this.onToggleReflectionReminder,
     required this.onTapReflectionInterval,
     required this.onToggleReflectionSound,
+    this.onUpdateReflectionMessage,
+    this.onSelectStartTime,
+    this.onSelectEndTime,
     required this.onPreviewReflectionSheet,
   });
 
@@ -24,9 +30,15 @@ class TimeReflectionSettingsPage extends StatelessWidget {
   final bool reflectionReminderEnabled;
   final int reflectionReminderIntervalMins;
   final bool reflectionReminderSound;
+  final String reflectionReminderMessage;
+  final TimeOfDay reflectionStartTime;
+  final TimeOfDay reflectionEndTime;
   final ValueChanged<bool> onToggleReflectionReminder;
   final ValueChanged<int> onTapReflectionInterval;
   final ValueChanged<bool> onToggleReflectionSound;
+  final ValueChanged<String>? onUpdateReflectionMessage;
+  final ValueChanged<TimeOfDay>? onSelectStartTime;
+  final ValueChanged<TimeOfDay>? onSelectEndTime;
   final VoidCallback onPreviewReflectionSheet;
 
   String _shortInterval(BuildContext context, int minutes) {
@@ -202,6 +214,251 @@ class TimeReflectionSettingsPage extends StatelessWidget {
     }
   }
 
+  Future<void> _openMessageEditor(BuildContext context) async {
+    HapticFeedback.selectionClick();
+    final controller = TextEditingController(text: reflectionReminderMessage);
+    final presets = [
+      'Pause. Breathe. Be present.',
+      'Take 3 deep breaths and reset.',
+      'Focus on what truly matters.',
+      'One mindful breath at a time.',
+    ];
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final textLen = controller.text.length;
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: p.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(32),
+                  ),
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.5),
+                    width: 0.8,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(32),
+                  ),
+                  child: Glass(
+                    p: p,
+                    radius: 32,
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    child: SafeArea(
+                      top: false,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: p.text3.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(2.5),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Mindfulness Message'.localized(context),
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              PressableScale(
+                                onTap: () => Navigator.pop(ctx),
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: p.surface2,
+                                  ),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    size: 18,
+                                    color: p.text2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: controller,
+                            maxLength: 60,
+                            maxLines: 2,
+                            onChanged: (_) => setModalState(() {}),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Short motivational line'.localized(
+                                context,
+                              ),
+                              hintStyle: TextStyle(
+                                color: p.text3,
+                                fontSize: 13,
+                              ),
+                              counterText: '$textLen/60',
+                              counterStyle: TextStyle(
+                                color: textLen > 55 ? p.orange : p.text3,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              filled: true,
+                              fillColor: p.surface2,
+                              contentPadding: const EdgeInsets.all(16),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: p.accent,
+                                  width: 1.5,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final preset in presets)
+                                InkWell(
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    controller.text = preset;
+                                    setModalState(() {});
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: p.surface2,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: controller.text == preset
+                                            ? p.accent
+                                            : p.border.withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      preset.localized(context),
+                                      style: TextStyle(
+                                        color: controller.text == preset
+                                            ? p.accent
+                                            : p.text2,
+                                        fontSize: 12,
+                                        fontWeight: controller.text == preset
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              if (controller.text.isNotEmpty)
+                                Expanded(
+                                  flex: 1,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      HapticFeedback.selectionClick();
+                                      controller.clear();
+                                      onUpdateReflectionMessage?.call('');
+                                      Navigator.pop(ctx);
+                                    },
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: p.text3,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                    ),
+                                    child: Text('Reset'.localized(context)),
+                                  ),
+                                ),
+                              if (controller.text.isNotEmpty)
+                                const SizedBox(width: 10),
+                              Expanded(
+                                flex: 2,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    onUpdateReflectionMessage?.call(
+                                      controller.text.trim(),
+                                    );
+                                    Navigator.pop(ctx);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: p.accent,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Save Message'.localized(context),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -338,6 +595,15 @@ class TimeReflectionSettingsPage extends StatelessWidget {
               ),
               SettingsRow(
                 p: p,
+                title: 'Mindfulness Message'.localized(context),
+                status: reflectionReminderMessage.trim().isNotEmpty
+                    ? reflectionReminderMessage.trim()
+                    : 'Short motivational line'.localized(context),
+                color: p.accent,
+                onTap: () => _openMessageEditor(context),
+              ),
+              SettingsRow(
+                p: p,
                 title: 'Test Alert'.localized(context),
                 status: 'Test (3s)'.localized(context),
                 color: p.accent,
@@ -346,12 +612,51 @@ class TimeReflectionSettingsPage extends StatelessWidget {
             ],
           ],
         ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'When active, your phone wakes up with a soothing chime and full-screen prompt at your chosen frequency even when locked.'
-                  .localized(context),
-        ),
+        if (reflectionReminderEnabled) ...[
+          const SizedBox(height: spacing8),
+          SettingsGroup(
+            p: p,
+            title: 'Active Schedule'.localized(context).toUpperCase(),
+            children: [
+              SettingsRow(
+                p: p,
+                title: 'Start Time'.localized(context),
+                status: reflectionStartTime.format(context),
+                color: p.accent,
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: reflectionStartTime,
+                  );
+                  if (picked != null) {
+                    onSelectStartTime?.call(picked);
+                  }
+                },
+              ),
+              SettingsRow(
+                p: p,
+                title: 'End Time'.localized(context),
+                status: reflectionEndTime.format(context),
+                color: p.accent,
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: reflectionEndTime,
+                  );
+                  if (picked != null) {
+                    onSelectEndTime?.call(picked);
+                  }
+                },
+              ),
+            ],
+          ),
+          SettingsPageDescription(
+            p: p,
+            text:
+                'Alarms only alert between ${reflectionStartTime.format(context)} and ${reflectionEndTime.format(context)} to keep your sleep peaceful and uninterrupted.'
+                    .localized(context),
+          ),
+        ],
 
         const SizedBox(height: spacing8),
 

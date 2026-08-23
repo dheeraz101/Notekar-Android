@@ -84,6 +84,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   bool _resetSingleDaily = false;
   bool _countOnSave = false;
   String _appIconStyle = 'default';
+  bool _enableMindfulness = false;
 
   static const _fileChannel = MethodChannel('notekar/files');
 
@@ -122,6 +123,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       _countOnSave = _prefs?.getBool('m-count-on-save') ?? widget.countOnSave;
       _appIconStyle =
           _prefs?.getString('m-app-icon-style') ?? widget.appIconStyle;
+      _enableMindfulness =
+          _prefs?.getBool('reminder_reflection_enabled') ?? false;
     });
   }
 
@@ -360,6 +363,102 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildMindfulnessPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.self_improvement_rounded,
+                color: p.accent,
+                size: 40,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Mindfulness & Time Reflection'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Take a 10-second mindful pause each hour to reset, breathe, and reflect without endless scrolling.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // Interactive Apple HIG Settings Group
+          SettingsGroup(
+            p: p,
+            children: [
+              SettingsSwitchRow(
+                p: p,
+                icon: Icons.notifications_active_rounded,
+                title: 'Hourly Mindfulness Alert'.localized(context),
+                subtitle:
+                    'Wakes your screen with a soothing chime and full-screen reflection overlay.'
+                        .localized(context),
+                color: p.accent,
+                value: _enableMindfulness,
+                onChanged: (value) async {
+                  if (_prefs != null) {
+                    await _prefs!.setBool('reminder_reflection_enabled', value);
+                  }
+                  setState(() => _enableMindfulness = value);
+                },
+              ),
+              SettingsRow(
+                p: p,
+                icon: Icons.bedtime_rounded,
+                title: 'Active Daytime Window'.localized(context),
+                status: '9:00 AM – 10:00 PM'.localized(context),
+                subtitle:
+                    'Automatically muted during night hours so your sleep is never disturbed.'
+                        .localized(context),
+                color: p.accent,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SettingsPageDescription(
+            p: p,
+            text:
+                '100% offline, private, and battery-friendly. You can fine-tune intervals, quiet hours, and custom messages anytime in Settings.'
+                    .localized(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1719,6 +1818,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'sobriety') {
                     return _buildSobrietyPage(p);
+                  }
+                  if (key == 'mindfulness') {
+                    return _buildMindfulnessPage(p);
                   }
                   return const SizedBox.shrink();
                 }).toList(),

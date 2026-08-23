@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class TimeReflectionSheet extends StatefulWidget {
@@ -12,17 +11,23 @@ class TimeReflectionSheet extends StatefulWidget {
     super.key,
     required this.p,
     this.intervalMinutes = 60,
+    this.customMessage,
+    this.playSound = true,
     this.onLogMoment,
   });
 
   final Palette p;
   final int intervalMinutes;
+  final String? customMessage;
+  final bool playSound;
   final VoidCallback? onLogMoment;
 
   static Future<void> show(
     BuildContext context, {
     required Palette p,
     int intervalMinutes = 60,
+    String? customMessage,
+    bool playSound = true,
     VoidCallback? onLogMoment,
   }) {
     HapticFeedback.heavyImpact();
@@ -37,6 +42,8 @@ class TimeReflectionSheet extends StatefulWidget {
         child: TimeReflectionSheet(
           p: p,
           intervalMinutes: intervalMinutes,
+          customMessage: customMessage,
+          playSound: playSound,
           onLogMoment: onLogMoment,
         ),
       ),
@@ -77,6 +84,15 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
       parent: _pulseController,
       curve: Curves.easeInOutSine,
     );
+
+    if (widget.playSound) {
+      SystemSound.play(SystemSoundType.alert);
+      try {
+        const MethodChannel(
+          'notekar/files',
+        ).invokeMethod('playReflectionSound');
+      } catch (_) {}
+    }
   }
 
   @override
@@ -101,6 +117,11 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
   Widget build(BuildContext context) {
     final p = widget.p;
     final now = TimeOfDay.now();
+    final message =
+        (widget.customMessage != null &&
+            widget.customMessage!.trim().isNotEmpty)
+        ? widget.customMessage!.trim()
+        : 'Pause. Breathe. Be present in this moment.'.localized(context);
 
     return Container(
       width: double.infinity,
@@ -283,7 +304,7 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
 
                     const SizedBox(height: 18),
 
-                    // Mindfulness Title & Guidance
+                    // Mindfulness Title
                     Text(
                       'Take a Mindful Breath'.localized(context),
                       style: TextStyle(
@@ -294,49 +315,34 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    const SizedBox(height: 14),
+
+                    // Focused Custom / Motivational Message (max 60 chars)
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 360),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface2,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                      ),
                       child: Text(
-                        'With your phone always with you, pause for a moment. Reflect on how you spent your last hour, and decide your focus for the next.'
-                            .localized(context),
+                        message,
                         style: TextStyle(
-                          color: p.text2,
-                          fontSize: 14,
-                          height: 1.5,
+                          color: p.text,
+                          fontSize: 15,
+                          height: 1.4,
+                          fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Quote / Reflection Card
-                    Glass(
-                      p: p,
-                      radius: 24,
-                      padding: const EdgeInsets.all(18),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.lightbulb_outline_rounded,
-                            color: p.orange,
-                            size: 26,
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Text(
-                              '"Time is what we want most, but what we use worst."'
-                                  .localized(context),
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 13,
-                                fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -344,63 +350,35 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
               ),
             ),
 
-            // Action Buttons at Bottom (Full-Screen Alarm Actions)
+            // Single Primary Action Button at Bottom
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        Navigator.pop(context);
-                        widget.onLogMoment?.call();
-                      },
-                      icon: const Icon(Icons.touch_app_rounded, size: 20),
-                      label: Text(
-                        'Log Current Moment'.localized(context),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: p.accent,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.pop(context);
+                    widget.onLogMoment?.call();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: p.accent,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: TextButton(
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.pop(context);
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: p.text2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      child: Text(
-                        'Dismiss Alarm'.localized(context),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  child: Text(
+                    "I'm Mindful".localized(context),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ],

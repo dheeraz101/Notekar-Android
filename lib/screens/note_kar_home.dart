@@ -771,6 +771,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefs.getBool('notekar.singleNumberingWalkthroughSeen_v7') ?? false;
     final appIconsWalkthroughSeen =
         prefs.getBool('notekar.appIconsWalkthroughSeen_v9') ?? false;
+    final mindfulnessWalkthroughSeen =
+        prefs.getBool('notekar.mindfulnessWalkthroughSeen_v10') ?? false;
 
     final isNewVersion =
         lastSeenVersion.isNotEmpty && lastSeenVersion != appVersion;
@@ -843,6 +845,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               'app-icons',
               'security',
               'features',
+              'mindfulness',
               'numbered-singles',
               'repo-move',
               'updates-permission',
@@ -880,9 +883,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
       await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
       await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
+      await prefs.setBool('notekar.mindfulnessWalkthroughSeen_v10', true);
     } else {
       // 2. Upgraded Users: Dynamically compile ONLY newly introduced feature cards
       final List<String> upgradePages = [];
+      if (!mindfulnessWalkthroughSeen) upgradePages.add('mindfulness');
       if (!appIconsWalkthroughSeen) upgradePages.add('app-icons');
       if (!securityWalkthroughSeen) upgradePages.add('security');
       if (!remindersWalkthroughSeen) {
@@ -1006,6 +1011,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.networkWalkthroughSeen_v5', true);
       await prefs.setBool('notekar.sobrietyWalkthroughSeen_v6', true);
       await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
+      await prefs.setBool('notekar.mindfulnessWalkthroughSeen_v10', true);
     }
   }
 

@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import org.json.JSONObject
@@ -34,6 +36,43 @@ class ReminderReceiver : BroadcastReceiver() {
         if (isTest) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().remove(id).apply()
+        }
+
+        // Active hours check for recurring reflection alarms
+        if (type == "reflection" && !isTest) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val jsonStr = prefs.getString(id, null)
+            if (jsonStr != null) {
+                try {
+                    val json = JSONObject(jsonStr)
+                    val startH = json.optInt("startHour", 9)
+                    val startM = json.optInt("startMinute", 0)
+                    val endH = json.optInt("endHour", 22)
+                    val endM = json.optInt("endMinute", 0)
+                    val nowCal = Calendar.getInstance()
+                    val nowMinutes =
+                        nowCal.get(Calendar.HOUR_OF_DAY) * 60 + nowCal.get(Calendar.MINUTE)
+                    val startMinutes = startH * 60 + startM
+                    val endMinutes = endH * 60 + endM
+
+                    var isOutside = false
+                    if (startMinutes <= endMinutes) {
+                        if (nowMinutes < startMinutes || nowMinutes > endMinutes) {
+                            isOutside = true
+                        }
+                    } else {
+                        if (nowMinutes > endMinutes && nowMinutes < startMinutes) {
+                            isOutside = true
+                        }
+                    }
+
+                    if (isOutside) {
+                        scheduleAlarm(context, id, json)
+                        return
+                    }
+                } catch (_: Exception) {
+                }
+            }
         }
 
         showNotification(context, id, title, body)
@@ -92,6 +131,10 @@ class ReminderReceiver : BroadcastReceiver() {
             dayOfMonth: Int?,
             intervalMinutes: Int?,
             delaySeconds: Int? = null,
+            startHour: Int? = null,
+            startMinute: Int? = null,
+            endHour: Int? = null,
+            endMinute: Int? = null,
             title: String,
             body: String
         ) {
@@ -115,6 +158,10 @@ class ReminderReceiver : BroadcastReceiver() {
                 if (delaySeconds != null && delaySeconds > 0) {
                     put("delaySeconds", delaySeconds)
                 }
+                if (startHour != null) put("startHour", startHour)
+                if (startMinute != null) put("startMinute", startMinute)
+                if (endHour != null) put("endHour", endHour)
+                if (endMinute != null) put("endMinute", endMinute)
                 put("title", title)
                 put("body", body)
             }
@@ -200,7 +247,46 @@ class ReminderReceiver : BroadcastReceiver() {
                 calendar.timeInMillis = System.currentTimeMillis() + (delaySec * 1000L)
             } else {
                 when (type) {
-                    "inactivity", "reflection" -> {
+                    "reflection" -> {
+                        val intervalMinutes = json.optInt("intervalMinutes", 60)
+                        val startH = json.optInt("startHour", 9)
+                        val startM = json.optInt("startMinute", 0)
+                        val endH = json.optInt("endHour", 22)
+                        val endM = json.optInt("endMinute", 0)
+
+                        val targetCal = Calendar.getInstance()
+                        targetCal.timeInMillis =
+                            System.currentTimeMillis() + (intervalMinutes * 60L * 1000L)
+
+                        val targetMinutes =
+                            targetCal.get(Calendar.HOUR_OF_DAY) * 60 + targetCal.get(Calendar.MINUTE)
+                        val startMinutes = startH * 60 + startM
+                        val endMinutes = endH * 60 + endM
+
+                        var isOutside = false
+                        if (startMinutes <= endMinutes) {
+                            if (targetMinutes < startMinutes || targetMinutes > endMinutes) {
+                                isOutside = true
+                            }
+                        } else {
+                            if (targetMinutes > endMinutes && targetMinutes < startMinutes) {
+                                isOutside = true
+                            }
+                        }
+
+                        if (isOutside) {
+                            targetCal.set(Calendar.HOUR_OF_DAY, startH)
+                            targetCal.set(Calendar.MINUTE, startM)
+                            targetCal.set(Calendar.SECOND, 0)
+                            targetCal.set(Calendar.MILLISECOND, 0)
+                            if (targetCal.before(now)) {
+                                targetCal.add(Calendar.DAY_OF_YEAR, 1)
+                            }
+                        }
+                        calendar.timeInMillis = targetCal.timeInMillis
+                    }
+
+                    "inactivity" -> {
                         val intervalMinutes = json.optInt("intervalMinutes", 60)
                         calendar.timeInMillis =
                             System.currentTimeMillis() + (intervalMinutes * 60L * 1000L)
@@ -328,6 +414,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 context.getSystemService(NotificationManager::class.java) ?: return
             val isReflection = reminderId.contains("reflection")
             val targetChannelId = if (isReflection) REFLECTION_CHANNEL_ID else CHANNEL_ID
+            val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channelName = if (isReflection) "Time Reflection Alarms" else "Reminders"
@@ -344,6 +432,11 @@ class ReminderReceiver : BroadcastReceiver() {
                     lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                     if (isReflection) {
                         setBypassDnd(true)
+                        val audioAttributes = AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                        setSound(soundUri, audioAttributes)
                     }
                 }
                 notificationManager.createNotificationChannel(channel)
@@ -385,6 +478,7 @@ class ReminderReceiver : BroadcastReceiver() {
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(openPending)
                 .setAutoCancel(true)
+                .setSound(soundUri)
                 .setPriority(if (isReflection) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
                 .setCategory(if (isReflection) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
