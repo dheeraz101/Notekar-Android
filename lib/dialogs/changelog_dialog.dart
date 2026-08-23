@@ -25,6 +25,26 @@ class ChangelogDialog extends StatefulWidget {
 
   static const releases = [
     (
+      version: '7.2.0',
+      date: 'August 23, 2026',
+      highlights: [
+        'Priority maintenance and stability improvements.',
+        'Add alarm audio chime, active hours schedule, and onboarding flow',
+        'Integrate system AlarmManager scheduling & full-screen lockscreen waking',
+        'Add Time Reflection dedicated page, full-screen alarm alerts & Priority Release channel',
+      ],
+      items: [
+        'Use iOS time picker, rename message row, and simplify editor sheet',
+        'Add alarm audio chime, active hours schedule, and onboarding flow',
+        'Refine Test Alert action & standardize interval picker bottom sheet',
+        'Resolve test alarm infinite loop and eliminate top notification banner',
+        'Integrate system AlarmManager scheduling & full-screen lockscreen waking',
+        'Refine Time Reflection settings, layout alignment & Apple HIG picker',
+        'Restructure localization into clean ARB files and modular helpers',
+        'Add Time Reflection dedicated page, full-screen alarm alerts & Priority Release channel',
+      ],
+    ),
+    (
       version: '7.1.0',
       date: 'August 21, 2026',
       highlights: [

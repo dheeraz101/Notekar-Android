@@ -1,0 +1,9 @@
+Update to 7.2.0 (build 26PR0823):
+- New: Add alarm audio chime, active hours schedule, and onboarding flow
+- New: Integrate system AlarmManager scheduling & full-screen lockscreen waking
+- New: Add Time Reflection dedicated page, full-screen alarm alerts & Priority Release channel
+- Use iOS time picker, rename message row, and simplify editor sheet
+- Refine Test Alert action & standardize interval picker bottom sheet
+- Refine Time Reflection settings, layout alignment & Apple HIG picker
+- Restructure localization into clean ARB files and modular helpers
+- Fix: Resolve test alarm infinite loop and eliminate top notification banner
