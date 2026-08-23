@@ -29,17 +29,41 @@ class ReminderReceiver : BroadcastReceiver() {
         val title = intent.getStringExtra(EXTRA_TITLE) ?: "NoteKar Reminder"
         val body = intent.getStringExtra(EXTRA_BODY) ?: "Time to log a moment!"
         val type = intent.getStringExtra(EXTRA_TYPE) ?: "daily"
+        val isTest = id.contains("test") || id.endsWith("_test")
+
+        if (isTest) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().remove(id).apply()
+        }
 
         showNotification(context, id, title, body)
 
-        // Reschedule next occurrence for repeating alarms
-        if (type == "daily" || type == "weekly" || type == "monthly" || type == "reflection") {
+        // Try direct launch for full-screen reflection
+        if (type == "reflection") {
+            try {
+                val directIntent = Intent(context, MainActivity::class.java).apply {
+                    putExtra(MainActivity.EXTRA_LAUNCH_ACTION, "reflection")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                }
+                context.startActivity(directIntent)
+            } catch (e: Exception) {
+                android.util.Log.w("ReminderReceiver", "Direct launch fallback", e)
+            }
+        }
+
+        // Reschedule next occurrence ONLY for real recurring alarms (never for test alarms)
+        if (!isTest && (type == "daily" || type == "weekly" || type == "monthly" || type == "reflection")) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val jsonStr = prefs.getString(id, null)
             if (jsonStr != null) {
                 try {
                     val json = JSONObject(jsonStr)
-                    scheduleAlarm(context, id, json)
+                    val delaySec = json.optInt("delaySeconds", 0)
+                    if (delaySec <= 0) {
+                        scheduleAlarm(context, id, json)
+                    }
                 } catch (_: Exception) {
                 }
             }
@@ -71,6 +95,8 @@ class ReminderReceiver : BroadcastReceiver() {
             title: String,
             body: String
         ) {
+            val isTest =
+                id.contains("test") || id.endsWith("_test") || (delaySeconds != null && delaySeconds > 0)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val json = JSONObject().apply {
                 put("id", id)
@@ -92,7 +118,12 @@ class ReminderReceiver : BroadcastReceiver() {
                 put("title", title)
                 put("body", body)
             }
-            prefs.edit().putString(id, json.toString()).apply()
+
+            if (!isTest) {
+                prefs.edit().putString(id, json.toString()).apply()
+            } else {
+                prefs.edit().remove(id).apply()
+            }
 
             scheduleAlarm(context, id, json)
         }
@@ -101,17 +132,26 @@ class ReminderReceiver : BroadcastReceiver() {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().remove(id).apply()
 
-            val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
-            val intent = Intent(context, ReminderReceiver::class.java).apply {
-                action = ACTION_TRIGGER
+            val alarmManager = context.getSystemService(AlarmManager::class.java)
+            if (alarmManager != null) {
+                val intent = Intent(context, ReminderReceiver::class.java).apply {
+                    action = ACTION_TRIGGER
+                }
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    id.hashCode(),
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.cancel(pendingIntent)
             }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                id.hashCode(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            alarmManager.cancel(pendingIntent)
+
+            try {
+                val notificationManager = context.getSystemService(NotificationManager::class.java)
+                val notificationId = NOTIFICATION_ID_BASE + Math.abs(id.hashCode() % 1000)
+                notificationManager?.cancel(notificationId)
+            } catch (_: Exception) {
+            }
         }
 
         fun rescheduleAll(context: Context) {

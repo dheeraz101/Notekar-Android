@@ -55,6 +55,14 @@ class MainActivity : FlutterActivity() {
     private fun applyLockscreenAndWakeFlags(intent: Intent?) {
         val action = actionFromIntent(intent)
         if (action == "reflection" || intent?.getStringExtra(EXTRA_LAUNCH_ACTION) == "reflection") {
+            try {
+                val notificationManager =
+                    getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                notificationManager?.cancel(ReminderReceiver.NOTIFICATION_ID_BASE + Math.abs("reminder_reflection".hashCode() % 1000))
+                notificationManager?.cancel(ReminderReceiver.NOTIFICATION_ID_BASE + Math.abs("reminder_reflection_test".hashCode() % 1000))
+            } catch (_: Exception) {
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 setShowWhenLocked(true)
                 setTurnScreenOn(true)
