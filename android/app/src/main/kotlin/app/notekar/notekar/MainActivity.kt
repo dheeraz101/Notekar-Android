@@ -58,22 +58,21 @@ class MainActivity : FlutterActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 setShowWhenLocked(true)
                 setTurnScreenOn(true)
-            } else {
-                @Suppress("DEPRECATION")
-                window.addFlags(
-                    android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                            android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                            android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                            android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                )
             }
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                        android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
             try {
                 val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
                 val wakeLock = powerManager?.newWakeLock(
                     PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
                     "notekar:TimeReflectionWakeLock"
                 )
-                wakeLock?.acquire(3000)
+                wakeLock?.acquire(5000)
             } catch (_: Exception) {
             }
         }
@@ -466,6 +465,7 @@ class MainActivity : FlutterActivity() {
                     val daysOfWeek = call.argument<List<Int>>("daysOfWeek")
                     val dayOfMonth = call.argument<Int>("dayOfMonth")
                     val intervalMinutes = call.argument<Int>("intervalMinutes")
+                    val delaySeconds = call.argument<Int>("delaySeconds")
                     val title = call.argument<String>("title") ?: "NoteKar Reminder"
                     val body = call.argument<String>("body") ?: "Time to log a moment!"
                     if (id.isNotBlank()) {
@@ -478,6 +478,7 @@ class MainActivity : FlutterActivity() {
                             daysOfWeek,
                             dayOfMonth,
                             intervalMinutes,
+                            delaySeconds,
                             title,
                             body
                         )

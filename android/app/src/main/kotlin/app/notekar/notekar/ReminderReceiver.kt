@@ -19,7 +19,8 @@ class ReminderReceiver : BroadcastReceiver() {
         if (action == Intent.ACTION_BOOT_COMPLETED ||
             action == Intent.ACTION_MY_PACKAGE_REPLACED ||
             action == "android.intent.action.QUICKBOOT_POWERON" ||
-            action == "com.htc.intent.action.QUICKBOOT_POWERON") {
+            action == "com.htc.intent.action.QUICKBOOT_POWERON"
+        ) {
             rescheduleAll(context)
             return
         }
@@ -39,7 +40,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 try {
                     val json = JSONObject(jsonStr)
                     scheduleAlarm(context, id, json)
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
             }
         }
     }
@@ -65,6 +67,7 @@ class ReminderReceiver : BroadcastReceiver() {
             daysOfWeek: List<Int>?,
             dayOfMonth: Int?,
             intervalMinutes: Int?,
+            delaySeconds: Int? = null,
             title: String,
             body: String
         ) {
@@ -82,6 +85,9 @@ class ReminderReceiver : BroadcastReceiver() {
                 }
                 if (intervalMinutes != null) {
                     put("intervalMinutes", intervalMinutes)
+                }
+                if (delaySeconds != null && delaySeconds > 0) {
+                    put("delaySeconds", delaySeconds)
                 }
                 put("title", title)
                 put("body", body)
@@ -116,7 +122,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 try {
                     val json = JSONObject(jsonStr)
                     scheduleAlarm(context, key, json)
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
             }
         }
 
@@ -126,6 +133,7 @@ class ReminderReceiver : BroadcastReceiver() {
             val minute = json.optInt("minute")
             val title = json.optString("title")
             val body = json.optString("body")
+            val delaySec = json.optInt("delaySeconds", 0)
 
             val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
             val intent = Intent(context, ReminderReceiver::class.java).apply {
@@ -148,59 +156,68 @@ class ReminderReceiver : BroadcastReceiver() {
             val calendar = Calendar.getInstance()
             val now = Calendar.getInstance()
 
-            when (type) {
-                "inactivity", "reflection" -> {
-                    val intervalMinutes = json.optInt("intervalMinutes", 60)
-                    calendar.timeInMillis = System.currentTimeMillis() + (intervalMinutes * 60L * 1000L)
-                }
-                "daily" -> {
-                    calendar.set(Calendar.HOUR_OF_DAY, hour)
-                    calendar.set(Calendar.MINUTE, minute)
-                    calendar.set(Calendar.SECOND, 0)
-                    calendar.set(Calendar.MILLISECOND, 0)
-                    if (calendar.before(now)) {
-                        calendar.add(Calendar.DAY_OF_YEAR, 1)
-                    }
-                }
-                "weekly" -> {
-                    val daysArr = json.optJSONArray("daysOfWeek")
-                    val days = mutableListOf<Int>()
-                    if (daysArr != null) {
-                        for (i in 0 until daysArr.length()) {
-                            days.add(daysArr.getInt(i))
-                        }
-                    }
-                    if (days.isEmpty()) {
-                        days.add(calendar.get(Calendar.DAY_OF_WEEK))
+            if (delaySec > 0) {
+                calendar.timeInMillis = System.currentTimeMillis() + (delaySec * 1000L)
+            } else {
+                when (type) {
+                    "inactivity", "reflection" -> {
+                        val intervalMinutes = json.optInt("intervalMinutes", 60)
+                        calendar.timeInMillis =
+                            System.currentTimeMillis() + (intervalMinutes * 60L * 1000L)
                     }
 
-                    var targetCalendar: Calendar? = null
-                    for (day in days) {
-                        val tempCal = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, hour)
-                            set(Calendar.MINUTE, minute)
-                            set(Calendar.SECOND, 0)
-                            set(Calendar.MILLISECOND, 0)
-                            set(Calendar.DAY_OF_WEEK, day)
-                        }
-                        if (tempCal.before(now)) {
-                            tempCal.add(Calendar.WEEK_OF_YEAR, 1)
-                        }
-                        if (targetCalendar == null || tempCal.before(targetCalendar)) {
-                            targetCalendar = tempCal
+                    "daily" -> {
+                        calendar.set(Calendar.HOUR_OF_DAY, hour)
+                        calendar.set(Calendar.MINUTE, minute)
+                        calendar.set(Calendar.SECOND, 0)
+                        calendar.set(Calendar.MILLISECOND, 0)
+                        if (calendar.before(now)) {
+                            calendar.add(Calendar.DAY_OF_YEAR, 1)
                         }
                     }
-                    calendar.timeInMillis = targetCalendar?.timeInMillis ?: System.currentTimeMillis()
-                }
-                "monthly" -> {
-                    val dayOfMonth = json.optInt("dayOfMonth", 1)
-                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    calendar.set(Calendar.HOUR_OF_DAY, hour)
-                    calendar.set(Calendar.MINUTE, minute)
-                    calendar.set(Calendar.SECOND, 0)
-                    calendar.set(Calendar.MILLISECOND, 0)
-                    if (calendar.before(now)) {
-                        calendar.add(Calendar.MONTH, 1)
+
+                    "weekly" -> {
+                        val daysArr = json.optJSONArray("daysOfWeek")
+                        val days = mutableListOf<Int>()
+                        if (daysArr != null) {
+                            for (i in 0 until daysArr.length()) {
+                                days.add(daysArr.getInt(i))
+                            }
+                        }
+                        if (days.isEmpty()) {
+                            days.add(calendar.get(Calendar.DAY_OF_WEEK))
+                        }
+
+                        var targetCalendar: Calendar? = null
+                        for (day in days) {
+                            val tempCal = Calendar.getInstance().apply {
+                                set(Calendar.HOUR_OF_DAY, hour)
+                                set(Calendar.MINUTE, minute)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
+                                set(Calendar.DAY_OF_WEEK, day)
+                            }
+                            if (tempCal.before(now)) {
+                                tempCal.add(Calendar.WEEK_OF_YEAR, 1)
+                            }
+                            if (targetCalendar == null || tempCal.before(targetCalendar)) {
+                                targetCalendar = tempCal
+                            }
+                        }
+                        calendar.timeInMillis =
+                            targetCalendar?.timeInMillis ?: System.currentTimeMillis()
+                    }
+
+                    "monthly" -> {
+                        val dayOfMonth = json.optInt("dayOfMonth", 1)
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                        calendar.set(Calendar.HOUR_OF_DAY, hour)
+                        calendar.set(Calendar.MINUTE, minute)
+                        calendar.set(Calendar.SECOND, 0)
+                        calendar.set(Calendar.MILLISECOND, 0)
+                        if (calendar.before(now)) {
+                            calendar.add(Calendar.MONTH, 1)
+                        }
                     }
                 }
             }
@@ -220,7 +237,11 @@ class ReminderReceiver : BroadcastReceiver() {
                     pendingIntent
                 )
             } catch (e: Exception) {
-                android.util.Log.w("ReminderReceiver", "Failed to schedule alarm clock, falling back", e)
+                android.util.Log.w(
+                    "ReminderReceiver",
+                    "Failed to schedule alarm clock, falling back",
+                    e
+                )
                 try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         alarmManager.setExactAndAllowWhileIdle(
@@ -236,7 +257,10 @@ class ReminderReceiver : BroadcastReceiver() {
                         )
                     }
                 } catch (e2: SecurityException) {
-                    android.util.Log.w("ReminderReceiver", "SecurityException scheduling exact alarm fallback")
+                    android.util.Log.w(
+                        "ReminderReceiver",
+                        "SecurityException scheduling exact alarm fallback"
+                    )
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         alarmManager.setAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
@@ -254,8 +278,14 @@ class ReminderReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun showNotification(context: Context, reminderId: String, title: String, body: String) {
-            val notificationManager = context.getSystemService(NotificationManager::class.java) ?: return
+        private fun showNotification(
+            context: Context,
+            reminderId: String,
+            title: String,
+            body: String
+        ) {
+            val notificationManager =
+                context.getSystemService(NotificationManager::class.java) ?: return
             val isReflection = reminderId.contains("reflection")
             val targetChannelId = if (isReflection) REFLECTION_CHANNEL_ID else CHANNEL_ID
 

@@ -360,8 +360,8 @@ class TimeReflectionSettingsPage extends StatelessWidget {
               ),
               SettingsRow(
                 p: p,
-                title: 'Preview Alert'.localized(context),
-                status: 'Open'.localized(context),
+                title: 'Test Full-Screen Alarm Alert'.localized(context),
+                status: 'Test (3s)'.localized(context),
                 color: p.accent,
                 onTap: onPreviewReflectionSheet,
               ),

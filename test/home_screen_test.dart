@@ -103,11 +103,11 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('Time Reflection'), findsOneWidget);
+        expect(find.text('Mindfulness Alarm'), findsOneWidget);
         expect(find.text('Take a Mindful Breath'), findsOneWidget);
         expect(find.text('1 Hour Has Passed'), findsOneWidget);
         expect(find.text('Log Current Moment'), findsOneWidget);
-        expect(find.text('Continue Mindfully'), findsOneWidget);
+        expect(find.text('Dismiss Alarm'), findsOneWidget);
 
         await tester.tap(find.text('Log Current Moment'));
         await tester.pump();

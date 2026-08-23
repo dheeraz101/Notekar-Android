@@ -25,17 +25,34 @@ class TimeReflectionSheet extends StatefulWidget {
     int intervalMinutes = 60,
     VoidCallback? onLogMoment,
   }) {
-    HapticFeedback.mediumImpact();
-    return showModalBottomSheet<void>(
+    HapticFeedback.heavyImpact();
+    return showGeneralDialog<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.75),
-      builder: (ctx) => TimeReflectionSheet(
-        p: p,
-        intervalMinutes: intervalMinutes,
-        onLogMoment: onLogMoment,
+      useRootNavigator: true,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.92),
+      transitionDuration: const Duration(milliseconds: 320),
+      pageBuilder: (ctx, anim1, anim2) => Material(
+        color: Colors.transparent,
+        child: TimeReflectionSheet(
+          p: p,
+          intervalMinutes: intervalMinutes,
+          onLogMoment: onLogMoment,
+        ),
       ),
+      transitionBuilder: (ctx, anim1, anim2, child) {
+        final curve = CurvedAnimation(
+          parent: anim1,
+          curve: Curves.easeOutCubic,
+        );
+        return FadeTransition(
+          opacity: curve,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.94, end: 1.0).animate(curve),
+            child: child,
+          ),
+        );
+      },
     );
   }
 
@@ -83,46 +100,52 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    final size = MediaQuery.of(context).size;
     final now = TimeOfDay.now();
 
     return Container(
-      height: size.height * 0.85,
-      decoration: BoxDecoration(
-        color: p.bg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(38)),
-        border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8),
-      ),
+      width: double.infinity,
+      height: double.infinity,
+      color: p.bg,
       child: SafeArea(
-        top: false,
         child: Column(
           children: [
-            // Grabber handle
+            // Top Bar with Alarm Badge and Close
             Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 8),
-              child: Container(
-                width: 36,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: p.text3.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2.5),
-                ),
-              ),
-            ),
-
-            // Top Bar with Close button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Time Reflection'.localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.notifications_active_rounded,
+                          color: p.accent,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Mindfulness Alarm'.localized(context),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   PressableScale(
@@ -131,16 +154,20 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                       Navigator.pop(context);
                     },
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: p.surface2,
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
                       ),
                       child: Icon(
                         Icons.close_rounded,
                         color: p.text2,
-                        size: 18,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -148,6 +175,7 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
               ),
             ),
 
+            // Scrollable Content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
@@ -157,12 +185,14 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Mindful Breathing Pulsing Ring
+                    const SizedBox(height: 16),
+
+                    // Mindful Breathing Pulsing Ring with Large Clock
                     AnimatedBuilder(
                       animation: _pulseAnimation,
                       builder: (context, child) {
-                        final scale = 1.0 + (_pulseAnimation.value * 0.12);
-                        final glowAlpha = 0.12 + (_pulseAnimation.value * 0.16);
+                        final scale = 1.0 + (_pulseAnimation.value * 0.14);
+                        final glowAlpha = 0.12 + (_pulseAnimation.value * 0.18);
 
                         return Stack(
                           alignment: Alignment.center,
@@ -171,8 +201,8 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                             Transform.scale(
                               scale: scale,
                               child: Container(
-                                width: 180,
-                                height: 180,
+                                width: 220,
+                                height: 220,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: p.accent.withValues(alpha: glowAlpha),
@@ -181,20 +211,20 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                             ),
                             // Mid ring
                             Container(
-                              width: 140,
-                              height: 140,
+                              width: 170,
+                              height: 170,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: p.surface2,
                                 border: Border.all(
                                   color: p.accent.withValues(alpha: 0.4),
-                                  width: 2,
+                                  width: 2.5,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: p.accent.withValues(alpha: 0.2),
-                                    blurRadius: 24,
-                                    spreadRadius: 4,
+                                    color: p.accent.withValues(alpha: 0.25),
+                                    blurRadius: 32,
+                                    spreadRadius: 6,
                                   ),
                                 ],
                               ),
@@ -202,18 +232,18 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons.hourglass_top_rounded,
+                                    Icons.self_improvement_rounded,
                                     color: p.accent,
-                                    size: 36,
+                                    size: 42,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
                                   Text(
                                     now.format(context),
                                     style: TextStyle(
                                       color: p.text,
-                                      fontSize: 16,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.2,
+                                      letterSpacing: -0.5,
                                     ),
                                   ),
                                 ],
@@ -224,17 +254,20 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                       },
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 36),
 
-                    // Passed interval text
+                    // Passed interval badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
+                        horizontal: 16,
+                        vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: p.accent.withValues(alpha: 0.12),
+                        color: p.accent.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: p.accent.withValues(alpha: 0.35),
+                        ),
                       ),
                       child: Text(
                         _formatIntervalText(
@@ -248,29 +281,32 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
 
                     // Mindfulness Title & Guidance
                     Text(
                       'Take a Mindful Breath'.localized(context),
                       style: TextStyle(
                         color: p.text,
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
+                        letterSpacing: -0.6,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      'With your phone always with you, pause for a moment. Reflect on how you spent your last hour, and decide your focus for the next.'
-                          .localized(context),
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 14,
-                        height: 1.45,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'With your phone always with you, pause for a moment. Reflect on how you spent your last hour, and decide your focus for the next.'
+                            .localized(context),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
 
                     const SizedBox(height: 32),
@@ -278,14 +314,14 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                     // Quote / Reflection Card
                     Glass(
                       p: p,
-                      radius: 20,
-                      padding: const EdgeInsets.all(16),
+                      radius: 24,
+                      padding: const EdgeInsets.all(18),
                       child: Row(
                         children: [
                           Icon(
-                            Icons.self_improvement_rounded,
-                            color: p.accent,
-                            size: 28,
+                            Icons.lightbulb_outline_rounded,
+                            color: p.orange,
+                            size: 26,
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -308,14 +344,14 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
               ),
             ),
 
-            // Action Buttons at Bottom
+            // Action Buttons at Bottom (Full-Screen Alarm Actions)
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
               child: Column(
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: 54,
                     child: ElevatedButton.icon(
                       onPressed: () {
                         HapticFeedback.mediumImpact();
@@ -326,7 +362,7 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                       label: Text(
                         'Log Current Moment'.localized(context),
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -335,7 +371,7 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
                     ),
@@ -352,13 +388,13 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                       style: TextButton.styleFrom(
                         foregroundColor: p.text2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
                       child: Text(
-                        'Continue Mindfully'.localized(context),
+                        'Dismiss Alarm'.localized(context),
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

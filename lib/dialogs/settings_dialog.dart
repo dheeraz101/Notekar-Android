@@ -4583,13 +4583,42 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   value,
                                 );
                               },
-                              onPreviewReflectionSheet: () {
-                                TimeReflectionSheet.show(
-                                  context,
-                                  p: p,
-                                  intervalMinutes:
-                                      _reflectionReminderIntervalMins,
+                              onPreviewReflectionSheet: () async {
+                                HapticFeedback.heavyImpact();
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Test alarm scheduled in 3 seconds! Lock your phone or exit the app to test.'
+                                          .localized(context),
+                                    ),
+                                    duration: const Duration(seconds: 4),
+                                  ),
                                 );
+                                try {
+                                  await _fileChannel.invokeMethod<
+                                    void
+                                  >('scheduleReminder', {
+                                    'id': 'reminder_reflection_test',
+                                    'type': 'reflection',
+                                    'delaySeconds': 3,
+                                    'intervalMinutes': 0,
+                                    'title': 'Mindfulness',
+                                    'body':
+                                        'Mindful pause: Take 3 deep breaths and acknowledge this hour.',
+                                  });
+                                } catch (_) {}
+                                await Future<void>.delayed(
+                                  const Duration(seconds: 3),
+                                );
+                                if (context.mounted) {
+                                  TimeReflectionSheet.show(
+                                    context,
+                                    p: p,
+                                    intervalMinutes:
+                                        _reflectionReminderIntervalMins,
+                                  );
+                                }
                               },
                             ),
                           ),
