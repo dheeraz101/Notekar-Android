@@ -2711,6 +2711,38 @@ class _SettingsDialogState extends State<SettingsDialog> {
         },
         status: null,
       ),
+      item(
+        title: 'Language Center',
+        subtitle: 'Download and manage on-demand language packages',
+        category: 'Personalization',
+        icon: Icons.language_rounded,
+        keywords: [
+          'language',
+          'languages',
+          'translate',
+          'localization',
+          'french',
+          'spanish',
+          'hindi',
+          'german',
+          'japanese',
+          'russian',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'On-Demand Packs',
+      ),
+      item(
+        title: 'Sleep Protection & Active Hours',
+        subtitle: 'Mute mindful reminders overnight to protect sleep',
+        category: 'Time Reflection',
+        icon: Icons.bedtime_rounded,
+        keywords: ['sleep', 'active', 'quiet', 'hours', 'night', 'schedule'],
+        kind: 'nav',
+        status:
+            '${_prefs?.getInt('reminder_reflection_start_hour') ?? 9}:00 – ${_prefs?.getInt('reminder_reflection_end_hour') ?? 22}:00',
+      ),
     ];
   }
 
@@ -5047,6 +5079,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     text:
                                         'Inspect internal diagnostics, device hardware health metrics, real-time network request audits, and GitHub commits cache under Settings > Advanced > Developer Options.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.self_improvement_rounded,
+                                    title:
+                                        'Hourly Time Reflection & Mindfulness',
+                                    text:
+                                        'Enable hourly mindful breathing overlays with soothing chimes in Settings > Time Reflection. Set active daytime schedules to automatically mute alerts during sleep.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.language_rounded,
+                                    title: 'On-Demand Dynamic Language Packs',
+                                    text:
+                                        'Download, activate, or delete official language packages (French, Spanish, Hindi, German, Japanese, Russian) directly from Settings > Personalization > Language with instant hot-swapping.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.battery_charging_full_rounded,
+                                    title: 'Battery & Doze Optimization',
+                                    text:
+                                        'NoteKar uses non-waking alarms for routine reminders, staying 100% compliant with Android Doze mode while eliminating unnecessary battery drain.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -5065,6 +5119,20 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How does Hourly Time Reflection work?',
+                                    answer:
+                                        'Time Reflection prompts you with an hourly mindful breathing pause and chime. It only runs during your configured Active Hours and mutes automatically overnight to protect your sleep.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do On-Demand Language Packs work?',
+                                    answer:
+                                        'NoteKar ships with default English to keep the app ultra-lightweight. You can download and activate French, Spanish, Hindi, German, Japanese, or Russian anytime in Settings > Personalization > Language. Once downloaded, language packs work 100% offline.',
+                                  ),
                                   HelpRow(
                                     p: p,
                                     question: 'Can I restore deleted moments?',

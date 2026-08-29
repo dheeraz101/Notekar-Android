@@ -123,9 +123,32 @@ NoteKar is built using modern, performance-oriented technologies:
 | **Language**         | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/)                   |
 | **Framework**        | [Flutter](https://flutter.dev/) (SDK 3.12.0+)                                   |
 | **Local Database**   | [Hive](https://pub.dev/packages/hive) (AES-256 encrypted NoSQL key-value store) |
-| **State Management** | [Provider](https://pub.dev/packages/provider)                                   |
+| **State Management** | [ChangeNotifier / Reactive Singletons](https://flutter.dev/)                    |
 | **Design System**    | Custom Apple HIG & iOS-inspired design system with AMOLED dark mode support.    |
 | **Platform Support** | Android 5.0 (API 21+) and above                                                 |
+
+---
+
+## 📂 Project Structure & Modular Architecture
+
+```text
+Notekar - Flutter/
+├── .github/workflows/          # Enterprise CI/CD pipelines (Lint, Test with coverage, Multi-ABI Release)
+├── android/                    # Native Android platform layer
+│   └── app/src/main/kotlin/    # Kotlin AlarmManager receivers, AppWidgetProvider & MainActivity
+├── lib/
+│   ├── dialogs/                # Apple HIG modal bottom sheets & dialogs
+│   │   └── settings/           # 24 modular settings sub-pages (Language Center, Backups, Icons, etc.)
+│   ├── l10n/                   # Localizations & dynamic package catalogs
+│   │   └── packages/           # On-demand downloadable language packs (fr, es, hi, de, ja, ru)
+│   ├── models/                 # Immutable domain entities (Moment, Palette, SobrietyTheme, etc.)
+│   ├── screens/                # Core screens (NoteKarHome, WelcomeScreen)
+│   ├── services/               # Decoupled domain services (DynamicL10nService, MindfulnessService)
+│   ├── utils/                  # Cryptography, adaptive hardware engine, and l10n utilities
+│   └── widgets/                # Reusable Apple HIG UI components (PressableScale, SettingsGroup, etc.)
+├── versions/                   # Master structured JSON release archive (changelog.json)
+└── test/                       # Comprehensive unit and widget test suites (100% passing)
+```
 
 ---
 
