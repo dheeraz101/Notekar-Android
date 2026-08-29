@@ -167,6 +167,25 @@ class MainActivity : FlutterActivity() {
                     authenticatePrivacyLock(result)
                 }
 
+                "isDeviceLocked" -> {
+                    val keyguardManager =
+                        getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+                    result.success(keyguardManager?.isKeyguardLocked ?: false)
+                }
+
+                "closeLockscreenActivity" -> {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            finishAndRemoveTask()
+                        } else {
+                            finish()
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
                 "getLaunchAction" -> {
                     result.success(pendingLaunchAction)
                     pendingLaunchAction = null

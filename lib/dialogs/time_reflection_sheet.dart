@@ -209,70 +209,75 @@ class _TimeReflectionSheetState extends State<TimeReflectionSheet>
                     const SizedBox(height: 16),
 
                     // Mindful Breathing Pulsing Ring with Large Clock
-                    AnimatedBuilder(
-                      animation: _pulseAnimation,
-                      builder: (context, child) {
-                        final scale = 1.0 + (_pulseAnimation.value * 0.14);
-                        final glowAlpha = 0.12 + (_pulseAnimation.value * 0.18);
+                    RepaintBoundary(
+                      child: AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          final scale = 1.0 + (_pulseAnimation.value * 0.14);
+                          final glowAlpha =
+                              0.12 + (_pulseAnimation.value * 0.18);
 
-                        return Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Outer ambient ring
-                            Transform.scale(
-                              scale: scale,
-                              child: Container(
-                                width: 220,
-                                height: 220,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: p.accent.withValues(alpha: glowAlpha),
-                                ),
-                              ),
-                            ),
-                            // Mid ring
-                            Container(
-                              width: 170,
-                              height: 170,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: p.surface2,
-                                border: Border.all(
-                                  color: p.accent.withValues(alpha: 0.4),
-                                  width: 2.5,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: p.accent.withValues(alpha: 0.25),
-                                    blurRadius: 32,
-                                    spreadRadius: 6,
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.self_improvement_rounded,
-                                    color: p.accent,
-                                    size: 42,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    now.format(context),
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.5,
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Outer ambient ring
+                              Transform.scale(
+                                scale: scale,
+                                child: Container(
+                                  width: 220,
+                                  height: 220,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: p.accent.withValues(
+                                      alpha: glowAlpha,
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
+                              // Mid ring
+                              Container(
+                                width: 170,
+                                height: 170,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: p.surface2,
+                                  border: Border.all(
+                                    color: p.accent.withValues(alpha: 0.4),
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: p.accent.withValues(alpha: 0.25),
+                                      blurRadius: 32,
+                                      spreadRadius: 6,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.self_improvement_rounded,
+                                      color: p.accent,
+                                      size: 42,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      now.format(context),
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
 
                     const SizedBox(height: 36),

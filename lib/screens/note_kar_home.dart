@@ -522,6 +522,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     _applySystemUiStyle();
 
+    // Early check for lockscreen reflection alarm
+    try {
+      final earlyAction = await _fileChannel.invokeMethod<String>(
+        'getLaunchAction',
+      );
+      if (earlyAction == 'reflection') {
+        final isLocked =
+            await _fileChannel.invokeMethod<bool>('isDeviceLocked') ?? false;
+        if (mounted) {
+          await _showStandaloneMindfulness(isLocked: isLocked);
+          if (isLocked) {
+            await _fileChannel.invokeMethod<void>('closeLockscreenActivity');
+            return;
+          }
+        }
+      }
+    } catch (_) {}
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
       final lastSeenVersion = prefs.getString(_lastSeenVersionKey) ?? '';
@@ -2357,22 +2375,43 @@ class _NoteKarHomeState extends State<NoteKarHome>
           unawaited(_logEntry());
         }
       case 'reflection':
-        await _openTimeReflection();
+        final isLocked =
+            await _fileChannel.invokeMethod<bool>('isDeviceLocked') ?? false;
+        await _showStandaloneMindfulness(isLocked: isLocked);
+        if (isLocked) {
+          await _fileChannel.invokeMethod<void>('closeLockscreenActivity');
+        }
       case 'updates':
       case 'releases':
         await _openExternalLink(githubReleases);
     }
   }
 
-  Future<void> _openTimeReflection() async {
+  Future<void> _showStandaloneMindfulness({bool isLocked = false}) async {
     if (!mounted) return;
-    await TimeReflectionSheet.show(
-      context,
-      p: p,
-      intervalMinutes: 60,
-      onLogMoment: () {
-        if (!_isDelayBlocked()) unawaited(_logEntry());
-      },
+    final intervalMins =
+        _prefs?.getInt('reminder_reflection_interval_mins') ?? 60;
+    final message = _prefs?.getString('reminder_reflection_body') ?? '';
+    final sound = _prefs?.getBool('reminder_reflection_sound') ?? true;
+
+    await showGeneralDialog<void>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: !isLocked,
+      barrierColor: Colors.black,
+      transitionDuration: const Duration(milliseconds: 240),
+      pageBuilder: (ctx, _, _) => Scaffold(
+        backgroundColor: Colors.black,
+        body: TimeReflectionSheet(
+          p: p,
+          intervalMinutes: intervalMins,
+          customMessage: message,
+          playSound: sound,
+          onLogMoment: () {
+            if (!_isDelayBlocked()) unawaited(_logEntry());
+          },
+        ),
+      ),
     );
   }
 
@@ -3487,14 +3526,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _applySystemUiStyle() {
-    final palette = p;
     final light = _theme == 'light';
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: palette.surface,
-        systemNavigationBarDividerColor: palette.border,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
         systemNavigationBarContrastEnforced: false,
         statusBarIconBrightness: light ? Brightness.dark : Brightness.light,
         systemNavigationBarIconBrightness: light

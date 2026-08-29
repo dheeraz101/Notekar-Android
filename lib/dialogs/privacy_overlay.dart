@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui';
+
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -244,30 +245,32 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
     return Column(
       children: [
         const Spacer(flex: 3),
-        AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, child) {
-            return Opacity(
-              opacity: 0.4 + (_pulseController.value * 0.6),
-              child: child,
-            );
-          },
-          child: Container(
-            width: 84,
-            height: 84,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.05),
-              shape: BoxShape.circle,
-              border: Border.all(
+        RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Opacity(
+                opacity: 0.4 + (_pulseController.value * 0.6),
+                child: child,
+              );
+            },
+            child: Container(
+              width: 84,
+              height: 84,
+              decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : Colors.black.withValues(alpha: 0.1),
-                width: 1.5,
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.1),
+                  width: 1.5,
+                ),
               ),
+              child: Icon(Icons.lock_rounded, color: p.accent, size: 36),
             ),
-            child: Icon(Icons.lock_rounded, color: p.accent, size: 36),
           ),
         ),
         const SizedBox(height: spacing32),
@@ -333,22 +336,24 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
     return Column(
       children: [
         const SizedBox(height: 36),
-        AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, child) {
-            return Opacity(
-              opacity: 0.5 + (_pulseController.value * 0.5),
-              child: child,
-            );
-          },
-          child: Icon(
-            Icons.lock_rounded,
-            color: _isCorrect
-                ? p.green
-                : (_hasError
-                      ? p.red
-                      : (isDark ? Colors.white : Colors.black87)),
-            size: 32,
+        RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Opacity(
+                opacity: 0.5 + (_pulseController.value * 0.5),
+                child: child,
+              );
+            },
+            child: Icon(
+              Icons.lock_rounded,
+              color: _isCorrect
+                  ? p.green
+                  : (_hasError
+                        ? p.red
+                        : (isDark ? Colors.white : Colors.black87)),
+              size: 32,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -397,47 +402,50 @@ class _PrivacyLockOverlayState extends State<PrivacyLockOverlay>
             ),
           ),
         ] else ...[
-          AnimatedBuilder(
-            animation: _shakeAnimation,
-            builder: (context, child) {
-              double offset = 0.0;
-              if (_shakeController.isAnimating) {
-                offset = math.sin(_shakeController.value * math.pi * 4) * 16.0;
-              }
-              return Transform.translate(
-                offset: Offset(offset, 0),
-                child: child,
-              );
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
-                final active = index < _enteredPin.length;
-                Color dotColor = Colors.transparent;
-                Color borderColor = textCol.withValues(alpha: 0.6);
-
-                if (_isCorrect) {
-                  dotColor = p.green;
-                  borderColor = p.green;
-                } else if (_hasError) {
-                  dotColor = Colors.transparent;
-                  borderColor = p.red;
-                } else if (active) {
-                  dotColor = textCol;
-                  borderColor = textCol;
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _shakeAnimation,
+              builder: (context, child) {
+                double offset = 0.0;
+                if (_shakeController.isAnimating) {
+                  offset =
+                      math.sin(_shakeController.value * math.pi * 4) * 16.0;
                 }
-
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  width: 13,
-                  height: 13,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: dotColor,
-                    border: Border.all(color: borderColor, width: 1.5),
-                  ),
+                return Transform.translate(
+                  offset: Offset(offset, 0),
+                  child: child,
                 );
-              }),
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(4, (index) {
+                  final active = index < _enteredPin.length;
+                  Color dotColor = Colors.transparent;
+                  Color borderColor = textCol.withValues(alpha: 0.6);
+
+                  if (_isCorrect) {
+                    dotColor = p.green;
+                    borderColor = p.green;
+                  } else if (_hasError) {
+                    dotColor = Colors.transparent;
+                    borderColor = p.red;
+                  } else if (active) {
+                    dotColor = textCol;
+                    borderColor = textCol;
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    width: 13,
+                    height: 13,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: dotColor,
+                      border: Border.all(color: borderColor, width: 1.5),
+                    ),
+                  );
+                }),
+              ),
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -99,6 +100,12 @@ class NoteKarAppState extends State<NoteKarApp> {
           bodyLarge: TextStyle(fontVariations: [FontVariation('wght', 400)]),
           bodyMedium: TextStyle(fontVariations: [FontVariation('wght', 400)]),
           titleLarge: TextStyle(fontVariations: [FontVariation('wght', 600)]),
+        ),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
         ),
         splashFactory: NoSplash.splashFactory,
       ),

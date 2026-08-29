@@ -348,59 +348,54 @@ class ReminderReceiver : BroadcastReceiver() {
                 }
             }
 
-            try {
-                val showIntent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val showPendingIntent = PendingIntent.getActivity(
-                    context,
-                    id.hashCode(),
-                    showIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                alarmManager.setAlarmClock(
-                    AlarmManager.AlarmClockInfo(calendar.timeInMillis, showPendingIntent),
-                    pendingIntent
-                )
-            } catch (e: Exception) {
-                android.util.Log.w(
-                    "ReminderReceiver",
-                    "Failed to schedule alarm clock, falling back",
-                    e
-                )
+            val isReflection = type == "reflection"
+
+            if (isReflection) {
                 try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            calendar.timeInMillis,
-                            pendingIntent
-                        )
-                    } else {
-                        alarmManager.setExact(
-                            AlarmManager.RTC_WAKEUP,
-                            calendar.timeInMillis,
-                            pendingIntent
-                        )
+                    val showIntent = Intent(context, MainActivity::class.java).apply {
+                        putExtra(MainActivity.EXTRA_LAUNCH_ACTION, "reflection")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
-                } catch (e2: SecurityException) {
+                    val showPendingIntent = PendingIntent.getActivity(
+                        context,
+                        id.hashCode(),
+                        showIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    alarmManager.setAlarmClock(
+                        AlarmManager.AlarmClockInfo(calendar.timeInMillis, showPendingIntent),
+                        pendingIntent
+                    )
+                    return
+                } catch (e: Exception) {
                     android.util.Log.w(
                         "ReminderReceiver",
-                        "SecurityException scheduling exact alarm fallback"
+                        "Failed to schedule alarm clock, falling back to exact alarm",
+                        e
                     )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            calendar.timeInMillis,
-                            pendingIntent
-                        )
-                    } else {
-                        alarmManager.set(
-                            AlarmManager.RTC_WAKEUP,
-                            calendar.timeInMillis,
-                            pendingIntent
-                        )
-                    }
                 }
+            }
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.set(
+                        AlarmManager.RTC,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                }
+            } catch (e2: SecurityException) {
+                android.util.Log.w(
+                    "ReminderReceiver",
+                    "SecurityException scheduling reminder fallback",
+                    e2
+                )
             }
         }
 

@@ -44,6 +44,7 @@
 ---
 
 <a id="screenshots"></a>
+
 ## 📸 Screenshots / UI Preview
 
 Designed for speed, simplicity, and privacy. Every screen is optimized for quick timestamp logging
@@ -62,6 +63,7 @@ with minimal interaction.
 ---
 
 <a id="features"></a>
+
 ## 🎯 Features & Highlights
 
 - **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly with
@@ -87,6 +89,18 @@ with minimal interaction.
     - **Streak Shields**: Safety-net mechanics preventing frustrating streak breaks.
 - **Dynamic iOS-Style Calendar Picker**: Calendar with iOS Red selected date circle, event dots for
   days with logs, and single-letter weekday headers.
+- **Hourly Time Reflection & Mindfulness**:
+    - **Standalone Lockscreen Alerts**: Full-screen mindful breathing prompts that wake up on
+      lockscreen without exposing private moments or home screen.
+    - **Sleep Protection & Active Hours**: Set customized active daily windows (e.g. 09:00 AM – 10:
+      00 PM) with automatic rollover to protect sleep.
+    - **Apple HIG Time Picker**: Seamless iOS Cupertino wheel time selector for scheduling.
+    - **Customizable 60-Char Mantra**: Custom affirmation or motivational mantra displayed directly
+      on the breathing aura view.
+- **Battery-Friendly Background Architecture**:
+    - Zero aggressive wake locks for routine logging reminders; fully compliant with Android Doze
+      power management.
+    - Isolated paint boundaries with `RepaintBoundary` for smooth 120 FPS rendering.
 - **Hardware-Backed Privacy & Security**:
     - Encrypted local Hive storage with AES-256 Android Keystore keys.
     - Biometric authentication & custom SHA-256 encrypted PIN lock.
@@ -99,6 +113,7 @@ with minimal interaction.
 ---
 
 <a id="tech-stack"></a>
+
 ## 🛠️ Tech Stack
 
 NoteKar is built using modern, performance-oriented technologies:
@@ -115,6 +130,7 @@ NoteKar is built using modern, performance-oriented technologies:
 ---
 
 <a id="translations"></a>
+
 ## 🌐 Community Translations
 
 Help make NoteKar accessible to everyone in their native language! NoteKar is committed to being
@@ -144,6 +160,7 @@ Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and many 
 ---
 
 <a id="privacy"></a>
+
 ## 🔒 Privacy & Legal Policy
 
 NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain
@@ -159,6 +176,7 @@ stored locally on your device.
 ---
 
 <a id="support"></a>
+
 ## ☕ Support
 
 If NoteKar helps you, you can support the project here:
@@ -171,6 +189,7 @@ Your support helps keep NoteKar free, offline-first, and actively maintained.
 ---
 
 <a id="version-scheme"></a>
+
 ## 🚀 Version Release Scheme & Build Numbers
 
 NoteKar uses a structured build numbering scheme: `YY<CHANNEL>MMDD[suffix]`
@@ -188,6 +207,7 @@ NoteKar uses a structured build numbering scheme: `YY<CHANNEL>MMDD[suffix]`
 ---
 
 <a id="f-droid"></a>
+
 ## 🤖 F-Droid & Reproducible Build Compliance
 
 NoteKar Android meets all official F-Droid inclusion requirements:
@@ -201,6 +221,7 @@ NoteKar Android meets all official F-Droid inclusion requirements:
 ---
 
 <a id="project-structure"></a>
+
 ## 📦 Project Structure
 
 ```
@@ -240,6 +261,7 @@ Notekar - Flutter/
 ---
 
 <a id="building-locally"></a>
+
 ## 🛠️ Building & Running Locally
 
 ### Prerequisites
@@ -271,6 +293,7 @@ Notekar - Flutter/
 ---
 
 <a id="release-apks"></a>
+
 ## 🔑 Building Release APKs & Keystore Setup
 
 > [!IMPORTANT]
@@ -303,6 +326,7 @@ To build a signed release APK or App Bundle (`.aab`):
 ---
 
 <a id="license"></a>
+
 ## 📄 License & Attribution
 
 - **License:** Open source under the **[MIT License](LICENSE)**.

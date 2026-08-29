@@ -82,8 +82,8 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
         private fun schedule(context: Context) {
             val alarmManager = context.getSystemService(AlarmManager::class.java)
             alarmManager.setInexactRepeating(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + INTERVAL_MS,
+                AlarmManager.ELAPSED_REALTIME,
+                android.os.SystemClock.elapsedRealtime() + INTERVAL_MS,
                 INTERVAL_MS,
                 pendingIntent(context)
             )

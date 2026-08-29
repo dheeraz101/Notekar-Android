@@ -52,8 +52,8 @@ jobs:
       - name: Analyze (dart/flutter)
         run: flutter analyze --fatal-infos --fatal-warnings
 
-      - name: Run tests
-        run: flutter test
+      - name: Run tests with coverage
+        run: flutter test --coverage
 
       - name: Verify Android Build Compilation
         run: flutter build apk --debug --no-pub

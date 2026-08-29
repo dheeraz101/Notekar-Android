@@ -229,57 +229,59 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
 
           if (_mode == UrgeMode.boxBreathing) ...[
             Center(
-              child: AnimatedBuilder(
-                animation: _breathingController,
-                builder: (context, child) {
-                  final scale = 1.0 + (_breathingController.value * 0.35);
-                  return Container(
-                    width: 140 * scale,
-                    height: 140 * scale,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: p.accent.withValues(alpha: 0.15),
-                      border: Border.all(
-                        color: p.accent,
-                        width: _isActive ? 4 : 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: p.accent.withValues(
-                            alpha: 0.25 * _breathingController.value,
-                          ),
-                          blurRadius: 24,
-                          spreadRadius: 4,
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _breathingController,
+                  builder: (context, child) {
+                    final scale = 1.0 + (_breathingController.value * 0.35);
+                    return Container(
+                      width: 140 * scale,
+                      height: 140 * scale,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: p.accent.withValues(alpha: 0.15),
+                        border: Border.all(
+                          color: p.accent,
+                          width: _isActive ? 4 : 2,
                         ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _phaseText,
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        if (_isActive) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '${_secondsRemaining}s',
-                            style: TextStyle(
-                              color: p.accent,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                        boxShadow: [
+                          BoxShadow(
+                            color: p.accent.withValues(
+                              alpha: 0.25 * _breathingController.value,
                             ),
+                            blurRadius: 24,
+                            spreadRadius: 4,
                           ),
                         ],
-                      ],
-                    ),
-                  );
-                },
+                      ),
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _phaseText,
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          if (_isActive) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${_secondsRemaining}s',
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 28),
