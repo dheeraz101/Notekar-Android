@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notekar/dialogs/changelog_dialog.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -16,6 +16,92 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
   final Palette p;
   final String subCategory;
   final ValueChanged<String> onOpenGithubIssue;
+
+  static const String webChangelogUrl =
+      'https://notekarapp.vercel.app/changelog.html';
+
+  static const latestRelease = (
+    version: '7.2.0',
+    date: 'August 23, 2026',
+    edition: 'Mindfulness & Battery Evolution',
+    badgeColor: Color(0xFF0A84FF),
+    highlights: [
+      (
+        title: 'Hourly Time Reflection',
+        desc:
+            'Full-screen mindful breathing prompts that wake on lockscreen without exposing private notes.',
+        icon: Icons.self_improvement_rounded,
+        tag: 'Mindfulness',
+      ),
+      (
+        title: 'Sleep Protection & Active Hours',
+        desc:
+            'Customizable daily active hours (09:00 AM – 10:00 PM) with quiet hours rollover to protect sleep.',
+        icon: Icons.bedtime_rounded,
+        tag: 'Sleep Guard',
+      ),
+      (
+        title: 'Zero-Wake Battery Architecture',
+        desc:
+            'Doze-compliant RTC non-waking alarms and isolated repaint boundaries for all animations.',
+        icon: Icons.battery_charging_full_rounded,
+        tag: 'Battery Safe',
+      ),
+    ],
+    items: [
+      '+ Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet',
+      '+ Add alarm audio chime, active hours schedule, and onboarding flow',
+      '* Eliminate RTC_WAKEUP battery drain for routine logging reminders',
+      '* Wrap animated widgets in RepaintBoundary for smooth 120 FPS rendering',
+      '! Add early lockscreen reflection launch handler in NoteKarHome',
+      '! Add isDeviceLocked and closeLockscreenActivity to dismiss activity on locked device',
+      '* Enable test coverage in GitHub Actions CI workflow',
+    ],
+  );
+
+  static const historicalReleases = [
+    (
+      version: '7.1.0',
+      date: 'August 21, 2026',
+      edition: 'Global Localization Edition',
+      items: [
+        '+ Add French, German, Japanese, Russian localization and dynamic pattern translation',
+        '+ Add localized numerals and currency symbols across the app',
+        '* Preserve Apple HIG typography in English and normalize toolbar buttons',
+        '* Standardize toolbar button icon containers & fix settings description placement',
+      ],
+    ),
+    (
+      version: '7.0.0',
+      date: 'August 16, 2026',
+      edition: 'Apple HIG Luxury Redesign',
+      items: [
+        '+ Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
+        '+ Modernized App Icon suite featuring 8 custom branded logo editions',
+        '+ Sobriety milestones card exporter with native Android share sheet & confetti',
+        '* 2-digit single numbering mode (01, 02...), daily reset, and directional badges',
+        '+ Complete local database backup manager with individual Restore and Delete options',
+      ],
+    ),
+  ];
+
+  Future<void> _openWebChangelog(BuildContext context) async {
+    HapticFeedback.selectionClick();
+    try {
+      const channel = MethodChannel('notekar/files');
+      await channel.invokeMethod<void>('openUrl', {'url': webChangelogUrl});
+    } catch (_) {
+      await Clipboard.setData(const ClipboardData(text: webChangelogUrl));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Link copied to clipboard'.localized(context)),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +155,143 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
   }
 
   Widget _buildWhatsNew(BuildContext context) {
+    final rel = latestRelease;
     return Column(
       children: [
         const SizedBox(height: spacing8),
-        ChangelogSettingsPage(p: p, latestOnly: true),
+
+        // Version Banner Group
+        SettingsGroup(
+          p: p,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: rel.badgeColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: rel.badgeColor.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      color: rel.badgeColor,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'v${rel.version} Update'.localized(context),
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              rel.date.localized(context),
+                              style: TextStyle(color: p.text3, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          rel.edition.localized(context),
+                          style: TextStyle(
+                            color: rel.badgeColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Highlights Group
+        SettingsGroup(
+          p: p,
+          title: 'Major Innovations'.localized(context).toUpperCase(),
+          children: [
+            for (final h in rel.highlights)
+              SettingsRow(
+                p: p,
+                icon: h.icon,
+                title: h.title.localized(context),
+                subtitle: h.desc.localized(context),
+                status: h.tag.localized(context),
+                color: p.accent,
+              ),
+          ],
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Changelog List Group with expressive badges
+        SettingsGroup(
+          p: p,
+          title: 'Detailed Additions & Fixes'.localized(context).toUpperCase(),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  for (final item in rel.items)
+                    _buildExpressiveRow(context, item),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Web Archive Link Group
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.open_in_browser_rounded,
+              title: 'Full Web Changelog Archive'.localized(context),
+              subtitle: 'View all past releases and updates on our website.'
+                  .localized(context),
+              color: p.accent,
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: p.text3,
+              ),
+              onTap: () => _openWebChangelog(context),
+            ),
+          ],
+        ),
+
+        SettingsPageDescription(
+          p: p,
+          text:
+              'NoteKar is continuously refined with privacy, battery efficiency, and Apple HIG polish.'
+                  .localized(context),
+        ),
+
         const SizedBox(height: spacing48),
       ],
     );
@@ -82,9 +301,146 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: spacing8),
-        ChangelogSettingsPage(p: p, latestOnly: false),
+
+        // Latest Release
+        SettingsGroup(
+          p: p,
+          title: 'v${latestRelease.version} — ${latestRelease.edition}'
+              .localized(context),
+          description: latestRelease.date.localized(context),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  for (final item in latestRelease.items)
+                    _buildExpressiveRow(context, item),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Historical Releases
+        for (final rel in historicalReleases) ...[
+          SettingsGroup(
+            p: p,
+            title: 'v${rel.version} — ${rel.edition}'.localized(context),
+            description: rel.date.localized(context),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    for (final item in rel.items)
+                      _buildExpressiveRow(context, item),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: spacing12),
+        ],
+
+        // Web Archive Link
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.history_rounded,
+              title: 'Older Releases on Web'.localized(context),
+              subtitle: 'Browse complete version logs dating back to v1.0.'
+                  .localized(context),
+              color: p.accent,
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: p.text3,
+              ),
+              onTap: () => _openWebChangelog(context),
+            ),
+          ],
+        ),
+
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Older changelogs are hosted on our official website to keep NoteKar ultra-lightweight.'
+                  .localized(context),
+        ),
+
         const SizedBox(height: spacing48),
       ],
+    );
+  }
+
+  Widget _buildExpressiveRow(BuildContext context, String item) {
+    final trimmed = item.trim();
+    String text = trimmed;
+    IconData iconData = Icons.circle;
+    double iconSize = 6;
+    Color iconColor = p.accent;
+    Color iconBg = p.accent.withValues(alpha: 0.12);
+
+    if (trimmed.startsWith('+') || trimmed.toLowerCase().startsWith('add')) {
+      text = trimmed.startsWith('+') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.add_rounded;
+      iconSize = 13;
+      iconColor = const Color(0xFF30D158);
+      iconBg = const Color(0xFF30D158).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('-') ||
+        trimmed.toLowerCase().startsWith('remove')) {
+      text = trimmed.startsWith('-') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.remove_rounded;
+      iconSize = 13;
+      iconColor = const Color(0xFFFF453A);
+      iconBg = const Color(0xFFFF453A).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('!') ||
+        trimmed.toLowerCase().startsWith('fix') ||
+        trimmed.toLowerCase().startsWith('resolve')) {
+      text = trimmed.startsWith('!') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.build_circle_outlined;
+      iconSize = 13;
+      iconColor = const Color(0xFF0A84FF);
+      iconBg = const Color(0xFF0A84FF).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('*') ||
+        trimmed.toLowerCase().startsWith('refine') ||
+        trimmed.toLowerCase().startsWith('optimize') ||
+        trimmed.toLowerCase().startsWith('update')) {
+      text = trimmed.startsWith('*') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.star_rounded;
+      iconSize = 14;
+      iconColor = const Color(0xFFFF9F0A);
+      iconBg = const Color(0xFFFF9F0A).withValues(alpha: 0.15);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            alignment: Alignment.center,
+            child: Icon(iconData, size: iconSize, color: iconColor),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text.localized(context),
+              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -497,21 +497,3 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
     );
   }
 }
-
-class ChangelogSettingsPage extends StatelessWidget {
-  const ChangelogSettingsPage({
-    super.key,
-    required this.p,
-    this.latestOnly = false,
-  });
-
-  final Palette p;
-  final bool latestOnly;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [ChangelogDialog(p: p, latestOnly: latestOnly)],
-    );
-  }
-}
