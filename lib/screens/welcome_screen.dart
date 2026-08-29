@@ -425,10 +425,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               SettingsSwitchRow(
                 p: p,
                 icon: Icons.notifications_active_rounded,
-                title: 'Hourly Mindfulness Alert'.localized(context),
-                subtitle:
-                    'Wakes your screen with a soothing chime and full-screen reflection overlay.'
-                        .localized(context),
+                title: 'Hourly Mindfulness'.localized(context),
+                subtitle: 'Hourly chime and mindful pause overlay.'.localized(
+                  context,
+                ),
                 color: p.accent,
                 value: _enableMindfulness,
                 onChanged: (value) async {
@@ -441,11 +441,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               SettingsRow(
                 p: p,
                 icon: Icons.bedtime_rounded,
-                title: 'Active Daytime Window'.localized(context),
-                status: '9:00 AM – 10:00 PM'.localized(context),
-                subtitle:
-                    'Automatically muted during night hours so your sleep is never disturbed.'
-                        .localized(context),
+                title: 'Active Hours'.localized(context),
+                status: '9 AM – 10 PM'.localized(context),
+                subtitle: 'Muted overnight to protect your sleep.'.localized(
+                  context,
+                ),
                 color: p.accent,
               ),
             ],

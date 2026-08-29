@@ -1,0 +1,109 @@
+[
+  {
+    "version": "7.2.0",
+    "buildNumber": "26PR0823a",
+    "releaseDate": "2026-08-23",
+    "edition": "Mindfulness & Battery Evolution",
+    "badgeColor": "#0A84FF",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Hourly Time Reflection",
+        "description": "Standalone mindful breathing prompts that wake up on lockscreen without exposing private moments.",
+        "icon": "self_improvement_rounded"
+      },
+      {
+        "title": "Sleep Protection & Active Hours",
+        "description": "Customizable active schedule (e.g. 09:00 AM – 10:00 PM) with quiet hours rollover protecting your sleep.",
+        "icon": "bedtime_rounded"
+      },
+      {
+        "title": "Zero-Wake Battery Architecture",
+        "description": "Doze-compliant RTC alarms, non-waking update checks, and RepaintBoundary animation isolation.",
+        "icon": "battery_charging_full_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet",
+      "Add alarm audio chime, active hours schedule, and onboarding flow",
+      "Eliminate RTC_WAKEUP battery drain for routine logging reminders",
+      "Wrap animated widgets in RepaintBoundary for smooth 120 FPS rendering",
+      "Add early lockscreen reflection launch handler in NoteKarHome",
+      "Add isDeviceLocked and closeLockscreenActivity to dismiss activity on locked device",
+      "Enable test coverage in GitHub Actions CI workflow"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.2.0/NoteKar-v7.2.0-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.2.0/NoteKar-v7.2.0-arm64-v8a-release.apk"
+    }
+  },
+  {
+    "version": "7.1.0",
+    "buildNumber": "26BE0821a",
+    "releaseDate": "2026-08-21",
+    "edition": "Global Localization Edition",
+    "badgeColor": "#30D158",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Multilingual Global Support",
+        "description": "Full native localization for 7 major languages including French, German, Japanese, and Russian.",
+        "icon": "translate_rounded"
+      },
+      {
+        "title": "Localized Numerals & Symbols",
+        "description": "Native numeral systems (Devanagari, etc.) and locale-aware currency and date formatting.",
+        "icon": "pin_rounded"
+      },
+      {
+        "title": "Modular L10n Engine",
+        "description": "Clean ARB string definitions and dynamic translation pattern interpolation.",
+        "icon": "code_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "Add French, German, Japanese, Russian localization and dynamic pattern translation",
+      "Add localized numerals and currency symbols across the app",
+      "Preserve Apple HIG typography in English and normalize toolbar buttons",
+      "Standardize toolbar button icon containers & fix settings description placement"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.1.0/NoteKar-v7.1.0-universal-release.apk"
+    }
+  },
+  {
+    "version": "7.0.0",
+    "buildNumber": "26SR0816a",
+    "releaseDate": "2026-08-16",
+    "edition": "Apple HIG Luxury Redesign",
+    "badgeColor": "#BF5AF2",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Apple HIG Visual Upgrade",
+        "description": "Frosted glass surfaces, Dynamic Island pill notifications, and tactile haptics.",
+        "icon": "auto_awesome_rounded"
+      },
+      {
+        "title": "Modernized App Icon Suite",
+        "description": "8 handcrafted luxury edition logos with high-resolution adaptive launcher integration.",
+        "icon": "palette_rounded"
+      },
+      {
+        "title": "Sobriety Milestones & Native Share",
+        "description": "21 neuroscience milestones, shareable peak cards, and 85-particle celebration confetti.",
+        "icon": "military_tech_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts",
+      "Modernized App Icon suite featuring 8 custom branded logo editions",
+      "Sobriety milestones card exporter with native Android share sheet & confetti",
+      "2-digit single numbering mode (01, 02...), daily reset, and directional badges",
+      "Complete local database backup manager with individual Restore and Delete options"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.0.0/NoteKar-v7.0.0-universal-release.apk"
+    }
+  }
+]

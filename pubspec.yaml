@@ -20,6 +20,7 @@ dependencies:
   quick_actions: ^1.0.10
   crypto: ^3.0.6
   flutter_secure_storage: ^10.3.1
+  http: ^1.3.0
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +34,7 @@ flutter:
   assets:
     - icon-maskable-512.png
     - app_icons/
+    - lib/l10n/packages/
 
   fonts:
     - family: Inter

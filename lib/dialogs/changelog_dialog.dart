@@ -1,12 +1,11 @@
-import 'dart:math' as math;
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/common_elements.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class ChangelogDialog extends StatefulWidget {
@@ -23,1430 +22,472 @@ class ChangelogDialog extends StatefulWidget {
   final bool blur;
   final bool largeText;
 
-  static const releases = [
-    (
-      version: '7.2.0',
-      date: 'August 23, 2026',
-      highlights: [
-        'Priority maintenance and stability improvements.',
-        'Add alarm audio chime, active hours schedule, and onboarding flow',
-        'Integrate system AlarmManager scheduling & full-screen lockscreen waking',
-        'Add Time Reflection dedicated page, full-screen alarm alerts & Priority Release channel',
-      ],
-      items: [
-        'Use iOS time picker, rename message row, and simplify editor sheet',
-        'Add alarm audio chime, active hours schedule, and onboarding flow',
-        'Refine Test Alert action & standardize interval picker bottom sheet',
-        'Resolve test alarm infinite loop and eliminate top notification banner',
-        'Integrate system AlarmManager scheduling & full-screen lockscreen waking',
-        'Refine Time Reflection settings, layout alignment & Apple HIG picker',
-        'Restructure localization into clean ARB files and modular helpers',
-        'Add Time Reflection dedicated page, full-screen alarm alerts & Priority Release channel',
-      ],
-    ),
-    (
-      version: '7.1.0',
-      date: 'August 21, 2026',
-      highlights: [
-        'Security and stability improvements.',
-        'Add localized numerals, currency symbols & redesign upcoming language sheet',
-        'Add French localization, dynamic pattern translation & upcoming languages catalog',
-      ],
-      items: [
-        'Refine version card and installation date formatting',
-        'Preserve Apple HIG typography in English and normalize home toolbar buttons',
-        'Standardize toolbar button icon containers & fix settings description placement',
-        'Add localized numerals, currency symbols & redesign upcoming language sheet',
-        'Add French localization, dynamic pattern translation & upcoming languages catalog',
-        'Fixed issues and added complete language support',
-      ],
-    ),
-    (
-      version: '7.0.0',
-      date: 'August 16, 2026',
-      highlights: [
-        'Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
-        'Modernized App Icon suite featuring 6 custom branded logo editions',
-        'Sobriety milestones card exporter with native Android share sheet & confetti',
-        'Full-length notes display in Search Notes with isolated search navigation',
-      ],
-      items: [
-        'Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
-        'Modernized App Icon suite featuring 6 custom branded logo editions',
-        'Sobriety milestones card exporter with native Android share sheet & confetti',
-        'Full-length notes display in Search Notes with isolated search navigation',
-        '2-digit single numbering mode (01, 02...), daily reset, and IN/OUT directional badges',
-        'Complete local database backup manager with individual Restore and Delete options',
-        'Grouped Developer Options (Diagnostics, Device Health, Network Monitor, Commits) under Advanced',
-        'Standardized CupertinoActivityIndicator spinners across Backup, Diagnostics, and Update Center',
-        'Apple Health IosActivityRingPainter circular glowing activity arcs for sobriety counters',
-        'Resolved version upgrade trigger for standalone welcome cards and Whats New sheet',
-      ],
-    ),
-    (
-      version: '6.0.9',
-      date: 'August 16, 2026',
-      highlights: [
-        'Redesign App Icons page and introduce branded edition names',
-        'Add App Icons selection page and standalone upgrade card',
-        'Modernize app icon suite and add Amethyst Nebula bonus edition',
-      ],
-      items: [
-        'Update guides, search index, reset routines, and diagnostics telemetry',
-        'Remove tick icon overlay from selected app logo options',
-        'Polish app icon applying modal and adopt enlarged icon-only gallery grid',
-        'Redesign App Icons page and introduce branded edition names',
-        'Add App Icons selection page and standalone upgrade card',
-        'Restore Download & Install and action buttons in Update Center',
-        'Modernize app icon suite and add Amethyst Nebula bonus edition',
-        'Fixed v6.0.8(26BE0815a) BR',
-      ],
-    ),
-    (
-      version: '6.0.8',
-      date: 'August 15, 2026',
-      highlights: [
-        'Export milestone card image, one-shot confetti, and home card layout polish',
-        'Dynamic iOS calendar selection, logging card counts, and channel-based build numbers',
-        'Add 2-digit single numbering, daily reset, count on save, and iOS calendar style',
-      ],
-      items: [
-        'Simplify milestone celebration button labels',
-        'Eliminate milestone dialog open delay and upgrade confetti dynamics',
-        'Fix android sharesheet image preview and remove export snackbar',
-        'Export milestone card image, one-shot confetti, and home card layout polish',
-        'Dynamic iOS calendar selection, logging card counts, and channel-based build numbers',
-        'Add 2-digit single numbering, daily reset, count on save, and iOS calendar style',
-      ],
-    ),
-    (
-      version: '6.0.7',
-      date: 'August 13, 2026',
-      highlights: ['Beta testing and feedback build.'],
-      items: [
-        'Replace all CircularProgressIndicator spinners with CupertinoActivityIndicator',
-      ],
-    ),
-    (
-      version: '6.0.6',
-      date: 'August 12, 2026',
-      highlights: [
-        'Complete Apple HIG & iOS UI/UX redesign upgrade',
-        'Add iOS dynamic pill toast notification for note copy action',
-        'Display all notes in full length by default in Search Notes page',
-        "Instant trash bin updates, milestone share menu, What's New hero card & backup options",
-      ],
-      items: [
-        'Complete Apple HIG & iOS UI/UX redesign upgrade',
-        'Add iOS dynamic pill toast notification for note copy action',
-        'Display all notes in full length by default in Search Notes page',
-        'Isolate search notes navigation, instant trash updates & milestone share menu',
-        "Instant trash bin updates, milestone share menu, What's New hero card & backup options",
-      ],
-    ),
-    (
-      version: '6.0.5',
-      date: 'August 12, 2026',
-      highlights: [
-        'Consolidate HIG design tokens and add IN/OUT directional arrow icons',
-      ],
-      items: [
-        'Consolidate HIG design tokens and add IN/OUT directional arrow icons',
-      ],
-    ),
-    (
-      version: '6.0.4',
-      date: 'August 12, 2026',
-      highlights: [
-        'Add streak counter spring animation, HIG shimmer loader, and shield activation moment',
-        'Implement Apple-level UX/UI audit redesign & home refactor',
-      ],
-      items: [
-        'Add streak counter spring animation, HIG shimmer loader, and shield activation moment',
-        'Remove trash bin icon from Recently Deleted card on logging page',
-        'Dynamic dividers, offline commits cache, haptics & trash bin relocation',
-        'Implement Apple-level UX/UI audit redesign & home refactor',
-      ],
-    ),
-    (
-      version: '6.0.3',
-      date: 'August 12, 2026',
-      highlights: [
-        'Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades',
-        'Apple HIG inset hairline dividers, activity ring & heavy taptic feedback',
-      ],
-      items: [
-        'Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades',
-        'Apple HIG inset hairline dividers, activity ring & heavy taptic feedback',
-        'Circular Checkbox in Network Warning Dialog, System Update Date Formatting',
-      ],
-    ),
-    (
-      version: '6.0.2',
-      date: 'August 11, 2026',
-      highlights: ['Code uprgade In'],
-      items: [
-        'Eliminate 5ms coachmark tooltip flash on app launch',
-        'Fix(network)',
-        'High-contrast settings icons, apple spring callout tooltip & instant sobriety toggle',
-        'Align empty state labels with Apple HIG punctuation guidelines',
-        'Dynamic upgrade walkthrough cards for existing users',
-        'Apply apple HIG visual squircle badges and punctuation minimalism',
-        'Industry-standard performance, security, storage & accessibility audit upgrades',
-        'Code uprgade In',
-      ],
-    ),
-    (
-      version: '6.0.1',
-      date: 'August 10, 2026',
-      highlights: [
-        '3-phase major update with urge surfing, risk radar, apple hig & gamification',
-      ],
-      items: [
-        '3-phase major update with urge surfing, risk radar, apple hig & gamification',
-        'Readme file formatting fixed',
-      ],
-    ),
-    (
-      version: '6.0.0',
-      date: 'July 31, 2026',
-      highlights: [
-        'Duolingo-Style Milestone Map: vertical progress trail with interactive peak details.',
-        'Local Backups Manager: restored, deleted, or saved local database files.',
-        'Streak Shields: protect your habit streak on relapse.',
-        'Hardware Security: hardware-backed AES-256 encryption and App Lock.',
-        'Apple HIG Style: iOS emojis, speech-bubble tooltips, and aligned toolbar buttons.',
-      ],
-      items: [
-        'Duolingo-Style Milestone Map: vertical progress trail with interactive peak details.',
-        'Local Backups Manager: restored, deleted, or saved local database files.',
-        'Streak Shields: protect your habit streak on relapse.',
-        'Hardware Security: hardware-backed AES-256 encryption and App Lock.',
-        'Apple HIG Style: iOS emojis, speech-bubble tooltips, and aligned toolbar buttons.',
-        'Bug Fixes: Resolved certificate validation errors on GitHub commits fetch, keyboard-overlap styling in note compose dialog, and home-screen flicker during factory reset.',
-      ],
-    ),
-    (
-      version: '5.1.9',
-      date: 'July 31, 2026',
-      highlights: [
-        'Add onboarding coachmark, streak freeze shields, and success rate dashboard',
-        'Implement loss-aversion copy, iOS emoji parser, and Cupertino icons',
-        'Overhaul settings search, sobriety theme icons, and resolve network issues',
-        'Implement search note history, Apple HIG cards, CupertinoIcons navigation, and gamified streak indicators',
-      ],
-      items: [
-        'Add onboarding coachmark, streak freeze shields, and success rate dashboard',
-        'Constrain note dialog viewport when keyboard is active to push relapse switch below fold',
-        'Constrain note dialog keyboard-height and preserve static input height',
-        'Refine note dialog dynamic height and match settings switch toggle',
-        'Implement loss-aversion copy, iOS emoji parser, and Cupertino icons',
-        'Optimize keyboard focus times and redesign note editor dialog',
-        'Overhaul settings search, sobriety theme icons, and resolve network issues',
-        'Implement search note history, Apple HIG cards, CupertinoIcons navigation, and gamified streak indicators',
-        'Fix readme formatting',
-      ],
-    ),
-    (
-      version: '5.1.8',
-      date: 'July 30, 2026',
-      highlights: ['Redesign sobriety widget'],
-      items: [
-        'Updated yabp links',
-        'Better empty state in the settings search bar and a recent results as well',
-        'Long url issues fixed',
-        'Introduced ExternalLinkConfirmSheet to showcase a warning banner, security promises, and a selectable destination URL card.',
-        'Added iOS-style confirmation popup dialog for external link navigation in note_kar_home.dart. - Added standard SettingsBetaNote with learn',
-        'Phase 20 : of refactor changes',
-        'Phase 19 : of refactor changes',
-        'Phase 18 : of refactor changes',
-        'Phase 17.5 : of refactor changes',
-        'Phase 17 : of refactor changes',
-        'Phase 15 : of refactor changes',
-        'Phase 14 : of refactor changes',
-        'Phase 13 : of refactor changes',
-        'Phase 12 : of refactor changes',
-        'Phase 11 : of refactor changes',
-        'Phase 10 : of refactor changes',
-        'Phase 9 : of refactor changes',
-        'Phase 8 : of refactor changes',
-        'Phase 7 : of refactor changes',
-        'Phase 6 : of refactor changes',
-        'Phase 5 : of refactor changes',
-        'Phase 4 : of refactor changes',
-        'Phase 3 : of refactor changes',
-        'Phase 2 : of refactor changes',
-        'Phase 1 : of refactor changes',
-        'Redesign sobriety widget',
-      ],
-    ),
-    (
-      version: '5.1.7',
-      date: 'July 29, 2026',
-      highlights: ['Beta testing and feedback build.'],
-      items: ['Fixed the Download system #4 App download'],
-    ),
-    (
-      version: '5.1.6',
-      date: 'July 29, 2026',
-      highlights: [
-        'Align home streak card and integrate onboarding walkthrough',
-        'Implement iOS-style date-time picker and clean copy text',
-        'Add 21 research-backed milestones, 10 psychological themes, custom start date picker, and pill progress card redesign',
-      ],
-      items: [
-        'Added more language support to the app',
-        'Align home streak card and integrate onboarding walkthrough',
-        'Implement iOS-style date-time picker and clean copy text',
-        'Refine Solo Leveling milestone progression hierarchy',
-        'Add 21 research-backed milestones, 10 psychological themes, custom start date picker, and pill progress card redesign',
-        '- Wired up the "Note on Click" setting to open the note compose dialog on single taps instead of executing a direct instant log.',
-      ],
-    ),
-    (
-      version: '5.1.5',
-      date: 'July 29, 2026',
-      highlights: ['Beta testing and feedback build.'],
-      items: [
-        'Optimize startup speed, enable R8 minification, and upgrade type safety',
-        'Keep cached commits on network failure, improve empty state, add inline refresh spinner, and remove RepaintBoundary on items to fix scrolling freezes',
-        'Rename persistent control and format beta note, performance(commits): cache and optimize commits list with repaint boundary and column layout, feat(analytics): fallback card for empty intelligent insights',
-        'Complete feedback proxy removal and settings polish',
-      ],
-    ),
-    (
-      version: '5.1.4',
-      date: 'July 25, 2026',
-      highlights: [
-        'Implement inline button spinner, success/failed states and compile-time API key injection',
-        'Implement offline check, iOS spinner overlay, and automated crash reporting',
-        'Add Email Support tile and Beta dialog Feedback link',
-        'Implement secure template-structured in-app feedback system',
-      ],
-      items: [
-        'Implement inline button spinner, success/failed states and compile-time API key injection',
-        'Implement offline check, iOS spinner overlay, and automated crash reporting',
-        'Format beta popup feedback redirect link and remove underline',
-        'Add Email Support tile and Beta dialog Feedback link',
-        'Implement secure template-structured in-app feedback system',
-      ],
-    ),
-    (
-      version: '5.1.3',
-      date: 'July 25, 2026',
-      highlights: [
-        'Add network monitor welcome card, FAQs, and fix upgrader walkthrough checks',
-        'Implement mobile data update warning & network monitor page',
-        'Upgrade widget layout and settings search index',
-        'Index app version, safety, and privacy in search database',
-      ],
-      items: [
-        'Remove extra margins/padding to match standard settings card widths',
-        'Integrate Network Monitor natively as a settings dialog subpage',
-        'Wrap NetworkMonitor root in Material and align card dimensions',
-        'Update NetworkMonitor with clear pill button & dynamic translucency',
-        'Wrap network monitor in Material to resolve double yellow underlines',
-        'Add network monitor welcome card, FAQs, and fix upgrader walkthrough checks',
-        'Implement mobile data update warning & network monitor page',
-        'Upgrade widget layout and settings search index',
-        'Index app version, safety, and privacy in search database',
-      ],
-    ),
-    (
-      version: '5.1.2',
-      date: 'July 25, 2026',
-      highlights: [
-        'Hardware-Backed DB Encryption: Secure your database using 256-bit AES keys generated inside the Android Keystore.',
-        'Persistent Lock-Screen Panel: Add a sticky, low-priority control drawer to log check-in/out directly from the lock screen.',
-        'Apple-Style Security Onboarding: Presents cryptographic upgrade details dynamically to users to build trust.',
-        'Quick Settings Tile & Launcher Shortcuts: Fast status bar tile and launcher options to bypass the main app shell.',
-        'App Switcher Privacy: Obfuscate active app screens and block screenshot capture when backgrounding the app.',
-        'Scroll Performance Optimizations: GPU repaint boundary caching for high-speed scrolling on long history lists.',
-      ],
-      items: [
-        'Hardware-Backed DB Encryption via Android Keystore',
-        'Persistent Lock-Screen notification control panel',
-        'Apple-Style security onboarding & release notice screens',
-        'Status bar Quick Settings tile & dynamic app shortcuts',
-        'App Switcher privacy obfuscation (screenshot blocking)',
-        'Scroll layout performance & list optimizations',
-      ],
-    ),
-    (
-      version: '5.1.1',
-      date: 'July 24, 2026',
-      highlights: [
-        'Apple HIG Minimalist Overhaul: Left-aligned, icon-less typography for beta notices and popups.',
-        'Compliant Touch Targets: 44x44 sheet header buttons, wider compact delete targets, and larger search clear actions.',
-        'Search & Docs Sync: Add Dashboard and Logging categories to settings search, and write help guides for widgets/analytics.',
-        'Restructured iOS 26 Widget: Bottom 2x2 action buttons and top live history stack.',
-        'Instant Live Widget Updates: Updates RemoteViews directly on button tap.',
-        'Elegant Custom Quick Note: Programmatic slate card view with iOS blue accent button.',
-        'Unified Dashboard Subpage: Move all habit analytics to a dedicated subpage.',
-        'Aligned Outline Insights Icons: Similar minimal outline style matching theme accent.',
-      ],
-      items: [
-        'Style: overhaul beta popup and settings notes to conform to Apple\'s minimalist HIG (left-aligned typography, icon-less layout)',
-        'Optimize: expand button touch targets to HIG compliance (44x44 sheet headers, wider compact delete buttons, and 40px search clear targets)',
-        'Feat: map Logging and Dashboard sub-pages in Settings search index, and add comprehensive widget/dashboard Help FAQs and Guides',
-        'Fix: remove redundant backslash escapes in markdown RegExp',
-        'Fix: remove old unresolved widget references and clean static update bindings',
-        'Feat: implement 2x2 action widget layout, live history updates, and custom quick note dialog',
-        'Fix: resolve widget inflation crash and align dashboard insights layout',
-        'Style: remove subtitle from Dashboard settings card row',
-        'Feat: restructure widget with split actions dock/view-point and organize Dashboard page',
-        'Feat: implement widget live action status suffixes and dedicated insights Dashboard sub-page',
-        'Feat: implement GitHub activity heatmap, intelligent insights, and gap alerts',
-        'Feat: implement native background widget logging, quick note dialog, and update client enhancements',
-      ],
-    ),
-    (
-      version: '5.1.0',
-      date: 'July 24, 2026',
-      highlights: [
-        'Security and stability improvements.',
-        'App Lock: Protect app access with custom PIN.',
-        'Optimized Downloader: Support parallel HTTP range requests.',
-        'Lefthook & Format on Save: Pre-commit formatting automation.',
-      ],
-      items: [
-        'Chore: integrate VS Code formatting on save, Lefthook configuration, and pre-commit hooks',
-        'Fix: resolve settings dialog type selection sync lag and align code formatting/lints with CI requirements',
-        'Feat: introduce App Lock with custom PIN, improve build pipeline, and polish release workflow',
-        'Optimize downloader with parallel HTTP range requests, redirect appCacheDir to externalCacheDir, and redesign build cache cards',
-      ],
-    ),
-    (
-      version: '5.0.0',
-      date: 'July 23, 2026',
-      highlights: [
-        'Windows-Style Updates Classification: Dynamically categorizes packages into Major Feature, Security, or Beta updates with matching colors, badges, and designs.',
-        'Native Markdown Text Renderer: native formatting of headers, bullet lists, code blocks, bold text, and highlights using the active theme color palette.',
-        'Double Card Action Controls: Added double actions to ready updates cards, supporting both "Install Now" and "Check for updates".',
-        'Refined Track Selectors: Restructured the Build Choose subpage numbered rules layout with perfectly baseline-aligned columns.',
-      ],
-      items: [
-        'Added: Windows-Style Updates Classification System dividing updates into Feature, Security, and Beta tracks with custom layouts.',
-        'Added: Native Markdown Text Renderer (MarkdownText) in settings for rich rendering of headers, lists, code, bold text, and hyperlinks.',
-        'Added: Double Action Buttons on the update checking card, supporting both "Install Now" and "Check for updates".',
-        'Added: Background reminders, Cupertino spinners, track switching overlays, and reminder message editor focus checkmarks.',
-        'Added: Track Switch Downgrades explanation guide to the Help FAQ section.',
-        'Added: Polished numbering list inside the Build Choose page with baseline-aligned number columns.',
-        'Added: Automated powershell script calculations for major (-stable), minor (-security), and patch (-beta) increments.',
-        'Fixed: Resolved 404 download errors on Beta APK downloads by tracking branch tagNames.',
-        'Fixed: Resolved VirusTotal pipeline size limit failures by fetching custom large-file upload URLs.',
-        'Fixed: Resolved Perl delimiter syntax warnings on release note generation scripts.',
-        'Fixed: Resolved update classification heuristic conflicts with markdown headers inside release bodies.',
-        'Fixed: version string layouts on the up-to-date panel to display version name alongside build codes.',
-      ],
-    ),
-    (
-      version: '4.0.9',
-      date: 'July 23, 2026',
-      highlights: [
-        'Custom Markdown Text Renderer: Rich rendering of headers, lists, code blocks, bold text, and hyperlinks in What\'s New release notes.',
-        'Double Card Action Buttons: Supports downloading, installing, and re-checking for updates simultaneously.',
-        'Track Switching FAQ Guides: Explains system package downgrades on Android when changing release tracks.',
-        'Horizontal Baseline Alignments: Separates numbers and rules inside Build Choose track settings, preventing text wrapping.',
-      ],
-      items: [
-        'Added: Custom Markdown Text Renderer (MarkdownText) in settings for rich rendering of headers, lists, code, bold text, and hyperlinks.',
-        'Added: Double Action Buttons on the update checking card, supporting both "Install Now" and "Check for updates".',
-        'Added: Track Switch Downgrades explanation guide to the Help FAQ section.',
-        'Added: Polished numbering list inside the Build Choose page with baseline-aligned number columns.',
-        'Fixed: Resolved 404 download errors on Beta APK downloads by tracking tagNames in the update checker.',
-        'Fixed: Resolved VirusTotal pipeline size limit failures by fetching custom large-file upload URLs.',
-        'Fixed: Resolved Perl delimiter syntax warnings on release note generation scripts.',
-        'Fixed: Resolved update classification heuristic conflicts with markdown headers inside release bodies.',
-        'Fixed: version string layouts on the up-to-date panel to display version name alongside build codes.',
-      ],
-    ),
-    (
-      version: '4.0.8',
-      date: 'July 23, 2026',
-      highlights: [
-        'Windows-Style Update Heuristics: Dynamically classifies update packages into Feature, Priority, or Beta updates with unique layout designs.',
-        'Track Transition Dialog Overlays: Smooth 3-second transparent dialog overlay with Apple Cupertino loading spinners when switching tracks.',
-        'Dynamic Reminder Editor Suffix: Focused input fields toggle the editing pencil icon to a checkmark in theme accent to save changes.',
-        'Automatic Version Release Calculators: Version management script increments major, minor, or patch versions via flags.',
-        'Dynamic Local Build Channel Status: Displays channel badges (Stable, Beta, or Priority Release) directly on the up-to-date panel.',
-      ],
-      items: [
-        'Added: Windows-Style Update Classification System dividing updates into Feature, Priority, and Beta tracks with custom layouts.',
-        'Added: Dynamic Build Channel Badges displaying local build channel track status (Stable Release, Beta Release, or Priority Release).',
-        'Added: Dynamic editing suffix icon in the reminder message editor toggling between edit and checkmark controls.',
-        'Added: 3-second transparent overlay modal with Cupertino Activity Indicators when switching release tracks.',
-        'Added: Upgraded version management scripts supporting automatic calculation increments via -stable, -beta, or -priority switches.',
-      ],
-    ),
-    (
-      version: '4.0.7',
-      date: 'July 23, 2026',
-      highlights: [
-        'In-App Download & Installation: Integrated update download and install engine with MD5/SHA256 checksum integrity verification.',
-        'Stable & Beta Tracks: Toggles to choose between stable releases and pre-release developer beta builds under updates options.',
-        'Offline Commits Caching: Persistently saves the commit feed to SharedPreferences for offline reading with offline warnings.',
-        'Dynamic VirusTotal Reports: Automatically fetches clean scan ratios, scan execution dates, and verification status colors.',
-        'iOS 26 Style Cupertino Indicators: Replaced CircularProgressIndicator screens with premium, high-fidelity CupertinoActivityIndicators.',
-      ],
-      items: [
-        'Added: Dynamic in-app update center to download and install new releases.',
-        'Added: Stable and Beta update tracks toggle under Updates & Notices.',
-        'Added: Persistent offline caching and offline error states for update commits.',
-        'Added: Real-time scan statistics display on the VirusTotal security card.',
-        'Added: Apple-style CupertinoActivityIndicator widgets throughout all screens.',
-        'Added: Dynamic settings search indexing for track selection, security, and commits.',
-        'Improved: Card container padding and layout widths aligned to a standard format.',
-        'Improved: FAQ support sections updated with offline commits and security references.',
-      ],
-    ),
-    (
-      version: '4.0.6',
-      date: 'July 22, 2026',
-      highlights: [
-        'Resilient Background Reminders: Elevates alarms to native system-level priority clocks to trigger offline alerts on time even when killed.',
-        'Swipe Onboarding Experience: Clean full-screen interactive onboarding guide to configure preferences and permissions step-by-step.',
-        'Cupertino Reminder Message Composer: Sleek Apple-style composer sheet with current value cards and a 5-item recent messages history queue.',
-        'Secured Staged Factory Reset: Overhauled 5-second timed secure sequence detailing SQLite, preference, and alarm purging phases.',
-        'Repository Moved: Official repository moved to a new home on GitHub at dheeraz101/Notekar-Android.',
-      ],
-      items: [
-        'Notice: Repository has been officially moved to the new home at dheeraz101/Notekar-Android.',
-        'Added: Full-screen Welcome and Onboarding experience with horizontal swipable pages.',
-        'Added: Dynamic update walkthrough flow displaying only the reminders permission step to updating users.',
-        'Added: Apple-style custom reminder message composer sheet supporting current value display, max 5 recent messages history queue, and empty/set status cards.',
-        'Added: Guided setup cards for exact alarms, notification permission, and manufacturer-specific Auto-Start settings.',
-        'Added: Manual close (\'x\') settings button to the Auto-Start warning card to permanently hide it.',
-        'Added: Rotating status icons and detailed sub-status phases to the 5-second Timed Factory Reset overlay.',
-        'Added: Privacy notice to the bottom of the factory reset overlay explaining secure local data wiping.',
-        'Improved: Background reminder reliability using AlarmManager system-level priority clocks and WakeLock.',
-        'Improved: Upgraded GitHub Action workflows to support Java 21 JDK, package caching, AppBundle generation, and CodeQL security configuration fixes.',
-        'Fixed: Walkthrough launch state sequence check at app startup.',
-        'Fixed: Suppressed automatic What\'s New changelog popups at startup for a cleaner upgrade experience.',
-      ],
-    ),
-    (
-      version: '4.0.5',
-      date: 'July 22, 2026',
-      highlights: [
-        'Dedicated Language selector supporting English, Hindi, and Spanish with full l10n support.',
-        'Recently Deleted (Trash Bin) view with individual restore and 30-day auto-purge policy.',
-        'Optimum contrast-adjusted accent colors dynamically matching Light/Dark/AMOLED themes.',
-        'Hardened Factory Reset & Clear Data logic covering trash moments and locale preferences.',
-        'Ultra-premium iOS 26 style snappy category transitions with synchronized header cross-fades.',
-      ],
-      items: [
-        'Added: Dedicated Language selection settings page for English, Hindi, and Spanish translation support.',
-        'Added: Onboarding welcome sheet language selector for smooth initial setup.',
-        'Added: Recently Deleted trash bin section with individual restore, empty trash, and restore all actions.',
-        'Added: 30-day auto-purge policy banner for trash bin contents.',
-        'Fixed: Dynamic contrast-adjusted accent colors for Light, Dark, and AMOLED themes.',
-        'Fixed: Snappy navigation transitions (180ms) with synchronized header title cross-fades.',
-        'Fixed: Hardened Factory Reset to purge preferences, active/trash databases, and reset active locales.',
-        'Fixed: Redesigned Check for Updates card to be minimal, neutral-colored, and match the iOS 26 style.',
-        'Fixed: Localized settings search results indexing and matching for Spanish and Hindi keywords.',
-        'Fixed: Localized Guides and Help FAQ items to match the user\'s selected interface language.',
-      ],
-    ),
-    (
-      version: '4.0.4',
-      date: 'July 20, 2026',
-      highlights: [
-        'A complete visual overhaul with an iOS-inspired design and fluid adaptive transitions.',
-        'Hardened data security with enhanced backup resilience and diagnostic logging.',
-        'Next-generation App Widgets and a redesigned, lightning-fast Settings Search.',
-        'A centralized Update Center and integrated feedback system to build a better NoteKar.',
-        'Intelligent accessibility including global text scaling and high-contrast support.',
-      ],
-      items: [
-        'Modular Refactor: Re-architected core components for improved performance scaling.',
-        'Adaptive Engine: Refined intelligence for smoother cross-device UI transitions.',
-        'Data Layer: Implemented diagnostic logging and SHA-256 validation for backup integrity.',
-        'App Widgets: Rebuilt Android widgets with modern layouts and optimized RemoteViews.',
-        'Settings Search: Overhauled search with cached indexing and improved query matching.',
-        'Feedback System: Integrated direct support routing with diagnostic attachment support.',
-        'Layout: Standardized global padding and standardized typography across all modules.',
-        'UX Hardening: Optimized state management for History, Note Input, and Calendar flows.',
-        'Build Integrity: Final build 13 with legal compliance integration and stability patches.',
-      ],
-    ),
-    (
-      version: '4.0.3',
-      date: 'June 17, 2026',
-      highlights: [
-        'Backup validation before import, with safer checks for damaged JSON and oversized files.',
-        'New backup import preview with total counts and settings restoration details.',
-        'Crash-safer startup sequencing and timeline profiling markers.',
-        'Cached search and calendar lookups for smoother performance.',
-      ],
-      items: [
-        'Moved the app line to 4.0.3 build 12 for the backup and performance hardening release.',
-        'Added backup validation before import, with safer checks for damaged JSON, invalid moments, oversized files, and unsupported data.',
-        'Added a backup import preview with total moments, notes, export date, new moments, duplicates skipped, and settings to restore.',
-        'Made backup import crash-safer by validating and persisting the merge before updating visible app state.',
-        'Improved startup sequencing so first paint, App Lock, and non-critical checks are staged more smoothly.',
-        'Added timeline profiling markers for startup and backup import work.',
-        'Cached Settings search, note search, and calendar date lookups for smoother repeated use.',
-        'Added focused tests for backup validation, corrupted files, duplicate handling, and dry-run summaries.',
-      ],
-    ),
+  static const String webChangelogUrl =
+      'https://notekarapp.vercel.app/changelog.html';
 
-    (
-      version: '4.0.2',
-      date: 'June 12, 2026',
-      highlights: [
-        'Optional home menu icon motion tied to Reduce Motion.',
-        'Dependency-aware Settings behavior for clearer guidance.',
-        'Refined bottom sheets and swipe-delete polish.',
-      ],
-      items: [
-        'Moved the app line to 4.0.2 build 11 for the polish release.',
-        'Made home menu icon motion optional, disabled by default, and tied it to Reduce Motion.',
-        'Added dependency-aware Settings behavior so unavailable controls explain what must be enabled first.',
-        'Refined History and Settings bottom sheets, History delete feedback, and swipe-delete polish.',
-        'Fixed App Lock immediate timing so Android screen-lock confirmation does not loop inside the app.',
-        'Added clearer feedback while Android applies launcher icon changes.',
-      ],
-    ),
+  static const latestRelease = (
+    version: '7.2.0',
+    date: 'August 23, 2026',
+    edition: 'Mindfulness & Battery Evolution',
+    badgeColor: Color(0xFF0A84FF),
+    highlights: [
+      (
+        title: 'Hourly Time Reflection',
+        desc:
+            'Full-screen mindful breathing prompts that wake on lockscreen without exposing private notes.',
+        icon: Icons.self_improvement_rounded,
+        tag: 'Mindfulness',
+      ),
+      (
+        title: 'Sleep Protection & Active Hours',
+        desc:
+            'Customizable daily active hours (e.g. 09:00 AM – 10:00 PM) with quiet hours rollover to protect sleep.',
+        icon: Icons.bedtime_rounded,
+        tag: 'Sleep Guard',
+      ),
+      (
+        title: 'Zero-Wake Battery Architecture',
+        desc:
+            'Doze-compliant RTC non-waking alarms and isolated repaint boundaries for all animations.',
+        icon: Icons.battery_charging_full_rounded,
+        tag: 'Battery Safe',
+      ),
+    ],
+    items: [
+      '+ Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet',
+      '+ Add alarm audio chime, active hours schedule, and onboarding flow',
+      '* Eliminate RTC_WAKEUP battery drain for routine logging reminders',
+      '* Wrap animated widgets in RepaintBoundary for smooth 120 FPS rendering',
+      '! Add early lockscreen reflection launch handler in NoteKarHome',
+      '! Add isDeviceLocked and closeLockscreenActivity to dismiss activity on locked device',
+      '* Enable test coverage in GitHub Actions CI workflow',
+    ],
+  );
 
-    (
-      version: '4.0.1',
-      date: 'June 1, 2026',
-      highlights: [
-        'Polish release with home menu icon motion options.',
-        'Dependency-aware settings and refined bottom sheets.',
-      ],
-      items: [
-        'Moved the app line to 4.0.1 build 11 for the polish release.',
-        'Made home menu icon motion optional, disabled by default, and tied it to Reduce Motion.',
-        'Added dependency-aware Settings behavior so unavailable controls explain what must be enabled first.',
-        'Refined History and Settings bottom sheets, History delete feedback, and swipe-delete polish.',
-        'Fixed App Lock immediate timing so Android screen-lock confirmation does not loop inside the app.',
-        'Added clearer feedback while Android applies launcher icon changes.',
-      ],
-    ),
-    (
-      version: '4.0.0',
-      date: 'June 1, 2026',
-      highlights: [
-        'Major redesign with clearer top-level Settings sections.',
-        'Real Android app icon switching support.',
-        'Improved Privacy & Security with App Lock enhancements.',
-        'Note validation and visible character counter.',
-      ],
-      items: [
-        'Moved the app line to 4.0.0 build 9 for the final release package.',
-        'Reduced Settings to clearer top-level sections: Personalization, Logging, Privacy & Security, Data & Backup, Updates, and Advanced.',
-        'Added real Android app icon switching with Default, Black, Blue, Gold, Green, Orange, and Red launcher icons.',
-        'Moved App Lock under Privacy & Security with background-only lock timing and clearer Android screen-lock wording.',
-        'Added note validation, a visible character counter, full-note viewing from History, and smoother History scroll-to-top behavior.',
-        'Cleaned Backup & Export by moving passive backup status cards into a second-level Backup Status page.',
-        'Polished release privacy and security behavior by avoiding clipboard fallback for failed exports and requiring HTTPS for remote notice links.',
-      ],
-    ),
-    (
-      version: '3.6.0',
-      date: 'May 27, 2026',
-      highlights: [
-        'Restored compact History cards for faster scanning.',
-        'Accessibility improvements for Quick Actions.',
-      ],
-      items: [
-        'Moved the app line to 3.6.0 build 8 for the next release wave.',
-        'Restored compact History to the denser 3.0.0-style cards for faster scanning.',
-        'Kept History as a simple normal / compact switch instead of splitting it into more modes.',
-        'Moved Quick Actions out of Privacy and into Accessibility so launcher shortcuts sit with interaction controls.',
-        'Kept the calmer action-color dots, haptic style, backup reminder, and privacy lock work from the previous polish pass.',
-      ],
-    ),
-    (
-      version: '3.5.0',
-      date: 'May 27, 2026',
-      highlights: [
-        'Theme-aware bottom navigation surface.',
-        'Curated Action Color support (Blue, Green, Purple, etc.).',
-        'Privacy Lock using Android system credentials.',
-        'Expanded Android app shortcuts.',
-      ],
-      items: [
-        'Moved the app line to 3.5.0 build 7 for the next release cycle.',
-        'Added a theme-aware bottom navigation surface so the home toolbar follows Light, Dark, and AMOLED themes more naturally.',
-        'Fixed Larger Text so it respects Android text scaling and never shrinks text when the system font is already larger.',
-        'Added curated Action Color support with Blue, Green, Purple, Pink, Orange, and Graphite accents while keeping destructive, success, and warning colors intentional.',
-        'Added Haptic Style, compact History, Auto Backup Reminder, Data Health, and Quick Actions controls.',
-        'Added Privacy Lock using Android system credentials, with guidance to add a system lock before enabling it.',
-        'Expanded Android app shortcuts to Single, IN, OUT, and Note actions.',
-        'Simplified Accessibility by replacing duplicate haptics switches with Off, Light, and Standard haptic styles.',
-      ],
-    ),
-    (
-      version: '3.0.0',
-      date: 'May 27, 2026',
-      highlights: [
-        'Complete Settings reshuffle for better clarity.',
-        'Dedicated Reset page with Factory Reset flow.',
-        'Privacy page with local-storage and data-use transparency.',
-        'Backup import merge logic instead of replace.',
-      ],
-      items: [
-        'Moved the current app line to 3.0.0 build 6 with refreshed What\'s New and changelog entries.',
-        'Reshuffled Settings into clearer categories: Display, Capture, Moments, Backup & Export, Updates & Notices, Privacy & Security, Accessibility, Reset, and Diagnostics.',
-        'Moved all reset actions into a dedicated Reset page with Reset Settings Only, Reset All Data, Factory Reset, and a guidance note.',
-        'Added a full-screen Factory Reset flow with real progress, a calm completion state, and a Start button before the welcome setup appears.',
-        'Made Settings navigation stack-aware, so nested pages go back to their previous section before closing the sheet.',
-        'Improved offline-first startup by delaying network notice checks until the app has loaded and connectivity is known.',
-        'Refined History with true compact rows, a scroll-to-top control, smoother delete removal, better swipe-delete background, and Single moments in duration selection.',
-        'Changed backup import to merge new moments with existing local history instead of replacing the current device data.',
-        'Added a dedicated Privacy page with local-storage details, limited network-use notes, no analytics/telemetry disclosure, and planned encryption/Drive backup guidance.',
-        'Cleaned Diagnostics with clearer labels, copyable support details, and Android backup visibility.',
-        'Fixed welcome theme selection, removed duplicate Minimal Clock controls, and kept Show Seconds as the single clock display setting.',
-        'Added Note-Focused Hold so long press can be reserved for moments that include context.',
-        'Reduced noisy setting-change notification pills while keeping meaningful feedback for updates, exports, connectivity, and errors.',
-        'Refined Settings row alignment so icons sit with titles, and restored compact History card radius to avoid red swipe background peeking through.',
-      ],
-    ),
-    (
-      version: '2.5.0',
-      date: 'May 27, 2026',
-      highlights: [
-        'Preparation for major release wave.',
-        'Documented planned release files and security approach.',
-      ],
-      items: [
-        'Prepared the 2.5.0 release notes and Android release folder structure without building APKs.',
-        'Kept the app version aligned for the next release step and preserved the 2.0.0 release history.',
-        'Documented the planned release files and SHA-256 packaging approach for the Android APK release.',
-      ],
-    ),
-    (
-      version: '2.0.0',
-      date: 'May 26, 2026',
-      highlights: [
-        'iOS-inspired Android redesign with grouped Settings.',
-        'GitHub Releases update checks and remote notices.',
-        'Accessibility and customization options for haptics and motion.',
-      ],
-      items: [
-        'Introduced the iOS-inspired Android redesign with grouped Settings pages, cleaner sheets, refined toolbar controls, and calmer colors.',
-        'Added GitHub Releases update checks, remote GitHub notice support, notification routing actions, What\'s New, and Changelog pages.',
-        'Added accessibility and customization options for haptics, motion, larger text, high contrast, compact history, button labels, and large controls.',
-        'Improved Android backup visibility, export shortcuts, backup import, diagnostics, typed reset confirmation, and release metadata.',
-        'Refined history filters, section headers, swipe-delete visuals, note indicators, and compact review controls.',
-      ],
-    ),
-    (
-      version: '1.0.0',
-      date: 'May 25, 2026',
-      highlights: [
-        'Native Android launch with private offline storage.',
-        'Note capture, history filters, and backup import.',
-      ],
-      items: [
-        'Launched the native Android rewrite with private offline moment storage.',
-        'Added Single and Two-Way logging, note capture, history filters, exports, and backup import.',
-        'Added settings for themes, default startup mode, and tap delay control.',
-      ],
-    ),
-  ];
+  static Future<void> show(
+    BuildContext context, {
+    required Palette p,
+    bool latestOnly = false,
+    bool blur = false,
+    bool largeText = false,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (ctx) => ChangelogDialog(
+        p: p,
+        latestOnly: latestOnly,
+        blur: blur,
+        largeText: largeText,
+      ),
+    );
+  }
 
   @override
   State<ChangelogDialog> createState() => _ChangelogDialogState();
 }
 
-class ChangelogSettingsPage extends StatefulWidget {
-  const ChangelogSettingsPage({
-    super.key,
-    required this.p,
-    required this.latestOnly,
-  });
-
-  final Palette p;
-  final bool latestOnly;
+class _ChangelogDialogState extends State<ChangelogDialog> {
+  List<String> _currentItems = ChangelogDialog.latestRelease.items;
 
   @override
-  State<ChangelogSettingsPage> createState() => _ChangelogSettingsPageState();
-}
+  void initState() {
+    super.initState();
+    _fetchRemoteChangelog();
+  }
 
-class _ChangelogSettingsPageState extends State<ChangelogSettingsPage> {
-  final Set<int> _expanded = {0};
+  Future<void> _fetchRemoteChangelog() async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse(
+              'https://raw.githubusercontent.com/dheeraz101/Notekar-Android/main/versions/changelog.json',
+            ),
+          )
+          .timeout(const Duration(seconds: 3));
+      if (res.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(res.body) as List<dynamic>;
+        if (data.isNotEmpty) {
+          final first = data.first as Map<String, dynamic>;
+          final items = (first['fullChangelog'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList();
+          if (items != null && items.isNotEmpty && mounted) {
+            setState(() {
+              _currentItems = items;
+            });
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _openWebChangelog() async {
+    HapticFeedback.selectionClick();
+    try {
+      const channel = MethodChannel('notekar/files');
+      await channel.invokeMethod<void>('openUrl', {
+        'url': ChangelogDialog.webChangelogUrl,
+      });
+    } catch (_) {
+      await Clipboard.setData(
+        const ClipboardData(text: ChangelogDialog.webChangelogUrl),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Link copied to clipboard'.localized(context)),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.p;
-    final visible = widget.latestOnly
-        ? ChangelogDialog.releases.take(1).toList()
-        : ChangelogDialog.releases;
-    if (widget.latestOnly) {
-      return _WhatsNewPanel(p: p, release: visible.first);
-    }
-    return Column(
-      children: [
-        for (var index = 0; index < visible.length; index++)
-          ChangelogReleaseCard(
+    final title = widget.latestOnly
+        ? "What's New".localized(context)
+        : 'Release Notes'.localized(context);
+
+    return AppSheet(
+      p: p,
+      title: title,
+      largeText: widget.largeText,
+      blur: widget.blur,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Personalized Version Hero Card
+          _buildHeroCard(context, p),
+
+          const SizedBox(height: 18),
+
+          // High-Impact Highlights Matrix
+          for (final h in ChangelogDialog.latestRelease.highlights) ...[
+            _buildHighlightCard(context, p, h),
+            const SizedBox(height: 10),
+          ],
+
+          const SizedBox(height: 14),
+
+          // Detailed Release Items with Expressive Bullet Icons
+          SettingsGroup(
             p: p,
-            release: visible[index],
-            isLatest: index == 0,
-            expanded: _expanded.contains(index),
-            onTap: () => setState(() {
-              if (_expanded.contains(index)) {
-                _expanded.remove(index);
-              } else {
-                _expanded.add(index);
-              }
-            }),
+            title: 'Version Highlights & Changes'
+                .localized(context)
+                .toUpperCase(),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    for (final item in _currentItems)
+                      _buildChangelogItem(context, p, item),
+                  ],
+                ),
+              ),
+            ],
           ),
-      ],
+
+          const SizedBox(height: 14),
+
+          // Web Archive Callout Card
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: p.border.withValues(alpha: 0.5)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.history_rounded, color: p.accent, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Full Release History'.localized(context),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Explore all past versions and updates on our website.'
+                            .localized(context),
+                        style: TextStyle(color: p.text3, fontSize: 11.5),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.tonal(
+                  onPressed: _openWebChangelog,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'View Web'.localized(context),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Primary Done Button
+          FilledButton.icon(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.check_rounded, size: 18),
+            label: Text('Got It'.localized(context)),
+            style: FilledButton.styleFrom(
+              backgroundColor: p.accent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
-}
 
-class _ChangelogItemRow extends StatelessWidget {
-  const _ChangelogItemRow({
-    required this.p,
-    required this.text,
-    required this.isLatest,
-  });
+  Widget _buildChangelogItem(BuildContext context, Palette p, String item) {
+    final trimmed = item.trim();
+    String text = trimmed;
+    IconData iconData = Icons.circle;
+    double iconSize = 6;
+    Color iconColor = p.accent;
+    Color iconBg = p.accent.withValues(alpha: 0.12);
 
-  final Palette p;
-  final String text;
-  final bool isLatest;
+    if (trimmed.startsWith('+') || trimmed.toLowerCase().startsWith('add')) {
+      text = trimmed.startsWith('+') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.add_rounded;
+      iconSize = 13;
+      iconColor = const Color(0xFF30D158);
+      iconBg = const Color(0xFF30D158).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('-') ||
+        trimmed.toLowerCase().startsWith('remove')) {
+      text = trimmed.startsWith('-') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.remove_rounded;
+      iconSize = 13;
+      iconColor = const Color(0xFFFF453A);
+      iconBg = const Color(0xFFFF453A).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('!') ||
+        trimmed.toLowerCase().startsWith('fix') ||
+        trimmed.toLowerCase().startsWith('resolve')) {
+      text = trimmed.startsWith('!') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.build_circle_outlined;
+      iconSize = 13;
+      iconColor = const Color(0xFF0A84FF);
+      iconBg = const Color(0xFF0A84FF).withValues(alpha: 0.15);
+    } else if (trimmed.startsWith('*') ||
+        trimmed.toLowerCase().startsWith('refine') ||
+        trimmed.toLowerCase().startsWith('optimize') ||
+        trimmed.toLowerCase().startsWith('update')) {
+      text = trimmed.startsWith('*') ? trimmed.substring(1).trim() : trimmed;
+      iconData = Icons.star_rounded;
+      iconSize = 14;
+      iconColor = const Color(0xFFFF9F0A);
+      iconBg = const Color(0xFFFF9F0A).withValues(alpha: 0.15);
+    }
 
-  ({IconData icon, Color color}) _getItemStyle() {
-    final lower = text.trim().toLowerCase();
-    if (lower.startsWith('add') ||
-        lower.startsWith('added') ||
-        lower.startsWith('new') ||
-        lower.startsWith('create')) {
-      return (icon: Icons.add_rounded, color: p.green);
-    }
-    if (lower.startsWith('delete') ||
-        lower.startsWith('deleted') ||
-        lower.startsWith('remove')) {
-      return (icon: Icons.remove_rounded, color: p.red);
-    }
-    if (lower.startsWith('fix') ||
-        lower.startsWith('fixed') ||
-        lower.startsWith('patch') ||
-        lower.startsWith('resolve')) {
-      return (icon: Icons.auto_awesome_rounded, color: p.orange);
-    }
-    if (lower.startsWith('update') ||
-        lower.startsWith('refactor') ||
-        lower.startsWith('improve') ||
-        lower.startsWith('moved')) {
-      return (icon: Icons.published_with_changes_rounded, color: p.accent);
-    }
-    return (icon: Icons.check_rounded, color: p.accent);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final style = _getItemStyle();
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 18,
-            height: 18,
-            margin: const EdgeInsets.only(top: 2),
+            width: 22,
+            height: 22,
             decoration: BoxDecoration(
-              color: style.color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+              color: iconBg,
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(style.icon, color: style.color, size: 11),
+            alignment: Alignment.center,
+            child: Icon(iconData, size: iconSize, color: iconColor),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              text,
-              style: TextStyle(
-                color: p.text2,
-                fontSize: 13,
-                height: 1.4,
-                fontWeight: FontWeight.w400,
-                letterSpacing: -0.1,
-              ),
+              text.localized(context),
+              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class ChangelogReleaseCard extends StatelessWidget {
-  const ChangelogReleaseCard({
-    super.key,
-    required this.p,
-    required this.release,
-    required this.isLatest,
-    required this.expanded,
-    required this.onTap,
-  });
-
-  final Palette p;
-  final ({
-    String date,
-    List<String> items,
-    List<String> highlights,
-    String version,
-  })
-  release;
-  final bool isLatest;
-  final bool expanded;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHeroCard(BuildContext context, Palette p) {
+    final rel = ChangelogDialog.latestRelease;
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: p.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          PressableScale(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 29,
-                    height: 29,
-                    decoration: BoxDecoration(
-                      color: isLatest
-                          ? p.accent.withValues(alpha: 0.14)
-                          : p.surface3,
-                      borderRadius: BorderRadius.circular(7),
-                    ),
-                    child: Icon(
-                      isLatest
-                          ? Icons.auto_awesome_rounded
-                          : Icons.article_rounded,
-                      color: isLatest ? p.accent : p.text2,
-                      size: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                'Version ${release.version}',
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                            ),
-                            if (isLatest) ...[
-                              const SizedBox(width: 8),
-                              SettingsStatusPill(
-                                p: p,
-                                label: 'LATEST',
-                                color: p.accent,
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          release.date,
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AnimatedRotation(
-                    turns: expanded ? 0.25 : 0,
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOutCubic,
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      color: p.text3.withValues(alpha: 0.7),
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Column(
-              children: [
-                Divider(color: p.border, height: 1, indent: 16, endIndent: 16),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                  child: Column(
-                    children: [
-                      for (final item in release.items)
-                        _ChangelogItemRow(p: p, text: item, isLatest: isLatest),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            crossFadeState: expanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 180),
-            sizeCurve: Curves.easeOutCubic,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChangelogDialogState extends State<ChangelogDialog> {
-  final Set<int> _expanded = {};
-
-  @override
-  Widget build(BuildContext context) {
-    final p = widget.p;
-    final visible = widget.latestOnly
-        ? ChangelogDialog.releases.take(1).toList()
-        : ChangelogDialog.releases;
-    final maxHeight = math.min(MediaQuery.sizeOf(context).height * 0.62, 520.0);
-    return AppSheet(
-      p: p,
-      title: widget.latestOnly ? "What's New" : 'Changelog',
-      blur: widget.blur,
-      largeText: widget.largeText,
-      removeBottomPadding: true,
-      child: SizedBox(
-        width: 410,
-        height: maxHeight,
-        child: widget.latestOnly
-            ? _WhatsNewPanel(p: p, release: visible.first)
-            : ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: visible.length,
-                itemBuilder: (context, index) {
-                  final release = visible[index];
-                  final expanded = _expanded.contains(index);
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: p.surface2,
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(color: p.border),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (expanded) {
-                                _expanded.remove(index);
-                              } else {
-                                _expanded.add(index);
-                              }
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 13,
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: index == 0
-                                        ? p.accent.withValues(alpha: 0.14)
-                                        : p.surface3,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    index == 0
-                                        ? Icons.auto_awesome_rounded
-                                        : Icons.article_rounded,
-                                    color: index == 0 ? p.accent : p.text2,
-                                    size: 18,
-                                  ),
-                                ),
-                                const SizedBox(width: 11),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              'Version ${release.version}',
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: p.text,
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          ),
-                                          if (index == 0) ...[
-                                            const SizedBox(width: 8),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 3,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: p.accent.withValues(
-                                                  alpha: 0.14,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(999),
-                                              ),
-                                              child: Text(
-                                                'New',
-                                                style: TextStyle(
-                                                  color: p.accent,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w900,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        release.date,
-                                        style: TextStyle(
-                                          color: p.text3,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                AnimatedRotation(
-                                  turns: expanded ? 0.25 : 0,
-                                  duration: const Duration(milliseconds: 160),
-                                  child: Icon(
-                                    Icons.chevron_right_rounded,
-                                    color: p.text3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        AnimatedCrossFade(
-                          firstChild: const SizedBox.shrink(),
-                          secondChild: Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                            child: Column(
-                              children: [
-                                Divider(color: p.border, height: 1),
-                                const SizedBox(height: 10),
-                                for (final item in release.items)
-                                  _ChangelogItemRow(
-                                    p: p,
-                                    text: item,
-                                    isLatest: index == 0,
-                                  ),
-                              ],
-                            ),
-                          ),
-                          crossFadeState: expanded
-                              ? CrossFadeState.showSecond
-                              : CrossFadeState.showFirst,
-                          duration: const Duration(milliseconds: 180),
-                          sizeCurve: Curves.easeOutCubic,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-      ),
-    );
-  }
-}
-
-class _WhatsNewPanel extends StatelessWidget {
-  const _WhatsNewPanel({required this.p, required this.release});
-
-  final Palette p;
-  final ({
-    String date,
-    List<String> items,
-    List<String> highlights,
-    String version,
-  })
-  release;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      primary: false,
-      physics: const BouncingScrollPhysics(),
-      children: [
-        WhatsNewHeroCard(p: p, version: release.version, date: release.date),
-
-        // iOS 26 Feature Cards List
-        SettingsGroup(
-          p: p,
-          insetDividers: true,
-          children: [
-            for (var i = 0; i < release.highlights.length; i++) ...[
-              Builder(
-                builder: (context) {
-                  final text = release.highlights[i];
-
-                  String headline = '';
-                  String body = text;
-                  if (text.contains(' with ')) {
-                    final parts = text.split(' with ');
-                    headline = parts.first;
-                    body = 'With ${parts.sublist(1).join(' with ')}';
-                  } else if (text.contains(' including ')) {
-                    final parts = text.split(' including ');
-                    headline = parts.first;
-                    body = 'Including ${parts.sublist(1).join(' including ')}';
-                  } else if (text.contains(' and ')) {
-                    final parts = text.split(' and ');
-                    headline = parts.first;
-                    body = 'And ${parts.sublist(1).join(' and ')}';
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 13,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 28,
-                          height: 28,
-                          margin: const EdgeInsets.only(top: 1),
-                          decoration: BoxDecoration(
-                            color: p.accent.withValues(alpha: 0.14),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: p.accent.withValues(alpha: 0.25),
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${i + 1}',
-                            style: TextStyle(
-                              color: p.accent,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (headline.isNotEmpty) ...[
-                                Text(
-                                  headline,
-                                  style: TextStyle(
-                                    color: p.text,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: -0.1,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                              ],
-                              Text(
-                                body,
-                                style: TextStyle(
-                                  color: headline.isNotEmpty ? p.text2 : p.text,
-                                  fontSize: 13,
-                                  height: 1.35,
-                                  fontWeight: headline.isNotEmpty
-                                      ? FontWeight.w400
-                                      : FontWeight.w500,
-                                  letterSpacing: -0.1,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class WhatsNewHeroCard extends StatelessWidget {
-  const WhatsNewHeroCard({
-    super.key,
-    required this.p,
-    required this.version,
-    required this.date,
-  });
-
-  final Palette p;
-  final String version;
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: p.border),
+        border: Border.all(
+          color: rel.badgeColor.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: p.accent.withValues(alpha: 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: rel.badgeColor.withValues(alpha: 0.12),
+            blurRadius: 28,
+            spreadRadius: 2,
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background Gradient + Geometric Pattern
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    p.surface2,
-                    p.accent.withValues(alpha: 0.25),
-                    p.orange.withValues(alpha: 0.15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: rel.badgeColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: rel.badgeColor.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 14,
+                      color: rel.badgeColor,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'v${rel.version}'.localized(context),
+                      style: TextStyle(
+                        color: rel.badgeColor,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
               ),
+              Text(
+                rel.date.localized(context),
+                style: TextStyle(color: p.text3, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            rel.edition.localized(context),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
             ),
           ),
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _GeometricPatternPainter(color: p.accent),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHighlightCard(
+    BuildContext context,
+    Palette p,
+    ({String title, String desc, IconData icon, String tag}) item,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.accent.withValues(alpha: 0.25)),
             ),
+            child: Icon(item.icon, color: p.accent, size: 22),
           ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(20),
+          const SizedBox(width: 14),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.auto_awesome_rounded,
-                          color: p.accent,
-                          size: 26,
-                        ),
+                    Text(
+                      item.title.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "What's New in NoteKar".localized(context),
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.4,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'NoteKar App • Native Experience',
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        item.tag.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: p.accent,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'v$version',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '$date • Build $kAppBuildNumber',
-                      style: TextStyle(
-                        color: p.text2,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text(
+                  item.desc.localized(context),
+                  style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
                 ),
               ],
             ),
@@ -1457,40 +498,20 @@ class WhatsNewHeroCard extends StatelessWidget {
   }
 }
 
-class _GeometricPatternPainter extends CustomPainter {
-  _GeometricPatternPainter({required this.color});
+class ChangelogSettingsPage extends StatelessWidget {
+  const ChangelogSettingsPage({
+    super.key,
+    required this.p,
+    this.latestOnly = false,
+  });
 
-  final Color color;
+  final Palette p;
+  final bool latestOnly;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withValues(alpha: 0.08)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-
-    final fillPaint = Paint()
-      ..color = color.withValues(alpha: 0.04)
-      ..style = PaintingStyle.fill;
-
-    final path1 = Path()
-      ..moveTo(size.width * 0.6, 0)
-      ..lineTo(size.width, size.height * 0.4)
-      ..lineTo(size.width * 0.7, size.height)
-      ..close();
-
-    final path2 = Path()
-      ..moveTo(size.width * 0.2, size.height)
-      ..lineTo(size.width * 0.8, size.height * 0.2)
-      ..lineTo(size.width, size.height * 0.8)
-      ..close();
-
-    canvas.drawPath(path1, fillPaint);
-    canvas.drawPath(path1, paint);
-    canvas.drawPath(path2, fillPaint);
-    canvas.drawPath(path2, paint);
+  Widget build(BuildContext context) {
+    return Column(
+      children: [ChangelogDialog(p: p, latestOnly: latestOnly)],
+    );
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

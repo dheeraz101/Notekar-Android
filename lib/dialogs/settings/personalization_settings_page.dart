@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/settings/language_center_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -94,6 +95,31 @@ class PersonalizationSettingsPage extends StatelessWidget {
               color: p.orange,
               onTap: () =>
                   onOpenCategory('App Icons', parent: 'Personalization'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.language_rounded,
+              title: 'Language'.localized(context),
+              status: switch (currentLocale) {
+                'fr' => 'Français',
+                'es' => 'Español',
+                'hi' => 'हिन्दी',
+                'de' => 'Deutsch',
+                'ja' => '日本語',
+                'ru' => 'Русский',
+                'en' => 'English',
+                _ => 'System Default',
+              }.localized(context),
+              color: p.accent,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                LanguageCenterSheet.show(
+                  context,
+                  p: p,
+                  currentLocale: currentLocale,
+                  onLocaleChanged: onLocaleChanged,
+                );
+              },
             ),
           ],
         ),
