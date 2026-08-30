@@ -28,9 +28,23 @@ class ChangelogDialog extends StatefulWidget {
   static const latestRelease = (
     version: '7.2.0',
     date: 'August 23, 2026',
-    edition: 'Mindfulness & Battery Evolution',
+    edition: 'Mindfulness, Integrations & Battery Evolution',
     badgeColor: Color(0xFF0A84FF),
     highlights: [
+      (
+        title: 'System Bridges & URL Schemes',
+        desc:
+            'Trigger instant logs, Two-Way tracking, or navigate with custom notekar:// links.',
+        icon: Icons.link_rounded,
+        tag: 'Bridges',
+      ),
+      (
+        title: 'Android Text Selection',
+        desc:
+            'Highlight text anywhere across Android and tap "Log in NoteKar" to capture notes offline.',
+        icon: Icons.select_all_rounded,
+        tag: 'Context Menu',
+      ),
       (
         title: 'Hourly Time Reflection',
         desc:
@@ -39,21 +53,21 @@ class ChangelogDialog extends StatefulWidget {
         tag: 'Mindfulness',
       ),
       (
-        title: 'Sleep Protection & Active Hours',
+        title: 'Obsidian & Calendar Live Sync',
         desc:
-            'Customizable daily active hours (e.g. 09:00 AM – 10:00 PM) with quiet hours rollover to protect sleep.',
-        icon: Icons.bedtime_rounded,
-        tag: 'Sleep Guard',
-      ),
-      (
-        title: 'Zero-Wake Battery Architecture',
-        desc:
-            'Doze-compliant RTC non-waking alarms and isolated repaint boundaries for all animations.',
-        icon: Icons.battery_charging_full_rounded,
-        tag: 'Battery Safe',
+            'Export formatted Markdown journal tables and RFC 5545 .ics calendar session intervals.',
+        icon: Icons.calendar_month_rounded,
+        tag: 'Export & Sync',
       ),
     ],
     items: [
+      '+ Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation',
+      '+ Add Android text selection context menu ("Log in NoteKar") via ProcessTextActivity',
+      '+ Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing',
+      '+ Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT',
+      '+ Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync',
+      '+ Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar',
+      '+ Add dedicated "Integrations & Automation" settings page with copyable templates and live test triggers',
       '+ Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet',
       '+ Add alarm audio chime, active hours schedule, and onboarding flow',
       '* Eliminate RTC_WAKEUP battery drain for routine logging reminders',

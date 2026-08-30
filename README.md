@@ -107,6 +107,24 @@ with minimal interaction.
     - Recent app switcher obfuscation (`FLAG_SECURE`).
 - **Android 2x2 Interactive App Widget**: Log moments and monitor sobriety progress directly from
   your Android home screen.
+- **System Bridges & Inter-App Ecosystem**:
+    - **Custom URL Scheme (`notekar://`)**: Deep link directly into NoteKar via NFC tags, browser
+      shortcuts, or automators (`notekar://log?type=single&note=Coffee`, `notekar://in`,
+      `notekar://out`, `notekar://note?text=Idea`, `notekar://open?page=history`,
+      `notekar://reflect`).
+    - **Android Global Text Selection (`ACTION_PROCESS_TEXT`)**: Highlight text anywhere in
+      Android (Chrome, WhatsApp, Kindle, Books, Twitter) and tap **"Log in NoteKar"** to capture
+      notes offline with zero friction.
+    - **Android Share Target (`ACTION_SEND` text/plain)**: Share text snippets, links, and reading
+      notes from external apps directly into NoteKar moments.
+    - **Obsidian & Logseq Markdown Live Sync**: Export pristine Markdown journal files with
+      timestamps, type indicators, session durations, and telemetry tables.
+    - **Calendar Sessions Exporter (RFC 5545 `.ics`)**: Convert tracked Two-Way IN/OUT intervals
+      into standard `.ics` calendar events for 1-tap import into Google Calendar, Samsung Calendar,
+      Outlook, and Proton.
+    - **Tasker / MacroDroid Automation Broadcast API**: Trigger background offline logging via
+      `app.notekar.notekar.ACTION_LOG_MOMENT` with `--es type single|in|out|note` and
+      `--es note "..."`.
 - **Zero Backend / Zero Analytics**: 100% offline-first, no accounts, no ads, no trackers. Full
   local JSON/CSV backup and restore.
 

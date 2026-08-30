@@ -2530,6 +2530,127 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: 'Bridges',
       ),
       item(
+        title: 'Deep Linking & URL Schemes',
+        subtitle:
+            'Log moments, trigger IN/OUT, or navigate with notekar:// links',
+        category: 'Integrations & Automation',
+        icon: CupertinoIcons.link,
+        keywords: [
+          'notekar://',
+          'url scheme',
+          'deep link',
+          'nfc',
+          'browser shortcut',
+          'notekar://log',
+          'notekar://in',
+          'notekar://out',
+          'notekar://note',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Active',
+      ),
+      item(
+        title: 'Text Selection Context Menu',
+        subtitle: 'Highlight text anywhere in Android and tap "Log in NoteKar"',
+        category: 'Integrations & Automation',
+        icon: CupertinoIcons.selection_pin_in_out,
+        keywords: [
+          'process text',
+          'text selection',
+          'highlight',
+          'context menu',
+          'log in notekar',
+          'quote capture',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Active',
+      ),
+      item(
+        title: 'Android Share Target',
+        subtitle: 'Share text and URLs from external apps directly to NoteKar',
+        category: 'Integrations & Automation',
+        icon: CupertinoIcons.share,
+        keywords: [
+          'share sheet',
+          'action send',
+          'share to notekar',
+          'text share',
+          'url share',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Active',
+      ),
+      item(
+        title: 'Obsidian & Markdown Journal Sync',
+        subtitle:
+            'Export date-grouped Markdown tables compatible with Obsidian & Logseq',
+        category: 'Integrations & Automation',
+        icon: Icons.article_rounded,
+        keywords: [
+          'obsidian',
+          'logseq',
+          'notion',
+          'markdown',
+          'md export',
+          'second brain',
+          'vault sync',
+          'journal',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Export',
+      ),
+      item(
+        title: 'Calendar Sessions (.ics) Export',
+        subtitle: 'Export Two-Way IN/OUT intervals as RFC 5545 calendar events',
+        category: 'Integrations & Automation',
+        icon: CupertinoIcons.calendar,
+        keywords: [
+          'calendar',
+          'ics',
+          'ical',
+          'google calendar',
+          'outlook',
+          'samsung calendar',
+          'proton calendar',
+          'session export',
+          'two way calendar',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Export',
+      ),
+      item(
+        title: 'Tasker & MacroDroid Broadcast API',
+        subtitle:
+            'Send app.notekar.notekar.ACTION_LOG_MOMENT broadcasts offline',
+        category: 'Integrations & Automation',
+        icon: CupertinoIcons.radiowaves_right,
+        keywords: [
+          'tasker',
+          'macrodroid',
+          'termux',
+          'automate',
+          'broadcast',
+          'intent',
+          'action_log_moment',
+          'cli',
+          'am broadcast',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'API',
+      ),
+      item(
         title: 'Reset All Data',
         subtitle: 'Erase every moment and note',
         category: 'Reset',
@@ -5197,6 +5318,42 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     text:
                                         'Encrypted hex stream detected: "23 67 6f 64 6d 6f 64 65". Decipher the hex ASCII sequence into plain text, then inscribe and save it inside any moment\'s note to awaken dormant powers.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: CupertinoIcons.link,
+                                    title: 'Deep Linking & URL Schemes',
+                                    text:
+                                        'Trigger instant logs, Two-Way intervals, prefill notes, or jump to specific screens using custom URL schemes (e.g. notekar://log?type=single&note=Coffee, notekar://in, notekar://out, notekar://open?page=history). Perfect for NFC tags, browser bookmarks, and launchers.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: CupertinoIcons.selection_pin_in_out,
+                                    title:
+                                        'Global Text Selection ("Log in NoteKar")',
+                                    text:
+                                        'Highlight text anywhere across Android in Chrome, WhatsApp, Kindle, Books, or Twitter and choose "Log in NoteKar" from the context menu to capture notes offline with an instant toast.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.article_rounded,
+                                    title: 'Obsidian & Logseq Markdown Journal',
+                                    text:
+                                        'Export pristine, date-grouped Markdown tables formatted with timestamps, session durations, and telemetry statistics under Settings > Integrations & Automation > Export Markdown Journal.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: CupertinoIcons.calendar,
+                                    title: 'Calendar Sessions (.ics) Export',
+                                    text:
+                                        'Export your tracked Two-Way IN/OUT intervals as RFC 5545 calendar events into an .ics file for 1-tap import into Google Calendar, Samsung Calendar, Outlook, or Proton.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: CupertinoIcons.radiowaves_right,
+                                    title: 'Tasker & Automation Broadcasts',
+                                    text:
+                                        'Trigger offline background moment logging via the system broadcast intent app.notekar.notekar.ACTION_LOG_MOMENT with extras type (single, in, out, note) and note.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -5215,6 +5372,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Can NoteKar communicate with other apps or automators?',
+                                    answer:
+                                        'Yes! NoteKar features a complete suite of system bridges: custom URL schemes (notekar://), Android global text selection ("Log in NoteKar"), Android share target for plain text, local Tasker/MacroDroid broadcast intents, Obsidian Markdown journal sync, and Calendar .ics session exports under Settings > Integrations & Automation.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I export tracked sessions to Google Calendar or Outlook?',
+                                    answer:
+                                        'Open Settings > Integrations & Automation and tap "Export Sessions to Calendar (.ics)". The exported file can be imported directly into Google Calendar, Samsung Calendar, Outlook, or Proton Calendar.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I sync NoteKar with Obsidian or Logseq?',
+                                    answer:
+                                        'Open Settings > Integrations & Automation and tap "Export Markdown Journal (.md)". The generated file contains structured Markdown tables grouped by date, ready to drop into your second-brain vault.',
+                                  ),
                                   HelpRow(
                                     p: p,
                                     question:

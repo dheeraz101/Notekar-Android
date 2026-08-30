@@ -11,20 +11,43 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### What's New
 
-- Add alarm audio chime, active hours schedule, and onboarding flow
-- Integrate system AlarmManager scheduling & full-screen lockscreen waking
-- Add Time Reflection dedicated page, full-screen alarm alerts & Priority Release channel
+- **Deep Linking & Custom URL Schemes (`notekar://`)**: Deep link directly into NoteKar via NFC
+  tags, browser shortcuts, or automators (`notekar://log?type=single&note=Coffee`, `notekar://in`,
+  `notekar://out`, `notekar://note?text=Idea`, `notekar://open?page=history`, `notekar://reflect`).
+- **Android Global Text Selection (`ACTION_PROCESS_TEXT`)**: Highlight text anywhere in Android (
+  Chrome, WhatsApp, Kindle, Books, Twitter) and tap **"Log in NoteKar"** to capture quotes and
+  reading notes offline with zero friction.
+- **Android Share Target (`ACTION_SEND` text/plain)**: Share text snippets, links, and reading notes
+  from external apps directly into NoteKar moments.
+- **Obsidian & Logseq Markdown Live Sync**: Export pristine Markdown journal files with timestamps,
+  type indicators, session durations, and telemetry tables.
+- **Calendar Sessions Exporter (RFC 5545 `.ics`)**: Convert tracked Two-Way IN/OUT intervals into
+  standard `.ics` calendar events for 1-tap import into Google Calendar, Samsung Calendar, Outlook,
+  and Proton.
+- **Tasker / MacroDroid Automation Broadcast API**: Trigger background offline logging via
+  `app.notekar.notekar.ACTION_LOG_MOMENT` with `--es type single|in|out|note` and `--es note "..."`.
+- **"Integrations & Automation" Settings Hub**: Interactive syntax documentation, copyable command
+  snippets, live test buttons, and export controls under Settings, fully indexed in search.
+- **Hourly Time Reflection & Mindfulness**: Standalone mindful breathing prompts, audio chime, and
+  active daytime schedule.
+- **Zero-Wake Battery Optimization**: Doze-compliant RTC non-waking alarms and isolated repaint
+  boundaries.
 
-### Improvements
+### Improvements & Polish
 
-- Use iOS time picker, rename message row, and simplify editor sheet
-- Refine Test Alert action & standardize interval picker bottom sheet
-- Refine Time Reflection settings, layout alignment & Apple HIG picker
-- Restructure localization into clean ARB files and modular helpers
+- Full search index integration with direct navigation deep links for URL schemes, markdown sync,
+  calendar export, and Tasker broadcast commands.
+- Localized across all 7 supported offline languages (English, French, Spanish, Hindi, German,
+  Japanese, and Russian).
+- Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet.
+- Refine Test Alert action & standardize interval picker bottom sheet.
+- Refine Time Reflection settings, layout alignment & Apple HIG picker.
+- Restructure localization into clean ARB files and modular helpers.
 
 ### Bug Fixes
 
-- Resolve test alarm infinite loop and eliminate top notification banner
+- Resolve test alarm infinite loop and eliminate top notification banner.
+- Dismiss activity cleanly on locked device.
 
 ## [7.1.0] - 2026-08-21 (versionCode 26PR0821) [PR]
 

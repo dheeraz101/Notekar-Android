@@ -6,27 +6,39 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Mindfulness & Battery Evolution",
+    "edition": "Mindfulness, Integrations & Battery Evolution",
     "badgeColor": "#0A84FF",
     "isLatest": true,
     "highlights": [
+      {
+        "title": "System Bridges & URL Schemes",
+        "description": "Trigger instant logs, Two-Way tracking, or navigate with custom notekar:// links.",
+        "icon": "link_rounded"
+      },
+      {
+        "title": "Android Text Selection & Share Target",
+        "description": "Highlight text in any app and tap 'Log in NoteKar' to capture notes offline with zero friction.",
+        "icon": "select_all_rounded"
+      },
       {
         "title": "Hourly Time Reflection",
         "description": "Standalone mindful breathing prompts that wake up on lockscreen without exposing private moments.",
         "icon": "self_improvement_rounded"
       },
       {
-        "title": "Sleep Protection & Active Hours",
-        "description": "Customizable active schedule (09:00 AM – 10:00 PM) with quiet hours rollover protecting your sleep.",
-        "icon": "bedtime_rounded"
-      },
-      {
-        "title": "Zero-Wake Battery Architecture",
-        "description": "Doze-compliant RTC non-waking alarms, non-waking update checks, and RepaintBoundary animation isolation.",
-        "icon": "battery_charging_full_rounded"
+        "title": "Obsidian & Calendar Live Sync",
+        "description": "Export structured Markdown journal tables and RFC 5545 .ics calendar session blocks.",
+        "icon": "calendar_month_rounded"
       }
     ],
     "fullChangelog": [
+      "+ Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation",
+      "+ Add Android text selection context menu ('Log in NoteKar') via ProcessTextActivity",
+      "+ Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing",
+      "+ Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT",
+      "+ Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync",
+      "+ Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar",
+      "+ Add dedicated 'Integrations & Automation' settings page with copyable templates and live test triggers",
       "+ Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet",
       "+ Add alarm audio chime, active hours schedule, and onboarding flow",
       "* Eliminate RTC_WAKEUP battery drain for routine logging reminders",
@@ -158,50 +170,523 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Battery & Haptic Architecture",
+    "edition": "Milestone Peak Export & Confetti Dynamics",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Haptic Engine V2",
-        "description": "Customizable selection, light, and medium vibration feedback.",
-        "icon": "vibration_rounded"
+        "title": "Milestone Card Export",
+        "description": "Export milestone cards as high-resolution PNG images with native share chooser.",
+        "icon": "share_rounded"
+      },
+      {
+        "title": "Confetti Dynamics",
+        "description": "85-particle multi-tier celebration explosion with 3D paper flutter.",
+        "icon": "auto_awesome_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Add haptic feedback intensity controls in settings",
-      "* Optimize background battery usage during idle hours",
-      "! Fix occasional haptic crash on older Android versions"
+      "+ Export milestone card image, one-shot confetti, and home card layout polish",
+      "+ Dynamic iOS calendar selection, logging card counts, and channel-based build numbers",
+      "+ Add 2-digit single numbering, daily reset, count on save, and iOS calendar style",
+      "* Eliminate milestone dialog open delay and upgrade confetti dynamics",
+      "! Fix android sharesheet image preview and remove export snackbar"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.8/NoteKar-v6.0.8-universal-release.apk"
     }
   },
   {
-    "version": "6.0.0",
-    "buildNumber": "26SR0810",
+    "version": "6.0.7",
+    "buildNumber": "26BE0815",
+    "releaseDate": "2026-08-15",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "2-Digit Single Numbering & iOS Calendar",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "2-Digit Single Numbering",
+        "description": "Sequential number badge (00-99) for standalone single moments.",
+        "icon": "pin_rounded"
+      },
+      {
+        "title": "Dynamic iOS Calendar",
+        "description": "Fluid calendar picker with red circle selected date and event dots.",
+        "icon": "calendar_month_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Add 2-digit sequential number badge (00-99) for single moments with daily reset",
+      "+ Add Count on Save real-time ripple pulse indicator on home screen",
+      "+ Add iOS-style fluid calendar picker with red circle selected date",
+      "+ Add high-resolution milestone PNG image generation with FileProvider",
+      "* Replace all CircularProgressIndicator instances with CupertinoActivityIndicator"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.7/NoteKar-v6.0.7-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.6",
+    "buildNumber": "36",
+    "releaseDate": "2026-08-12",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Dynamic Island Pill Toasts & Search Notes",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Dynamic Island Pill Toasts",
+        "description": "Top-floating capsule toasts for copy actions and quick feedback.",
+        "icon": "notifications_active_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Complete Apple HIG & iOS UI/UX redesign upgrade",
+      "+ Add iOS dynamic pill toast notification for note copy action",
+      "+ Display all notes in full length by default in Search Notes page",
+      "! Isolate search notes navigation, instant trash updates & milestone share menu"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.6/NoteKar-v6.0.6-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.5",
+    "buildNumber": "35",
+    "releaseDate": "2026-08-12",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "HIG Design Tokens & Directional Arrows",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "HIG Design Tokens",
+        "description": "Consolidated Apple HIG typography, spacing, and directional arrow badges.",
+        "icon": "style_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Consolidate HIG design tokens and add IN/OUT directional arrow icons",
+      "* Standardize modal sheet corner radiuses and rubberband spring dismiss physics"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.5/NoteKar-v6.0.5-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.4",
+    "buildNumber": "34",
+    "releaseDate": "2026-08-12",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Streak Spring Animation & HIG Shimmer",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Streak Counter Animations",
+        "description": "Elastic spring animations and HIG shimmer loaders for recovery metrics.",
+        "icon": "motion_photos_on_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Add streak counter spring animation, HIG shimmer loader, and shield activation moment",
+      "+ Implement Apple-level UX/UI audit redesign & home refactor",
+      "! Remove trash bin icon from Recently Deleted card on logging page"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.4/NoteKar-v6.0.4-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.3",
+    "buildNumber": "33",
+    "releaseDate": "2026-08-12",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Elastic Bouncing Scroll & Hairline Dividers",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Elastic Bouncing Scroll",
+        "description": "Native iOS physics and inset hairline dividers across settings.",
+        "icon": "swipe_vertical_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades",
+      "+ Apple HIG inset hairline dividers, activity ring & heavy taptic feedback",
+      "* Circular Checkbox in Network Warning Dialog, System Update Date Formatting"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.3/NoteKar-v6.0.3-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.2",
+    "buildNumber": "32",
+    "releaseDate": "2026-08-11",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Apple HIG Visual Squircle Badges",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Visual Squircle Badges",
+        "description": "Standardized squircle badges, typography minimalism, and performance tuning.",
+        "icon": "check_box_outline_blank_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "* Align empty state labels with Apple HIG punctuation guidelines",
+      "* Apply apple HIG visual squircle badges and punctuation minimalism",
+      "* Industry-standard performance, security, storage & accessibility audit upgrades",
+      "! Eliminate 5ms coachmark tooltip flash on app launch"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.2/NoteKar-v6.0.2-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.1",
+    "buildNumber": "31",
     "releaseDate": "2026-08-10",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Urge Surfing & Gamification",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Urge Surfing Guide",
+        "description": "Interactive breathing circle and risk radar for relapse prevention.",
+        "icon": "self_improvement_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ 3-phase major update with urge surfing, risk radar, apple hig & gamification",
+      "* Readme file formatting and repository documentation polish"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.1/NoteKar-v6.0.1-universal-release.apk"
+    }
+  },
+  {
+    "version": "6.0.0",
+    "buildNumber": "30",
+    "releaseDate": "2026-07-31",
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Sobriety Milestone Engine",
+    "edition": "Milestone Map & Hardware Encryption",
     "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Sobriety Tracking",
-        "description": "Milestone badges, streak counters, and Apple Health activity rings.",
-        "icon": "flag_rounded"
+        "title": "Milestone Trail",
+        "description": "Vertical progress trail showing milestone peaks that illuminate with recovery.",
+        "icon": "route_rounded"
+      },
+      {
+        "title": "Hardware Keystore AES-256",
+        "description": "Hardware-backed database encryption keys inside Android Keystore.",
+        "icon": "security_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Introduce Sobriety Tracker with custom milestone badges",
-      "+ Add Apple Health inspired activity ring progress arcs",
-      "* Refine dark mode contrast for AMOLED screens",
-      "! Fix streak calculation across daylight saving transitions"
+      "+ Add Duolingo-style vertical milestone progress trail with neuroscience recovery details",
+      "+ Add local database backup manager with individual Restore and Delete options",
+      "+ Add Streak Freeze Shields to prevent binary reset frustration",
+      "+ Hardware-backed database encryption using AES-256 keys inside Android Keystore",
+      "+ Apple HIG visuals: speech bubble onboarding tooltip, Cupertino chevrons, and aligned navbar",
+      "+ App-switcher content obfuscation and dynamic screenshot blocking"
     ],
     "downloads": {
-      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.0/NoteKar-v6.0.0-universal-release.apk"
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.0/NoteKar-v6.0.0-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.0/NoteKar-v6.0.0-arm64-v8a-release.apk"
+    }
+  },
+  {
+    "version": "5.1.9",
+    "buildNumber": "29",
+    "releaseDate": "2026-07-31",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Onboarding Coachmarks & Streak Freeze",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Onboarding Coachmark",
+        "description": "Floating speech bubble guiding new users through first tap interactions.",
+        "icon": "waving_hand_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Add onboarding coachmark, streak freeze shields, and success rate dashboard",
+      "+ Implement loss-aversion copy, iOS emoji parser, and Cupertino icons",
+      "+ Overhaul settings search, sobriety theme icons, and resolve network issues",
+      "* Constrain note dialog viewport when keyboard is active"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.9/NoteKar-v5.1.9-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.8",
+    "buildNumber": "28",
+    "releaseDate": "2026-07-30",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Sobriety Widget & Link Safety Sheet",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Link Safety Confirmation",
+        "description": "ExternalLinkConfirmSheet protecting users before opening external links.",
+        "icon": "shield_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Redesign sobriety widget with streak metrics",
+      "+ Introduce ExternalLinkConfirmSheet with warning banner and destination URL card",
+      "* Refine settings search bar empty state and recent results history",
+      "* Complete 20-phase architecture refactor changes"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.8/NoteKar-v5.1.8-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.7",
+    "buildNumber": "27",
+    "releaseDate": "2026-07-29",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Downloader Engine Optimization",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Download Engine",
+        "description": "Parallel range-request downloads and auto-verifying SHA-256 checksums.",
+        "icon": "download_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "* Fixed App download system with parallel range-request support",
+      "* Enhance release payload parsing resilience"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.7/NoteKar-v5.1.7-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.6",
+    "buildNumber": "26",
+    "releaseDate": "2026-07-29",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Solo Leveling Milestones & Note on Click",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Psychological Themes",
+        "description": "21 research-backed milestones across 10 distinct narrative themes.",
+        "icon": "psychology_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Add 21 research-backed milestones and 10 psychological themes",
+      "+ Add iOS-style date-time picker for custom sobriety start timestamps",
+      "+ Wire up 'Note on Click' setting to open note composer on single taps",
+      "* Align home streak card and integrate onboarding walkthrough"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.6/NoteKar-v5.1.6-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.5",
+    "buildNumber": "25",
+    "releaseDate": "2026-07-29",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "R8 Minification & Commit Cache",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Performance Optimization",
+        "description": "R8 code shrinking, offline commits cache, and intelligent insights.",
+        "icon": "speed_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "* Optimize startup speed, enable R8 minification, and upgrade type safety",
+      "* Cache and optimize commits list with repaint boundary and column layout",
+      "* Fallback card for empty intelligent insights in dashboard",
+      "! Keep cached commits on network failure and add inline refresh spinner"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.5/NoteKar-v5.1.5-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.4",
+    "buildNumber": "24",
+    "releaseDate": "2026-07-25",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Template-Structured In-App Feedback",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Feedback System",
+        "description": "Structured in-app feedback system and automated offline diagnostics.",
+        "icon": "feedback_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Implement inline button spinner, success/failed states and compile-time API key injection",
+      "+ Implement offline check, iOS spinner overlay, and automated crash reporting",
+      "+ Add Email Support tile and Beta dialog Feedback link",
+      "+ Implement secure template-structured in-app feedback system"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.4/NoteKar-v5.1.4-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.3",
+    "buildNumber": "23",
+    "releaseDate": "2026-07-25",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Network Monitor & Mobile Data Warning",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Network Monitor",
+        "description": "Live audit log of all network requests, sizes, and privacy guarantees.",
+        "icon": "wifi_tethering_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Add network monitor welcome card, FAQs, and upgrader walkthrough checks",
+      "+ Implement mobile data update warning & network monitor page",
+      "+ Upgrade widget layout and settings search index with version and privacy metadata",
+      "* Standardize settings card widths and dynamic translucency"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.3/NoteKar-v5.1.3-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.2",
+    "buildNumber": "22",
+    "releaseDate": "2026-07-25",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Hardware Keystore AES-256 & QS Tile",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Quick Settings Tile",
+        "description": "Native Android status bar QS tile to compose notes or check status instantly.",
+        "icon": "quick_reference_all_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Hardware-Backed database encryption using 256-bit AES keys inside Android Keystore",
+      "+ Persistent low-priority status bar drawer control panel for lock screen checking",
+      "+ Native Quick Settings Status Bar tile to compose notes or check status instantly",
+      "+ Dynamic home launcher shortcuts for fast background check-in/out commands",
+      "+ App switcher screen content obfuscation and dynamic screenshot blocking"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.2/NoteKar-v5.1.2-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.1",
+    "buildNumber": "21",
+    "releaseDate": "2026-07-24",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "2x2 Widget Layout & Activity Heatmap",
+    "badgeColor": "#FF9F0A",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "Interactive 2x2 Widget",
+        "description": "Split actions dock with background logging and quick note overlay.",
+        "icon": "widgets_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Implement 2x2 action widget layout, live history updates, and custom quick note dialog",
+      "+ Implement GitHub activity heatmap, intelligent insights, and gap alerts",
+      "+ Implement native background widget logging and update client enhancements",
+      "* Overhaul beta popup and settings notes to conform to Apple HIG"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.1/NoteKar-v5.1.1-universal-release.apk"
+    }
+  },
+  {
+    "version": "5.1.0",
+    "buildNumber": "20",
+    "releaseDate": "2026-07-24",
+    "channel": "security",
+    "channelTag": "[Security]",
+    "isBeta": false,
+    "edition": "App Lock with Custom PIN & Security",
+    "badgeColor": "#30D158",
+    "isLatest": false,
+    "highlights": [
+      {
+        "title": "In-App PIN Lock",
+        "description": "Custom PIN lock with rate-limiting lockout protection and biometric auth.",
+        "icon": "lock_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Introduce App Lock with custom PIN and rate-limiting lockout protection",
+      "+ Optimize downloader with parallel HTTP range requests",
+      "+ Redesign build cache cards and polish release workflow",
+      "* Integrate VS Code formatting on save, Lefthook configuration, and pre-commit hooks"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.1.0/NoteKar-v5.1.0-universal-release.apk"
     }
   },
   {
@@ -211,31 +696,31 @@
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Windows-Style Update Classification",
-    "badgeColor": "#0A84FF",
+    "edition": "Windows-Style Updates Classification System",
+    "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Update Classification",
-        "description": "Automatic classification into Feature, Priority, and Beta updates.",
+        "title": "Windows-Style Updates Classification",
+        "description": "Categorizes updates into Feature, Security, and Beta tracks with matching badges.",
         "icon": "system_update_rounded"
       },
       {
-        "title": "Native Markdown Renderer",
-        "description": "Rich rendering of release notes with custom fonts and code blocks.",
-        "icon": "text_fields_rounded"
+        "title": "Native MarkdownText Renderer",
+        "description": "Renders GitHub release notes with headers, lists, code, and links natively.",
+        "icon": "article_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Windows-Style Updates Classification System (Feature, Security, Beta)",
-      "+ Native Markdown Text Renderer in release notes",
-      "+ Double Action Buttons on update check card",
-      "* Background reminders & UI refinements with Cupertino spinners",
-      "! Fix 404 errors on Beta APK downloads by tracking branch release tagNames",
-      "! Fix VirusTotal pipeline size limit on large universal APK files"
+      "+ Windows-Style Updates Classification System for Feature, Security, and Beta tracks",
+      "+ Native Markdown Text Renderer inside release notes using app color palette",
+      "+ Double Action Buttons on update card (Download/Install and Check for Updates)",
+      "+ Background reminders with iOS Cupertino Activity Indicators",
+      "+ Automated PowerShell version calculations for Major, Minor, and Patch increments"
     ],
     "downloads": {
-      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.0.0/NoteKar-v5.0.0-universal-release.apk"
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.0.0/NoteKar-v5.0.0-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v5.0.0/NoteKar-v5.0.0-arm64-v8a-release.apk"
     }
   },
   {
@@ -245,20 +730,21 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Markdown Text & Fastlane CI",
+    "edition": "Custom Markdown Renderer & Dual Action Buttons",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Markdown Engine",
-        "description": "Rich markdown text rendering for release notes and guides.",
-        "icon": "article_rounded"
+        "title": "Release Note Markdown Engine",
+        "description": "Rich rendering of markdown release notes in update center.",
+        "icon": "code_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Custom Markdown Text Renderer in settings",
-      "+ Fastlane metadata automation for F-Droid",
-      "! Fix version string layouts on up-to-date panel"
+      "+ Custom Markdown Text Renderer in settings for rich rendering of headers, lists, and code",
+      "+ Double Action Buttons on update checking card",
+      "+ Track Switch Downgrades explanation guide in Help FAQ",
+      "! Resolve 404 download errors on Beta APK downloads by tracking release tagNames"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v4.0.9/NoteKar-v4.0.9-universal-release.apk"
@@ -271,20 +757,20 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Dynamic Build Channel Badges",
+    "edition": "Track Switch Downgrades & Build Choose",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Build Channel Badges",
-        "description": "Visual track badges distinguishing Stable, Beta, and Priority builds.",
-        "icon": "label_rounded"
+        "title": "Track Management",
+        "description": "Seamless switching between Stable and Beta release tracks.",
+        "icon": "tune_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Dynamic Build Channel Badges (SR, BR, PR)",
-      "+ 3-second transparent overlay modal when switching release tracks",
-      "+ Upgraded version management scripts"
+      "+ Add Track Switch Downgrades explanation guide to Help FAQ",
+      "+ Add Build Choose subpage with baseline-aligned number columns",
+      "! Fix version string layouts on up-to-date panel"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v4.0.8/NoteKar-v4.0.8-universal-release.apk"
@@ -294,29 +780,22 @@
     "version": "4.0.7",
     "buildNumber": "16",
     "releaseDate": "2026-07-23",
-    "channel": "stable",
-    "channelTag": "[Stable]",
-    "isBeta": false,
-    "edition": "In-App APK Installer & VirusTotal Reports",
-    "badgeColor": "#30D158",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Universal APK Download Engine",
+    "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "In-App Installer",
-        "description": "Download, MD5 hash verify, and install APKs without leaving NoteKar.",
-        "icon": "download_for_offline_rounded"
-      },
-      {
-        "title": "VirusTotal Telemetry",
-        "description": "Clean scan ratios and automated verification certificates.",
-        "icon": "verified_user_rounded"
+        "title": "Universal APK Support",
+        "description": "Multi-architecture APK packaging and verified asset hashes.",
+        "icon": "inventory_2_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Integrated update installer with MD5 integrity verification",
-      "+ Offline commits caching for checking logs without internet",
-      "+ Dynamic VirusTotal reports showing clean scan ratios",
-      "+ Adopted CupertinoActivityIndicator across sheets"
+      "+ Universal APK download support in Update Center",
+      "* Enhance release payload parsing resilience"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v4.0.7/NoteKar-v4.0.7-universal-release.apk"
@@ -326,24 +805,22 @@
     "version": "4.0.6",
     "buildNumber": "15",
     "releaseDate": "2026-07-22",
-    "channel": "stable",
-    "channelTag": "[Stable]",
-    "isBeta": false,
-    "edition": "Native Alarm Reminders & Auto-Start",
-    "badgeColor": "#30D158",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Bug Fixes & Release Pipeline",
+    "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Native AlarmManager Reminders",
-        "description": "Offline background alerts using exact Android alarm scheduling.",
-        "icon": "alarm_rounded"
+        "title": "Release Pipeline Polish",
+        "description": "Automated asset verification and checksum checks.",
+        "icon": "build_circle_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Reliable Background Reminders using Android AlarmManager",
-      "+ New full-screen Onboarding setup guide for permissions",
-      "+ Auto-Start settings shortcuts for Xiaomi, Oppo, Vivo, Samsung, Huawei",
-      "+ Enhanced Factory Reset with safety verification steps"
+      "+ Automated asset verification in CI pipeline",
+      "! Resolve occasional null check operator in update status builder"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v4.0.6/NoteKar-v4.0.6-universal-release.apk"
@@ -356,21 +833,19 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Trash Bin & Multi-Language",
+    "edition": "Haptic Engine & Performance",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Recently Deleted Trash Bin",
-        "description": "30-day recovery bin with individual and batch restore options.",
-        "icon": "delete_sweep_rounded"
+        "title": "Tactile Feedback",
+        "description": "Standardized haptic clicks across moment saving and settings toggles.",
+        "icon": "vibration_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Dedicated Language settings page (English, Hindi, Spanish)",
-      "+ Recently Deleted moments view (Trash Bin) with 30-day auto-purge",
-      "+ SettingsBetaNote card and Beta disclaimer popup",
-      "! Optimum contrast-adjusted accent colors"
+      "+ Add tactile feedback across all interactive cards and switches",
+      "* Optimize database query speeds for moments history"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v4.0.5/NoteKar-v4.0.5-universal-release.apk"
@@ -380,26 +855,22 @@
     "version": "4.0.4",
     "buildNumber": "13",
     "releaseDate": "2026-07-20",
-    "channel": "stable",
-    "channelTag": "[Stable]",
-    "isBeta": false,
-    "edition": "Flutter Native Android Architecture",
-    "badgeColor": "#30D158",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Telemetry & Storage Isolation",
+    "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Flutter Android Rebuild",
-        "description": "Complete rewrite with 120 FPS animations and Hive NoSQL encryption.",
-        "icon": "flutter_dash_rounded"
+        "title": "Storage Isolation",
+        "description": "Sandboxed app-specific storage with zero external storage permissions required.",
+        "icon": "folder_special_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Native Android rebuild powered by Flutter",
-      "+ Offline-first local database persistence via Hive (AES-256)",
-      "+ Android OS Auto Backup compatibility (Google Drive)",
-      "+ Two-Way (IN/OUT) and Single timestamping modes",
-      "+ Data export to CSV and JSON formats",
-      "+ 8pt grid visual design system with Dark, Light, AMOLED themes"
+      "+ Sandboxed app-specific storage with zero external storage permissions required",
+      "+ Offline telemetry and device health diagnostics"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v4.0.4/NoteKar-v4.0.4-universal-release.apk"
@@ -407,106 +878,102 @@
   },
   {
     "version": "3.2.7",
-    "buildNumber": "PWA-2606",
+    "buildNumber": "12",
     "releaseDate": "2026-06-10",
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Progressive Web App & Offline Caching",
-    "badgeColor": "#0A84FF",
+    "edition": "CSV Exporter & Custom Delimiters",
+    "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Web PWA Edition",
-        "description": "Installable offline web application with IndexedDB.",
-        "icon": "public_rounded"
+        "title": "Data Export",
+        "description": "Export history to CSV with customizable delimiters (comma, semicolon, tab).",
+        "icon": "table_chart_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Web PWA release with IndexedDB persistence",
-      "+ Offline Service Worker caching",
-      "+ Responsive layout for mobile and desktop browsers"
+      "+ Export moment history to CSV with custom delimiter support (comma, semicolon, tab)",
+      "+ Filter history by Today and This Week"
     ],
     "downloads": {
-      "universalApk": "https://notekarapp.vercel.app"
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v3.2.7/NoteKar-v3.2.7-universal-release.apk"
     }
   },
   {
     "version": "3.0.0",
-    "buildNumber": "v3",
-    "releaseDate": "2026-05-01",
+    "buildNumber": "10",
+    "releaseDate": "2026-05-15",
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Two-Way Timestamping & CSV Export",
-    "badgeColor": "#30D158",
+    "edition": "Two-Way Logging & Duration Analytics",
+    "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Two-Way Mode",
-        "description": "Track paired check-in and check-out durations.",
-        "icon": "swap_horiz_rounded"
+        "title": "Two-Way Tracking",
+        "description": "Track IN and OUT sessions with automatic interval duration calculations.",
+        "icon": "timer_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Added Two-Way session tracking mode",
-      "+ CSV spreadsheet data exporter",
-      "+ Daily streak badges"
+      "+ Introduce Two-Way mode for IN and OUT session duration calculations",
+      "+ Add time-between-moments comparison tool in history"
     ],
     "downloads": {
-      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/tag/v3.0.0"
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v3.0.0/NoteKar-v3.0.0-universal-release.apk"
     }
   },
   {
     "version": "2.0.0",
-    "buildNumber": "v2",
-    "releaseDate": "2026-03-15",
+    "buildNumber": "5",
+    "releaseDate": "2026-04-01",
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Encrypted Local Storage & Dark Theme",
-    "badgeColor": "#30D158",
+    "edition": "Search Notes & Tagging Engine",
+    "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Encrypted Storage",
-        "description": "Hardware-backed AES encryption for all saved logs.",
-        "icon": "lock_rounded"
+        "title": "Search & Notes",
+        "description": "Attach rich notes to any timestamp and search instantly.",
+        "icon": "search_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Hardware-backed AES encrypted storage",
-      "+ True Black AMOLED dark theme",
-      "+ Search notes with instant keyword filtering"
+      "+ Add rich note attachments to timestamps via long-press",
+      "+ Add dedicated Search Notes page with instant text matching"
     ],
     "downloads": {
-      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/tag/v2.0.0"
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v2.0.0/NoteKar-v2.0.0-universal-release.apk"
     }
   },
   {
     "version": "1.0.0",
-    "buildNumber": "v1",
-    "releaseDate": "2026-01-01",
+    "buildNumber": "1",
+    "releaseDate": "2026-03-01",
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Initial Public Release",
-    "badgeColor": "#30D158",
+    "edition": "Initial Native Release",
+    "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Minimalist Habit Logging",
-        "description": "Zero-friction 1-tap logging for habits, sobriety, and thoughts.",
+        "title": "One-Tap Timestamping",
+        "description": "Zero friction instant timestamp logging with tactile haptics.",
         "icon": "touch_app_rounded"
       }
     ],
     "fullChangelog": [
-      "+ 1-tap timestamp moment logger",
-      "+ Clean timeline history with calendar navigation",
-      "+ 100% private, offline, and ad-free architecture"
+      "+ Initial native Android release of NoteKar",
+      "+ Instant single-tap timestamp logging with local storage and dark mode"
     ],
     "downloads": {
-      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/tag/v1.0.0"
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v1.0.0/NoteKar-v1.0.0-universal-release.apk"
     }
   }
 ]
