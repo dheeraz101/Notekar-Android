@@ -137,6 +137,8 @@ void main() {
       await tester.pump();
 
       expect(find.text('Signature Verified'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 2500));
+      await tester.pumpAndSettle();
     });
 
     testWidgets(

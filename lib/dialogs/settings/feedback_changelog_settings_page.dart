@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class FeedbackChangelogSettingsPage extends StatelessWidget {
@@ -107,11 +108,11 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     } catch (_) {
       await Clipboard.setData(const ClipboardData(text: webChangelogUrl));
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Link copied to clipboard'.localized(context)),
-            duration: const Duration(seconds: 2),
-          ),
+        showIosPillToast(
+          context: context,
+          p: p,
+          message: 'Link copied to clipboard'.localized(context),
+          icon: Icons.copy_rounded,
         );
       }
     }

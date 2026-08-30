@@ -10,6 +10,7 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/markdown_text.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
@@ -343,8 +344,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             _downloading = false;
             _verificationStatus = 'failed';
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Download failed'.localized(context))),
+          showIosPillToast(
+            context: context,
+            p: widget.p,
+            message: 'Download failed'.localized(context),
+            icon: Icons.error_outline_rounded,
           );
         }
         return;
@@ -364,12 +368,13 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           _verificationStatus = ok ? 'verified' : 'failed';
         });
         if (!ok) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Integrity check failed: checksum mismatch'.localized(context),
-              ),
+          showIosPillToast(
+            context: context,
+            p: widget.p,
+            message: 'Integrity check failed: checksum mismatch'.localized(
+              context,
             ),
+            icon: Icons.security_rounded,
           );
         }
       }
@@ -415,10 +420,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
       'filePath': _downloadedApkPath,
     });
     if (success == false && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Installation failed to start'.localized(context)),
-        ),
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: 'Installation failed to start'.localized(context),
+        icon: Icons.error_outline_rounded,
       );
     }
   }
@@ -455,27 +461,22 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   ),
                 ],
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CupertinoActivityIndicator(
-                      radius: 12,
-                      color: widget.p.accent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CupertinoActivityIndicator(
+                    radius: 14,
+                    color: widget.p.accent,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Clearing cached update files...'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.text,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Deleting cache...'.localized(context),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: widget.p.text,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -488,8 +489,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Build cache cleared'.localized(context))),
+      showIosPillToast(
+        context: context,
+        p: widget.p,
+        message: 'Build cache cleared'.localized(context),
+        icon: Icons.cleaning_services_rounded,
       );
       setState(() {
         _downloadedApkPath = null;

@@ -123,6 +123,21 @@ void main() {
 
         expect(find.text('URL SCHEMES'), findsOneWidget);
         expect(find.text('Quick Log'), findsOneWidget);
+        expect(
+          find.text(
+            'Log a single instant moment with optional note',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Check-In & Out'), findsOneWidget);
+        expect(
+          find.text(
+            'Trigger Two-Way check-in or check-out',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
         expect(find.text('SYSTEM BRIDGES'), findsOneWidget);
         expect(find.text('Text Selection Menu'), findsOneWidget);
         expect(find.text('Share Target'), findsOneWidget);
@@ -132,11 +147,19 @@ void main() {
         expect(find.text('Export Calendar (.ics)'), findsOneWidget);
         expect(find.text('AUTOMATION BROADCAST API'), findsOneWidget);
         expect(find.text('ACTION_LOG_MOMENT'), findsOneWidget);
+        expect(
+          find.text(
+            'app.notekar.notekar.ACTION_LOG_MOMENT',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
 
         await tester.tap(find.text('Quick Log'));
         await tester.pump();
 
         expect(triggeredScheme, 'notekar://log?type=single&note=Quick%20Log');
+        await tester.pumpAndSettle();
       },
     );
   });

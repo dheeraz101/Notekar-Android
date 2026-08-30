@@ -120,16 +120,13 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
         );
       } else if (isManualRefresh && mounted) {
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'No Internet Connection. Showing cached preview.'.localized(
-                context,
-              ),
-            ),
-            backgroundColor: widget.p.red,
-            duration: const Duration(seconds: 2),
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'No Internet Connection. Showing cached preview.'.localized(
+            context,
           ),
+          icon: Icons.wifi_off_rounded,
         );
       }
     } catch (e) {
@@ -144,16 +141,12 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
         });
         if (isManualRefresh) {
           HapticFeedback.heavyImpact();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'No Internet Connection. Showing cached preview.'.localized(
-                  context,
-                ),
-              ),
-              backgroundColor: widget.p.red,
-              duration: const Duration(seconds: 2),
-            ),
+          showIosPillToast(
+            context: context,
+            p: widget.p,
+            message: 'No Internet Connection. Showing cached preview.'
+                .localized(context),
+            icon: Icons.wifi_off_rounded,
           );
         }
       }

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class ChangelogDialog extends StatefulWidget {
@@ -150,11 +151,11 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
         const ClipboardData(text: ChangelogDialog.webChangelogUrl),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Link copied to clipboard'.localized(context)),
-            duration: const Duration(seconds: 2),
-          ),
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Link copied to clipboard'.localized(context),
+          icon: Icons.copy_rounded,
         );
       }
     }

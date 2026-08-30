@@ -4580,13 +4580,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       true;
                                   if (!context.mounted) return;
                                   if (!granted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Notification permission needed'
-                                              .localized(context),
-                                        ),
-                                      ),
+                                    showIosPillToast(
+                                      context: context,
+                                      p: p,
+                                      message: 'Notification permission needed'
+                                          .localized(context),
+                                      icon: Icons.notifications_off_outlined,
                                     );
                                     return;
                                   }
@@ -4629,13 +4628,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       true;
                                   if (!context.mounted) return;
                                   if (!granted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Notification permission needed'
-                                              .localized(context),
-                                        ),
-                                      ),
+                                    showIosPillToast(
+                                      context: context,
+                                      p: p,
+                                      message: 'Notification permission needed'
+                                          .localized(context),
+                                      icon: Icons.notifications_off_outlined,
                                     );
                                     return;
                                   }
@@ -4669,13 +4667,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       true;
                                   if (!context.mounted) return;
                                   if (!granted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Notification permission needed'
-                                              .localized(context),
-                                        ),
-                                      ),
+                                    showIosPillToast(
+                                      context: context,
+                                      p: p,
+                                      message: 'Notification permission needed'
+                                          .localized(context),
+                                      icon: Icons.notifications_off_outlined,
                                     );
                                     return;
                                   }
@@ -4728,13 +4725,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       true;
                                   if (!context.mounted) return;
                                   if (!granted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Notification permission needed'
-                                              .localized(context),
-                                        ),
-                                      ),
+                                    showIosPillToast(
+                                      context: context,
+                                      p: p,
+                                      message: 'Notification permission needed'
+                                          .localized(context),
+                                      icon: Icons.notifications_off_outlined,
                                     );
                                     return;
                                   }
@@ -4798,13 +4794,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       true;
                                   if (!context.mounted) return;
                                   if (!granted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Notification permission needed'
-                                              .localized(context),
-                                        ),
-                                      ),
+                                    showIosPillToast(
+                                      context: context,
+                                      p: p,
+                                      message: 'Notification permission needed'
+                                          .localized(context),
+                                      icon: Icons.notifications_off_outlined,
                                     );
                                     return;
                                   }
@@ -4897,14 +4892,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onPreviewReflectionSheet: () async {
                                 HapticFeedback.heavyImpact();
                                 if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Test alarm scheduled in 3 seconds! Lock your phone or exit the app to test.'
+                                showIosPillToast(
+                                  context: context,
+                                  p: p,
+                                  message:
+                                      'Test alarm scheduled in 3 seconds! Lock phone or exit app.'
                                           .localized(context),
-                                    ),
-                                    duration: const Duration(seconds: 4),
-                                  ),
+                                  icon: Icons.alarm_rounded,
+                                  duration: const Duration(seconds: 3),
                                 );
                                 try {
                                   await _fileChannel.invokeMethod<
@@ -6357,14 +6352,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   _categoryStack.clear();
                                 });
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'God Mode has been revoked.'.localized(
-                                          context,
-                                        ),
-                                      ),
-                                    ),
+                                  showIosPillToast(
+                                    context: context,
+                                    p: p,
+                                    message: 'God Mode has been revoked.'
+                                        .localized(context),
+                                    icon: Icons.shield_outlined,
                                   );
                                 }
                               },

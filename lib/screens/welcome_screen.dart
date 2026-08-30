@@ -1339,19 +1339,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   'https://github.com/dheeraz101/Notekar-Android',
                             ),
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Repository link copied to clipboard'.localized(
-                                  context,
-                                ),
-                              ),
-                              duration: const Duration(seconds: 2),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
+                          showIosPillToast(
+                            context: context,
+                            p: p,
+                            message: 'Repository link copied to clipboard'
+                                .localized(context),
+                            icon: Icons.copy_rounded,
                           );
                         },
                         style: OutlinedButton.styleFrom(

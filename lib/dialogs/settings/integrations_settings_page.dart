@@ -9,6 +9,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/calendar_sync_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/markdown_sync_service.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class IntegrationsSettingsPage extends StatefulWidget {
@@ -35,44 +36,21 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.selectionClick();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label copied to clipboard'.localized(context)),
-        duration: const Duration(seconds: 2),
-      ),
+    showIosPillToast(
+      context: context,
+      p: widget.p,
+      message: '$label copied'.localized(context),
+      icon: Icons.copy_rounded,
     );
   }
 
   void _showSavedToast({required bool success, required String message}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              success
-                  ? Icons.check_circle_rounded
-                  : Icons.error_outline_rounded,
-              color: success ? const Color(0xFF30D158) : widget.p.red,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: widget.p.surface,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 3),
-      ),
+    showIosPillToast(
+      context: context,
+      p: widget.p,
+      message: message,
+      icon: success ? Icons.check_circle_rounded : Icons.error_outline_rounded,
     );
   }
 
@@ -149,6 +127,8 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Quick Log'.localized(context),
+              subtitle: 'Log a single instant moment with optional note'
+                  .localized(context),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -164,6 +144,9 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Check-In & Out'.localized(context),
+              subtitle: 'Trigger Two-Way check-in or check-out'.localized(
+                context,
+              ),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -178,6 +161,9 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Draft Note'.localized(context),
+              subtitle: 'Open note composer prefilled with text'.localized(
+                context,
+              ),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () =>
@@ -191,6 +177,8 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Open Screen'.localized(context),
+              subtitle: 'Directly navigate to history, stats, or settings'
+                  .localized(context),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () =>
@@ -215,10 +203,11 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsGroup(
           p: p,
           title: 'System Bridges'.localized(context).toUpperCase(),
-          insetDividers: false,
+          insetDividers: true,
           children: [
             SettingsRow(
               p: p,
+              icon: CupertinoIcons.selection_pin_in_out,
               title: 'Text Selection Menu'.localized(context),
               status: 'Active'.localized(context),
               color: p.accent,
@@ -226,6 +215,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             ),
             SettingsRow(
               p: p,
+              icon: CupertinoIcons.share,
               title: 'Share Target'.localized(context),
               status: 'Active'.localized(context),
               color: p.green,
@@ -246,10 +236,10 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsGroup(
           p: p,
           title: 'Markdown Journal'.localized(context).toUpperCase(),
-          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
+              icon: Icons.article_rounded,
               title: 'Export Journal (.md)'.localized(context),
               status: _exportingMarkdown ? null : 'Export'.localized(context),
               trailing: _exportingMarkdown
@@ -273,10 +263,10 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsGroup(
           p: p,
           title: 'Calendar Sessions'.localized(context).toUpperCase(),
-          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
+              icon: CupertinoIcons.calendar,
               title: 'Export Calendar (.ics)'.localized(context),
               status: _exportingCalendar ? null : 'Export'.localized(context),
               trailing: _exportingCalendar
@@ -305,6 +295,9 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'ACTION_LOG_MOMENT',
+              subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT'.localized(
+                context,
+              ),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(

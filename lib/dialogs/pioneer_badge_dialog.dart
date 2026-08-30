@@ -7,6 +7,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class PioneerBadgeDialog extends StatefulWidget {
@@ -60,12 +61,11 @@ class _PioneerBadgeDialogState extends State<PioneerBadgeDialog> {
   void _verifyIntegrity() {
     HapticFeedback.heavyImpact();
     setState(() => _verified = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Signature verified'.localized(context)),
-        backgroundColor: const Color(0xFF248A3D),
-        duration: const Duration(seconds: 2),
-      ),
+    showIosPillToast(
+      context: context,
+      p: widget.p,
+      message: 'Signature verified'.localized(context),
+      icon: Icons.verified_rounded,
     );
   }
 
@@ -323,15 +323,12 @@ class _PioneerBadgeDialogState extends State<PioneerBadgeDialog> {
               onTap: () {
                 Clipboard.setData(ClipboardData(text: hash));
                 HapticFeedback.mediumImpact();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Pioneer integrity token copied to clipboard!'.localized(
-                        context,
-                      ),
-                    ),
-                    duration: const Duration(seconds: 2),
-                  ),
+                showIosPillToast(
+                  context: context,
+                  p: widget.p,
+                  message: 'Pioneer integrity token copied to clipboard!'
+                      .localized(context),
+                  icon: Icons.copy_rounded,
                 );
               },
               child: Container(
