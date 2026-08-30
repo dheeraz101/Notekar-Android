@@ -46,7 +46,7 @@ class MomentTile extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: compact ? 8 : 12,
-            vertical: compact ? 6 : 12,
+            vertical: compact ? 6 : 10,
           ),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
@@ -72,8 +72,8 @@ class MomentTile extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: compact ? 28 : 38,
-                height: compact ? 28 : 38,
+                width: compact ? 28 : 36,
+                height: compact ? 28 : 36,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.35),
@@ -84,63 +84,31 @@ class MomentTile extends StatelessWidget {
                   ),
                 ),
                 child: Icon(
-                  Icons.auto_awesome_rounded,
-                  color: const Color(0xFFFFE600),
-                  size: compact ? 16 : 20,
+                  Icons.alternate_email_rounded,
+                  color: Colors.white,
+                  size: compact ? 15 : 19,
                 ),
               ),
               SizedBox(width: compact ? 8 : 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          timeOnly(entry.timestamp),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: compact ? 13 : 15,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1.5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.45),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: const Color(
-                                0xFFFFE600,
-                              ).withValues(alpha: 0.8),
-                              width: 1,
-                            ),
-                          ),
-                          child: const Text(
-                            '⚡ GOD MODE',
-                            style: TextStyle(
-                              color: Color(0xFFFFE600),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 9,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
                     Text(
-                      entry.note,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      'God Mode'.localized(context),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        fontSize: compact ? 11 : 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: compact ? 13 : 14.5,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    Text(
+                      'Unlocked'.localized(context),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.90),
+                        fontSize: compact ? 10.5 : 11.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

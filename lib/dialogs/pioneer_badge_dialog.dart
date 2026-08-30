@@ -62,12 +62,9 @@ class _PioneerBadgeDialogState extends State<PioneerBadgeDialog> {
     setState(() => _verified = true);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Cryptographic integrity verified! Database signature is valid and authentic.'
-              .localized(context),
-        ),
+        content: Text('Signature verified'.localized(context)),
         backgroundColor: const Color(0xFF248A3D),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -305,7 +302,7 @@ class _PioneerBadgeDialogState extends State<PioneerBadgeDialog> {
                     Flexible(
                       child: Text(
                         _verified
-                            ? 'Signature Cryptographically Valid'
+                            ? 'Signature Verified'
                             : 'Verify Database Signature',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

@@ -112,7 +112,7 @@ Future<void> showGodModeUnlockCelebrationDialog({
                           ),
                         ),
                         child: Text(
-                          'You have discovered the Architect\'s cipher. Secret Matrix and E-Ink themes, the Mindful Gravity Sandbox, and VIP Pioneer credentials are now awakened in Settings.'
+                          'You have discovered the Architect\'s cipher. Secret Matrix Phosphor & E-Ink themes, and the VIP Pioneer cryptographic badge are now awakened in Settings.'
                               .localized(context),
                           textAlign: TextAlign.center,
                           style: TextStyle(

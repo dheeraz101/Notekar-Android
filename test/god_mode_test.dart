@@ -5,7 +5,6 @@ import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/widgets/chrono_focus_game.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 
 void main() {
@@ -57,7 +56,7 @@ void main() {
     });
 
     testWidgets(
-      'MomentTile renders rainbow card for God Mode without delete button',
+      'MomentTile renders rainbow card with @ icon, God Mode title, and Unlocked subtitle without timestamp',
       (tester) async {
         final p = paletteFor('dark');
         final godMoment = Moment(
@@ -84,8 +83,9 @@ void main() {
           ),
         );
 
-        expect(find.text('⚡ GOD MODE'), findsOneWidget);
-        expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+        expect(find.text('God Mode'), findsOneWidget);
+        expect(find.text('Unlocked'), findsOneWidget);
+        expect(find.byIcon(Icons.alternate_email_rounded), findsOneWidget);
         expect(find.byIcon(Icons.close_rounded), findsNothing);
         expect(find.byIcon(Icons.lock_open_rounded), findsOneWidget);
       },
@@ -136,26 +136,11 @@ void main() {
       await tester.tap(find.text('Verify Database Signature'));
       await tester.pump();
 
-      expect(find.text('Signature Cryptographically Valid'), findsOneWidget);
-    });
-
-    testWidgets('ChronoFocusGame renders and handles strike', (tester) async {
-      final p = paletteFor('dark');
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ChronoFocusGame(p: p, onClose: () {}),
-          ),
-        ),
-      );
-
-      expect(find.text('CHRONO FOCUS'), findsOneWidget);
-      expect(find.text('STRIKE ON SYNC'), findsOneWidget);
+      expect(find.text('Signature Verified'), findsOneWidget);
     });
 
     testWidgets(
-      'GodModeSettingsPage renders secret developer themes and revocation action',
+      'GodModeSettingsPage renders secret developer themes, VIP badge, and revocation action',
       (tester) async {
         final p = paletteFor('dark');
 
@@ -178,7 +163,6 @@ void main() {
 
         expect(find.text('Matrix Phosphor Terminal'), findsOneWidget);
         expect(find.text('Kindle E-Ink Paperwhite'), findsOneWidget);
-        expect(find.text('Chrono Focus Game'), findsOneWidget);
         expect(find.text('VIP Pioneer Badge'), findsOneWidget);
         expect(find.text('Revoke God Mode'), findsOneWidget);
       },

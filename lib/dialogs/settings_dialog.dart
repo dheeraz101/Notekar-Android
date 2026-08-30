@@ -2476,19 +2476,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
       if (_isGodModeUnlocked)
         item(
           title: 'God Mode',
-          subtitle: 'Secret themes, Chrono Focus game, and VIP pioneer badge',
+          subtitle: 'Secret themes and VIP pioneer badge',
           category: 'God Mode',
           icon: Icons.auto_awesome_rounded,
           keywords: [
             'god mode',
+            'godmode',
             'matrix',
             'terminal',
             'eink',
             'e-ink',
-            'sandbox',
-            'gravity',
             'pioneer',
             'vip',
+            'badge',
             'developer',
             'easter egg',
           ],
@@ -3535,9 +3535,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       p: p,
                                       icon: Icons.auto_awesome_rounded,
                                       title: 'God Mode',
-                                      subtitle:
-                                          'Secret themes, Chrono Focus & VIP badge'
-                                              .localized(context),
                                       status: 'Unlocked',
                                       color: const Color(0xFFFFD700),
                                       onTap: () => _openCategory('God Mode'),

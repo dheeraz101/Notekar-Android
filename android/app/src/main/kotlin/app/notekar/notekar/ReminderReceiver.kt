@@ -77,21 +77,6 @@ class ReminderReceiver : BroadcastReceiver() {
 
         showNotification(context, id, title, body)
 
-        // Try direct launch for full-screen reflection
-        if (type == "reflection") {
-            try {
-                val directIntent = Intent(context, MainActivity::class.java).apply {
-                    putExtra(MainActivity.EXTRA_LAUNCH_ACTION, "reflection")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                }
-                context.startActivity(directIntent)
-            } catch (e: Exception) {
-                android.util.Log.w("ReminderReceiver", "Direct launch fallback", e)
-            }
-        }
-
         // Reschedule next occurrence ONLY for real recurring alarms (never for test alarms)
         if (!isTest && (type == "daily" || type == "weekly" || type == "monthly" || type == "reflection")) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -348,44 +333,16 @@ class ReminderReceiver : BroadcastReceiver() {
                 }
             }
 
-            val isReflection = type == "reflection"
-
-            if (isReflection) {
-                try {
-                    val showIntent = Intent(context, MainActivity::class.java).apply {
-                        putExtra(MainActivity.EXTRA_LAUNCH_ACTION, "reflection")
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    }
-                    val showPendingIntent = PendingIntent.getActivity(
-                        context,
-                        id.hashCode(),
-                        showIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    alarmManager.setAlarmClock(
-                        AlarmManager.AlarmClockInfo(calendar.timeInMillis, showPendingIntent),
-                        pendingIntent
-                    )
-                    return
-                } catch (e: Exception) {
-                    android.util.Log.w(
-                        "ReminderReceiver",
-                        "Failed to schedule alarm clock, falling back to exact alarm",
-                        e
-                    )
-                }
-            }
-
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC,
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
                     )
                 } else {
-                    alarmManager.set(
-                        AlarmManager.RTC,
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
                     )
@@ -480,7 +437,6 @@ class ReminderReceiver : BroadcastReceiver() {
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
 
             if (isReflection) {
-                builder.setFullScreenIntent(openPending, true)
                 builder.addAction(
                     android.R.drawable.ic_menu_view,
                     "Reflect Now",
