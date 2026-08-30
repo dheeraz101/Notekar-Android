@@ -1,0 +1,18 @@
+Update to 7.3.0 (build 26PR0830):
+- New: Migrate to Apple HIG pill toasts & polish bridges settings
+- New: Add system bridges, documentation, and full changelog database
+- New: Add system bridges, deep links, share targets, markdown sync & calendar export
+- New: Refine God Mode UX, fix lockscreen notification behavior, and streamline VIP credentials
+- New: Refine God Mode suite with undeletable history pill, Chrono Focus game & revocation dialog
+- New: Add sovereign God Mode suite with secret themes, gravity sandbox & VIP badge
+- New: Integrate on-demand language packages into welcome screen
+- New: Refine What's New, overhaul Language Center lifecycle & complete historical changelog database
+- New: Add dynamic changelog fetching, expressive icons & on-demand language pack engine
+- New: Optimize battery consumption, fix lockscreen mindfulness launch & add Cupertino transitions
+- Updated readme to reflect all new changes
+- Fixed god mode issues
+- Optimize R8 compiler, enable build caching & clean up obsolete scripts
+- Restore 100% offline built-in multilingual architecture
+- Fix: Safeguard repo init on god mode revoke & streamline bridges UX
+- Fix: Import java.util.Locale in MainActivity for URI normalization
+- Fix: Eliminate nested sheets in What's New, Changelog & Language Center

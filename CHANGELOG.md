@@ -7,6 +7,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.3.0] - 2026-08-30 (versionCode 26PR0830) [PR]
+
+### What's New
+
+- Migrate to Apple HIG pill toasts & polish bridges settings
+- Add system bridges, documentation, and full changelog database
+- Add system bridges, deep links, share targets, markdown sync & calendar export
+- Refine God Mode UX, fix lockscreen notification behavior, and streamline VIP credentials
+- Refine God Mode suite with undeletable history pill, Chrono Focus game & revocation dialog
+- Add sovereign God Mode suite with secret themes, gravity sandbox & VIP badge
+- Integrate on-demand language packages into welcome screen
+- Refine What's New, overhaul Language Center lifecycle & complete historical changelog database
+- Add dynamic changelog fetching, expressive icons & on-demand language pack engine
+- Optimize battery consumption, fix lockscreen mindfulness launch & add Cupertino transitions
+
+### Improvements
+
+- Updated readme to reflect all new changes
+- Fixed god mode issues
+- Optimize R8 compiler, enable build caching & clean up obsolete scripts
+- Restore 100% offline built-in multilingual architecture
+
+### Bug Fixes
+
+- Safeguard repo init on god mode revoke & streamline bridges UX
+- Import java.util.Locale in MainActivity for URI normalization
+- Eliminate nested sheets in What's New, Changelog & Language Center
+
 ## [7.2.0] - 2026-08-23 (versionCode 26PR0823) [PR]
 
 ### What's New

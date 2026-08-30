@@ -27,8 +27,8 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.2.0',
-    date: 'August 23, 2026',
+    version: '7.3.0',
+    date: 'August 30, 2026',
     edition: 'Mindfulness, Integrations & Battery Evolution',
     badgeColor: Color(0xFF0A84FF),
     highlights: [
