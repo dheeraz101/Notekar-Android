@@ -360,6 +360,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
+    if (_isGodModeUnlocked) {
+      unawaited(_prefs?.setBool('god_mode_unlocked', true));
+    }
     setState(() {
       _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
       obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
@@ -901,6 +904,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   List<Moment> get entries => widget.entriesNotifier.value;
+
+  bool get _isGodModeUnlocked {
+    if (_prefs?.getBool('god_mode_unlocked') == true) return true;
+    return entries.any(
+      (e) =>
+          e.note.contains('God Mode Unlocked') || e.note.contains('#godmode'),
+    );
+  }
 
   List<Moment> get _trash => widget.trashEntriesNotifier.value;
 
@@ -2462,11 +2473,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: 'View',
       ),
-      if (_prefs?.getBool('god_mode_unlocked') ?? false)
+      if (_isGodModeUnlocked)
         item(
           title: 'God Mode',
-          subtitle:
-              'Secret themes, gravity sandbox, and VIP pioneer credentials',
+          subtitle: 'Secret themes, Chrono Focus game, and VIP pioneer badge',
           category: 'God Mode',
           icon: Icons.auto_awesome_rounded,
           keywords: [
@@ -3520,12 +3530,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     color: p.orange,
                                     onTap: () => _openCategory('Advanced'),
                                   ),
-                                  if (_prefs?.getBool('god_mode_unlocked') ??
-                                      false)
+                                  if (_isGodModeUnlocked)
                                     SettingsRow(
                                       p: p,
                                       icon: Icons.auto_awesome_rounded,
                                       title: 'God Mode',
+                                      subtitle:
+                                          'Secret themes, Chrono Focus & VIP badge'
+                                              .localized(context),
                                       status: 'Unlocked',
                                       color: const Color(0xFFFFD700),
                                       onTap: () => _openCategory('God Mode'),
@@ -4236,8 +4248,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                             child: AppIconsSettingsPage(
                               p: p,
                               appIconStyle: appIconStyle,
-                              godModeUnlocked:
-                                  _prefs?.getBool('god_mode_unlocked') ?? false,
+                              godModeUnlocked: _isGodModeUnlocked,
                               onAppIconStyleChanged: (value) {
                                 setState(() => appIconStyle = value);
                                 unawaited(widget.onAppIconStyle(value));

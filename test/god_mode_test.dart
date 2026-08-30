@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/pioneer_badge_dialog.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
+import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/widgets/chrono_focus_game.dart';
@@ -152,5 +153,35 @@ void main() {
       expect(find.text('CHRONO FOCUS'), findsOneWidget);
       expect(find.text('STRIKE ON SYNC'), findsOneWidget);
     });
+
+    testWidgets(
+      'GodModeSettingsPage renders secret developer themes and revocation action',
+      (tester) async {
+        final p = paletteFor('dark');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: GodModeSettingsPage(
+                  p: p,
+                  currentTheme: 'dark',
+                  onThemeChanged: (_) {},
+                  totalMoments: 50,
+                  streakDays: 10,
+                  onRelockGodMode: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('Matrix Phosphor Terminal'), findsOneWidget);
+        expect(find.text('Kindle E-Ink Paperwhite'), findsOneWidget);
+        expect(find.text('Chrono Focus Game'), findsOneWidget);
+        expect(find.text('VIP Pioneer Badge'), findsOneWidget);
+        expect(find.text('Revoke God Mode'), findsOneWidget);
+      },
+    );
   });
 }
