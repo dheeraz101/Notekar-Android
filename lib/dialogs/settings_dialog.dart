@@ -3486,6 +3486,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                   : (_editingReminderType == 'weekly'
                         ? 'Weekly Reminder Message'.localized(context)
                         : 'Monthly Reminder Message'.localized(context)))
+            : category == 'Integrations & Automation'
+            ? 'Bridges & Automation'.localized(context)
             : (category ?? 'Settings').localized(context),
         onBack: category != null ? _popCategory : null,
         docked: true,
@@ -3682,16 +3684,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     status: 'Tools',
                                     color: p.orange,
                                     onTap: () => _openCategory('Advanced'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.link,
-                                    title: 'Integrations & Automation',
-                                    status: 'Bridges',
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Integrations & Automation',
-                                    ),
                                   ),
                                   if (_isGodModeUnlocked)
                                     SettingsRow(
@@ -6351,8 +6343,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     );
                                   widget.entriesNotifier.value = updated;
                                   final repo = MomentRepository();
+                                  await repo.ensureInitialized();
                                   for (final gm in godModeEntries) {
-                                    unawaited(repo.deleteMoment(gm.id));
+                                    await repo.deleteMoment(gm.id);
                                   }
                                 }
                                 if (theme == 'matrix' || theme == 'eink') {

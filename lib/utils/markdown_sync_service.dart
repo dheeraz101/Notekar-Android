@@ -91,7 +91,7 @@ class MarkdownSyncService {
   }
 
   /// Exports markdown to the user's Downloads or local storage.
-  Future<bool> exportMarkdownFile(
+  Future<String?> exportMarkdownFile(
     List<Moment> moments, {
     String? customFileName,
   }) async {
@@ -107,9 +107,12 @@ class MarkdownSyncService {
         'content': content,
         'mimeType': 'text/markdown',
       });
-      return res != null && res.isNotEmpty;
+      if (res != null && res.isNotEmpty) {
+        return fileName;
+      }
+      return null;
     } catch (_) {
-      return false;
+      return null;
     }
   }
 

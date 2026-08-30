@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -97,6 +98,17 @@ class AdvancedSettingsPage extends StatelessWidget {
                   : hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
               color: p.orange,
               onTap: () => onOpenCategory('Accessibility', parent: 'Advanced'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.link,
+              title: 'Bridges & Automation'.localized(context),
+              status: 'Bridges'.localized(context),
+              color: p.accent,
+              onTap: () => onOpenCategory(
+                'Integrations & Automation',
+                parent: 'Advanced',
+              ),
             ),
             SettingsRow(
               p: p,

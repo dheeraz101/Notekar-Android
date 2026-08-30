@@ -43,51 +43,92 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
     );
   }
 
+  void _showSavedToast({required bool success, required String message}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              success
+                  ? Icons.check_circle_rounded
+                  : Icons.error_outline_rounded,
+              color: success ? const Color(0xFF30D158) : widget.p.red,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: widget.p.surface,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   Future<void> _exportMarkdown() async {
+    if (_exportingMarkdown) return;
     setState(() => _exportingMarkdown = true);
     HapticFeedback.mediumImpact();
+
     final moments = widget.entriesNotifier.value;
-    final success = await const MarkdownSyncService().exportMarkdownFile(
-      moments,
-    );
+    final exportOp = const MarkdownSyncService().exportMarkdownFile(moments);
+    final delayOp = Future.delayed(const Duration(milliseconds: 1500));
+
+    final results = await Future.wait([exportOp, delayOp]);
+    final savedFileName = results[0];
+
     if (mounted) {
       setState(() => _exportingMarkdown = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? 'Markdown journal exported to Downloads!'.localized(context)
-                : 'Failed to export Markdown journal.'.localized(context),
-          ),
-          backgroundColor: success ? const Color(0xFF248A3D) : widget.p.red,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      if (savedFileName != null) {
+        _showSavedToast(
+          success: true,
+          message: 'Saved to Downloads/$savedFileName'.localized(context),
+        );
+      } else {
+        _showSavedToast(
+          success: false,
+          message: 'Failed to export Markdown journal.'.localized(context),
+        );
+      }
     }
   }
 
   Future<void> _exportCalendar() async {
+    if (_exportingCalendar) return;
     setState(() => _exportingCalendar = true);
     HapticFeedback.mediumImpact();
+
     final moments = widget.entriesNotifier.value;
-    final success = await const CalendarSyncService().exportCalendarFile(
-      moments,
-    );
+    final exportOp = const CalendarSyncService().exportCalendarFile(moments);
+    final delayOp = Future.delayed(const Duration(milliseconds: 1500));
+
+    final results = await Future.wait([exportOp, delayOp]);
+    final savedFileName = results[0];
+
     if (mounted) {
       setState(() => _exportingCalendar = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? 'Calendar (.ics) sessions exported to Downloads!'.localized(
-                    context,
-                  )
-                : 'Failed to export Calendar sessions.'.localized(context),
-          ),
-          backgroundColor: success ? const Color(0xFF248A3D) : widget.p.red,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      if (savedFileName != null) {
+        _showSavedToast(
+          success: true,
+          message: 'Saved to Downloads/$savedFileName'.localized(context),
+        );
+      } else {
+        _showSavedToast(
+          success: false,
+          message: 'Failed to export Calendar sessions.'.localized(context),
+        );
+      }
     }
   }
 
@@ -99,18 +140,15 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
       children: [
         const SizedBox(height: spacing8),
 
-        // Deep Linking & URL Scheme
+        // URL Schemes
         SettingsGroup(
           p: p,
-          title: 'Deep Linking & URL Scheme'.localized(context).toUpperCase(),
-          insetDividers: true,
+          title: 'URL Schemes'.localized(context).toUpperCase(),
+          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.link,
-              title: 'notekar://log?type=single',
-              subtitle: 'Log a single instant moment with optional note'
-                  .localized(context),
+              title: 'Quick Log'.localized(context),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -125,11 +163,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.arrow_right_circle,
-              title: 'notekar://in & notekar://out',
-              subtitle: 'Trigger Two-Way check-in or check-out'.localized(
-                context,
-              ),
+              title: 'Check-In & Out'.localized(context),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -143,11 +177,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.doc_text,
-              title: 'notekar://note?text=...',
-              subtitle: 'Open note composer prefilled with text'.localized(
-                context,
-              ),
+              title: 'Draft Note'.localized(context),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () =>
@@ -160,10 +190,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.compass,
-              title: 'notekar://open?page=history',
-              subtitle: 'Directly navigate to history, stats, or settings'
-                  .localized(context),
+              title: 'Open Screen'.localized(context),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () =>
@@ -184,30 +211,22 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
 
         const SizedBox(height: spacing16),
 
-        // System Text Selection & Share Target
+        // System Bridges
         SettingsGroup(
           p: p,
           title: 'System Bridges'.localized(context).toUpperCase(),
-          insetDividers: true,
+          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.selection_pin_in_out,
-              title: 'Text Selection Context Menu'.localized(context),
-              subtitle:
-                  'Highlight text anywhere in Android and tap "Log in NoteKar"'
-                      .localized(context),
+              title: 'Text Selection Menu'.localized(context),
               status: 'Active'.localized(context),
               color: p.accent,
               onTap: null,
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.share,
-              title: 'Android Share Target'.localized(context),
-              subtitle:
-                  'Share plain text and links from any app directly to NoteKar'
-                      .localized(context),
+              title: 'Share Target'.localized(context),
               status: 'Active'.localized(context),
               color: p.green,
               onTap: null,
@@ -217,24 +236,25 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsPageDescription(
           p: p,
           text:
-              'Capture quotes, reading notes, and links without leaving Chrome, WhatsApp, or reader apps.'
+              'Capture quotes, reading notes, and links directly from Chrome, WhatsApp, or other apps.'
                   .localized(context),
         ),
 
         const SizedBox(height: spacing16),
 
-        // Obsidian & Second Brain Interop
+        // Obsidian & Markdown Journal
         SettingsGroup(
           p: p,
-          title: 'Obsidian & Markdown Journal'.localized(context).toUpperCase(),
+          title: 'Markdown Journal'.localized(context).toUpperCase(),
+          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.article_rounded,
-              title: 'Export Markdown Journal (.md)'.localized(context),
-              subtitle: 'Formatted tables, timestamps, and daily telemetry'
-                  .localized(context),
-              status: _exportingMarkdown ? 'Exporting...' : 'Export',
+              title: 'Export Journal (.md)'.localized(context),
+              status: _exportingMarkdown ? null : 'Export'.localized(context),
+              trailing: _exportingMarkdown
+                  ? const CupertinoActivityIndicator(radius: 9)
+                  : null,
               color: const Color(0xFF7000FF),
               onTap: _exportingMarkdown ? null : _exportMarkdown,
             ),
@@ -243,25 +263,25 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsPageDescription(
           p: p,
           text:
-              'Compatible with Obsidian, Logseq, and Notion. Generates pristine Markdown tables sorted by date.'
+              'Generates date-grouped Markdown tables compatible with Obsidian, Logseq, and Notion.'
                   .localized(context),
         ),
 
         const SizedBox(height: spacing16),
 
-        // Calendar .ics Session Sync
+        // Calendar Sessions (.ics)
         SettingsGroup(
           p: p,
-          title: 'Calendar Sessions (.ics)'.localized(context).toUpperCase(),
+          title: 'Calendar Sessions'.localized(context).toUpperCase(),
+          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.calendar,
-              title: 'Export Sessions to Calendar (.ics)'.localized(context),
-              subtitle:
-                  'Converts Two-Way IN/OUT intervals into RFC 5545 calendar events'
-                      .localized(context),
-              status: _exportingCalendar ? 'Exporting...' : 'Export',
+              title: 'Export Calendar (.ics)'.localized(context),
+              status: _exportingCalendar ? null : 'Export'.localized(context),
+              trailing: _exportingCalendar
+                  ? const CupertinoActivityIndicator(radius: 9)
+                  : null,
               color: p.orange,
               onTap: _exportingCalendar ? null : _exportCalendar,
             ),
@@ -270,24 +290,21 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsPageDescription(
           p: p,
           text:
-              'Import your tracked focus sessions directly into Google Calendar, Samsung Calendar, Outlook, or Proton Calendar.'
+              'Converts Two-Way intervals into standard calendar events for Google Calendar, Outlook, and Samsung Calendar.'
                   .localized(context),
         ),
 
         const SizedBox(height: spacing16),
 
-        // Tasker & Automation Broadcast API
+        // Tasker Broadcast API
         SettingsGroup(
           p: p,
-          title: 'Tasker & Broadcast API'.localized(context).toUpperCase(),
+          title: 'Automation Broadcast API'.localized(context).toUpperCase(),
+          insetDividers: false,
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.radiowaves_right,
               title: 'ACTION_LOG_MOMENT',
-              subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT'.localized(
-                context,
-              ),
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -306,7 +323,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsPageDescription(
           p: p,
           text:
-              'Send broadcast intents with extras (type: "single"|"in"|"out"|"note", note: string) to log in background.'
+              'Send offline broadcast intents from Tasker, MacroDroid, or Termux with extras to log moments.'
                   .localized(context),
         ),
 

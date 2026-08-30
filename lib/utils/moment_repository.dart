@@ -9,6 +9,12 @@ import 'package:notekar/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MomentRepository {
+  static final MomentRepository _instance = MomentRepository._internal();
+
+  factory MomentRepository() => _instance;
+
+  MomentRepository._internal();
+
   static const String _entryBoxName = 'notekar_entries_v1';
   static const String _trashBoxName = 'notekar_trash_v1';
   static const String _nextIdKey = 'notekar.nextId';
@@ -18,6 +24,14 @@ class MomentRepository {
   late Box<dynamic> _trashBox;
   late SharedPreferences _prefs;
   final _logger = AppLogger();
+  bool _isInitialized = false;
+
+  bool get isInitialized => _isInitialized;
+
+  Future<void> ensureInitialized({SharedPreferences? preloadedPrefs}) async {
+    if (_isInitialized) return;
+    await initialize(preloadedPrefs: preloadedPrefs);
+  }
 
   // In-memory cache to boost read performance
   List<Moment>? _cachedMoments;
@@ -98,6 +112,7 @@ class MomentRepository {
   }
 
   Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
+    if (_isInitialized) return;
     _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
 
     final encryptionKey = await _getOrGenerateEncryptionKey();
@@ -158,6 +173,8 @@ class MomentRepository {
       }
     }
 
+    _isInitialized = true;
+
     unawaited(
       Future(() async {
         await _autoPurgeOldTrash();
@@ -215,6 +232,9 @@ class MomentRepository {
     if (_cachedMoments != null) {
       return _cachedMoments!;
     }
+    if (!_isInitialized) {
+      return [];
+    }
     try {
       final moments = _box.values
           .whereType<Map<dynamic, dynamic>>()
@@ -232,6 +252,9 @@ class MomentRepository {
   List<Moment> getTrashMoments() {
     if (_cachedTrashMoments != null) {
       return _cachedTrashMoments!;
+    }
+    if (!_isInitialized) {
+      return [];
     }
     try {
       final moments = <Moment>[];
@@ -256,6 +279,7 @@ class MomentRepository {
   }
 
   Future<void> saveMoment(Moment moment) async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       await _box.put(moment.id, moment.toJson());
       final currentNextId = _prefs.getInt(_nextIdKey) ?? 0;
@@ -275,6 +299,7 @@ class MomentRepository {
   }
 
   Future<void> deleteMoment(int id) async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       final raw = _box.get(id);
       if (raw != null) {
@@ -309,6 +334,7 @@ class MomentRepository {
   }
 
   Future<void> restoreTrashMoment(int id) async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       final raw = _trashBox.get(id);
       if (raw != null) {
@@ -341,6 +367,7 @@ class MomentRepository {
   }
 
   Future<void> restoreAllTrash() async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       final entries = _trashBox.toMap();
       await _box.putAll(entries);
@@ -355,6 +382,7 @@ class MomentRepository {
   }
 
   Future<void> permanentlyDeleteTrashMoment(int id) async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       await _trashBox.delete(id);
       // Update trash cache
@@ -368,6 +396,7 @@ class MomentRepository {
   }
 
   Future<void> clearTrash() async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       await _trashBox.clear();
       _cachedTrashMoments = [];
@@ -378,6 +407,7 @@ class MomentRepository {
   }
 
   Future<void> clearAll() async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       final entries = _box.toMap();
       if (entries.isNotEmpty) {
@@ -395,6 +425,7 @@ class MomentRepository {
   }
 
   Future<void> replaceAll(List<Moment> moments) async {
+    if (!_isInitialized) await ensureInitialized();
     try {
       await _box.clear();
       final Map<int, dynamic> entries = {};

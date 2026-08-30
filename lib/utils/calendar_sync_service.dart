@@ -116,7 +116,7 @@ class CalendarSyncService {
   }
 
   /// Exports .ics calendar file to Downloads/Storage.
-  Future<bool> exportCalendarFile(
+  Future<String?> exportCalendarFile(
     List<Moment> moments, {
     String? customFileName,
   }) async {
@@ -132,9 +132,12 @@ class CalendarSyncService {
         'content': content,
         'mimeType': 'text/calendar',
       });
-      return res != null && res.isNotEmpty;
+      if (res != null && res.isNotEmpty) {
+        return fileName;
+      }
+      return null;
     } catch (_) {
-      return false;
+      return null;
     }
   }
 }

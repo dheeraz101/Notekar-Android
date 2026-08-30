@@ -121,19 +121,19 @@ void main() {
           ),
         );
 
-        expect(find.text('DEEP LINKING & URL SCHEME'), findsOneWidget);
-        expect(find.text('notekar://log?type=single'), findsOneWidget);
+        expect(find.text('URL SCHEMES'), findsOneWidget);
+        expect(find.text('Quick Log'), findsOneWidget);
         expect(find.text('SYSTEM BRIDGES'), findsOneWidget);
-        expect(find.text('Text Selection Context Menu'), findsOneWidget);
-        expect(find.text('Android Share Target'), findsOneWidget);
-        expect(find.text('OBSIDIAN & MARKDOWN JOURNAL'), findsOneWidget);
-        expect(find.text('Export Markdown Journal (.md)'), findsOneWidget);
-        expect(find.text('CALENDAR SESSIONS (.ICS)'), findsOneWidget);
-        expect(find.text('Export Sessions to Calendar (.ics)'), findsOneWidget);
-        expect(find.text('TASKER & BROADCAST API'), findsOneWidget);
+        expect(find.text('Text Selection Menu'), findsOneWidget);
+        expect(find.text('Share Target'), findsOneWidget);
+        expect(find.text('MARKDOWN JOURNAL'), findsOneWidget);
+        expect(find.text('Export Journal (.md)'), findsOneWidget);
+        expect(find.text('CALENDAR SESSIONS'), findsOneWidget);
+        expect(find.text('Export Calendar (.ics)'), findsOneWidget);
+        expect(find.text('AUTOMATION BROADCAST API'), findsOneWidget);
         expect(find.text('ACTION_LOG_MOMENT'), findsOneWidget);
 
-        await tester.tap(find.text('notekar://log?type=single'));
+        await tester.tap(find.text('Quick Log'));
         await tester.pump();
 
         expect(triggeredScheme, 'notekar://log?type=single&note=Quick%20Log');
