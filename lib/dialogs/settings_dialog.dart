@@ -41,6 +41,7 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
@@ -6086,6 +6087,38 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     'god_mode_unlocked',
                                     false,
                                   );
+                                  await _prefs!.setBool(
+                                    'god_mode_game_enabled',
+                                    false,
+                                  );
+                                }
+                                final godModeEntries = entries
+                                    .where(
+                                      (e) =>
+                                          e.note.contains(
+                                            'God Mode Unlocked',
+                                          ) ||
+                                          e.note.contains('#godmode'),
+                                    )
+                                    .toList();
+                                if (godModeEntries.isNotEmpty) {
+                                  final updated = List<Moment>.from(entries)
+                                    ..removeWhere(
+                                      (e) =>
+                                          e.note.contains(
+                                            'God Mode Unlocked',
+                                          ) ||
+                                          e.note.contains('#godmode'),
+                                    );
+                                  widget.entriesNotifier.value = updated;
+                                  final repo = MomentRepository();
+                                  for (final gm in godModeEntries) {
+                                    unawaited(repo.deleteMoment(gm.id));
+                                  }
+                                }
+                                if (theme == 'matrix' || theme == 'eink') {
+                                  setState(() => theme = 'dark');
+                                  widget.onTheme('dark');
                                 }
                                 setState(() {
                                   category = null;
@@ -6095,7 +6128,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'God Mode has been relocked.'.localized(
+                                        'God Mode has been revoked.'.localized(
                                           context,
                                         ),
                                       ),

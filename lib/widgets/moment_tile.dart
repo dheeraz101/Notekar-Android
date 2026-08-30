@@ -29,6 +29,138 @@ class MomentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isGodMode =
+        entry.note.contains('God Mode Unlocked') ||
+        entry.note.contains('#godmode');
+
+    if (isGodMode) {
+      return GestureDetector(
+        onTap: () {
+          AppHaptics.heavy();
+          onTap?.call();
+        },
+        onLongPress: () {
+          AppHaptics.heavy();
+          onLongPress?.call();
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 8 : 12,
+            vertical: compact ? 6 : 12,
+          ),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFFFF007A),
+                Color(0xFFFF7A00),
+                Color(0xFFFFD600),
+                Color(0xFF00E5FF),
+                Color(0xFF7000FF),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF007A).withValues(alpha: 0.30),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: compact ? 28 : 38,
+                height: compact ? 28 : 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: const Color(0xFFFFE600),
+                  size: compact ? 16 : 20,
+                ),
+              ),
+              SizedBox(width: compact ? 8 : 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          timeOnly(entry.timestamp),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: compact ? 13 : 15,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: const Color(
+                                0xFFFFE600,
+                              ).withValues(alpha: 0.8),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text(
+                            '⚡ GOD MODE',
+                            style: TextStyle(
+                              color: Color(0xFFFFE600),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 9,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      entry.note,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontSize: compact ? 11 : 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 10),
+                child: Icon(
+                  Icons.lock_open_rounded,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  size: compact ? 16 : 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final color = momentColor(p, entry.type);
     if (compact) {
       return GestureDetector(
@@ -123,149 +255,6 @@ class MomentTile extends StatelessWidget {
         ),
       );
     }
-    final isGodMode =
-        entry.note.contains('God Mode Unlocked') ||
-        entry.note.contains('#godmode');
-
-    if (isGodMode) {
-      return GestureDetector(
-        onTap: () {
-          AppHaptics.light();
-          onTap?.call();
-        },
-        onLongPress: () {
-          AppHaptics.medium();
-          onLongPress?.call();
-        },
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 2),
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 10 : 14,
-            vertical: compact ? 8 : 12,
-          ),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFFFF007A),
-                Color(0xFFFF7A00),
-                Color(0xFFFFD600),
-                Color(0xFF00E5FF),
-                Color(0xFF7000FF),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(compact ? 999 : 20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFFF007A).withValues(alpha: 0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: compact ? 30 : 40,
-                height: compact ? 30 : 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    width: 1.5,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: Color(0xFFFFE600),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          timeOnly(entry.timestamp),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 15,
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: const Color(
-                                0xFFFFE600,
-                              ).withValues(alpha: 0.7),
-                            ),
-                          ),
-                          child: const Text(
-                            '⚡ GOD MODE',
-                            style: TextStyle(
-                              color: Color(0xFFFFE600),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 9.5,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      entry.note,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                visualDensity: compact
-                    ? VisualDensity.compact
-                    : VisualDensity.standard,
-                constraints: BoxConstraints.tightFor(
-                  width: compact ? 32 : 40,
-                  height: compact ? 32 : 40,
-                ),
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  AppHaptics.medium();
-                  onDelete();
-                },
-                icon: const Icon(
-                  Icons.close_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return GestureDetector(
       onTap: () {
         AppHaptics.light();

@@ -31,6 +31,7 @@ import 'package:notekar/utils/backup_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:notekar/widgets/chrono_focus_game.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
@@ -110,6 +111,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   Map<String, dynamic>? _pendingTap;
   bool _enableNoteOnClick = false;
   bool _enableSobrietyMode = false;
+  bool _godModeGameEnabled = false;
   String _sobrietyResetType = 'any';
   DateTime? _sobrietyCustomStart;
   String _sobrietyMilestoneTheme = 'science';
@@ -2293,6 +2295,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       setState(() {
         _enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
         _enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
+        _godModeGameEnabled = _prefs?.getBool('god_mode_game_enabled') ?? false;
         _sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
         final customStartMs = _prefs?.getInt('sobriety_custom_start_ms');
         _sobrietyCustomStart = customStartMs != null
@@ -3780,6 +3783,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
               left: spacing16,
               right: spacing16,
               child: _buildSobrietyStreakCard(palette),
+            ),
+          if (_godModeGameEnabled &&
+              (_prefs?.getBool('god_mode_unlocked') ?? false))
+            Positioned(
+              top: spacing16 + MediaQuery.paddingOf(context).top,
+              left: spacing16,
+              right: spacing16,
+              child: ChronoFocusGame(
+                p: palette,
+                onClose: () async {
+                  setState(() => _godModeGameEnabled = false);
+                  await _prefs?.setBool('god_mode_game_enabled', false);
+                },
+              ),
             ),
           if (lastSaved && _showLastSavedHint)
             Positioned(

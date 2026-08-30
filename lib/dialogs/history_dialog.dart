@@ -13,6 +13,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
+import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -596,17 +597,33 @@ class _HistoryDialogState extends State<HistoryDialog> {
                               clipBehavior: Clip.antiAlias,
                               child: Dismissible(
                                 key: ValueKey('dismiss-${entry.id}'),
-                                direction: DismissDirection.endToStart,
-                                background: Container(
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(right: 18),
-                                  color: widget.p.red,
-                                  child: const Icon(
-                                    Icons.delete_outline_rounded,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                direction:
+                                    (entry.note.contains('God Mode Unlocked') ||
+                                        entry.note.contains('#godmode'))
+                                    ? DismissDirection.none
+                                    : DismissDirection.endToStart,
+                                background:
+                                    (entry.note.contains('God Mode Unlocked') ||
+                                        entry.note.contains('#godmode'))
+                                    ? const SizedBox.shrink()
+                                    : Container(
+                                        alignment: Alignment.centerRight,
+                                        padding: const EdgeInsets.only(
+                                          right: 18,
+                                        ),
+                                        color: widget.p.red,
+                                        child: const Icon(
+                                          Icons.delete_outline_rounded,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                 confirmDismiss: (_) async {
+                                  if (entry.note.contains(
+                                        'God Mode Unlocked',
+                                      ) ||
+                                      entry.note.contains('#godmode')) {
+                                    return false;
+                                  }
                                   _removeEntry(entry);
                                   return false;
                                 },
@@ -625,18 +642,41 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                       selected: selected,
                                       compact: widget.compactRows,
                                       singleNumber: _singleNumberMap[entry.id],
-                                      onLongPress: _enableNoteOnClick
-                                          ? () => _handleSelection(
-                                              entry,
-                                              selected,
-                                            )
-                                          : () => _showMomentDetails(entry),
-                                      onTap: _enableNoteOnClick
-                                          ? () => _showMomentDetails(entry)
-                                          : () => _handleSelection(
-                                              entry,
-                                              selected,
-                                            ),
+                                      onLongPress:
+                                          (entry.note.contains(
+                                                'God Mode Unlocked',
+                                              ) ||
+                                              entry.note.contains('#godmode'))
+                                          ? () =>
+                                                showGodModeUnlockCelebrationDialog(
+                                                  context: context,
+                                                  p: widget.p,
+                                                )
+                                          : (_enableNoteOnClick
+                                                ? () => _handleSelection(
+                                                    entry,
+                                                    selected,
+                                                  )
+                                                : () => _showMomentDetails(
+                                                    entry,
+                                                  )),
+                                      onTap:
+                                          (entry.note.contains(
+                                                'God Mode Unlocked',
+                                              ) ||
+                                              entry.note.contains('#godmode'))
+                                          ? () =>
+                                                showGodModeUnlockCelebrationDialog(
+                                                  context: context,
+                                                  p: widget.p,
+                                                )
+                                          : (_enableNoteOnClick
+                                                ? () =>
+                                                      _showMomentDetails(entry)
+                                                : () => _handleSelection(
+                                                    entry,
+                                                    selected,
+                                                  )),
                                       onDelete: () => _removeEntry(entry),
                                     ),
                                   ),
