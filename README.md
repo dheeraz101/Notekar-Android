@@ -1,355 +1,357 @@
-# NoteKar Android
+<div align="center">
 
-![NoteKar Banner](screenshot/notekar_banner.png)
+# ⚡ NoteKar Android
 
-> **The Official Native Android Application for NoteKar.** Instant tap timestamp logger. Zero
-> friction. 100% Offline-First & Privacy-Focused.
+[![NoteKar Banner](screenshot/notekar_banner.png)](https://github.com/dheeraz101/Notekar-Android)
 
-![version](https://img.shields.io/badge/version-7.2.0-blue) ![flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B) ![android](https://img.shields.io/badge/Android-SDK%2021%2B-green) ![license](https://img.shields.io/badge/license-MIT-green) ![fdroid](https://img.shields.io/badge/F--Droid-Compatible-brightgreen) ![privacy](https://img.shields.io/badge/privacy-100%25%20Offline-brightgreen) ![l10n](https://img.shields.io/badge/l10n-Contributions%20Welcome-orange) ![issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android) ![stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android)
+### *The Sovereign, Offline-First Timestamp & Focus Companion for Android*
 
-<a href="https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/">
-  <img src="https://raw.githubusercontent.com/dheeraz101/Yet-Another-Boring-Project/main/logo.png" width="48" height="48" alt="YABP Initiative Logo" style="display: inline-block; vertical-align: middle;" />
-</a>
+**Instant Tap Logging • Two-Way Intervals • Obsidian & Calendar Sync • 100% Private**
+
+---
+
+[![Version](https://img.shields.io/badge/version-7.2.0-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Build](https://img.shields.io/badge/build-26PR0823-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![F-Droid Compatible](https://img.shields.io/badge/F--Droid-100%25%20Compliant-brightgreen.svg?style=flat-square&logo=f-droid&logoColor=white)](https://f-droid.org)
+[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://dheeraz101.github.io/Notekar/privacy.html)
+[![Translations](https://img.shields.io/badge/l10n-7%20Live%20%7C%2050%2B%20Target-orange.svg?style=flat-square&logo=googletranslate&logoColor=white)](TRANSLATIONS.md)
+[![GitHub Stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/issues)
+
+<p align="center">
+  <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.2.0-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://notekarapp.vercel.app/">
+    <img src="https://img.shields.io/badge/🌐_Web_PWA_App-Launch-0070F3?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch Web App" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/">
+    <img src="https://raw.githubusercontent.com/dheeraz101/Yet-Another-Boring-Project/main/logo.png" width="28" height="28" alt="YABP Initiative" style="vertical-align: middle;" />
+  </a>
+</p>
+
+</div>
 
 ---
 
 > [!IMPORTANT]
-> 🚀 **Official Release Hub for NoteKar**
+> 🚀 **Official Release Hub & Active Development**
 >
-> **This repository is the official home for all new NoteKar version releases, Android APK
-> downloads, and active app development.**
+> This repository is the official home for all NoteKar Android version releases, APK packages,
+> community localizations, and feature updates.
 >
-> 📥 To download the latest stable Android APK release,
-> visit: **[GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)**.
->
-> 🌐 Website/PWA Notekar Repo **[Github](https://github.com/dheeraz101/Notekar)**.
+> 📦 **Download Official APKs
+**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)
+> 🌐 **Companion Web App
+**: [notekarapp.vercel.app](https://notekarapp.vercel.app/) • [Web Source Repo](https://github.com/dheeraz101/Notekar)
 
 ---
 
-## 📖 Table of Contents
+## 🧭 Table of Contents
 
-- [📸 Screenshots / UI Preview](#screenshots)
-- [🎯 Features & Highlights](#features)
-- [🛠️ Tech Stack](#tech-stack)
-- [🌐 Community Translations](#translations)
-- [🔒 Privacy & Legal Policy](#privacy)
-- [☕ Support](#support)
-- [🚀 Version Release Scheme & Build Numbers](#version-scheme)
-- [🤖 F-Droid & Reproducible Build Compliance](#f-droid)
-- [📦 Project Structure](#project-structure)
-- [🛠️ Building & Running Locally](#building-locally)
-- [🔑 Building Release APKs & Keystore Setup](#release-apks)
-- [📄 License & Attribution](#license)
-
----
-
-<a id="screenshots"></a>
-
-## 📸 Screenshots / UI Preview
-
-Designed for speed, simplicity, and privacy. Every screen is optimized for quick timestamp logging
-with minimal interaction.
-
-|                                        Welcome                                        |                                        Premium                                        |                                      Permissions                                      |                                         Home                                          |                                        History                                        |
-|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|
-| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="175"> |
-|                             _Quick onboarding and setup._                             |                            _Premium features at a glance._                            |                        _Configure permissions for reminders._                         |                          _Log timestamps with a single tap._                          |                          _Browse and manage saved entries._                           |
-
-|                                       Settings                                        |                                        Privacy                                        |                                         Help                                          |                                      Statistics                                       |                                       Reminders                                        |
-|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
-| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="175"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="175"> |
-|                             _Customize app preferences._                              |                         _Privacy, security, and diagnostics._                         |                        _Guides, FAQs, and legal information._                         |                         _View activity insights and trends._                          |                       _Schedule daily and inactivity reminders._                       |
+- [✨ Why NoteKar?](#-why-notekar)
+- [📸 Visual UI Gallery](#-visual-ui-gallery)
+- [🌟 Core Features & Highlights](#-core-features--highlights)
+- [🌉 System Bridges & Automation](#-system-bridges--automation)
+- [🛡️ Privacy, Security & Hardware Protection](#️-privacy-security--hardware-protection)
+- [🌐 Multilingual & Global Community](#-multilingual--global-community)
+- [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
+- [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
+- [💻 Building & Running Locally](#-building--running-locally)
+- [🔑 Release Signing & Keystore Setup](#-release-signing--keystore-setup)
+- [☕ Support & Community](#-support--community)
+- [📄 License & Attribution](#-license--attribution)
 
 ---
 
-<a id="features"></a>
+## ✨ Why NoteKar?
 
-## 🎯 Features & Highlights
+In an era of bloatware, mandatory account logins, cloud tracking, and battery-draining telemetry, *
+*NoteKar** is engineered as an uncompromising, sovereign utility.
 
-- **Instant Tap Logging**: Tap anywhere on the main screen to log exact timestamps instantly with
-  tactile haptics.
-- **Dual Operating Modes**: Switch seamlessly between **Two-Way mode** (IN/OUT session pairs for
-  work/study) and **Single mode** (one-shot timestamp logging).
-- **2-Digit Single Moments Numbering**: Clean sequence counter from `00` to `99` with automatic
-  rollover back to `00`, optional daily reset, and "Count on Save" pulse badges (`00 saved`,
-  `01 saved`...).
-- **Full Multilingual & Global Support**:
-    - **7 Live Officially Supported Languages**: 🇬🇧 English, 🇫🇷 French (Français), 🇪🇸 Spanish (
-      Español), 🇮🇳 Hindi (हिन्दी), 🇩🇪 German (Deutsch), 🇯🇵 Japanese (日本語), 🇷🇺 Russian (Русский).
-    - **50+ Upcoming Languages Initiative**: Dedicated onboarding and in-app language picker
-      supporting worldwide community localization.
-- **Sobriety Companion & Milestone Map**:
-    - **21 Neuroscience-Backed Milestones**: Track sobriety with 34 narrative themes (Science,
-      Warrior, Samurai, Anime, Cyberpunk, etc.).
-    - **Shareable Milestone Peak Card**: High-resolution PNG image rendering and sharing via Android
-      native share sheet.
-    - **Research-Backed Confetti**: 85-particle celebration explosion with 3D paper flutter and
-      gravity dynamics.
-    - **Urge Surfing Breathing Guide**: Interactive 4-7-8 breathing circle for impulse control.
-    - **Streak Shields**: Safety-net mechanics preventing frustrating streak breaks.
-- **Dynamic iOS-Style Calendar Picker**: Calendar with iOS Red selected date circle, event dots for
-  days with logs, and single-letter weekday headers.
-- **Hourly Time Reflection & Mindfulness**:
-    - **Standalone Lockscreen Alerts**: Full-screen mindful breathing prompts that wake up on
-      lockscreen without exposing private moments or home screen.
-    - **Sleep Protection & Active Hours**: Set customized active daily windows (e.g. 09:00 AM – 10:
-      00 PM) with automatic rollover to protect sleep.
-    - **Apple HIG Time Picker**: Seamless iOS Cupertino wheel time selector for scheduling.
-    - **Customizable 60-Char Mantra**: Custom affirmation or motivational mantra displayed directly
-      on the breathing aura view.
-- **Battery-Friendly Background Architecture**:
-    - Zero aggressive wake locks for routine logging reminders; fully compliant with Android Doze
-      power management.
-    - Isolated paint boundaries with `RepaintBoundary` for smooth 120 FPS rendering.
-- **Hardware-Backed Privacy & Security**:
-    - Encrypted local Hive storage with AES-256 Android Keystore keys.
-    - Biometric authentication & custom SHA-256 encrypted PIN lock.
-    - Recent app switcher obfuscation (`FLAG_SECURE`).
-- **Android 2x2 Interactive App Widget**: Log moments and monitor sobriety progress directly from
-  your Android home screen.
-- **System Bridges & Inter-App Ecosystem**:
-    - **Custom URL Scheme (`notekar://`)**: Deep link directly into NoteKar via NFC tags, browser
-      shortcuts, or automators (`notekar://log?type=single&note=Coffee`, `notekar://in`,
-      `notekar://out`, `notekar://note?text=Idea`, `notekar://open?page=history`,
-      `notekar://reflect`).
-    - **Android Global Text Selection (`ACTION_PROCESS_TEXT`)**: Highlight text anywhere in
-      Android (Chrome, WhatsApp, Kindle, Books, Twitter) and tap **"Log in NoteKar"** to capture
-      notes offline with zero friction.
-    - **Android Share Target (`ACTION_SEND` text/plain)**: Share text snippets, links, and reading
-      notes from external apps directly into NoteKar moments.
-    - **Obsidian & Logseq Markdown Live Sync**: Export pristine Markdown journal files with
-      timestamps, type indicators, session durations, and telemetry tables.
-    - **Calendar Sessions Exporter (RFC 5545 `.ics`)**: Convert tracked Two-Way IN/OUT intervals
-      into standard `.ics` calendar events for 1-tap import into Google Calendar, Samsung Calendar,
-      Outlook, and Proton.
-    - **Tasker / MacroDroid Automation Broadcast API**: Trigger background offline logging via
-      `app.notekar.notekar.ACTION_LOG_MOMENT` with `--es type single|in|out|note` and
-      `--es note "..."`.
-- **Zero Backend / Zero Analytics**: 100% offline-first, no accounts, no ads, no trackers. Full
-  local JSON/CSV backup and restore.
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  ⚡ ZERO-FRICTION LOGGING  │  Tap anywhere on the glass to log timestamps.   │
+│  🛡️ 100% OFFLINE-FIRST     │  AES-256 encrypted Hive database. Zero cloud.   │
+│  🧘 TIME REFLECTION        │  Mindful breathing alarms on lockscreen.        │
+│  🌉 SYSTEM BRIDGES         │  Obsidian MD live export, .ICS calendar sync.   │
+│  🌱 SOBRIETY COMPANION     │  21 neuroscience milestones with peak cards.    │
+│  📱 HOME SCREEN WIDGET     │  2x2 native Android widget for 1-tap capture.   │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-<a id="tech-stack"></a>
+## 📸 Visual UI Gallery
 
-## 🛠️ Tech Stack
+Designed with an obsession for Apple Human Interface Guidelines (HIG), dynamic tactile feedback,
+fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
 
-NoteKar is built using modern, performance-oriented technologies:
+|                                            Welcome & Onboarding                                            |                                             VIP Sovereign Theme                                              |                                               Permissions Setup                                               |                                             Home Log Canvas                                             |                                            History & Timeline                                            |
+|:----------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="180" alt="Welcome Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="180" alt="Sovereign Themes"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="180" alt="Permissions Setup"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="180" alt="Home Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="180" alt="History View"> |
+|                                           _Zero-friction start_                                            |                                           _Champagne gold palette_                                           |                                        _Transparent privacy controls_                                         |                                          _Instant tap canvas_                                           |                                         _Rich moment telemetry_                                          |
 
-| Component            | Technology                                                                      |
-|:---------------------|:--------------------------------------------------------------------------------|
-| **Language**         | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/)                   |
-| **Framework**        | [Flutter](https://flutter.dev/) (SDK 3.12.0+)                                   |
-| **Local Database**   | [Hive](https://pub.dev/packages/hive) (AES-256 encrypted NoSQL key-value store) |
-| **State Management** | [ChangeNotifier / Reactive Singletons](https://flutter.dev/)                    |
-| **Design System**    | Custom Apple HIG & iOS-inspired design system with AMOLED dark mode support.    |
-| **Platform Support** | Android 5.0 (API 21+) and above                                                 |
+|                                               Settings Dashboard                                               |                                             Security & Biometrics                                             |                                             Knowledge & Guides                                              |                                            Analytics & Heatmaps                                            |                                               Proactive Reminders                                               |
+|:--------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="180" alt="Settings Dashboard"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="180" alt="Security Settings"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="180" alt="Guides and Help"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="180" alt="Analytics View"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="180" alt="Reminder Scheduler"> |
+|                                               _24 modular tools_                                               |                                            _Biometric & PIN vault_                                            |                                          _Offline FAQs & manuals_                                           |                                         _Interactive habit trends_                                         |                                             _Doze-friendly alarms_                                              |
 
 ---
 
-## 📂 Project Structure & Modular Architecture
+## 🌟 Core Features & Highlights
+
+### ⚡ 1. Instant Timestamp Engine
+
+- **One-Tap Glass Capture**: Tap anywhere on the main screen to immediately capture exact timestamps
+  with custom tactile haptic pulses.
+- **Dual Operating Modes**:
+    - **Single Mode**: Rapid one-shot timestamp counter (`00` to `99`) with automatic rollover,
+      optional daily reset, and "Count on Save" badges.
+    - **Two-Way Mode**: Track deep work, study, workouts, or shifts by recording distinct `IN` and
+      `OUT` interval pairs with duration computations.
+- **Interactive iOS-Style Calendar Picker**: Date navigation with iOS red circle selectors, moment
+  count event dots, and single-letter weekday headers.
+
+### 🌱 2. Sobriety Companion & Milestone Map
+
+- **21 Neuroscience-Backed Milestones**: Track habits and clean streaks across 34 narrative themes (
+  Science, Warrior, Samurai, Anime, Cyberpunk, and more).
+- **Shareable Milestone Peak Cards**: Render high-resolution PNG celebratory milestone cards with
+  1-tap sharing via the native Android share sheet.
+- **Physics-Based Confetti**: 85-particle celebration engine with 3D paper flutter, gravity
+  dynamics, and low-end hardware fallbacks.
+- **Urge Surfing Breathing Companion**: Guided 4-7-8 breathing circle to conquer cravings and
+  practice nervous system regulation.
+- **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
+
+### 🧘 3. Hourly Time Reflection & Mindfulness
+
+- **Standalone Lockscreen Breathing Alarms**: Full-screen breathing prompts that display directly
+  over the lockscreen without unlocking your device or exposing private logs.
+- **Active Hours & Sleep Protection**: Configure daily active windows (e.g. 09:00 AM – 10:00 PM)
+  with overnight rollover protection.
+- **Apple HIG Cupertino Wheel Time Picker**: Smooth wheel selector for scheduling reflection
+  reminders and check-in intervals.
+- **Customizable Affirmation Mantra**: Display a 60-character personal mantra directly on the
+  breathing aura display.
+
+### 📱 4. Android Home Screen Widget (2x2)
+
+- Fast, battery-efficient App Widget to log moments and check streak milestones directly from your
+  Android launcher without opening the app.
+
+---
+
+## 🌉 System Bridges & Automation
+
+NoteKar functions as an extensible bridge between your Android OS, note-taking vaults, calendars,
+and automation engines.
+
+```mermaid
+graph TD
+    A[External Android Environment] -->|notekar:// URL Schemes| B(NoteKar Engine)
+    A -->|ACTION_PROCESS_TEXT Highlight| B
+    A -->|ACTION_SEND Share Sheet| B
+    A -->|Tasker Broadcast am broadcast| B
+    B -->|Export .md| C[Obsidian / Logseq / Notion Vault]
+    B -->|Export .ics| D[Google / Outlook / Apple Calendar]
+    B -->|AES-256 Hive Encrypted| E[Local Private Storage]
+```
+
+### 🔗 1. Deep Linking URL Schemes (`notekar://`)
+
+Trigger actions from NFC tags, browser bookmarks, or home screen shortcuts:
+
+| Action          | URL Scheme Pattern                      | Description                                       |
+|:----------------|:----------------------------------------|:--------------------------------------------------|
+| **Quick Log**   | `notekar://log?type=single&note=Coffee` | Logs an instant single moment                     |
+| **Check-In**    | `notekar://in?note=Focus%20Work`        | Starts a Two-Way tracking interval                |
+| **Check-Out**   | `notekar://out?note=PR%20Merged`        | Closes the active Two-Way interval                |
+| **Draft Note**  | `notekar://note?text=Quick%20Idea`      | Opens composer prefilled with text                |
+| **Open Screen** | `notekar://open?page=history`           | Navigates directly to History, Stats, or Settings |
+| **Breathe**     | `notekar://reflect`                     | Launches the Time Reflection breathing sheet      |
+
+### 📝 2. Global Text Selection Menu (`ACTION_PROCESS_TEXT`)
+
+Highlight any snippet in **Chrome, WhatsApp, Twitter/X, Kindle, or Books** and select **"Log in
+NoteKar"** from the system popup menu to capture quotes instantly offline.
+
+### 📤 3. Native Share Target (`ACTION_SEND`)
+
+Send text, URLs, and articles from any app directly to NoteKar with automatic title parsing and
+timestamp attribution.
+
+### 📓 4. Obsidian & Logseq Markdown Live Export
+
+Generate clean Markdown journal files formatted with date grouping, session tables, and daily
+telemetry:
+
+```markdown
+# NoteKar Journal
+## 📅 Sunday, August 30, 2026
+| Time | Type | Details / Note |
+|---|---|---|
+| 09:00:15 AM | 🟢 **IN** | Deep Work: Rust Backend |
+| 11:30:20 AM | 🔴 **OUT** | Completed Compiler Architecture |
+| 02:15:00 PM | ⚡ **SINGLE** | Team sync & architecture review |
+```
+
+### 🗓️ 5. Calendar Session Exporter (RFC 5545 `.ics`)
+
+Convert tracked Two-Way intervals into standard `.ics` calendar files with 1-tap import into *
+*Google Calendar, Outlook, Samsung Calendar, and Proton Calendar**.
+
+### 🤖 6. Tasker, MacroDroid & Termux Broadcast API
+
+Execute offline background logging via Android intent broadcasts:
+
+```bash
+# Log single moment via ADB or Tasker
+am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"
+
+# Check-in Two-Way interval
+am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type in --es note "Study Session"
+
+# Check-out Two-Way interval
+am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type out --es note "Finished Chapter 4"
+```
+
+---
+
+## 🛡️ Privacy, Security & Hardware Protection
+
+NoteKar operates on a strict **Zero Knowledge / Sovereign Data** architecture:
+
+- 🔒 **AES-256 Hardware Encryption**: All logs and timestamps are stored in a local Hive NoSQL
+  database encrypted with keys generated inside the **Android Keystore System**.
+- 🛡️ **Biometric & PIN Vault**: Protect app access with fingerprint/face unlock and SHA-256 salted
+  PIN codes.
+- 👁️ **Recent App Obfuscation**: Android `FLAG_SECURE` prevents screenshots and masks contents in
+  the app switcher.
+- 🚫 **Zero Analytics & Zero Network Calls**: No telemetry scripts, no third-party trackers, no
+  Firebase, and no account creation requirements.
+- 💾 **1-Tap Offline Data Portability**: Complete backup, restore, and JSON/CSV export without cloud
+  dependencies.
+
+---
+
+## 🌐 Multilingual & Global Community
+
+NoteKar is committed to universal accessibility with full native offline localization:
+
+### 🌟 Officially Supported (7 Live Languages)
+
+| Flag | Language     | Native Name | Code |     Numbers      |   Status   |
+|:----:|:-------------|:------------|:----:|:----------------:|:----------:|
+| 🇬🇧 | **English**  | English     | `en` |     Standard     | ✅ Complete |
+| 🇫🇷 | **French**   | Français    | `fr` |     Standard     | ✅ Complete |
+| 🇪🇸 | **Spanish**  | Español     | `es` |     Standard     | ✅ Complete |
+| 🇮🇳 | **Hindi**    | हिन्दी      | `hi` | Devanagari (०-९) | ✅ Complete |
+| 🇩🇪 | **German**   | Deutsch     | `de` |     Standard     | ✅ Complete |
+| 🇯🇵 | **Japanese** | 日本語         | `ja` |     Standard     | ✅ Complete |
+| 🇷🇺 | **Russian**  | Русский     | `ru` |     Standard     | ✅ Complete |
+
+### 🚀 50+ Target Community Languages Initiative
+
+We welcome contributions for **Arabic, Portuguese, Italian, Chinese (Simplified/Traditional),
+Korean, Turkish, Dutch, Polish, Swedish, Indonesian, Vietnamese, Thai, Ukrainian, Greek, Bengali,
+Marathi, Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and more!
+
+👉 **[Read our 3-Step Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)**
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+| Layer                      | Technology                                                    | Details                                        |
+|:---------------------------|:--------------------------------------------------------------|:-----------------------------------------------|
+| **Language**               | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/) | Type-safe reactive codebase                    |
+| **Framework**              | [Flutter](https://flutter.dev/) (`^3.12.0`)                   | High-performance 120 FPS rendering             |
+| **Local Storage**          | [Hive](https://pub.dev/packages/hive)                         | AES-256 encrypted NoSQL key-value store        |
+| **State Management**       | [Reactive Singletons & ValueNotifiers](https://flutter.dev/)  | Ultra-low memory overhead                      |
+| **Design System**          | Custom Apple HIG & iOS 26 High-Radius Style                   | Dynamic glass, haptics, and AMOLED dark mode   |
+| **Hardware Compatibility** | Android 5.0+ (API Level 21+)                                  | Doze-compliant, low-end device adaptive engine |
+
+### 📂 Directory Architecture
 
 ```text
 Notekar - Flutter/
-├── .github/workflows/          # Enterprise CI/CD pipelines (Lint, Test with coverage, Multi-ABI Release)
-├── android/                    # Native Android platform layer
-│   └── app/src/main/kotlin/    # Kotlin AlarmManager receivers, AppWidgetProvider & MainActivity
+├── .github/workflows/          # Enterprise CI/CD (Lint, Test Coverage, Release Builds)
+├── android/                    # Native Android platform layer & Alarm receivers
+│   └── app/src/main/kotlin/    # MainActivity.kt, NoteKarAppWidgetProvider.kt
 ├── lib/
 │   ├── dialogs/                # Apple HIG modal bottom sheets & dialogs
-│   │   └── settings/           # 24 modular settings sub-pages (Language, Backups, Icons, etc.)
+│   │   └── settings/           # 24 modular settings pages (Bridges, Backups, Icons, etc.)
 │   ├── l10n/                   # ARB translation files & static multilingual dictionaries
-│   ├── models/                 # Immutable domain entities (Moment, Palette, SobrietyTheme, etc.)
-│   ├── screens/                # Core screens (NoteKarHome, WelcomeScreen)
-│   ├── services/               # Decoupled domain services (MindfulnessService, NotificationEngine)
-│   ├── utils/                  # Cryptography, adaptive hardware engine, and l10n utilities
-│   └── widgets/                # Reusable Apple HIG UI components (PressableScale, SettingsGroup, etc.)
-├── versions/                   # Master structured JSON release archive (changelog.json)
-└── test/                       # Comprehensive unit and widget test suites (100% passing)
+│   ├── models/                 # Domain models (Moment, Palette, SobrietyTheme, Backup)
+│   ├── screens/                # Core views (NoteKarHome, WelcomeScreen)
+│   ├── services/               # Decoupled services (NotificationEngine, UpdateService)
+│   ├── utils/                  # Cryptography, moment repository, and sync services
+│   └── widgets/                # Reusable UI widgets (PressableScale, IosPillToast, Glass)
+├── versions/                   # Structured JSON version archive (changelog.json)
+└── test/                       # 100% passing unit and widget test suites
 ```
 
 ---
-
-<a id="translations"></a>
-
-## 🌐 Community Translations
-
-Help make NoteKar accessible to everyone in their native language! NoteKar is committed to being
-100% community-friendly and localization-ready.
-
-### 🌟 Currently Supported (7 Languages)
-
-| Language      | Code | Native Name | Status |
-|:--------------|:----:|:------------|:------:|
-| 🇬🇧 English  | `en` | English     | ✅ Live |
-| 🇫🇷 French   | `fr` | Français    | ✅ Live |
-| 🇪🇸 Spanish  | `es` | Español     | ✅ Live |
-| 🇮🇳 Hindi    | `hi` | हिन्दी      | ✅ Live |
-| 🇩🇪 German   | `de` | Deutsch     | ✅ Live |
-| 🇯🇵 Japanese | `ja` | 日本語         | ✅ Live |
-| 🇷🇺 Russian  | `ru` | Русский     | ✅ Live |
-
-### 🚀 50+ Upcoming Target Languages
-
-We are actively seeking community contributions for **Arabic, Portuguese, Italian, Chinese, Korean,
-Turkish, Dutch, Polish, Swedish, Indonesian, Vietnamese, Thai, Ukrainian, Greek, Bengali, Marathi,
-Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and many more!
-
-- 📖 Read our **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a 3-step guide on adding
-  or improving translations for NoteKar.
-
----
-
-<a id="privacy"></a>
-
-## 🔒 Privacy & Legal Policy
-
-NoteKar Android is built with **privacy-by-design**. Your logs, notes, and session history remain
-stored locally on your device.
-
-- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**: Full privacy policy
-  detailing data handling, local storage, and permissions.
-- 📜 **[Terms of Use](https://dheeraz101.github.io/Notekar/terms.html)**: Terms of service and
-  open-source usage.
-- 🌐 **[NoteKar Web PWA](https://dheeraz101.github.io/Notekar/)**: Official Web application & legal
-  hub.
-
----
-
-<a id="support"></a>
-
-## ☕ Support
-
-If NoteKar helps you, you can support the project here:
-
-[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/dheeraz)
-[![Buy Me A Chai](https://buymeachai.ezee.li/assets/images/buymeachai-button.png)](https://buymeachai.ezee.li/dheeraz)
-
-Your support helps keep NoteKar free, offline-first, and actively maintained.
-
----
-
-<a id="version-scheme"></a>
-
-## 🚀 Version Release Scheme & Build Numbers
-
-NoteKar uses a structured build numbering scheme: `YY<CHANNEL>MMDD[suffix]`
-
-- **Channel Codes**:
-    - `BR` (Beta Release): Active feature experimentation.
-    - `SR` (Stable Release): Production-tested releases.
-    - `PR` (Priority Release): Critical hotfixes, security patches, and library upgrades (Previously
-      Security Release).
-- **Format Example**: `26BR0815` (Year 2026, Beta Release, August 15), `26SR0816` (Stable Release),
-  `26PR0821` (Priority Release). Multiple builds on the same
-  date automatically increment suffixes: `26BR0815a`, `26BR0815b`.
-- **Android versionCode**: Internally mapped to unique sequential integers (e.g. `26081501`).
-
----
-
-<a id="f-droid"></a>
 
 ## 🤖 F-Droid & Reproducible Build Compliance
 
-NoteKar Android meets all official F-Droid inclusion requirements:
+NoteKar Android complies with all official F-Droid free software guidelines:
 
-- **100% Open Source**: Code licensed under the OSI-approved **MIT License**.
-- **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or closed-source
-  libraries.
-- **No Trackers**: Zero telemetry scripts or analytics frameworks.
-- **Fastlane Metadata**: Fully structured in `fastlane/metadata/android/en-US/`.
-
----
-
-<a id="project-structure"></a>
-
-## 📦 Project Structure
-
-```
-Notekar - Flutter/
-├── android/                        # Android native project files & FileProvider config
-├── assets/                         # App fonts (Inter) and icon resources
-├── fastlane/                       # F-Droid Fastlane metadata & graphics
-├── lib/
-│   ├── main.dart                   # App entry point, Hive DB init, and theme setup
-│   ├── dialogs/                    # Modals, bottom sheets & settings views
-│   │   ├── settings/               # Modular settings pages (Logging, Moments, Sobriety, Privacy, etc.)
-│   │   ├── calendar_dialog.dart    # Dynamic iOS-style calendar date picker
-│   │   ├── shareable_milestone_sheet.dart # High-res milestone card PNG export
-│   │   └── urge_surfing_dialog.dart# 4-7-8 breathing exercise companion
-│   ├── models/                     # Data models (Moments, Sobriety Milestones, Palette, Backup)
-│   ├── screens/                    # Home screen, History view, and Welcome onboarding
-│   ├── utils/                      # Database repositories, App utils, Update service, L10n
-│   └── widgets/                    # Custom UI components, Confetti overlay, PressableScale
-├── scripts/
-│   ├── build-release-apks.ps1      # Automated multi-architecture release APK build script
-│   └── update-version.ps1          # Automated version bump and build number updater
-├── test/
-│   ├── backup_import_test.dart     # Backup parsing and JSON normalization tests
-│   ├── home_screen_test.dart       # Palette & settings controller tests
-│   └── single_numbering_test.dart  # 2-digit sequence rollover and daily reset unit tests
-├── CHANGELOG.md                    # Detailed version history
-├── CONTRIBUTING.md                 # Developer contribution guidelines
-├── CODE_OF_CONDUCT.md              # Community Code of Conduct
-├── SECURITY.md                     # Security policy & vulnerability reporting
-├── PRIVACY_POLICY.md               # Privacy policy reference
-├── TERMS.md                        # Terms of use reference
-├── pubspec.yaml                    # Project dependencies & asset configuration
-├── README.md                       # App documentation
-└── LICENSE                         # MIT License
-```
+- ✅ **100% Free & Open Source**: Licensed under the OSI-approved **MIT License**.
+- ✅ **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or proprietary
+  binaries.
+- ✅ **Zero Telemetry**: No tracking libraries, analytics SDKs, or advertising code.
+- ✅ **Structured Fastlane Metadata**: Included in `fastlane/metadata/android/en-US/`.
 
 ---
 
-<a id="building-locally"></a>
-
-## 🛠️ Building & Running Locally
+## 💻 Building & Running Locally
 
 ### Prerequisites
 
-1. Install [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.12.0` or higher).
-2. Install [Android Studio](https://developer.android.com/studio) with Android SDK (API 21+).
-3. Connect an Android device (via USB Debugging or Wireless Debugging) or start an Android Emulator.
+1. [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.12.0` or higher).
+2. [Android Studio](https://developer.android.com/studio) with Android SDK (API 21+).
+3. Connected Android device with USB Debugging enabled or an active Android Emulator.
 
-### Setup Steps
+### Setup & Run
 
-1. **Clone the Android repository:**
+```bash
+# 1. Clone the repository
+git clone https://github.com/dheeraz101/Notekar-Android.git
+cd "Notekar - Flutter"
 
-   ```bash
-   git clone https://github.com/dheeraz101/Notekar-Android.git
-   cd Notekar-Android
-   ```
+# 2. Install Flutter packages
+flutter pub get
 
-2. **Fetch Flutter packages:**
+# 3. Run the test suite
+flutter test
 
-   ```bash
-   flutter pub get
-   ```
-
-3. **Run on connected device:**
-   ```bash
-   flutter run
-   ```
+# 4. Launch on your connected device
+flutter run
+```
 
 ---
 
-<a id="release-apks"></a>
+## 🔑 Release Signing & Keystore Setup
 
-## 🔑 Building Release APKs & Keystore Setup
+> [!NOTE]
+> Keystore secrets (`*.jks`, `key.properties`) are excluded from Git for security.
 
-> [!IMPORTANT]
-> Signing secrets and keystores (`*.jks`, `key.properties`) are ignored by Git to ensure repository
-> safety.
+To generate a signed release APK or App Bundle (`.aab`):
 
-To build a signed release APK or App Bundle (`.aab`):
-
-1. **Generate a keystore** (if you don't already have one):
-
+1. **Generate a signing keystore**:
    ```bash
    keytool -genkey -v -keystore android/app/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
    ```
 
-2. **Create `android/key.properties`** in your local copy:
-
+2. **Create `android/key.properties`**:
    ```properties
    storePassword=<your-store-password>
    keyPassword=<your-key-password>
@@ -357,21 +359,42 @@ To build a signed release APK or App Bundle (`.aab`):
    storeFile=upload-keystore.jks
    ```
 
-3. **Build Release APK:**
+3. **Build the production release APK**:
    ```bash
    flutter build apk --release
    ```
-   The APK will be generated at `build/app/outputs/flutter-apk/app-release.apk`.
+   *The generated APK will be output to `build/app/outputs/flutter-apk/app-release.apk`.*
 
 ---
 
-<a id="license"></a>
+## ☕ Support & Community
+
+If NoteKar brings calm and focus to your daily workflow, consider supporting its open-source
+journey:
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/dheeraz">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="190" alt="Buy Me a Coffee" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://buymeachai.ezee.li/dheeraz">
+    <img src="https://buymeachai.ezee.li/assets/images/buymeachai-button.png" width="190" alt="Buy Me A Chai" />
+  </a>
+</p>
+
+- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**
+- 📜 **[Terms of Service](https://dheeraz101.github.io/Notekar/terms.html)**
+- 🐛 **[Report Issues & Feature Ideas](https://github.com/dheeraz101/Notekar-Android/issues)**
+- 📖 **[Version Changelog (CHANGELOG.md)](CHANGELOG.md)**
+
+---
 
 ## 📄 License & Attribution
 
-- **License:** Open source under the **[MIT License](LICENSE)**.
-- **Initiative:** Part of
-  the [YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)
-  initiative.
-- **Developer:** [Dheeraz](https://github.com/dheeraz101)
-- **Made with ❤ in India.**
+- **License**: Distributed under the **[MIT License](LICENSE)**.
+- **Initiative**: Proudly created under the *
+  *[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)
+  ** initiative.
+- **Developer**: [Dheeraz](https://github.com/dheeraz101)
+- **Made with ❤️ in India.**
+
