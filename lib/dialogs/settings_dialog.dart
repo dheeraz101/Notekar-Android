@@ -4736,6 +4736,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   );
                                 }
                               },
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Moments'))

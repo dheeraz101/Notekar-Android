@@ -51,6 +51,7 @@ class DynamicL10nService {
 
   String? _storageDirPath;
   final Map<String, Map<String, String>> _loadedTranslations = {};
+  final Set<String> _downloadedCodes = {};
   List<LanguagePackInfo> _catalog = [];
 
   List<LanguagePackInfo> get catalog => _catalog;
@@ -68,6 +69,30 @@ class DynamicL10nService {
         _storageDirPath = dir.path;
       }
     } catch (_) {}
+
+    // Load tracked downloaded codes
+    final downloadedList =
+        prefs.getStringList('downloaded_l10n_packs') ?? <String>[];
+    _downloadedCodes.clear();
+    _downloadedCodes.addAll(downloadedList);
+
+    // Verify downloaded files physically exist if storage directory is set
+    if (_storageDirPath != null) {
+      final toRemove = <String>[];
+      for (final code in _downloadedCodes) {
+        final file = File('$_storageDirPath/$code.json');
+        if (!file.existsSync()) {
+          toRemove.add(code);
+        }
+      }
+      if (toRemove.isNotEmpty) {
+        _downloadedCodes.removeAll(toRemove);
+        await prefs.setStringList(
+          'downloaded_l10n_packs',
+          _downloadedCodes.toList(),
+        );
+      }
+    }
 
     // Load available languages catalog from embedded asset
     try {
@@ -143,28 +168,33 @@ class DynamicL10nService {
       ];
     }
 
-    // Preload all downloaded translations into memory
+    // Preload active locale translation if downloaded
     final activeLocale = prefs.getString('m-locale') ?? 'system';
     if (activeLocale != 'en' && activeLocale != 'system') {
-      await loadLanguage(activeLocale);
+      if (isDownloaded(activeLocale)) {
+        await loadLanguage(activeLocale);
+      } else {
+        // If active locale is not downloaded, revert to English
+        await prefs.setString('m-locale', 'en');
+      }
     }
   }
 
   bool isDownloaded(String code) {
     if (code == 'en' || code == 'system') return true;
+    if (!_downloadedCodes.contains(code)) return false;
     if (_storageDirPath != null) {
       final file = File('$_storageDirPath/$code.json');
-      if (file.existsSync()) return true;
+      return file.existsSync();
     }
-    // Also true if bundled in memory
-    return kL10nTranslations.containsKey(code);
+    return true;
   }
 
   Future<bool> loadLanguage(String code) async {
     if (code == 'en' || code == 'system') return true;
     if (_loadedTranslations.containsKey(code)) return true;
 
-    // 1. Try reading from local storage
+    // 1. Read from local storage
     if (_storageDirPath != null) {
       final file = File('$_storageDirPath/$code.json');
       if (file.existsSync()) {
@@ -179,21 +209,11 @@ class DynamicL10nService {
       }
     }
 
-    // 2. Try loading from bundled package asset
-    try {
-      final assetContent = await rootBundle.loadString(
-        'lib/l10n/packages/$code.json',
-      );
-      final map = jsonDecode(assetContent) as Map<String, dynamic>;
-      _loadedTranslations[code] = map.map(
-        (k, v) => MapEntry(k.toString(), v.toString()),
-      );
-      return true;
-    } catch (_) {}
-
-    // 3. Fallback to kL10nTranslations
+    // 2. Fallback to bundled translations
     if (kL10nTranslations.containsKey(code)) {
-      _loadedTranslations[code] = kL10nTranslations[code]!;
+      _loadedTranslations[code] = Map<String, String>.from(
+        kL10nTranslations[code]!,
+      );
       return true;
     }
 
@@ -208,49 +228,73 @@ class DynamicL10nService {
     try {
       String? jsonContent;
 
-      // Attempt remote download from GitHub Raw CDN
+      // 1. Attempt remote download from GitHub Raw CDN
       try {
         final url = Uri.parse('$_baseUrl/$code.json');
         final response = await http
             .get(url)
             .timeout(const Duration(seconds: 8));
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 && response.body.trim().isNotEmpty) {
           jsonContent = response.body;
         }
       } catch (_) {}
 
       onProgress?.call(0.6);
 
-      // Fallback to embedded asset if offline
-      jsonContent ??= await rootBundle.loadString(
-        'lib/l10n/packages/$code.json',
-      );
+      // 2. Fallback to bundled package asset if offline
+      try {
+        jsonContent ??= await rootBundle.loadString(
+          'lib/l10n/packages/$code.json',
+        );
+      } catch (_) {}
 
-      if (_storageDirPath != null) {
+      // 3. Fallback to in-memory dictionary if package asset is unavailable
+      if ((jsonContent == null || jsonContent.isEmpty) &&
+          kL10nTranslations.containsKey(code)) {
+        _loadedTranslations[code] = Map<String, String>.from(
+          kL10nTranslations[code]!,
+        );
+        jsonContent = jsonEncode(_loadedTranslations[code]);
+      }
+
+      // 4. Save to local app storage
+      if (_storageDirPath != null && jsonContent != null) {
         final file = File('$_storageDirPath/$code.json');
         await file.writeAsString(jsonContent);
       }
 
-      final map = jsonDecode(jsonContent) as Map<String, dynamic>;
-      _loadedTranslations[code] = map.map(
-        (k, v) => MapEntry(k.toString(), v.toString()),
+      if (jsonContent != null &&
+          jsonContent.isNotEmpty &&
+          !_loadedTranslations.containsKey(code)) {
+        final map = jsonDecode(jsonContent) as Map<String, dynamic>;
+        _loadedTranslations[code] = map.map(
+          (k, v) => MapEntry(k.toString(), v.toString()),
+        );
+      }
+
+      // 5. Mark downloaded in cache and prefs
+      _downloadedCodes.add(code);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+        'downloaded_l10n_packs',
+        _downloadedCodes.toList(),
       );
 
       onProgress?.call(1.0);
       return true;
     } catch (_) {
-      // Fallback to built-in dictionary
-      if (kL10nTranslations.containsKey(code)) {
-        _loadedTranslations[code] = kL10nTranslations[code]!;
-        onProgress?.call(1.0);
-        return true;
-      }
       return false;
     }
   }
 
   Future<void> deleteLanguage(String code, SharedPreferences prefs) async {
     _loadedTranslations.remove(code);
+    _downloadedCodes.remove(code);
+    await prefs.setStringList(
+      'downloaded_l10n_packs',
+      _downloadedCodes.toList(),
+    );
+
     if (_storageDirPath != null) {
       final file = File('$_storageDirPath/$code.json');
       if (file.existsSync()) {
@@ -260,7 +304,7 @@ class DynamicL10nService {
       }
     }
 
-    // Revert to English / system if current locale was deleted
+    // Revert to English if the active locale was deleted
     final currentLocale = prefs.getString('m-locale') ?? 'system';
     if (currentLocale == code) {
       await prefs.setString('m-locale', 'en');
@@ -268,16 +312,18 @@ class DynamicL10nService {
   }
 
   String? lookup(String locale, String key) {
-    if (locale == 'en') return null;
+    if (locale == 'en' || locale == 'system') return null;
+    if (!isDownloaded(locale)) return null;
+
     final normalized = key.trim().toLowerCase();
 
-    // 1. Check loaded dynamic translations
+    // Check loaded dynamic translations
     final dynamicMap = _loadedTranslations[locale];
     if (dynamicMap != null && dynamicMap.containsKey(normalized)) {
       return dynamicMap[normalized];
     }
 
-    // 2. Check static fallback dictionary
+    // Fallback to static dictionary if downloaded
     final staticMap = kL10nTranslations[locale];
     if (staticMap != null && staticMap.containsKey(normalized)) {
       return staticMap[normalized];

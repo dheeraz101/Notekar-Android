@@ -264,31 +264,10 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing12),
 
-        // Web Archive Link Group
-        SettingsGroup(
-          p: p,
-          children: [
-            SettingsRow(
-              p: p,
-              icon: Icons.open_in_browser_rounded,
-              title: 'Full Web Changelog Archive'.localized(context),
-              subtitle: 'View all past releases and updates on our website.'
-                  .localized(context),
-              color: p.accent,
-              trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14,
-                color: p.text3,
-              ),
-              onTap: () => _openWebChangelog(context),
-            ),
-          ],
-        ),
-
         SettingsPageDescription(
           p: p,
           text:
-              'NoteKar is continuously refined with privacy, battery efficiency, and Apple HIG polish.'
+              'What’s New highlights recent innovations and design evolutions introduced in NoteKar.'
                   .localized(context),
         ),
 
@@ -302,7 +281,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       children: [
         const SizedBox(height: spacing8),
 
-        // Latest Release
+        // Current Version Changelog
         SettingsGroup(
           p: p,
           title: 'v${latestRelease.version} — ${latestRelease.edition}'
@@ -323,36 +302,15 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing12),
 
-        // Historical Releases
-        for (final rel in historicalReleases) ...[
-          SettingsGroup(
-            p: p,
-            title: 'v${rel.version} — ${rel.edition}'.localized(context),
-            description: rel.date.localized(context),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    for (final item in rel.items)
-                      _buildExpressiveRow(context, item),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: spacing12),
-        ],
-
-        // Web Archive Link
+        // Web Archive Link for older releases
         SettingsGroup(
           p: p,
           children: [
             SettingsRow(
               p: p,
               icon: Icons.history_rounded,
-              title: 'Older Releases on Web'.localized(context),
-              subtitle: 'Browse complete version logs dating back to v1.0.'
+              title: 'Full Release Archive on Web'.localized(context),
+              subtitle: 'Browse all historical versions and beta releases.'
                   .localized(context),
               color: p.accent,
               trailing: Icon(
@@ -368,7 +326,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Older changelogs are hosted on our official website to keep NoteKar ultra-lightweight.'
+              'Older changelogs are hosted on the official website to maintain NoteKar’s minimal app footprint.'
                   .localized(context),
         ),
 

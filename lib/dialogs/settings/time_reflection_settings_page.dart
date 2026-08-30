@@ -24,9 +24,11 @@ class TimeReflectionSettingsPage extends StatelessWidget {
     this.onTapStartTime,
     this.onTapEndTime,
     required this.onPreviewReflectionSheet,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
+  final VoidCallback? onLearnMoreBeta;
   final bool reflectionReminderEnabled;
   final int reflectionReminderIntervalMins;
   final bool reflectionReminderSound;
@@ -678,7 +680,15 @@ class TimeReflectionSettingsPage extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        if (onLearnMoreBeta != null)
+          SettingsBetaNote(
+            p: p,
+            text:
+                'Hourly Time Reflection & Mindfulness features are currently under Beta stage.'
+                    .localized(context),
+            onLearnMore: onLearnMoreBeta!,
+          ),
+        const SizedBox(height: 48),
       ],
     );
   }

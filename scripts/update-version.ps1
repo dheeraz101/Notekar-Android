@@ -396,54 +396,116 @@ $releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - bu
 Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
 Write-Host "Created/Updated GitHub Release notes template: $releaseNotesFile"
 
-# 4. Automate In-App Changelog section injection inside changelog_dialog.dart
-$changelogPath = Join-Path $repoRoot "lib/dialogs/changelog_dialog.dart"
-if (Test-Path -LiteralPath $changelogPath)
+# 4. Automate versions/changelog.json update (Structured Release Repository)
+$versionsJsonPath = Join-Path $repoRoot "versions/changelog.json"
+if (Test-Path -LiteralPath $versionsJsonPath)
 {
-    $changelogText = Get-Content -LiteralPath $changelogPath -Raw
-    $changelogText = $changelogText -replace "`r`n", "`n"
+    try
+    {
+        $jsonRaw = Get-Content -LiteralPath $versionsJsonPath -Raw
+        $jsonList = ConvertFrom-Json $jsonRaw
 
-    $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
+        $channelName = "stable"
+        $tagLabel = "[Stable]"
+        $isBetaRelease = $false
+        $editionName = "Feature & Quality Evolution"
+        $colorHex = "#30D158"
 
-    # Highlights: use features list
-    $hlList = @()
-    if ($priority -or $security)
-    {
-        $hlList += "Priority maintenance and stability improvements."
-    }
-    foreach ($f in $features)
-    {
-        $hlList += $f
-    }
-    if ($hlList.Count -eq 0)
-    {
         if ($beta)
         {
-            $hlList += "Beta testing and feedback build."
+            $channelName = "beta"
+            $tagLabel = "[Beta]"
+            $isBetaRelease = $true
+            $editionName = "Beta Preview Build"
+            $colorHex = "#FF9F0A"
         }
-        elseif ($stable)
+        elseif ($priority -or $security)
         {
-            $hlList += "Stable feature updates and enhancements."
+            $channelName = "priority"
+            $tagLabel = "[Priority]"
+            $isBetaRelease = $false
+            $editionName = "Priority Maintenance & Security"
+            $colorHex = "#0A84FF"
         }
-        else
+
+        # Set isLatest to false on existing releases
+        foreach ($r in $jsonList)
         {
-            $hlList += "Quality improvements and stability updates."
+            $r.isLatest = $false
         }
+
+        # Create new release highlights list
+        $newHighlights = @()
+        foreach ($f in $features)
+        {
+            $newHighlights += [PSCustomObject]@{
+                title = $f
+                description = "Enhanced capability and design refinements in NoteKar v$Version."
+                icon = "auto_awesome_rounded"
+            }
+        }
+        if ($newHighlights.Count -eq 0)
+        {
+            $newHighlights += [PSCustomObject]@{
+                title = "Quality & Stability"
+                description = "Refined performance, memory optimization, and Apple HIG polish."
+                icon = "check_circle_outline_rounded"
+            }
+        }
+
+        # Filter out existing version if re-running script on same version
+        $jsonList = @($jsonList | Where-Object { $_.version -ne $Version })
+
+        $newEntry = [PSCustomObject]@{
+            version = $Version
+            buildNumber = $BuildNumber
+            releaseDate = $BuildDate
+            channel = $channelName
+            channelTag = $tagLabel
+            isBeta = $isBetaRelease
+            edition = $editionName
+            badgeColor = $colorHex
+            isLatest = $true
+            highlights = $newHighlights
+            fullChangelog = $cleanCommits
+            downloads = [PSCustomObject]@{
+                universalApk = "https://github.com/dheeraz101/Notekar-Android/releases/download/v$Version/NoteKar-v$Version-universal-release.apk"
+                arm64Apk = "https://github.com/dheeraz101/Notekar-Android/releases/download/v$Version/NoteKar-v$Version-arm64-v8a-release.apk"
+            }
+        }
+
+        $allReleases = @($newEntry) + $jsonList
+        $updatedJson = ConvertTo-Json -InputObject $allReleases -Depth 6
+        Set-Content -LiteralPath $versionsJsonPath -Value $updatedJson -NoNewline
+        Write-Host "Updated versions/changelog.json with release v$Version"
     }
-
-    $jsHighlights = ($hlList | ForEach-Object { "        '$_'," }) -join "`n"
-    $jsItems = ($cleanCommits | ForEach-Object { "        '$_'," }) -join "`n"
-
-    $newReleaseEntry = "  static const releases = [`n    (`n      version: '$Version',`n      date: '$formattedDate',`n      highlights: [`n$jsHighlights`n      ],`n      items: [`n$jsItems`n      ],`n    ),"
-
-    $entryPattern = "(?s)\(\s*version:\s*'$Version',.*?\),\s*"
-    if ($changelogText -match $entryPattern)
+    catch
     {
-        $changelogText = $changelogText -replace $entryPattern, ""
+        Write-Host "Warning: Failed to update versions/changelog.json: $_"
     }
-    $changelogText = $changelogText.Replace("  static const releases = [", $newReleaseEntry)
-    Set-Content -LiteralPath $changelogPath -Value $changelogText -NoNewline
-    Write-Host "Injected/Updated in-app changelog section for v$Version inside changelog_dialog.dart"
+}
+
+# 4b. Automate In-App What's New & Changelog updates
+$feedbackPagePath = Join-Path $repoRoot "lib/dialogs/settings/feedback_changelog_settings_page.dart"
+if (Test-Path -LiteralPath $feedbackPagePath)
+{
+    $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
+    $fcText = Get-Content -LiteralPath $feedbackPagePath -Raw
+    $fcText = [regex]::Replace($fcText, "version: '[^']+'", "version: '$Version'")
+    $fcText = [regex]::Replace($fcText, "date: '[^']+'", "date: '$formattedDate'")
+    Set-Content -LiteralPath $feedbackPagePath -Value $fcText -NoNewline
+    Write-Host "Updated latestRelease in feedback_changelog_settings_page.dart"
+}
+
+$changelogDialogPath = Join-Path $repoRoot "lib/dialogs/changelog_dialog.dart"
+if (Test-Path -LiteralPath $changelogDialogPath)
+{
+    $formattedDate = (Get-Date).ToString("MMMM dd, yyyy")
+    $cdText = Get-Content -LiteralPath $changelogDialogPath -Raw
+    $cdText = [regex]::Replace($cdText, "version: '[^']+'", "version: '$Version'")
+    $cdText = [regex]::Replace($cdText, "date: '[^']+'", "date: '$formattedDate'")
+    Set-Content -LiteralPath $changelogDialogPath -Value $cdText -NoNewline
+    Write-Host "Updated latestRelease in changelog_dialog.dart"
 }
 
 # 5. Automate CHANGELOG.md updates

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -100,7 +101,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
   }
 
   Future<void> _handleDelete(String code) async {
-    HapticFeedback.selectionClick();
+    HapticFeedback.heavyImpact();
     final prefs = await SharedPreferences.getInstance();
     await DynamicL10nService.instance.deleteLanguage(code, prefs);
     if (!mounted) return;
@@ -199,10 +200,15 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
     final p = widget.p;
     final l10nService = DynamicL10nService.instance;
     final languages = l10nService.catalog;
+    final downloadedPacks = languages
+        .where((l) => DynamicL10nService.instance.isDownloaded(l.code))
+        .toList();
 
     return Column(
       children: [
         const SizedBox(height: spacing8),
+
+        // 1. Core Languages (Built-in + Downloaded)
         SettingsGroup(
           p: p,
           title: 'Core Languages'.localized(context).toUpperCase(),
@@ -210,7 +216,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
             SettingsRow(
               p: p,
               title: 'System Default'.localized(context),
-              subtitle: 'Follow device settings'.localized(context),
+              subtitle: 'Follow device system language'.localized(context),
               trailing: widget.currentLocale == 'system'
                   ? Icon(Icons.check_rounded, color: p.accent, size: 20)
                   : const SizedBox.shrink(),
@@ -233,16 +239,33 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                 widget.onLocaleChanged?.call('en');
               },
             ),
+            // Render any downloaded language pack directly in Core Languages for instant activation
+            for (final pack in downloadedPacks)
+              SettingsRow(
+                p: p,
+                title: '${pack.flag}  ${pack.name}',
+                subtitle:
+                    '${pack.englishName} (${'Downloaded'.localized(context)})',
+                trailing: widget.currentLocale == pack.code
+                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    : const SizedBox.shrink(),
+                onTap: () {
+                  if (widget.currentLocale == pack.code) return;
+                  HapticFeedback.selectionClick();
+                  widget.onLocaleChanged?.call(pack.code);
+                },
+              ),
           ],
         ),
         const SizedBox(height: spacing12),
 
+        // 2. On-Demand Downloadable Language Packs
         SettingsGroup(
           p: p,
           title: 'On-Demand Language Packs'.localized(context).toUpperCase(),
           children: [
             for (final lang in languages)
-              _buildLanguageRow(
+              _buildLanguagePackRow(
                 p: p,
                 flag: lang.flag,
                 name: lang.name,
@@ -254,11 +277,13 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
         SettingsPageDescription(
           p: p,
           text:
-              'Downloaded language packs operate 100% offline. Deleting a language frees local storage and restores English.'
+              'Downloaded language packs operate 100% offline. Deleting a pack frees local storage and reverts to English.'
                   .localized(context),
         ),
 
         const SizedBox(height: spacing12),
+
+        // 3. Upcoming Languages
         SettingsGroup(
           p: p,
           title: 'Upcoming Languages'.localized(context).toUpperCase(),
@@ -288,17 +313,15 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
     );
   }
 
-  Widget _buildLanguageRow({
+  Widget _buildLanguagePackRow({
     required Palette p,
     required String flag,
     required String name,
     required String englishName,
     required String code,
   }) {
-    final isSelected = widget.currentLocale == code;
     final isDownloaded = DynamicL10nService.instance.isDownloaded(code);
     final isDownloading = _downloadingCodes.contains(code);
-    final progress = _downloadProgress[code] ?? 0.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -311,7 +334,9 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               color: p.surface2,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isSelected ? p.accent : p.border.withValues(alpha: 0.5),
+                color: isDownloaded
+                    ? p.accent.withValues(alpha: 0.5)
+                    : p.border.withValues(alpha: 0.5),
               ),
             ),
             alignment: Alignment.center,
@@ -325,85 +350,36 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                 Text(
                   name.localized(context),
                   style: TextStyle(
-                    color: isSelected ? p.accent : p.text,
-                    fontSize: 14.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: p.text,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   englishName.localized(context),
-                  style: TextStyle(color: p.text3, fontSize: 11.5),
+                  style: TextStyle(color: p.text3, fontSize: 12.5),
                 ),
               ],
             ),
           ),
           if (isDownloading) ...[
-            SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                value: progress > 0.1 ? progress : null,
-                strokeWidth: 2.2,
-                color: p.accent,
-              ),
-            ),
-          ] else if (isSelected) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: p.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: p.accent.withValues(alpha: 0.35)),
-              ),
-              child: Text(
-                'Active'.localized(context),
-                style: TextStyle(
-                  color: p.accent,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            CupertinoActivityIndicator(radius: 10, color: p.accent),
           ] else if (isDownloaded) ...[
-            PressableScale(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                widget.onLocaleChanged?.call(code);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: p.border.withValues(alpha: 0.6)),
-                ),
-                child: Text(
-                  'Use'.localized(context),
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
             PressableScale(
               onTap: () => _handleDelete(code),
               child: Container(
-                width: 30,
-                height: 30,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(8),
+                  color: p.red.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: p.red.withValues(alpha: 0.3)),
                 ),
+                alignment: Alignment.center,
                 child: Icon(
                   Icons.delete_outline_rounded,
-                  size: 15,
+                  size: 18,
                   color: p.red,
                 ),
               ),
@@ -413,12 +389,12 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               onTap: () => _handleDownloadAndApply(code),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
+                  horizontal: 14,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
                   color: p.accent,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(999),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -426,14 +402,14 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                     const Icon(
                       Icons.cloud_download_rounded,
                       color: Colors.white,
-                      size: 13,
+                      size: 14,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 5),
                     Text(
                       'Get'.localized(context),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

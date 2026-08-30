@@ -14,15 +14,16 @@ void main() {
       await service.initialize(prefs);
       expect(service.catalog.isNotEmpty, true);
 
-      // Default English / system
+      // Default English / system are always marked downloaded
       expect(service.isDownloaded('en'), true);
       expect(service.isDownloaded('system'), true);
 
       // Lookup returns null for English (so default strings pass through)
       expect(service.lookup('en', 'Settings'), null);
 
-      // Lookup returns French translation when locale is French
-      await service.loadLanguage('fr');
+      // Download and test French
+      await service.downloadLanguage('fr');
+      expect(service.isDownloaded('fr'), true);
       final frLookup = service.lookup('fr', 'settings');
       expect(frLookup != null, true);
     });
@@ -32,7 +33,11 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final service = DynamicL10nService.instance;
 
+      await service.downloadLanguage('fr');
+      expect(service.isDownloaded('fr'), true);
+
       await service.deleteLanguage('fr', prefs);
+      expect(service.isDownloaded('fr'), false);
       expect(prefs.getString('m-locale'), 'en');
     });
   });
