@@ -1,16 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/services/dynamic_l10n_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class AdvancedSettingsPage extends StatefulWidget {
+class AdvancedSettingsPage extends StatelessWidget {
   const AdvancedSettingsPage({
     super.key,
     required this.p,
@@ -54,79 +50,20 @@ class AdvancedSettingsPage extends StatefulWidget {
   final void Function(String category, {required String parent}) onOpenCategory;
 
   @override
-  State<AdvancedSettingsPage> createState() => _AdvancedSettingsPageState();
-}
-
-class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
-  final Map<String, double> _downloadProgress = {};
-  final Set<String> _downloadingCodes = {};
-
-  Future<void> _handleDownloadAndApply(String code) async {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _downloadingCodes.add(code);
-      _downloadProgress[code] = 0.1;
-    });
-
-    final success = await DynamicL10nService.instance.downloadLanguage(
-      code,
-      onProgress: (p) {
-        if (mounted) {
-          setState(() => _downloadProgress[code] = p);
-        }
-      },
-    );
-
-    if (!mounted) return;
-    setState(() {
-      _downloadingCodes.remove(code);
-      _downloadProgress.remove(code);
-    });
-
-    if (success) {
-      HapticFeedback.mediumImpact();
-      widget.onLocaleChanged?.call(code);
-    } else {
-      HapticFeedback.heavyImpact();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to download language pack. Check network connection.'
-                .localized(context),
-          ),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
-  Future<void> _handleDelete(String code) async {
-    HapticFeedback.heavyImpact();
-    final prefs = await SharedPreferences.getInstance();
-    await DynamicL10nService.instance.deleteLanguage(code, prefs);
-    if (!mounted) return;
-    setState(() {});
-    if (widget.currentLocale == code) {
-      widget.onLocaleChanged?.call('en');
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.subCategory == 'Advanced') {
+    if (subCategory == 'Advanced') {
       return _buildAdvanced(context);
-    } else if (widget.subCategory == 'Language') {
+    } else if (subCategory == 'Language') {
       return _buildLanguage(context);
-    } else if (widget.subCategory == 'Accessibility') {
+    } else if (subCategory == 'Accessibility') {
       return _buildAccessibility(context);
-    } else if (widget.subCategory == 'Reset') {
+    } else if (subCategory == 'Reset') {
       return _buildReset(context);
     }
     return const SizedBox.shrink();
   }
 
   Widget _buildAdvanced(BuildContext context) {
-    final p = widget.p;
     return Column(
       children: [
         const SizedBox(height: spacing8),
@@ -138,7 +75,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               p: p,
               icon: Icons.translate_rounded,
               title: 'Language'.localized(context),
-              status: switch (widget.currentLocale) {
+              status: switch (currentLocale) {
                 'en' => 'English',
                 'fr' => 'Français',
                 'hi' => 'हिन्दी',
@@ -149,20 +86,17 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                 _ => 'System Default',
               }.localized(context),
               color: p.accent,
-              onTap: () =>
-                  widget.onOpenCategory('Language', parent: 'Advanced'),
+              onTap: () => onOpenCategory('Language', parent: 'Advanced'),
             ),
             SettingsRow(
               p: p,
               icon: Icons.accessibility_new_rounded,
               title: 'Accessibility'.localized(context),
-              status: widget.hapticStyle.isEmpty
+              status: hapticStyle.isEmpty
                   ? ''
-                  : widget.hapticStyle[0].toUpperCase() +
-                        widget.hapticStyle.substring(1),
+                  : hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
               color: p.orange,
-              onTap: () =>
-                  widget.onOpenCategory('Accessibility', parent: 'Advanced'),
+              onTap: () => onOpenCategory('Accessibility', parent: 'Advanced'),
             ),
             SettingsRow(
               p: p,
@@ -170,10 +104,8 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               title: 'Developer Options'.localized(context),
               status: 'Tools'.localized(context),
               color: p.accent,
-              onTap: () => widget.onOpenCategory(
-                'Developer Options',
-                parent: 'Advanced',
-              ),
+              onTap: () =>
+                  onOpenCategory('Developer Options', parent: 'Advanced'),
             ),
             SettingsRow(
               p: p,
@@ -181,7 +113,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               title: 'Reset'.localized(context),
               status: 'Wipe'.localized(context),
               color: p.red,
-              onTap: () => widget.onOpenCategory('Reset', parent: 'Advanced'),
+              onTap: () => onOpenCategory('Reset', parent: 'Advanced'),
             ),
           ],
         ),
@@ -197,93 +129,87 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
   }
 
   Widget _buildLanguage(BuildContext context) {
-    final p = widget.p;
-    final l10nService = DynamicL10nService.instance;
-    final languages = l10nService.catalog;
-    final downloadedPacks = languages
-        .where((l) => DynamicL10nService.instance.isDownloaded(l.code))
-        .toList();
+    final availableLanguages = [
+      (
+        code: 'system',
+        name: 'System Default',
+        native: 'System Default',
+        subtitle: 'Follow device system language',
+      ),
+      (
+        code: 'en',
+        name: 'English',
+        native: 'English',
+        subtitle: 'Core built-in language',
+      ),
+      (
+        code: 'fr',
+        name: 'French',
+        native: '🇫🇷  Français',
+        subtitle: 'French localization (100% offline)',
+      ),
+      (
+        code: 'hi',
+        name: 'Hindi',
+        native: '🇮🇳  हिन्दी',
+        subtitle: 'Hindi localization (100% offline)',
+      ),
+      (
+        code: 'es',
+        name: 'Spanish',
+        native: '🇪🇸  Español',
+        subtitle: 'Spanish localization (100% offline)',
+      ),
+      (
+        code: 'de',
+        name: 'German',
+        native: '🇩🇪  Deutsch',
+        subtitle: 'German localization (100% offline)',
+      ),
+      (
+        code: 'ja',
+        name: 'Japanese',
+        native: '🇯🇵  日本語',
+        subtitle: 'Japanese localization (100% offline)',
+      ),
+      (
+        code: 'ru',
+        name: 'Russian',
+        native: '🇷🇺  Русский',
+        subtitle: 'Russian localization (100% offline)',
+      ),
+    ];
 
     return Column(
       children: [
         const SizedBox(height: spacing8),
-
-        // 1. Core Languages (Built-in + Downloaded)
         SettingsGroup(
           p: p,
-          title: 'Core Languages'.localized(context).toUpperCase(),
+          title: 'Available Languages'.localized(context).toUpperCase(),
           children: [
-            SettingsRow(
-              p: p,
-              title: 'System Default'.localized(context),
-              subtitle: 'Follow device system language'.localized(context),
-              trailing: widget.currentLocale == 'system'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                  : const SizedBox.shrink(),
-              onTap: () {
-                if (widget.currentLocale == 'system') return;
-                HapticFeedback.selectionClick();
-                widget.onLocaleChanged?.call('system');
-              },
-            ),
-            SettingsRow(
-              p: p,
-              title: 'English',
-              subtitle: 'Core built-in language'.localized(context),
-              trailing: widget.currentLocale == 'en'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
-                  : const SizedBox.shrink(),
-              onTap: () {
-                if (widget.currentLocale == 'en') return;
-                HapticFeedback.selectionClick();
-                widget.onLocaleChanged?.call('en');
-              },
-            ),
-            // Render any downloaded language pack directly in Core Languages for instant activation
-            for (final pack in downloadedPacks)
+            for (final lang in availableLanguages)
               SettingsRow(
                 p: p,
-                title: '${pack.flag}  ${pack.name}',
-                subtitle:
-                    '${pack.englishName} (${'Downloaded'.localized(context)})',
-                trailing: widget.currentLocale == pack.code
+                title: lang.native.localized(context),
+                subtitle: lang.subtitle.localized(context),
+                trailing: currentLocale == lang.code
                     ? Icon(Icons.check_rounded, color: p.accent, size: 20)
                     : const SizedBox.shrink(),
                 onTap: () {
-                  if (widget.currentLocale == pack.code) return;
+                  if (currentLocale == lang.code) return;
                   HapticFeedback.selectionClick();
-                  widget.onLocaleChanged?.call(pack.code);
+                  onLocaleChanged?.call(lang.code);
                 },
-              ),
-          ],
-        ),
-        const SizedBox(height: spacing12),
-
-        // 2. On-Demand Downloadable Language Packs
-        SettingsGroup(
-          p: p,
-          title: 'On-Demand Language Packs'.localized(context).toUpperCase(),
-          children: [
-            for (final lang in languages)
-              _buildLanguagePackRow(
-                p: p,
-                flag: lang.flag,
-                name: lang.name,
-                englishName: '${lang.englishName} (~${lang.sizeKb} KB)',
-                code: lang.code,
               ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Downloaded language packs operate 100% offline. Deleting a pack frees local storage and reverts to English.'
+              'All 7 supported languages are 100% built into NoteKar, requiring zero network downloads or data usage.'
                   .localized(context),
         ),
-
         const SizedBox(height: spacing12),
-
-        // 3. Upcoming Languages
         SettingsGroup(
           p: p,
           title: 'Upcoming Languages'.localized(context).toUpperCase(),
@@ -301,130 +227,19 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               ),
           ],
         ),
-        if (widget.onLearnMoreBeta != null)
+        if (onLearnMoreBeta != null)
           SettingsBetaNote(
             p: p,
             text: 'The current features on this page are under Beta stage.'
                 .localized(context),
-            onLearnMore: widget.onLearnMoreBeta!,
+            onLearnMore: onLearnMoreBeta!,
           ),
         const SizedBox(height: spacing48),
       ],
     );
   }
 
-  Widget _buildLanguagePackRow({
-    required Palette p,
-    required String flag,
-    required String name,
-    required String englishName,
-    required String code,
-  }) {
-    final isDownloaded = DynamicL10nService.instance.isDownloaded(code);
-    final isDownloading = _downloadingCodes.contains(code);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: isDownloaded
-                    ? p.accent.withValues(alpha: 0.5)
-                    : p.border.withValues(alpha: 0.5),
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Text(flag, style: const TextStyle(fontSize: 18)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name.localized(context),
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  englishName.localized(context),
-                  style: TextStyle(color: p.text3, fontSize: 12.5),
-                ),
-              ],
-            ),
-          ),
-          if (isDownloading) ...[
-            CupertinoActivityIndicator(radius: 10, color: p.accent),
-          ] else if (isDownloaded) ...[
-            PressableScale(
-              onTap: () => _handleDelete(code),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: p.red.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: p.red.withValues(alpha: 0.3)),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.delete_outline_rounded,
-                  size: 18,
-                  color: p.red,
-                ),
-              ),
-            ),
-          ] else ...[
-            PressableScale(
-              onTap: () => _handleDownloadAndApply(code),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: p.accent,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.cloud_download_rounded,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Get'.localized(context),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Widget _buildAccessibility(BuildContext context) {
-    final p = widget.p;
     return Column(
       children: [
         const SizedBox(height: spacing8),
@@ -436,13 +251,13 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               SettingsRow(
                 p: p,
                 title: style[0].toUpperCase() + style.substring(1),
-                trailing: widget.hapticStyle == style
+                trailing: hapticStyle == style
                     ? Icon(Icons.check_rounded, color: p.accent, size: 20)
                     : const SizedBox.shrink(),
                 onTap: () {
-                  if (widget.hapticStyle == style) return;
+                  if (hapticStyle == style) return;
                   HapticFeedback.selectionClick();
-                  widget.onHapticStyleChanged(style);
+                  onHapticStyleChanged(style);
                 },
               ),
           ],
@@ -461,8 +276,8 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               p: p,
               title: 'Reduced Motion',
               color: p.green,
-              value: widget.reduceMotion,
-              onChanged: widget.onReduceMotionChanged,
+              value: reduceMotion,
+              onChanged: onReduceMotionChanged,
             ),
           ],
         ),
@@ -480,8 +295,8 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               p: p,
               title: 'Large Text',
               color: p.accent,
-              value: widget.largeText,
-              onChanged: widget.onLargeTextChanged,
+              value: largeText,
+              onChanged: onLargeTextChanged,
             ),
           ],
         ),
@@ -499,8 +314,8 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               p: p,
               title: 'High Contrast Mode',
               color: p.orange,
-              value: widget.highContrast,
-              onChanged: widget.onHighContrastChanged,
+              value: highContrast,
+              onChanged: onHighContrastChanged,
             ),
           ],
         ),
@@ -516,7 +331,6 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
   }
 
   Widget _buildReset(BuildContext context) {
-    final p = widget.p;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -532,7 +346,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   'Restores default themes, haptics, and notification preferences without deleting saved moments.'
                       .localized(context),
               color: p.orange,
-              onTap: widget.onResetSettings,
+              onTap: onResetSettings,
             ),
           ],
         ),
@@ -549,7 +363,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   'Permanently removes all saved moments and session histories from local storage.'
                       .localized(context),
               color: p.red,
-              onTap: widget.onResetAllData,
+              onTap: onResetAllData,
             ),
           ],
         ),
@@ -566,7 +380,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   'Completely wipes all moments, preferences, and hardware keys back to fresh install state.'
                       .localized(context),
               color: p.red,
-              onTap: widget.onFactoryReset,
+              onTap: onFactoryReset,
             ),
           ],
         ),

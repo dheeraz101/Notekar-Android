@@ -34,7 +34,6 @@ flutter:
   assets:
     - icon-maskable-512.png
     - app_icons/
-    - lib/l10n/packages/
 
   fonts:
     - family: Inter

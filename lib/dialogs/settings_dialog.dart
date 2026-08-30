@@ -2712,9 +2712,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
-        title: 'Language Center',
-        subtitle: 'Download and manage on-demand language packages',
-        category: 'Personalization',
+        title: 'Language',
+        subtitle: 'Choose from 7 built-in offline languages',
+        category: 'Advanced',
         icon: Icons.language_rounded,
         keywords: [
           'language',
@@ -2729,9 +2729,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'russian',
         ],
         kind: 'nav',
-        boolValue: null,
-        onBoolChanged: null,
-        status: 'On-Demand Packs',
+        status: '7 Languages',
       ),
       item(
         title: 'Sleep Protection & Active Hours',
@@ -5091,9 +5089,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   GuideRow(
                                     p: p,
                                     icon: Icons.language_rounded,
-                                    title: 'On-Demand Dynamic Language Packs',
+                                    title:
+                                        '100% Offline Multilingual Localization',
                                     text:
-                                        'Download, activate, or delete official language packages (French, Spanish, Hindi, German, Japanese, Russian) directly from Settings > Personalization > Language with instant hot-swapping.',
+                                        'Switch between English, French, Spanish, Hindi, German, Japanese, and Russian instantly in Settings > Advanced > Language with zero data usage or downloads.',
                                   ),
                                   GuideRow(
                                     p: p,
@@ -5130,9 +5129,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   HelpRow(
                                     p: p,
                                     question:
-                                        'How do On-Demand Language Packs work?',
+                                        'Does NoteKar support offline languages?',
                                     answer:
-                                        'NoteKar ships with default English to keep the app ultra-lightweight. You can download and activate French, Spanish, Hindi, German, Japanese, or Russian anytime in Settings > Personalization > Language. Once downloaded, language packs work 100% offline.',
+                                        'Yes! NoteKar includes 7 built-in language localizations (English, French, Spanish, Hindi, German, Japanese, and Russian) that work 100% offline without requiring any internet connection or file downloads.',
                                   ),
                                   HelpRow(
                                     p: p,

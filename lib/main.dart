@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/screens/note_kar_home.dart';
-import 'package:notekar/services/dynamic_l10n_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +20,6 @@ void main() async {
 
   final prefs = results[0] as SharedPreferences;
   unawaited(AdaptiveEngine().initialize(prefs: prefs));
-  unawaited(DynamicL10nService.instance.initialize(prefs));
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);

@@ -138,12 +138,11 @@ Notekar - Flutter/
 │   └── app/src/main/kotlin/    # Kotlin AlarmManager receivers, AppWidgetProvider & MainActivity
 ├── lib/
 │   ├── dialogs/                # Apple HIG modal bottom sheets & dialogs
-│   │   └── settings/           # 24 modular settings sub-pages (Language Center, Backups, Icons, etc.)
-│   ├── l10n/                   # Localizations & dynamic package catalogs
-│   │   └── packages/           # On-demand downloadable language packs (fr, es, hi, de, ja, ru)
+│   │   └── settings/           # 24 modular settings sub-pages (Language, Backups, Icons, etc.)
+│   ├── l10n/                   # ARB translation files & static multilingual dictionaries
 │   ├── models/                 # Immutable domain entities (Moment, Palette, SobrietyTheme, etc.)
 │   ├── screens/                # Core screens (NoteKarHome, WelcomeScreen)
-│   ├── services/               # Decoupled domain services (DynamicL10nService, MindfulnessService)
+│   ├── services/               # Decoupled domain services (MindfulnessService, NotificationEngine)
 │   ├── utils/                  # Cryptography, adaptive hardware engine, and l10n utilities
 │   └── widgets/                # Reusable Apple HIG UI components (PressableScale, SettingsGroup, etc.)
 ├── versions/                   # Master structured JSON release archive (changelog.json)

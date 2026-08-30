@@ -1,15 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
-import 'package:notekar/services/dynamic_l10n_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -88,38 +85,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   bool _countOnSave = false;
   String _appIconStyle = 'default';
   bool _enableMindfulness = false;
-  final Set<String> _downloadingLanguageCodes = {};
-
-  Future<void> _downloadAndApplyLanguage(String code) async {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _downloadingLanguageCodes.add(code);
-    });
-
-    final success = await DynamicL10nService.instance.downloadLanguage(code);
-
-    if (!mounted) return;
-    setState(() {
-      _downloadingLanguageCodes.remove(code);
-    });
-
-    if (success) {
-      HapticFeedback.mediumImpact();
-      setState(() => currentLocale = code);
-      widget.onLocaleChanged(code);
-    } else {
-      HapticFeedback.heavyImpact();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to download language pack. Check network connection.'
-                .localized(context),
-          ),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
 
   static const _fileChannel = MethodChannel('notekar/files');
 
@@ -576,11 +541,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   Widget _buildLanguagePage(Palette p) {
-    final l10nService = DynamicL10nService.instance;
-    final languages = l10nService.catalog;
-    final downloadedPacks = languages
-        .where((l) => l10nService.isDownloaded(l.code))
-        .toList();
+    final availableLanguages = [
+      (code: 'system', name: 'System Default', native: 'System Default'),
+      (code: 'en', name: 'English', native: 'English'),
+      (code: 'fr', name: 'French', native: 'Français (French)'),
+      (code: 'hi', name: 'Hindi', native: 'हिन्दी (Hindi)'),
+      (code: 'es', name: 'Spanish', native: 'Español (Spanish)'),
+      (code: 'de', name: 'German', native: 'Deutsch (German)'),
+      (code: 'ja', name: 'Japanese', native: '日本語 (Japanese)'),
+      (code: 'ru', name: 'Russian', native: 'Русский (Russian)'),
+    ];
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -621,82 +591,37 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Select your preferred interface language. On-demand packages download instantly and work offline.'
+              'Select your preferred interface language. 100% offline-ready with zero data usage.'
                   .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: p.text2, fontSize: 14, height: 1.4),
             ),
           ),
           const SizedBox(height: 28),
-
-          // 1. Core Languages
           SettingsGroup(
             p: p,
-            title: 'Core Languages'.localized(context).toUpperCase(),
+            title: 'Available Languages'.localized(context),
             children: [
-              SettingsRow(
-                p: p,
-                title: 'System Default'.localized(context),
-                subtitle: 'Follow device system language'.localized(context),
-                trailing: currentLocale == 'system'
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 22)
-                    : const SizedBox.shrink(),
-                onTap: () {
-                  if (currentLocale == 'system') return;
-                  HapticFeedback.selectionClick();
-                  setState(() => currentLocale = 'system');
-                  widget.onLocaleChanged('system');
-                },
-              ),
-              SettingsRow(
-                p: p,
-                title: 'English',
-                subtitle: 'Core built-in language'.localized(context),
-                trailing: currentLocale == 'en'
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 22)
-                    : const SizedBox.shrink(),
-                onTap: () {
-                  if (currentLocale == 'en') return;
-                  HapticFeedback.selectionClick();
-                  setState(() => currentLocale = 'en');
-                  widget.onLocaleChanged('en');
-                },
-              ),
-              for (final pack in downloadedPacks)
+              for (final lang in availableLanguages)
                 SettingsRow(
                   p: p,
-                  title: '${pack.flag}  ${pack.name}',
-                  subtitle:
-                      '${pack.englishName} (${'Downloaded'.localized(context)})',
-                  trailing: currentLocale == pack.code
+                  title: lang.native,
+                  trailing: currentLocale == lang.code
                       ? Icon(Icons.check_rounded, color: p.accent, size: 22)
                       : const SizedBox.shrink(),
                   onTap: () {
-                    if (currentLocale == pack.code) return;
+                    if (currentLocale == lang.code) return;
                     HapticFeedback.selectionClick();
-                    setState(() => currentLocale = pack.code);
-                    widget.onLocaleChanged(pack.code);
+                    setState(() => currentLocale = lang.code);
+                    widget.onLocaleChanged(lang.code);
                   },
                 ),
             ],
           ),
           const SizedBox(height: 20),
-
-          // 2. On-Demand Downloadable Language Packs
           SettingsGroup(
             p: p,
-            title: 'On-Demand Language Packs'.localized(context).toUpperCase(),
-            children: [
-              for (final lang in languages)
-                _buildWelcomeLanguagePackRow(p, lang),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // 3. Upcoming Languages
-          SettingsGroup(
-            p: p,
-            title: 'Upcoming Languages'.localized(context).toUpperCase(),
+            title: 'Upcoming Languages'.localized(context),
             description:
                 'These languages are planned for future releases. Help translate NoteKar on GitHub.'
                     .localized(context),
@@ -712,108 +637,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ],
           ),
           const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWelcomeLanguagePackRow(Palette p, LanguagePackInfo lang) {
-    final isDownloaded = DynamicL10nService.instance.isDownloaded(lang.code);
-    final isDownloading = _downloadingLanguageCodes.contains(lang.code);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: isDownloaded
-                    ? p.accent.withValues(alpha: 0.5)
-                    : p.border.withValues(alpha: 0.5),
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Text(lang.flag, style: const TextStyle(fontSize: 18)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lang.name.localized(context),
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${lang.englishName} (~${lang.sizeKb} KB)'.localized(context),
-                  style: TextStyle(color: p.text3, fontSize: 12.5),
-                ),
-              ],
-            ),
-          ),
-          if (isDownloading) ...[
-            CupertinoActivityIndicator(radius: 10, color: p.accent),
-          ] else if (isDownloaded) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: p.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: p.accent.withValues(alpha: 0.35)),
-              ),
-              child: Text(
-                'Available Above'.localized(context),
-                style: TextStyle(
-                  color: p.accent,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ] else ...[
-            PressableScale(
-              onTap: () => _downloadAndApplyLanguage(lang.code),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: p.accent,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.cloud_download_rounded,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Get'.localized(context),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
