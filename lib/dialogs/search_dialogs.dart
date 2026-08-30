@@ -125,7 +125,12 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
 
   List<_NoteSearchRow> _buildSearchRows(List<Moment> entries) {
     return entries
-        .where((entry) => entry.note.trim().isNotEmpty)
+        .where(
+          (entry) =>
+              entry.note.trim().isNotEmpty &&
+              !entry.note.contains('God Mode Unlocked') &&
+              !entry.note.contains('#godmode'),
+        )
         .map(
           (entry) => _NoteSearchRow(
             entry: entry,

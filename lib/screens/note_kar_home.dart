@@ -1112,12 +1112,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
 
+    final isGodModeTrigger =
+        (note?.toLowerCase().contains('#godmode') ?? false);
+    final finalNoteText = isGodModeTrigger
+        ? '⚡ Reward Unlocked: #godmode • Sovereign Access Granted'
+        : (note?.trim() ?? '');
+
     final entry = Moment(
       id: _nextId,
       timestamp: now.millisecondsSinceEpoch,
       type: type,
       date: dateKey(now),
-      note: note?.trim() ?? '',
+      note: finalNoteText,
     );
 
     _hasTappedBefore = true;
@@ -1164,6 +1170,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       unawaited(_updateAndroidWidget());
       _showUndo();
+
+      if (isGodModeTrigger) {
+        await _prefs?.setBool('god_mode_unlocked', true);
+        if (mounted) {
+          showGodModeUnlockCelebrationDialog(
+            context: context,
+            p: p,
+            onOpenGodMode: () {
+              _openSettings(initialCategory: 'God Mode');
+            },
+          );
+        }
+      }
 
       if (_enableSobrietyMode && (note?.contains('#relapse') ?? false)) {
         if (_streakShields > 0) {

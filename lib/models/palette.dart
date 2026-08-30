@@ -65,6 +65,46 @@ Palette paletteFor(
       blue: const Color(0xFF007AFF),
     );
   }
+  if (theme == 'matrix') {
+    return Palette(
+      name: 'matrix',
+      bg: const Color(0xFF000000),
+      surface: const Color(0xFF000000),
+      surface2: const Color(0xFF051105),
+      surface3: const Color(0xFF0A220A),
+      border: const Color(
+        0xFF00FF41,
+      ).withValues(alpha: highContrast ? 0.8 : 0.4),
+      text: const Color(0xFF00FF41),
+      text2: const Color(0xFF00DD38).withValues(alpha: 0.8),
+      text3: const Color(0xFF008F24),
+      clock: const Color(0xFF00FF41),
+      accent: const Color(0xFF00FF41),
+      green: const Color(0xFF00FF41),
+      orange: const Color(0xFF39FF14),
+      red: const Color(0xFFFF0055),
+      blue: const Color(0xFF00FFCC),
+    );
+  }
+  if (theme == 'eink') {
+    return Palette(
+      name: 'eink',
+      bg: const Color(0xFFFFFFFF),
+      surface: const Color(0xFFFFFFFF),
+      surface2: const Color(0xFFF4F4F4),
+      surface3: const Color(0xFFE5E5E5),
+      border: const Color(0xFF000000),
+      text: const Color(0xFF000000),
+      text2: const Color(0xFF2A2A2A),
+      text3: const Color(0xFF666666),
+      clock: const Color(0xFF000000),
+      accent: const Color(0xFF000000),
+      green: const Color(0xFF222222),
+      orange: const Color(0xFF444444),
+      red: const Color(0xFF000000),
+      blue: const Color(0xFF111111),
+    );
+  }
   final amoled = theme == 'amoled';
   return Palette(
     name: theme,

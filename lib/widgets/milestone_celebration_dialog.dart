@@ -10,6 +10,165 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
 
 /// Shows the Sobriety Milestone Unlock Celebration dialog with animated particles and haptics.
+Future<void> showGodModeUnlockCelebrationDialog({
+  required BuildContext context,
+  required Palette p,
+  VoidCallback? onOpenGodMode,
+}) async {
+  HapticFeedback.heavyImpact();
+
+  await showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'God Mode Celebration',
+    barrierColor: Colors.black.withValues(alpha: 0.8),
+    transitionDuration: const Duration(milliseconds: 240),
+    transitionBuilder: (context, anim1, anim2, child) {
+      final curved = Curves.easeOutBack.transform(anim1.value);
+      return Transform.scale(
+        scale: 0.88 + (curved * 0.12),
+        child: Opacity(opacity: anim1.value.clamp(0.0, 1.0), child: child),
+      );
+    },
+    pageBuilder: (context, animation1, animation2) {
+      return Stack(
+        children: [
+          const Positioned.fill(
+            child: IgnorePointer(child: ConfettiParticleOverlay()),
+          ),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Glass(
+                p: p,
+                radius: 28,
+                padding: const EdgeInsets.all(28),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFFFF007A),
+                              Color(0xFFFFD600),
+                              Color(0xFF00E5FF),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFFFFD600,
+                              ).withValues(alpha: 0.4),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: Colors.white,
+                          size: 38,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        '⚡ GOD MODE UNLOCKED!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFFFFD600),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Sovereign Access Granted'.localized(context),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: p.surface3.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: p.border.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          'You have discovered the Architect\'s cipher. Secret Matrix and E-Ink themes, the Mindful Gravity Sandbox, and VIP Pioneer credentials are now awakened in Settings.'
+                              .localized(context),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 13,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFD600),
+                                foregroundColor: Colors.black,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).pop();
+                                onOpenGodMode?.call();
+                              },
+                              child: const Text(
+                                'Explore God Mode',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// Shows the Sobriety Milestone Unlock Celebration dialog with animated particles and haptics.
 Future<void> showMilestoneUnlockDialog({
   required BuildContext context,
   required Palette p,

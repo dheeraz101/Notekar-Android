@@ -19,6 +19,7 @@ import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
+import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/legal_about_settings_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
@@ -2460,6 +2461,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
         status: 'View',
       ),
+      if (_prefs?.getBool('god_mode_unlocked') ?? false)
+        item(
+          title: 'God Mode',
+          subtitle:
+              'Secret themes, gravity sandbox, and VIP pioneer credentials',
+          category: 'God Mode',
+          icon: Icons.auto_awesome_rounded,
+          keywords: [
+            'god mode',
+            'matrix',
+            'terminal',
+            'eink',
+            'e-ink',
+            'sandbox',
+            'gravity',
+            'pioneer',
+            'vip',
+            'developer',
+            'easter egg',
+          ],
+          kind: 'nav',
+          boolValue: null,
+          onBoolChanged: null,
+          status: 'Unlocked',
+        ),
       item(
         title: 'Reset All Data',
         subtitle: 'Erase every moment and note',
@@ -3493,6 +3519,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     color: p.orange,
                                     onTap: () => _openCategory('Advanced'),
                                   ),
+                                  if (_prefs?.getBool('god_mode_unlocked') ??
+                                      false)
+                                    SettingsRow(
+                                      p: p,
+                                      icon: Icons.auto_awesome_rounded,
+                                      title: 'God Mode',
+                                      status: 'Unlocked',
+                                      color: const Color(0xFFFFD700),
+                                      onTap: () => _openCategory('God Mode'),
+                                    ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -4199,6 +4235,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                             child: AppIconsSettingsPage(
                               p: p,
                               appIconStyle: appIconStyle,
+                              godModeUnlocked:
+                                  _prefs?.getBool('god_mode_unlocked') ?? false,
                               onAppIconStyleChanged: (value) {
                                 setState(() => appIconStyle = value);
                                 unawaited(widget.onAppIconStyle(value));
@@ -5101,6 +5139,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     text:
                                         'NoteKar uses non-waking alarms for routine reminders, staying 100% compliant with Android Doze mode while eliminating unnecessary battery drain.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.vpn_key_rounded,
+                                    title: 'The Architect\'s Cipher (Enigma)',
+                                    text:
+                                        'Encrypted hex stream detected: "23 67 6f 64 6d 6f 64 65". Decipher the hex ASCII sequence into plain text, then inscribe and save it inside any moment\'s note to awaken dormant powers.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -5125,6 +5170,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         'How does Hourly Time Reflection work?',
                                     answer:
                                         'Time Reflection prompts you with an hourly mindful breathing pause and chime. It only runs during your configured Active Hours and mutes automatically overnight to protect your sleep.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Is there a secret sovereign or god mode?',
+                                    answer:
+                                        'Legend speaks of an ancient developer cipher: "#" + "g-o-d-m-o-d-e". Inscribe and save "#godmode" as any moment\'s note to awaken exclusive developer themes, the mindful gravity sandbox, and cryptographic pioneer credentials.',
                                   ),
                                   HelpRow(
                                     p: p,
@@ -6015,6 +6067,42 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               subCategory: 'Changelog',
                               onOpenGithubIssue: _openGithubIssue,
+                            ),
+                          ),
+                        if (show('God Mode'))
+                          SliverToBoxAdapter(
+                            child: GodModeSettingsPage(
+                              p: p,
+                              currentTheme: theme,
+                              onThemeChanged: (val) {
+                                setState(() => theme = val);
+                                widget.onTheme(val);
+                              },
+                              totalMoments: entries.length,
+                              streakDays: _prefs?.getInt('streak_days') ?? 0,
+                              onRelockGodMode: () async {
+                                if (_prefs != null) {
+                                  await _prefs!.setBool(
+                                    'god_mode_unlocked',
+                                    false,
+                                  );
+                                }
+                                setState(() {
+                                  category = null;
+                                  _categoryStack.clear();
+                                });
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'God Mode has been relocked.'.localized(
+                                          context,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ),
                       ],

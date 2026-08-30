@@ -28,13 +28,23 @@ class SearchNotesSettingsPage {
     required VoidCallback onClearRecentSearches,
   }) {
     final q = settingsQuery.trim().toLowerCase();
-    final notes = entries.where((e) => e.note.trim().isNotEmpty).where((e) {
-      if (q.isEmpty) return true;
-      return e.note.toLowerCase().contains(q) ||
-          datePretty(e.timestamp).toLowerCase().contains(q) ||
-          timeOnly(e.timestamp).toLowerCase().contains(q) ||
-          e.type.toLowerCase().contains(q);
-    }).toList()..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final notes =
+        entries
+            .where(
+              (e) =>
+                  e.note.trim().isNotEmpty &&
+                  !e.note.contains('God Mode Unlocked') &&
+                  !e.note.contains('#godmode'),
+            )
+            .where((e) {
+              if (q.isEmpty) return true;
+              return e.note.toLowerCase().contains(q) ||
+                  datePretty(e.timestamp).toLowerCase().contains(q) ||
+                  timeOnly(e.timestamp).toLowerCase().contains(q) ||
+                  e.type.toLowerCase().contains(q);
+            })
+            .toList()
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     return [
       SliverPersistentHeader(

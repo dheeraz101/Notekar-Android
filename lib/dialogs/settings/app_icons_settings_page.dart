@@ -75,11 +75,13 @@ class AppIconsSettingsPage extends StatelessWidget {
     required this.p,
     required this.appIconStyle,
     required this.onAppIconStyleChanged,
+    this.godModeUnlocked = false,
   });
 
   final Palette p;
   final String appIconStyle;
   final ValueChanged<String> onAppIconStyleChanged;
+  final bool godModeUnlocked;
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +140,13 @@ class AppIconsSettingsPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        'Active Launcher Icon'.localized(context),
+                        (godModeUnlocked && currentIcon.key == 'gold')
+                            ? '⚡ VIP Sovereign Icon'.localized(context)
+                            : 'Active Launcher Icon'.localized(context),
                         style: TextStyle(
-                          color: p.accent,
+                          color: (godModeUnlocked && currentIcon.key == 'gold')
+                              ? const Color(0xFFFFD700)
+                              : p.accent,
                           fontSize: 10.5,
                           fontWeight: FontWeight.w800,
                         ),
@@ -148,7 +154,9 @@ class AppIconsSettingsPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${currentIcon.title.localized(context)} • ${currentIcon.subtitle.localized(context)}',
+                      (godModeUnlocked && currentIcon.key == 'gold')
+                          ? 'Sovereign • Champagne VIP'
+                          : '${currentIcon.title.localized(context)} • ${currentIcon.subtitle.localized(context)}',
                       style: TextStyle(
                         color: p.text,
                         fontSize: 16.5,

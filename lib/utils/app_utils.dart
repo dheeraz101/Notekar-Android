@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
 const appVersion = '7.2.0';
+const kAppVersion = appVersion;
 const kAppBuildNumber = '26PR0823';
 const appBuildDate = '2026-08-23';
 

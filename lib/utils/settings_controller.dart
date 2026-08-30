@@ -33,32 +33,58 @@ class SettingsController extends ChangeNotifier {
   bool _largeText = false;
   bool _highContrast = false;
   String _historyDensity = 'comfortable';
+  bool _godModeUnlocked = false;
 
   // Getters
   String get theme => _theme;
+
   String get locale => _locale;
+
   String get accentColor => _accentColor;
+
   String get appIconStyle => _appIconStyle;
+
   bool get showSeconds => _showSeconds;
+
   bool get highlightSeconds => _highlightSeconds;
+
   bool get buttonLabels => _buttonLabels;
+
   bool get largeControls => _largeControls;
+
   bool get homeMenuPill => _homeMenuPill;
+
   bool get homeMenuAnimations => _homeMenuAnimations;
+
   bool get enableTranslucency => _enableTranslucency;
+
   bool get showHistoryText => _showHistoryText;
+
   bool get showLastSavedHint => _showLastSavedHint;
+
   String get defaultMode => _defaultMode;
+
   int get tapDelay => _tapDelay;
+
   bool get requireLongPressNote => _requireLongPressNote;
+
   bool get compactHistory => _compactHistory;
+
   bool get confirmDelete => _confirmDelete;
+
   bool get extendedDuration => _extendedDuration;
+
   bool get minimalMomentOptions => _minimalMomentOptions;
+
   bool get reduceMotion => _reduceMotion;
+
   bool get largeText => _largeText;
+
   bool get highContrast => _highContrast;
+
   String get historyDensity => _historyDensity;
+
+  bool get godModeUnlocked => _godModeUnlocked;
 
   void _loadFromPrefs() {
     _theme = _prefs.getString('theme') ?? 'dark';
@@ -85,6 +111,14 @@ class SettingsController extends ChangeNotifier {
     _largeText = _prefs.getBool('large_text') ?? false;
     _highContrast = _prefs.getBool('high_contrast') ?? false;
     _historyDensity = _prefs.getString('history_density') ?? 'comfortable';
+    _godModeUnlocked = _prefs.getBool('god_mode_unlocked') ?? false;
+  }
+
+  Future<void> setGodModeUnlocked(bool value) async {
+    if (_godModeUnlocked == value) return;
+    _godModeUnlocked = value;
+    await _prefs.setBool('god_mode_unlocked', value);
+    notifyListeners();
   }
 
   // Setters with persistent storage
