@@ -21,6 +21,7 @@ import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
 import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
+import 'package:notekar/dialogs/settings/integrations_settings_page.dart';
 import 'package:notekar/dialogs/settings/legal_about_settings_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
@@ -155,8 +156,10 @@ class SettingsDialog extends StatefulWidget {
     required this.currentLocale,
     required this.onLocaleChanged,
     this.initialCategory,
+    this.onTriggerUrlScheme,
   });
 
+  final ValueChanged<String>? onTriggerUrlScheme;
   final String currentLocale;
   final ValueChanged<String> onLocaleChanged;
 
@@ -2498,6 +2501,35 @@ class _SettingsDialogState extends State<SettingsDialog> {
           status: 'Unlocked',
         ),
       item(
+        title: 'Integrations & Automation',
+        subtitle:
+            'URL schemes, text selection, share target, Markdown sync, and Tasker broadcast API',
+        category: 'Integrations & Automation',
+        icon: CupertinoIcons.link,
+        keywords: [
+          'integration',
+          'integrations',
+          'automation',
+          'url scheme',
+          'deep link',
+          'obsidian',
+          'logseq',
+          'markdown',
+          'calendar',
+          'ics',
+          'tasker',
+          'macrodroid',
+          'broadcast',
+          'share',
+          'selection',
+          'nfc',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Bridges',
+      ),
+      item(
         title: 'Reset All Data',
         subtitle: 'Erase every moment and note',
         category: 'Reset',
@@ -3529,6 +3561,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     status: 'Tools',
                                     color: p.orange,
                                     onTap: () => _openCategory('Advanced'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: CupertinoIcons.link,
+                                    title: 'Integrations & Automation',
+                                    status: 'Bridges',
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Integrations & Automation',
+                                    ),
                                   ),
                                   if (_isGodModeUnlocked)
                                     SettingsRow(
@@ -6076,6 +6118,17 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               subCategory: 'Changelog',
                               onOpenGithubIssue: _openGithubIssue,
+                            ),
+                          ),
+                        if (show('Integrations & Automation'))
+                          SliverToBoxAdapter(
+                            child: IntegrationsSettingsPage(
+                              p: p,
+                              entriesNotifier: widget.entriesNotifier,
+                              onTriggerUrlScheme: (url) {
+                                _popCategory();
+                                widget.onTriggerUrlScheme?.call(url);
+                              },
                             ),
                           ),
                         if (show('God Mode'))

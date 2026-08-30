@@ -1871,7 +1871,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
-  Future<void> _openNote({Offset? position}) async {
+  Future<void> _openNote({Offset? position, String? initialText}) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
       return;
@@ -1886,6 +1886,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       transitionDuration: const Duration(milliseconds: 120),
       pageBuilder: (_, _, _) => NoteDialog(
         p: p,
+        initialNote: initialText ?? '',
         blur:
             _enableTranslucency &&
             AdaptiveEngine().supportsBlur &&
@@ -2286,6 +2287,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onSobrietyModeChanged: (value) {
           setState(() => _enableSobrietyMode = value);
         },
+        onTriggerUrlScheme: _handleIncomingUrlScheme,
       ),
     );
 
@@ -2350,11 +2352,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _handlePendingLaunchAction() async {
+    Map<dynamic, dynamic>? payload;
     String? action;
     try {
-      action = await _fileChannel.invokeMethod<String>('getLaunchAction');
+      final rawPayload = await _fileChannel.invokeMethod<dynamic>(
+        'getLaunchPayload',
+      );
+      if (rawPayload is Map) {
+        payload = rawPayload;
+        action = payload['action']?.toString();
+      } else {
+        action = await _fileChannel.invokeMethod<String>('getLaunchAction');
+      }
     } catch (e, stack) {
-      _logger.warn('Failed to get launch action', e, stack);
+      _logger.warn('Failed to get launch action/payload', e, stack);
       return;
     }
     if (!mounted || action == null || action.trim().isEmpty) return;
@@ -2362,6 +2373,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       final unlocked = await _unlockPrivacyLock();
       if (!unlocked) return;
     }
+
+    final note = (payload?['note'] as String?)?.trim() ?? '';
+    final typeParam = (payload?['type'] as String?)?.trim().toLowerCase();
+    final pageParam = (payload?['page'] as String?)?.trim().toLowerCase();
+
     switch (action.trim().toLowerCase()) {
       case 'history':
         await _openHistory();
@@ -2373,17 +2389,44 @@ class _NoteKarHomeState extends State<NoteKarHome>
       case 'changelog':
         await _openChangelog();
       case 'note':
-        await _openNote();
+        await _openNote(initialText: note.isNotEmpty ? note : null);
+      case 'share':
+        await _openNote(initialText: note.isNotEmpty ? note : null);
       case 'moment':
       case 'single':
-        if (!_isDelayBlocked()) unawaited(_logEntry());
+        if (!_isDelayBlocked()) {
+          unawaited(
+            _logEntry(
+              forcedType: 'single',
+              note: note.isNotEmpty ? note : null,
+            ),
+          );
+        }
+      case 'log':
+        if (!_isDelayBlocked()) {
+          final targetType = typeParam ?? 'single';
+          if (targetType == 'in' || targetType == 'out') {
+            setState(() {
+              _mode = 'two-way';
+              _inout = targetType;
+            });
+          }
+          unawaited(
+            _logEntry(
+              forcedType: targetType,
+              note: note.isNotEmpty ? note : null,
+            ),
+          );
+        }
       case 'in':
         if (!_isDelayBlocked()) {
           setState(() {
             _mode = 'two-way';
             _inout = 'in';
           });
-          unawaited(_logEntry());
+          unawaited(
+            _logEntry(forcedType: 'in', note: note.isNotEmpty ? note : null),
+          );
         }
       case 'out':
         if (!_isDelayBlocked()) {
@@ -2391,9 +2434,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
             _mode = 'two-way';
             _inout = 'out';
           });
-          unawaited(_logEntry());
+          unawaited(
+            _logEntry(forcedType: 'out', note: note.isNotEmpty ? note : null),
+          );
+        }
+      case 'open':
+        if (pageParam == 'history') {
+          await _openHistory();
+        } else if (pageParam == 'settings') {
+          await _openSettings();
+        } else if (pageParam == 'stats') {
+          await _openSettings(initialCategory: 'Stats');
+        } else if (pageParam == 'sobriety') {
+          await _openSettings(initialCategory: 'Sobriety Tracker');
+        } else if (pageParam == 'integrations') {
+          await _openSettings(initialCategory: 'Integrations & Automation');
         }
       case 'reflection':
+      case 'reflect':
         final isLocked =
             await _fileChannel.invokeMethod<bool>('isDeviceLocked') ?? false;
         await _showStandaloneMindfulness(isLocked: isLocked);
@@ -2403,6 +2461,80 @@ class _NoteKarHomeState extends State<NoteKarHome>
       case 'updates':
       case 'releases':
         await _openExternalLink(githubReleases);
+    }
+  }
+
+  Future<void> _handleIncomingUrlScheme(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    final action = uri.host.isNotEmpty
+        ? uri.host.toLowerCase()
+        : uri.path.replaceAll('/', '').toLowerCase();
+    final note =
+        uri.queryParameters['note'] ??
+        uri.queryParameters['text'] ??
+        uri.queryParameters['msg'] ??
+        '';
+    final typeParam = uri.queryParameters['type']?.toLowerCase();
+    final pageParam = uri.queryParameters['page']?.toLowerCase();
+
+    switch (action) {
+      case 'log':
+        final type = typeParam == 'in'
+            ? 'in'
+            : (typeParam == 'out'
+                  ? 'out'
+                  : (typeParam == 'note' ? 'note' : 'single'));
+        if (type == 'in' || type == 'out') {
+          setState(() {
+            _mode = 'two-way';
+            _inout = type;
+          });
+        }
+        unawaited(
+          _logEntry(forcedType: type, note: note.isNotEmpty ? note : null),
+        );
+      case 'in':
+        setState(() {
+          _mode = 'two-way';
+          _inout = 'in';
+        });
+        unawaited(
+          _logEntry(forcedType: 'in', note: note.isNotEmpty ? note : null),
+        );
+      case 'out':
+        setState(() {
+          _mode = 'two-way';
+          _inout = 'out';
+        });
+        unawaited(
+          _logEntry(forcedType: 'out', note: note.isNotEmpty ? note : null),
+        );
+      case 'note':
+        await _openNote(initialText: note.isNotEmpty ? note : null);
+      case 'open':
+        if (pageParam == 'history') {
+          await _openHistory();
+        } else if (pageParam == 'settings') {
+          await _openSettings();
+        } else if (pageParam == 'stats') {
+          await _openSettings(initialCategory: 'Stats');
+        } else if (pageParam == 'sobriety') {
+          await _openSettings(initialCategory: 'Sobriety Tracker');
+        } else if (pageParam == 'integrations') {
+          await _openSettings(initialCategory: 'Integrations & Automation');
+        }
+      case 'reflect':
+      case 'reflection':
+        await _showStandaloneMindfulness();
+      case 'history':
+        await _openHistory();
+      case 'settings':
+        await _openSettings();
+      case 'stats':
+        await _openSettings(initialCategory: 'Stats');
+      default:
+        _showToast('URL Scheme triggered: $action');
     }
   }
 

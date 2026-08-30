@@ -30,6 +30,7 @@ class MainActivity : FlutterActivity() {
     private var pendingOpenResult: MethodChannel.Result? = null
     private var pendingPrivacyResult: MethodChannel.Result? = null
     private var pendingLaunchAction: String? = null
+    private var pendingLaunchPayload: Map<String, Any?>? = null
     private var pendingNotificationResult: MethodChannel.Result? = null
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
@@ -48,12 +49,16 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        pendingLaunchAction = actionFromIntent(intent)
+        pendingLaunchPayload = payloadFromIntent(intent)
+        pendingLaunchAction =
+            actionFromIntent(intent) ?: pendingLaunchPayload?.get("action") as? String
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        pendingLaunchAction = actionFromIntent(intent)
+        pendingLaunchPayload = payloadFromIntent(intent)
+        pendingLaunchAction =
+            actionFromIntent(intent) ?: pendingLaunchPayload?.get("action") as? String
 
         try {
             ReminderReceiver.rescheduleAll(applicationContext)
@@ -152,6 +157,17 @@ class MainActivity : FlutterActivity() {
 
                 "getLaunchAction" -> {
                     result.success(pendingLaunchAction)
+                    pendingLaunchAction = null
+                }
+
+                "getLaunchPayload" -> {
+                    val payload = pendingLaunchPayload ?: if (pendingLaunchAction != null) {
+                        mapOf("action" to pendingLaunchAction)
+                    } else {
+                        null
+                    }
+                    result.success(payload)
+                    pendingLaunchPayload = null
                     pendingLaunchAction = null
                 }
 
@@ -602,6 +618,125 @@ class MainActivity : FlutterActivity() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(intent)
+    }
+
+    private fun payloadFromIntent(intent: Intent?): Map<String, Any?>? {
+        if (intent == null) return null
+
+        // 1. Check for Share Sheet text (ACTION_SEND with text/plain)
+        if (intent.action == Intent.ACTION_SEND) {
+            val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                ?: intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
+            if (!text.isNullOrEmpty()) {
+                return mapOf(
+                    "action" to "share",
+                    "note" to text.trim(),
+                    "type" to "single"
+                )
+            }
+        }
+
+        // 2. Check for deep links (URI scheme: notekar://...)
+        val uri = intent.data
+        if (uri != null && uri.scheme.equals("notekar", ignoreCase = true)) {
+            val host = uri.host?.lowercase(Locale.ROOT) ?: ""
+            val path = (uri.path ?: "").removePrefix("/").lowercase(Locale.ROOT)
+            val actionKey = if (host.isNotEmpty()) host else path
+
+            val note = uri.getQueryParameter("note")
+                ?: uri.getQueryParameter("text")
+                ?: uri.getQueryParameter("msg")
+                ?: ""
+            val typeParam = uri.getQueryParameter("type")?.lowercase(Locale.ROOT)
+            val pageParam = uri.getQueryParameter("page")?.lowercase(Locale.ROOT)
+
+            return when (actionKey) {
+                "log" -> {
+                    val logType = when (typeParam) {
+                        "in" -> "in"
+                        "out" -> "out"
+                        "note" -> "note"
+                        else -> "single"
+                    }
+                    mapOf(
+                        "action" to "log",
+                        "type" to logType,
+                        "note" to note
+                    )
+                }
+
+                "in" -> mapOf(
+                    "action" to "in",
+                    "type" to "in",
+                    "note" to note
+                )
+
+                "out" -> mapOf(
+                    "action" to "out",
+                    "type" to "out",
+                    "note" to note
+                )
+
+                "note" -> mapOf(
+                    "action" to "note",
+                    "type" to "note",
+                    "note" to note
+                )
+
+                "single" -> mapOf(
+                    "action" to "single",
+                    "type" to "single",
+                    "note" to note
+                )
+
+                "open" -> mapOf(
+                    "action" to "open",
+                    "page" to (pageParam ?: "home")
+                )
+
+                "reflect", "reflection", "mindful" -> mapOf(
+                    "action" to "reflect"
+                )
+
+                "history" -> mapOf(
+                    "action" to "open",
+                    "page" to "history"
+                )
+
+                "settings" -> mapOf(
+                    "action" to "open",
+                    "page" to "settings"
+                )
+
+                "stats" -> mapOf(
+                    "action" to "open",
+                    "page" to "stats"
+                )
+
+                "sobriety" -> mapOf(
+                    "action" to "open",
+                    "page" to "sobriety"
+                )
+
+                else -> {
+                    val normalized = normalizeAction(actionKey)
+                    if (normalized != null) {
+                        mapOf("action" to normalized, "note" to note)
+                    } else {
+                        mapOf("action" to "open", "page" to actionKey)
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback to standard actionFromIntent
+        val action = actionFromIntent(intent)
+        if (action != null) {
+            return mapOf("action" to action)
+        }
+
+        return null
     }
 
     private fun actionFromIntent(intent: Intent?): String? {
