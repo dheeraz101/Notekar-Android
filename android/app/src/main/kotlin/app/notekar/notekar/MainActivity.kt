@@ -25,6 +25,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.util.Locale
 
 class MainActivity : FlutterActivity() {
     private var pendingOpenResult: MethodChannel.Result? = null
