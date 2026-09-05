@@ -110,10 +110,50 @@ class TimelineDaySection {
 List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
   if (entries.isEmpty) return [];
 
-  // 1. Group moments by date
-  final Map<String, List<Moment>> groupedByDate = {};
-  for (final m in entries) {
-    groupedByDate.putIfAbsent(m.date, () => []).add(m);
+  // 1. Sort all moments chronologically ascending (earliest to latest) to pair sessions globally
+  final chronoSorted = List<Moment>.from(entries)
+    ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+  final List<TimelineItem> allItems = [];
+  final Set<int> consumedOutIds = {};
+
+  for (int i = 0; i < chronoSorted.length; i++) {
+    final m = chronoSorted[i];
+    if (consumedOutIds.contains(m.id)) continue;
+
+    if (m.type == 'in') {
+      Moment? matchedOut;
+      for (int j = i + 1; j < chronoSorted.length; j++) {
+        final next = chronoSorted[j];
+        if (next.type == 'in') {
+          break; // Next session started before this ended
+        }
+        if (next.type == 'out' && !consumedOutIds.contains(next.id)) {
+          matchedOut = next;
+          consumedOutIds.add(next.id);
+          break;
+        }
+      }
+
+      final session = TimelineSessionItem(inMoment: m, outMoment: matchedOut);
+      allItems.add(session);
+    } else if (m.type == 'out') {
+      allItems.add(TimelineSingleItem(moment: m));
+    } else {
+      allItems.add(TimelineSingleItem(moment: m));
+    }
+  }
+
+  // 2. Group timeline items by day based on the item's anchor date
+  // For a session, its anchor date is when it started (inMoment.date).
+  // For a single/out, its anchor date is moment.date.
+  final Map<String, List<TimelineItem>> groupedByDate = {};
+  for (final item in allItems) {
+    final dKey = switch (item) {
+      TimelineSessionItem s => s.inMoment.date,
+      TimelineSingleItem s => s.moment.date,
+    };
+    groupedByDate.putIfAbsent(dKey, () => []).add(item);
   }
 
   final now = DateTime.now();
@@ -127,45 +167,21 @@ List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
   final List<TimelineDaySection> sections = [];
 
   for (final dKey in sortedDates) {
-    final dayMoments = groupedByDate[dKey]!;
-    // Sort moments chronologically ascending (earliest to latest) to pair sessions correctly
-    final chronoSorted = List<Moment>.from(dayMoments)
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    final List<TimelineItem> items = [];
-    final Set<int> consumedOutIds = {};
-    int totalTrackedMs = 0;
-
-    for (int i = 0; i < chronoSorted.length; i++) {
-      final m = chronoSorted[i];
-      if (consumedOutIds.contains(m.id)) continue;
-
-      if (m.type == 'in') {
-        Moment? matchedOut;
-        for (int j = i + 1; j < chronoSorted.length; j++) {
-          final next = chronoSorted[j];
-          if (next.type == 'in') {
-            break; // Next session started before this ended
-          }
-          if (next.type == 'out' && !consumedOutIds.contains(next.id)) {
-            matchedOut = next;
-            consumedOutIds.add(next.id);
-            break;
-          }
-        }
-
-        final session = TimelineSessionItem(inMoment: m, outMoment: matchedOut);
-        items.add(session);
-        totalTrackedMs += session.duration.inMilliseconds;
-      } else if (m.type == 'out') {
-        items.add(TimelineSingleItem(moment: m));
-      } else {
-        items.add(TimelineSingleItem(moment: m));
-      }
-    }
+    final dayItems = groupedByDate[dKey]!;
 
     // Sort items descending so newest moments/sessions within the day appear at the top
-    items.sort((a, b) => b.primaryTimestamp.compareTo(a.primaryTimestamp));
+    dayItems.sort((a, b) => b.primaryTimestamp.compareTo(a.primaryTimestamp));
+
+    int totalTrackedMs = 0;
+    int totalLogs = 0;
+    for (final it in dayItems) {
+      if (it is TimelineSessionItem) {
+        totalTrackedMs += it.duration.inMilliseconds;
+        totalLogs += it.momentIds.length;
+      } else {
+        totalLogs += 1;
+      }
+    }
 
     // Formulate clean Apple HIG day section title
     final sampleDate = dateFromKey(dKey);
@@ -184,8 +200,8 @@ List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
         date: sampleDate,
         displayTitle: title,
         totalTrackedDuration: Duration(milliseconds: totalTrackedMs),
-        totalLogs: dayMoments.length,
-        items: items,
+        totalLogs: totalLogs,
+        items: dayItems,
       ),
     );
   }

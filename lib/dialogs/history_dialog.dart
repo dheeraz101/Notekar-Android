@@ -92,7 +92,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
   bool _enableNoteOnClick = false;
 
   // Memoized lists & number maps
-  List<Moment> _filteredEntries = [];
   List<TimelineDaySection> _daySections = [];
   List<_TimelineRowItem> _allTimelineRows = [];
   List<_TimelineRowItem> _timelineRows = [];
@@ -150,24 +149,24 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final today = dateKey(DateTime.now());
     final weekAgo = DateTime.now().subtract(const Duration(days: 7));
 
-    _filteredEntries = _entries.where((e) {
-      if (_filter == 'today') return e.date == today;
-      if (_filter == 'week') {
-        return DateTime.fromMillisecondsSinceEpoch(
-          e.timestamp,
-        ).isAfter(weekAgo);
-      }
-      if (_filter == 'date') return e.date == _selectedDateKey;
-      if (_filter == 'sessions') return e.type == 'in' || e.type == 'out';
-      if (_filter == 'in') return e.type == 'in';
-      if (_filter == 'out') return e.type == 'out';
-      if (_filter == 'single') return e.type == 'single';
-      if (_filter == 'notes') return e.note.trim().isNotEmpty;
-      return true;
-    }).toList();
+    // ALWAYS pair sessions across the full history first so pairings are preserved
+    // across midnight, multiple sessions, and filter transitions.
+    final allSections = buildTimelineDaySections(_entries);
 
-    var sections = buildTimelineDaySections(_filteredEntries);
-    if (_filter == 'sessions') {
+    var sections = allSections;
+    if (_filter == 'today') {
+      sections = sections.where((s) => s.dateKey == today).toList();
+    } else if (_filter == 'week') {
+      sections = sections.where((s) {
+        return s.dateKey == today || s.date.isAfter(weekAgo);
+      }).toList();
+    } else if (_filter == 'date') {
+      if (_selectedDateKey != null) {
+        sections = sections
+            .where((s) => s.dateKey == _selectedDateKey)
+            .toList();
+      }
+    } else if (_filter == 'sessions') {
       sections = sections
           .map(
             (s) => TimelineDaySection(
@@ -190,7 +189,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
               displayTitle: s.displayTitle,
               totalTrackedDuration: s.totalTrackedDuration,
               totalLogs: s.totalLogs,
-              items: s.items.whereType<TimelineSingleItem>().toList(),
+              items: s.items
+                  .whereType<TimelineSingleItem>()
+                  .where((item) => item.moment.type == 'single')
+                  .toList(),
             ),
           )
           .where((s) => s.items.isNotEmpty)
@@ -204,7 +206,15 @@ class _HistoryDialogState extends State<HistoryDialog> {
               displayTitle: s.displayTitle,
               totalTrackedDuration: s.totalTrackedDuration,
               totalLogs: s.totalLogs,
-              items: s.items.where((it) => it.note.isNotEmpty).toList(),
+              items: s.items.where((it) {
+                if (it is TimelineSessionItem) {
+                  return it.inMoment.note.trim().isNotEmpty ||
+                      (it.outMoment?.note.trim().isNotEmpty ?? false);
+                } else if (it is TimelineSingleItem) {
+                  return it.moment.note.trim().isNotEmpty;
+                }
+                return false;
+              }).toList(),
             ),
           )
           .where((s) => s.items.isNotEmpty)
@@ -455,26 +465,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                 : null,
                                             active: _filter == f,
                                             onTap: f == 'date'
-                                                ? () {
-                                                    if (_filter == 'date') {
-                                                      _openDateFilter();
-                                                    } else {
-                                                      setState(() {
-                                                        _filter = 'date';
-                                                        _visibleCount =
-                                                            _pageSize;
-                                                        _rebuildMemoizedLists();
-                                                      });
-                                                      if (_scrollController
-                                                          .hasClients) {
-                                                        _scrollController
-                                                            .jumpTo(0.0);
-                                                      }
-                                                    }
-                                                  }
+                                                ? () => _openDateFilter()
                                                 : () {
                                                     setState(() {
                                                       _filter = f;
+                                                      _selectedDateKey = null;
                                                       _visibleCount = _pageSize;
                                                       _rebuildMemoizedLists();
                                                     });
@@ -961,7 +956,20 @@ class _HistoryDialogState extends State<HistoryDialog> {
       barrierColor: Colors.black.withValues(alpha: 0.42),
       barrierDismissible: true,
       barrierLabel: 'Close calendar',
-      transitionDuration: const Duration(milliseconds: 120),
+      transitionDuration: const Duration(milliseconds: 160),
+      transitionBuilder: (ctx, anim, _, child) {
+        final curved = CurvedAnimation(
+          parent: anim,
+          curve: Curves.easeOutCubic,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.95, end: 1.0).animate(curved),
+            child: child,
+          ),
+        );
+      },
       pageBuilder: (_, _, _) => MomentCalendarDialog(
         p: widget.p,
         availableDateKeys: _availableDateKeys,
@@ -1052,13 +1060,41 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   Future<void> _endLiveSession(TimelineSessionItem session) async {
     NotekarHaptics.success('standard');
-    final now = DateTime.now();
-    final effectiveTimestamp = math.max(
-      now.millisecondsSinceEpoch,
-      session.startTimestamp + 1000,
-    );
+
+    // Find any subsequent session boundaries (in or out) that occurred strictly after this session started
+    final laterSessionMoments =
+        _entries
+            .where(
+              (m) =>
+                  m.timestamp > session.startTimestamp &&
+                  (m.type == 'in' || m.type == 'out'),
+            )
+            .toList()
+          ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    final int effectiveTimestamp;
+    if (laterSessionMoments.isNotEmpty) {
+      final nextSessionStart = laterSessionMoments.first.timestamp;
+      final diff = nextSessionStart - session.startTimestamp;
+      if (diff > 2000) {
+        effectiveTimestamp = nextSessionStart - 1000;
+      } else if (diff > 1) {
+        effectiveTimestamp = session.startTimestamp + (diff ~/ 2);
+      } else {
+        effectiveTimestamp = session.startTimestamp + 1;
+      }
+    } else {
+      effectiveTimestamp = math.max(
+        DateTime.now().millisecondsSinceEpoch,
+        session.startTimestamp + 1000,
+      );
+    }
+
+    final maxId = _entries.isEmpty
+        ? 0
+        : _entries.map((e) => e.id).reduce(math.max);
     final outEntry = Moment(
-      id: effectiveTimestamp,
+      id: math.max(maxId + 1, effectiveTimestamp),
       timestamp: effectiveTimestamp,
       type: 'out',
       date: dateKey(DateTime.fromMillisecondsSinceEpoch(effectiveTimestamp)),

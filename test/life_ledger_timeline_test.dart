@@ -91,6 +91,149 @@ void main() {
       expect(session.outMoment, isNull);
       expect(session.duration.inMinutes, greaterThanOrEqualTo(37));
     });
+
+    test(
+      'Pairs midnight-crossing session into start day section with full duration',
+      () {
+        final inTime = DateTime(2026, 9, 4, 23, 45);
+        final outTime = DateTime(2026, 9, 5, 0, 30); // 45m across midnight
+
+        final moments = [
+          Moment(
+            id: 1,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-04',
+            note: 'Night owl session',
+          ),
+          Moment(
+            id: 2,
+            timestamp: outTime.millisecondsSinceEpoch,
+            type: 'out',
+            date: '2026-09-05',
+            note: '',
+          ),
+        ];
+
+        final sections = buildTimelineDaySections(moments);
+        expect(sections.length, 1);
+        final sec = sections.first;
+        expect(sec.dateKey, '2026-09-04');
+        expect(sec.totalTrackedDuration.inMinutes, 45);
+        expect(sec.totalLogs, 2);
+
+        final session = sec.items.first as TimelineSessionItem;
+        expect(session.isOngoing, isFalse);
+        expect(session.inMoment.id, 1);
+        expect(session.outMoment?.id, 2);
+        expect(session.duration.inMinutes, 45);
+      },
+    );
+
+    test(
+      'Closing an older live session with a later out moment ends it cleanly',
+      () {
+        final inTime = DateTime(2026, 9, 4, 21, 0); // Yesterday
+        final moments = [
+          Moment(
+            id: 1,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-04',
+            note: 'Evening work',
+          ),
+        ];
+
+        // Initially ongoing
+        var sections = buildTimelineDaySections(moments);
+        var session = sections.first.items.first as TimelineSessionItem;
+        expect(session.isOngoing, isTrue);
+
+        // Simulated "End" action creates an out moment today:
+        final outTime = DateTime(2026, 9, 5, 1, 30);
+        final outEntry = Moment(
+          id: 2,
+          timestamp: outTime.millisecondsSinceEpoch,
+          type: 'out',
+          date: '2026-09-05',
+          note: '',
+        );
+
+        final updatedMoments = [outEntry, ...moments];
+        sections = buildTimelineDaySections(updatedMoments);
+        expect(sections.length, 1);
+        session = sections.first.items.first as TimelineSessionItem;
+        expect(session.isOngoing, isFalse);
+        expect(session.outMoment, isNotNull);
+        expect(session.outMoment?.id, 2);
+        expect(session.duration.inMinutes, 270); // 4h 30m
+      },
+    );
+
+    test(
+      'Multiple in moments: Ending older session pairs it without breaking newer session',
+      () {
+        final t1 = DateTime(2026, 9, 5, 9, 0).millisecondsSinceEpoch;
+        final t2 = DateTime(2026, 9, 5, 12, 0).millisecondsSinceEpoch;
+        final t3 = DateTime(2026, 9, 5, 13, 0).millisecondsSinceEpoch;
+
+        final moments = [
+          Moment(
+            id: 1,
+            timestamp: t1,
+            type: 'in',
+            date: '2026-09-05',
+            note: 'Session 1',
+          ),
+          Moment(
+            id: 2,
+            timestamp: t2,
+            type: 'in',
+            date: '2026-09-05',
+            note: 'Session 2',
+          ),
+          Moment(
+            id: 3,
+            timestamp: t3,
+            type: 'out',
+            date: '2026-09-05',
+            note: '',
+          ),
+        ];
+
+        // Session 1 is unclosed, Session 2 is closed
+        var sections = buildTimelineDaySections(moments);
+        var s1 = sections.first.items
+            .whereType<TimelineSessionItem>()
+            .firstWhere((s) => s.inMoment.id == 1);
+        expect(s1.isOngoing, isTrue);
+
+        // Targeted end of Session 1: out moment placed before Session 2 starts
+        final out1 = Moment(
+          id: 4,
+          timestamp: t2 - 1000,
+          type: 'out',
+          date: '2026-09-05',
+          note: '',
+        );
+
+        final updated = [out1, ...moments];
+        sections = buildTimelineDaySections(updated);
+        expect(sections.length, 1);
+        final sessionItems = sections.first.items
+            .whereType<TimelineSessionItem>()
+            .toList();
+        expect(sessionItems.length, 2);
+
+        final updatedS1 = sessionItems.firstWhere((s) => s.inMoment.id == 1);
+        final updatedS2 = sessionItems.firstWhere((s) => s.inMoment.id == 2);
+
+        expect(updatedS1.isOngoing, isFalse);
+        expect(updatedS1.outMoment?.id, 4);
+        expect(updatedS2.isOngoing, isFalse);
+        expect(updatedS2.outMoment?.id, 3);
+      },
+    );
   });
 
   group('Timeline Widgets Tests', () {

@@ -37,7 +37,9 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
     final days = DateTime(_month.year, _month.month + 1, 0).day;
     final cells = leading + days;
     final rowCount = (cells / 7).ceil();
-    final todayKey = dateKey(DateTime.now());
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final todayKey = dateKey(now);
 
     return AppSheet(
       p: widget.p,
@@ -116,6 +118,11 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                   final available = widget.availableDateKeys.contains(key);
                   final selected = key == dateKey(widget.initialDate);
 
+                  final isFuture = date.isAfter(
+                    DateTime(today.year, today.month, today.day),
+                  );
+                  final isSelectable = !isFuture;
+
                   // iOS Calendar Styling:
                   // 1. The currently selected date gets the solid iOS Red circle (#FF3B30) with bold white text.
                   // 2. When any other date is selected, the red circle moves to that selected date.
@@ -134,6 +141,8 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                     textColor = const Color(0xFFFF3B30);
                   } else if (available) {
                     textColor = widget.p.text;
+                  } else if (isSelectable) {
+                    textColor = widget.p.text.withValues(alpha: 0.72);
                   } else {
                     textColor = widget.p.text3.withValues(alpha: 0.28);
                   }
@@ -141,8 +150,8 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                   return Padding(
                     padding: const EdgeInsets.all(3),
                     child: PressableScale(
-                      enabled: available || isToday,
-                      onTap: available || isToday
+                      enabled: isSelectable,
+                      onTap: isSelectable
                           ? () {
                               HapticFeedback.mediumImpact();
                               Navigator.pop(context, date);
