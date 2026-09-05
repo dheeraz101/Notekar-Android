@@ -149,94 +149,126 @@ class TimelineSessionCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    timeOnly(session.startTimestamp),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-
-                  // Duration Connector
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 1,
-                              color: p.border.withValues(alpha: 0.8),
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isOngoing
-                                  ? p.green.withValues(alpha: 0.15)
-                                  : p.surface3,
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: isOngoing
-                                    ? p.green.withValues(alpha: 0.35)
-                                    : p.border,
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isOngoing) ...[
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: p.green,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                ],
-                                Text(
-                                  isOngoing ? 'LIVE $durationStr' : durationStr,
-                                  style: TextStyle(
-                                    color: isOngoing ? p.green : p.text2,
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w800,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 1,
-                              color: p.border.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // End node (Ruby if ended, Pulsing ring if ongoing)
-                  if (session.endTimestamp != null) ...[
-                    Text(
-                      timeOnly(session.endTimestamp!),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      timeOnly(session.startTimestamp),
                       style: TextStyle(
                         color: p.text,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+
+                  // Duration Connector or Live Activity Pill
+                  if (isOngoing) ...[
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: p.border.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.green.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: p.green.withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: p.green,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'LIVE $durationStr',
+                            style: TextStyle(
+                              color: p.green,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else ...[
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Container(
+                                height: 1,
+                                color: p.border.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: p.surface3,
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: p.border.withValues(alpha: 0.6),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                durationStr,
+                                style: TextStyle(
+                                  color: p.text2,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Container(
+                                height: 1,
+                                color: p.border.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        timeOnly(session.endTimestamp!),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -246,16 +278,6 @@ class TimelineSessionCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: p.red,
                         shape: BoxShape.circle,
-                      ),
-                    ),
-                  ] else ...[
-                    Text(
-                      'IN PROGRESS'.localized(context),
-                      style: TextStyle(
-                        color: p.green,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.4,
                       ),
                     ),
                   ],
@@ -304,6 +326,8 @@ class TimelineSessionCard extends StatelessWidget {
                               )
                             : Text(
                                 'Tap to add session note...'.localized(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: p.text3,
                                   fontSize: 12,

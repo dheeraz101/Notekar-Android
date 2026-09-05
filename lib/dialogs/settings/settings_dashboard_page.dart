@@ -289,15 +289,19 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
             children: [
               Icon(Icons.radar_rounded, color: accentColor, size: 20),
               const SizedBox(width: 8),
-              Text(
-                'Intelligent Risk Radar'.localized(context),
-                style: TextStyle(
-                  color: p.text,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14.5,
+              Expanded(
+                child: Text(
+                  'Intelligent Risk Radar'.localized(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: p.text,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14.5,
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,

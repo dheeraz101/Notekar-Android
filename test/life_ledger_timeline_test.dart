@@ -183,5 +183,42 @@ void main() {
         expect(editNoteCalled, isTrue);
       },
     );
+
+    testWidgets(
+      'TimelineSessionCard ongoing session renders live indicator cleanly without overflow',
+      (tester) async {
+        final inTime = DateTime.now().subtract(const Duration(minutes: 38));
+        final ongoingSession = TimelineSessionItem(
+          inMoment: Moment(
+            id: 10,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: dateKey(DateTime.now()),
+            note: 'Ongoing deep work session',
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: ongoingSession,
+                onEditNote: () {},
+                onDeleteSession: () {},
+              ),
+            ),
+          ),
+        );
+
+        expect(find.textContaining('LIVE'), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (w) => w is IosEmojiText && w.text == 'Ongoing deep work session',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

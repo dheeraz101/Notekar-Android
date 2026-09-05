@@ -142,68 +142,130 @@ class HeroActivityRingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildGlanceMetricRow(
-                  label: 'Total Tracked'.localized(context),
-                  value: data.formattedTotalTracked,
-                  valueColor: p.text,
-                  icon: Icons.timer_outlined,
+                Row(
+                  children: [
+                    Icon(Icons.timer_outlined, size: 14, color: p.accent),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Total Tracked: '.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        data.formattedTotalTracked,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                _buildGlanceMetricRow(
-                  label: 'Moments Logged'.localized(context),
-                  value: '${data.totalMoments} logs',
-                  valueColor: p.text,
-                  icon: Icons.history_toggle_off_rounded,
-                ),
-                const SizedBox(height: 6),
-                _buildGlanceMetricRow(
-                  label: 'Pace'.localized(context),
-                  value: data.paceText,
-                  valueColor: data.paceIsPositive ? p.green : p.orange,
-                  icon: data.paceIsPositive
-                      ? Icons.trending_up_rounded
-                      : Icons.trending_down_rounded,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Moments pill
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.surface3.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: p.border.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.history_toggle_off_rounded,
+                              size: 13,
+                              color: p.text3,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                '${data.totalMoments} logs',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    // Pace pill
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (data.paceIsPositive ? p.green : p.orange)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: (data.paceIsPositive ? p.green : p.orange)
+                                .withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              data.paceIsPositive
+                                  ? Icons.trending_up_rounded
+                                  : Icons.trending_down_rounded,
+                              size: 13,
+                              color: data.paceIsPositive ? p.green : p.orange,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                data.paceText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: data.paceIsPositive
+                                      ? p.green
+                                      : p.orange,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildGlanceMetricRow({
-    required String label,
-    required String value,
-    required Color valueColor,
-    required IconData icon,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: p.text3),
-        const SizedBox(width: 6),
-        Text(
-          '$label: ',
-          style: TextStyle(
-            color: p.text3,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: valueColor,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -321,24 +383,34 @@ class IntelligentTimeSlotBiasCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Text(
-                  slot.name.localized(context),
-                  style: TextStyle(
-                    color: slot.isPeak ? p.text : p.text2,
-                    fontSize: 12,
-                    fontWeight: slot.isPeak ? FontWeight.w800 : FontWeight.w600,
+            Expanded(
+              child: Row(
+                children: [
+                  Text(
+                    slot.name.localized(context),
+                    style: TextStyle(
+                      color: slot.isPeak ? p.text : p.text2,
+                      fontSize: 12,
+                      fontWeight: slot.isPeak
+                          ? FontWeight.w800
+                          : FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '(${slot.rangeLabel})',
-                  style: TextStyle(color: p.text3, fontSize: 11),
-                ),
-              ],
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      '(${slot.rangeLabel})',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: p.text3, fontSize: 11),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '${slot.percentage}%',
@@ -437,15 +509,22 @@ class DailyRhythmBarChart extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         // Duration text above bar
-                        Text(
-                          day.trackedDuration.inHours > 0
-                              ? '${day.trackedDuration.inHours}h'
-                              : (day.count > 0 ? '${day.count}' : '·'),
-                          style: TextStyle(
-                            color: day.isToday ? p.accent : p.text3,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: const [FontFeature.tabularFigures()],
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            day.trackedDuration.inHours > 0
+                                ? '${day.trackedDuration.inHours}h'
+                                : (day.trackedDuration.inMinutes > 0
+                                      ? '${day.trackedDuration.inMinutes}m'
+                                      : (day.count > 0 ? '${day.count}' : '·')),
+                            style: TextStyle(
+                              color: day.isToday ? p.accent : p.text3,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -601,6 +680,8 @@ class FocusTagBreakdownCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     cat.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: p.text,
                       fontSize: 12.5,
@@ -608,6 +689,7 @@ class FocusTagBreakdownCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '${_formatDuration(cat.duration)} (${cat.percentage}%)',
                   style: TextStyle(
@@ -666,20 +748,27 @@ class YearlyActivityGridCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.grid_view_rounded, size: 18, color: p.green),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Activity Grid (Last 90 Days)'.localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.grid_view_rounded, size: 18, color: p.green),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Activity Grid (Last 90 Days)'.localized(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -735,19 +824,23 @@ class YearlyActivityGridCard extends StatelessWidget {
 
           // Streak badges footer
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStreakBadge(
-                icon: Icons.local_fire_department_rounded,
-                color: p.orange,
-                label: 'Current Streak'.localized(context),
-                value: '${stats.currentStreak} days',
+              Expanded(
+                child: _buildStreakCard(
+                  icon: Icons.local_fire_department_rounded,
+                  color: p.orange,
+                  label: 'Current Streak'.localized(context),
+                  value: '${stats.currentStreak} days',
+                ),
               ),
-              _buildStreakBadge(
-                icon: Icons.emoji_events_rounded,
-                color: p.accent,
-                label: 'Longest Streak'.localized(context),
-                value: '${stats.longestStreak} days',
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildStreakCard(
+                  icon: Icons.emoji_events_rounded,
+                  color: p.accent,
+                  label: 'Longest Streak'.localized(context),
+                  value: '${stats.longestStreak} days',
+                ),
               ),
             ],
           ),
@@ -780,27 +873,52 @@ class YearlyActivityGridCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStreakBadge({
+  Widget _buildStreakCard({
     required IconData icon,
     required Color color,
     required String label,
     required String value,
   }) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 5),
-        Text('$label: ', style: TextStyle(color: p.text3, fontSize: 11.5)),
-        Text(
-          value,
-          style: TextStyle(
-            color: p.text,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            fontFeatures: const [FontFeature.tabularFigures()],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: p.surface3.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: p.border.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 13, color: color),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

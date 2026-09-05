@@ -192,6 +192,7 @@ void main() {
                     HeroActivityRingCard(p: p, data: data),
                     IntelligentTimeSlotBiasCard(p: p, data: data.timeSlotBias),
                     DailyRhythmBarChart(p: p, data: data.dailyRhythm),
+                    YearlyActivityGridCard(p: p, stats: data.gridStats),
                   ],
                 ),
               ),
@@ -204,6 +205,9 @@ void main() {
         expect(find.text('Time-Slot Intelligence'), findsOneWidget);
         expect(find.text('★ EVENING'), findsOneWidget);
         expect(find.text('Daily Rhythm (Mon – Sun)'), findsOneWidget);
+        expect(find.text('Activity Grid (Last 90 Days)'), findsOneWidget);
+        expect(find.text('Current Streak'), findsOneWidget);
+        expect(find.text('Longest Streak'), findsOneWidget);
       },
     );
   });

@@ -433,25 +433,24 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                       context,
                                                     ),
                                                     'sessions' =>
-                                                      '🟢 Sessions'.localized(
+                                                      'Sessions'.localized(
                                                         context,
                                                       ),
                                                     'single' =>
-                                                      '⚡ Singles'.localized(
+                                                      'Singles'.localized(
                                                         context,
                                                       ),
                                                     'notes' =>
-                                                      '📝 With Notes'.localized(
+                                                      'With Notes'.localized(
                                                         context,
                                                       ),
-                                                    'date' =>
-                                                      'Select Date'.localized(
-                                                        context,
-                                                      ),
+                                                    'date' => 'Date'.localized(
+                                                      context,
+                                                    ),
                                                     _ => f,
                                                   },
                                             icon: f == 'date'
-                                                ? Icons.calendar_month_rounded
+                                                ? Icons.calendar_today_rounded
                                                 : null,
                                             active: _filter == f,
                                             onTap: f == 'date'
@@ -658,25 +657,32 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today_rounded,
-                                        size: 12,
-                                        color: widget.p.text3,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        sec.displayTitle,
-                                        style: TextStyle(
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today_rounded,
+                                          size: 12,
                                           color: widget.p.text3,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.6,
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            sec.displayTitle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: widget.p.text3,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.6,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                  const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,

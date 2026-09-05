@@ -107,22 +107,23 @@ class TimelineSingleTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Vertical Timeline Rail & Node
+              // Vertical Timeline Rail & Node (Line is never behind the circle or dot)
               SizedBox(
                 width: 28,
-                child: Stack(
-                  alignment: Alignment.center,
+                child: Column(
                   children: [
-                    // Continuous vertical rail line
-                    Positioned(
-                      top: isFirst ? 14 : 0,
-                      bottom: isLast ? 14 : 0,
-                      child: Container(
-                        width: 1.5,
-                        color: p.border.withValues(alpha: 0.6),
-                      ),
+                    // Top rail segment (stops before the node)
+                    Expanded(
+                      child: isFirst
+                          ? const SizedBox()
+                          : Center(
+                              child: Container(
+                                width: 1.5,
+                                color: p.border.withValues(alpha: 0.5),
+                              ),
+                            ),
                     ),
-                    // Timeline Node
+                    // Timeline Node (Solid opaque background, completely isolating from line)
                     Container(
                       width: moment.type == 'single' && singleNumber != null
                           ? 22
@@ -132,9 +133,7 @@ class TimelineSingleTile extends StatelessWidget {
                           : 12,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isGodMode
-                            ? const Color(0xFFFF007A)
-                            : color.withValues(alpha: 0.18),
+                        color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isGodMode ? Colors.white : color,
@@ -146,7 +145,7 @@ class TimelineSingleTile extends StatelessWidget {
                               singleNumber!.localizedDigits(context),
                               style: TextStyle(
                                 color: color,
-                                fontSize: 9,
+                                fontSize: 9.5,
                                 fontWeight: FontWeight.w900,
                                 fontFeatures: const [
                                   FontFeature.tabularFigures(),
@@ -159,6 +158,17 @@ class TimelineSingleTile extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: isGodMode ? Colors.white : color,
                                 shape: BoxShape.circle,
+                              ),
+                            ),
+                    ),
+                    // Bottom rail segment (starts below the node)
+                    Expanded(
+                      child: isLast
+                          ? const SizedBox()
+                          : Center(
+                              child: Container(
+                                width: 1.5,
+                                color: p.border.withValues(alpha: 0.5),
                               ),
                             ),
                     ),
@@ -223,6 +233,8 @@ class TimelineSingleTile extends StatelessWidget {
                                     'Tap to add quick note...'.localized(
                                       context,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: p.text3.withValues(alpha: 0.8),
                                       fontSize: 11.5,
