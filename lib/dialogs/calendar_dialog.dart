@@ -173,34 +173,37 @@ class _MomentCalendarDialogState extends State<MomentCalendarDialog> {
                                 ]
                               : null,
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
-                            Text(
-                              '$day',
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 14.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : (isToday || available
-                                          ? FontWeight.w700
-                                          : FontWeight.w500),
-                              ),
-                            ),
-                            if (!isSelected && available) ...[
-                              const SizedBox(height: 2),
-                              Container(
-                                width: 4,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: isToday
-                                      ? const Color(0xFFFF3B30)
-                                      : widget.p.accent,
-                                  shape: BoxShape.circle,
+                            Center(
+                              child: Text(
+                                '$day',
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14.5,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w800
+                                      : (isToday || available
+                                            ? FontWeight.w700
+                                            : FontWeight.w500),
                                 ),
                               ),
-                            ],
+                            ),
+                            if (!isSelected && available)
+                              Positioned(
+                                bottom: 4,
+                                child: Container(
+                                  width: 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: isToday
+                                        ? const Color(0xFFFF3B30)
+                                        : widget.p.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
