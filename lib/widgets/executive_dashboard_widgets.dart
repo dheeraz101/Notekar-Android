@@ -22,6 +22,9 @@ class TimeframeSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final values = DashboardTimeframe.values;
+    final selectedIndex = values.indexOf(selected);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(3),
@@ -30,49 +33,73 @@ class TimeframeSegmentedControl extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: p.border.withValues(alpha: 0.6)),
       ),
-      child: Row(
-        children: [
-          for (final tf in DashboardTimeframe.values)
-            Expanded(
-              child: PressableScale(
-                onTap: () {
-                  if (tf != selected) {
-                    NotekarHaptics.selection('standard');
-                    onChanged(tf);
-                  }
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tabWidth = constraints.maxWidth / values.length;
+
+          return Stack(
+            children: [
+              // Single sliding thumb indicator (smooth iOS UISegmentedControl physics)
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                left: selectedIndex * tabWidth,
+                top: 0,
+                bottom: 0,
+                width: tabWidth,
+                child: Container(
                   decoration: BoxDecoration(
-                    color: tf == selected ? p.accent : Colors.transparent,
+                    color: p.accent,
                     borderRadius: BorderRadius.circular(999),
-                    boxShadow: tf == selected
-                        ? [
-                            BoxShadow(
-                              color: p.accent.withValues(alpha: 0.25),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    tf.label.localized(context),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: tf == selected ? Colors.white : p.text3,
-                      fontSize: 12.5,
-                      fontWeight: tf == selected
-                          ? FontWeight.w800
-                          : FontWeight.w600,
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: p.accent.withValues(alpha: 0.28),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-        ],
+
+              // Tab text buttons
+              Row(
+                children: [
+                  for (final tf in values)
+                    Expanded(
+                      child: PressableScale(
+                        onTap: () {
+                          if (tf != selected) {
+                            NotekarHaptics.selection('standard');
+                            onChanged(tf);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          alignment: Alignment.center,
+                          color: Colors.transparent,
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 180),
+                            style: TextStyle(
+                              color: tf == selected ? Colors.white : p.text3,
+                              fontSize: 12.5,
+                              fontWeight: tf == selected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                            ),
+                            child: Text(
+                              tf.label.localized(context),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -528,9 +555,10 @@ class DailyRhythmBarChart extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        // Bar
+                        // Bar (Anchored at the bottom so low bars rise from the baseline)
                         Expanded(
                           child: FractionallySizedBox(
+                            alignment: Alignment.bottomCenter,
                             heightFactor: maxMinutes > 0
                                 ? (day.trackedDuration.inMinutes / maxMinutes)
                                       .clamp(0.06, 1.0)
@@ -754,15 +782,28 @@ class YearlyActivityGridCard extends StatelessWidget {
                     Icon(Icons.grid_view_rounded, size: 18, color: p.green),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        'Activity Grid (Last 90 Days)'.localized(context),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: p.text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Activity Grid'.localized(context),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            '(Last 90 Days)'.localized(context),
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

@@ -13,6 +13,7 @@ class TimelineSessionCard extends StatelessWidget {
     required this.session,
     required this.onEditNote,
     required this.onDeleteSession,
+    this.onEndSession,
     this.onTapCard,
     this.onLongPressCard,
     this.selected = false,
@@ -22,6 +23,7 @@ class TimelineSessionCard extends StatelessWidget {
   final TimelineSessionItem session;
   final VoidCallback onEditNote;
   final VoidCallback onDeleteSession;
+  final VoidCallback? onEndSession;
   final VoidCallback? onTapCard;
   final VoidCallback? onLongPressCard;
   final bool selected;
@@ -52,6 +54,7 @@ class TimelineSessionCard extends StatelessWidget {
       ),
       direction: DismissDirection.horizontal,
       background: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 20),
         decoration: BoxDecoration(
@@ -74,6 +77,7 @@ class TimelineSessionCard extends StatelessWidget {
         ),
       ),
       secondaryBackground: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
@@ -211,6 +215,45 @@ class TimelineSessionCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (onEndSession != null) ...[
+                      const SizedBox(width: 6),
+                      PressableScale(
+                        onTap: onEndSession,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: p.red.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: p.red.withValues(alpha: 0.4),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.stop_circle_rounded,
+                                size: 12,
+                                color: p.red,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'End'.localized(context),
+                                style: TextStyle(
+                                  color: p.red,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ] else ...[
                     Expanded(
                       child: Padding(

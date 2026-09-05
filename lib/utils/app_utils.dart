@@ -147,6 +147,25 @@ String compactDateLabel(String value) {
       '${(date.year % 100).toString().padLeft(2, '0')}';
 }
 
+String fullDateLabel(String value) {
+  final date = dateFromKey(value);
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
+}
+
 String monthLabel(DateTime value) {
   const months = [
     'January',

@@ -46,6 +46,7 @@ class TimelineSingleTile extends StatelessWidget {
           ? DismissDirection.none
           : DismissDirection.horizontal,
       background: Container(
+        margin: const EdgeInsets.symmetric(vertical: 3),
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 20),
         decoration: BoxDecoration(
@@ -68,6 +69,7 @@ class TimelineSingleTile extends StatelessWidget {
         ),
       ),
       secondaryBackground: Container(
+        margin: const EdgeInsets.symmetric(vertical: 3),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
@@ -101,166 +103,156 @@ class TimelineSingleTile extends StatelessWidget {
           return false;
         }
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Vertical Timeline Rail & Node (Line is never behind the circle or dot)
-              SizedBox(
-                width: 28,
-                child: Column(
-                  children: [
-                    // Top rail segment (stops before the node)
-                    Expanded(
-                      child: isFirst
-                          ? const SizedBox()
-                          : Center(
-                              child: Container(
-                                width: 1.5,
-                                color: p.border.withValues(alpha: 0.5),
-                              ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Vertical Timeline Rail & Node (Line is never behind the circle or dot)
+            SizedBox(
+              width: 28,
+              child: Column(
+                children: [
+                  // Top rail segment (stops before the node)
+                  Expanded(
+                    child: isFirst
+                        ? const SizedBox()
+                        : Center(
+                            child: Container(
+                              width: 1.5,
+                              color: p.border.withValues(alpha: 0.5),
                             ),
-                    ),
-                    // Timeline Node (Solid opaque background, completely isolating from line)
-                    Container(
-                      width: moment.type == 'single' && singleNumber != null
-                          ? 22
-                          : 12,
-                      height: moment.type == 'single' && singleNumber != null
-                          ? 22
-                          : 12,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isGodMode ? Colors.white : color,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: moment.type == 'single' && singleNumber != null
-                          ? Text(
-                              singleNumber!.localizedDigits(context),
-                              style: TextStyle(
-                                color: color,
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w900,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              width: 5,
-                              height: 5,
-                              decoration: BoxDecoration(
-                                color: isGodMode ? Colors.white : color,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                    ),
-                    // Bottom rail segment (starts below the node)
-                    Expanded(
-                      child: isLast
-                          ? const SizedBox()
-                          : Center(
-                              child: Container(
-                                width: 1.5,
-                                color: p.border.withValues(alpha: 0.5),
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // Content Bubble
-              Expanded(
-                child: PressableScale(
-                  onTap: onTap ?? onEditNote,
-                  onLongPress: onLongPress,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? p.surface3
-                          : p.surface2.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: selected
-                            ? p.accent.withValues(alpha: 0.4)
-                            : p.border.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          timeOnly(moment.timestamp),
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
+                  ),
+                  // Timeline Node (Solid opaque background, completely isolating from line)
+                  Container(
+                    width: moment.type == 'single' && singleNumber != null
+                        ? 22
+                        : 12,
+                    height: moment.type == 'single' && singleNumber != null
+                        ? 22
+                        : 12,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isGodMode ? Colors.white : color,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: moment.type == 'single' && singleNumber != null
+                        ? Text(
+                            singleNumber!.localizedDigits(context),
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: isGodMode ? Colors.white : color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                  ),
+                  // Bottom rail segment (starts below the node)
+                  Expanded(
+                    child: isLast
+                        ? const SizedBox()
+                        : Center(
+                            child: Container(
+                              width: 1.5,
+                              color: p.border.withValues(alpha: 0.5),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            // Content Bubble
+            Expanded(
+              child: PressableScale(
+                onTap: onTap ?? onEditNote,
+                onLongPress: onLongPress,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? p.surface3
+                        : p.surface2.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: selected
+                          ? p.accent.withValues(alpha: 0.4)
+                          : p.border.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        timeOnly(moment.timestamp),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '•',
-                          style: TextStyle(color: p.text3, fontSize: 12),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: hasNote
-                              ? IosEmojiText(
-                                  moment.note,
+                      ),
+                      const SizedBox(width: 8),
+                      Text('•', style: TextStyle(color: p.text3, fontSize: 12)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: hasNote
+                            ? IosEmojiText(
+                                moment.note,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: p.text2, fontSize: 12),
+                              )
+                            : GestureDetector(
+                                onTap: onEditNote,
+                                child: Text(
+                                  'Tap to add quick note...'.localized(context),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: p.text2,
-                                    fontSize: 12,
-                                  ),
-                                )
-                              : GestureDetector(
-                                  onTap: onEditNote,
-                                  child: Text(
-                                    'Tap to add quick note...'.localized(
-                                      context,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: p.text3.withValues(alpha: 0.8),
-                                      fontSize: 11.5,
-                                      fontStyle: FontStyle.italic,
-                                    ),
+                                    color: p.text3.withValues(alpha: 0.8),
+                                    fontSize: 11.5,
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
-                        ),
-                        if (hasNote) ...[
-                          const SizedBox(width: 4),
-                          PressableScale(
-                            onTap: onEditNote,
-                            child: Icon(
-                              Icons.edit_outlined,
-                              size: 14,
-                              color: p.text3,
-                            ),
+                              ),
+                      ),
+                      if (hasNote) ...[
+                        const SizedBox(width: 4),
+                        PressableScale(
+                          onTap: onEditNote,
+                          child: Icon(
+                            Icons.edit_outlined,
+                            size: 14,
+                            color: p.text3,
                           ),
-                        ],
+                        ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

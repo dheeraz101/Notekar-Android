@@ -28,32 +28,46 @@ class ChipButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasLabel = label != null && label!.isNotEmpty;
+    final hasIcon = icon != null;
+
     return PressableScale(
       onTap: onTap,
       onLongPress: onLongPress,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        padding: EdgeInsets.symmetric(
+          horizontal: (hasIcon && !hasLabel) ? 11 : 14,
+          vertical: 9,
+        ),
         decoration: BoxDecoration(
           color: active ? p.surface3 : p.surface2,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: active ? p.accent : p.border),
           boxShadow: active ? selectedGlow(p.accent) : null,
         ),
-        child: icon == null
-            ? Text(
-                (label ?? '').localized(context),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (hasIcon) ...[
+              Icon(
+                icon,
+                color: active ? p.text : p.text2,
+                size: 16,
+                semanticLabel: semanticLabel,
+              ),
+              if (hasLabel) const SizedBox(width: 6),
+            ],
+            if (hasLabel)
+              Text(
+                label!.localized(context),
                 style: TextStyle(
                   color: active ? p.text : p.text2,
                   fontWeight: FontWeight.w800,
                   fontSize: 12,
                 ),
-              )
-            : Icon(
-                icon,
-                color: active ? p.text : p.text2,
-                size: 17,
-                semanticLabel: semanticLabel,
               ),
+          ],
+        ),
       ),
     );
   }

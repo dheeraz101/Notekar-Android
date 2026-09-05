@@ -1185,7 +1185,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _lastDeletedPreview = null;
       if (_nextId <= entry.id) _nextId = entry.id + 1;
+      if (_mode == 'two-way' && _entries.first.id == entry.id) {
+        if (entry.type == 'out') {
+          _inout = 'in';
+          _sessionStart = null;
+        } else if (entry.type == 'in') {
+          _inout = 'out';
+          _sessionStart = entry.timestamp;
+        }
+      }
     });
+    if (_mode == 'two-way' && _entries.first.id == entry.id) {
+      if (_sessionStart == null) {
+        await _prefs?.remove('m-ses');
+      } else {
+        await _saveSetting('m-ses', _sessionStart!);
+      }
+      await _saveSetting('m-inout', _inout);
+    }
     await _saveEntry(entry);
     unawaited(_updateAndroidWidget());
   }

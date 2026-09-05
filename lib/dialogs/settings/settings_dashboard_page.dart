@@ -180,7 +180,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: p.border.withValues(alpha: 0.5)),
       ),
       child: Column(
@@ -279,7 +279,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: accentColor.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -350,7 +350,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: p.accent.withValues(alpha: 0.3)),
       ),
       child: Column(

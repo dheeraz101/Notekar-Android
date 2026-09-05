@@ -220,5 +220,51 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      'TimelineSessionCard ongoing session renders End button and triggers callback',
+      (tester) async {
+        final inTime = DateTime.now().subtract(const Duration(minutes: 20));
+        final ongoingSession = TimelineSessionItem(
+          inMoment: Moment(
+            id: 20,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: dateKey(DateTime.now()),
+            note: 'Live study session',
+          ),
+        );
+
+        bool endSessionCalled = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: ongoingSession,
+                onEditNote: () {},
+                onDeleteSession: () {},
+                onEndSession: () => endSessionCalled = true,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('End'), findsOneWidget);
+        expect(find.byIcon(Icons.stop_circle_rounded), findsOneWidget);
+
+        await tester.tap(find.text('End'));
+        await tester.pump();
+
+        expect(endSessionCalled, isTrue);
+      },
+    );
+
+    test('fullDateLabel formats correctly', () {
+      expect(fullDateLabel('2026-09-05'), '05 Sep 2026');
+      expect(fullDateLabel('2026-01-01'), '01 Jan 2026');
+      expect(fullDateLabel('2026-12-31'), '31 Dec 2026');
+    });
   });
 }

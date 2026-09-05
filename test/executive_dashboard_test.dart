@@ -205,7 +205,8 @@ void main() {
         expect(find.text('Time-Slot Intelligence'), findsOneWidget);
         expect(find.text('★ EVENING'), findsOneWidget);
         expect(find.text('Daily Rhythm (Mon – Sun)'), findsOneWidget);
-        expect(find.text('Activity Grid (Last 90 Days)'), findsOneWidget);
+        expect(find.text('Activity Grid'), findsOneWidget);
+        expect(find.text('(Last 90 Days)'), findsOneWidget);
         expect(find.text('Current Streak'), findsOneWidget);
         expect(find.text('Longest Streak'), findsOneWidget);
       },

@@ -422,12 +422,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           ),
                                           child: ChipButton(
                                             p: widget.p,
-                                            label:
-                                                f == 'date' &&
-                                                    _selectedDateKey != null
-                                                ? compactDateLabel(
-                                                    _selectedDateKey!,
-                                                  )
+                                            label: f == 'date'
+                                                ? (_selectedDateKey != null &&
+                                                          _selectedDateKey !=
+                                                              dateKey(
+                                                                DateTime.now(),
+                                                              )
+                                                      ? fullDateLabel(
+                                                          _selectedDateKey!,
+                                                        )
+                                                      : null)
                                                 : switch (f) {
                                                     'all' => 'All'.localized(
                                                       context,
@@ -444,9 +448,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                       'With Notes'.localized(
                                                         context,
                                                       ),
-                                                    'date' => 'Date'.localized(
-                                                      context,
-                                                    ),
                                                     _ => f,
                                                   },
                                             icon: f == 'date'
@@ -454,21 +455,23 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                 : null,
                                             active: _filter == f,
                                             onTap: f == 'date'
-                                                ? (_selectedDateKey == null
-                                                      ? _openDateFilter
-                                                      : () {
-                                                          setState(() {
-                                                            _filter = 'date';
-                                                            _visibleCount =
-                                                                _pageSize;
-                                                            _rebuildMemoizedLists();
-                                                          });
-                                                          if (_scrollController
-                                                              .hasClients) {
-                                                            _scrollController
-                                                                .jumpTo(0.0);
-                                                          }
-                                                        })
+                                                ? () {
+                                                    if (_filter == 'date') {
+                                                      _openDateFilter();
+                                                    } else {
+                                                      setState(() {
+                                                        _filter = 'date';
+                                                        _visibleCount =
+                                                            _pageSize;
+                                                        _rebuildMemoizedLists();
+                                                      });
+                                                      if (_scrollController
+                                                          .hasClients) {
+                                                        _scrollController
+                                                            .jumpTo(0.0);
+                                                      }
+                                                    }
+                                                  }
                                                 : () {
                                                     setState(() {
                                                       _filter = f;
@@ -731,6 +734,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 onEditNote: () =>
                                     _openDirectNoteEditor(session.inMoment),
                                 onDeleteSession: () => _removeSession(session),
+                                onEndSession: session.isOngoing
+                                    ? () => _endLiveSession(session)
+                                    : null,
                                 onTapCard: _selected.isNotEmpty
                                     ? () => _handleSelection(
                                         session.inMoment,
@@ -1042,6 +1048,30 @@ class _HistoryDialogState extends State<HistoryDialog> {
     for (final id in ids) {
       unawaited(widget.onDelete(id));
     }
+  }
+
+  Future<void> _endLiveSession(TimelineSessionItem session) async {
+    NotekarHaptics.success('standard');
+    final now = DateTime.now();
+    final effectiveTimestamp = math.max(
+      now.millisecondsSinceEpoch,
+      session.startTimestamp + 1000,
+    );
+    final outEntry = Moment(
+      id: effectiveTimestamp,
+      timestamp: effectiveTimestamp,
+      type: 'out',
+      date: dateKey(DateTime.fromMillisecondsSinceEpoch(effectiveTimestamp)),
+      note: '',
+    );
+    setState(() {
+      _entries = [outEntry, ..._entries]
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _rebuildMemoizedLists();
+    });
+    _showNotice('Session ended'.localized(context));
+    await widget.onRestore(outEntry);
   }
 
   void _restoreRemovedEntries(List<Moment> moments) {
