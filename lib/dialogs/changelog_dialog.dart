@@ -190,26 +190,27 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
 
           const SizedBox(height: 14),
 
-          // Detailed Release Items with Expressive Bullet Icons
-          SettingsGroup(
-            p: p,
-            title: 'Version Highlights & Changes'
-                .localized(context)
-                .toUpperCase(),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    for (final item in _currentItems)
-                      _buildChangelogItem(context, p, item),
-                  ],
+          // Detailed Release Items with Expressive Bullet Icons (Exclusive to full changelog)
+          if (!widget.latestOnly) ...[
+            SettingsGroup(
+              p: p,
+              title: 'Version Highlights & Changes'
+                  .localized(context)
+                  .toUpperCase(),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      for (final item in _currentItems)
+                        _buildChangelogItem(context, p, item),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
+              ],
+            ),
+            const SizedBox(height: 14),
+          ],
 
           // Web Archive Callout Card
           Container(
@@ -468,14 +469,17 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      item.title.localized(context),
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Text(
+                        item.title.localized(context),
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,

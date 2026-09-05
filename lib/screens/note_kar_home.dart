@@ -36,6 +36,7 @@ import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
+import 'package:notekar/widgets/home_top_insights_pill.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
@@ -776,24 +777,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
     final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
-    final lastSeenVersion = prefs.getString(_lastSeenVersionKey) ?? '';
-    final remindersWalkthroughSeen =
-        prefs.getBool('notekar.remindersWalkthroughSeen') ?? false;
-    final securityWalkthroughSeen =
-        prefs.getBool('notekar.securityWalkthroughSeen_v5') ?? false;
-    final networkWalkthroughSeen =
-        prefs.getBool('notekar.networkWalkthroughSeen_v5') ?? false;
-    final sobrietyWalkthroughSeen =
-        prefs.getBool('notekar.sobrietyWalkthroughSeen_v6') ?? false;
-    final singleNumberingWalkthroughSeen =
-        prefs.getBool('notekar.singleNumberingWalkthroughSeen_v7') ?? false;
-    final appIconsWalkthroughSeen =
-        prefs.getBool('notekar.appIconsWalkthroughSeen_v9') ?? false;
-    final mindfulnessWalkthroughSeen =
-        prefs.getBool('notekar.mindfulnessWalkthroughSeen_v10') ?? false;
-
-    final isNewVersion =
-        lastSeenVersion.isNotEmpty && lastSeenVersion != appVersion;
 
     if (!welcomeSeen) {
       // 1. New Users: Show full onboarding flow with all pages
@@ -903,125 +886,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
       await prefs.setBool('notekar.mindfulnessWalkthroughSeen_v10', true);
     } else {
-      // 2. Upgraded Users: Dynamically compile ONLY newly introduced feature cards
-      final List<String> upgradePages = [];
-      if (!mindfulnessWalkthroughSeen) upgradePages.add('mindfulness');
-      if (!appIconsWalkthroughSeen) upgradePages.add('app-icons');
-      if (!securityWalkthroughSeen) upgradePages.add('security');
-      if (!remindersWalkthroughSeen) {
-        upgradePages.add('repo-move');
-        upgradePages.add('reminders');
-      }
-      if (!networkWalkthroughSeen) upgradePages.add('network-monitor');
-      if (!sobrietyWalkthroughSeen) upgradePages.add('sobriety');
-      if (!singleNumberingWalkthroughSeen) upgradePages.add('numbered-singles');
-
-      if (upgradePages.isNotEmpty) {
-        if (!mounted) return;
-        await Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => WelcomeScreen(
-              p: p,
-              theme: _theme,
-              defaultMode: _defaultMode,
-              currentLocale: _locale,
-              appIconStyle: _appIconStyle,
-              useNumbersInSingle: _useNumbersInSingle,
-              resetSingleDaily: _resetSingleDaily,
-              countOnSave: _countOnSave,
-              enableSobrietyMode: _enableSobrietyMode,
-              sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
-              compactHistory: _compactHistory,
-              onAppIconStyle: (value) async {
-                setState(() => _appIconStyle = value);
-                await _setAppIconStyle(value, showToast: false);
-              },
-              onLocaleChanged: (value) {
-                NoteKarApp.of(context)?.setLocale(value);
-                setState(() => _locale = value);
-              },
-              onTheme: (value) {
-                setState(() => _theme = value);
-                _saveSetting('m-theme', value);
-                _applySystemUiStyle();
-              },
-              onDefaultMode: (value) {
-                setState(() => _defaultMode = value);
-                _saveSetting('m-default-mode', value);
-              },
-              onUseNumbersInSingle: (value) {
-                setState(() => _useNumbersInSingle = value);
-                _saveSetting('m-use-numbers-in-single', value);
-              },
-              onResetSingleDaily: (value) {
-                setState(() => _resetSingleDaily = value);
-                _saveSetting('m-reset-single-daily', value);
-              },
-              onCountOnSave: (value) {
-                setState(() => _countOnSave = value);
-                _saveSetting('m-count-on-save', value);
-              },
-              onSobrietyMode: (value) {
-                setState(() => _enableSobrietyMode = value);
-                _prefs?.setBool('enable_sobriety_mode', value);
-              },
-              onSobrietyMilestoneTheme: (value) {
-                setState(() => _sobrietyMilestoneTheme = value);
-                _prefs?.setString('sobriety_milestone_theme', value);
-              },
-              onCompactHistory: (value) {
-                setState(() {
-                  _compactHistory = value;
-                  _historyDensity = value ? 'compact' : 'comfortable';
-                });
-                _saveSetting('m-compact-history', value);
-                _saveSetting('m-history-density', _historyDensity);
-              },
-              pages: upgradePages,
-            ),
-          ),
-        );
-        if (mounted) {
-          setState(() {
-            _useNumbersInSingle =
-                prefs.getBool('m-use-numbers-in-single') ?? _useNumbersInSingle;
-            _resetSingleDaily =
-                prefs.getBool('m-reset-single-daily') ?? _resetSingleDaily;
-            _countOnSave = prefs.getBool('m-count-on-save') ?? _countOnSave;
-            _enableSobrietyMode =
-                prefs.getBool('enable_sobriety_mode') ?? _enableSobrietyMode;
-            _sobrietyMilestoneTheme =
-                prefs.getString('sobriety_milestone_theme') ??
-                _sobrietyMilestoneTheme;
-            _compactHistory =
-                prefs.getBool('m-compact-history') ?? _compactHistory;
-            _historyDensity =
-                prefs.getString('m-history-density') ?? _historyDensity;
-            _appIconStyle =
-                prefs.getString('m-app-icon-style') ?? _appIconStyle;
-          });
-        }
-      } else if (isNewVersion) {
-        // If version updated but standalone feature cards were already seen, show the What's New Hero sheet
-        if (!mounted) return;
-        await showGeneralDialog<void>(
-          context: context,
-          barrierColor: Colors.black.withValues(alpha: 0.42),
-          barrierDismissible: true,
-          barrierLabel: 'Close What\'s New',
-          transitionDuration: const Duration(milliseconds: 180),
-          pageBuilder: (_, _, _) => ChangelogDialog(
-            p: p,
-            latestOnly: true,
-            blur:
-                !_reduceMotion &&
-                _enableTranslucency &&
-                AdaptiveEngine().supportsBlur,
-          ),
-        );
-      }
-
-      // Mark version & walkthroughs as seen for this version
+      // 2. Upgraded Users: Update version tracking silently without interrupting the user
       await prefs.setString(_lastSeenVersionKey, appVersion);
       await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
@@ -3906,13 +3771,32 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ),
             ),
 
-          if (_enableSobrietyMode)
-            Positioned(
-              top: spacing16 + MediaQuery.paddingOf(context).top,
-              left: spacing16,
-              right: spacing16,
-              child: _buildSobrietyStreakCard(palette),
+          Positioned(
+            top: spacing16 + MediaQuery.paddingOf(context).top,
+            left: spacing16,
+            right: spacing16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_enableSobrietyMode) ...[
+                  _buildSobrietyStreakCard(palette),
+                  const SizedBox(height: spacing8),
+                ],
+                RepaintBoundary(
+                  child: HomeTopInsightsPill(
+                    p: palette,
+                    entries: _entries,
+                    blur:
+                        _enableTranslucency &&
+                        AdaptiveEngine().supportsBlur &&
+                        !_reduceMotion,
+                    onTap: () =>
+                        unawaited(_openSettings(initialCategory: 'Dashboard')),
+                  ),
+                ),
+              ],
             ),
+          ),
           if (lastSaved && _showLastSavedHint)
             Positioned(
               left: 0,
@@ -3945,6 +3829,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     motionX: motion.dx,
                     motionY: motion.dy,
                     showHistoryText: _showHistoryText,
+                    lastTimestamp: _entries.isNotEmpty
+                        ? formatTimeShort(_entries.first.timestamp)
+                        : null,
                     blur:
                         _enableTranslucency &&
                         AdaptiveEngine().supportsBlur &&

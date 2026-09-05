@@ -1198,6 +1198,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _openCategory(String name, {String? parent}) {
+    NotekarHaptics.selection(hapticStyle);
     if (name == 'Network Monitor') {
       _loadNetworkLogs();
     }
@@ -1218,6 +1219,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _popCategory() {
+    NotekarHaptics.selection(hapticStyle);
     if (category == 'Search') {
       setState(() {
         _settingsQuery = '';

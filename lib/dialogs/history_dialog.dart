@@ -272,7 +272,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
       removeBottomPadding: true,
       leadingAction: widget.onClearAll != null && _entries.isNotEmpty
           ? PressableScale(
-              onTap: _confirmDeleteAll,
+              onTap: () {
+                AppHaptics.heavy();
+                _confirmDeleteAll();
+              },
               child: Container(
                 width: 36,
                 height: 36,

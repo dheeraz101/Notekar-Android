@@ -22,6 +22,7 @@ class Toolbar extends StatelessWidget {
     required this.motionX,
     required this.motionY,
     required this.showHistoryText,
+    this.lastTimestamp,
     this.blur = false,
   });
 
@@ -37,10 +38,12 @@ class Toolbar extends StatelessWidget {
   final double motionX;
   final double motionY;
   final bool showHistoryText;
+  final String? lastTimestamp;
   final bool blur;
 
   @override
   Widget build(BuildContext context) {
+    final historyLabel = lastTimestamp ?? 'History';
     if (showLabels) {
       final labeledRow = Padding(
         padding: EdgeInsets.all(showBackgroundPill ? spacing8 : 0),
@@ -60,7 +63,7 @@ class Toolbar extends StatelessWidget {
               Expanded(
                 child: TextToolButton(
                   p: p,
-                  label: showHistoryText ? 'History' : '',
+                  label: showHistoryText ? historyLabel : '',
                   icon: showHistoryText ? null : CupertinoIcons.clock,
                   blur: blur,
                   onTap: onHistory,
@@ -137,7 +140,7 @@ class Toolbar extends StatelessWidget {
                           ),
                           const SizedBox(width: spacing8),
                           Text(
-                            'History',
+                            historyLabel,
                             style: TextStyle(
                               color: p.text,
                               fontWeight: FontWeight.w700,

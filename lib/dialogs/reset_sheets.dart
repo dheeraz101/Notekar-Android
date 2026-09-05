@@ -96,7 +96,10 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context, false),
+                    onPressed: () {
+                      NotekarHaptics.selection('standard');
+                      Navigator.pop(context, false);
+                    },
                     child: Text(
                       'Cancel'.localized(context),
                       style: const TextStyle(fontWeight: FontWeight.w700),
@@ -117,7 +120,10 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
                       ),
                     ),
                     onPressed: _canReset
-                        ? () => Navigator.pop(context, true)
+                        ? () {
+                            NotekarHaptics.selection('standard');
+                            Navigator.pop(context, true);
+                          }
                         : null,
                     child: Text(
                       'Reset'.localized(context),
@@ -384,7 +390,10 @@ class ActionConfirmSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context, false),
+                    onPressed: () {
+                      NotekarHaptics.selection('standard');
+                      Navigator.pop(context, false);
+                    },
                     child: Text(
                       'Cancel'.localized(context),
                       style: const TextStyle(fontWeight: FontWeight.w700),
@@ -404,7 +413,10 @@ class ActionConfirmSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context, true),
+                    onPressed: () {
+                      NotekarHaptics.selection('standard');
+                      Navigator.pop(context, true);
+                    },
                     child: Text(
                       confirmLabel.localized(context),
                       style: const TextStyle(fontWeight: FontWeight.w800),

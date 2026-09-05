@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -237,6 +238,7 @@ class _HeaderCircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressableScale(
       onTap: () {
+        HapticFeedback.selectionClick();
         NotekarHaptics.selection('standard');
         onTap();
       },

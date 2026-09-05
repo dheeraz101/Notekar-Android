@@ -172,6 +172,11 @@ String timeOnly(int timestamp) {
       '${d.second.toString().padLeft(2, '0')}';
 }
 
+String formatTimeShort(int timestamp) {
+  final d = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+}
+
 String datePretty(int timestamp) {
   final d = DateTime.fromMillisecondsSinceEpoch(timestamp);
   return '${d.day.toString().padLeft(2, '0')}/'
