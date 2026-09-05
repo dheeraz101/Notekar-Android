@@ -3,15 +3,16 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/daily_wisdom_service.dart';
+import 'package:notekar/utils/dashboard_metrics_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/risk_radar_service.dart';
 import 'package:notekar/utils/user_rank_service.dart';
-import 'package:notekar/widgets/activity_heatmap_widget.dart';
+import 'package:notekar/widgets/executive_dashboard_widgets.dart';
 import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SettingsDashboardPage extends StatelessWidget {
+class SettingsDashboardPage extends StatefulWidget {
   const SettingsDashboardPage({
     super.key,
     required this.p,
@@ -28,7 +29,26 @@ class SettingsDashboardPage extends StatelessWidget {
   final VoidCallback onLearnMoreBeta;
 
   @override
+  State<SettingsDashboardPage> createState() => _SettingsDashboardPageState();
+}
+
+class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
+  DashboardTimeframe _timeframe = DashboardTimeframe.week;
+
+  Palette get p => widget.p;
+
+  List<Moment> get entries => widget.entries;
+
+  bool get enableSobrietyMode => widget.enableSobrietyMode;
+
+  @override
   Widget build(BuildContext context) {
+    final dashboardData = DashboardMetricsService.calculate(
+      entries: entries,
+      timeframe: _timeframe,
+      p: p,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,10 +56,15 @@ class SettingsDashboardPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.'
+              'Executive activity intelligence hub featuring time-slot rhythm, focus tag distribution, connected session durations, and 90-day consistency matrix.'
                   .localized(context),
         ),
-        AnomalyAlertCard(p: p, entries: entries, onLogNow: onLogNow),
+        TimeframeSegmentedControl(
+          p: p,
+          selected: _timeframe,
+          onChanged: (tf) => setState(() => _timeframe = tf),
+        ),
+        AnomalyAlertCard(p: p, entries: entries, onLogNow: widget.onLogNow),
         if (entries.isNotEmpty &&
             DateTime.now()
                     .difference(
@@ -56,31 +81,16 @@ class SettingsDashboardPage extends StatelessWidget {
           _buildRiskRadarCard(context),
           const SizedBox(height: 6),
         ],
-        _buildDashboardSectionHeader('Real-time Metrics'),
-        ActivitySummaryCard(p: p, entries: entries),
-        const SizedBox(height: 8),
-        _buildDashboardSectionHeader('Habit Frequency & Trends'),
-        RepaintBoundary(
-          child: ActivityTrendsCard(p: p, entries: entries),
-        ),
-        const SizedBox(height: 6),
-        RepaintBoundary(
-          child: ActivityHeatmapWidget(p: p, entries: entries),
-        ),
-        const SizedBox(height: 6),
-        RepaintBoundary(
-          child: ActivityHeatmapCard(p: p, entries: entries),
-        ),
-        const SizedBox(height: 8),
-        _buildDashboardSectionHeader('Correlation Intelligence'),
-        RepaintBoundary(
-          child: IntelligentInsightsCard(p: p, entries: entries),
-        ),
+        HeroActivityRingCard(p: p, data: dashboardData),
+        IntelligentTimeSlotBiasCard(p: p, data: dashboardData.timeSlotBias),
+        DailyRhythmBarChart(p: p, data: dashboardData.dailyRhythm),
+        FocusTagBreakdownCard(p: p, data: dashboardData.focusBreakdown),
+        YearlyActivityGridCard(p: p, stats: dashboardData.gridStats),
         SettingsBetaNote(
           p: p,
           text: 'The current features on this page are under Beta stage.'
               .localized(context),
-          onLearnMore: onLearnMoreBeta,
+          onLearnMore: widget.onLearnMoreBeta,
         ),
         const SizedBox(height: spacing48),
       ],
@@ -509,27 +519,6 @@ class SettingsDashboardPage extends StatelessWidget {
               color: p.text,
               fontSize: 13,
               fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDashboardSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 6, top: 16, bottom: 6),
-      child: Row(
-        children: [
-          Icon(Icons.analytics_outlined, color: p.accent, size: 15),
-          const SizedBox(width: 8),
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              color: p.text3,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.8,
             ),
           ),
         ],

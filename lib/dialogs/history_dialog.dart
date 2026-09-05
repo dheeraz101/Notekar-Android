@@ -7,6 +7,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/calendar_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
+import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -14,8 +15,9 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
-import 'package:notekar/widgets/moment_tile.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/timeline_session_card.dart';
+import 'package:notekar/widgets/timeline_single_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryDialog extends StatefulWidget {
@@ -58,6 +60,22 @@ class HistoryDialog extends StatefulWidget {
   State<HistoryDialog> createState() => _HistoryDialogState();
 }
 
+sealed class _TimelineRowItem {}
+
+class _SectionHeaderRow extends _TimelineRowItem {
+  _SectionHeaderRow(this.section);
+
+  final TimelineDaySection section;
+}
+
+class _TimelineElementRow extends _TimelineRowItem {
+  _TimelineElementRow(this.item, {this.isFirst = false, this.isLast = false});
+
+  final TimelineItem item;
+  final bool isFirst;
+  final bool isLast;
+}
+
 class _HistoryDialogState extends State<HistoryDialog> {
   static const _pageSize = 100;
   String _filter = 'all';
@@ -75,7 +93,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   // Memoized lists & number maps
   List<Moment> _filteredEntries = [];
-  List<HistoryListItem> _listItems = [];
+  List<TimelineDaySection> _daySections = [];
+  List<_TimelineRowItem> _allTimelineRows = [];
+  List<_TimelineRowItem> _timelineRows = [];
   Map<int, String> _singleNumberMap = {};
 
   @override
@@ -138,29 +158,80 @@ class _HistoryDialogState extends State<HistoryDialog> {
         ).isAfter(weekAgo);
       }
       if (_filter == 'date') return e.date == _selectedDateKey;
+      if (_filter == 'sessions') return e.type == 'in' || e.type == 'out';
       if (_filter == 'in') return e.type == 'in';
       if (_filter == 'out') return e.type == 'out';
       if (_filter == 'single') return e.type == 'single';
-      if (_filter == 'notes') return e.note.isNotEmpty;
+      if (_filter == 'notes') return e.note.trim().isNotEmpty;
       return true;
     }).toList();
 
+    var sections = buildTimelineDaySections(_filteredEntries);
+    if (_filter == 'sessions') {
+      sections = sections
+          .map(
+            (s) => TimelineDaySection(
+              dateKey: s.dateKey,
+              date: s.date,
+              displayTitle: s.displayTitle,
+              totalTrackedDuration: s.totalTrackedDuration,
+              totalLogs: s.totalLogs,
+              items: s.items.whereType<TimelineSessionItem>().toList(),
+            ),
+          )
+          .where((s) => s.items.isNotEmpty)
+          .toList();
+    } else if (_filter == 'single') {
+      sections = sections
+          .map(
+            (s) => TimelineDaySection(
+              dateKey: s.dateKey,
+              date: s.date,
+              displayTitle: s.displayTitle,
+              totalTrackedDuration: s.totalTrackedDuration,
+              totalLogs: s.totalLogs,
+              items: s.items.whereType<TimelineSingleItem>().toList(),
+            ),
+          )
+          .where((s) => s.items.isNotEmpty)
+          .toList();
+    } else if (_filter == 'notes') {
+      sections = sections
+          .map(
+            (s) => TimelineDaySection(
+              dateKey: s.dateKey,
+              date: s.date,
+              displayTitle: s.displayTitle,
+              totalTrackedDuration: s.totalTrackedDuration,
+              totalLogs: s.totalLogs,
+              items: s.items.where((it) => it.note.isNotEmpty).toList(),
+            ),
+          )
+          .where((s) => s.items.isNotEmpty)
+          .toList();
+    }
+
+    _daySections = sections;
+    final allRows = <_TimelineRowItem>[];
+    for (final sec in _daySections) {
+      if (sec.items.isEmpty) continue;
+      allRows.add(_SectionHeaderRow(sec));
+      for (int i = 0; i < sec.items.length; i++) {
+        allRows.add(
+          _TimelineElementRow(
+            sec.items[i],
+            isFirst: i == 0,
+            isLast: i == sec.items.length - 1,
+          ),
+        );
+      }
+    }
+    _allTimelineRows = allRows;
     _updateVisibleItems();
   }
 
   void _updateVisibleItems() {
-    final rows = _filteredEntries.take(_visibleCount).toList();
-    final items = <HistoryListItem>[];
-    String? lastLabel;
-    for (final row in rows) {
-      final label = historySectionLabel(row.timestamp);
-      if (label != lastLabel) {
-        items.add(HistoryListItem.header(label));
-        lastLabel = label;
-      }
-      items.add(HistoryListItem.moment(row));
-    }
-    _listItems = items;
+    _timelineRows = _allTimelineRows.take(_visibleCount).toList();
   }
 
   @override
@@ -186,13 +257,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
     });
   }
 
-  bool get _hasOlderRows => _visibleCount < _filteredEntries.length;
+  bool get _hasOlderRows => _visibleCount < _allTimelineRows.length;
 
   IconData get _emptyIcon {
     return switch (_filter) {
       'today' => Icons.today_rounded,
       'week' => Icons.date_range_rounded,
       'date' => Icons.event_busy_rounded,
+      'sessions' => Icons.hourglass_empty_rounded,
       'in' => Icons.login_rounded,
       'out' => Icons.logout_rounded,
       'single' => Icons.radio_button_checked_rounded,
@@ -206,6 +278,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'today' => 'Nothing Today',
       'week' => 'Clean Week',
       'date' => 'Empty Date',
+      'sessions' => 'No Sessions',
       'in' => 'No IN Moments',
       'out' => 'No OUT Moments',
       'single' => 'No Single Logs',
@@ -219,6 +292,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'today' => 'Your moments for today will appear here as you log them.',
       'week' => 'You haven\'t saved any moments during the last seven days.',
       'date' => 'There are no records for this specific calendar day.',
+      'sessions' =>
+        'Two-Way IN and OUT moments are automatically grouped into sessions.',
       'in' => 'IN moments are created when using Two-Way logging mode.',
       'out' => 'OUT moments complete the pair in Two-Way logging mode.',
       'single' => 'Single logs are standalone timestamps for one-shot events.',
@@ -336,13 +411,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                     children: [
                                       for (final f in const [
                                         'all',
-                                        'date',
-                                        'today',
-                                        'week',
-                                        'in',
-                                        'out',
+                                        'sessions',
                                         'single',
                                         'notes',
+                                        'date',
                                       ])
                                         Padding(
                                           padding: const EdgeInsets.only(
@@ -350,21 +422,36 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           ),
                                           child: ChipButton(
                                             p: widget.p,
-                                            label: f == 'single'
-                                                ? null
-                                                : f == 'date' &&
-                                                      _selectedDateKey != null
+                                            label:
+                                                f == 'date' &&
+                                                    _selectedDateKey != null
                                                 ? compactDateLabel(
                                                     _selectedDateKey!,
                                                   )
-                                                : f == 'date'
-                                                ? 'Select Date'
-                                                : filterLabel(f),
-                                            icon: f == 'single'
-                                                ? Icons.arrow_upward_rounded
-                                                : null,
-                                            semanticLabel: f == 'single'
-                                                ? 'Single'
+                                                : switch (f) {
+                                                    'all' => 'All'.localized(
+                                                      context,
+                                                    ),
+                                                    'sessions' =>
+                                                      '🟢 Sessions'.localized(
+                                                        context,
+                                                      ),
+                                                    'single' =>
+                                                      '⚡ Singles'.localized(
+                                                        context,
+                                                      ),
+                                                    'notes' =>
+                                                      '📝 With Notes'.localized(
+                                                        context,
+                                                      ),
+                                                    'date' =>
+                                                      'Select Date'.localized(
+                                                        context,
+                                                      ),
+                                                    _ => f,
+                                                  },
+                                            icon: f == 'date'
+                                                ? Icons.calendar_month_rounded
                                                 : null,
                                             active: _filter == f,
                                             onTap: f == 'date'
@@ -488,7 +575,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     ),
                   ),
                 ),
-                if (_listItems.isEmpty)
+                if (_timelineRows.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: HIGEmptyState(
@@ -516,7 +603,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          if (index >= _listItems.length) {
+                          if (index >= _timelineRows.length) {
                             if (hasOlderRows) {
                               return Padding(
                                 padding: const EdgeInsets.fromLTRB(
@@ -543,7 +630,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                       ),
                                     ),
                                     child: Text(
-                                      'Load older moments',
+                                      'Load older moments'.localized(context),
                                       style: TextStyle(
                                         color: widget.p.accent,
                                         fontSize: 13,
@@ -557,138 +644,147 @@ class _HistoryDialogState extends State<HistoryDialog> {
                             return null;
                           }
 
-                          final item = _listItems[index];
-                          if (item.label != null) {
+                          final row = _timelineRows[index];
+                          if (row is _SectionHeaderRow) {
+                            final sec = row.section;
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(
                                 spacing16,
-                                spacing12,
                                 spacing16,
-                                6,
+                                spacing16,
+                                spacing8,
                               ),
-                              child: Text(
-                                item.label!.toUpperCase(),
-                                style: TextStyle(
-                                  color: widget.p.text3,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  fontVariations: const [
-                                    FontVariation('wght', 800),
-                                  ],
-                                  letterSpacing: 0.6,
-                                ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today_rounded,
+                                        size: 12,
+                                        color: widget.p.text3,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        sec.displayTitle,
+                                        style: TextStyle(
+                                          color: widget.p.text3,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.6,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: widget.p.surface3,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: widget.p.border.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      sec.summaryText,
+                                      style: TextStyle(
+                                        color: widget.p.accent,
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           }
-                          final entry = item.moment!;
-                          final selected = _selected.any(
-                            (item) => item.id == entry.id,
+
+                          final elem = row as _TimelineElementRow;
+                          if (elem.item is TimelineSessionItem) {
+                            final session = elem.item as TimelineSessionItem;
+                            final isSelected = _selected.any(
+                              (m) => session.momentIds.contains(m.id),
+                            );
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: spacing16,
+                              ),
+                              child: TimelineSessionCard(
+                                p: widget.p,
+                                session: session,
+                                selected: isSelected,
+                                onEditNote: () =>
+                                    _openDirectNoteEditor(session.inMoment),
+                                onDeleteSession: () => _removeSession(session),
+                                onTapCard: _selected.isNotEmpty
+                                    ? () => _handleSelection(
+                                        session.inMoment,
+                                        isSelected,
+                                      )
+                                    : (_enableNoteOnClick
+                                          ? () => _openDirectNoteEditor(
+                                              session.inMoment,
+                                            )
+                                          : () => _handleSelection(
+                                              session.inMoment,
+                                              isSelected,
+                                            )),
+                                onLongPressCard: () =>
+                                    _showMomentDetails(session.inMoment),
+                              ),
+                            );
+                          }
+
+                          final single = elem.item as TimelineSingleItem;
+                          final moment = single.moment;
+                          final isSelected = _selected.any(
+                            (m) => m.id == moment.id,
                           );
+                          final isGodMode =
+                              moment.note.contains('God Mode Unlocked') ||
+                              moment.note.contains('#godmode');
+
                           return Padding(
-                            key: ValueKey(entry.id),
-                            padding: EdgeInsets.fromLTRB(
-                              spacing16,
-                              0,
-                              spacing16,
-                              widget.compactRows ? 3 : 8,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: spacing16,
                             ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: widget.p.red,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: Dismissible(
-                                key: ValueKey('dismiss-${entry.id}'),
-                                direction:
-                                    (entry.note.contains('God Mode Unlocked') ||
-                                        entry.note.contains('#godmode'))
-                                    ? DismissDirection.none
-                                    : DismissDirection.endToStart,
-                                background:
-                                    (entry.note.contains('God Mode Unlocked') ||
-                                        entry.note.contains('#godmode'))
-                                    ? const SizedBox.shrink()
-                                    : Container(
-                                        alignment: Alignment.centerRight,
-                                        padding: const EdgeInsets.only(
-                                          right: 18,
-                                        ),
-                                        color: widget.p.red,
-                                        child: const Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                confirmDismiss: (_) async {
-                                  if (entry.note.contains(
-                                        'God Mode Unlocked',
-                                      ) ||
-                                      entry.note.contains('#godmode')) {
-                                    return false;
-                                  }
-                                  _removeEntry(entry);
-                                  return false;
-                                },
-                                onDismissed: (_) => _dismissEntry(entry),
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: selected
-                                        ? widget.p.surface3
-                                        : widget.p.surface2,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: RepaintBoundary(
-                                    child: MomentTile(
+                            child: TimelineSingleTile(
+                              p: widget.p,
+                              moment: moment,
+                              singleNumber: _singleNumberMap[moment.id],
+                              selected: isSelected,
+                              isFirst: elem.isFirst,
+                              isLast: elem.isLast,
+                              onEditNote: () => _openDirectNoteEditor(moment),
+                              onDelete: () => _removeEntry(moment),
+                              onTap: _selected.isNotEmpty
+                                  ? () => _handleSelection(moment, isSelected)
+                                  : (_enableNoteOnClick
+                                        ? () => _openDirectNoteEditor(moment)
+                                        : () => _handleSelection(
+                                            moment,
+                                            isSelected,
+                                          )),
+                              onLongPress: isGodMode
+                                  ? () => showGodModeUnlockCelebrationDialog(
+                                      context: context,
                                       p: widget.p,
-                                      entry: entry,
-                                      selected: selected,
-                                      compact: widget.compactRows,
-                                      singleNumber: _singleNumberMap[entry.id],
-                                      onLongPress:
-                                          (entry.note.contains(
-                                                'God Mode Unlocked',
-                                              ) ||
-                                              entry.note.contains('#godmode'))
-                                          ? () =>
-                                                showGodModeUnlockCelebrationDialog(
-                                                  context: context,
-                                                  p: widget.p,
-                                                )
-                                          : (_enableNoteOnClick
-                                                ? () => _handleSelection(
-                                                    entry,
-                                                    selected,
-                                                  )
-                                                : () => _showMomentDetails(
-                                                    entry,
-                                                  )),
-                                      onTap:
-                                          (entry.note.contains(
-                                                'God Mode Unlocked',
-                                              ) ||
-                                              entry.note.contains('#godmode'))
-                                          ? () =>
-                                                showGodModeUnlockCelebrationDialog(
-                                                  context: context,
-                                                  p: widget.p,
-                                                )
-                                          : (_enableNoteOnClick
-                                                ? () =>
-                                                      _showMomentDetails(entry)
-                                                : () => _handleSelection(
-                                                    entry,
-                                                    selected,
-                                                  )),
-                                      onDelete: () => _removeEntry(entry),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                                    )
+                                  : () => _showMomentDetails(moment),
                             ),
                           );
                         },
-                        childCount: _listItems.length + (hasOlderRows ? 1 : 0),
+                        childCount:
+                            _timelineRows.length + (hasOlderRows ? 1 : 0),
                         addAutomaticKeepAlives: false,
                         addRepaintBoundaries: true,
                       ),
@@ -872,19 +968,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
-  void _dismissEntry(Moment entry) {
-    NotekarHaptics.success('standard');
-    setState(() {
-      _entries = _entries.where((item) => item.id != entry.id).toList();
-      _availableDateKeys = _entries.map((item) => item.date).toSet();
-      _selected.removeWhere((item) => item.id == entry.id);
-      _pendingDeleteId = null;
-      _rebuildMemoizedLists();
-    });
-    _showNotice('Moment removed', onUndo: () => _restoreRemovedEntry(entry));
-    unawaited(widget.onDelete(entry.id));
-  }
-
   void _restoreRemovedEntry(Moment entry) {
     _noticeTimer?.cancel();
     setState(() {
@@ -899,6 +982,80 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _rebuildMemoizedLists();
     });
     unawaited(widget.onRestore(entry));
+  }
+
+  Future<void> _openDirectNoteEditor(Moment entry) async {
+    final isAdd = entry.note.trim().isEmpty;
+    final title = (isAdd ? 'Add Note' : 'Edit Note').localized(context);
+    final saveLabel = (isAdd ? 'Add Note' : 'Save').localized(context);
+    final addedNotice = 'Note added'.localized(context);
+    final updatedNotice = 'Note updated'.localized(context);
+
+    HapticFeedback.selectionClick();
+    final note = await showGeneralDialog<String>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close note editor',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => NoteDialog(
+        p: widget.p,
+        initialNote: entry.note,
+        title: title,
+        saveLabel: saveLabel,
+        allowEmpty: false,
+      ),
+    );
+
+    if (note == null || !mounted) return;
+    await _updateEntryNote(entry, note);
+    _showNotice(isAdd ? addedNotice : updatedNotice);
+  }
+
+  void _removeSession(TimelineSessionItem session) {
+    final ids = session.momentIds;
+    final toRemove = _entries.where((m) => ids.contains(m.id)).toList();
+    if (toRemove.isEmpty) return;
+
+    NotekarHaptics.success('standard');
+    setState(() {
+      _entries.removeWhere((m) => ids.contains(m.id));
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _selected.removeWhere((item) => ids.contains(item.id));
+      _pendingDeleteId = null;
+      _rebuildMemoizedLists();
+    });
+
+    _showNotice(
+      ids.length > 1
+          ? 'Session removed'.localized(context)
+          : 'Moment removed'.localized(context),
+      onUndo: () => _restoreRemovedEntries(toRemove),
+    );
+
+    for (final id in ids) {
+      unawaited(widget.onDelete(id));
+    }
+  }
+
+  void _restoreRemovedEntries(List<Moment> moments) {
+    _noticeTimer?.cancel();
+    setState(() {
+      for (final m in moments) {
+        if (!_entries.any((item) => item.id == m.id)) {
+          _entries.add(m);
+        }
+      }
+      _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _notice = null;
+      _noticeUndo = null;
+      _pendingDeleteId = null;
+      _rebuildMemoizedLists();
+    });
+    for (final m in moments) {
+      unawaited(widget.onRestore(m));
+    }
   }
 
   Future<void> _updateEntryNote(Moment entry, String note) async {
