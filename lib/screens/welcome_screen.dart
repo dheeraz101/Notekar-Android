@@ -1191,6 +1191,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     required IconData icon,
     required String title,
     required String text,
+    Color? iconColor,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -1202,10 +1203,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             height: 40,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: p.surface3,
+              color: (iconColor ?? p.accent).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: p.accent, size: 20),
+            child: Icon(icon, color: iconColor ?? p.accent, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1718,6 +1719,642 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
+  Widget _buildHistoryRedesignPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.auto_stories_rounded,
+                color: p.accent,
+                size: 38,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Life Ledger Timeline'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'A high-precision chronological record of your moments with intelligent session pairing and Apple HIG elegance.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Interactive Visual Card Mockup
+          Glass(
+            p: p,
+            radius: 20,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Day Pill
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.surface2,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          size: 12,
+                          color: p.text2,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Today · Sunday, Sep 6',
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Paired Session Preview Card
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: p.surface.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.border.withValues(alpha: 0.25)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: p.green,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '09:30 AM',
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.accent.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              '1h 45m',
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '11:15 AM',
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: p.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Deep focus: Core architecture & tests',
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Live Session Preview Card
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: p.green.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.green.withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: p.green,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: p.green.withValues(alpha: 0.5),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '02:00 PM',
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.green.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'LIVE 24m',
+                          style: TextStyle(
+                            color: p.green,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      // 1-Tap End Button
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF3B30),
+                          borderRadius: BorderRadius.circular(999),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFFFF3B30,
+                              ).withValues(alpha: 0.35),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.stop_circle_rounded,
+                              size: 13,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'End',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Core Highlights
+          SettingsGroup(
+            p: p,
+            children: [
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.linear_scale_rounded,
+                iconColor: p.accent,
+                title: 'Connected Session Pairing'.localized(context),
+                text:
+                    'Two-Way IN and OUT moments automatically pair into unified sessions with live elapsed duration and end times.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.stop_circle_rounded,
+                iconColor: const Color(0xFFFF3B30),
+                title: '1-Tap Live Session End'.localized(context),
+                text:
+                    'Seal ongoing sessions instantly with the red End button on the card, logging an OUT moment in real time without opening menus.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.tune_rounded,
+                iconColor: p.orange,
+                title: 'Frictionless Filter Pills'.localized(context),
+                text:
+                    'Switch effortlessly between All, Sessions, Singles (00–99), and With Notes with zero UI lag.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.calendar_month_rounded,
+                iconColor: p.accent,
+                title: 'iOS Calendar with Event Dots'.localized(context),
+                text:
+                    'Tap the calendar pill to pick any past date. Days with logged moments display subtle event dots anchored beneath centered numerals.'
+                        .localized(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SettingsPageDescription(
+            p: p,
+            text:
+                'All moments stay 100% offline. Accidentally deleted moments can be restored anytime from the built-in Trash Bin.'
+                    .localized(context),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDashboardRedesignPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.dashboard_customize_outlined,
+                color: p.accent,
+                size: 38,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Executive Intelligence Hub'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Deep behavioral analytics, habit consistency rhythms, and circadian insights compiled 100% on-device.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Interactive Visual Card Mockup for Dashboard
+          Glass(
+            p: p,
+            radius: 20,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Filter Tabs Simulation
+                Row(
+                  children: [
+                    _buildMockFilterPill(p, 'Today', false),
+                    const SizedBox(width: 6),
+                    _buildMockFilterPill(p, 'Week', true),
+                    const SizedBox(width: 6),
+                    _buildMockFilterPill(p, 'Month', false),
+                    const SizedBox(width: 6),
+                    _buildMockFilterPill(p, 'All', false),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // Grounded Daily Rhythm Bars Simulation
+                Text(
+                  'Daily Rhythm'.localized(context),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  height: 65,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildMockRhythmBar(p, 'M', 20, false),
+                      _buildMockRhythmBar(p, 'T', 34, false),
+                      _buildMockRhythmBar(p, 'W', 14, false),
+                      _buildMockRhythmBar(p, 'T', 44, true),
+                      _buildMockRhythmBar(p, 'F', 28, false),
+                      _buildMockRhythmBar(p, 'S', 16, false),
+                      _buildMockRhythmBar(p, 'S', 36, false),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Activity Grid Simulation
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Activity Grid'.localized(context),
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '(last 90 days)'.localized(context),
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.orange.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.local_fire_department_rounded,
+                            size: 12,
+                            color: p.orange,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '12-day streak',
+                            style: TextStyle(
+                              color: p.orange,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(12, (index) {
+                    final alphas = [
+                      0.15,
+                      0.35,
+                      0.65,
+                      0.9,
+                      0.4,
+                      0.75,
+                      1.0,
+                      0.5,
+                      0.85,
+                      0.3,
+                      0.6,
+                      0.95,
+                    ];
+                    return Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: p.accent.withValues(
+                          alpha: alphas[index % alphas.length],
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Core Highlights
+          SettingsGroup(
+            p: p,
+            children: [
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.filter_alt_rounded,
+                iconColor: p.accent,
+                title: 'Time-Scope Intelligence'.localized(context),
+                text:
+                    'Toggle instant analytical perspectives across Today, Week, Month, or All Time with responsive, lag-free transitions.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.bar_chart_rounded,
+                iconColor: p.accent,
+                title: 'Grounded Daily Rhythm Chart'.localized(context),
+                text:
+                    'Activity bars stay flush to the bottom baseline and ascend upward dynamically, providing balanced visual feedback on both quiet and intense days.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.grid_on_rounded,
+                iconColor: p.green,
+                title: '90-Day Activity Heatmap Grid'.localized(context),
+                text:
+                    'Visualize your long-term momentum with color-coded intensity cells across the last 90 days alongside current and peak habit streaks.'
+                        .localized(context),
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.wb_twilight_rounded,
+                iconColor: p.orange,
+                title: 'Circadian & Time-of-Day Bias'.localized(context),
+                text:
+                    'Discover when you are most active across Morning, Afternoon, Evening, and Night windows to optimize your daily focus flow.'
+                        .localized(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SettingsPageDescription(
+            p: p,
+            text:
+                'Zero telemetry, zero cloud processing. Every chart, trend, and score is computed in milliseconds entirely within local device memory.'
+                    .localized(context),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMockFilterPill(Palette p, String label, bool active) {
+    return Expanded(
+      child: Container(
+        height: 28,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: active ? p.accent : p.surface2,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? Colors.white : p.text2,
+            fontSize: 11,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMockRhythmBar(
+    Palette p,
+    String day,
+    double height,
+    bool active,
+  ) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          width: 18,
+          height: height,
+          decoration: BoxDecoration(
+            color: active ? p.accent : p.accent.withValues(alpha: 0.35),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          day,
+          style: TextStyle(
+            color: active ? p.accent : p.text3,
+            fontSize: 10,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = paletteFor(theme);
@@ -1814,6 +2451,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'mindfulness') {
                     return _buildMindfulnessPage(p);
+                  }
+                  if (key == 'history' || key == 'history-redesign') {
+                    return _buildHistoryRedesignPage(p);
+                  }
+                  if (key == 'dashboard' || key == 'dashboard-redesign') {
+                    return _buildDashboardRedesignPage(p);
                   }
                   return const SizedBox.shrink();
                 }).toList(),

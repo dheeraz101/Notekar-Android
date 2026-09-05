@@ -9,16 +9,61 @@ class HelpGuidesSettingsPage extends StatelessWidget {
     super.key,
     required this.p,
     required this.onOpenCategory,
+    this.onOpenTour,
   });
 
   final Palette p;
   final void Function(String category, {required String parent}) onOpenCategory;
+  final void Function(List<String> pages)? onOpenTour;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: spacing8),
+        SettingsGroup(
+          p: p,
+          title: 'Interactive Feature Tours'.localized(context),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.auto_stories_rounded,
+              title: 'Life Ledger Timeline Tour'.localized(context),
+              subtitle:
+                  'Redesigned History, session pairing, live end & calendar'
+                      .localized(context),
+              color: p.accent,
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: p.text3,
+                size: 20,
+              ),
+              onTap: () => onOpenTour?.call(['history-redesign']),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.insights_rounded,
+              title: 'Executive Intelligence Hub Tour'.localized(context),
+              subtitle: 'Redesigned Dashboard, daily rhythm & activity grid'
+                  .localized(context),
+              color: p.orange,
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: p.text3,
+                size: 20,
+              ),
+              onTap: () => onOpenTour?.call(['dashboard-redesign']),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Step-by-step interactive walkthroughs highlighting deep features and Apple Human Interface Guidelines styling.'
+                  .localized(context),
+        ),
+
         SettingsGroup(
           p: p,
           title: 'Documentation',

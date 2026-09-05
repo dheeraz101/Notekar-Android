@@ -38,6 +38,7 @@ import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -1250,6 +1251,40 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  void _openOnboardingTour(List<String> pages) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => WelcomeScreen(
+          p: paletteFor(
+            theme,
+            highContrast: highContrast,
+            accentName: accentColor,
+          ),
+          theme: theme,
+          defaultMode: defaultMode,
+          currentLocale: currentLocale,
+          appIconStyle: appIconStyle,
+          useNumbersInSingle: useNumbersInSingle,
+          resetSingleDaily: resetSingleDaily,
+          countOnSave: countOnSave,
+          enableSobrietyMode: enableSobrietyMode,
+          sobrietyMilestoneTheme: sobrietyMilestoneTheme,
+          compactHistory: compactHistory,
+          onLocaleChanged: (l) => widget.onLocaleChanged(l),
+          onTheme: (t) {
+            setState(() => theme = t);
+            widget.onTheme(t);
+          },
+          onDefaultMode: (m) {
+            setState(() => defaultMode = m);
+            widget.onDefaultMode(m);
+          },
+          pages: pages,
+        ),
+      ),
+    );
+  }
+
   String get _updateSubtitle {
     if (checkingUpdates) return 'Checking...';
     return updateStatus.isEmpty ? 'Up to date' : updateStatus;
@@ -1809,6 +1844,114 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: enableSobrietyMode ? 'Active' : 'Off',
       ),
       item(
+        title: 'Life Ledger Timeline',
+        subtitle:
+            'Chronological timeline with session pairing, live end & calendar',
+        category: 'Help & Guides',
+        icon: Icons.auto_stories_rounded,
+        keywords: [
+          'history',
+          'timeline',
+          'life ledger',
+          'sessions',
+          'session pairing',
+          'live session',
+          'end session',
+          'stop session',
+          'in out',
+          'single moments',
+          'calendar',
+          'calendar picker',
+          'date filter',
+          'event dots',
+          'review moments',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Tour',
+      ),
+      item(
+        title: 'Executive Intelligence Hub',
+        subtitle:
+            'Grounded daily rhythm, 90-day activity grid & circadian trends',
+        category: 'Dashboard',
+        icon: Icons.dashboard_customize_outlined,
+        keywords: [
+          'dashboard',
+          'analytics',
+          'executive intelligence hub',
+          'intelligence hub',
+          'heatmap',
+          'trends',
+          'insights',
+          'graphs',
+          'correlation',
+          'habits',
+          'charts',
+          'summary',
+          'history grid',
+          'daily rhythm',
+          'rhythm',
+          'bar chart',
+          'activity grid',
+          '90 days',
+          'last 90 days',
+          'circadian',
+          'today',
+          'week',
+          'month',
+          'time scope',
+          'streak',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'View',
+      ),
+      item(
+        title: 'Life Ledger Timeline Tour',
+        subtitle:
+            'Interactive onboarding walkthrough of the redesigned History',
+        category: 'Help & Guides',
+        icon: Icons.explore_rounded,
+        keywords: [
+          'tour',
+          'history tour',
+          'onboarding',
+          'welcome',
+          'guide',
+          'walkthrough',
+          'history guide',
+          'life ledger tour',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Tour',
+      ),
+      item(
+        title: 'Executive Intelligence Hub Tour',
+        subtitle:
+            'Interactive onboarding walkthrough of the redesigned Dashboard',
+        category: 'Help & Guides',
+        icon: Icons.insights_rounded,
+        keywords: [
+          'tour',
+          'dashboard tour',
+          'onboarding',
+          'welcome',
+          'guide',
+          'walkthrough',
+          'analytics tour',
+          'intelligence hub tour',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Tour',
+      ),
+      item(
         title: 'Dashboard',
         subtitle: 'Interactive summaries, grids, trends, and correlations',
         category: 'Dashboard',
@@ -1825,6 +1968,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'charts',
           'summary',
           'history grid',
+          'daily rhythm',
+          'rhythm',
+          'bar chart',
+          'activity grid',
+          '90 days',
+          'circadian',
+          'time scope',
         ],
         kind: 'nav',
         boolValue: null,
@@ -4269,6 +4419,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                               }
                                               return;
                                             }
+                                            if (result.title ==
+                                                    'Life Ledger Timeline' ||
+                                                result.title ==
+                                                    'Life Ledger Timeline Tour') {
+                                              _openOnboardingTour([
+                                                'history-redesign',
+                                              ]);
+                                              return;
+                                            }
+                                            if (result.title ==
+                                                'Executive Intelligence Hub Tour') {
+                                              _openOnboardingTour([
+                                                'dashboard-redesign',
+                                              ]);
+                                              return;
+                                            }
+                                            if (result.title ==
+                                                'Executive Intelligence Hub') {
+                                              _openCategory('Dashboard');
+                                              return;
+                                            }
                                             _openCategory(result.category);
                                           },
                                         ),
@@ -5138,6 +5309,20 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   GuideRow(
                                     p: p,
+                                    icon: Icons.auto_stories_rounded,
+                                    title: 'Life Ledger Timeline',
+                                    text:
+                                        'Open History to explore connected session cards pairing Two-Way IN and OUT intervals with duration badges. Filter seamlessly across All, Sessions, Singles, or With Notes.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.stop_circle_rounded,
+                                    title: '1-Tap Live Session End',
+                                    text:
+                                        'Active ongoing sessions in History feature a red "End" button right on the card. Tap it anytime to seal the session at the current moment with zero friction.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
                                     icon: Icons.history_rounded,
                                     title: 'Review History',
                                     text:
@@ -5209,9 +5394,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   GuideRow(
                                     p: p,
                                     icon: Icons.dashboard_customize_rounded,
-                                    title: 'Dashboard & Analytics',
+                                    title: 'Executive Intelligence Hub',
                                     text:
-                                        'Open Settings > Logging > Dashboard to see habit grids, activity trends, correlation insights, and anomaly alerts compiled locally.',
+                                        'Open Settings > Logging > Dashboard to explore your Daily Rhythm bar chart with bottom-aligned bars, 90-day activity intensity grid, circadian time-of-day breakdowns, and instant time-scope filters (Today, Week, Month, All).',
                                   ),
                                   GuideRow(
                                     p: p,
@@ -5266,9 +5451,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   GuideRow(
                                     p: p,
                                     icon: Icons.calendar_month_rounded,
-                                    title: 'iOS Calendar & Date Navigation',
+                                    title:
+                                        'iOS Calendar & Centered Date Baseline',
                                     text:
-                                        'Tap any date in the History screen to launch the fluid calendar picker with month controls, highlighted log days, and instant jump to Today.',
+                                        'Tap the calendar chip in History to pick any past date. Dates with recorded moments feature subtle event dots anchored beneath numerals with zero vertical baseline shift.',
                                   ),
                                   GuideRow(
                                     p: p,
@@ -5361,6 +5547,34 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How does the Life Ledger Timeline work in History?',
+                                    answer:
+                                        'History automatically pairs chronological Two-Way IN and OUT moments into connected session cards with elapsed duration calculations and start/finish nodes. Single moments show clean rail nodes with optional 00–99 badges. You can filter by All, Sessions, Singles, or With Notes without any layout overlapping.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I end an ongoing live session?',
+                                    answer:
+                                        'Ongoing sessions in History display a pulsing green LIVE duration pill alongside a red "End" button. Tapping End instantly logs an OUT moment at the current time and closes the session card on the spot.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I filter History by specific calendar dates?',
+                                    answer:
+                                        'Tap the calendar icon [📅] in the History filter bar to open the Apple HIG calendar picker. Days with recorded moments show an event dot anchored beneath the number. Selecting any past date instantly filters your history to that day.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do I interpret the Dashboard Daily Rhythm and Activity Grid?',
+                                    answer:
+                                        'The Daily Rhythm bar chart displays your activity volume for each day of the week, anchored cleanly to the bottom baseline. The 90-day Activity Grid uses color intensity gradations to visualize consistency, alongside habit streak counts and time-of-day circadian focus breakdowns.',
+                                  ),
                                   HelpRow(
                                     p: p,
                                     question:
@@ -5964,6 +6178,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
+                              onOpenTour: _openOnboardingTour,
                             ),
                           ),
                         if (show('Advanced'))

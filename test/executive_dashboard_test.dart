@@ -209,6 +209,64 @@ void main() {
         expect(find.text('(Last 90 Days)'), findsOneWidget);
         expect(find.text('Current Streak'), findsOneWidget);
         expect(find.text('Longest Streak'), findsOneWidget);
+
+        // Verify that the second pill (pace/trend) is positioned downward below the first pill (logs)
+        final logsPillFinder = find.text('2 logs');
+        final pacePillFinder = find.text(data.paceText);
+        expect(logsPillFinder, findsOneWidget);
+        expect(pacePillFinder, findsOneWidget);
+        final logsBottom = tester.getBottomLeft(logsPillFinder).dy;
+        final paceTop = tester.getTopLeft(pacePillFinder).dy;
+        expect(
+          paceTop,
+          greaterThanOrEqualTo(logsBottom),
+          reason: 'Pace pill should be moved downward below the logs pill',
+        );
+      },
+    );
+
+    testWidgets(
+      'HeroActivityRingCard renders downward pace pill with long text without overflow',
+      (tester) async {
+        final mockData = ExecutiveDashboardData(
+          timeframe: DashboardTimeframe.today,
+          totalTracked: const Duration(hours: 14, minutes: 30),
+          totalMoments: 10001,
+          paceText: 'Active tracking (10001 logs)',
+          paceIsPositive: true,
+          activityRingRatio: 0.85,
+          timeSlotBias: const TimeSlotBiasData(
+            headline: 'Consistent bias',
+            peakSlotName: 'Morning',
+            slots: [],
+          ),
+          dailyRhythm: const DailyRhythmData(days: [], comparisonText: ''),
+          focusBreakdown: const FocusBreakdownData(categories: []),
+          gridStats: const ActivityGridStats(
+            longestStreak: 20,
+            currentStreak: 12,
+            activeDaysCount: 45,
+            totalDaysCount: 90,
+            dayIntensities: {},
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: HeroActivityRingCard(p: p, data: mockData),
+            ),
+          ),
+        );
+
+        expect(find.text('10001 logs'), findsOneWidget);
+        expect(find.text('Active tracking (10001 logs)'), findsOneWidget);
+
+        final logsBottom = tester.getBottomLeft(find.text('10001 logs')).dy;
+        final paceTop = tester
+            .getTopLeft(find.text('Active tracking (10001 logs)'))
+            .dy;
+        expect(paceTop, greaterThanOrEqualTo(logsBottom));
       },
     );
   });

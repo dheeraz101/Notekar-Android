@@ -194,99 +194,81 @@ class HeroActivityRingCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    // Moments pill
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: p.surface3.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: p.border.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.history_toggle_off_rounded,
-                              size: 13,
-                              color: p.text3,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                '${data.totalMoments} logs',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                const SizedBox(height: 7),
+                // Moments pill
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: p.border.withValues(alpha: 0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.history_toggle_off_rounded,
+                        size: 13,
+                        color: p.text3,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${data.totalMoments} logs',
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 5),
+                // Pace pill (moved downward for complete visibility)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (data.paceIsPositive ? p.green : p.orange)
+                        .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: (data.paceIsPositive ? p.green : p.orange)
+                          .withValues(alpha: 0.3),
                     ),
-                    const SizedBox(width: 6),
-                    // Pace pill
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: (data.paceIsPositive ? p.green : p.orange)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: (data.paceIsPositive ? p.green : p.orange)
-                                .withValues(alpha: 0.3),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.paceIsPositive
+                            ? Icons.trending_up_rounded
+                            : Icons.trending_down_rounded,
+                        size: 13,
+                        color: data.paceIsPositive ? p.green : p.orange,
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          data.paceText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: data.paceIsPositive ? p.green : p.orange,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              data.paceIsPositive
-                                  ? Icons.trending_up_rounded
-                                  : Icons.trending_down_rounded,
-                              size: 13,
-                              color: data.paceIsPositive ? p.green : p.orange,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                data.paceText,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: data.paceIsPositive
-                                      ? p.green
-                                      : p.orange,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

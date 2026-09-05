@@ -115,10 +115,46 @@ fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
       optional daily reset, and "Count on Save" badges.
     - **Two-Way Mode**: Track deep work, study, workouts, or shifts by recording distinct `IN` and
       `OUT` interval pairs with duration computations.
-- **Interactive iOS-Style Calendar Picker**: Date navigation with iOS red circle selectors, moment
-  count event dots, and single-letter weekday headers.
 
-### 🌱 2. Sobriety Companion & Milestone Map
+### 📜 2. Life Ledger Timeline (Redesigned History)
+
+Designed strictly to Apple Human Interface Guidelines (HIG), the **Life Ledger Timeline** transforms
+raw log records into an elegant, unified chronicle of your day:
+
+- **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into
+  paired session cards featuring start/finish nodes, elapsed duration pills (e.g. `2h 15m`), and
+  in-line note previews.
+- **1-Tap Live Session End**: Ongoing sessions display a pulsing green `LIVE <duration>` badge
+  alongside a dedicated red **End** button (`stop_circle_rounded`). Tap **End** right on the card to
+  seal the active session in real time with an instant `OUT` moment.
+- **Sequential Single Numbering (`00`–`99`)**: Standalone moments feature high-contrast circular
+  rail badges displaying sequential 2-digit counters, with optional midnight daily resets.
+- **Frictionless Filter Pills**: Seamlessly toggle between **All**, **Sessions**, **Singles**, and *
+  *With Notes** with instant responsive transitions and zero layout clipping.
+- **iOS-Style Calendar Picker**: A fluid monthly calendar sheet featuring solid iOS System Red
+  selection circles, past-date selection, and anchored event dots positioned with locked geometric
+  centering (zero vertical baseline shift).
+- **Trash Bin Safety**: Local soft-delete vault to restore or permanently purge removed records
+  anytime.
+
+### 📊 3. Executive Intelligence Hub (Redesigned Dashboard)
+
+The **Executive Intelligence Hub** delivers deep behavioral analytics, habit rhythms, and circadian
+insights computed 100% on-device:
+
+- **Time-Scope Switching**: Toggle between **Today**, **Week**, **Month**, and **All Time** with
+  fluid, responsive pill controls.
+- **Grounded Daily Rhythm Chart**: Daily activity bars are anchored flush to the bottom baseline and
+  ascend upward dynamically, ensuring visual equilibrium and eliminating awkward middle-floating
+  bars on low-volume days.
+- **90-Day High-Density Activity Grid**: GitHub-style color intensity heatmap tracking logging
+  consistency across the last 90 days with dedicated streak counters and clear subtitles.
+- **Circadian Time-of-Day Bias**: Real-time breakdown of activity distribution across **Morning (
+  06–12)**, **Afternoon (12–18)**, **Evening (18–22)**, and **Night (22–06)** windows.
+- **Executive Focus Metrics**: Track total session focus hours, average session lengths, and peak
+  productivity intervals with local in-memory aggregation.
+
+### 🌱 4. Sobriety Companion & Milestone Map
 
 - **21 Neuroscience-Backed Milestones**: Track habits and clean streaks across 34 narrative themes (
   Science, Warrior, Samurai, Anime, Cyberpunk, and more).
@@ -130,7 +166,7 @@ fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
   practice nervous system regulation.
 - **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
 
-### 🧘 3. Hourly Time Reflection & Mindfulness
+### 🧘 5. Hourly Time Reflection & Mindfulness
 
 - **Standalone Lockscreen Breathing Alarms**: Full-screen breathing prompts that display directly
   over the lockscreen without unlocking your device or exposing private logs.
@@ -141,7 +177,7 @@ fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
 - **Customizable Affirmation Mantra**: Display a 60-character personal mantra directly on the
   breathing aura display.
 
-### 📱 4. Android Home Screen Widget (2x2)
+### 📱 6. Android Home Screen Widget (2x2)
 
 - Fast, battery-efficient App Widget to log moments and check streak milestones directly from your
   Android launcher without opening the app.
