@@ -7,6 +7,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.3.1] - 2026-09-06 (versionCode 26BR0906) [BR]
+
+### What's New
+
+- Add onboarding tours, guides, and fix hero card pill layout
+- Add 1-tap live session end and refine Apple HIG UI
+- Implement Apple HIG life ledger timeline & executive intelligence hub
+- Add top insights pill, toolbar last timestamp & universal haptics
+
+### Bug Fixes
+
+- Lock day number baseline and decouple event dot positioning
+- Resolve live session ending and calendar date filter issues
+
 ## [7.3.0] - 2026-08-30 (versionCode 26PR0830) [PR]
 
 ### What's New

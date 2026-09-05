@@ -1,5 +1,50 @@
 [
   {
+    "version": "7.3.1",
+    "buildNumber": "26BR0906",
+    "releaseDate": "2026-09-06",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Beta Preview Build",
+    "badgeColor": "#FF9F0A",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Add onboarding tours, guides, and fix hero card pill layout",
+        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
+        "icon": "auto_awesome_rounded"
+      },
+      {
+        "title": "Add 1-tap live session end and refine Apple HIG UI",
+        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
+        "icon": "auto_awesome_rounded"
+      },
+      {
+        "title": "Implement Apple HIG life ledger timeline \u0026 executive intelligence hub",
+        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
+        "icon": "auto_awesome_rounded"
+      },
+      {
+        "title": "Add top insights pill, toolbar last timestamp \u0026 universal haptics",
+        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
+        "icon": "auto_awesome_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "Add onboarding tours, guides, and fix hero card pill layout",
+      "Lock day number baseline and decouple event dot positioning",
+      "Resolve live session ending and calendar date filter issues",
+      "Add 1-tap live session end and refine Apple HIG UI",
+      "Implement Apple HIG life ledger timeline \u0026 executive intelligence hub",
+      "Add top insights pill, toolbar last timestamp \u0026 universal haptics"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.1/NoteKar-v7.3.1-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.1/NoteKar-v7.3.1-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.3.0",
     "buildNumber": "26PR0830",
     "releaseDate": "2026-08-30",
@@ -8,7 +53,7 @@
     "isBeta": false,
     "edition": "Priority Maintenance \u0026 Security",
     "badgeColor": "#0A84FF",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Migrate to Apple HIG pill toasts \u0026 polish bridges settings",

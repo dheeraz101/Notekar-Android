@@ -1,0 +1,7 @@
+Update to 7.3.1 (build 26BR0906):
+- New: Add onboarding tours, guides, and fix hero card pill layout
+- New: Add 1-tap live session end and refine Apple HIG UI
+- New: Implement Apple HIG life ledger timeline & executive intelligence hub
+- New: Add top insights pill, toolbar last timestamp & universal haptics
+- Fix: Lock day number baseline and decouple event dot positioning
+- Fix: Resolve live session ending and calendar date filter issues

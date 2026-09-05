@@ -22,8 +22,8 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.3.0',
-    date: 'August 30, 2026',
+    version: '7.3.1',
+    date: 'September 06, 2026',
     edition: 'Mindfulness, Integrations & Battery Evolution',
     badgeColor: Color(0xFF0A84FF),
     highlights: [
@@ -76,8 +76,8 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
   static const historicalReleases = [
     (
-      version: '7.3.0',
-      date: 'August 30, 2026',
+      version: '7.3.1',
+      date: 'September 06, 2026',
       edition: 'Global Localization Edition',
       items: [
         '+ Add French, German, Japanese, Russian localization and dynamic pattern translation',
@@ -87,8 +87,8 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       ],
     ),
     (
-      version: '7.3.0',
-      date: 'August 30, 2026',
+      version: '7.3.1',
+      date: 'September 06, 2026',
       edition: 'Apple HIG Luxury Redesign',
       items: [
         '+ Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',

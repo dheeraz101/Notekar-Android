@@ -10,7 +10,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-7.3.0-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Version](https://img.shields.io/badge/version-7.3.1-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Build](https://img.shields.io/badge/build-26PR0823-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
