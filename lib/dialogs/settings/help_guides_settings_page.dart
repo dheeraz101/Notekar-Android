@@ -23,44 +23,32 @@ class HelpGuidesSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         SettingsGroup(
           p: p,
-          title: 'Interactive Feature Tours'.localized(context),
+          title: 'Philosophy'.localized(context),
           insetDividers: true,
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.auto_stories_rounded,
-              title: 'Life Ledger Timeline Tour'.localized(context),
+              icon: Icons.auto_awesome_rounded,
+              title: 'App Philosophy'.localized(context),
               subtitle:
-                  'Redesigned History, session pairing, live end & calendar'
+                  'Timeless craft, radical privacy, and reverence for human attention'
                       .localized(context),
               color: p.accent,
+              status: 'Manifesto'.localized(context),
               trailing: Icon(
                 Icons.chevron_right_rounded,
                 color: p.text3,
                 size: 20,
               ),
-              onTap: () => onOpenTour?.call(['history-redesign']),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.insights_rounded,
-              title: 'Executive Intelligence Hub Tour'.localized(context),
-              subtitle: 'Redesigned Dashboard, daily rhythm & activity grid'
-                  .localized(context),
-              color: p.orange,
-              trailing: Icon(
-                Icons.chevron_right_rounded,
-                color: p.text3,
-                size: 20,
-              ),
-              onTap: () => onOpenTour?.call(['dashboard-redesign']),
+              onTap: () =>
+                  onOpenCategory('App Philosophy', parent: 'Help & Guides'),
             ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Step-by-step interactive walkthroughs highlighting deep features and Apple Human Interface Guidelines styling.'
+              'Our guiding convictions: why NoteKar is built offline-first, rejects telemetry, and treats human attention with reverence.'
                   .localized(context),
         ),
 

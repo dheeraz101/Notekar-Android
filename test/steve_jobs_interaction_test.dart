@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
+import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -392,6 +393,57 @@ void main() {
         // Verifies prominent warning box and icon
         expect(find.text('Irreversible Actions'), findsOneWidget);
         expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'AppPhilosophySettingsPage renders Apple-style manifesto, Steve Jobs conviction quote, 5 pillars, and spec sheet',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AppPhilosophySettingsPage(p: p, appVersion: '2.4.0'),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // 1. Hero Header
+        expect(find.text('THE NOTEKAR MANIFESTO'), findsOneWidget);
+        expect(
+          find.text('Simplicity is the Ultimate Sophistication'),
+          findsOneWidget,
+        );
+
+        // 2. Steve Jobs Conviction Callout
+        expect(find.text('THE COURAGE TO SAY NO'), findsOneWidget);
+        expect(find.text('— Steve Jobs'), findsOneWidget);
+
+        // 3. Five Core Pillars
+        expect(find.text('FIVE PILLARS OF CRAFT'), findsOneWidget);
+        expect(find.text('Simplicity is Sacred'), findsOneWidget);
+        expect(find.text('Sanctuary of Radical Privacy'), findsOneWidget);
+        expect(find.text('Reverence for Human Attention'), findsOneWidget);
+        expect(find.text('The Back of the Mahogany Cabinet'), findsOneWidget);
+        expect(find.text('Built Like an Heirloom'), findsOneWidget);
+
+        // 4. Architectural Spec Grid
+        expect(find.text('THE ARCHITECTURAL CODE'), findsOneWidget);
+        expect(find.text('100% Offline Core'), findsOneWidget);
+        expect(find.text('Zero Analytics or Trackers'), findsOneWidget);
+        expect(find.text('Local Hive Engine'), findsOneWidget);
+        expect(find.text('Tactile Mechanical Haptics'), findsOneWidget);
+        expect(find.text('Open Source Transparency'), findsOneWidget);
+        expect(find.text('Zero Subscriptions or Ads'), findsOneWidget);
+
+        // 5. Colophon
+        expect(
+          find.text('Version v2.4.0 • Designed with Conviction'),
+          findsOneWidget,
+        );
       },
     );
   });

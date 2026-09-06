@@ -103,11 +103,10 @@ void main() {
     );
   });
 
-  group('HelpGuidesSettingsPage Interactive Feature Tours Tests', () {
-    testWidgets('Renders Interactive Feature Tours and handles tour taps', (
-      tester,
-    ) async {
-      List<String>? launchedPages;
+  group('HelpGuidesSettingsPage Philosophy Tests', () {
+    testWidgets('Renders App Philosophy card and handles tap', (tester) async {
+      String? openedCategory;
+      String? openedParent;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -115,8 +114,10 @@ void main() {
             body: SingleChildScrollView(
               child: HelpGuidesSettingsPage(
                 p: p,
-                onOpenCategory: (_, {required parent}) {},
-                onOpenTour: (pages) => launchedPages = pages,
+                onOpenCategory: (category, {required parent}) {
+                  openedCategory = category;
+                  openedParent = parent;
+                },
               ),
             ),
           ),
@@ -125,19 +126,15 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('INTERACTIVE FEATURE TOURS'), findsOneWidget);
-      expect(find.text('Life Ledger Timeline Tour'), findsOneWidget);
-      expect(find.text('Executive Intelligence Hub Tour'), findsOneWidget);
+      expect(find.text('PHILOSOPHY'), findsOneWidget);
+      expect(find.text('App Philosophy'), findsOneWidget);
+      expect(find.text('Manifesto', findRichText: true), findsOneWidget);
 
-      // Tap History Tour
-      await tester.tap(find.text('Life Ledger Timeline Tour'));
+      // Tap App Philosophy card
+      await tester.tap(find.text('App Philosophy'));
       await tester.pump();
-      expect(launchedPages, ['history-redesign']);
-
-      // Tap Dashboard Tour
-      await tester.tap(find.text('Executive Intelligence Hub Tour'));
-      await tester.pump();
-      expect(launchedPages, ['dashboard-redesign']);
+      expect(openedCategory, 'App Philosophy');
+      expect(openedParent, 'Help & Guides');
     });
   });
 }

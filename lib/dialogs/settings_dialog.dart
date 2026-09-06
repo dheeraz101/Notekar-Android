@@ -13,6 +13,7 @@ import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
+import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/capture_settings_page.dart';
 import 'package:notekar/dialogs/settings/commits_settings_page.dart';
 import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
@@ -1908,6 +1909,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: 'View',
+      ),
+      item(
+        title: 'App Philosophy',
+        subtitle:
+            'Timeless craft, radical privacy, and reverence for human attention',
+        category: 'About',
+        icon: Icons.auto_awesome_rounded,
+        keywords: [
+          'philosophy',
+          'manifesto',
+          'steve jobs',
+          'apple',
+          'privacy',
+          'offline',
+          'craft',
+          'design',
+          'principles',
+          'about',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Manifesto',
       ),
       item(
         title: 'Life Ledger Timeline Tour',
@@ -4131,6 +4155,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                       return;
                                                     }
                                                     if (result.title ==
+                                                        'App Philosophy') {
+                                                      _openCategory(
+                                                        'App Philosophy',
+                                                        parent: 'About',
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
                                                         'Network Monitor') {
                                                       _openCategory(
                                                         'Network Monitor',
@@ -6084,6 +6116,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
                               onOpenTour: _openOnboardingTour,
+                            ),
+                          ),
+                        if (show('App Philosophy'))
+                          SliverToBoxAdapter(
+                            child: AppPhilosophySettingsPage(
+                              p: p,
+                              appVersion: appVersion,
                             ),
                           ),
                         if (show('Advanced'))
