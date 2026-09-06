@@ -17,6 +17,7 @@ class TimelineSessionCard extends StatelessWidget {
     this.onTapCard,
     this.onLongPressCard,
     this.selected = false,
+    this.compact = false,
   });
 
   final Palette p;
@@ -27,6 +28,7 @@ class TimelineSessionCard extends StatelessWidget {
   final VoidCallback? onTapCard;
   final VoidCallback? onLongPressCard;
   final bool selected;
+  final bool compact;
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -115,11 +117,13 @@ class TimelineSessionCard extends StatelessWidget {
         onTap: onTapCard ?? onEditNote,
         onLongPress: onLongPressCard,
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          padding: const EdgeInsets.all(14),
+          margin: EdgeInsets.symmetric(vertical: compact ? 2.5 : 4),
+          padding: compact
+              ? const EdgeInsets.symmetric(horizontal: 11, vertical: 8)
+              : const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: selected ? p.surface3 : p.surface2,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(compact ? 12 : 16),
             border: Border.all(
               color: selected
                   ? p.accent.withValues(alpha: 0.5)
@@ -145,21 +149,21 @@ class TimelineSessionCard extends StatelessWidget {
                 children: [
                   // Start node (Emerald)
                   Container(
-                    width: 8,
-                    height: 8,
+                    width: compact ? 6 : 8,
+                    height: compact ? 6 : 8,
                     decoration: BoxDecoration(
                       color: p.green,
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: compact ? 4 : 6),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       timeOnly(session.startTimestamp),
                       style: TextStyle(
                         color: p.text,
-                        fontSize: 13,
+                        fontSize: compact ? 12 : 13,
                         fontWeight: FontWeight.w700,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
@@ -168,18 +172,18 @@ class TimelineSessionCard extends StatelessWidget {
 
                   // Duration Connector or Live Activity Pill
                   if (isOngoing) ...[
-                    const SizedBox(width: 8),
+                    SizedBox(width: compact ? 6 : 8),
                     Expanded(
                       child: Container(
                         height: 1,
                         color: p.border.withValues(alpha: 0.6),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: compact ? 6 : 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 3.5,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 6 : 9,
+                        vertical: compact ? 2 : 3.5,
                       ),
                       decoration: BoxDecoration(
                         color: p.green.withValues(alpha: 0.15),
@@ -193,19 +197,19 @@ class TimelineSessionCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 6,
-                            height: 6,
+                            width: compact ? 5 : 6,
+                            height: compact ? 5 : 6,
                             decoration: BoxDecoration(
                               color: p.green,
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          SizedBox(width: compact ? 4 : 5),
                           Text(
                             'LIVE $durationStr',
                             style: TextStyle(
                               color: p.green,
-                              fontSize: 11,
+                              fontSize: compact ? 10 : 11,
                               fontWeight: FontWeight.w800,
                               fontFeatures: const [
                                 FontFeature.tabularFigures(),
@@ -216,13 +220,13 @@ class TimelineSessionCard extends StatelessWidget {
                       ),
                     ),
                     if (onEndSession != null) ...[
-                      const SizedBox(width: 6),
+                      SizedBox(width: compact ? 4 : 6),
                       PressableScale(
                         onTap: onEndSession,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3.5,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact ? 6 : 8,
+                            vertical: compact ? 2 : 3.5,
                           ),
                           decoration: BoxDecoration(
                             color: p.red.withValues(alpha: 0.15),
@@ -237,7 +241,7 @@ class TimelineSessionCard extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.stop_circle_rounded,
-                                size: 12,
+                                size: compact ? 11 : 12,
                                 color: p.red,
                               ),
                               const SizedBox(width: 4),
@@ -245,7 +249,7 @@ class TimelineSessionCard extends StatelessWidget {
                                 'End'.localized(context),
                                 style: TextStyle(
                                   color: p.red,
-                                  fontSize: 10.5,
+                                  fontSize: compact ? 9.5 : 10.5,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -257,7 +261,9 @@ class TimelineSessionCard extends StatelessWidget {
                   ] else ...[
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 4 : 6,
+                        ),
                         child: Row(
                           children: [
                             Flexible(
@@ -267,10 +273,12 @@ class TimelineSessionCard extends StatelessWidget {
                               ),
                             ),
                             Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 5),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2.5,
+                              margin: EdgeInsets.symmetric(
+                                horizontal: compact ? 3 : 5,
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: compact ? 5 : 7,
+                                vertical: compact ? 1.5 : 2.5,
                               ),
                               decoration: BoxDecoration(
                                 color: p.surface3,
@@ -284,7 +292,7 @@ class TimelineSessionCard extends StatelessWidget {
                                 durationStr,
                                 style: TextStyle(
                                   color: p.text2,
-                                  fontSize: 10.5,
+                                  fontSize: compact ? 9.5 : 10.5,
                                   fontWeight: FontWeight.w800,
                                   fontFeatures: const [
                                     FontFeature.tabularFigures(),
@@ -308,16 +316,16 @@ class TimelineSessionCard extends StatelessWidget {
                         timeOnly(session.endTimestamp!),
                         style: TextStyle(
                           color: p.text,
-                          fontSize: 13,
+                          fontSize: compact ? 12 : 13,
                           fontWeight: FontWeight.w700,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: compact ? 4 : 6),
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: compact ? 6 : 8,
+                      height: compact ? 6 : 8,
                       decoration: BoxDecoration(
                         color: p.red,
                         shape: BoxShape.circle,
@@ -327,66 +335,69 @@ class TimelineSessionCard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 10),
-
               // Note Content / Tap to Add Note area
-              GestureDetector(
-                onTap: onEditNote,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: p.surface3.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: p.border.withValues(alpha: 0.3),
-                      width: 0.8,
+              if (hasNote || !compact) ...[
+                SizedBox(height: compact ? 6 : 10),
+                GestureDetector(
+                  onTap: onEditNote,
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 8 : 10,
+                      vertical: compact ? 4 : 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.surface3.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(compact ? 6 : 8),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.3),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          hasNote
+                              ? Icons.notes_rounded
+                              : Icons.add_comment_outlined,
+                          size: compact ? 12 : 14,
+                          color: hasNote ? p.accent : p.text3,
+                        ),
+                        SizedBox(width: compact ? 6 : 8),
+                        Expanded(
+                          child: hasNote
+                              ? IosEmojiText(
+                                  session.note,
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: compact ? 11.5 : 12.5,
+                                    height: 1.3,
+                                  ),
+                                )
+                              : Text(
+                                  'Tap to add session note...'.localized(
+                                    context,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: compact ? 13 : 15,
+                          color: p.text3.withValues(alpha: 0.6),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        hasNote
-                            ? Icons.notes_rounded
-                            : Icons.add_comment_outlined,
-                        size: 14,
-                        color: hasNote ? p.accent : p.text3,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: hasNote
-                            ? IosEmojiText(
-                                session.note,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 12.5,
-                                  height: 1.3,
-                                ),
-                              )
-                            : Text(
-                                'Tap to add session note...'.localized(context),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: p.text3,
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 15,
-                        color: p.text3.withValues(alpha: 0.6),
-                      ),
-                    ],
-                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

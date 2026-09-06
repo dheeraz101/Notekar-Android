@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -2450,13 +2451,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _openExternalLink(String url) async {
     if (!mounted) return;
-    final confirmed = await showGeneralDialog<bool>(
+    final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close external link warning',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => ExternalLinkConfirmSheet(p: p, url: url),
+      builder: (context) => ExternalLinkConfirmSheet(p: p, url: url),
     );
 
     if (confirmed == true) {
@@ -3961,129 +3958,104 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
       if (domain.isEmpty) domain = url;
     } catch (_) {}
 
-    return AppSheet(
-      p: p,
-      title: 'External Navigation'.localized(context),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: p.orange.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(16),
+    return CupertinoAlertDialog(
+      title: Text('External Navigation'.localized(context)),
+      content: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'You are now leaving NoteKar to access an external website. Please review the destination address carefully:'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, height: 1.35),
             ),
-            child: Icon(Icons.warning_amber_rounded, color: p.orange, size: 26),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'You are now leaving NoteKar to access an external website. Please review the destination address carefully:'
-                .localized(context),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: p.text2,
-              fontSize: 13.5,
-              height: 1.45,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: p.border.withValues(alpha: 0.6)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.lock_outline_rounded, color: p.green, size: 14),
-                    const SizedBox(width: 6),
-                    Text(
-                      domain.toUpperCase(),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.systemGrey6,
+                  context,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  url,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: p.accent,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    height: 1.35,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'NoteKar is offline-first. Your private data remains securely stored on your local device and is never shared.'
-                .localized(context),
-            textAlign: TextAlign.center,
-            style: TextStyle(color: p.text3, fontSize: 11.5, height: 1.4),
-          ),
-          const SizedBox(height: spacing24),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 52,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: p.text,
-                      side: BorderSide(color: p.border),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(
-                      'Cancel'.localized(context),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: p.border.withValues(alpha: 0.3),
+                  width: 0.8,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 52,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: p.accent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.lock_shield_fill,
+                        color: CupertinoColors.systemGreen,
+                        size: 13,
                       ),
-                    ),
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(
-                      'Open Link'.localized(context),
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      const SizedBox(width: 5),
+                      Text(
+                        domain.toUpperCase(),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    url,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 11.5,
+                      fontFamily: 'monospace',
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'NoteKar is offline-first. Your private data remains securely stored on your local device and is never shared.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel,
+                  context,
+                ),
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
       ),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () {
+            NotekarHaptics.selection('standard');
+            Navigator.pop(context, false);
+          },
+          child: Text('Cancel'.localized(context)),
+        ),
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () {
+            NotekarHaptics.selection('standard');
+            Navigator.pop(context, true);
+          },
+          child: Text('Open Link'.localized(context)),
+        ),
+      ],
     );
   }
 }

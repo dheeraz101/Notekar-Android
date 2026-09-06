@@ -35,23 +35,16 @@ class TrashBinSettingsPage {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     onPressed: () async {
-                      final confirmed = await showGeneralDialog<bool>(
-                        context: context,
-                        barrierColor: Colors.black.withValues(alpha: 0.42),
-                        barrierDismissible: true,
-                        barrierLabel: 'Close restore confirmation',
-                        transitionDuration: const Duration(milliseconds: 120),
-                        pageBuilder: (_, _, _) => ActionConfirmSheet(
-                          p: p,
-                          title: 'Restore All Moments?'.localized(context),
-                          message:
-                              'This will return all items currently in the trash to your history.'
-                                  .localized(context),
-                          confirmLabel: 'Restore All'.localized(context),
-                          icon: Icons.restore_rounded,
-                        ),
+                      final confirmed = await showIosConfirmSheet(
+                        context,
+                        p: p,
+                        title: 'Restore All Moments?',
+                        message:
+                            'This will return all items currently in the trash to your history.',
+                        confirmLabel: 'Restore All',
+                        icon: Icons.restore_rounded,
                       );
-                      if (confirmed == true) {
+                      if (confirmed) {
                         onRestoreAllTrash();
                       }
                     },
@@ -74,24 +67,17 @@ class TrashBinSettingsPage {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     onPressed: () async {
-                      final confirmed = await showGeneralDialog<bool>(
-                        context: context,
-                        barrierColor: Colors.black.withValues(alpha: 0.42),
-                        barrierDismissible: true,
-                        barrierLabel: 'Close empty confirmation',
-                        transitionDuration: const Duration(milliseconds: 120),
-                        pageBuilder: (_, _, _) => ActionConfirmSheet(
-                          p: p,
-                          title: 'Empty Trash?'.localized(context),
-                          message:
-                              'Permanently delete all trash? This cannot be undone.'
-                                  .localized(context),
-                          confirmLabel: 'Empty'.localized(context),
-                          isDestructive: true,
-                          icon: Icons.delete_forever_rounded,
-                        ),
+                      final confirmed = await showIosConfirmSheet(
+                        context,
+                        p: p,
+                        title: 'Empty Trash?',
+                        message:
+                            'Permanently delete all trash? This cannot be undone.',
+                        confirmLabel: 'Empty',
+                        isDestructive: true,
+                        icon: Icons.delete_forever_rounded,
                       );
-                      if (confirmed == true) {
+                      if (confirmed) {
                         onClearTrash();
                       }
                     },
@@ -204,25 +190,16 @@ class TrashBinSettingsPage {
                           size: 20,
                         ),
                         onPressed: () async {
-                          final confirmed = await showGeneralDialog<bool>(
-                            context: context,
-                            barrierColor: Colors.black.withValues(alpha: 0.42),
-                            barrierDismissible: true,
-                            barrierLabel: 'Close delete confirmation',
-                            transitionDuration: const Duration(
-                              milliseconds: 120,
-                            ),
-                            pageBuilder: (_, _, _) => ActionConfirmSheet(
-                              p: p,
-                              title: 'Delete Permanently?'.localized(context),
-                              message: 'This moment will be erased forever.'
-                                  .localized(context),
-                              confirmLabel: 'Delete'.localized(context),
-                              isDestructive: true,
-                              icon: Icons.delete_forever_rounded,
-                            ),
+                          final confirmed = await showIosConfirmSheet(
+                            context,
+                            p: p,
+                            title: 'Delete Permanently?',
+                            message: 'This moment will be erased forever.',
+                            confirmLabel: 'Delete',
+                            isDestructive: true,
+                            icon: Icons.delete_forever_rounded,
                           );
-                          if (confirmed == true) {
+                          if (confirmed) {
                             onDeleteTrashPermanent(moment.id);
                           }
                         },

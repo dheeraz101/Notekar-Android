@@ -314,21 +314,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _confirmDeleteAll() async {
-    final confirmed = await showGeneralDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close delete all confirmation',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => ActionConfirmSheet(
-        p: widget.p,
-        title: 'Delete All Moments?',
-        message:
-            'Are you sure you want to delete all history moments? Deleted moments will be moved to Trash Bin.',
-        confirmLabel: 'Delete All',
-        isDestructive: true,
-        icon: Icons.delete_sweep_rounded,
-      ),
+    final confirmed = await showIosConfirmSheet(
+      context,
+      p: widget.p,
+      title: 'Delete All Moments?'.localized(context),
+      message:
+          'Are you sure you want to delete all history moments? Deleted moments will be moved to Trash Bin.'
+              .localized(context),
+      confirmLabel: 'Delete All'.localized(context),
+      isDestructive: true,
+      icon: Icons.delete_sweep_rounded,
     );
 
     if (confirmed == true && widget.onClearAll != null) {
@@ -645,11 +640,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           if (row is _SectionHeaderRow) {
                             final sec = row.section;
                             return Padding(
-                              padding: const EdgeInsets.fromLTRB(
+                              padding: EdgeInsets.fromLTRB(
                                 spacing16,
+                                widget.compactRows ? 8 : spacing16,
                                 spacing16,
-                                spacing16,
-                                spacing8,
+                                widget.compactRows ? 4 : spacing8,
                               ),
                               child: Row(
                                 mainAxisAlignment:
@@ -726,6 +721,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 p: widget.p,
                                 session: session,
                                 selected: isSelected,
+                                compact: widget.compactRows,
                                 onEditNote: () =>
                                     _openDirectNoteEditor(session.inMoment),
                                 onDeleteSession: () => _removeSession(session),
@@ -769,6 +765,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                               moment: moment,
                               singleNumber: _singleNumberMap[moment.id],
                               selected: isSelected,
+                              compact: widget.compactRows,
                               isFirst: elem.isFirst,
                               isLast: elem.isLast,
                               onEditNote: () => _openDirectNoteEditor(moment),

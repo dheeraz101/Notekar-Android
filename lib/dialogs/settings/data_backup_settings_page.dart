@@ -497,24 +497,16 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
   }
 
   Future<void> _confirmDeleteBackup(File file) async {
-    final confirmed = await showGeneralDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close delete confirmation',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => ActionConfirmSheet(
-        p: widget.p,
-        title: 'Delete Backup?'.localized(context),
-        message: 'This local backup file will be erased permanently.'.localized(
-          context,
-        ),
-        confirmLabel: 'Delete'.localized(context),
-        isDestructive: true,
-        icon: Icons.delete_forever_rounded,
-      ),
+    final confirmed = await showIosConfirmSheet(
+      context,
+      p: widget.p,
+      title: 'Delete Backup?',
+      message: 'This local backup file will be erased permanently.',
+      confirmLabel: 'Delete',
+      isDestructive: true,
+      icon: Icons.delete_forever_rounded,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await _deleteBackup(file);
     }
   }

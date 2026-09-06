@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -446,53 +447,71 @@ class RemindersSettingsPage extends StatelessWidget {
                   HapticFeedback.selectionClick();
                   final days = [1, 2, 3, 4, 5, 6, 7];
                   final selectedDays = List<int>.from(weeklyReminderDays);
-                  final updated = await showDialog<List<int>>(
+                  final updated = await showCupertinoDialog<List<int>>(
                     context: context,
                     builder: (context) {
                       return StatefulBuilder(
                         builder: (context, setDialogState) {
-                          return AlertDialog(
+                          return CupertinoAlertDialog(
                             title: Text('Days of Week'.localized(context)),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: days.map((day) {
-                                  final name = switch (day) {
-                                    1 => 'Sunday'.localized(context),
-                                    2 => 'Monday'.localized(context),
-                                    3 => 'Tuesday'.localized(context),
-                                    4 => 'Wednesday'.localized(context),
-                                    5 => 'Thursday'.localized(context),
-                                    6 => 'Friday'.localized(context),
-                                    7 => 'Saturday'.localized(context),
-                                    _ => '',
-                                  };
-                                  final contains = selectedDays.contains(day);
-                                  return CheckboxListTile(
-                                    title: Text(
-                                      name,
-                                      style: TextStyle(color: p.text),
-                                    ),
-                                    value: contains,
-                                    activeColor: p.accent,
-                                    onChanged: (val) {
-                                      setDialogState(() {
-                                        if (val == true) {
-                                          selectedDays.add(day);
-                                        } else {
-                                          selectedDays.remove(day);
-                                        }
-                                      });
-                                    },
-                                  );
-                                }).toList(),
+                            content: Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: days.map((day) {
+                                      final name = switch (day) {
+                                        1 => 'Sunday'.localized(context),
+                                        2 => 'Monday'.localized(context),
+                                        3 => 'Tuesday'.localized(context),
+                                        4 => 'Wednesday'.localized(context),
+                                        5 => 'Thursday'.localized(context),
+                                        6 => 'Friday'.localized(context),
+                                        7 => 'Saturday'.localized(context),
+                                        _ => '',
+                                      };
+                                      final contains = selectedDays.contains(
+                                        day,
+                                      );
+                                      return CheckboxListTile(
+                                        title: Text(
+                                          name,
+                                          style: TextStyle(color: p.text),
+                                        ),
+                                        value: contains,
+                                        activeColor: p.accent,
+                                        onChanged: (val) {
+                                          setDialogState(() {
+                                            if (val == true) {
+                                              selectedDays.add(day);
+                                            } else {
+                                              selectedDays.remove(day);
+                                            }
+                                          });
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                               ),
                             ),
                             actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.pop(context, selectedDays),
-                                child: Text('OK'.localized(context)),
+                              CupertinoDialogAction(
+                                onPressed: () {
+                                  NotekarHaptics.selection('standard');
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Cancel'.localized(context)),
+                              ),
+                              CupertinoDialogAction(
+                                isDefaultAction: true,
+                                onPressed: () {
+                                  NotekarHaptics.selection('standard');
+                                  Navigator.pop(context, selectedDays);
+                                },
+                                child: Text('Done'.localized(context)),
                               ),
                             ],
                           );

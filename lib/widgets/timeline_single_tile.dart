@@ -19,6 +19,7 @@ class TimelineSingleTile extends StatelessWidget {
     this.singleNumber,
     this.isFirst = false,
     this.isLast = false,
+    this.compact = false,
   });
 
   final Palette p;
@@ -31,6 +32,7 @@ class TimelineSingleTile extends StatelessWidget {
   final String? singleNumber;
   final bool isFirst;
   final bool isLast;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +111,7 @@ class TimelineSingleTile extends StatelessWidget {
           children: [
             // Vertical Timeline Rail & Node (Line is never behind the circle or dot)
             SizedBox(
-              width: 28,
+              width: compact ? 20 : 28,
               child: Column(
                 children: [
                   // Top rail segment (stops before the node)
@@ -126,18 +128,18 @@ class TimelineSingleTile extends StatelessWidget {
                   // Timeline Node (Solid opaque background, completely isolating from line)
                   Container(
                     width: moment.type == 'single' && singleNumber != null
-                        ? 22
-                        : 12,
+                        ? (compact ? 18 : 22)
+                        : (compact ? 9 : 12),
                     height: moment.type == 'single' && singleNumber != null
-                        ? 22
-                        : 12,
+                        ? (compact ? 18 : 22)
+                        : (compact ? 9 : 12),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isGodMode ? Colors.white : color,
-                        width: 1.5,
+                        width: compact ? 1.2 : 1.5,
                       ),
                     ),
                     child: moment.type == 'single' && singleNumber != null
@@ -145,7 +147,7 @@ class TimelineSingleTile extends StatelessWidget {
                             singleNumber!.localizedDigits(context),
                             style: TextStyle(
                               color: color,
-                              fontSize: 9.5,
+                              fontSize: compact ? 8.5 : 9.5,
                               fontWeight: FontWeight.w900,
                               fontFeatures: const [
                                 FontFeature.tabularFigures(),
@@ -153,8 +155,8 @@ class TimelineSingleTile extends StatelessWidget {
                             ),
                           )
                         : Container(
-                            width: 5,
-                            height: 5,
+                            width: compact ? 3.5 : 5,
+                            height: compact ? 3.5 : 5,
                             decoration: BoxDecoration(
                               color: isGodMode ? Colors.white : color,
                               shape: BoxShape.circle,
@@ -176,7 +178,7 @@ class TimelineSingleTile extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 8),
+            SizedBox(width: compact ? 6 : 8),
 
             // Content Bubble
             Expanded(
@@ -184,16 +186,16 @@ class TimelineSingleTile extends StatelessWidget {
                 onTap: onTap ?? onEditNote,
                 onLongPress: onLongPress,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 3),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                  margin: EdgeInsets.symmetric(vertical: compact ? 1.5 : 3),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 9 : 12,
+                    vertical: compact ? 5 : 8,
                   ),
                   decoration: BoxDecoration(
                     color: selected
                         ? p.surface3
                         : p.surface2.withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(compact ? 9 : 12),
                     border: Border.all(
                       color: selected
                           ? p.accent.withValues(alpha: 0.4)
@@ -206,21 +208,30 @@ class TimelineSingleTile extends StatelessWidget {
                         timeOnly(moment.timestamp),
                         style: TextStyle(
                           color: p.text,
-                          fontSize: 12.5,
+                          fontSize: compact ? 11.5 : 12.5,
                           fontWeight: FontWeight.w700,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text('•', style: TextStyle(color: p.text3, fontSize: 12)),
-                      const SizedBox(width: 8),
+                      SizedBox(width: compact ? 6 : 8),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: compact ? 10 : 12,
+                        ),
+                      ),
+                      SizedBox(width: compact ? 6 : 8),
                       Expanded(
                         child: hasNote
                             ? IosEmojiText(
                                 moment.note,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: p.text2, fontSize: 12),
+                                style: TextStyle(
+                                  color: p.text2,
+                                  fontSize: compact ? 11 : 12,
+                                ),
                               )
                             : GestureDetector(
                                 onTap: onEditNote,
@@ -230,7 +241,7 @@ class TimelineSingleTile extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: p.text3.withValues(alpha: 0.8),
-                                    fontSize: 11.5,
+                                    fontSize: compact ? 10.5 : 11.5,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
@@ -242,7 +253,7 @@ class TimelineSingleTile extends StatelessWidget {
                           onTap: onEditNote,
                           child: Icon(
                             Icons.edit_outlined,
-                            size: 14,
+                            size: compact ? 12 : 14,
                             color: p.text3,
                           ),
                         ),

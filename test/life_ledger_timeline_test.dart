@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -408,6 +410,164 @@ void main() {
       expect(fullDateLabel('2026-09-05'), '05 Sep 2026');
       expect(fullDateLabel('2026-01-01'), '01 Jan 2026');
       expect(fullDateLabel('2026-12-31'), '31 Dec 2026');
+    });
+
+    testWidgets(
+      'TimelineSessionCard renders high-density layout in compact mode',
+      (tester) async {
+        final inTime = DateTime(2026, 9, 5, 10, 0);
+        final outTime = DateTime(2026, 9, 5, 11, 15);
+        final sessionWithNote = TimelineSessionItem(
+          inMoment: Moment(
+            id: 50,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-05',
+            note: 'Compact note test',
+          ),
+          outMoment: Moment(
+            id: 51,
+            timestamp: outTime.millisecondsSinceEpoch,
+            type: 'out',
+            date: '2026-09-05',
+            note: '',
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: sessionWithNote,
+                compact: true,
+                onEditNote: () {},
+                onDeleteSession: () {},
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('1h 15m'), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (w) => w is IosEmojiText && w.text == 'Compact note test',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'TimelineSessionCard in compact mode omits placeholder box when note is empty',
+      (tester) async {
+        final inTime = DateTime(2026, 9, 5, 10, 0);
+        final outTime = DateTime(2026, 9, 5, 10, 45);
+        final sessionNoNote = TimelineSessionItem(
+          inMoment: Moment(
+            id: 60,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-05',
+            note: '',
+          ),
+          outMoment: Moment(
+            id: 61,
+            timestamp: outTime.millisecondsSinceEpoch,
+            type: 'out',
+            date: '2026-09-05',
+            note: '',
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: sessionNoNote,
+                compact: true,
+                onEditNote: () {},
+                onDeleteSession: () {},
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('45m'), findsOneWidget);
+        // In compact mode, empty note placeholder is omitted to save vertical space
+        expect(find.text('Tap to add session note...'), findsNothing);
+      },
+    );
+
+    testWidgets('TimelineSingleTile renders compact layout correctly', (
+      tester,
+    ) async {
+      final moment = Moment(
+        id: 70,
+        timestamp: DateTime(2026, 9, 5, 14, 30).millisecondsSinceEpoch,
+        type: 'single',
+        date: '2026-09-05',
+        note: 'Coffee break',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TimelineSingleTile(
+              p: p,
+              moment: moment,
+              singleNumber: '1',
+              compact: true,
+              onEditNote: () {},
+              onDelete: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('1'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is IosEmojiText && w.text == 'Coffee break',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('ActionConfirmSheet renders as standard CupertinoAlertDialog', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => ElevatedButton(
+                onPressed: () {
+                  showIosConfirmSheet(
+                    ctx,
+                    p: p,
+                    title: 'Delete Item?',
+                    message: 'This cannot be undone.',
+                    confirmLabel: 'Delete',
+                    isDestructive: true,
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(find.text('Delete Item?'), findsOneWidget);
+      expect(find.text('This cannot be undone.'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
     });
   });
 }

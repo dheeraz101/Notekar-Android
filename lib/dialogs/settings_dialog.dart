@@ -3302,146 +3302,55 @@ class _SettingsDialogState extends State<SettingsDialog> {
     VoidCallback? onConfirm,
     String cancelLabel = 'Close',
   }) {
-    final finalIconColor = iconColor ?? p.accent;
-    return showGeneralDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      transitionDuration: const Duration(milliseconds: 150),
-      pageBuilder: (_, anim1, _) => ScaleTransition(
-        scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
-        child: Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: 320,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              decoration: BoxDecoration(
-                color: p.surface2,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: p.border.withValues(alpha: 0.5)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 28,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: finalIconColor.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(icon, color: finalIconColor, size: 28),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    title.localized(context),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    message.localized(context),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      height: 1.5,
-                      letterSpacing: -0.1,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  if (confirmLabel != null && onConfirm != null) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: p.text,
-                              side: BorderSide(color: p.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(
-                              cancelLabel.localized(context),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: finalIconColor,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                              onConfirm();
-                            },
-                            child: Text(
-                              confirmLabel.localized(context),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ] else ...[
-                    PressableScale(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: double.infinity,
-                        height: 48,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: p.accent,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Text(
-                          cancelLabel.localized(context),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+    if (confirmLabel != null && onConfirm != null) {
+      return showCupertinoDialog<void>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text(title.localized(ctx)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(message.localized(ctx)),
           ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () {
+                NotekarHaptics.selection('standard');
+                Navigator.pop(ctx);
+              },
+              child: Text(cancelLabel.localized(ctx)),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                NotekarHaptics.selection('standard');
+                Navigator.pop(ctx);
+                onConfirm();
+              },
+              child: Text(confirmLabel.localized(ctx)),
+            ),
+          ],
         ),
+      );
+    }
+
+    return showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(title.localized(ctx)),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(message.localized(ctx)),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () {
+              NotekarHaptics.selection('standard');
+              Navigator.pop(ctx);
+            },
+            child: Text(cancelLabel.localized(ctx)),
+          ),
+        ],
       ),
     );
   }

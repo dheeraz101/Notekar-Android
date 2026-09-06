@@ -159,138 +159,96 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
     bool dontShowCheckbox = false;
 
-    await showDialog<void>(
+    await showCupertinoDialog<void>(
       context: context,
-      barrierDismissible: false,
       builder: (context) {
         final p = widget.p;
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: p.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: p.border.withValues(alpha: 0.2)),
-              ),
-              title: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: p.orange, size: 24),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Network Warning'.localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
+            return CupertinoAlertDialog(
+              title: Text('Network Warning'.localized(context)),
+              content: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Warning!: The current update will be downloaded via your mobile data, if you wish to switch to Wifi please do so and continue to download the update over Wifi.'
+                          .localized(context),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 13, height: 1.35),
                     ),
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Warning!: The current update will be downloaded via your mobile data, if you wish to switch to Wifi please do so and continue to download the update over Wifi.'
-                        .localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      height: 1.45,
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Download Size: '.localized(context),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          sizeText,
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Text(
-                        'Download Size: '.localized(context),
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        sizeText,
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  InkWell(
-                    onTap: () {
-                      setDialogState(() {
-                        dontShowCheckbox = !dontShowCheckbox;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            curve: Curves.easeOutCubic,
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () {
+                        setDialogState(() {
+                          dontShowCheckbox = !dontShowCheckbox;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              dontShowCheckbox
+                                  ? CupertinoIcons.check_mark_circled_solid
+                                  : CupertinoIcons.circle,
+                              size: 18,
                               color: dontShowCheckbox
                                   ? p.accent
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: dontShowCheckbox
-                                    ? p.accent
-                                    : p.text3.withValues(alpha: 0.4),
-                                width: 2,
+                                  : CupertinoColors.systemGrey,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                "Don't show this warning again".localized(
+                                  context,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                            child: dontShowCheckbox
-                                ? const Icon(
-                                    Icons.check_rounded,
-                                    size: 14,
-                                    color: Colors.white,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              "Don't show this warning again".localized(
-                                context,
-                              ),
-                              style: TextStyle(
-                                color: p.text2,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               actions: [
-                TextButton(
+                CupertinoDialogAction(
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                   },
-                  child: Text(
-                    'Cancel'.localized(context),
-                    style: TextStyle(
-                      color: p.text2,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: Text('Cancel'.localized(context)),
                 ),
-                TextButton(
+                CupertinoDialogAction(
+                  isDefaultAction: true,
                   onPressed: () async {
                     HapticFeedback.mediumImpact();
                     final navigator = Navigator.of(context);
@@ -303,13 +261,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                       unawaited(_startDownload());
                     }
                   },
-                  child: Text(
-                    'Download'.localized(context),
-                    style: TextStyle(
-                      color: p.accent,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: Text('Download'.localized(context)),
                 ),
               ],
             );
