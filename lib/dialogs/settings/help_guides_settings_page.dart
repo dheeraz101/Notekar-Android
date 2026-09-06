@@ -30,9 +30,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.auto_awesome_rounded,
               title: 'App Philosophy'.localized(context),
-              subtitle:
-                  'Timeless craft, radical privacy, and reverence for human attention'
-                      .localized(context),
+              subtitle: 'Timeless craft and radical privacy'.localized(context),
               color: p.accent,
               status: 'Manifesto'.localized(context),
               trailing: Icon(

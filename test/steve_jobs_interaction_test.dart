@@ -15,6 +15,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_top_insights_pill.dart';
+import 'package:notekar/widgets/swipeable_card_bed.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/timeline_single_tile.dart';
 import 'package:notekar/widgets/toolbar.dart';
@@ -602,7 +603,7 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('SPECIAL EVENT · KEYNOTE RELEASE'), findsOneWidget);
+        expect(find.text('KEYNOTE RELEASE'), findsOneWidget);
         expect(find.text('v7.3.2 Update'), findsOneWidget);
         expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
         expect(find.text('Pinch-to-Density Physics'), findsOneWidget);
@@ -620,7 +621,7 @@ void main() {
     );
 
     testWidgets(
-      'TimelineSessionCard Dismissible secondary background uses solid flat color fill without inner radius',
+      'TimelineSessionCard SwipeableCardBed provides true bed of red geometry matching card border radius',
       (tester) async {
         final now = DateTime.now();
         final session = TimelineSessionItem(
@@ -640,15 +641,18 @@ void main() {
           ),
         );
 
+        bool deleteCalled = false;
+        bool tapCalled = false;
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: TimelineSessionCard(
                 p: p,
                 session: session,
-                onTapCard: () {},
+                onTapCard: () => tapCalled = true,
                 onEditNote: () {},
-                onDeleteSession: () {},
+                onDeleteSession: () => deleteCalled = true,
               ),
             ),
           ),
@@ -656,18 +660,29 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        final dismissibleFinder = find.byType(Dismissible);
-        expect(dismissibleFinder, findsOneWidget);
+        final swipeFinder = find.byType(SwipeableCardBed);
+        expect(swipeFinder, findsOneWidget);
 
-        final dismissible = tester.widget<Dismissible>(dismissibleFinder);
-        final secBg = dismissible.secondaryBackground as Container;
-        expect(secBg.color, equals(p.red));
-        expect(secBg.decoration, isNull);
+        final swipeWidget = tester.widget<SwipeableCardBed>(swipeFinder);
+        expect(swipeWidget.deleteColor, equals(p.red));
+        expect(swipeWidget.borderRadius, equals(BorderRadius.circular(16)));
+
+        // Verify tap works seamlessly
+        await tester.tap(find.byType(TimelineSessionCard));
+        expect(tapCalled, isTrue);
+
+        // Verify swipe left reveals red bed and triggers delete
+        await tester.drag(
+          find.byType(TimelineSessionCard),
+          const Offset(-100, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(deleteCalled, isTrue);
       },
     );
 
     testWidgets(
-      'TimelineSingleTile Dismissible secondary background uses solid flat color fill without inner radius',
+      'TimelineSingleTile SwipeableCardBed provides true bed of red geometry matching card border radius',
       (tester) async {
         final now = DateTime.now();
         final moment = Moment(
@@ -677,6 +692,8 @@ void main() {
           timestamp: now.millisecondsSinceEpoch,
         );
 
+        bool deleteCalled = false;
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -684,7 +701,7 @@ void main() {
                 p: p,
                 moment: moment,
                 onEditNote: () {},
-                onDelete: () {},
+                onDelete: () => deleteCalled = true,
               ),
             ),
           ),
@@ -692,13 +709,20 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        final dismissibleFinder = find.byType(Dismissible);
-        expect(dismissibleFinder, findsOneWidget);
+        final swipeFinder = find.byType(SwipeableCardBed);
+        expect(swipeFinder, findsOneWidget);
 
-        final dismissible = tester.widget<Dismissible>(dismissibleFinder);
-        final secBg = dismissible.secondaryBackground as Container;
-        expect(secBg.color, equals(p.red));
-        expect(secBg.decoration, isNull);
+        final swipeWidget = tester.widget<SwipeableCardBed>(swipeFinder);
+        expect(swipeWidget.deleteColor, equals(p.red));
+        expect(swipeWidget.borderRadius, equals(BorderRadius.circular(12)));
+
+        // Verify swipe left triggers delete
+        await tester.drag(
+          find.byType(TimelineSingleTile),
+          const Offset(-100, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(deleteCalled, isTrue);
       },
     );
   });

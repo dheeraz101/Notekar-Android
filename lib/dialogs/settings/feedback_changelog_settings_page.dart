@@ -229,17 +229,21 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.auto_awesome_rounded,
-                      size: 13,
+                      size: 12,
                       color: rel.badgeColor,
                     ),
                     const SizedBox(width: 5),
-                    Text(
-                      'SPECIAL EVENT · KEYNOTE RELEASE'.localized(context),
-                      style: TextStyle(
-                        color: rel.badgeColor,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
+                    Flexible(
+                      child: Text(
+                        'KEYNOTE RELEASE'.localized(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: rel.badgeColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                        ),
                       ),
                     ),
                   ],
@@ -281,12 +285,16 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
                 children: [
                   Icon(Icons.calendar_today_rounded, size: 12, color: p.text3),
                   const SizedBox(width: 5),
-                  Text(
-                    '${rel.date.localized(context)} · ${'Production Release'.localized(context)}',
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      '${rel.date.localized(context)} · ${'Production'.localized(context)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

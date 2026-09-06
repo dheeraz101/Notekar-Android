@@ -2040,8 +2040,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
       item(
         title: 'App Philosophy',
-        subtitle:
-            'Timeless craft, radical privacy, and reverence for human attention',
+        subtitle: 'Timeless craft and radical privacy',
         category: 'About',
         icon: Icons.auto_awesome_rounded,
         keywords: [
