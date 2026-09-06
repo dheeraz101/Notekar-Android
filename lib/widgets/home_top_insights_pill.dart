@@ -25,11 +25,7 @@ class HomeTopInsightsPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (slotName, slotRange, percentage) = _computeTimeSlotBias();
-
-    final label = entries.isEmpty
-        ? 'Activity Insights • Tap to explore'.localized(context)
-        : '$slotName ($slotRange) • $percentage%';
+    final label = _computeHumanLifeNarrative(context);
 
     return Center(
       child: PressableScale(
@@ -137,5 +133,42 @@ class HomeTopInsightsPill extends StatelessWidget {
 
     final pct = total > 0 ? (peakCount / total * 100).round() : 0;
     return (peakSlot, range, pct);
+  }
+
+  String _computeHumanLifeNarrative(BuildContext context) {
+    if (entries.isEmpty) {
+      return 'Activity Insights • Tap to explore'.localized(context);
+    }
+
+    final now = DateTime.now();
+    final todayKey = dateKey(now);
+    final todayEntries = entries.where((e) => e.date == todayKey).toList();
+
+    if (todayEntries.isEmpty) {
+      final (slotName, _, _) = _computeTimeSlotBias();
+      return 'Ready for today • Peak rhythm in $slotName'.localized(context);
+    }
+
+    final inCount = todayEntries.where((e) => e.type == 'in').length;
+    final outCount = todayEntries.where((e) => e.type == 'out').length;
+    if (inCount > outCount) {
+      return 'Active session in flow • Tap to inspect'.localized(context);
+    }
+
+    final completedSessions = math.min(inCount, outCount);
+    final (slotName, _, _) = _computeTimeSlotBias();
+
+    if (completedSessions > 0) {
+      final sessionLabel = completedSessions == 1
+          ? '1 session today'
+          : '$completedSessions sessions today';
+      return '$sessionLabel • Peak in $slotName'.localized(context);
+    }
+
+    final singles = todayEntries.length;
+    final momentLabel = singles == 1
+        ? '1 moment today'
+        : '$singles moments today';
+    return '$momentLabel • Rhythm in flow'.localized(context);
   }
 }

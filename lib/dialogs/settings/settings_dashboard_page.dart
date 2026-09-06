@@ -64,6 +64,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           selected: _timeframe,
           onChanged: (tf) => setState(() => _timeframe = tf),
         ),
+        _buildLifeNarrativeCard(context, dashboardData),
         AnomalyAlertCard(p: p, entries: entries, onLogNow: widget.onLogNow),
         if (entries.isNotEmpty &&
             DateTime.now()
@@ -473,6 +474,128 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildLifeNarrativeCard(
+    BuildContext context,
+    ExecutiveDashboardData data,
+  ) {
+    final narrative = _computeLifeNarrative(context, data);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.accent.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 13,
+                  color: p.accent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'THE STORY OF YOUR TIME'.localized(context),
+                style: TextStyle(
+                  color: p.accent,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            narrative,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              height: 1.45,
+              letterSpacing: -0.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _computeLifeNarrative(
+    BuildContext context,
+    ExecutiveDashboardData data,
+  ) {
+    if (data.totalMoments == 0 && data.totalTracked.inMinutes == 0) {
+      return 'Your timeline is serene and clear. Begin a session or record your next moment to watch your story unfold.'
+          .localized(context);
+    }
+
+    final periodLabel = switch (data.timeframe) {
+      DashboardTimeframe.today => 'Today',
+      DashboardTimeframe.week => 'This week',
+      DashboardTimeframe.month => 'This month',
+      DashboardTimeframe.all => 'Across all logged history',
+    }.localized(context);
+
+    final parts = <String>[];
+    if (data.totalTracked.inMinutes > 0 && data.totalMoments > 0) {
+      parts.add(
+        '$periodLabel, you dedicated ${data.formattedTotalTracked} of focused attention across ${data.totalMoments} ${data.totalMoments == 1 ? 'entry' : 'entries'}.'
+            .localized(context),
+      );
+    } else if (data.totalTracked.inMinutes > 0) {
+      parts.add(
+        '$periodLabel, you logged ${data.formattedTotalTracked} of focused flow.'
+            .localized(context),
+      );
+    } else {
+      parts.add(
+        '$periodLabel, you captured ${data.totalMoments} distinct ${data.totalMoments == 1 ? 'moment' : 'moments'}.'
+            .localized(context),
+      );
+    }
+
+    if (data.timeSlotBias.peakSlotName != 'None') {
+      final slot = data.timeSlotBias.peakSlotName.toLowerCase();
+      parts.add(
+        'Your energy and momentum peaked in the $slot.'.localized(context),
+      );
+    }
+
+    if (data.focusBreakdown.categories.isNotEmpty) {
+      final topCat = data.focusBreakdown.categories.first;
+      if (topCat.percentage >= 25 && topCat.name != 'General') {
+        parts.add(
+          'Primary intention centered on ${topCat.name} (${topCat.percentage}% of attention).'
+              .localized(context),
+        );
+      }
+    }
+
+    if (data.gridStats.currentStreak > 1) {
+      parts.add(
+        '${data.gridStats.currentStreak}-day continuous focus streak active.'
+            .localized(context),
+      );
+    }
+
+    return parts.join(' ');
   }
 
   int _calculateStreakDays() {

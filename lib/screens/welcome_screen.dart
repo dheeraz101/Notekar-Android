@@ -1310,12 +1310,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         label: Text('Open Link'.localized(context)),
                         onPressed: () async {
                           HapticFeedback.selectionClick();
-                          try {
-                            await _fileChannel.invokeMethod<void>('openUrl', {
-                              'url':
-                                  'https://github.com/dheeraz101/Notekar-Android',
-                            });
-                          } catch (_) {}
+                          await openExternalLinkSafely(
+                            context,
+                            p: p,
+                            url:
+                                'https://github.com/dheeraz101/Notekar-Android',
+                          );
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: p.accent,

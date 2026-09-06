@@ -148,7 +148,7 @@ class _AppSheetState extends State<AppSheet> {
                     Positioned.fill(
                       child: Center(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 50),
+                          padding: const EdgeInsets.symmetric(horizontal: 88),
                           child: Opacity(
                             opacity: widget.showLargeTitle
                                 ? _titleOpacity

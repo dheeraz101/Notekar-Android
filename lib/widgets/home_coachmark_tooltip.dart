@@ -82,7 +82,7 @@ class _CoachmarkTooltipState extends State<CoachmarkTooltip>
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Tap to record a moment. Hold to add a note.'.localized(
+                  'Tap anywhere to begin. Hold to add a note.'.localized(
                     context,
                   ),
                   style: const TextStyle(

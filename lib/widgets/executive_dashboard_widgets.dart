@@ -322,7 +322,7 @@ class IntelligentTimeSlotBiasCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Time-Slot Intelligence'.localized(context),
+                  'Rhythm of the Day'.localized(context),
                   style: TextStyle(
                     color: p.text,
                     fontSize: 15,

@@ -74,93 +74,9 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     ],
   );
 
-  static const historicalReleases = [
-    (
-      version: '7.3.1',
-      date: 'September 06, 2026',
-      edition: 'Life Ledger Timeline & Executive Intelligence Hub',
-      items: [
-        '+ Add Life Ledger continuous session cards with emerald start nodes and crimson end nodes',
-        '+ Add 1-tap inline live session end button in History to terminate tracking immediately',
-        '+ Add Executive Intelligence Hub with grounded Daily Rhythm chart and 90-day intensity grid',
-        '+ Add standalone interactive onboarding tour pages for History and Dashboard',
-        '+ Add 2-digit sequential single moment numbering (00–99) with daily midnight reset',
-        '* Geometrically lock calendar day cell baselines so dates with activity dots never jitter',
-        '* Reposition Dashboard hero card pace and trend badges to eliminate horizontal clipping',
-        '! Fix calendar icon chip in History to immediately open MomentCalendarDialog on first tap',
-      ],
-    ),
-    (
-      version: '7.3.0',
-      date: 'August 30, 2026',
-      edition: 'Sovereign God Mode & Apple HIG Evolution',
-      items: [
-        '+ Add sovereign God Mode suite with secret theme palettes, gravity sandbox & VIP badge',
-        '+ Add Apple HIG Dynamic Island pill toasts with frosted glass translucency',
-        '+ Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT',
-        '+ Eliminate RTC_WAKEUP battery drain for routine logging reminders (zero-wake Doze)',
-        '+ Add full offline historical changelog archive with dynamic GitHub releases sync',
-        '* Optimize R8 and ProGuard compiler rules with build caching for faster startup',
-        '! Safeguard database initialization when revoking God Mode to prevent preference desynchronization',
-      ],
-    ),
-    (
-      version: '7.2.0',
-      date: 'August 23, 2026',
-      edition: 'Mindfulness, Integrations & Battery Evolution',
-      items: [
-        '+ Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation',
-        '+ Add Android text selection context menu ("Log in NoteKar") via ProcessTextActivity',
-        '+ Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing',
-        '+ Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync',
-        '+ Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar',
-        '+ Add dedicated "Integrations & Automation" settings page with copyable templates and live test triggers',
-        '+ Add hourly time reflection alarms with mindful breathing prompts waking over lockscreen',
-        '* Eliminate RTC_WAKEUP battery drain for routine logging reminders',
-        '* Wrap animated widgets in RepaintBoundary for smooth 120 FPS rendering',
-      ],
-    ),
-    (
-      version: '7.1.0',
-      date: 'August 21, 2026',
-      edition: 'Global Localization Edition',
-      items: [
-        '+ Add French, German, Japanese, Russian localization and dynamic pattern translation',
-        '+ Add localized numerals and currency symbols across the app',
-        '* Preserve Apple HIG typography in English and normalize toolbar buttons',
-        '* Standardize toolbar button icon containers & fix settings description placement',
-      ],
-    ),
-    (
-      version: '7.0.0',
-      date: 'August 15, 2026',
-      edition: 'Apple HIG Luxury Redesign',
-      items: [
-        '+ Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
-        '+ Modernized App Icon suite featuring 8 custom branded logo editions',
-        '+ Sobriety milestones card exporter with native Android share sheet & confetti',
-        '* 2-digit single numbering mode (01, 02...), daily reset, and directional badges',
-        '+ Complete local database backup manager with individual Restore and Delete options',
-      ],
-    ),
-  ];
-
   Future<void> _openWebChangelog(BuildContext context) async {
     HapticFeedback.selectionClick();
-    try {
-      const channel = MethodChannel('notekar/files');
-      await channel.invokeMethod<void>('openUrl', {'url': webChangelogUrl});
-    } catch (_) {
-      await Clipboard.setData(const ClipboardData(text: webChangelogUrl));
-      if (context.mounted) {
-        showIosPillToast(
-          context: context,
-          p: p,
-          message: 'Link copied to clipboard'.localized(context),
-          icon: Icons.copy_rounded,
-        );
-      }
-    }
+    await openExternalLinkSafely(context, p: p, url: webChangelogUrl);
   }
 
   @override
@@ -305,25 +221,6 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing12),
 
-        // Changelog List Group with expressive badges
-        SettingsGroup(
-          p: p,
-          title: 'Detailed Additions & Fixes'.localized(context).toUpperCase(),
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  for (final item in rel.items)
-                    _buildExpressiveRow(context, item),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: spacing12),
-
         SettingsPageDescription(
           p: p,
           text:
@@ -359,27 +256,6 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             ),
           ],
         ),
-
-        // Historical Releases
-        for (final rel in historicalReleases) ...[
-          const SizedBox(height: spacing12),
-          SettingsGroup(
-            p: p,
-            title: 'v${rel.version} — ${rel.edition}'.localized(context),
-            description: rel.date.localized(context),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    for (final item in rel.items)
-                      _buildExpressiveRow(context, item),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
 
         const SizedBox(height: spacing12),
 

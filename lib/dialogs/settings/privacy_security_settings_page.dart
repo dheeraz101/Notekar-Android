@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class PrivacySecuritySettingsPage extends StatelessWidget {
@@ -32,8 +32,6 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
   final void Function(String category, {required String parent}) onOpenCategory;
   final VoidCallback onLearnMoreBeta;
 
-  static const _fileChannel = MethodChannel('notekar/files');
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -49,13 +47,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
               subtitle: 'Verified clean of malicious activity',
               color: p.green,
               status: vtStatus,
-              onTap: () async {
-                try {
-                  await _fileChannel.invokeMethod<void>('openUrl', {
-                    'url': vtUrl,
-                  });
-                } catch (_) {}
-              },
+              onTap: () => openExternalLinkSafely(context, p: p, url: vtUrl),
             ),
           ],
         ),
@@ -66,13 +58,8 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      await _fileChannel.invokeMethod<void>('openUrl', {
-                        'url': vtUrl,
-                      });
-                    } catch (_) {}
-                  },
+                  onPressed: () =>
+                      openExternalLinkSafely(context, p: p, url: vtUrl),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: p.green.withValues(alpha: 0.15),
                     foregroundColor: p.green,
@@ -111,14 +98,12 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () async {
-                    try {
-                      await _fileChannel.invokeMethod<void>('openUrl', {
-                        'url':
-                            'https://github.com/dheeraz101/Notekar-Android/releases/latest',
-                      });
-                    } catch (_) {}
-                  },
+                  onPressed: () => openExternalLinkSafely(
+                    context,
+                    p: p,
+                    url:
+                        'https://github.com/dheeraz101/Notekar-Android/releases/latest',
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: p.text2,
                     side: BorderSide(color: p.border),

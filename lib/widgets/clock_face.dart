@@ -133,37 +133,42 @@ class _ClockFaceState extends State<ClockFace> {
     );
     return MediaQuery(
       data: mediaQuery.copyWith(textScaler: clampedScaler),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              hm,
-              style: TextStyle(
-                color: clockColor,
-                fontSize: 116,
-                fontWeight: FontWeight.w200,
-                height: 1,
-                letterSpacing: -4,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-            if (!widget.minimal && widget.showSeconds)
+      child: AnimatedScale(
+        scale: _bright ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutBack,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
               Text(
-                sec,
+                hm,
                 style: TextStyle(
-                  color: _bright
-                      ? actionColor.withValues(alpha: 0.75)
-                      : secondsColor,
-                  fontSize: 42,
+                  color: clockColor,
+                  fontSize: 116,
                   fontWeight: FontWeight.w200,
                   height: 1,
+                  letterSpacing: -4,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
-          ],
+              if (!widget.minimal && widget.showSeconds)
+                Text(
+                  sec,
+                  style: TextStyle(
+                    color: _bright
+                        ? actionColor.withValues(alpha: 0.75)
+                        : secondsColor,
+                    fontSize: 42,
+                    fontWeight: FontWeight.w200,
+                    height: 1,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

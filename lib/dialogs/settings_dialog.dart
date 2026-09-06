@@ -4088,26 +4088,22 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                     }
                                                     if (result.title ==
                                                         'Developer & Creator') {
-                                                      const MethodChannel(
-                                                        'notekar/files',
-                                                      ).invokeMethod<
-                                                        void
-                                                      >('openUrl', {
-                                                        'url':
+                                                      openExternalLinkSafely(
+                                                        context,
+                                                        p: p,
+                                                        url:
                                                             'https://github.com/dheeraz101',
-                                                      });
+                                                      );
                                                       return;
                                                     }
                                                     if (result.title ==
                                                         'Open Source Codebase') {
-                                                      const MethodChannel(
-                                                        'notekar/files',
-                                                      ).invokeMethod<
-                                                        void
-                                                      >('openUrl', {
-                                                        'url':
+                                                      openExternalLinkSafely(
+                                                        context,
+                                                        p: p,
+                                                        url:
                                                             'https://github.com/dheeraz101/Notekar-Android',
-                                                      });
+                                                      );
                                                       return;
                                                     }
                                                     if (result.title ==
@@ -4257,22 +4253,22 @@ ${stackTrace ?? 'No stack trace provided.'}
                                             }
                                             if (result.title ==
                                                 'Developer & Creator') {
-                                              const MethodChannel(
-                                                'notekar/files',
-                                              ).invokeMethod<void>('openUrl', {
-                                                'url':
+                                              openExternalLinkSafely(
+                                                context,
+                                                p: p,
+                                                url:
                                                     'https://github.com/dheeraz101',
-                                              });
+                                              );
                                               return;
                                             }
                                             if (result.title ==
                                                 'Open Source Codebase') {
-                                              const MethodChannel(
-                                                'notekar/files',
-                                              ).invokeMethod<void>('openUrl', {
-                                                'url':
+                                              openExternalLinkSafely(
+                                                context,
+                                                p: p,
+                                                url:
                                                     'https://github.com/dheeraz101/Notekar-Android',
-                                              });
+                                              );
                                               return;
                                             }
                                             if (result.title ==

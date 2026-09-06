@@ -186,10 +186,11 @@ List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
     // Formulate clean Apple HIG day section title
     final sampleDate = dateFromKey(dKey);
     final String title;
+    final weekdayShort = _weekdayShort(sampleDate.weekday).toUpperCase();
     if (dKey == todayKey) {
-      title = 'TODAY, ${_formatDayMonth(sampleDate).toUpperCase()}';
+      title = 'TODAY, $weekdayShort';
     } else if (dKey == yesterdayKey) {
-      title = 'YESTERDAY, ${_formatDayMonth(sampleDate).toUpperCase()}';
+      title = 'YESTERDAY, $weekdayShort';
     } else {
       title = _formatDayMonth(sampleDate).toUpperCase();
     }

@@ -68,7 +68,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Evening (5–10 PM) • 100%'), findsOneWidget);
+      expect(find.textContaining('Evening'), findsOneWidget);
     });
   });
 

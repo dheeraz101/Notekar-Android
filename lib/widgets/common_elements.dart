@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -389,7 +390,7 @@ class SliverStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return child;
+    return SizedBox(height: height, width: double.infinity, child: child);
   }
 
   @override
@@ -706,9 +707,6 @@ Future<void> showUpcomingLanguageNotice(
   HapticFeedback.selectionClick();
   const translationsGuideUrl =
       'https://github.com/dheeraz101/Notekar-Android/blob/main/TRANSLATIONS.md';
-  const MethodChannel fileChannel = MethodChannel(
-    'com.project.yabp.notekar/files',
-  );
 
   await showModalBottomSheet<void>(
     context: context,
@@ -813,15 +811,11 @@ Future<void> showUpcomingLanguageNotice(
                           if (onOpenLink != null) {
                             onOpenLink(translationsGuideUrl);
                           } else {
-                            try {
-                              await fileChannel.invokeMethod<void>('openUrl', {
-                                'url': translationsGuideUrl,
-                              });
-                            } catch (_) {
-                              await Clipboard.setData(
-                                const ClipboardData(text: translationsGuideUrl),
-                              );
-                            }
+                            await openExternalLinkSafely(
+                              context,
+                              p: p,
+                              url: translationsGuideUrl,
+                            );
                           }
                         },
                         child: Container(
@@ -900,5 +894,145 @@ class UpcomingBadge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Cupertino-styled external navigation confirmation dialog displaying
+/// domain verification badge, monospace preview, and offline-first notice.
+class ExternalLinkConfirmSheet extends StatelessWidget {
+  const ExternalLinkConfirmSheet({
+    super.key,
+    required this.p,
+    required this.url,
+  });
+
+  final Palette p;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    String domain = url;
+    try {
+      final uri = Uri.parse(url);
+      domain = uri.host;
+      if (domain.isEmpty) domain = url;
+    } catch (_) {}
+
+    return CupertinoAlertDialog(
+      title: Text('External Navigation'.localized(context)),
+      content: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'You are now leaving NoteKar to access an external website. Please review the destination address carefully:'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, height: 1.35),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.systemGrey6,
+                  context,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: p.border.withValues(alpha: 0.3),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.lock_shield_fill,
+                        color: CupertinoColors.systemGreen,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        domain.toUpperCase(),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    url,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 11.5,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'NoteKar is offline-first. Your private data remains securely stored on your local device and is never shared.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: p.text3, height: 1.3),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text('Cancel'.localized(context)),
+        ),
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text('Open Link'.localized(context)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Global helper that intercepts any link departure with the native
+/// Cupertino confirmation alert before opening via Android intent.
+Future<void> openExternalLinkSafely(
+  BuildContext context, {
+  required Palette p,
+  required String url,
+}) async {
+  final confirmed = await showCupertinoDialog<bool>(
+    context: context,
+    builder: (ctx) => ExternalLinkConfirmSheet(p: p, url: url),
+  );
+
+  if (confirmed == true && context.mounted) {
+    try {
+      const channel = MethodChannel('notekar/files');
+      await channel.invokeMethod<void>('openUrl', {'url': url});
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (context.mounted) {
+        showIosPillToast(
+          context: context,
+          p: p,
+          message: 'Link copied to clipboard'.localized(context),
+          icon: Icons.copy_rounded,
+        );
+      }
+    }
   }
 }

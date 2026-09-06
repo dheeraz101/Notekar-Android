@@ -141,24 +141,11 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
 
   Future<void> _openWebChangelog() async {
     HapticFeedback.selectionClick();
-    try {
-      const channel = MethodChannel('notekar/files');
-      await channel.invokeMethod<void>('openUrl', {
-        'url': ChangelogDialog.webChangelogUrl,
-      });
-    } catch (_) {
-      await Clipboard.setData(
-        const ClipboardData(text: ChangelogDialog.webChangelogUrl),
-      );
-      if (mounted) {
-        showIosPillToast(
-          context: context,
-          p: widget.p,
-          message: 'Link copied to clipboard'.localized(context),
-          icon: Icons.copy_rounded,
-        );
-      }
-    }
+    await openExternalLinkSafely(
+      context,
+      p: widget.p,
+      url: ChangelogDialog.webChangelogUrl,
+    );
   }
 
   @override

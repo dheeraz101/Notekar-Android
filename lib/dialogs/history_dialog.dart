@@ -87,9 +87,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
   VoidCallback? _noticeUndo;
   Timer? _noticeTimer;
   int _visibleCount = _pageSize;
-  int? _pendingDeleteId;
   final _scrollController = ScrollController();
   bool _enableNoteOnClick = false;
+  late bool _compactRows;
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -100,6 +100,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   @override
   void initState() {
     super.initState();
+    _compactRows = widget.compactRows;
     _entries = List<Moment>.from(widget.entries);
     _availableDateKeys = _entries.map((entry) => entry.date).toSet();
     _rebuildMemoizedLists();
@@ -257,7 +258,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _notice = text;
       _noticeUndo = onUndo;
     });
-    _noticeTimer = Timer(const Duration(milliseconds: 2200), () {
+    _noticeTimer = Timer(const Duration(milliseconds: 3500), () {
       if (mounted) {
         setState(() {
           _notice = null;
@@ -350,8 +351,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
       controller: _scrollController,
       showLargeTitle: true,
       removeBottomPadding: true,
-      leadingAction: widget.onClearAll != null && _entries.isNotEmpty
-          ? PressableScale(
+      leadingAction: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.onClearAll != null && _entries.isNotEmpty) ...[
+            PressableScale(
               onTap: () {
                 AppHaptics.heavy();
                 _confirmDeleteAll();
@@ -369,432 +373,559 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   size: 20,
                 ),
               ),
-            )
-          : null,
+            ),
+            const SizedBox(width: 8),
+          ],
+          Tooltip(
+            message: _compactRows
+                ? 'Comfortable view'.localized(context)
+                : 'Compact view'.localized(context),
+            child: PressableScale(
+              onTap: () {
+                NotekarHaptics.selection('standard');
+                setState(() => _compactRows = !_compactRows);
+                unawaited(
+                  SharedPreferences.getInstance().then(
+                    (prefs) => prefs.setBool('m-compact-history', _compactRows),
+                  ),
+                );
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _compactRows
+                      ? widget.p.accent.withValues(alpha: 0.16)
+                      : widget.p.surface3,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _compactRows
+                        ? widget.p.accent.withValues(alpha: 0.4)
+                        : Colors.transparent,
+                    width: 0.8,
+                  ),
+                ),
+                child: Icon(
+                  _compactRows
+                      ? Icons.view_agenda_rounded
+                      : Icons.density_medium_rounded,
+                  color: _compactRows ? widget.p.accent : widget.p.text3,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       child: SizedBox(
         width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
         child: Stack(
           children: [
-            CustomScrollView(
-              controller: _scrollController,
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                  sliver: SliverToBoxAdapter(
-                    child: AppSheetLargeTitle(
-                      p: widget.p,
-                      title: 'History'.localized(context),
-                      scrollController: _scrollController,
-                    ),
+            Positioned.fill(
+              child: GestureDetector(
+                onScaleUpdate: (details) {
+                  if (details.pointerCount >= 2) {
+                    if (details.scale < 0.85 && !_compactRows) {
+                      NotekarHaptics.selection('standard');
+                      setState(() => _compactRows = true);
+                      unawaited(
+                        SharedPreferences.getInstance().then(
+                          (prefs) => prefs.setBool('m-compact-history', true),
+                        ),
+                      );
+                    } else if (details.scale > 1.15 && _compactRows) {
+                      NotekarHaptics.selection('standard');
+                      setState(() => _compactRows = false);
+                      unawaited(
+                        SharedPreferences.getInstance().then(
+                          (prefs) => prefs.setBool('m-compact-history', false),
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
                   ),
-                ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SliverStickyHeaderDelegate(
-                    height: 56.0 + (_selected.isNotEmpty ? 52.0 : 0.0),
-                    child: Container(
-                      color: widget.p.surface.withValues(
-                        alpha: widget.blur ? 0.65 : 1.0,
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: spacing16,
                       ),
-                      padding: const EdgeInsets.only(bottom: spacing8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
+                      sliver: SliverToBoxAdapter(
+                        child: AppSheetLargeTitle(
+                          p: widget.p,
+                          title: 'History'.localized(context),
+                          scrollController: _scrollController,
+                        ),
+                      ),
+                    ),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: SliverStickyHeaderDelegate(
+                        height: 56.0 + (_selected.isNotEmpty ? 52.0 : 0.0),
+                        child: Container(
+                          color: widget.p.surface.withValues(
+                            alpha: widget.blur ? 0.65 : 1.0,
+                          ),
+                          padding: const EdgeInsets.only(bottom: spacing8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: spacing16,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      for (final f in const [
-                                        'all',
-                                        'sessions',
-                                        'single',
-                                        'notes',
-                                        'date',
-                                      ])
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: spacing8,
-                                          ),
-                                          child: ChipButton(
-                                            p: widget.p,
-                                            label: f == 'date'
-                                                ? (_selectedDateKey != null &&
-                                                          _selectedDateKey !=
-                                                              dateKey(
-                                                                DateTime.now(),
-                                                              )
-                                                      ? fullDateLabel(
-                                                          _selectedDateKey!,
-                                                        )
-                                                      : null)
-                                                : switch (f) {
-                                                    'all' => 'All'.localized(
-                                                      context,
-                                                    ),
-                                                    'sessions' =>
-                                                      'Sessions'.localized(
-                                                        context,
-                                                      ),
-                                                    'single' =>
-                                                      'Singles'.localized(
-                                                        context,
-                                                      ),
-                                                    'notes' =>
-                                                      'With Notes'.localized(
-                                                        context,
-                                                      ),
-                                                    _ => f,
-                                                  },
-                                            icon: f == 'date'
-                                                ? Icons.calendar_today_rounded
-                                                : null,
-                                            active: _filter == f,
-                                            onTap: f == 'date'
-                                                ? () => _openDateFilter()
-                                                : () {
-                                                    setState(() {
-                                                      _filter = f;
-                                                      _selectedDateKey = null;
-                                                      _visibleCount = _pageSize;
-                                                      _rebuildMemoizedLists();
-                                                    });
-                                                    if (_scrollController
-                                                        .hasClients) {
-                                                      _scrollController.jumpTo(
-                                                        0.0,
-                                                      );
-                                                    }
-                                                  },
-                                            onLongPress: f == 'date'
-                                                ? _openDateFilter
-                                                : null,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: spacing8),
-                              Tooltip(
-                                message: 'Scroll to top',
-                                child: PressableScale(
-                                  onTap: () {
-                                    if (!_scrollController.hasClients) return;
-                                    _scrollController.animateTo(
-                                      0,
-                                      duration: const Duration(
-                                        milliseconds: 250,
-                                      ),
-                                      curve: Curves.easeOutCubic,
-                                    );
-                                  },
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: widget.p.surface2,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: widget.p.border,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.keyboard_double_arrow_up_rounded,
-                                      color: widget.p.text2,
-                                      size: 19,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: spacing16),
-                            ],
-                          ),
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 160),
-                            curve: Curves.easeOutCubic,
-                            child: _selected.isEmpty
-                                ? const SizedBox.shrink()
-                                : Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      spacing16,
-                                      spacing8,
-                                      spacing16,
-                                      0,
-                                    ),
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: widget.p.accent.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                        border: Border.all(
-                                          color: widget.p.accent.withValues(
-                                            alpha: 0.20,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Selected ${_selected.length} of 2 for duration',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: widget.p.accent,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (_timelineRows.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: HIGEmptyState(
-                      p: widget.p,
-                      icon: _emptyIcon,
-                      title: _emptyTitle,
-                      message: _emptyMessage,
-                      actionLabel: _filter == 'all'
-                          ? 'Start Logging'
-                          : 'Show All',
-                      onAction: _filter == 'all'
-                          ? () => Navigator.pop(context)
-                          : () {
-                              setState(() {
-                                _filter = 'all';
-                                _visibleCount = _pageSize;
-                                _rebuildMemoizedLists();
-                              });
-                            },
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing48),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          if (index >= _timelineRows.length) {
-                            if (hasOlderRows) {
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  spacing16,
-                                  4,
-                                  spacing16,
-                                  8,
-                                ),
-                                child: PressableScale(
-                                  onTap: () => setState(() {
-                                    _visibleCount += _pageSize;
-                                    _updateVisibleItems();
-                                  }),
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: widget.p.surface2,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: widget.p.border,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Load older moments'.localized(context),
-                                      style: TextStyle(
-                                        color: widget.p.accent,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                            return null;
-                          }
-
-                          final row = _timelineRows[index];
-                          if (row is _SectionHeaderRow) {
-                            final sec = row.section;
-                            return Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                spacing16,
-                                widget.compactRows ? 8 : spacing16,
-                                spacing16,
-                                widget.compactRows ? 4 : spacing8,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                              Row(
                                 children: [
                                   Expanded(
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.calendar_today_rounded,
-                                          size: 12,
-                                          color: widget.p.text3,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            sec.displayTitle,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: widget.p.text3,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: 0.6,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 3,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: widget.p.surface3,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: widget.p.border.withValues(
-                                          alpha: 0.5,
-                                        ),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: spacing16,
                                       ),
-                                    ),
-                                    child: Text(
-                                      sec.summaryText,
-                                      style: TextStyle(
-                                        color: widget.p.accent,
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w700,
-                                        fontFeatures: const [
-                                          FontFeature.tabularFigures(),
+                                      child: Row(
+                                        children: [
+                                          for (final f in const [
+                                            'all',
+                                            'sessions',
+                                            'single',
+                                            'notes',
+                                            'date',
+                                          ])
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: spacing8,
+                                              ),
+                                              child: ChipButton(
+                                                p: widget.p,
+                                                label: f == 'date'
+                                                    ? (_selectedDateKey !=
+                                                                  null &&
+                                                              _selectedDateKey !=
+                                                                  dateKey(
+                                                                    DateTime.now(),
+                                                                  )
+                                                          ? fullDateLabel(
+                                                              _selectedDateKey!,
+                                                            )
+                                                          : null)
+                                                    : switch (f) {
+                                                        'all' =>
+                                                          'All'.localized(
+                                                            context,
+                                                          ),
+                                                        'sessions' =>
+                                                          'Sessions'.localized(
+                                                            context,
+                                                          ),
+                                                        'single' =>
+                                                          'Singles'.localized(
+                                                            context,
+                                                          ),
+                                                        'notes' =>
+                                                          'With Notes'
+                                                              .localized(
+                                                                context,
+                                                              ),
+                                                        _ => f,
+                                                      },
+                                                icon: f == 'date'
+                                                    ? Icons
+                                                          .calendar_today_rounded
+                                                    : null,
+                                                active: _filter == f,
+                                                onTap: f == 'date'
+                                                    ? () => _openDateFilter()
+                                                    : () {
+                                                        setState(() {
+                                                          _filter = f;
+                                                          _selectedDateKey =
+                                                              null;
+                                                          _visibleCount =
+                                                              _pageSize;
+                                                          _rebuildMemoizedLists();
+                                                        });
+                                                        if (_scrollController
+                                                            .hasClients) {
+                                                          _scrollController
+                                                              .jumpTo(0.0);
+                                                        }
+                                                      },
+                                                onLongPress: f == 'date'
+                                                    ? _openDateFilter
+                                                    : null,
+                                              ),
+                                            ),
                                         ],
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(width: spacing8),
+                                  Tooltip(
+                                    message: 'Scroll to top',
+                                    child: PressableScale(
+                                      onTap: () {
+                                        if (!_scrollController.hasClients) {
+                                          return;
+                                        }
+                                        _scrollController.animateTo(
+                                          0,
+                                          duration: const Duration(
+                                            milliseconds: 250,
+                                          ),
+                                          curve: Curves.easeOutCubic,
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 36,
+                                        height: 36,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: widget.p.surface2,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: widget.p.border,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons
+                                              .keyboard_double_arrow_up_rounded,
+                                          color: widget.p.text2,
+                                          size: 19,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: spacing16),
                                 ],
                               ),
-                            );
-                          }
-
-                          final elem = row as _TimelineElementRow;
-                          if (elem.item is TimelineSessionItem) {
-                            final session = elem.item as TimelineSessionItem;
-                            final isSelected = _selected.any(
-                              (m) => session.momentIds.contains(m.id),
-                            );
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: spacing16,
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 160),
+                                curve: Curves.easeOutCubic,
+                                child: _selected.isEmpty
+                                    ? const SizedBox.shrink()
+                                    : Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          spacing16,
+                                          spacing8,
+                                          spacing16,
+                                          0,
+                                        ),
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: widget.p.accent.withValues(
+                                              alpha: 0.12,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                            border: Border.all(
+                                              color: widget.p.accent.withValues(
+                                                alpha: 0.20,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Selected ${_selected.length} of 2 for duration',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: widget.p.accent,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                               ),
-                              child: TimelineSessionCard(
-                                p: widget.p,
-                                session: session,
-                                selected: isSelected,
-                                compact: widget.compactRows,
-                                onEditNote: () =>
-                                    _openDirectNoteEditor(session.inMoment),
-                                onDeleteSession: () => _removeSession(session),
-                                onEndSession: session.isOngoing
-                                    ? () => _endLiveSession(session)
-                                    : null,
-                                onTapCard: _selected.isNotEmpty
-                                    ? () => _handleSelection(
-                                        session.inMoment,
-                                        isSelected,
-                                      )
-                                    : (_enableNoteOnClick
-                                          ? () => _openDirectNoteEditor(
-                                              session.inMoment,
-                                            )
-                                          : () => _handleSelection(
-                                              session.inMoment,
-                                              isSelected,
-                                            )),
-                                onLongPressCard: () =>
-                                    _showMomentDetails(session.inMoment),
-                              ),
-                            );
-                          }
-
-                          final single = elem.item as TimelineSingleItem;
-                          final moment = single.moment;
-                          final isSelected = _selected.any(
-                            (m) => m.id == moment.id,
-                          );
-                          final isGodMode =
-                              moment.note.contains('God Mode Unlocked') ||
-                              moment.note.contains('#godmode');
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: spacing16,
-                            ),
-                            child: TimelineSingleTile(
-                              p: widget.p,
-                              moment: moment,
-                              singleNumber: _singleNumberMap[moment.id],
-                              selected: isSelected,
-                              compact: widget.compactRows,
-                              isFirst: elem.isFirst,
-                              isLast: elem.isLast,
-                              onEditNote: () => _openDirectNoteEditor(moment),
-                              onDelete: () => _removeEntry(moment),
-                              onTap: _selected.isNotEmpty
-                                  ? () => _handleSelection(moment, isSelected)
-                                  : (_enableNoteOnClick
-                                        ? () => _openDirectNoteEditor(moment)
-                                        : () => _handleSelection(
-                                            moment,
-                                            isSelected,
-                                          )),
-                              onLongPress: isGodMode
-                                  ? () => showGodModeUnlockCelebrationDialog(
-                                      context: context,
-                                      p: widget.p,
-                                    )
-                                  : () => _showMomentDetails(moment),
-                            ),
-                          );
-                        },
-                        childCount:
-                            _timelineRows.length + (hasOlderRows ? 1 : 0),
-                        addAutomaticKeepAlives: false,
-                        addRepaintBoundaries: true,
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                    if (_timelineRows.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: HIGEmptyState(
+                          p: widget.p,
+                          icon: _emptyIcon,
+                          title: _emptyTitle,
+                          message: _emptyMessage,
+                          actionLabel: _filter == 'all'
+                              ? 'Start Logging'
+                              : 'Show All',
+                          onAction: _filter == 'all'
+                              ? () => Navigator.pop(context)
+                              : () {
+                                  setState(() {
+                                    _filter = 'all';
+                                    _visibleCount = _pageSize;
+                                    _rebuildMemoizedLists();
+                                  });
+                                },
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing48),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              if (index >= _timelineRows.length) {
+                                if (hasOlderRows) {
+                                  return Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      spacing16,
+                                      4,
+                                      spacing16,
+                                      8,
+                                    ),
+                                    child: PressableScale(
+                                      onTap: () => setState(() {
+                                        _visibleCount += _pageSize;
+                                        _updateVisibleItems();
+                                      }),
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: widget.p.surface2,
+                                          borderRadius: BorderRadius.circular(
+                                            999,
+                                          ),
+                                          border: Border.all(
+                                            color: widget.p.border,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Load older moments'.localized(
+                                            context,
+                                          ),
+                                          style: TextStyle(
+                                            color: widget.p.accent,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return null;
+                              }
+
+                              final row = _timelineRows[index];
+                              if (row is _SectionHeaderRow) {
+                                final sec = row.section;
+                                return Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    spacing16,
+                                    _compactRows ? 8 : spacing16,
+                                    spacing16,
+                                    _compactRows ? 4 : spacing8,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_today_rounded,
+                                              size: 12,
+                                              color: widget.p.text3,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              sec.displayTitle.localized(
+                                                context,
+                                              ),
+                                              style: TextStyle(
+                                                color: widget.p.text2,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 7,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: widget.p.surface2,
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                                border: Border.all(
+                                                  color: widget.p.border,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                '${sec.totalLogs} logs'
+                                                    .localized(context),
+                                                style: TextStyle(
+                                                  color: widget.p.text3,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (sec.totalTrackedDuration.inSeconds >
+                                          0)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2.5,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xFF30D158,
+                                            ).withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                            border: Border.all(
+                                              color: const Color(
+                                                0xFF30D158,
+                                              ).withValues(alpha: 0.3),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.timelapse_rounded,
+                                                size: 11,
+                                                color: Color(0xFF30D158),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                sec.formattedTrackedDuration,
+                                                style: const TextStyle(
+                                                  color: Color(0xFF30D158),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontFeatures: [
+                                                    FontFeature.tabularFigures(),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              final elem = row as _TimelineElementRow;
+                              if (elem.item is TimelineSessionItem) {
+                                final session =
+                                    elem.item as TimelineSessionItem;
+                                final isSelected = _selected.any(
+                                  (m) => session.momentIds.contains(m.id),
+                                );
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: spacing16,
+                                  ),
+                                  child: TimelineSessionCard(
+                                    p: widget.p,
+                                    session: session,
+                                    selected: isSelected,
+                                    compact: _compactRows,
+                                    onEditNote: () =>
+                                        _openDirectNoteEditor(session.inMoment),
+                                    onDeleteSession: () =>
+                                        _removeSession(session),
+                                    onEndSession: session.isOngoing
+                                        ? () => _endLiveSession(session)
+                                        : null,
+                                    onTapCard: _selected.isNotEmpty
+                                        ? () => _handleSelection(
+                                            session.inMoment,
+                                            isSelected,
+                                          )
+                                        : (_enableNoteOnClick
+                                              ? () => _openDirectNoteEditor(
+                                                  session.inMoment,
+                                                )
+                                              : () => _handleSelection(
+                                                  session.inMoment,
+                                                  isSelected,
+                                                )),
+                                    onLongPressCard: () =>
+                                        _showMomentDetails(session.inMoment),
+                                  ),
+                                );
+                              }
+
+                              final single = elem.item as TimelineSingleItem;
+                              final moment = single.moment;
+                              final isSelected = _selected.any(
+                                (m) => m.id == moment.id,
+                              );
+                              final isGodMode =
+                                  moment.note.contains('God Mode Unlocked') ||
+                                  moment.note.contains('#godmode');
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: spacing16,
+                                ),
+                                child: TimelineSingleTile(
+                                  p: widget.p,
+                                  moment: moment,
+                                  singleNumber: _singleNumberMap[moment.id],
+                                  selected: isSelected,
+                                  compact: _compactRows,
+                                  isFirst: elem.isFirst,
+                                  isLast: elem.isLast,
+                                  onEditNote: () =>
+                                      _openDirectNoteEditor(moment),
+                                  onDelete: () => _removeEntry(moment),
+                                  onTap: _selected.isNotEmpty
+                                      ? () =>
+                                            _handleSelection(moment, isSelected)
+                                      : (_enableNoteOnClick
+                                            ? () =>
+                                                  _openDirectNoteEditor(moment)
+                                            : () => _handleSelection(
+                                                moment,
+                                                isSelected,
+                                              )),
+                                  onLongPress: isGodMode
+                                      ? () =>
+                                            showGodModeUnlockCelebrationDialog(
+                                              context: context,
+                                              p: widget.p,
+                                            )
+                                      : () => _showMomentDetails(moment),
+                                ),
+                              );
+                            },
+                            childCount:
+                                _timelineRows.length + (hasOlderRows ? 1 : 0),
+                            addAutomaticKeepAlives: false,
+                            addRepaintBoundaries: true,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
             Positioned(
               bottom:
@@ -921,11 +1052,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   void _removeEntry(Moment entry) {
-    if (widget.confirmDelete && _pendingDeleteId != entry.id) {
-      setState(() => _pendingDeleteId = entry.id);
-      _showNotice('Tap delete again to confirm');
-      return;
-    }
     NotekarHaptics.success(
       'standard',
     ); // History delete is an intentional success action
@@ -933,10 +1059,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _entries = _entries.where((item) => item.id != entry.id).toList();
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _selected.removeWhere((item) => item.id == entry.id);
-      _pendingDeleteId = null;
       _rebuildMemoizedLists();
     });
-    _showNotice('Moment removed', onUndo: () => _restoreRemovedEntry(entry));
+    _showNotice(
+      'Moment removed'.localized(context),
+      onUndo: () => _restoreRemovedEntry(entry),
+    );
     unawaited(widget.onDelete(entry.id));
   }
 
@@ -995,7 +1123,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
       }
       _notice = null;
       _noticeUndo = null;
-      _pendingDeleteId = null;
       _rebuildMemoizedLists();
     });
     unawaited(widget.onRestore(entry));
@@ -1039,7 +1166,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _entries.removeWhere((m) => ids.contains(m.id));
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _selected.removeWhere((item) => ids.contains(item.id));
-      _pendingDeleteId = null;
       _rebuildMemoizedLists();
     });
 
@@ -1119,7 +1245,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _notice = null;
       _noticeUndo = null;
-      _pendingDeleteId = null;
       _rebuildMemoizedLists();
     });
     for (final m in moments) {

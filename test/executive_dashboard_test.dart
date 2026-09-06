@@ -202,7 +202,7 @@ void main() {
 
         expect(find.text('Total Tracked: '), findsOneWidget);
         expect(find.text('2h'), findsNWidgets(2));
-        expect(find.text('Time-Slot Intelligence'), findsOneWidget);
+        expect(find.text('Rhythm of the Day'), findsOneWidget);
         expect(find.text('★ EVENING'), findsOneWidget);
         expect(find.text('Daily Rhythm (Mon – Sun)'), findsOneWidget);
         expect(find.text('Activity Grid'), findsOneWidget);

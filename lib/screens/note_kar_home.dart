@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -80,6 +79,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _reduceMotion = false;
   bool _haptics = true;
   String _hapticStyle = 'standard';
+  bool _acousticFeedback = true;
   String _accentColor = 'blue';
   String _appIconStyle = 'default';
   String _csvDelimiter = ',';
@@ -467,6 +467,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _hapticStyle =
           prefs.getString('m-haptic-style') ?? (_haptics ? 'standard' : 'off');
       _haptics = _hapticStyle != 'off';
+      _acousticFeedback = prefs.getBool('m-acoustic-feedback') ?? true;
       _accentColor = prefs.getString('m-accent-color') ?? 'blue';
       final savedAppIconStyle =
           prefs.getString('m-app-icon-style') ?? 'default';
@@ -962,6 +963,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _savedPulseToken++;
       });
       NotekarHaptics.save(_hapticStyle, type);
+      if (_acousticFeedback) {
+        SystemSound.play(SystemSoundType.click);
+      }
 
       _pendingTap = {
         'note': note?.trim() ?? '',
@@ -1010,6 +1014,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
 
     NotekarHaptics.save(_hapticStyle, type);
+    if (_acousticFeedback) {
+      SystemSound.play(SystemSoundType.click);
+    }
 
     try {
       if (_mode == 'two-way') {
@@ -1379,6 +1386,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-reduce-motion',
         'm-haptics',
         'm-reduced-haptics',
+        'm-acoustic-feedback',
         'm-large-text',
         'm-high-contrast',
         'm-compact-history',
@@ -1488,6 +1496,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _remoteNotices = false;
       _reduceMotion = false;
       _haptics = true;
+      _acousticFeedback = true;
       _largeText = false;
       _highContrast = false;
       _compactHistory = false;
@@ -2451,19 +2460,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _openExternalLink(String url) async {
     if (!mounted) return;
-    final confirmed = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (context) => ExternalLinkConfirmSheet(p: p, url: url),
-    );
-
-    if (confirmed == true) {
-      try {
-        await _fileChannel.invokeMethod<void>('openUrl', {'url': url});
-      } catch (_) {
-        await Clipboard.setData(ClipboardData(text: url));
-        if (mounted) _showToast('Link copied');
-      }
-    }
+    await openExternalLinkSafely(context, p: p, url: url);
   }
 
   Future<void> _setRemoteNotices(bool value) async {
@@ -3935,127 +3932,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
         resizeToAvoidBottomInset: false,
         body: body,
       ),
-    );
-  }
-}
-
-class ExternalLinkConfirmSheet extends StatelessWidget {
-  const ExternalLinkConfirmSheet({
-    super.key,
-    required this.p,
-    required this.url,
-  });
-
-  final Palette p;
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    String domain = url;
-    try {
-      final uri = Uri.parse(url);
-      domain = uri.host;
-      if (domain.isEmpty) domain = url;
-    } catch (_) {}
-
-    return CupertinoAlertDialog(
-      title: Text('External Navigation'.localized(context)),
-      content: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'You are now leaving NoteKar to access an external website. Please review the destination address carefully:'
-                  .localized(context),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, height: 1.35),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.systemGrey6,
-                  context,
-                ),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: p.border.withValues(alpha: 0.3),
-                  width: 0.8,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        CupertinoIcons.lock_shield_fill,
-                        color: CupertinoColors.systemGreen,
-                        size: 13,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        domain.toUpperCase(),
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    url,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 11.5,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'NoteKar is offline-first. Your private data remains securely stored on your local device and is never shared.'
-                  .localized(context),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel,
-                  context,
-                ),
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        CupertinoDialogAction(
-          onPressed: () {
-            NotekarHaptics.selection('standard');
-            Navigator.pop(context, false);
-          },
-          child: Text('Cancel'.localized(context)),
-        ),
-        CupertinoDialogAction(
-          isDefaultAction: true,
-          onPressed: () {
-            NotekarHaptics.selection('standard');
-            Navigator.pop(context, true);
-          },
-          child: Text('Open Link'.localized(context)),
-        ),
-      ],
     );
   }
 }

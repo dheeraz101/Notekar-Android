@@ -12,7 +12,7 @@ class MomentsSettingsPage extends StatelessWidget {
     required this.p,
     required this.showTrashBin,
     required this.trash,
-    required this.compactHistory,
+    this.compactHistory = false,
     required this.confirmDelete,
     required this.enableNoteOnClick,
     required this.extendedDuration,
@@ -21,7 +21,7 @@ class MomentsSettingsPage extends StatelessWidget {
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
     this.countOnSave = false,
-    required this.onCompactHistoryChanged,
+    this.onCompactHistoryChanged,
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
     required this.onEnableNoteOnClickChanged,
@@ -46,7 +46,7 @@ class MomentsSettingsPage extends StatelessWidget {
   final bool resetSingleDaily;
   final bool countOnSave;
 
-  final ValueChanged<bool> onCompactHistoryChanged;
+  final ValueChanged<bool>? onCompactHistoryChanged;
   final ValueChanged<String> onHistoryDensityChanged;
   final ValueChanged<bool> onConfirmDeleteChanged;
   final ValueChanged<bool> onEnableNoteOnClickChanged;
@@ -67,31 +67,6 @@ class MomentsSettingsPage extends StatelessWidget {
           p: p,
           title: 'History Controls',
           children: [
-            SettingsSwitchRow(
-              p: p,
-              title: 'Compact History',
-              color: p.accent,
-              value: compactHistory,
-              onChanged: (value) async {
-                if (value && useNumbersInSingle) {
-                  final confirmed = await showFeatureConflictDialog(
-                    context,
-                    p: p,
-                    title: 'Turn Off Single Numbers?',
-                    message:
-                        'Compact History cannot be enabled while Single Moment Numbering is active. Disable Single Numbers to use compact rows.',
-                    confirmLabel: 'Turn Off & Enable',
-                    icon: Icons.compress_rounded,
-                    iconColor: p.accent,
-                  );
-                  if (!confirmed) return;
-                  onUseNumbersInSingleChanged(false);
-                }
-                final density = value ? 'compact' : 'comfortable';
-                onCompactHistoryChanged(value);
-                onHistoryDensityChanged(density);
-              },
-            ),
             SettingsSwitchRow(
               p: p,
               title: 'Confirm Delete',
@@ -134,7 +109,7 @@ class MomentsSettingsPage extends StatelessWidget {
                     iconColor: p.accent,
                   );
                   if (!confirmed) return;
-                  onCompactHistoryChanged(false);
+                  onCompactHistoryChanged?.call(false);
                   onHistoryDensityChanged('comfortable');
                 }
                 onUseNumbersInSingleChanged(value);
