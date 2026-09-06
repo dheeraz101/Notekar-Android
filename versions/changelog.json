@@ -1,5 +1,53 @@
 [
   {
+    "version": "7.3.3",
+    "buildNumber": "26BR0906b",
+    "releaseDate": "2026-09-06",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Physical Swipe Geometry & Sovereign Signal",
+    "badgeColor": "#0A84FF",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Physical Bed of Red",
+        "description": "SwipeableCardBed matches exact card corner geometry with solid crimson ground.",
+        "icon": "swipe_rounded"
+      },
+      {
+        "title": "Sovereign Bulletins",
+        "description": "Official advisories coupled with App Notices toggle and socket-level offline verification.",
+        "icon": "campaign_rounded"
+      },
+      {
+        "title": "Keynote Architecture",
+        "description": "Flush settings width, proportioned pill tags, and Steve Jobs design colophon.",
+        "icon": "auto_awesome_rounded"
+      },
+      {
+        "title": "Refined App Philosophy",
+        "description": "Streamlined About manifesto with focused typography and zero redundant subtitles.",
+        "icon": "lightbulb_outline_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "Re-engineer swipe-to-delete with SwipeableCardBed matching exact 16pt/12pt card corner radii",
+      "Eliminate all background straight-line cutouts and gaps behind sliding session and single moment cards",
+      "Standardize What's New keynote hero card and innovation cards to flush settings group bounds",
+      "Align keynote pill tags, release edition badges, and date metadata to eliminate horizontal overflows",
+      "Couple Official Bulletins visibility with App Notices preference switch in Notifications & Updates",
+      "Add 1-second deliberate activity feedback spinner and socket-level DNS verification to bulletin checks",
+      "Refine App Philosophy card in About with elevated typography, removing redundant subtitle copy",
+      "Simplify Reset page description to minimal text and subtle warning icon",
+      "Update in-app guides, help FAQs, and settings search indexing for recent sovereign feature additions"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.3/NoteKar-v7.3.3-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.3/NoteKar-v7.3.3-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.3.2",
     "buildNumber": "26BR0906a",
     "releaseDate": "2026-09-06",
@@ -8,7 +56,7 @@
     "isBeta": true,
     "edition": "Life Ledger Density & iOS Dialog Architecture",
     "badgeColor": "#FF9F0A",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Compact History Timeline",

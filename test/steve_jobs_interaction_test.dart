@@ -604,7 +604,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('KEYNOTE RELEASE'), findsOneWidget);
-        expect(find.text('v7.3.2 Update'), findsOneWidget);
+        expect(find.text('v7.3.3 Update'), findsOneWidget);
         expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
         expect(find.text('Pinch-to-Density Physics'), findsOneWidget);
         expect(find.text('Physical Swipe & Bed of Red'), findsOneWidget);

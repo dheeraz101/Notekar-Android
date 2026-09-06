@@ -27,55 +27,51 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.3.2',
+    version: '7.3.3',
     date: 'September 06, 2026',
-    edition: 'Life Ledger Density & iOS Dialog Architecture',
+    edition: 'Physical Swipe Geometry & Sovereign Signal',
     badgeColor: Color(0xFF0A84FF),
     highlights: [
       (
-        title: 'Compact History Timeline',
+        title: 'Physical Bed of Red',
         desc:
-            'Ultra-dense timeline layout presenting 2x–3x more moments with scaled rail markers and micro duration badges.',
-        icon: Icons.view_agenda_rounded,
-        tag: 'Timeline',
+            'Dedicated swipe background bed matching exact card corner radii to eliminate gaps during dismiss gestures.',
+        icon: Icons.swipe_rounded,
+        tag: 'Gestures',
       ),
       (
-        title: 'Standardized iOS Dialogs',
+        title: 'Keynote What’s New Hub',
         desc:
-            'All multi-choice alerts upgraded to native CupertinoAlertDialog standard with zero button label truncation.',
-        icon: Icons.chat_bubble_outline_rounded,
-        tag: 'Apple HIG',
+            'Standardized settings-width cards, proportional keynote badges, and refined typography without overflow.',
+        icon: Icons.auto_awesome_rounded,
+        tag: 'Design',
       ),
       (
-        title: 'Life Ledger Session Pairing',
+        title: 'Sovereign Official Bulletins',
         desc:
-            'Intelligently pairs Two-Way IN/OUT intervals into unified session cards with 1-tap inline live session ending.',
-        icon: Icons.timeline_rounded,
-        tag: 'Sessions',
+            'Official releases and advisories notice center coupled directly with App Notices toggle and offline verification.',
+        icon: Icons.campaign_rounded,
+        tag: 'Notices',
       ),
       (
-        title: 'Executive Intelligence Hub',
+        title: 'Refined App Philosophy',
         desc:
-            'Grounded Daily Rhythm hourly charts, 90-day activity intensity grid, and responsive time-scope habit analytics.',
-        icon: Icons.insights_rounded,
-        tag: 'Analytics',
+            'Streamlined About manifesto with focused typography and zero redundant subtitles or cluttered descriptions.',
+        icon: Icons.lightbulb_outline_rounded,
+        tag: 'Manifesto',
       ),
     ],
     items: [
-      '+ Add high-density Compact History Mode for TimelineSessionCard and TimelineSingleTile',
-      '+ Automatically suppress empty note placeholder boxes in compact mode to maximize vertical density',
-      '+ Standardize all 2+ option confirmation popups to native CupertinoAlertDialog via showCupertinoDialog',
-      '+ Upgrade External Navigation warning to native Cupertino alert with verified domain badges and link preview',
-      '+ Upgrade Network Warning modal to Cupertino alert with animated check toggle and download size indicators',
-      '+ Unify Trash Bin, Backup Deletion, and Feature Conflict dialogs under Apple HIG action stacking rules',
-      '+ Add Life Ledger continuous session cards with emerald start nodes, crimson end nodes, and duration connectors',
-      '+ Add 1-tap live session end button to stop active tracking immediately from inside History',
-      '+ Add Executive Intelligence Hub with Daily Rhythm bar chart and rolling 90-day activity intensity matrix',
-      '+ Add standalone onboarding tour walkthrough pages for the History Timeline and Dashboard Hub',
-      '* Geometrically lock calendar day cell baselines so dates with event activity dots never shift upward',
-      '* Reposition Dashboard hero card pace and trend badges to eliminate horizontal text truncation',
-      '! Ensure history calendar chip immediately launches MomentCalendarDialog on first tap',
-      '* Full automated test coverage across compact timeline cards and Cupertino confirmation alerts',
+      '+ Re-engineer swipe-to-delete with SwipeableCardBed matching exact 16pt/12pt card corner radii',
+      '+ Eliminate background straight-line cutouts and gaps behind sliding session and single moment cards',
+      '+ Standardize What’s New keynote hero card and innovation cards to flush settings group bounds',
+      '+ Align keynote pill tags, release edition badges, and date metadata to eliminate horizontal overflows',
+      '+ Couple Official Bulletins visibility with App Notices preference switch in Notifications & Updates',
+      '+ Add 1-second deliberate activity feedback spinner and socket-level DNS verification to bulletin checks',
+      '+ Refine App Philosophy card in About with elevated typography, removing redundant subtitle copy',
+      '+ Simplify Reset page description to minimal text and subtle warning icon',
+      '+ Update in-app guides, help FAQs, and settings search indexing for recent sovereign feature additions',
+      '* Full automated test suite coverage for physical swipe geometry, bulletins sheet, and keynote views',
     ],
   );
 

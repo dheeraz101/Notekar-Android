@@ -1,0 +1,6 @@
+Update to 7.3.3 (build 26BR0906b):
+- Physical Bed of Red: Re-engineered swipe dismiss with corner geometry matching cards
+- Keynote What's New: Standardized full-width cards with proportioned pill badges
+- Sovereign Bulletins: Official advisories coupled with App Notices and offline check
+- Refined Philosophy: Clean About manifesto typography with zero subtitle redundancy
+- Minimal Reset: Streamlined data reset view with minimal text and warning icon
