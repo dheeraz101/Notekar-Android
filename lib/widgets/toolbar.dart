@@ -498,14 +498,50 @@ class ModeToolButton extends StatelessWidget {
                 color: p.surface3,
                 shape: BoxShape.circle,
               ),
-              child: AnimatedHomeIcon(
-                icon: single
-                    ? CupertinoIcons.arrow_up
-                    : CupertinoIcons.arrow_up_arrow_down,
-                color: color,
-                size: large ? 20 : 18,
-                motionX: motionX,
-                motionY: motionY,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 260),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final inAnimation =
+                      Tween<Offset>(
+                        begin: single
+                            ? const Offset(0.0, 0.25)
+                            : const Offset(0.0, -0.25),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      );
+
+                  return SlideTransition(
+                    position: inAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(
+                          begin: 0.85,
+                          end: 1.0,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    ),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey<bool>(single),
+                  child: AnimatedHomeIcon(
+                    icon: single
+                        ? CupertinoIcons.arrow_up
+                        : CupertinoIcons.arrow_up_arrow_down,
+                    color: color,
+                    size: large ? 20 : 18,
+                    motionX: motionX,
+                    motionY: motionY,
+                  ),
+                ),
               ),
             ),
           ),

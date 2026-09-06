@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
+import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
@@ -37,6 +38,7 @@ import 'package:notekar/dialogs/settings/time_reflection_settings_page.dart';
 import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
+import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/welcome_screen.dart';
@@ -46,6 +48,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/network_logger.dart';
+import 'package:notekar/utils/notice_service.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
@@ -311,6 +314,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late String currentLocale;
   List<NetworkLogEntry> _networkLogs = [];
   bool _loadingNetworkLogs = false;
+  AppNotice? _criticalNotice;
 
   String? _editingReminderType;
   final TextEditingController _reminderMessageController =
@@ -362,6 +366,126 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _vtUrl =
       'https://www.virustotal.com/gui/file/a95a703eaf519bd0ddf1ab7839dab7a90a02150e7808882c3247cb35465a2bfe';
   String _currentBuildChannel = '';
+
+  Future<void> _loadCriticalNotice() async {
+    try {
+      final notice = await NoticeService.instance.getActiveCriticalAdvisory();
+      if (mounted && notice != null) {
+        setState(() {
+          _criticalNotice = notice;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Widget _buildCriticalAdvisoryBanner(Palette p) {
+    if (_criticalNotice == null) return const SizedBox.shrink();
+    final notice = _criticalNotice!;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: spacing12),
+      child: PressableScale(
+        onTap: () {
+          OfficialBulletinsSheet.show(
+            context,
+            p: p,
+            onOpenLink: widget.onOpenLink,
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: p.red.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: p.red.withValues(alpha: 0.35), width: 1),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: p.red.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.warning_amber_rounded,
+                  color: p.red,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: spacing12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'CRITICAL ADVISORY'.localized(context),
+                          style: TextStyle(
+                            color: p.red,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        const Spacer(),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () async {
+                            await NoticeService.instance.dismissNotice(
+                              notice.id,
+                            );
+                            if (mounted) {
+                              setState(() => _criticalNotice = null);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: 16,
+                              color: p.text3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: spacing4),
+                    Text(
+                      notice.localizedTitle(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      notice.localizedBody(context),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 13,
+                        height: 1.3,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
@@ -992,6 +1116,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _loadRecentSearches();
     _loadRecentNoteSearches();
     _loadRemindersSettings();
+    _loadCriticalNotice();
 
     _settingsSearchFocusNode.addListener(() {
       if (_settingsSearchFocusNode.hasFocus && category != 'Search') {
@@ -3702,6 +3827,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
                           SliverList(
                             delegate: SliverChildListDelegate([
+                              if (_criticalNotice != null)
+                                _buildCriticalAdvisoryBanner(p),
                               SettingsGroup(
                                 p: p,
                                 insetDividers: true,
@@ -5859,6 +5986,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                              onOpenLink: widget.onOpenLink,
                             ),
                           ),
                         if (show('Data & Backup'))

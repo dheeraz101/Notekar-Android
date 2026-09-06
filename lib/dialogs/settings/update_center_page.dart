@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -1132,6 +1133,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
     required this.onRemoteNoticesChanged,
     required this.onOpenCategory,
     required this.onLearnMoreBeta,
+    this.onOpenLink,
   });
 
   final Palette p;
@@ -1142,6 +1144,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
   final ValueChanged<bool> onRemoteNoticesChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
   final VoidCallback onLearnMoreBeta;
+  final void Function(String url)? onOpenLink;
 
   @override
   Widget build(BuildContext context) {
@@ -1216,6 +1219,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
         ),
         SettingsGroup(
           p: p,
+          insetDividers: true,
           children: [
             SettingsSwitchRow(
               p: p,
@@ -1224,12 +1228,43 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               value: remoteNotices,
               onChanged: onRemoteNoticesChanged,
             ),
+            SettingsRow(
+              p: p,
+              icon: Icons.campaign_rounded,
+              title: 'Official Bulletins & Advisories',
+              color: p.accent,
+              status: null,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'View'.localized(context),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: spacing4),
+                  Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                ],
+              ),
+              onTap: () {
+                OfficialBulletinsSheet.show(
+                  context,
+                  p: p,
+                  onOpenLink:
+                      onOpenLink ??
+                      (url) => openExternalLinkSafely(context, p: p, url: url),
+                );
+              },
+            ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Checks for official announcement notices and bug fix announcements.'
+              'Official bulletins, critical advisories, and curated release highlights delivered with zero user tracking.'
                   .localized(context),
         ),
         SettingsGroup(

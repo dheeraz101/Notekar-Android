@@ -129,46 +129,64 @@ class _AppSheetState extends State<AppSheet> {
               ),
 
               // Header Area (Stack for absolute horizontal centering)
-              SizedBox(
-                height: 44,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (widget.onBack != null)
-                      Positioned(
-                        left: 0,
-                        child: _HeaderCircleButton(
-                          p: p,
-                          icon: Icons.chevron_left_rounded,
-                          onTap: widget.onBack!,
-                        ),
-                      )
-                    else if (widget.leadingAction != null)
-                      Positioned(left: 0, child: widget.leadingAction!),
-                    Positioned.fill(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 88),
-                          child: Opacity(
-                            opacity: widget.showLargeTitle
-                                ? _titleOpacity
-                                : 1.0,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 180),
-                              child: FittedBox(
-                                key: ValueKey<String>(widget.title),
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  widget.title.localized(context),
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: p.text,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.4,
-                                    fontFamily: 'Inter',
+              () {
+                final hasLeading =
+                    widget.onBack != null || widget.leadingAction != null;
+                final hasTrailingAction = widget.trailingAction != null;
+                final leadingWidth = hasLeading ? 40.0 : 0.0;
+                final trailingWidth = 40.0 + (hasTrailingAction ? 40.0 : 0.0);
+                final symmetricalMargin =
+                    (leadingWidth > trailingWidth
+                        ? leadingWidth
+                        : trailingWidth) +
+                    12.0;
+                final horizontalPadding = symmetricalMargin > 88.0
+                    ? symmetricalMargin
+                    : 88.0;
+
+                return SizedBox(
+                  height: 44,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (widget.onBack != null)
+                        Positioned(
+                          left: 0,
+                          child: _HeaderCircleButton(
+                            p: p,
+                            icon: Icons.chevron_left_rounded,
+                            onTap: widget.onBack!,
+                          ),
+                        )
+                      else if (widget.leadingAction != null)
+                        Positioned(left: 0, child: widget.leadingAction!),
+                      Positioned.fill(
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                            ),
+                            child: Opacity(
+                              opacity: widget.showLargeTitle
+                                  ? _titleOpacity
+                                  : 1.0,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 180),
+                                child: FittedBox(
+                                  key: ValueKey<String>(widget.title),
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    widget.title.localized(context),
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: p.text,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.4,
+                                      fontFamily: 'Inter',
+                                    ),
                                   ),
                                 ),
                               ),
@@ -176,27 +194,27 @@ class _AppSheetState extends State<AppSheet> {
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.trailingAction != null) ...[
-                            widget.trailingAction!,
-                            const SizedBox(width: 8),
+                      Positioned(
+                        right: 0,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.trailingAction != null) ...[
+                              widget.trailingAction!,
+                              const SizedBox(width: 8),
+                            ],
+                            _HeaderCircleButton(
+                              p: p,
+                              icon: Icons.close_rounded,
+                              onTap: () => Navigator.of(context).pop(),
+                            ),
                           ],
-                          _HeaderCircleButton(
-                            p: p,
-                            icon: Icons.close_rounded,
-                            onTap: () => Navigator.pop(context),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  ),
+                );
+              }(),
               const SizedBox(height: spacing20),
               widget.child,
             ],

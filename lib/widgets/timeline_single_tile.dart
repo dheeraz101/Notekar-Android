@@ -54,7 +54,10 @@ class TimelineSingleTile extends StatelessWidget {
               ? DismissDirection.none
               : DismissDirection.horizontal,
           background: Container(
-            color: p.accent,
+            decoration: BoxDecoration(
+              color: p.accent,
+              borderRadius: tileRadius,
+            ),
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 20),
             child: const Row(
@@ -73,7 +76,7 @@ class TimelineSingleTile extends StatelessWidget {
             ),
           ),
           secondaryBackground: Container(
-            color: p.red,
+            decoration: BoxDecoration(color: p.red, borderRadius: tileRadius),
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             child: const Row(

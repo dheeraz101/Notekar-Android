@@ -136,7 +136,7 @@ class _ClockFaceState extends State<ClockFace> {
       child: AnimatedScale(
         scale: _bright ? 0.96 : 1.0,
         duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutBack,
+        curve: Curves.easeOutCubic,
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: Row(

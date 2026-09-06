@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
+import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
+import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -13,6 +16,8 @@ import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_top_insights_pill.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/timeline_single_tile.dart';
+import 'package:notekar/widgets/toolbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   final p = paletteFor('dark');
@@ -265,7 +270,7 @@ void main() {
       final animatedScale = tester.widget<AnimatedScale>(
         find.byType(AnimatedScale),
       );
-      expect(animatedScale.curve, Curves.easeOutBack);
+      expect(animatedScale.curve, Curves.easeOutCubic);
       expect(animatedScale.scale, 1.0);
     });
 
@@ -444,6 +449,130 @@ void main() {
           find.text('Version v2.4.0 • Designed with Conviction'),
           findsOneWidget,
         );
+      },
+    );
+
+    testWidgets(
+      'ModeToolButton precision sliding switch transitions smoothly between Single and Two-Way',
+      (tester) async {
+        var currentMode = 'single';
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return ModeToolButton(
+                    p: p,
+                    mode: currentMode,
+                    large: false,
+                    onTap: () {
+                      setState(() {
+                        currentMode = currentMode == 'single'
+                            ? 'two-way'
+                            : 'single';
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Initially Single mode: arrow up
+        expect(find.byIcon(Icons.arrow_upward), findsNothing);
+        // Tap to toggle to Two-Way mode
+        await tester.tap(find.byType(ModeToolButton));
+        // Animate halfway through 260ms transition
+        await tester.pump(const Duration(milliseconds: 130));
+        expect(find.byType(SlideTransition), findsWidgets);
+        expect(find.byType(ScaleTransition), findsWidgets);
+
+        await tester.pumpAndSettle();
+        expect(currentMode, 'two-way');
+      },
+    );
+
+    testWidgets(
+      'OfficialBulletinsSheet renders Apple-grade hierarchy, manual refresh, and privacy guarantee',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({
+          'cached_app_notices':
+              '[{"id":"test-1","priority":"critical","title":"Security Update","body":"Important security fix deployed.","enabled":true}]',
+          'last_notice_check_ts': DateTime.now().millisecondsSinceEpoch,
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: OfficialBulletinsSheet(p: p, onOpenLink: (_) {}),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bulletins & Advisories'), findsOneWidget);
+        expect(find.text('Check Now'), findsOneWidget);
+        expect(find.text('ZERO-TRACKING GUARANTEE'), findsOneWidget);
+        expect(find.text('Security Update'), findsOneWidget);
+      },
+    );
+
+    test(
+      'AppNotice data model correctly identifies hierarchy and priority levels',
+      () {
+        final critical = AppNotice(
+          id: 'c1',
+          enabled: true,
+          priority: 'critical',
+          title: 'Critical Patch',
+          body: 'Patch details',
+        );
+        expect(critical.isCritical, isTrue);
+        expect(critical.isReleaseBulletin, isFalse);
+        expect(critical.isCuratedTip, isFalse);
+
+        final bulletin = AppNotice(
+          id: 'b1',
+          enabled: true,
+          priority: 'release',
+          title: 'Release Notes',
+          body: 'New features',
+        );
+        expect(bulletin.isCritical, isFalse);
+        expect(bulletin.isReleaseBulletin, isTrue);
+
+        final tip = AppNotice(
+          id: 't1',
+          enabled: true,
+          priority: 'tip',
+          title: 'Curated Tip',
+          body: 'Productivity tip',
+        );
+        expect(tip.isCuratedTip, isTrue);
+      },
+    );
+
+    testWidgets(
+      'AppSheet header mathematically centers collapsed title when trailing action exists',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AppSheet(
+                p: p,
+                title: 'Mathematical Alignment',
+                trailingAction: const Icon(Icons.share, size: 20),
+                child: const SizedBox(height: 100),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Mathematical Alignment'), findsOneWidget);
       },
     );
   });

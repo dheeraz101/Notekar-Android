@@ -525,7 +525,7 @@ class DailyRhythmBarChart extends StatelessWidget {
                                 ? '${day.trackedDuration.inHours}h'
                                 : (day.trackedDuration.inMinutes > 0
                                       ? '${day.trackedDuration.inMinutes}m'
-                                      : (day.count > 0 ? '${day.count}' : '·')),
+                                      : (day.count > 0 ? '${day.count}' : '')),
                             style: TextStyle(
                               color: day.isToday ? p.accent : p.text3,
                               fontSize: 9.5,
