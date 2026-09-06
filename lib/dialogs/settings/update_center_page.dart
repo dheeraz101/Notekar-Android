@@ -1228,37 +1228,39 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               value: remoteNotices,
               onChanged: onRemoteNoticesChanged,
             ),
-            SettingsRow(
-              p: p,
-              icon: Icons.campaign_rounded,
-              title: 'Official Bulletins & Advisories',
-              color: p.accent,
-              status: null,
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'View'.localized(context),
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+            if (remoteNotices)
+              SettingsRow(
+                p: p,
+                icon: Icons.campaign_rounded,
+                title: 'Official Bulletins',
+                color: p.accent,
+                status: null,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: spacing4),
-                  Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
-                ],
+                    const SizedBox(width: spacing4),
+                    Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                  ],
+                ),
+                onTap: () {
+                  OfficialBulletinsSheet.show(
+                    context,
+                    p: p,
+                    onOpenLink:
+                        onOpenLink ??
+                        (url) =>
+                            openExternalLinkSafely(context, p: p, url: url),
+                  );
+                },
               ),
-              onTap: () {
-                OfficialBulletinsSheet.show(
-                  context,
-                  p: p,
-                  onOpenLink:
-                      onOpenLink ??
-                      (url) => openExternalLinkSafely(context, p: p, url: url),
-                );
-              },
-            ),
           ],
         ),
         SettingsPageDescription(

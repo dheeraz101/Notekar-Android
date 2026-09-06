@@ -386,52 +386,15 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: spacing16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: p.red.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: p.red.withValues(alpha: 0.25),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.warning_amber_rounded, color: p.red, size: 22),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Irreversible Actions'.localized(context),
-                        style: TextStyle(
-                          color: p.red,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Data wipe operations permanently erase local storage and cannot be undone. Export a backup beforehand from Data & Backup.'
-                            .localized(context),
-                        style: TextStyle(
-                          color: p.text2,
-                          fontSize: 12.5,
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+        const SizedBox(height: spacing4),
+        SettingsPageDescription(
+          p: p,
+          showIcon: true,
+          icon: Icons.warning_amber_rounded,
+          iconColor: p.red,
+          text:
+              'Data wipe operations permanently erase local storage and cannot be undone. Export a backup beforehand from Data & Backup.'
+                  .localized(context),
         ),
         const SizedBox(height: spacing48),
       ],

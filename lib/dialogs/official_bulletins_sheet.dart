@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -65,10 +67,59 @@ class _OfficialBulletinsSheetState extends State<OfficialBulletinsSheet> {
     }
   }
 
+  Future<bool> _isOffline() async {
+    try {
+      final result = await InternetAddress.lookup('github.com');
+      return result.isEmpty || result[0].rawAddress.isEmpty;
+    } on SocketException catch (_) {
+      return true;
+    } catch (_) {
+      return true;
+    }
+  }
+
   Future<void> _checkNow() async {
     if (_checking) return;
     NotekarHaptics.selection('standard');
     setState(() => _checking = true);
+
+    final stopwatch = Stopwatch()..start();
+    final offline = await _isOffline();
+
+    final elapsed = stopwatch.elapsedMilliseconds;
+    if (elapsed < 1000) {
+      await Future.delayed(Duration(milliseconds: 1000 - elapsed));
+    }
+
+    if (!mounted) return;
+
+    if (offline) {
+      setState(() => _checking = false);
+      if (mounted) {
+        showCupertinoDialog<void>(
+          context: context,
+          builder: (dialogCtx) => CupertinoAlertDialog(
+            title: Text('No Internet Connection'.localized(dialogCtx)),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Please check your network connection and try again.'.localized(
+                  dialogCtx,
+                ),
+              ),
+            ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.of(dialogCtx).pop(),
+                child: Text('OK'.localized(dialogCtx)),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
 
     final fresh = await _service.fetchNotices(force: true);
     final lastCheck = await _service.getLastCheckTime();
@@ -107,7 +158,7 @@ class _OfficialBulletinsSheetState extends State<OfficialBulletinsSheet> {
 
     return AppSheet(
       p: p,
-      title: 'Bulletins & Advisories'.localized(context),
+      title: 'Official Bulletins'.localized(context),
       docked: true,
       child: SizedBox(
         height: MediaQuery.sizeOf(context).height * 0.78,
@@ -168,7 +219,7 @@ class _OfficialBulletinsSheetState extends State<OfficialBulletinsSheet> {
                       ),
                     ),
                     PressableScale(
-                      onTap: _checkNow,
+                      onTap: _checking ? null : _checkNow,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
@@ -178,33 +229,36 @@ class _OfficialBulletinsSheetState extends State<OfficialBulletinsSheet> {
                           color: p.accent.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_checking)
-                              CupertinoActivityIndicator(
-                                radius: 6,
-                                color: p.accent,
+                        child: _checking
+                            ? SizedBox(
+                                height: 16,
+                                width: 36,
+                                child: Center(
+                                  child: CupertinoActivityIndicator(
+                                    radius: 7,
+                                    color: p.accent,
+                                  ),
+                                ),
                               )
-                            else
-                              Icon(
-                                Icons.refresh_rounded,
-                                size: 14,
-                                color: p.accent,
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.refresh_rounded,
+                                    size: 14,
+                                    color: p.accent,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Check Now'.localized(context),
+                                    style: TextStyle(
+                                      color: p.accent,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _checking
-                                  ? 'Checking'.localized(context)
-                                  : 'Check Now'.localized(context),
-                              style: TextStyle(
-                                color: p.accent,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                   ],

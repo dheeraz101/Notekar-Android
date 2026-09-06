@@ -368,6 +368,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String _currentBuildChannel = '';
 
   Future<void> _loadCriticalNotice() async {
+    if (!remoteNotices) return;
     try {
       final notice = await NoticeService.instance.getActiveCriticalAdvisory();
       if (mounted && notice != null) {
@@ -379,7 +380,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   Widget _buildCriticalAdvisoryBanner(Palette p) {
-    if (_criticalNotice == null) return const SizedBox.shrink();
+    if (!remoteNotices || _criticalNotice == null) {
+      return const SizedBox.shrink();
+    }
     final notice = _criticalNotice!;
 
     return Padding(
@@ -2197,7 +2200,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
         subtitle: 'Denser rows for scanning many moments',
         category: 'Moments',
         icon: Icons.view_agenda_rounded,
-        keywords: ['compact', 'history', 'density', 'list', 'rows'],
+        keywords: [
+          'compact',
+          'history',
+          'density',
+          'list',
+          'rows',
+          'pinch-to-density',
+          'pinch zoom',
+          'comfortable',
+          'two fingers',
+        ],
         kind: 'switch',
         boolValue: compactHistory,
         onBoolChanged: (bool value) async {
@@ -2230,7 +2243,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
         subtitle: 'Show a prompt before deleting moments',
         category: 'Moments',
         icon: Icons.delete_sweep_rounded,
-        keywords: ['delete', 'confirm', 'safety', 'prompt', 'remove'],
+        keywords: [
+          'delete',
+          'confirm',
+          'safety',
+          'prompt',
+          'remove',
+          'swipe to delete',
+          'bed of red',
+          'undo',
+          'dynamic island',
+        ],
         kind: 'switch',
         boolValue: confirmDelete,
         onBoolChanged: (bool value) {
@@ -2419,11 +2442,43 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: _betaTrack ? 'Beta' : 'Stable',
       ),
       item(
+        title: 'Official Bulletins',
+        subtitle: 'Critical advisories, release highlights & bulletins',
+        category: 'Updates & Notices',
+        icon: Icons.campaign_rounded,
+        keywords: [
+          'official bulletins',
+          'bulletins',
+          'advisories',
+          'official',
+          'alerts',
+          'security advisories',
+          'notices',
+          'announcements',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: null,
+      ),
+      item(
         title: "What's New",
-        subtitle: 'Latest release highlights',
+        subtitle: 'Keynote release innovations & highlights',
         category: "What's New",
-        icon: Icons.new_releases_rounded,
-        keywords: ['new', 'latest', 'release', 'features', 'changelog'],
+        icon: Icons.auto_awesome_rounded,
+        keywords: [
+          'new',
+          'latest',
+          'release',
+          'features',
+          'changelog',
+          'keynote',
+          'innovations',
+          'steve jobs',
+          'pinch-to-density',
+          'bed of red',
+          'cupertino alerts',
+        ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
@@ -4325,6 +4380,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                       }
                                                       return;
                                                     }
+                                                    if (result.title ==
+                                                        'Official Bulletins') {
+                                                      OfficialBulletinsSheet.show(
+                                                        context,
+                                                        p: p,
+                                                        onOpenLink:
+                                                            widget.onOpenLink,
+                                                      );
+                                                      return;
+                                                    }
                                                     _openCategory(
                                                       result.category,
                                                     );
@@ -5464,6 +5529,35 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   GuideRow(
                                     p: p,
+                                    icon: Icons.pinch_rounded,
+                                    title: 'Pinch-to-Density Sensory Zoom',
+                                    text:
+                                        'Pinch with two fingers anywhere on the History timeline or toggle under Settings > Personalization > History to fluidly scale between Compact (information dense) and Comfortable (spacious ivory cards).',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.volume_up_rounded,
+                                    title: 'Acoustic Glass Mechanics & Haptics',
+                                    text:
+                                        'Every interaction carries physical weight: single taps evoke crisp mechanical tocks, switching clock faces produces a precision sliding resistance, and saves chime like polished acoustic crystal.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.swipe_rounded,
+                                    title: 'Swipe-to-Undo Dynamic Island',
+                                    text:
+                                        'Accidentally delete a moment? Swiping to dismiss reveals a solid red bed beneath the card with exact corner geometry, followed by a floating Dynamic Island pill with a tactile Undo button and countdown ring.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.campaign_rounded,
+                                    title:
+                                        'Official Bulletins (Zero Telemetry)',
+                                    text:
+                                        'Critical security alerts, version bulletins, and release insights delivered directly from static GitHub feeds without sending a single byte of user telemetry or tracking.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
                                     icon: Icons.widgets_rounded,
                                     title: 'Home Screen Widget',
                                     text:
@@ -5611,6 +5705,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How does Pinch-to-Density work in History?',
+                                    answer:
+                                        'Simply pinch in or out with two fingers on the History timeline. The cards scale fluidly between compact information-dense tiles and comfortable expanded views with live tactile feedback.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Where can I read Official Bulletins?',
+                                    answer:
+                                        'Open Settings > Updates & Notices > Official Bulletins to view verified release announcements, curated tips, and security advisories fetched securely with zero tracking.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'What happens when I swipe to delete a moment?',
+                                    answer:
+                                        'Swiping a moment card glides it smoothly off the screen revealing a solid red bed underneath. A floating Dynamic Island undo prompt instantly appears at the top, letting you restore the card with a single tap before it is sent to Trash.',
+                                  ),
                                   HelpRow(
                                     p: p,
                                     question:
@@ -5982,6 +6097,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onRemoteNoticesChanged: (value) {
                                 setState(() => remoteNotices = value);
                                 widget.onRemoteNotices(value);
+                                if (value) {
+                                  _loadCriticalNotice();
+                                }
                               },
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),

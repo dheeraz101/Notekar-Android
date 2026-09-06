@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
+import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -395,8 +396,14 @@ void main() {
           findsOneWidget,
         );
 
-        // Verifies prominent warning box and icon
-        expect(find.text('Irreversible Actions'), findsOneWidget);
+        // Verifies minimal warning description and icon
+        expect(
+          find.text(
+            'Data wipe operations permanently erase local storage and cannot be undone. Export a backup beforehand from Data & Backup.',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
         expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
       },
     );
@@ -513,7 +520,7 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Bulletins & Advisories'), findsOneWidget);
+        expect(find.text('Official Bulletins'), findsOneWidget);
         expect(find.text('Check Now'), findsOneWidget);
         expect(find.text('ZERO-TRACKING GUARANTEE'), findsOneWidget);
         expect(find.text('Security Update'), findsOneWidget);
@@ -573,6 +580,125 @@ void main() {
 
         await tester.pumpAndSettle();
         expect(find.text('Mathematical Alignment'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'FeedbackChangelogSettingsPage Whats New renders Apple Keynote hero, innovations, and Steve Jobs colophon',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: FeedbackChangelogSettingsPage(
+                  p: p,
+                  subCategory: "What's New",
+                  onOpenGithubIssue: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('SPECIAL EVENT · KEYNOTE RELEASE'), findsOneWidget);
+        expect(find.text('v7.3.2 Update'), findsOneWidget);
+        expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
+        expect(find.text('Pinch-to-Density Physics'), findsOneWidget);
+        expect(find.text('Physical Swipe & Bed of Red'), findsOneWidget);
+        expect(find.text('Cupertino Alert Architecture'), findsOneWidget);
+        expect(find.text('Executive Intelligence Hub'), findsOneWidget);
+        expect(find.text('Official Bulletins Engine'), findsOneWidget);
+        expect(
+          find.text('"Details matter, it’s worth waiting to get it right."'),
+          findsOneWidget,
+        );
+        expect(find.text('STEVE JOBS'), findsOneWidget);
+        expect(find.text('View Full Technical Changelog'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'TimelineSessionCard Dismissible secondary background uses solid flat color fill without inner radius',
+      (tester) async {
+        final now = DateTime.now();
+        final session = TimelineSessionItem(
+          inMoment: Moment(
+            id: 1,
+            type: 'in',
+            date: dateKey(now),
+            timestamp: now
+                .subtract(const Duration(minutes: 45))
+                .millisecondsSinceEpoch,
+          ),
+          outMoment: Moment(
+            id: 2,
+            type: 'out',
+            date: dateKey(now),
+            timestamp: now.millisecondsSinceEpoch,
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: session,
+                onTapCard: () {},
+                onEditNote: () {},
+                onDeleteSession: () {},
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        final dismissibleFinder = find.byType(Dismissible);
+        expect(dismissibleFinder, findsOneWidget);
+
+        final dismissible = tester.widget<Dismissible>(dismissibleFinder);
+        final secBg = dismissible.secondaryBackground as Container;
+        expect(secBg.color, equals(p.red));
+        expect(secBg.decoration, isNull);
+      },
+    );
+
+    testWidgets(
+      'TimelineSingleTile Dismissible secondary background uses solid flat color fill without inner radius',
+      (tester) async {
+        final now = DateTime.now();
+        final moment = Moment(
+          id: 1,
+          type: 'single',
+          date: dateKey(now),
+          timestamp: now.millisecondsSinceEpoch,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSingleTile(
+                p: p,
+                moment: moment,
+                onEditNote: () {},
+                onDelete: () {},
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        final dismissibleFinder = find.byType(Dismissible);
+        expect(dismissibleFinder, findsOneWidget);
+
+        final dismissible = tester.widget<Dismissible>(dismissibleFinder);
+        final secBg = dismissible.secondaryBackground as Container;
+        expect(secBg.color, equals(p.red));
+        expect(secBg.decoration, isNull);
       },
     );
   });

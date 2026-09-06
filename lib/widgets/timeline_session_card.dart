@@ -61,10 +61,7 @@ class TimelineSessionCard extends StatelessWidget {
           ),
           direction: DismissDirection.horizontal,
           background: Container(
-            decoration: BoxDecoration(
-              color: p.accent,
-              borderRadius: cardRadius,
-            ),
+            color: p.accent,
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 20),
             child: const Row(
@@ -83,7 +80,7 @@ class TimelineSessionCard extends StatelessWidget {
             ),
           ),
           secondaryBackground: Container(
-            decoration: BoxDecoration(color: p.red, borderRadius: cardRadius),
+            color: p.red,
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             child: const Row(

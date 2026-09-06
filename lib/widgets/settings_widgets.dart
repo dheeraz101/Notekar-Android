@@ -925,12 +925,16 @@ class SettingsPageDescription extends StatelessWidget {
     required this.p,
     required this.text,
     this.showIcon = false,
+    this.icon,
+    this.iconColor,
     this.bottomPadding = 16.0,
   });
 
   final Palette p;
   final String text;
   final bool showIcon;
+  final IconData? icon;
+  final Color? iconColor;
   final double bottomPadding;
 
   @override
@@ -944,8 +948,8 @@ class SettingsPageDescription extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 3.5),
               child: Icon(
-                Icons.info_outline_rounded,
-                color: p.text3.withValues(alpha: 0.6),
+                icon ?? Icons.info_outline_rounded,
+                color: iconColor ?? p.text3.withValues(alpha: 0.6),
                 size: 13,
               ),
             ),
