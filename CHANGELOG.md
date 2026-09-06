@@ -7,47 +7,130 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.3.2] - 2026-09-06 (versionCode 26BR0906a) [BR]
+
+### What's New
+
+- **Redesigned Compact History Mode (Life Ledger High-Density View)**:
+    - Introduced an ultra-dense, distraction-free timeline layout for power users who log extensive
+      daily moments.
+    - Scaled row margins down to `2.5px`, reduced card padding to `11×8px`, and shrank timeline node
+      markers to `6px`, comfortably presenting 2x to 3x more entries on screen without vertical
+      scrolling fatigue.
+    - **Intelligent Note Footprint**: In compact mode, empty note placeholder boxes are
+      automatically
+      suppressed to reclaim ~40px per item, while maintaining seamless 1-tap card selection to
+      inspect
+      or attach notes.
+    - Scaled duration connector badges (`9.5pt`) and start/end time markers (`12pt`) with tabular
+      numerical figures for perfect vertical scanning alignment.
+
+- **Unified Apple HIG Dialog Architecture (`CupertinoAlertDialog`)**:
+    - Re-engineered all multi-choice confirmation dialogs across NoteKar to native iOS
+      `CupertinoAlertDialog` presented via `showCupertinoDialog`, matching the Sovereign God Mode
+      standard.
+    - **Zero Truncation Guarantee**: Action buttons automatically wrap or stack vertically according
+      to Apple Human Interface Guidelines, completely eliminating truncated button labels (such as
+      *"
+      Turn Off & Enable"*, *"Restore All Moments"*, or *"Delete Permanently"*).
+    - Standardized across External Navigation alerts, Network Warnings, Trash Bin management, Data
+      Backup deletion, Feature Conflicts, System Error reporting, and Day-of-Week schedulers.
+    - **External Navigation Security Alert**: Replaced modal bottom sheet with a native Cupertino
+      security alert displaying domain verification badges, monospace destination links, and offline
+      privacy reassurances.
+    - **Network Warning Alert**: Modernized data warning modal with interactive animated circular
+      toggles and explicit download size indicators.
+
+### Improvements & Polish
+
+- Refined day section header spacing in `HistoryDialog` when compact history is toggled, matching
+  timeline density.
+- Enhanced haptic feedback patterns across all confirmation dialogs (`NotekarHaptics.selection`).
+- Full automated test suite coverage for compact timeline cards, empty note omission logic, and
+  Cupertino alert rendering.
+
 ## [7.3.1] - 2026-09-06 (versionCode 26BR0906) [BR]
 
 ### What's New
 
-- Add onboarding tours, guides, and fix hero card pill layout
-- Add 1-tap live session end and refine Apple HIG UI
-- Implement Apple HIG life ledger timeline & executive intelligence hub
-- Add top insights pill, toolbar last timestamp & universal haptics
+- **Life Ledger Timeline (Redesigned History)**:
+    - Reimagined chronological history into a continuous Life Ledger, automatically pairing Two-Way
+      `IN` and `OUT` punches into unified interval session cards with emerald start nodes, crimson
+      end
+      nodes, and hairline connector rails.
+    - **1-Tap Inline Live Session Termination**: Active sessions now display a pulsing green `LIVE`
+      duration pill alongside an immediate red `End` button to conclude tracking directly inside
+      history with zero friction.
+    - Sequential `00`–`99` Devanagari and Arabic numbering badges for single moments with optional
+      daily reset.
+- **Executive Intelligence Hub (Redesigned Dashboard)**:
+    - **Grounded Daily Rhythm Chart**: Hourly activity bar charts anchored to a solid bottom
+      baseline
+      with tabular weekday labels for intuitive circadian habit visualization.
+    - **90-Day Activity Heatmap Matrix**: Rolling quarterly activity intensity grid displaying habit
+      streaks, milestone badges, and daily density tiers.
+    - **Responsive Time-Scope Intelligence**: Dynamic switching between `Today`, `Week`, `Month`,
+      and
+      `All` with smooth animated chart updates and time-of-day circadian bias calculations.
+- **Precision Apple HIG Calendar Picker (`MomentCalendarDialog`)**:
+    - Re-engineered day cells using stacked coordinate geometry, permanently locking day number
+      baselines so dates with event activity dots never shift or jitter upward.
+    - Direct 1-tap presentation from the history calendar chip with fluid scale and fade
+      transitions.
+- **Interactive Feature Tours & Help Guides**:
+    - Added dedicated standalone welcome tour pages for both the Life Ledger Timeline and Executive
+      Intelligence Hub with realistic interactive mockups.
+    - Added Interactive Feature Tours section to Help & Guides settings with direct tour launching.
+    - Deep keyword indexing across Settings Search with direct navigation routes.
+
+### Improvements & Polish
+
+- **Dashboard Hero Activity Card**: Re-aligned pace and trend badges beneath total moments to ensure
+  lengthy metrics (e.g., *"Active tracking (10001 logs)"*, *"+50% vs last week"*) display completely
+  without horizontal clipping.
+- **Global Session Pairing**: Re-architected `buildTimelineDaySections` to pair sessions globally
+  across the entire database before date grouping, flawlessly handling sessions spanning across
+  midnight.
 
 ### Bug Fixes
 
-- Lock day number baseline and decouple event dot positioning
-- Resolve live session ending and calendar date filter issues
+- Fixed calendar icon chip in History to immediately launch `MomentCalendarDialog` on first tap
+  instead of defaulting to an empty date filter.
+- Resolved edge cases where ending a live session in an older date section could decouple subsequent
+  session boundaries.
 
 ## [7.3.0] - 2026-08-30 (versionCode 26PR0830) [PR]
 
 ### What's New
 
-- Migrate to Apple HIG pill toasts & polish bridges settings
-- Add system bridges, documentation, and full changelog database
-- Add system bridges, deep links, share targets, markdown sync & calendar export
-- Refine God Mode UX, fix lockscreen notification behavior, and streamline VIP credentials
-- Refine God Mode suite with undeletable history pill, Chrono Focus game & revocation dialog
-- Add sovereign God Mode suite with secret themes, gravity sandbox & VIP badge
-- Integrate on-demand language packages into welcome screen
-- Refine What's New, overhaul Language Center lifecycle & complete historical changelog database
-- Add dynamic changelog fetching, expressive icons & on-demand language pack engine
-- Optimize battery consumption, fix lockscreen mindfulness launch & add Cupertino transitions
+- **Sovereign God Mode Suite**:
+    - Secret VIP credential authorization unlocking sovereign theme palettes (*God Mode Pink*,
+      *Cyber
+      Void*), Chrono Focus tactile challenge, and a 2D physics gravity sandbox.
+    - Undeletable Sovereign History moment card and exclusive VIP gold profile badge.
+    - Native iOS-style revocation dialog allowing users to safely relock secret perks and clean
+      history anytime.
+- **Apple HIG Dynamic Island Pill Toasts**:
+    - Modernized feedback notifications into fluid, top-floating capsule pill banners with frosted
+      translucency, high-contrast glyphs, and contextual tactile haptics.
+- **Zero-Wake Offline Battery Architecture**:
+    - Converted routine reminder alarms to Doze-compliant non-waking RTC alarms and wrapped animated
+      elements in isolated repaint boundaries, reducing background battery draw to near-zero.
+- **Complete Historical Changelog Database**:
+    - Integrated full offline release archive within NoteKar alongside dynamic GitHub releases
+      synchronization.
 
-### Improvements
+### Improvements & Polish
 
-- Updated readme to reflect all new changes
-- Fixed god mode issues
-- Optimize R8 compiler, enable build caching & clean up obsolete scripts
-- Restore 100% offline built-in multilingual architecture
+- Streamlined R8 and ProGuard compiler rules with build caching, resulting in faster startup and
+  smaller APK footprints.
+- Restored 100% offline built-in multilingual translations across 7 supported languages.
 
 ### Bug Fixes
 
-- Safeguard repo init on god mode revoke & streamline bridges UX
-- Import java.util.Locale in MainActivity for URI normalization
-- Eliminate nested sheets in What's New, Changelog & Language Center
+- Safeguarded database initialization when revoking God Mode to prevent preference
+  desynchronization.
+- Eliminated nested modal sheet collisions in What's New, Changelog, and Language Center dialogs.
 
 ## [7.2.0] - 2026-08-23 (versionCode 26PR0823) [PR]
 

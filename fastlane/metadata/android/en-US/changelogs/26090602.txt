@@ -1,0 +1,5 @@
+Update to 7.3.2 (build 26BR0906a):
+- New: Redesigned Compact History Mode delivering 2x–3x higher density and automatic empty note suppression
+- New: Standardized Apple HIG dialogs with native CupertinoAlertDialog and zero button truncation
+- New: Native Cupertino security alerts for External Navigation and Network Warnings
+- Polish: Perfect calendar day number baseline stability and complete automated test coverage

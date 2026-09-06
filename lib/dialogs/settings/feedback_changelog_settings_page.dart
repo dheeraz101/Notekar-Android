@@ -22,55 +22,55 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.3.1',
+    version: '7.3.2',
     date: 'September 06, 2026',
-    edition: 'Mindfulness, Integrations & Battery Evolution',
+    edition: 'Life Ledger Density & iOS Dialog Architecture',
     badgeColor: Color(0xFF0A84FF),
     highlights: [
       (
-        title: 'System Bridges & URL Schemes',
+        title: 'Compact History Timeline',
         desc:
-            'Trigger instant logs, Two-Way tracking, or navigate with custom notekar:// links.',
-        icon: Icons.link_rounded,
-        tag: 'Bridges',
+            'Ultra-dense timeline layout presenting 2x–3x more moments with scaled rail markers and micro duration badges.',
+        icon: Icons.view_agenda_rounded,
+        tag: 'Timeline',
       ),
       (
-        title: 'Android Text Selection',
+        title: 'Standardized iOS Dialogs',
         desc:
-            'Highlight text anywhere across Android and tap "Log in NoteKar" to capture notes offline.',
-        icon: Icons.select_all_rounded,
-        tag: 'Context Menu',
+            'All multi-choice alerts upgraded to native CupertinoAlertDialog standard with zero button label truncation.',
+        icon: Icons.chat_bubble_outline_rounded,
+        tag: 'Apple HIG',
       ),
       (
-        title: 'Hourly Time Reflection',
+        title: 'Life Ledger Session Pairing',
         desc:
-            'Full-screen mindful breathing prompts that wake on lockscreen without exposing private notes.',
-        icon: Icons.self_improvement_rounded,
-        tag: 'Mindfulness',
+            'Intelligently pairs Two-Way IN/OUT intervals into unified session cards with 1-tap inline live session ending.',
+        icon: Icons.timeline_rounded,
+        tag: 'Sessions',
       ),
       (
-        title: 'Obsidian & Calendar Live Sync',
+        title: 'Executive Intelligence Hub',
         desc:
-            'Export formatted Markdown journal tables and RFC 5545 .ics calendar session intervals.',
-        icon: Icons.calendar_month_rounded,
-        tag: 'Export & Sync',
+            'Grounded Daily Rhythm hourly charts, 90-day activity intensity grid, and responsive time-scope habit analytics.',
+        icon: Icons.insights_rounded,
+        tag: 'Analytics',
       ),
     ],
     items: [
-      '+ Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation',
-      '+ Add Android text selection context menu ("Log in NoteKar") via ProcessTextActivity',
-      '+ Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing',
-      '+ Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT',
-      '+ Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync',
-      '+ Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar',
-      '+ Add dedicated "Integrations & Automation" settings page with copyable templates and live test triggers',
-      '+ Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet',
-      '+ Add alarm audio chime, active hours schedule, and onboarding flow',
-      '* Eliminate RTC_WAKEUP battery drain for routine logging reminders',
-      '* Wrap animated widgets in RepaintBoundary for smooth 120 FPS rendering',
-      '! Add early lockscreen reflection launch handler in NoteKarHome',
-      '! Add isDeviceLocked and closeLockscreenActivity to dismiss activity on locked device',
-      '* Enable test coverage in GitHub Actions CI workflow',
+      '+ Add high-density Compact History Mode for TimelineSessionCard and TimelineSingleTile',
+      '+ Automatically suppress empty note placeholder boxes in compact mode to maximize vertical density',
+      '+ Standardize all 2+ option confirmation popups to native CupertinoAlertDialog via showCupertinoDialog',
+      '+ Upgrade External Navigation warning to native Cupertino alert with verified domain badges and link preview',
+      '+ Upgrade Network Warning modal to Cupertino alert with animated check toggle and download size indicators',
+      '+ Unify Trash Bin, Backup Deletion, and Feature Conflict dialogs under Apple HIG action stacking rules',
+      '+ Add Life Ledger continuous session cards with emerald start nodes, crimson end nodes, and duration connectors',
+      '+ Add 1-tap live session end button to stop active tracking immediately from inside History',
+      '+ Add Executive Intelligence Hub with Daily Rhythm bar chart and rolling 90-day activity intensity matrix',
+      '+ Add standalone onboarding tour walkthrough pages for the History Timeline and Dashboard Hub',
+      '* Geometrically lock calendar day cell baselines so dates with event activity dots never shift upward',
+      '* Reposition Dashboard hero card pace and trend badges to eliminate horizontal text truncation',
+      '! Ensure history calendar chip immediately launches MomentCalendarDialog on first tap',
+      '* Full automated test coverage across compact timeline cards and Cupertino confirmation alerts',
     ],
   );
 
@@ -78,6 +78,51 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     (
       version: '7.3.1',
       date: 'September 06, 2026',
+      edition: 'Life Ledger Timeline & Executive Intelligence Hub',
+      items: [
+        '+ Add Life Ledger continuous session cards with emerald start nodes and crimson end nodes',
+        '+ Add 1-tap inline live session end button in History to terminate tracking immediately',
+        '+ Add Executive Intelligence Hub with grounded Daily Rhythm chart and 90-day intensity grid',
+        '+ Add standalone interactive onboarding tour pages for History and Dashboard',
+        '+ Add 2-digit sequential single moment numbering (00–99) with daily midnight reset',
+        '* Geometrically lock calendar day cell baselines so dates with activity dots never jitter',
+        '* Reposition Dashboard hero card pace and trend badges to eliminate horizontal clipping',
+        '! Fix calendar icon chip in History to immediately open MomentCalendarDialog on first tap',
+      ],
+    ),
+    (
+      version: '7.3.0',
+      date: 'August 30, 2026',
+      edition: 'Sovereign God Mode & Apple HIG Evolution',
+      items: [
+        '+ Add sovereign God Mode suite with secret theme palettes, gravity sandbox & VIP badge',
+        '+ Add Apple HIG Dynamic Island pill toasts with frosted glass translucency',
+        '+ Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT',
+        '+ Eliminate RTC_WAKEUP battery drain for routine logging reminders (zero-wake Doze)',
+        '+ Add full offline historical changelog archive with dynamic GitHub releases sync',
+        '* Optimize R8 and ProGuard compiler rules with build caching for faster startup',
+        '! Safeguard database initialization when revoking God Mode to prevent preference desynchronization',
+      ],
+    ),
+    (
+      version: '7.2.0',
+      date: 'August 23, 2026',
+      edition: 'Mindfulness, Integrations & Battery Evolution',
+      items: [
+        '+ Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation',
+        '+ Add Android text selection context menu ("Log in NoteKar") via ProcessTextActivity',
+        '+ Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing',
+        '+ Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync',
+        '+ Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar',
+        '+ Add dedicated "Integrations & Automation" settings page with copyable templates and live test triggers',
+        '+ Add hourly time reflection alarms with mindful breathing prompts waking over lockscreen',
+        '* Eliminate RTC_WAKEUP battery drain for routine logging reminders',
+        '* Wrap animated widgets in RepaintBoundary for smooth 120 FPS rendering',
+      ],
+    ),
+    (
+      version: '7.1.0',
+      date: 'August 21, 2026',
       edition: 'Global Localization Edition',
       items: [
         '+ Add French, German, Japanese, Russian localization and dynamic pattern translation',
@@ -87,8 +132,8 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       ],
     ),
     (
-      version: '7.3.1',
-      date: 'September 06, 2026',
+      version: '7.0.0',
+      date: 'August 15, 2026',
       edition: 'Apple HIG Luxury Redesign',
       items: [
         '+ Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts',
@@ -314,6 +359,27 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             ),
           ],
         ),
+
+        // Historical Releases
+        for (final rel in historicalReleases) ...[
+          const SizedBox(height: spacing12),
+          SettingsGroup(
+            p: p,
+            title: 'v${rel.version} — ${rel.edition}'.localized(context),
+            description: rel.date.localized(context),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    for (final item in rel.items)
+                      _buildExpressiveRow(context, item),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
 
         const SizedBox(height: spacing12),
 

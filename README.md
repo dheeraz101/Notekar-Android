@@ -10,8 +10,8 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-7.3.1-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
-[![Build](https://img.shields.io/badge/build-26PR0823-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Version](https://img.shields.io/badge/version-7.3.2-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Build](https://img.shields.io/badge/build-26BR0906a-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -23,7 +23,7 @@
 
 <p align="center">
   <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.2.0-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.3.2-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
   </a>
   &nbsp;&nbsp;
   <a href="https://notekarapp.vercel.app/">
@@ -129,6 +129,12 @@ raw log records into an elegant, unified chronicle of your day:
   seal the active session in real time with an instant `OUT` moment.
 - **Sequential Single Numbering (`00`–`99`)**: Standalone moments feature high-contrast circular
   rail badges displaying sequential 2-digit counters, with optional midnight daily resets.
+- **Redesigned Compact History Mode**: Ultra-dense timeline layout presenting 2x–3x more moments
+  with scaled rail markers, micro duration badges, and automatic suppression of empty note
+  placeholder boxes.
+- **Unified Apple HIG Dialog Architecture**: All multi-choice confirmation prompts, external
+  navigation security alerts, and network warnings standardized to native `CupertinoAlertDialog`
+  with zero button truncation.
 - **Frictionless Filter Pills**: Seamlessly toggle between **All**, **Sessions**, **Singles**, and *
   *With Notes** with instant responsive transitions and zero layout clipping.
 - **iOS-Style Calendar Picker**: A fluid monthly calendar sheet featuring solid iOS System Red
@@ -230,7 +236,9 @@ telemetry:
 
 ```markdown
 # NoteKar Journal
+
 ## 📅 Sunday, August 30, 2026
+
 | Time | Type | Details / Note |
 |---|---|---|
 | 09:00:15 AM | 🟢 **IN** | Deep Work: Rust Backend |

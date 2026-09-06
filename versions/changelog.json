@@ -1,43 +1,98 @@
 [
   {
+    "version": "7.3.2",
+    "buildNumber": "26BR0906a",
+    "releaseDate": "2026-09-06",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Life Ledger Density & iOS Dialog Architecture",
+    "badgeColor": "#FF9F0A",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Compact History Timeline",
+        "description": "Ultra-dense timeline layout presenting 2x–3x more moments with scaled rail markers and micro duration badges.",
+        "icon": "view_agenda_rounded"
+      },
+      {
+        "title": "Standardized iOS Dialogs",
+        "description": "All multi-choice alerts upgraded to native CupertinoAlertDialog standard with zero button label truncation.",
+        "icon": "chat_bubble_outline_rounded"
+      },
+      {
+        "title": "Life Ledger Session Pairing",
+        "description": "Intelligently pairs Two-Way IN/OUT intervals into unified session cards with 1-tap inline live session ending.",
+        "icon": "timeline_rounded"
+      },
+      {
+        "title": "Executive Intelligence Hub",
+        "description": "Grounded Daily Rhythm hourly charts, 90-day activity intensity grid, and responsive time-scope habit analytics.",
+        "icon": "insights_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "Add high-density Compact History Mode for TimelineSessionCard and TimelineSingleTile",
+      "Automatically suppress empty note placeholder boxes in compact mode to maximize vertical density",
+      "Standardize all 2+ option confirmation popups to native CupertinoAlertDialog via showCupertinoDialog",
+      "Upgrade External Navigation warning to native Cupertino alert with verified domain badges and link preview",
+      "Upgrade Network Warning modal to Cupertino alert with animated check toggle and download size indicators",
+      "Unify Trash Bin, Backup Deletion, and Feature Conflict dialogs under Apple HIG action stacking rules",
+      "Add Life Ledger continuous session cards with emerald start nodes, crimson end nodes, and duration connectors",
+      "Add 1-tap live session end button to stop active tracking immediately from inside History",
+      "Add Executive Intelligence Hub with Daily Rhythm bar chart and rolling 90-day activity intensity matrix",
+      "Add standalone onboarding tour walkthrough pages for the History Timeline and Dashboard Hub",
+      "Geometrically lock calendar day cell baselines so dates with event activity dots never shift upward",
+      "Reposition Dashboard hero card pace and trend badges to eliminate horizontal text truncation",
+      "Ensure history calendar chip immediately launches MomentCalendarDialog on first tap",
+      "Full automated test coverage across compact timeline cards and Cupertino confirmation alerts"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.2/NoteKar-v7.3.2-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.2/NoteKar-v7.3.2-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.3.1",
     "buildNumber": "26BR0906",
     "releaseDate": "2026-09-06",
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Beta Preview Build",
+    "edition": "Life Ledger Timeline & Executive Intelligence Hub",
     "badgeColor": "#FF9F0A",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
-        "title": "Add onboarding tours, guides, and fix hero card pill layout",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
-        "icon": "auto_awesome_rounded"
+        "title": "Life Ledger Timeline",
+        "description": "Reimagined chronological history into a continuous Life Ledger with connected session cards and emerald/crimson nodes.",
+        "icon": "timeline_rounded"
       },
       {
-        "title": "Add 1-tap live session end and refine Apple HIG UI",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
-        "icon": "auto_awesome_rounded"
+        "title": "1-Tap Inline Session End",
+        "description": "Active tracking sessions feature an inline live duration badge and immediate stop button right on the card.",
+        "icon": "stop_circle_rounded"
       },
       {
-        "title": "Implement Apple HIG life ledger timeline \u0026 executive intelligence hub",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
-        "icon": "auto_awesome_rounded"
+        "title": "Executive Intelligence Hub",
+        "description": "Circadian Daily Rhythm hourly bar charts and rolling 90-day activity intensity heatmap matrix.",
+        "icon": "insights_rounded"
       },
       {
-        "title": "Add top insights pill, toolbar last timestamp \u0026 universal haptics",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.1.",
-        "icon": "auto_awesome_rounded"
+        "title": "Precision Apple HIG Calendar",
+        "description": "Locked coordinate geometry ensuring day numbers never shift upward when activity dots appear.",
+        "icon": "calendar_month_rounded"
       }
     ],
     "fullChangelog": [
-      "Add onboarding tours, guides, and fix hero card pill layout",
-      "Lock day number baseline and decouple event dot positioning",
-      "Resolve live session ending and calendar date filter issues",
-      "Add 1-tap live session end and refine Apple HIG UI",
-      "Implement Apple HIG life ledger timeline \u0026 executive intelligence hub",
-      "Add top insights pill, toolbar last timestamp \u0026 universal haptics"
+      "Add Life Ledger continuous session cards with emerald start nodes and crimson end nodes",
+      "Add 1-tap inline live session end button in History to terminate tracking immediately",
+      "Add Executive Intelligence Hub with grounded Daily Rhythm chart and 90-day intensity grid",
+      "Add standalone interactive onboarding tour pages for History and Dashboard",
+      "Add 2-digit sequential single moment numbering (00–99) with daily midnight reset",
+      "Geometrically lock calendar day cell baselines so dates with activity dots never jitter",
+      "Reposition Dashboard hero card pace and trend badges to eliminate horizontal clipping",
+      "Fix calendar icon chip in History to immediately open MomentCalendarDialog on first tap"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.1/NoteKar-v7.3.1-universal-release.apk",
@@ -51,79 +106,45 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Priority Maintenance \u0026 Security",
+    "edition": "Sovereign God Mode & Apple HIG Evolution",
     "badgeColor": "#0A84FF",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Migrate to Apple HIG pill toasts \u0026 polish bridges settings",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
+        "title": "Sovereign God Mode Suite",
+        "description": "Secret VIP credential authorization unlocking custom themes, Chrono Focus game, and physics gravity sandbox.",
+        "icon": "vpn_key_rounded"
       },
       {
-        "title": "Add system bridges, documentation, and full changelog database",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
+        "title": "Apple HIG Dynamic Island Pill Toasts",
+        "description": "Fluid top-floating capsule banners with frosted translucency, high-contrast glyphs, and contextual haptics.",
+        "icon": "notifications_active_rounded"
       },
       {
-        "title": "Add system bridges, deep links, share targets, markdown sync \u0026 calendar export",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
+        "title": "System Bridges & Broadcast APIs",
+        "description": "Custom notekar:// URL schemes, Android text selection context menu, and Tasker broadcast automation.",
+        "icon": "link_rounded"
       },
       {
-        "title": "Refine God Mode UX, fix lockscreen notification behavior, and streamline VIP credentials",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
-      },
-      {
-        "title": "Refine God Mode suite with undeletable history pill, Chrono Focus game \u0026 revocation dialog",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
-      },
-      {
-        "title": "Add sovereign God Mode suite with secret themes, gravity sandbox \u0026 VIP badge",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
-      },
-      {
-        "title": "Integrate on-demand language packages into welcome screen",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
-      },
-      {
-        "title": "Refine What\u0027s New, overhaul Language Center lifecycle \u0026 complete historical changelog database",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
-      },
-      {
-        "title": "Add dynamic changelog fetching, expressive icons \u0026 on-demand language pack engine",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
-      },
-      {
-        "title": "Optimize battery consumption, fix lockscreen mindfulness launch \u0026 add Cupertino transitions",
-        "description": "Enhanced capability and design refinements in NoteKar v7.3.0.",
-        "icon": "auto_awesome_rounded"
+        "title": "Zero-Wake Battery Architecture",
+        "description": "Doze-compliant RTC non-waking alarms and isolated repaint boundaries eliminating idle battery drain.",
+        "icon": "battery_charging_full_rounded"
       }
     ],
     "fullChangelog": [
-      "Updated readme to reflect all new changes",
-      "Migrate to Apple HIG pill toasts \u0026 polish bridges settings",
-      "Safeguard repo init on god mode revoke \u0026 streamline bridges UX",
-      "Import java.util.Locale in MainActivity for URI normalization",
-      "Add system bridges, documentation, and full changelog database",
-      "Add system bridges, deep links, share targets, markdown sync \u0026 calendar export",
-      "Refine God Mode UX, fix lockscreen notification behavior, and streamline VIP credentials",
-      "Fixed god mode issues",
-      "Refine God Mode suite with undeletable history pill, Chrono Focus game \u0026 revocation dialog",
-      "Add sovereign God Mode suite with secret themes, gravity sandbox \u0026 VIP badge",
-      "Optimize R8 compiler, enable build caching \u0026 clean up obsolete scripts",
-      "Restore 100% offline built-in multilingual architecture",
-      "Integrate on-demand language packages into welcome screen",
-      "Refine What\u0027s New, overhaul Language Center lifecycle \u0026 complete historical changelog database",
-      "Eliminate nested sheets in What\u0027s New, Changelog \u0026 Language Center",
-      "Add dynamic changelog fetching, expressive icons \u0026 on-demand language pack engine",
-      "Optimize battery consumption, fix lockscreen mindfulness launch \u0026 add Cupertino transitions"
+      "Add sovereign God Mode suite with secret theme palettes, gravity sandbox & VIP badge",
+      "Add Apple HIG Dynamic Island pill toasts with frosted glass translucency",
+      "Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation",
+      "Add Android text selection context menu (\"Log in NoteKar\") via ProcessTextActivity",
+      "Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing",
+      "Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT",
+      "Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync",
+      "Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar",
+      "Eliminate RTC_WAKEUP battery drain for routine logging reminders (zero-wake Doze)",
+      "Add full offline historical changelog archive with dynamic GitHub releases sync",
+      "Optimize R8 and ProGuard compiler rules with build caching for faster startup",
+      "Safeguard database initialization when revoking God Mode to prevent preference desynchronization",
+      "Eliminate nested modal sheets in What's New, Changelog, and Language Center"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.0/NoteKar-v7.3.0-universal-release.apk",
