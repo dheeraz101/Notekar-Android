@@ -125,17 +125,14 @@ void main() {
         expect(find.text('Quick Log'), findsOneWidget);
         expect(
           find.text(
-            'Log a single instant moment with optional note',
+            'notekar://log?type=single&note=Coffee',
             findRichText: true,
           ),
           findsOneWidget,
         );
         expect(find.text('Check-In & Out'), findsOneWidget);
         expect(
-          find.text(
-            'Trigger Two-Way check-in or check-out',
-            findRichText: true,
-          ),
+          find.text('notekar://in?note=Focus%20Session', findRichText: true),
           findsOneWidget,
         );
         expect(find.text('SYSTEM BRIDGES'), findsOneWidget);
@@ -146,7 +143,7 @@ void main() {
         expect(find.text('CALENDAR SESSIONS'), findsOneWidget);
         expect(find.text('Export Calendar (.ics)'), findsOneWidget);
         expect(find.text('AUTOMATION BROADCAST API'), findsOneWidget);
-        expect(find.text('ACTION_LOG_MOMENT'), findsOneWidget);
+        expect(find.text('Log Moment Intent'), findsOneWidget);
         expect(
           find.text(
             'app.notekar.notekar.ACTION_LOG_MOMENT',

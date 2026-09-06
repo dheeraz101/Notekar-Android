@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
+import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -280,6 +281,117 @@ void main() {
           find.text('Tap anywhere to begin. Hold to add a note.'),
           findsOneWidget,
         );
+      },
+    );
+
+    testWidgets(
+      'AdvancedSettingsPage Language view renders localized greetings without flags',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AdvancedSettingsPage(
+                  p: p,
+                  subCategory: 'Language',
+                  hapticStyle: 'standard',
+                  reduceMotion: false,
+                  largeText: false,
+                  highContrast: false,
+                  healthStatus: 'Healthy',
+                  onHapticStyleChanged: (_) {},
+                  onReduceMotionChanged: (_) {},
+                  onLargeTextChanged: (_) {},
+                  onHighContrastChanged: (_) {},
+                  onResetSettings: () {},
+                  onResetAllData: () {},
+                  onFactoryReset: () {},
+                  onOpenCategory: (_, {required String parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Verifies clean native names without flag emojis
+        expect(find.text('Français'), findsOneWidget);
+        expect(find.text('हिन्दी'), findsOneWidget);
+        expect(find.text('Español'), findsOneWidget);
+        expect(find.text('Deutsch'), findsOneWidget);
+        expect(find.text('日本語'), findsOneWidget);
+        expect(find.text('Русский'), findsOneWidget);
+
+        // Verifies native greeting subtitles
+        expect(
+          find.text('Comment allez-vous ?', findRichText: true),
+          findsOneWidget,
+        );
+        expect(find.text('आप कैसे हैं?', findRichText: true), findsOneWidget);
+        expect(find.text('¿Cómo estás?', findRichText: true), findsOneWidget);
+        expect(
+          find.text('Wie geht es dir?', findRichText: true),
+          findsOneWidget,
+        );
+        expect(find.text('お元気ですか？', findRichText: true), findsOneWidget);
+        expect(find.text('Как ваши дела?', findRichText: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'AdvancedSettingsPage Reset view renders concise subtitles and bottom warning card',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AdvancedSettingsPage(
+                  p: p,
+                  subCategory: 'Reset',
+                  hapticStyle: 'standard',
+                  reduceMotion: false,
+                  largeText: false,
+                  highContrast: false,
+                  healthStatus: 'Healthy',
+                  onHapticStyleChanged: (_) {},
+                  onReduceMotionChanged: (_) {},
+                  onLargeTextChanged: (_) {},
+                  onHighContrastChanged: (_) {},
+                  onResetSettings: () {},
+                  onResetAllData: () {},
+                  onFactoryReset: () {},
+                  onOpenCategory: (_, {required String parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Verifies concise Apple-style subtitles
+        expect(
+          find.text(
+            'Restore default preferences and layout',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            'Delete all recorded moments and sessions',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            'Erase all data and restore factory settings',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+
+        // Verifies prominent warning box and icon
+        expect(find.text('Irreversible Actions'), findsOneWidget);
+        expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
       },
     );
   });

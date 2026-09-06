@@ -127,8 +127,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Quick Log'.localized(context),
-              subtitle: 'Log a single instant moment with optional note'
-                  .localized(context),
+              subtitle: 'notekar://log?type=single&note=Coffee',
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -144,9 +143,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Check-In & Out'.localized(context),
-              subtitle: 'Trigger Two-Way check-in or check-out'.localized(
-                context,
-              ),
+              subtitle: 'notekar://in?note=Focus%20Session',
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(
@@ -161,9 +158,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Draft Note'.localized(context),
-              subtitle: 'Open note composer prefilled with text'.localized(
-                context,
-              ),
+              subtitle: 'notekar://note?text=My%20Idea',
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () =>
@@ -177,8 +172,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             SettingsRow(
               p: p,
               title: 'Open Screen'.localized(context),
-              subtitle: 'Directly navigate to history, stats, or settings'
-                  .localized(context),
+              subtitle: 'notekar://open?page=history',
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () =>
@@ -294,10 +288,8 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
           children: [
             SettingsRow(
               p: p,
-              title: 'ACTION_LOG_MOMENT',
-              subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT'.localized(
-                context,
-              ),
+              title: 'Log Moment Intent'.localized(context),
+              subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT',
               trailing: IconButton(
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 onPressed: () => _copyToClipboard(

@@ -542,14 +542,44 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Widget _buildLanguagePage(Palette p) {
     final availableLanguages = [
-      (code: 'system', name: 'System Default', native: 'System Default'),
-      (code: 'en', name: 'English', native: 'English'),
-      (code: 'fr', name: 'French', native: 'Français (French)'),
-      (code: 'hi', name: 'Hindi', native: 'हिन्दी (Hindi)'),
-      (code: 'es', name: 'Spanish', native: 'Español (Spanish)'),
-      (code: 'de', name: 'German', native: 'Deutsch (German)'),
-      (code: 'ja', name: 'Japanese', native: '日本語 (Japanese)'),
-      (code: 'ru', name: 'Russian', native: 'Русский (Russian)'),
+      (
+        code: 'system',
+        name: 'System Default',
+        native: 'System Default',
+        subtitle: 'Follows device system language',
+      ),
+      (
+        code: 'en',
+        name: 'English',
+        native: 'English',
+        subtitle: 'How are you?',
+      ),
+      (
+        code: 'fr',
+        name: 'French',
+        native: 'Français',
+        subtitle: 'Comment allez-vous ?',
+      ),
+      (code: 'hi', name: 'Hindi', native: 'हिन्दी', subtitle: 'आप कैसे हैं?'),
+      (
+        code: 'es',
+        name: 'Spanish',
+        native: 'Español',
+        subtitle: '¿Cómo estás?',
+      ),
+      (
+        code: 'de',
+        name: 'German',
+        native: 'Deutsch',
+        subtitle: 'Wie geht es dir?',
+      ),
+      (code: 'ja', name: 'Japanese', native: '日本語', subtitle: 'お元気ですか？'),
+      (
+        code: 'ru',
+        name: 'Russian',
+        native: 'Русский',
+        subtitle: 'Как ваши дела?',
+      ),
     ];
 
     return SingleChildScrollView(
@@ -591,7 +621,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Select your preferred interface language. 100% offline-ready with zero data usage.'
+              'Select your preferred interface language. Completely offline-ready with zero data usage.'
                   .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: p.text2, fontSize: 14, height: 1.4),
@@ -606,6 +636,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 SettingsRow(
                   p: p,
                   title: lang.native,
+                  subtitle: lang.subtitle,
                   trailing: currentLocale == lang.code
                       ? Icon(Icons.check_rounded, color: p.accent, size: 22)
                       : const SizedBox.shrink(),

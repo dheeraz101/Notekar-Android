@@ -146,49 +146,39 @@ class AdvancedSettingsPage extends StatelessWidget {
         code: 'system',
         name: 'System Default',
         native: 'System Default',
-        subtitle: 'Follow device system language',
+        subtitle: 'Follows device system language',
       ),
       (
         code: 'en',
         name: 'English',
         native: 'English',
-        subtitle: 'Core built-in language',
+        subtitle: 'How are you?',
       ),
       (
         code: 'fr',
         name: 'French',
-        native: '🇫🇷  Français',
-        subtitle: 'French localization (100% offline)',
+        native: 'Français',
+        subtitle: 'Comment allez-vous ?',
       ),
-      (
-        code: 'hi',
-        name: 'Hindi',
-        native: '🇮🇳  हिन्दी',
-        subtitle: 'Hindi localization (100% offline)',
-      ),
+      (code: 'hi', name: 'Hindi', native: 'हिन्दी', subtitle: 'आप कैसे हैं?'),
       (
         code: 'es',
         name: 'Spanish',
-        native: '🇪🇸  Español',
-        subtitle: 'Spanish localization (100% offline)',
+        native: 'Español',
+        subtitle: '¿Cómo estás?',
       ),
       (
         code: 'de',
         name: 'German',
-        native: '🇩🇪  Deutsch',
-        subtitle: 'German localization (100% offline)',
+        native: 'Deutsch',
+        subtitle: 'Wie geht es dir?',
       ),
-      (
-        code: 'ja',
-        name: 'Japanese',
-        native: '🇯🇵  日本語',
-        subtitle: 'Japanese localization (100% offline)',
-      ),
+      (code: 'ja', name: 'Japanese', native: '日本語', subtitle: 'お元気ですか？'),
       (
         code: 'ru',
         name: 'Russian',
-        native: '🇷🇺  Русский',
-        subtitle: 'Russian localization (100% offline)',
+        native: 'Русский',
+        subtitle: 'Как ваши дела?',
       ),
     ];
 
@@ -202,8 +192,8 @@ class AdvancedSettingsPage extends StatelessWidget {
             for (final lang in availableLanguages)
               SettingsRow(
                 p: p,
-                title: lang.native.localized(context),
-                subtitle: lang.subtitle.localized(context),
+                title: lang.native,
+                subtitle: lang.subtitle,
                 trailing: currentLocale == lang.code
                     ? Icon(Icons.check_rounded, color: p.accent, size: 20)
                     : const SizedBox.shrink(),
@@ -218,7 +208,7 @@ class AdvancedSettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'All 7 supported languages are 100% built into NoteKar, requiring zero network downloads or data usage.'
+              'NoteKar includes native offline localization across all supported languages with zero data usage.'
                   .localized(context),
         ),
         const SizedBox(height: spacing12),
@@ -354,9 +344,9 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.restore_rounded,
               title: 'Reset Settings'.localized(context),
-              subtitle:
-                  'Restores default themes, haptics, and notification preferences without deleting saved moments.'
-                      .localized(context),
+              subtitle: 'Restore default preferences and layout'.localized(
+                context,
+              ),
               color: p.orange,
               onTap: onResetSettings,
             ),
@@ -371,9 +361,9 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.delete_forever_rounded,
               title: 'Reset All Data'.localized(context),
-              subtitle:
-                  'Permanently removes all saved moments and session histories from local storage.'
-                      .localized(context),
+              subtitle: 'Delete all recorded moments and sessions'.localized(
+                context,
+              ),
               color: p.red,
               onTap: onResetAllData,
             ),
@@ -388,19 +378,60 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.phonelink_erase_rounded,
               title: 'Factory Reset'.localized(context),
-              subtitle:
-                  'Completely wipes all moments, preferences, and hardware keys back to fresh install state.'
-                      .localized(context),
+              subtitle: 'Erase all data and restore factory settings'.localized(
+                context,
+              ),
               color: p.red,
               onTap: onFactoryReset,
             ),
           ],
         ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Data wipe operations are permanent and cannot be undone unless you have exported a JSON backup.'
-                  .localized(context),
+        const SizedBox(height: spacing16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: p.red.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: p.red.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.warning_amber_rounded, color: p.red, size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Irreversible Actions'.localized(context),
+                        style: TextStyle(
+                          color: p.red,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Data wipe operations permanently erase local storage and cannot be undone. Export a backup beforehand from Data & Backup.'
+                            .localized(context),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 12.5,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: spacing48),
       ],
