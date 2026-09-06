@@ -192,11 +192,10 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
         // 1. Apple Keynote Hero Event Banner
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
               color: rel.badgeColor.withValues(alpha: 0.3),
               width: 1.2,
@@ -306,7 +305,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing20),
 
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
           child: Text(
             'MAJOR INNOVATIONS'.localized(context),
             style: TextStyle(
@@ -318,17 +317,17 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: spacing8),
+        const SizedBox(height: spacing4),
 
         // 2. Keynote Innovation Cards
         for (final inv in rel.innovations)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+            padding: const EdgeInsets.symmetric(vertical: 5),
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: p.border.withValues(alpha: 0.5),
                   width: 1,
@@ -427,11 +426,10 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
         // 3. Steve Jobs Quote Card
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(color: p.border.withValues(alpha: 0.4)),
           ),
           child: Column(
@@ -471,33 +469,30 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing16),
 
         // 4. View Full Technical Changelog Button
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: PressableScale(
-            onTap: () => _openWebChangelog(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: p.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: p.accent.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.history_edu_rounded, color: p.accent, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'View Full Technical Changelog'.localized(context),
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.1,
-                    ),
+        PressableScale(
+          onTap: () => _openWebChangelog(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.history_edu_rounded, color: p.accent, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'View Full Technical Changelog'.localized(context),
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.1,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
