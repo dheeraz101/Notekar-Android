@@ -670,9 +670,10 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
       timeframe: auditTimeframe,
     );
 
-    final wasted = summary.formattedTotalWasted;
-    final wakingLost = summary.wakingDaysLostText;
-    final isSevere = summary.intentionalityRatio < 40.0;
+    final hasData = summary.hasData;
+    final wasted = hasData ? summary.formattedTotalWasted : '0h';
+    final wakingLost = hasData ? summary.wakingDaysLostText : '0 days';
+    final isSevere = hasData && (summary.intentionalityRatio < 40.0);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -702,7 +703,9 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         Icon(
                           Icons.timelapse_rounded,
                           size: 17,
-                          color: isSevere ? p.red : p.orange,
+                          color: isSevere
+                              ? p.red
+                              : (hasData ? p.orange : p.accent),
                         ),
                         const SizedBox(width: 7),
                         Flexible(
@@ -711,7 +714,9 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: isSevere ? p.red : p.orange,
+                              color: isSevere
+                                  ? p.red
+                                  : (hasData ? p.orange : p.accent),
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.0,
@@ -753,7 +758,9 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        '$wasted ${'Lost'.localized(context)}',
+                        hasData
+                            ? '$wasted ${'Lost'.localized(context)}'
+                            : '0h ${'Lost'.localized(context)}',
                         maxLines: 1,
                         style: TextStyle(
                           color: isSevere ? p.red : p.text,
@@ -771,19 +778,23 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: (isSevere ? p.red : p.orange).withValues(
-                          alpha: 0.12,
-                        ),
+                        color:
+                            (hasData ? (isSevere ? p.red : p.orange) : p.accent)
+                                .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.center,
                         child: Text(
-                          '$wakingLost ${'waking days void'.localized(context)}',
+                          hasData
+                              ? '$wakingLost ${'waking days void'.localized(context)}'
+                              : '0 Data Available'.localized(context),
                           maxLines: 1,
                           style: TextStyle(
-                            color: isSevere ? p.red : p.orange,
+                            color: hasData
+                                ? (isSevere ? p.red : p.orange)
+                                : p.accent,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -795,8 +806,14 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Based on your daily conscious window ($wasted unaccounted for). Tap to customize sleep, logistics, and explore multi-horizon mortality statistics.'
-                    .localized(context),
+                hasData
+                    ? 'Based on your daily conscious window ($wasted unaccounted for). Tap to customize sleep, logistics, and explore multi-horizon mortality statistics.'
+                          .localized(context)
+                    : (entries.isEmpty
+                          ? 'No sessions logged yet. Tap to configure your daily conscious window and begin tracking.'
+                                .localized(context)
+                          : 'Awaiting ${summary.requiredDays} days of history (${summary.availableHistoryDays} recorded). Tap to inspect available ledger and multi-horizon audits.'
+                                .localized(context)),
                 style: TextStyle(color: p.text2, fontSize: 12, height: 1.35),
               ),
             ],

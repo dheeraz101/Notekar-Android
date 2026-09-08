@@ -4,6 +4,7 @@ import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/life_audit_service.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 void main() {
   final p = paletteFor('dark');
@@ -39,57 +40,104 @@ void main() {
       );
     });
 
-    test('Zero moments results in 100% void loss across all timeframes', () {
-      for (final tf in LifeAuditTimeframe.values) {
-        final summary = LifeAuditService.calculate(
-          entries: [],
-          timeframe: tf,
-          sleepHours: 10.0,
-          essentialsHours: 4.0,
+    test(
+      'Zero moments results in hasData: false, 0 wasted hours, and 0 available history across all timeframes',
+      () {
+        for (final tf in LifeAuditTimeframe.values) {
+          final summary = LifeAuditService.calculate(
+            entries: [],
+            timeframe: tf,
+            sleepHours: 10.0,
+            essentialsHours: 4.0,
+            referenceNow: referenceNow,
+          );
+
+          final expectedDays = tf.daysCount;
+          expect(summary.daysCount, expectedDays);
+          expect(summary.requiredDays, expectedDays);
+          expect(summary.hasData, isFalse);
+          expect(summary.availableHistoryDays, 0);
+          expect(summary.dailyRecords, isEmpty);
+          expect(summary.totalTrackedDuration, Duration.zero);
+          expect(summary.totalWastedDuration, Duration.zero);
+          expect(summary.intentionalityRatio, 0.0);
+          expect(summary.voidRatio, 0.0);
+          expect(summary.totalWakingDaysLost, 0.0);
+          expect(summary.totalCelestialDaysLost, 0.0);
+        }
+      },
+    );
+
+    test(
+      'Insufficient history sets hasData: false, 0 wasted hours, and populates partial records for available history',
+      () {
+        // User logged an entry 3 days ago
+        final threeDaysAgo = referenceNow.subtract(const Duration(days: 2));
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: threeDaysAgo.millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-06',
+          ),
+        ];
+
+        // Week horizon requires 7 days, but user only has 3 days of history
+        final weekSummary = LifeAuditService.calculate(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.week,
           referenceNow: referenceNow,
         );
 
-        final expectedDays = tf.daysCount;
-        expect(summary.daysCount, expectedDays);
-        expect(summary.dailyRecords.length, expectedDays);
-        expect(summary.totalTrackedDuration, Duration.zero);
-        expect(summary.totalWastedDuration, Duration(hours: expectedDays * 10));
-        expect(summary.intentionalityRatio, 0.0);
-        expect(summary.voidRatio, 100.0);
-        // Total waking days lost should equal the number of days evaluated
-        expect(
-          summary.totalWakingDaysLost,
-          closeTo(expectedDays.toDouble(), 0.01),
-        );
-        // Celestial days lost should equal (expectedDays * 10) / 24
-        expect(
-          summary.totalCelestialDaysLost,
-          closeTo((expectedDays * 10) / 24.0, 0.01),
-        );
-      }
-    });
+        expect(weekSummary.hasData, isFalse);
+        expect(weekSummary.availableHistoryDays, 3);
+        expect(weekSummary.requiredDays, 7);
+        expect(weekSummary.totalWastedDuration, Duration.zero);
+        // Partial daily records should match available history days (3 days)
+        expect(weekSummary.dailyRecords.length, 3);
 
-    test('Multi-horizon breakdown handles 6 weeks and 6 months accurately', () {
-      final halfQuarterSummary = LifeAuditService.calculate(
-        entries: [],
-        timeframe: LifeAuditTimeframe.halfQuarter,
-        sleepHours: 10.0,
-        essentialsHours: 4.0,
-        referenceNow: referenceNow,
-      );
-      expect(halfQuarterSummary.daysCount, 45);
-      expect(halfQuarterSummary.totalConsciousWindow.inHours, 450);
+        // Today horizon requires 1 day, user has 3 days -> hasData is true!
+        final todaySummary = LifeAuditService.calculate(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.today,
+          referenceNow: referenceNow,
+        );
+        expect(todaySummary.hasData, isTrue);
+        expect(todaySummary.availableHistoryDays, 3);
+        expect(todaySummary.requiredDays, 1);
+      },
+    );
 
-      final halfYearSummary = LifeAuditService.calculate(
-        entries: [],
-        timeframe: LifeAuditTimeframe.halfYear,
-        sleepHours: 10.0,
-        essentialsHours: 4.0,
-        referenceNow: referenceNow,
-      );
-      expect(halfYearSummary.daysCount, 180);
-      expect(halfYearSummary.totalConsciousWindow.inHours, 1800);
-    });
+    test(
+      'Sufficient history across all 7 days computes full aggregate metrics',
+      () {
+        final eightDaysAgo = referenceNow.subtract(const Duration(days: 7));
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: eightDaysAgo.millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-01',
+          ),
+        ];
+
+        final weekSummary = LifeAuditService.calculate(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.week,
+          referenceNow: referenceNow,
+        );
+
+        expect(weekSummary.hasData, isTrue);
+        expect(weekSummary.availableHistoryDays, 8);
+        expect(weekSummary.requiredDays, 7);
+        expect(weekSummary.dailyRecords.length, 7);
+        expect(
+          weekSummary.totalWastedDuration.inHours,
+          70,
+        ); // 7 days * 10h conscious
+        expect(weekSummary.wakingDaysLostText, '7.0 days');
+      },
+    );
 
     test(
       'Paired Two-Way sessions reduce wasted void and increase intentionality',
@@ -213,20 +261,23 @@ void main() {
         expect(find.text('4.0 Hours'), findsOneWidget);
 
         // Check timeframe buttons
-        expect(
-          find.text('Today'),
-          findsNWidgets(2),
-        ); // Timeframe button + ledger item
+        expect(find.text('Today'), findsOneWidget); // Timeframe button
         expect(find.text('Week'), findsOneWidget);
         expect(find.text('Month'), findsOneWidget);
         expect(find.text('6 Weeks'), findsOneWidget);
         expect(find.text('6 Months'), findsOneWidget);
         expect(find.text('Year'), findsOneWidget);
 
-        // Check Brutal Reality hero card
+        // Check Brutal Reality hero card for new user (0 Data Available)
         expect(find.text('THE COST OF THE VOID'), findsOneWidget);
+        expect(find.text('0 DATA AVAILABLE'), findsOneWidget);
+        expect(find.text('0h Lost'), findsOneWidget);
         expect(find.text('Waking Days Lost'), findsOneWidget);
         expect(find.text('Earth (24h) Days'), findsOneWidget);
+
+        // Check empty ledger state
+        expect(find.text('No Ledger History Yet'), findsOneWidget);
+        expect(find.text('0 Days Recorded'), findsNWidgets(2));
 
         // Check Seneca Stoic quote
         expect(find.text('THE STOIC REALITY'), findsOneWidget);
@@ -234,44 +285,110 @@ void main() {
       },
     );
 
-    testWidgets('Tapping timeframe switches audit calculation and updates UI', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: LifeAuditPage(
-                p: p,
-                entries: const [],
-                sleepHours: 10.0,
-                essentialsHours: 4.0,
-                onSleepHoursChanged: (_) {},
-                onEssentialsHoursChanged: (_) {},
+    testWidgets(
+      'Tapping timeframe switches audit calculation and updates UI with recorded history',
+      (tester) async {
+        final entriesWithHistory = [
+          Moment(
+            id: 1,
+            timestamp: DateTime.now()
+                .subtract(const Duration(days: 200))
+                .millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-01-01',
+          ),
+          Moment(
+            id: 2,
+            timestamp:
+                DateTime.now()
+                    .subtract(const Duration(days: 200))
+                    .millisecondsSinceEpoch +
+                3600000,
+            type: 'out',
+            date: '2026-01-01',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: LifeAuditPage(
+                  p: p,
+                  entries: entriesWithHistory,
+                  sleepHours: 10.0,
+                  essentialsHours: 4.0,
+                  onSleepHoursChanged: (_) {},
+                  onEssentialsHoursChanged: (_) {},
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // Default is Week (7 days)
-      expect(find.text('7 Days Total'), findsOneWidget);
+        // Default is Week (7 days)
+        expect(find.text('7 Days Total'), findsOneWidget);
 
-      // Tap 'Month'
-      await tester.tap(find.text('Month'));
-      await tester.pumpAndSettle();
-      expect(find.text('30 Days Total'), findsOneWidget);
+        // Tap 'Month'
+        await tester.tap(find.text('Month'));
+        await tester.pumpAndSettle();
+        expect(find.text('30 Days Total'), findsOneWidget);
 
-      // Tap '6 Weeks' (Half-Quarter)
-      await tester.tap(find.text('6 Weeks'));
-      await tester.pumpAndSettle();
-      expect(find.text('45 Days Total'), findsOneWidget);
+        // Tap '6 Weeks' (Half-Quarter)
+        await tester.tap(find.text('6 Weeks'));
+        await tester.pumpAndSettle();
+        expect(find.text('45 Days Total'), findsOneWidget);
 
-      // Tap '6 Months' (Half-Year)
-      await tester.tap(find.text('6 Months'));
-      await tester.pumpAndSettle();
-      expect(find.text('180 Days Total'), findsOneWidget);
-    });
+        // Tap '6 Months' (Half-Year)
+        await tester.tap(find.text('6 Months'));
+        await tester.pumpAndSettle();
+        expect(find.text('180 Days Total'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Renders SettingsBetaNote in LifeAuditPage and triggers onLearnMoreBeta',
+      (tester) async {
+        bool betaClicked = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: LifeAuditPage(
+                  p: p,
+                  entries: const [],
+                  sleepHours: 10.0,
+                  essentialsHours: 4.0,
+                  onSleepHoursChanged: (_) {},
+                  onEssentialsHoursChanged: (_) {},
+                  onLearnMoreBeta: () => betaClicked = true,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final betaNoteFinder = find.byType(SettingsBetaNote);
+        await tester.scrollUntilVisible(
+          betaNoteFinder,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.textContaining('Life Audit mathematical models'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('Learn More'), findsOneWidget);
+        final betaNoteWidget = tester.widget<SettingsBetaNote>(betaNoteFinder);
+        betaNoteWidget.onLearnMore();
+        await tester.pumpAndSettle();
+        expect(betaClicked, isTrue);
+      },
+    );
   });
 }

@@ -606,6 +606,7 @@ class MilestonesPage extends StatelessWidget {
       pageBuilder: (_, _, _) => AppSheet(
         p: p,
         title: 'Milestone Peak'.localized(context),
+        onBack: () => Navigator.of(context).pop(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

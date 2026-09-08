@@ -47,8 +47,8 @@
 > chronometer craft. Every second is accounted for; the void is revealed.
 >
 > 📦 **Download Official APKs
-**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases) • 🌐 **Companion
-> Web App
+**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases) •
+> 🌐 **Companion Web App
 **: [notekarapp.vercel.app](https://notekarapp.vercel.app/) • [Web Source Repo](https://github.com/dheeraz101/Notekar)
 
 ---

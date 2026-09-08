@@ -37,6 +37,7 @@ class _ResetAllConfirmSheetState extends State<ResetAllConfirmSheet> {
     return AppSheet(
       p: p,
       title: widget.title,
+      onBack: () => Navigator.of(context).pop(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

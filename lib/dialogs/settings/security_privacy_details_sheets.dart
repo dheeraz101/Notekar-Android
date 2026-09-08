@@ -18,6 +18,7 @@ void showSecurityDetailsSheet({
       p: p,
       title: 'Security & Integrity'.localized(context),
       docked: true,
+      onBack: () => Navigator.pop(context),
       blur:
           !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
       child: SizedBox(
@@ -119,6 +120,7 @@ void showPrivacyDetailsSheet({
       p: p,
       title: 'Privacy & Offline Model'.localized(context),
       docked: true,
+      onBack: () => Navigator.pop(context),
       blur:
           !reduceMotion && enableTranslucency && AdaptiveEngine().supportsBlur,
       child: SizedBox(

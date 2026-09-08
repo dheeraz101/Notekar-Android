@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -78,6 +80,18 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
 
         // 5. Stoic Philosophical Colophon
         _buildStoicColophonCard(),
+
+        // 6. Beta Refinement Note
+        if (widget.onLearnMoreBeta != null) ...[
+          const SizedBox(height: 16),
+          SettingsBetaNote(
+            p: p,
+            text:
+                'Life Audit mathematical models and conscious partitions are in active refinement. Unaccounted void metrics are continuously calibrated for precision.'
+                    .localized(context),
+            onLearnMore: widget.onLearnMoreBeta!,
+          ),
+        ],
         const SizedBox(height: spacing48),
       ],
     );
@@ -89,14 +103,16 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     final conscious = summary.consciousHoursPerDay;
 
     // Today's tracked hours
-    final todayRecord = summary.dailyRecords.firstWhere(
-      (r) => r.isToday,
-      orElse: () => summary.dailyRecords.first,
-    );
-    final trackedTodayHours =
-        todayRecord.trackedDuration.inMilliseconds / (3600.0 * 1000.0);
+    final todayRecord = summary.dailyRecords
+        .where((r) => r.isToday)
+        .firstOrNull;
+    final trackedTodayHours = todayRecord != null
+        ? todayRecord.trackedDuration.inMilliseconds / (3600.0 * 1000.0)
+        : 0.0;
     final activeToday = trackedTodayHours.clamp(0.0, conscious);
     final voidToday = (conscious - activeToday).clamp(0.0, conscious);
+    final formattedTracked = todayRecord?.formattedTracked ?? '0m';
+    final formattedWasted = todayRecord?.formattedWasted ?? '0m';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -183,8 +199,14 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   ],
                   // Conscious Void
                   Expanded(
-                    flex: (voidToday * 10).round(),
-                    child: Container(color: p.red),
+                    flex: (voidToday * 10).round().clamp(1, 240),
+                    child: Container(
+                      color:
+                          (todayRecord != null &&
+                              todayRecord.wastedDuration > Duration.zero)
+                          ? p.red
+                          : p.surface3,
+                    ),
                   ),
                 ],
               ),
@@ -209,13 +231,15 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               ),
               _buildLegendPill(
                 color: p.green,
-                label:
-                    '${'Focus'.localized(context)} (${todayRecord.formattedTracked})',
+                label: '${'Focus'.localized(context)} ($formattedTracked)',
               ),
               _buildLegendPill(
-                color: p.red,
-                label:
-                    '${'Void'.localized(context)} (${todayRecord.formattedWasted})',
+                color:
+                    (todayRecord != null &&
+                        todayRecord.wastedDuration > Duration.zero)
+                    ? p.red
+                    : p.text3,
+                label: '${'Void'.localized(context)} ($formattedWasted)',
               ),
             ],
           ),
@@ -381,6 +405,232 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
   }
 
   Widget _buildBrutalRealityCard(LifeAuditSummary summary) {
+    if (!summary.hasData) {
+      final isNewUser = widget.entries.isEmpty;
+      final recordedDays = summary.availableHistoryDays;
+      final requiredDays = summary.requiredDays;
+      final horizonName = summary.timeframe.label.localized(context);
+
+      return Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: p.surface2,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: p.border.withValues(alpha: 0.5), width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'The Cost of the Void'.localized(context).toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '0 DATA AVAILABLE'.localized(context),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Big Typographic Hero
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '0h ${'Lost'.localized(context)}',
+                maxLines: 1,
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                  height: 1.1,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              isNewUser
+                  ? 'No session history recorded yet. Log your first focus session to start calculating your conscious audit.'
+                        .localized(context)
+                  : 'Accumulated $recordedDays of $requiredDays days required for the full $horizonName horizon. Void calculations will unlock once full period data is logged.'
+                        .localized(context),
+              style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 18),
+
+            // Dual-Stat Pill Badges
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Waking Days Lost'.localized(context),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '0 days',
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Earth (24h) Days'.localized(context),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '0 days',
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            // History Accumulation Progress Bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isNewUser
+                      ? '0 Days Recorded'.localized(context)
+                      : '$recordedDays / $requiredDays ${'Days Recorded'.localized(context)}',
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  isNewUser
+                      ? 'Awaiting Logs'.localized(context)
+                      : '${((recordedDays / requiredDays) * 100.0).clamp(0.0, 100.0).toStringAsFixed(0)}% ${'Collected'.localized(context)}',
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: SizedBox(
+                height: 10,
+                child: Row(
+                  children: [
+                    if (!isNewUser && recordedDays > 0)
+                      Expanded(
+                        flex: (recordedDays * 10).clamp(1, requiredDays * 10),
+                        child: Container(color: p.accent),
+                      ),
+                    Expanded(
+                      flex: math.max(1, (requiredDays - recordedDays) * 10),
+                      child: Container(color: p.surface3),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final wasted = summary.formattedTotalWasted;
     final wakingLost = summary.wakingDaysLostText;
     final celestialLost = summary.celestialDaysLostText;
@@ -619,6 +869,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
 
   Widget _buildDayByDayLedger(LifeAuditSummary summary) {
     final records = summary.dailyRecords;
+    final isNewUser = widget.entries.isEmpty;
     final displayRecords = _showAllDays ? records : records.take(7).toList();
 
     return Container(
@@ -645,102 +896,144 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 ),
               ),
               Text(
-                '${records.length} ${'Days Total'.localized(context)}',
+                isNewUser
+                    ? '0 Days Recorded'.localized(context)
+                    : (!summary.hasData
+                          ? '${records.length} / ${summary.requiredDays} ${'Days Recorded'.localized(context)}'
+                          : '${records.length} ${'Days Total'.localized(context)}'),
                 style: TextStyle(color: p.text3, fontSize: 12),
               ),
             ],
           ),
           const SizedBox(height: 14),
 
-          ...displayRecords.map((r) {
-            final statusColor = r.status.color(
-              accent: p.accent,
-              green: p.green,
-              orange: p.orange,
-              red: p.red,
-            );
+          if (isNewUser || records.isEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              decoration: BoxDecoration(
+                color: p.surface3,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Icon(CupertinoIcons.clock, size: 28, color: p.text3),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No Ledger History Yet'.localized(context),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Start tracking your focus sessions to populate day-by-day intentionality breakdowns.'
+                        .localized(context),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            ...displayRecords.map((r) {
+              final statusColor = r.status.color(
+                accent: p.accent,
+                green: p.green,
+                orange: p.orange,
+                red: p.red,
+              );
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: p.surface3,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: statusColor,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface3,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: statusColor,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              r.displayLabel,
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 13,
-                                fontWeight: r.isToday
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                              const SizedBox(width: 8),
+                              Text(
+                                r.displayLabel,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 13,
+                                  fontWeight: r.isToday
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                ),
                               ),
+                            ],
+                          ),
+                          Text(
+                            r.wastedDuration.inMinutes > 0
+                                ? '${r.formattedWasted} ${'lost'.localized(context)}'
+                                : 'Fully Accounted'.localized(context),
+                            style: TextStyle(
+                              color: r.wastedDuration.inMinutes > 0
+                                  ? p.red
+                                  : p.green,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
                             ),
-                          ],
-                        ),
-                        Text(
-                          r.wastedDuration.inMinutes > 0
-                              ? '${r.formattedWasted} ${'lost'.localized(context)}'
-                              : 'Fully Accounted'.localized(context),
-                          style: TextStyle(
-                            color: r.wastedDuration.inMinutes > 0
-                                ? p.red
-                                : p.green,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Progress line
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: SizedBox(
+                          height: 5,
+                          child: Row(
+                            children: [
+                              if (r.intentionalityPercentage > 0)
+                                Expanded(
+                                  flex: (r.intentionalityPercentage * 10)
+                                      .round(),
+                                  child: Container(color: p.green),
+                                ),
+                              if (r.intentionalityPercentage < 100)
+                                Expanded(
+                                  flex:
+                                      ((100 - r.intentionalityPercentage) * 10)
+                                          .round(),
+                                  child: Container(color: p.red),
+                                ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // Progress line
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: SizedBox(
-                        height: 5,
-                        child: Row(
-                          children: [
-                            if (r.intentionalityPercentage > 0)
-                              Expanded(
-                                flex: (r.intentionalityPercentage * 10).round(),
-                                child: Container(color: p.green),
-                              ),
-                            if (r.intentionalityPercentage < 100)
-                              Expanded(
-                                flex: ((100 - r.intentionalityPercentage) * 10)
-                                    .round(),
-                                child: Container(color: p.red),
-                              ),
-                          ],
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ],
 
           if (records.length > 7) ...[
             const SizedBox(height: 6),

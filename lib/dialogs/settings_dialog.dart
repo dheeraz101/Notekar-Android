@@ -372,8 +372,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Future<void> _loadCriticalNotice() async {
     if (!remoteNotices) return;
     try {
-      final notice = await NoticeService.instance.getActiveCriticalAdvisory();
+      var notice = await NoticeService.instance.getActiveCriticalAdvisory();
       if (mounted && notice != null) {
+        setState(() {
+          _criticalNotice = notice;
+        });
+      }
+      // Silently check for fresh bulletins if stale (> 4 hours)
+      await NoticeService.instance.syncIfStale();
+      notice = await NoticeService.instance.getActiveCriticalAdvisory();
+      if (mounted) {
         setState(() {
           _criticalNotice = notice;
         });
@@ -3376,8 +3384,39 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.sparkles,
+                          size: 13,
+                          color: p.accent,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'BETA REFINEMENT'.localized(context),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Text(
-                    'Beta Feature'.localized(context),
+                    'Early Access Innovation'.localized(context),
                     style: TextStyle(
                       color: p.text,
                       fontSize: 18,
@@ -3385,14 +3424,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       letterSpacing: -0.4,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Text(
-                    'This feature is currently in active development. While fully functional and secure, you may notice minor adjustments to the layout or performance as we refine the experience. All calculations, data, and security policies remain entirely local to your device.'
+                    'Features marked as Beta are fully functional, stable, and production-grade, but actively undergoing mathematical calibration and ergonomic tuning based on real-world usage.'
                         .localized(context),
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       color: p.text2,
                       fontSize: 13,
+                      height: 1.45,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '• Priority Updates: Enhancements ship first to beta testers before wide public stabilization.\n• 100% Offline & Private: Zero telemetry or cloud syncing. All calculations, data, and security policies remain strictly on your device.'
+                        .localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 12,
                       height: 1.5,
                       letterSpacing: -0.1,
                     ),
@@ -3402,7 +3452,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        '* Have suggestions or found a bug? '.localized(
+                        '* Have feedback or found an edge case? '.localized(
                           context,
                         ),
                         style: TextStyle(color: p.text2, fontSize: 13),
@@ -4366,11 +4416,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                     }
                                                     if (result.title ==
                                                         'Official Bulletins') {
-                                                      OfficialBulletinsSheet.show(
-                                                        context,
-                                                        p: p,
-                                                        onOpenLink:
-                                                            widget.onOpenLink,
+                                                      _openCategory(
+                                                        'Official Bulletins',
+                                                        parent:
+                                                            'Updates & Notices',
                                                       );
                                                       return;
                                                     }
@@ -6101,6 +6150,18 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   _openCategory(category, parent: parent),
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
                               onOpenLink: widget.onOpenLink,
+                            ),
+                          ),
+                        if (show('Official Bulletins'))
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                              ),
+                              child: OfficialBulletinsContent(
+                                p: p,
+                                onOpenLink: widget.onOpenLink,
+                              ),
                             ),
                           ),
                         if (show('Data & Backup'))

@@ -39,7 +39,8 @@ enum DayAuditStatus {
   substantial,
   partial,
   severeVoid,
-  totalLoss;
+  totalLoss,
+  noData;
 
   String get label => switch (this) {
     DayAuditStatus.transcendent => 'Transcendent (Over-Accounted)',
@@ -47,6 +48,7 @@ enum DayAuditStatus {
     DayAuditStatus.partial => 'Partially Accounted',
     DayAuditStatus.severeVoid => 'Severe Void',
     DayAuditStatus.totalLoss => 'Total Void Loss',
+    DayAuditStatus.noData => 'No Data Logged',
   };
 
   Color color({
@@ -61,6 +63,7 @@ enum DayAuditStatus {
       DayAuditStatus.partial => orange,
       DayAuditStatus.severeVoid => red.withValues(alpha: 0.8),
       DayAuditStatus.totalLoss => red,
+      DayAuditStatus.noData => Colors.grey,
     };
   }
 }
@@ -124,6 +127,10 @@ class LifeAuditSummary {
     required this.intentionalityRatio,
     required this.voidRatio,
     required this.dailyRecords,
+    this.hasData = true,
+    this.availableHistoryDays = 0,
+    this.requiredDays = 1,
+    this.firstLogDate,
   });
 
   final LifeAuditTimeframe timeframe;
@@ -139,6 +146,10 @@ class LifeAuditSummary {
   final double intentionalityRatio;
   final double voidRatio;
   final List<DayAuditRecord> dailyRecords;
+  final bool hasData;
+  final int availableHistoryDays;
+  final int requiredDays;
+  final DateTime? firstLogDate;
 
   String get formattedTotalTracked =>
       DayAuditRecord._formatDuration(totalTrackedDuration);
@@ -192,6 +203,50 @@ class LifeAuditService {
       milliseconds: (consciousHours * 3600 * 1000).round(),
     );
 
+    final requiredDays = timeframe.daysCount;
+
+    // If there are no entries, the user has 0 recorded history.
+    // Return 0 data available instead of fabricating false lost hours.
+    if (entries.isEmpty) {
+      return LifeAuditSummary(
+        timeframe: timeframe,
+        daysCount: requiredDays,
+        sleepHours: sleepHours,
+        essentialsHours: essentialsHours,
+        consciousHoursPerDay: consciousHours,
+        totalConsciousWindow: Duration.zero,
+        totalTrackedDuration: Duration.zero,
+        totalWastedDuration: Duration.zero,
+        totalWakingDaysLost: 0.0,
+        totalCelestialDaysLost: 0.0,
+        intentionalityRatio: 0.0,
+        voidRatio: 0.0,
+        dailyRecords: const [],
+        hasData: false,
+        availableHistoryDays: 0,
+        requiredDays: requiredDays,
+      );
+    }
+
+    final todayStart = DateTime(now.year, now.month, now.day);
+
+    // Determine earliest moment in the user's recorded history
+    int minTs = entries.first.timestamp;
+    for (final e in entries) {
+      if (e.timestamp < minTs) minTs = e.timestamp;
+    }
+    final firstLogDate = DateTime.fromMillisecondsSinceEpoch(minTs);
+    final firstLogDay = DateTime(
+      firstLogDate.year,
+      firstLogDate.month,
+      firstLogDate.day,
+    );
+
+    final availableHistoryDays = math.max(
+      1,
+      todayStart.difference(firstLogDay).inDays + 1,
+    );
+
     // Build timeline sections to accurately capture session durations per day
     final daySections = buildTimelineDaySections(entries);
     final Map<String, Duration> trackedByDateKey = {};
@@ -199,15 +254,82 @@ class LifeAuditService {
       trackedByDateKey[section.dateKey] = section.totalTrackedDuration;
     }
 
-    final int daysCount = timeframe.daysCount;
-    final List<DayAuditRecord> records = [];
+    // Determine if user has sufficient history for this macro horizon.
+    // For today: since entries is not empty, availableHistoryDays >= 1 is always true.
+    // For week, month, halfQuarter, halfYear, year: require availableHistoryDays >= requiredDays.
+    final bool hasSufficientHistory = availableHistoryDays >= requiredDays;
 
+    if (!hasSufficientHistory) {
+      // Build daily records for the days that actually exist in the user's history path
+      final int daysToBuild = math.min(requiredDays, availableHistoryDays);
+      final List<DayAuditRecord> partialRecords = [];
+
+      for (int i = 0; i < daysToBuild; i++) {
+        final dayDate = todayStart.subtract(Duration(days: i));
+        final k = dateKey(dayDate);
+        final isToday = i == 0;
+
+        final tracked = trackedByDateKey[k] ?? Duration.zero;
+        final trackedMs = tracked.inMilliseconds;
+        final consciousMs = consciousWindowPerDay.inMilliseconds;
+
+        final wastedMs = math.max(0, consciousMs - trackedMs);
+        final overtimeMs = math.max(0, trackedMs - consciousMs);
+
+        final double intentionalityPct = consciousMs > 0
+            ? ((trackedMs / consciousMs) * 100.0).clamp(0.0, 100.0)
+            : 0.0;
+
+        final status = _evaluateStatus(
+          trackedMs: trackedMs,
+          consciousMs: consciousMs,
+        );
+
+        final displayLabel = _formatDayDisplay(dayDate, isToday);
+
+        partialRecords.add(
+          DayAuditRecord(
+            dateKey: k,
+            date: dayDate,
+            displayLabel: displayLabel,
+            trackedDuration: tracked,
+            consciousWindow: consciousWindowPerDay,
+            wastedDuration: Duration(milliseconds: wastedMs),
+            overtimeDuration: Duration(milliseconds: overtimeMs),
+            intentionalityPercentage: intentionalityPct,
+            isToday: isToday,
+            status: status,
+          ),
+        );
+      }
+
+      return LifeAuditSummary(
+        timeframe: timeframe,
+        daysCount: requiredDays,
+        sleepHours: sleepHours,
+        essentialsHours: essentialsHours,
+        consciousHoursPerDay: consciousHours,
+        totalConsciousWindow: Duration.zero,
+        totalTrackedDuration: Duration.zero,
+        totalWastedDuration: Duration.zero,
+        totalWakingDaysLost: 0.0,
+        totalCelestialDaysLost: 0.0,
+        intentionalityRatio: 0.0,
+        voidRatio: 0.0,
+        dailyRecords: partialRecords,
+        hasData: false,
+        availableHistoryDays: availableHistoryDays,
+        requiredDays: requiredDays,
+        firstLogDate: firstLogDate,
+      );
+    }
+
+    // User has accumulated sufficient history for this timeframe: compute full audit
+    final List<DayAuditRecord> records = [];
     int totalTrackedMs = 0;
     int totalWastedMs = 0;
 
-    final todayStart = DateTime(now.year, now.month, now.day);
-
-    for (int i = 0; i < daysCount; i++) {
+    for (int i = 0; i < requiredDays; i++) {
       final dayDate = todayStart.subtract(Duration(days: i));
       final k = dateKey(dayDate);
       final isToday = i == 0;
@@ -250,7 +372,7 @@ class LifeAuditService {
     }
 
     final totalConsciousWindow = Duration(
-      milliseconds: consciousWindowPerDay.inMilliseconds * daysCount,
+      milliseconds: consciousWindowPerDay.inMilliseconds * requiredDays,
     );
     final totalTrackedDuration = Duration(milliseconds: totalTrackedMs);
     final totalWastedDuration = Duration(milliseconds: totalWastedMs);
@@ -273,7 +395,7 @@ class LifeAuditService {
 
     return LifeAuditSummary(
       timeframe: timeframe,
-      daysCount: daysCount,
+      daysCount: requiredDays,
       sleepHours: sleepHours,
       essentialsHours: essentialsHours,
       consciousHoursPerDay: consciousHours,
@@ -285,6 +407,10 @@ class LifeAuditService {
       intentionalityRatio: aggregateIntentionality,
       voidRatio: aggregateVoid,
       dailyRecords: records,
+      hasData: true,
+      availableHistoryDays: availableHistoryDays,
+      requiredDays: requiredDays,
+      firstLogDate: firstLogDate,
     );
   }
 

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -1027,8 +1026,9 @@ class BuildTrackSelectPage extends StatelessWidget {
               p: p,
               icon: Icons.track_changes_rounded,
               title: 'Beta Build',
-              subtitle: 'Early access to active development features.'
-                  .localized(context),
+              subtitle:
+                  'Priority updates and early access to active development features.'
+                      .localized(context),
               trailing: betaTrack
                   ? Icon(Icons.check_rounded, color: p.accent, size: 20)
                   : const SizedBox.shrink(),
@@ -1042,7 +1042,7 @@ class BuildTrackSelectPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds.'
+                'Stable track offers thoroughly tested releases. Beta track offers active pre-release compilation builds with Priority updates.'
                     .localized(context),
                 style: TextStyle(
                   color: p.text3,
@@ -1061,27 +1061,34 @@ class BuildTrackSelectPage extends StatelessWidget {
               _buildNumberingRow(
                 context,
                 '2.',
-                'Switching to the Beta Build track will fetch the last compiled beta build and show the update.',
+                'Switching to the Beta Build track gives you priority access to the latest compiled pre-release features and direct engine updates.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '3.',
-                'If in a Beta build and switched to Stable now, you will only receive Stable releases when a higher version is published.',
+                'Beta users will receive stable updates as well whenever a stable release is published.',
               ),
               const SizedBox(height: 8),
               _buildNumberingRow(
                 context,
                 '4.',
-                'If in a Stable build and switched to Beta now, you will receive upcoming Beta releases immediately as they are published.',
+                'If in a Beta build and switched to Stable now, you will only receive Stable releases when a higher version is published.',
+              ),
+              const SizedBox(height: 8),
+              _buildNumberingRow(
+                context,
+                '5.',
+                'If in a Stable build and switched to Beta now, you will receive upcoming Priority & Beta releases immediately as they are published.',
               ),
             ],
           ),
         ),
         SettingsBetaNote(
           p: p,
-          text: 'The features on this track are under active beta testing.'
-              .localized(context),
+          text:
+              'The features on this track receive priority updates and active testing. Beta users also receive all stable releases.'
+                  .localized(context),
           onLearnMore: onLearnMoreBeta,
         ),
         const SizedBox(height: spacing48),
@@ -1251,13 +1258,9 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
                   ],
                 ),
                 onTap: () {
-                  OfficialBulletinsSheet.show(
-                    context,
-                    p: p,
-                    onOpenLink:
-                        onOpenLink ??
-                        (url) =>
-                            openExternalLinkSafely(context, p: p, url: url),
+                  onOpenCategory(
+                    'Official Bulletins',
+                    parent: 'Updates & Notices',
                   );
                 },
               ),

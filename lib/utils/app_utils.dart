@@ -290,6 +290,7 @@ String filterLabel(String value) {
 
 bool isNewerVersion(String candidate, String current) {
   List<int> parts(String value) => value
+      .replaceFirst(RegExp(r'^[vV]'), '')
       .split('+')
       .first
       .split(RegExp(r'[^0-9]+'))
@@ -304,6 +305,19 @@ bool isNewerVersion(String candidate, String current) {
     final bv = i < b.length ? b[i] : 0;
     if (av != bv) return av > bv;
   }
+
+  // If base semantic versions are identical, compare build numbers if present
+  int buildNum(String value) {
+    if (!value.contains('+')) return 0;
+    final suffix = value.split('+').last;
+    final digits = suffix.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(digits) ?? 0;
+  }
+
+  final ba = buildNum(candidate);
+  final bb = buildNum(current);
+  if (ba != bb) return ba > bb;
+
   return false;
 }
 

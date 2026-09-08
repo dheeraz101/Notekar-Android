@@ -48,7 +48,7 @@
 
 ---
 
-### Integrity and Verification
+### Security and Integrity
 
 - **Build Tag**: `26PR0908` (version `7.4.0+26090801`)
 - **Automated Tests**: 106 unit & widget tests passing (0 failures, 0 lints)
