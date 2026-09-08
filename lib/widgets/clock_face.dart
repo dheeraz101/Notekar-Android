@@ -12,6 +12,7 @@ class LiveClockFace extends StatefulWidget {
     required this.pulseType,
     required this.showSeconds,
     required this.highlightSeconds,
+    this.sessionStart,
   });
 
   final Palette p;
@@ -19,6 +20,7 @@ class LiveClockFace extends StatefulWidget {
   final String pulseType;
   final bool showSeconds;
   final bool highlightSeconds;
+  final int? sessionStart;
 
   @override
   State<LiveClockFace> createState() => _LiveClockFaceState();
@@ -56,6 +58,13 @@ class _LiveClockFaceState extends State<LiveClockFace> {
 
   @override
   Widget build(BuildContext context) {
+    Duration? sessionElapsed;
+    if (widget.sessionStart != null) {
+      final startDt = DateTime.fromMillisecondsSinceEpoch(widget.sessionStart!);
+      sessionElapsed = _now.difference(startDt);
+      if (sessionElapsed.isNegative) sessionElapsed = Duration.zero;
+    }
+
     return ClockFace(
       now: _now,
       p: widget.p,
@@ -64,6 +73,7 @@ class _LiveClockFaceState extends State<LiveClockFace> {
       minimal: false,
       showSeconds: widget.showSeconds,
       highlightSeconds: widget.highlightSeconds,
+      sessionElapsed: sessionElapsed,
     );
   }
 }
@@ -78,6 +88,7 @@ class ClockFace extends StatefulWidget {
     required this.minimal,
     required this.showSeconds,
     required this.highlightSeconds,
+    this.sessionElapsed,
   });
 
   final DateTime now;
@@ -87,6 +98,7 @@ class ClockFace extends StatefulWidget {
   final bool minimal;
   final bool showSeconds;
   final bool highlightSeconds;
+  final Duration? sessionElapsed;
 
   @override
   State<ClockFace> createState() => _ClockFaceState();
@@ -116,13 +128,37 @@ class _ClockFaceState extends State<ClockFace> {
 
   @override
   Widget build(BuildContext context) {
-    final hm =
-        '${widget.now.hour.toString().padLeft(2, '0')}:${widget.now.minute.toString().padLeft(2, '0')}';
-    final sec = '.${widget.now.second.toString().padLeft(2, '0')}';
-    final actionColor = momentColor(widget.p, widget.pulseType);
+    final isSessionActive = widget.sessionElapsed != null;
+    final String hm;
+    final String sec;
+
+    if (isSessionActive) {
+      final elapsed = widget.sessionElapsed!;
+      if (elapsed.inHours > 0) {
+        final hours = elapsed.inHours.toString().padLeft(2, '0');
+        final mins = (elapsed.inMinutes % 60).toString().padLeft(2, '0');
+        final secs = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+        hm = '$hours:$mins';
+        sec = '.$secs';
+      } else {
+        final mins = elapsed.inMinutes.toString().padLeft(2, '0');
+        final secs = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+        hm = '$mins:$secs';
+        sec = '';
+      }
+    } else {
+      hm =
+          '${widget.now.hour.toString().padLeft(2, '0')}:${widget.now.minute.toString().padLeft(2, '0')}';
+      sec = '.${widget.now.second.toString().padLeft(2, '0')}';
+    }
+
+    final actionColor = isSessionActive
+        ? widget.p.green
+        : momentColor(widget.p, widget.pulseType);
+    final baseClockColor = isSessionActive ? widget.p.green : widget.p.clock;
     final clockColor = _bright
         ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)
-        : widget.p.clock;
+        : baseClockColor;
     final secondsColor = widget.highlightSeconds
         ? clockColor
         : clockColor.withValues(alpha: 0.38);
@@ -154,7 +190,7 @@ class _ClockFaceState extends State<ClockFace> {
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
-              if (!widget.minimal && widget.showSeconds)
+              if (!widget.minimal && widget.showSeconds && sec.isNotEmpty)
                 Text(
                   sec,
                   style: TextStyle(

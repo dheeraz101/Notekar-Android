@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -298,7 +298,41 @@ class AdvancedSettingsPage extends StatelessWidget {
               title: 'Large Text',
               color: p.accent,
               value: largeText,
-              onChanged: onLargeTextChanged,
+              onChanged: (val) {
+                final systemScale = MediaQuery.of(context).textScaler.scale(1);
+                if (val && systemScale >= 1.15) {
+                  showCupertinoDialog<void>(
+                    context: context,
+                    builder: (ctx) => CupertinoAlertDialog(
+                      title: Text('System Text Size Active'.localized(ctx)),
+                      content: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Your device already has larger text enabled in system settings. Enabling additional in-app enlargement may alter layout proportions.'
+                              .localized(ctx),
+                        ),
+                      ),
+                      actions: [
+                        CupertinoDialogAction(
+                          isDefaultAction: true,
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: Text('Keep System Default'.localized(ctx)),
+                        ),
+                        CupertinoDialogAction(
+                          isDestructiveAction: false,
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            onLargeTextChanged(true);
+                          },
+                          child: Text('Enable Anyway'.localized(ctx)),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  onLargeTextChanged(val);
+                }
+              },
             ),
           ],
         ),

@@ -112,8 +112,8 @@ class NoteKarAppState extends State<NoteKarApp> {
       builder: (context, child) {
         final media = MediaQuery.of(context);
         final clampedScaler = media.textScaler.clamp(
-          minScaleFactor: 1.0,
-          maxScaleFactor: 1.50,
+          minScaleFactor: 0.85,
+          maxScaleFactor: 1.20,
         );
 
         return MediaQuery(

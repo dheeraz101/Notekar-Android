@@ -45,97 +45,95 @@ class TimelineSingleTile extends StatelessWidget {
 
     final tileRadius = BorderRadius.circular(compact ? 9 : 12);
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: compact ? 1.5 : 3),
-      child: SwipeableCardBed(
-        key: ValueKey('single-${moment.id}'),
-        borderRadius: tileRadius,
-        deleteColor: p.red,
-        editColor: p.accent,
-        deleteLabel: 'Delete',
-        editLabel: 'Note',
-        actionIconSize: compact ? 19 : 21,
-        actionFontSize: compact ? 11.5 : 12.5,
-        enabled: !isGodMode,
-        onDelete: onDelete,
-        onEdit: onEditNote,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Vertical Timeline Rail & Node (Line is never behind the circle or dot)
-              SizedBox(
-                width: compact ? 20 : 28,
-                child: Column(
-                  children: [
-                    // Top rail segment (stops before the node)
-                    Expanded(
-                      child: isFirst
-                          ? const SizedBox()
-                          : Center(
-                              child: Container(
-                                width: 1.5,
-                                color: p.border.withValues(alpha: 0.5),
-                              ),
-                            ),
-                    ),
-                    // Timeline Node (Solid opaque background, completely isolating from line)
-                    Container(
-                      width: moment.type == 'single' && singleNumber != null
-                          ? (compact ? 18 : 22)
-                          : (compact ? 9 : 12),
-                      height: moment.type == 'single' && singleNumber != null
-                          ? (compact ? 18 : 22)
-                          : (compact ? 9 : 12),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isGodMode ? Colors.white : color,
-                          width: compact ? 1.2 : 1.5,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Vertical Timeline Rail & Node (Continuous unbroken line)
+          SizedBox(
+            width: compact ? 20 : 28,
+            child: Column(
+              children: [
+                // Top rail segment (connects flush to top edge)
+                Expanded(
+                  child: isFirst
+                      ? const SizedBox()
+                      : Center(
+                          child: Container(
+                            width: 1.5,
+                            color: p.border.withValues(alpha: 0.5),
+                          ),
                         ),
-                      ),
-                      child: moment.type == 'single' && singleNumber != null
-                          ? Text(
-                              singleNumber!.localizedDigits(context),
-                              style: TextStyle(
-                                color: color,
-                                fontSize: compact ? 8.5 : 9.5,
-                                fontWeight: FontWeight.w900,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              width: compact ? 3.5 : 5,
-                              height: compact ? 3.5 : 5,
-                              decoration: BoxDecoration(
-                                color: isGodMode ? Colors.white : color,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                    ),
-                    // Bottom rail segment (starts below the node)
-                    Expanded(
-                      child: isLast
-                          ? const SizedBox()
-                          : Center(
-                              child: Container(
-                                width: 1.5,
-                                color: p.border.withValues(alpha: 0.5),
-                              ),
-                            ),
-                    ),
-                  ],
                 ),
-              ),
+                // Timeline Node (Solid opaque background, completely isolating from line)
+                Container(
+                  width: moment.type == 'single' && singleNumber != null
+                      ? (compact ? 18 : 22)
+                      : (compact ? 9 : 12),
+                  height: moment.type == 'single' && singleNumber != null
+                      ? (compact ? 18 : 22)
+                      : (compact ? 9 : 12),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isGodMode ? Colors.white : color,
+                      width: compact ? 1.2 : 1.5,
+                    ),
+                  ),
+                  child: moment.type == 'single' && singleNumber != null
+                      ? Text(
+                          singleNumber!.localizedDigits(context),
+                          style: TextStyle(
+                            color: color,
+                            fontSize: compact ? 8.5 : 9.5,
+                            fontWeight: FontWeight.w900,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        )
+                      : Container(
+                          width: compact ? 3.5 : 5,
+                          height: compact ? 3.5 : 5,
+                          decoration: BoxDecoration(
+                            color: isGodMode ? Colors.white : color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                ),
+                // Bottom rail segment (starts below the node)
+                Expanded(
+                  child: isLast
+                      ? const SizedBox()
+                      : Center(
+                          child: Container(
+                            width: 1.5,
+                            color: p.border.withValues(alpha: 0.5),
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
 
-              SizedBox(width: compact ? 6 : 8),
+          SizedBox(width: compact ? 6 : 8),
 
-              // Content Bubble
-              Expanded(
+          // Content Bubble
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: compact ? 1.5 : 3),
+              child: SwipeableCardBed(
+                key: ValueKey('single-${moment.id}'),
+                borderRadius: tileRadius,
+                deleteColor: p.red,
+                editColor: p.accent,
+                deleteLabel: 'Delete',
+                editLabel: 'Note',
+                actionIconSize: compact ? 19 : 21,
+                actionFontSize: compact ? 11.5 : 12.5,
+                enabled: !isGodMode,
+                onDelete: onDelete,
+                onEdit: onEditNote,
                 child: PressableScale(
                   onTap: onTap ?? onEditNote,
                   onLongPress: onLongPress,
@@ -216,9 +214,9 @@ class TimelineSingleTile extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

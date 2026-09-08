@@ -1097,10 +1097,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   void _handleTap(TapUpDetails details) {
     if (_isDelayBlocked()) return;
-    if (_enableNoteOnClick) {
+    if (_mode == 'single') {
       unawaited(_openNote(position: details.globalPosition));
     } else {
-      unawaited(_logEntry(position: details.globalPosition));
+      if (_enableNoteOnClick) {
+        unawaited(_openNote(position: details.globalPosition));
+      } else {
+        unawaited(_logEntry(position: details.globalPosition));
+      }
     }
   }
 
@@ -3745,6 +3749,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         pulseType: _lastSavedType,
                         showSeconds: _showSeconds,
                         highlightSeconds: _highlightSeconds,
+                        sessionStart: _mode == 'two-way' ? _sessionStart : null,
                       ),
                       if (_startupComplete &&
                           _entries.isEmpty &&
@@ -3840,9 +3845,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     motionX: motion.dx,
                     motionY: motion.dy,
                     showHistoryText: _showHistoryText,
-                    lastTimestamp: _entries.isNotEmpty
-                        ? formatTimeShort(_entries.first.timestamp)
-                        : null,
+                    lastTimestamp: _mode == 'two-way' && _sessionStart != null
+                        ? formatTimeShort(DateTime.now().millisecondsSinceEpoch)
+                        : (_entries.isNotEmpty
+                              ? formatTimeShort(_entries.first.timestamp)
+                              : null),
                     blur:
                         _enableTranslucency &&
                         AdaptiveEngine().supportsBlur &&

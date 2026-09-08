@@ -398,6 +398,6 @@ class NotekarHaptics {
 MediaQueryData largerTextQuery(BuildContext context) {
   final media = MediaQuery.of(context);
   final current = media.textScaler.scale(1);
-  final target = math.max(current, math.min(current * 1.12, 1.6));
+  final target = math.max(current, math.min(current * 1.08, 1.22));
   return media.copyWith(textScaler: TextScaler.linear(target));
 }

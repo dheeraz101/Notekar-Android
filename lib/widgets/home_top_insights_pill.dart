@@ -1,12 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 class HomeTopInsightsPill extends StatelessWidget {
@@ -33,51 +31,18 @@ class HomeTopInsightsPill extends StatelessWidget {
           NotekarHaptics.selection('standard');
           onTap();
         },
-        child: Glass(
-          p: p,
-          blur: blur,
-          radius: 999,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: math.min(
-                MediaQuery.sizeOf(context).width - spacing32,
-                340,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: p.accent.withValues(alpha: 0.16),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    CupertinoIcons.sparkles,
-                    color: p.accent,
-                    size: 13,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Icon(Icons.chevron_right_rounded, color: p.text3, size: 16),
-              ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
             ),
           ),
         ),
