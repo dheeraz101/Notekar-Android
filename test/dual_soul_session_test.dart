@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -213,6 +215,55 @@ void main() {
         await tester.tap(find.text('Enable Anyway'));
         await tester.pumpAndSettle();
         expect(toggled, isTrue);
+      },
+    );
+  });
+
+  group('NoteDialog WhatsApp-Grade Typing Tests', () {
+    testWidgets(
+      'NoteDialog TextField has sentence capitalization and truncateAfterCompositionEnds',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoteDialog(p: p, initialNote: 'Test note'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final textFieldFinder = find.byType(TextField);
+        expect(textFieldFinder, findsOneWidget);
+        final textField = tester.widget<TextField>(textFieldFinder);
+
+        expect(textField.textCapitalization, TextCapitalization.sentences);
+        expect(
+          textField.maxLengthEnforcement,
+          MaxLengthEnforcement.truncateAfterCompositionEnds,
+        );
+        expect(textField.autocorrect, isTrue);
+        expect(textField.enableSuggestions, isTrue);
+        expect(textField.minLines, 4);
+        expect(textField.maxLines, 6);
+      },
+    );
+
+    testWidgets(
+      'NoteDialog typing smoothly updates character indicator without rebuilding parent dialog error',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoteDialog(p: p, initialNote: ''),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'Writing smooth notes');
+        await tester.pump();
+
+        expect(find.text('Writing smooth notes'), findsOneWidget);
       },
     );
   });

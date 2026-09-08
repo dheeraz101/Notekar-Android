@@ -1111,16 +1111,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   void _toggleMode() {
     setState(() {
       _mode = _mode == 'two-way' ? 'single' : 'two-way';
-      if (_mode == 'single') {
-        _inout = 'in';
-        _sessionStart = null;
-      }
     });
     _saveSetting('m-mode', _mode);
-    if (_mode == 'single') {
-      _prefs?.remove('m-inout');
-      _prefs?.remove('m-ses');
-    }
     NotekarHaptics.selection(_hapticStyle);
     _showToast(_mode == 'two-way' ? 'Two-Way Mode' : 'Single Mode');
     unawaited(_updateAndroidWidget());

@@ -32,7 +32,6 @@ class NoteDialog extends StatefulWidget {
 
 class _NoteDialogState extends State<NoteDialog> {
   late final TextEditingController _controller;
-  final _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   bool _showWarning = false;
 
@@ -47,7 +46,6 @@ class _NoteDialogState extends State<NoteDialog> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
-    _controller.addListener(_scrollToBottom);
     _loadSobrietyMode();
     // Pre-check if note already contains relapse or tags
     if (widget.initialNote.contains('#relapse')) {
@@ -70,20 +68,9 @@ class _NoteDialogState extends State<NoteDialog> {
     });
   }
 
-  void _scrollToBottom() {
-    if (!_scrollController.hasClients) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
-  }
-
   @override
   void dispose() {
-    _controller.removeListener(_scrollToBottom);
     _controller.dispose();
-    _scrollController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -114,59 +101,67 @@ class _NoteDialogState extends State<NoteDialog> {
               ),
             ),
             const SizedBox(height: spacing12),
-            SizedBox(
-              height: 130,
-              child: TextField(
-                controller: _controller,
-                scrollController: _scrollController,
-                focusNode: _focusNode,
-                autofocus: true,
-                maxLength: maxNoteLength,
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.newline,
-                scrollPadding: const EdgeInsets.all(spacing64),
-                style: TextStyle(color: widget.p.text),
-                decoration: InputDecoration(
-                  counterText: '',
-                  hintText: 'What should this moment remember?',
-                  hintStyle: TextStyle(color: widget.p.text3),
-                  filled: true,
-                  fillColor: widget.p.surface3,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: _showWarning ? widget.p.red : widget.p.border,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: _showWarning ? widget.p.red : widget.p.border,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: _showWarning ? widget.p.red : widget.p.accent,
-                    ),
+            TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              autofocus: true,
+              maxLength: maxNoteLength,
+              maxLengthEnforcement:
+                  MaxLengthEnforcement.truncateAfterCompositionEnds,
+              minLines: 4,
+              maxLines: 6,
+              textAlignVertical: TextAlignVertical.top,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              textCapitalization: TextCapitalization.sentences,
+              autocorrect: true,
+              enableSuggestions: true,
+              scrollPadding: const EdgeInsets.all(spacing64),
+              style: TextStyle(color: widget.p.text),
+              decoration: InputDecoration(
+                counterText: '',
+                hintText: 'What should this moment remember?',
+                hintStyle: TextStyle(color: widget.p.text3),
+                filled: true,
+                fillColor: widget.p.surface3,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _showWarning ? widget.p.red : widget.p.border,
                   ),
                 ),
-                onChanged: (text) {
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _showWarning ? widget.p.red : widget.p.border,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _showWarning ? widget.p.red : widget.p.accent,
+                  ),
+                ),
+              ),
+              onChanged: (text) {
+                if (_showWarning) {
                   setState(() {
                     _showWarning = false;
                   });
-                },
-                onSubmitted: (_) => _saveNote(),
-              ),
+                }
+              },
+              onSubmitted: (_) => _saveNote(),
             ),
             const SizedBox(height: spacing12),
-            _LinearCharacterIndicator(
-              p: widget.p,
-              count: _controller.text.length,
-              max: maxNoteLength,
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _controller,
+              builder: (context, value, _) {
+                return _LinearCharacterIndicator(
+                  p: widget.p,
+                  count: value.text.length,
+                  max: maxNoteLength,
+                );
+              },
             ),
             if (_sobrietyMode) ...[
               const SizedBox(height: 14),
