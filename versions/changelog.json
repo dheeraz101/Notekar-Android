@@ -1,14 +1,69 @@
 [
   {
+    "version": "7.4.0",
+    "buildNumber": "26PR0908",
+    "releaseDate": "2026-09-08",
+    "channel": "priority",
+    "channelTag": "[Priority]",
+    "isBeta": false,
+    "edition": "Life Audit, Spatial Harmony \u0026 Sovereign Signal",
+    "badgeColor": "#7000FF",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Life Audit \u0026 The Void",
+        "description": "Daily 24h partition engine confronting unaccounted hours across 6 horizons.",
+        "icon": "auto_graph_rounded"
+      },
+      {
+        "title": "Spatial Bebas Neue Clock",
+        "description": "Optically centered usable-viewport chronometer face with authentic tall typography.",
+        "icon": "schedule_rounded"
+      },
+      {
+        "title": "Two-Way Session Continuity",
+        "description": "Unbroken stopwatch and note state preservation across Single and Two-Way modes.",
+        "icon": "sync_alt_rounded"
+      },
+      {
+        "title": "WhatsApp-Grade Note Input",
+        "description": "Instantaneous note entry with sentence capitalization and composition safety.",
+        "icon": "edit_note_rounded"
+      },
+      {
+        "title": "Smart Onboarding \u0026 7 Locales",
+        "description": "Tours integrated into onboarding, unseen cards for updating users, and full 7-language support.",
+        "icon": "translate_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "NoteKar has revisioned itself. Moving beyond a minimalist clicker into an existential compass: accounting for finite conscious hours, confronting the cost of the void, and perfecting sensory chronometer craft.",
+      "+ Add Life Audit time wastage engine with 24-hour conscious partitions and 6 temporal horizons",
+      "+ Implement The Cost of the Void existential metrics: Waking Days Lost and Earth Days Lost",
+      "+ Introduce Executive Dashboard Life Audit card with dynamic horizon indicators and overflow guards",
+      "+ Optically center main clock within usable viewport between top insights and bottom toolbar",
+      "+ Bundle authentic Bebas Neue tall typography for chronometer and active session countdowns",
+      "+ Guarantee Two-Way session continuity across Single and Two-Way mode toggles with zero state loss",
+      "+ Overhaul NoteDialog with WhatsApp-grade zero-lag input, sentence capitalization, and composition safety",
+      "+ Migrate feature tours from settings to onboarding, adding standalone unseen cards for updating users",
+      "+ Expand offline multilingual localizations across 7 languages (EN, HI, ES, FR, DE, JA, RU)",
+      "* Full automated test suite passing across all unit, widget, and state continuity verifications"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.4.0/NoteKar-v7.4.0-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.4.0/NoteKar-v7.4.0-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.3.3",
     "buildNumber": "26BR0906b",
     "releaseDate": "2026-09-06",
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Physical Swipe Geometry & Sovereign Signal",
+    "edition": "Physical Swipe Geometry \u0026 Sovereign Signal",
     "badgeColor": "#0A84FF",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Physical Bed of Red",
@@ -34,9 +89,9 @@
     "fullChangelog": [
       "Re-engineer swipe-to-delete with SwipeableCardBed matching exact 16pt/12pt card corner radii",
       "Eliminate all background straight-line cutouts and gaps behind sliding session and single moment cards",
-      "Standardize What's New keynote hero card and innovation cards to flush settings group bounds",
+      "Standardize What\u0027s New keynote hero card and innovation cards to flush settings group bounds",
       "Align keynote pill tags, release edition badges, and date metadata to eliminate horizontal overflows",
-      "Couple Official Bulletins visibility with App Notices preference switch in Notifications & Updates",
+      "Couple Official Bulletins visibility with App Notices preference switch in Notifications \u0026 Updates",
       "Add 1-second deliberate activity feedback spinner and socket-level DNS verification to bulletin checks",
       "Refine App Philosophy card in About with elevated typography, removing redundant subtitle copy",
       "Simplify Reset page description to minimal text and subtle warning icon",
@@ -54,7 +109,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Life Ledger Density & iOS Dialog Architecture",
+    "edition": "Life Ledger Density \u0026 iOS Dialog Architecture",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -107,7 +162,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Life Ledger Timeline & Executive Intelligence Hub",
+    "edition": "Life Ledger Timeline \u0026 Executive Intelligence Hub",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -154,7 +209,7 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Sovereign God Mode & Apple HIG Evolution",
+    "edition": "Sovereign God Mode \u0026 Apple HIG Evolution",
     "badgeColor": "#0A84FF",
     "isLatest": false,
     "highlights": [
@@ -169,7 +224,7 @@
         "icon": "notifications_active_rounded"
       },
       {
-        "title": "System Bridges & Broadcast APIs",
+        "title": "System Bridges \u0026 Broadcast APIs",
         "description": "Custom notekar:// URL schemes, Android text selection context menu, and Tasker broadcast automation.",
         "icon": "link_rounded"
       },
@@ -180,7 +235,7 @@
       }
     ],
     "fullChangelog": [
-      "Add sovereign God Mode suite with secret theme palettes, gravity sandbox & VIP badge",
+      "Add sovereign God Mode suite with secret theme palettes, gravity sandbox \u0026 VIP badge",
       "Add Apple HIG Dynamic Island pill toasts with frosted glass translucency",
       "Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation",
       "Add Android text selection context menu (\"Log in NoteKar\") via ProcessTextActivity",
@@ -192,7 +247,7 @@
       "Add full offline historical changelog archive with dynamic GitHub releases sync",
       "Optimize R8 and ProGuard compiler rules with build caching for faster startup",
       "Safeguard database initialization when revoking God Mode to prevent preference desynchronization",
-      "Eliminate nested modal sheets in What's New, Changelog, and Language Center"
+      "Eliminate nested modal sheets in What\u0027s New, Changelog, and Language Center"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.0/NoteKar-v7.3.0-universal-release.apk",

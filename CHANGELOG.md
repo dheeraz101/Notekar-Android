@@ -7,6 +7,54 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.4.0] - 2026-09-08 (versionCode 26PR0908) [PR]
+
+> *NoteKar has revisioned itself.* Moving beyond a minimalist clicker, NoteKar elevates into an
+> existential compass: accounting for finite human conscious hours, confronting the cost of the
+> unaccounted void, and perfecting sensory chronometer craft.
+
+### What's New
+
+- **Life Audit & Time Wastage Engine ("The Cost of the Void")**:
+    - Uncompromising daily 24-hour partition
+      architecture ($24\text{h} = \text{Sleep} + \text{Logistics} + \text{Conscious Window}$).
+    - Multi-horizon existential audit across 6 temporal windows: Today, Weekly (7d), Monthly (30d),
+      Half-Quarterly (45d), Half-Yearly (180d), and Planetary Yearly (365d).
+    - Visceral mortality metrics: Conscious Waking Days Lost, Earth (24h) Days Lost, and
+      intentionality ratios.
+    - Interactive partition sliders with soft haptic feedback and dynamic color-coded horizon bars.
+    - Day-by-day historical ledger with void intensity badges and Seneca's Stoic reality colophon.
+    - Executive Dashboard Life Audit card with auto-scaling `FittedBox` metrics and collision-proof
+      headers.
+
+- **Vertically Centered Clock & Authentic Bebas Neue Chronometer**:
+    - Home clock is now mathematically and optically centered within the usable viewport between the
+      top insights pill and the bottom toolbar, eliminating artificial vertical bias.
+    - Replaced artificial matrix transforms with genuine, bundled open-source *Bebas Neue* tall
+      typography (100% offline, zero network dependencies).
+    - Naturally tall, commanding numerals (144pt scale) with tabular figures for both the home clock
+      and active Two-Way session countdown timers.
+
+- **Seamless Two-Way Session Continuity**:
+    - Switching between Single mode and Two-Way mode mid-session seamlessly preserves active
+      stopwatch timers and elapsed session state without reset or dropped timestamps.
+
+- **WhatsApp-Grade Zero-Lag Note Input**:
+    - Overhauled note input mechanics with sentence capitalization, composition truncation handling,
+      and isolated character indicator state updates, eliminating typing lag and dialog re-renders.
+
+- **Intelligent Onboarding Architecture & Tour Migration**:
+    - Removed Feature Tours from Help & Guides / About settings to maintain an uncluttered surface.
+    - Integrated all feature tours into the unified welcome flow for new users.
+    - Added standalone unseen card presentation for existing users updating the app, presenting only
+      newly introduced features dismissible with a single "Done" tap.
+
+- **Full Multilingual Localization (7 Locales)**:
+    - Added complete offline translation dictionaries and dynamic string pattern resolvers across
+      English (`en`), Hindi (`hi`), Spanish (`es`), French (`fr`), German (`de`), Japanese (`ja`),
+      and Russian (`ru`).
+    - Terse, overflow-proof typography across compact cards and Devanagari numerals for Hindi.
+
 ## [7.3.3] - 2026-09-06 (versionCode 26BR0906b) [BR]
 
 ### What's New

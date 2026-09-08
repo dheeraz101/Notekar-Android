@@ -604,13 +604,13 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('KEYNOTE RELEASE'), findsOneWidget);
-        expect(find.text('v7.3.3 Update'), findsOneWidget);
+        expect(find.text('v7.4.0 Update'), findsOneWidget);
         expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
-        expect(find.text('Pinch-to-Density Physics'), findsOneWidget);
-        expect(find.text('Physical Swipe & Bed of Red'), findsOneWidget);
-        expect(find.text('Cupertino Alert Architecture'), findsOneWidget);
-        expect(find.text('Executive Intelligence Hub'), findsOneWidget);
-        expect(find.text('Official Bulletins Engine'), findsOneWidget);
+        expect(find.text('Life Audit & The Void'), findsOneWidget);
+        expect(find.text('Spatial Bebas Neue Clock'), findsOneWidget);
+        expect(find.text('Two-Way Session Continuity'), findsOneWidget);
+        expect(find.text('WhatsApp-Grade Note Input'), findsOneWidget);
+        expect(find.text('Smart Onboarding & 7 Locales'), findsOneWidget);
         expect(
           find.text('"Details matter, it’s worth waiting to get it right."'),
           findsOneWidget,

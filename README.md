@@ -4,14 +4,14 @@
 
 [![NoteKar Banner](screenshot/notekar_banner.png)](https://github.com/dheeraz101/Notekar-Android)
 
-### *The Sovereign, Offline-First Timestamp & Focus Companion for Android*
+### *The Sovereign Existential Compass & Chronometer Craft for Android*
 
-**Instant Tap Logging • Two-Way Intervals • Obsidian & Calendar Sync • 100% Private**
+**Daily 24h Conscious Accounting • The Cost of the Void • Seamless Focus • 100% Private & Offline**
 
 ---
 
-[![Version](https://img.shields.io/badge/version-7.3.3-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
-[![Build](https://img.shields.io/badge/build-26BR0906b-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Version](https://img.shields.io/badge/version-7.4.0-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Build](https://img.shields.io/badge/build-26PR0908-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -23,7 +23,7 @@
 
 <p align="center">
   <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.3.3-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.4.0-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
   </a>
   &nbsp;&nbsp;
   <a href="https://notekarapp.vercel.app/">
@@ -40,14 +40,15 @@
 ---
 
 > [!IMPORTANT]
-> 🚀 **Official Release Hub & Active Development**
+> 🧭 **"NoteKar has revisioned itself."**
 >
-> This repository is the official home for all NoteKar Android version releases, APK packages,
-> community localizations, and feature updates.
+> Moving beyond a minimalist clicker, NoteKar elevates into an existential compass: accounting for
+> finite human conscious hours, confronting the cost of the unaccounted void, and perfecting sensory
+> chronometer craft. Every second is accounted for; the void is revealed.
 >
 > 📦 **Download Official APKs
-**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases)
-> 🌐 **Companion Web App
+**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases) • 🌐 **Companion
+> Web App
 **: [notekarapp.vercel.app](https://notekarapp.vercel.app/) • [Web Source Repo](https://github.com/dheeraz101/Notekar)
 
 ---
@@ -56,7 +57,16 @@
 
 - [✨ Why NoteKar?](#-why-notekar)
 - [📸 Visual UI Gallery](#-visual-ui-gallery)
-- [🌟 Core Features & Highlights](#-core-features--highlights)
+- [🌟 Core Features & Existential Engine](#-core-features--existential-engine)
+    - [⏳ 1. Life Audit & The Cost of the Void](#-1-life-audit--the-cost-of-the-void)
+    - [⏱️ 2. Spatial Chronometer & Authentic Bebas Neue Typography](#-2-spatial-chronometer--authentic-bebas-neue-typography)
+    - [⚡ 3. Instant Glass Logging & Seamless Continuity](#-3-instant-glass-logging--seamless-continuity)
+    - [✍️ 4. WhatsApp-Grade Zero-Lag Note Input](#-4-whatsapp-grade-zero-lag-note-input)
+    - [📜 5. Life Ledger Timeline (Redesigned History)](#-5-life-ledger-timeline-redesigned-history)
+    - [📊 6. Executive Intelligence Hub (Dashboard)](#-6-executive-intelligence-hub-dashboard)
+    - [🌱 7. Sobriety Companion & Milestone Map](#-7-sobriety-companion--milestone-map)
+    - [🧘 8. Hourly Time Reflection & Mindfulness](#-8-hourly-time-reflection--mindfulness)
+    - [📱 9. Android Home Screen Widget (2x2)](#-9-android-home-screen-widget-2x2)
 - [🌉 System Bridges & Automation](#-system-bridges--automation)
 - [🛡️ Privacy, Security & Hardware Protection](#️-privacy-security--hardware-protection)
 - [🌐 Multilingual & Global Community](#-multilingual--global-community)
@@ -71,17 +81,21 @@
 
 ## ✨ Why NoteKar?
 
-In an era of bloatware, mandatory account logins, cloud tracking, and battery-draining telemetry, *
-*NoteKar** is engineered as an uncompromising, sovereign utility.
+In an era of bloatware, mandatory logins, infinite algorithmic distraction, and cloud surveillance,
+**NoteKar** is engineered as an uncompromising, sovereign utility and existential mirror.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│  ⚡ ZERO-FRICTION LOGGING  │  Tap anywhere on the glass to log timestamps.   │
-│  🛡️ 100% OFFLINE-FIRST     │  AES-256 encrypted Hive database. Zero cloud.   │
-│  🧘 TIME REFLECTION        │  Mindful breathing alarms on lockscreen.        │
-│  🌉 SYSTEM BRIDGES         │  Obsidian MD live export, .ICS calendar sync.   │
-│  🌱 SOBRIETY COMPANION     │  21 neuroscience milestones with peak cards.    │
-│  📱 HOME SCREEN WIDGET     │  2x2 native Android widget for 1-tap capture.   │
+│  ⏳ LIFE AUDIT & THE VOID   │  24h conscious partitions confronting lost days.│
+│  ⏱️ SPATIAL CHRONOMETER     │  Optically centered Bebas Neue tall numerals.   │
+│  ⚡ ZERO-FRICTION CAPTURE   │  Tap anywhere on glass to log timestamps.       │
+│  🔄 UNBROKEN CONTINUITY     │  Live stopwatch preserved across mode toggles.  │
+│  ✍️ WHATSAPP-GRADE TYPING   │  Zero-lag note entry with auto-capitalization.  │
+│  📜 LIFE LEDGER TIMELINE    │  Apple HIG paired sessions & 1-tap live end.    │
+│  📊 EXECUTIVE INTELLIGENCE  │  Circadian rhythm & 90-day heatmap (on-device). │
+│  🛡️ 100% OFFLINE SOVEREIGN  │  AES-256 encrypted Hive NoSQL. Zero telemetry.  │
+│  🌉 SYSTEM BRIDGES          │  Obsidian MD live export, .ICS calendar sync.   │
+│  🌱 SOBRIETY & MINDFULNESS  │  21 neuroscience milestones & lockscreen breath.│
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -104,19 +118,72 @@ fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
 
 ---
 
-## 🌟 Core Features & Highlights
+## 🌟 Core Features & Existential Engine
 
-### ⚡ 1. Instant Timestamp Engine
+### ⏳ 1. Life Audit & The Cost of the Void (Existential Accounting Engine)
+
+NoteKar's most transformative innovation: **confronting the finite nature of human conscious time**.
+If you are not logging your hours, time does not pause—it vanishes into the unaccounted void.
+NoteKar makes this friction visible with mathematical clarity:
+
+- **Daily 24-Hour Partition Architecture**:
+  Every day is rigorously partitioned into three fundamental temporal buckets:
+  $$\text{Total Day (24h)} = \text{Sleep} + \text{Logistics (Food, Travel, Routine)} + \text{Conscious Window}$$
+- **The Cost of the Void**:
+  Conscious hours not accounted for in deliberate focus sessions or intentional moments are
+  calculated as the **Void**:
+  $$\text{Unaccounted Void} = \text{Conscious Window} - \text{Logged Focus Sessions}$$
+- **Multi-Horizon Existential Ledger (6 Horizons)**:
+  Examine your time debt across six distinct temporal scopes:
+    - **Today**: 24-Hour immediate feedback.
+    - **Weekly (7d)**: 168-Hour work & rest review.
+    - **Monthly (30d)**: 720-Hour monthly cadence.
+    - **Half-Quarterly (6 Weeks / 45d)**: Habit formation and mid-quarter momentum check.
+    - **Half-Yearly (26 Weeks / 180d)**: Deep reflection on macro goals and seasonal shifts.
+    - **Planetary Yearly (365d)**: Comprehensive audit of conscious solar rotations.
+- **Visceral Mortality & Intentionality Metrics**:
+    - **Conscious Waking Days Lost**: How many waking days (e.g. 14h blocks) slipped away without a
+      trace.
+    - **Earth (24h) Days Lost**: Equivalent full planetary rotations consumed by unrecorded time.
+    - **Intentionality Ratio**: Visual percentage gauge of conscious time actively captured and
+      justified.
+- **Interactive Partition Sliders**: Real-time tactile adjustment for baseline sleep (e.g., 8–10h)
+  and food/travel logistics (e.g., 2–4h) with haptic resistance.
+- **Historical Ledger & Seneca Colophon**: Day-by-day audit chronicle paired with Seneca’s Stoic
+  reality reminder (*"Time is the only thing where it is a virtue to be greedy"*).
+- **Executive Dashboard Integration**: Dedicated Life Audit card with auto-scaling dynamic horizon
+  meters and collision-proof responsive typography.
+
+### ⏱️ 2. Spatial Chronometer & Authentic Bebas Neue Typography
+
+- **Usable Viewport Optical Centering**: The home chronometer face is mathematically positioned at
+  the exact optical midpoint of the usable canvas between the floating top insights pill and the
+  bottom tool navigation, eliminating artificial vertical bias.
+- **Authentic Bebas Neue Numerals**: Replaced artificial matrix transforms with genuine, bundled
+  open-source *Bebas Neue* tall typography (61KB offline OFL). Naturally tall, commanding numerals (
+  144pt scale) with tabular figures for both the main clock and active Two-Way countdown timers.
+
+### ⚡ 3. Instant Glass Logging & Seamless Continuity
 
 - **One-Tap Glass Capture**: Tap anywhere on the main screen to immediately capture exact timestamps
   with custom tactile haptic pulses.
+- **Seamless Two-Way Session Continuity**: Switch dynamically between **Single** mode and **Two-Way
+  ** mode mid-flight without resetting the live stopwatch, losing elapsed intervals, or dropping
+  draft notes.
 - **Dual Operating Modes**:
     - **Single Mode**: Rapid one-shot timestamp counter (`00` to `99`) with automatic rollover,
       optional daily reset, and "Count on Save" badges.
     - **Two-Way Mode**: Track deep work, study, workouts, or shifts by recording distinct `IN` and
       `OUT` interval pairs with duration computations.
 
-### 📜 2. Life Ledger Timeline (Redesigned History)
+### ✍️ 4. WhatsApp-Grade Zero-Lag Note Input
+
+- **Typing on Glass**: Overhauled note input mechanics with sentence auto-capitalization,
+  composition truncation guards, and decoupled character state updates.
+- **Zero Input Lag**: Completely eliminates keystroke latency and dialog re-renders during
+  high-speed typing, delivering buttery-smooth text entry.
+
+### 📜 5. Life Ledger Timeline (Redesigned History)
 
 Designed strictly to Apple Human Interface Guidelines (HIG), the **Life Ledger Timeline** transforms
 raw log records into an elegant, unified chronicle of your day:
@@ -129,6 +196,9 @@ raw log records into an elegant, unified chronicle of your day:
   seal the active session in real time with an instant `OUT` moment.
 - **Sequential Single Numbering (`00`–`99`)**: Standalone moments feature high-contrast circular
   rail badges displaying sequential 2-digit counters, with optional midnight daily resets.
+- **Physical Bed of Red Swipe-to-Delete**: Swipe gestures reveal a solid red backing bed matching
+  the card's exact corner radius (16pt sessions, 12pt singles), eliminating gap cutouts, paired with
+  a 5-second Dynamic Island countdown undo pill.
 - **Redesigned Compact History Mode**: Ultra-dense timeline layout presenting 2x–3x more moments
   with scaled rail markers, micro duration badges, and automatic suppression of empty note
   placeholder boxes.
@@ -143,7 +213,7 @@ raw log records into an elegant, unified chronicle of your day:
 - **Trash Bin Safety**: Local soft-delete vault to restore or permanently purge removed records
   anytime.
 
-### 📊 3. Executive Intelligence Hub (Redesigned Dashboard)
+### 📊 6. Executive Intelligence Hub (Redesigned Dashboard)
 
 The **Executive Intelligence Hub** delivers deep behavioral analytics, habit rhythms, and circadian
 insights computed 100% on-device:
@@ -160,7 +230,7 @@ insights computed 100% on-device:
 - **Executive Focus Metrics**: Track total session focus hours, average session lengths, and peak
   productivity intervals with local in-memory aggregation.
 
-### 🌱 4. Sobriety Companion & Milestone Map
+### 🌱 7. Sobriety Companion & Milestone Map
 
 - **21 Neuroscience-Backed Milestones**: Track habits and clean streaks across 34 narrative themes (
   Science, Warrior, Samurai, Anime, Cyberpunk, and more).
@@ -172,7 +242,7 @@ insights computed 100% on-device:
   practice nervous system regulation.
 - **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
 
-### 🧘 5. Hourly Time Reflection & Mindfulness
+### 🧘 8. Hourly Time Reflection & Mindfulness
 
 - **Standalone Lockscreen Breathing Alarms**: Full-screen breathing prompts that display directly
   over the lockscreen without unlocking your device or exposing private logs.
@@ -183,7 +253,7 @@ insights computed 100% on-device:
 - **Customizable Affirmation Mantra**: Display a 60-character personal mantra directly on the
   breathing aura display.
 
-### 📱 6. Android Home Screen Widget (2x2)
+### 📱 9. Android Home Screen Widget (2x2)
 
 - Fast, battery-efficient App Widget to log moments and check streak milestones directly from your
   Android launcher without opening the app.
@@ -317,6 +387,7 @@ Marathi, Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, 
 |:---------------------------|:--------------------------------------------------------------|:-----------------------------------------------|
 | **Language**               | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/) | Type-safe reactive codebase                    |
 | **Framework**              | [Flutter](https://flutter.dev/) (`^3.12.0`)                   | High-performance 120 FPS rendering             |
+| **Typography**             | [Bebas Neue](assets/fonts/BebasNeue-Regular.ttf) (OFL)        | Bundled offline tall chronometer font          |
 | **Local Storage**          | [Hive](https://pub.dev/packages/hive)                         | AES-256 encrypted NoSQL key-value store        |
 | **State Management**       | [Reactive Singletons & ValueNotifiers](https://flutter.dev/)  | Ultra-low memory overhead                      |
 | **Design System**          | Custom Apple HIG & iOS 26 High-Radius Style                   | Dynamic glass, haptics, and AMOLED dark mode   |
@@ -329,17 +400,20 @@ Notekar - Flutter/
 ├── .github/workflows/          # Enterprise CI/CD (Lint, Test Coverage, Release Builds)
 ├── android/                    # Native Android platform layer & Alarm receivers
 │   └── app/src/main/kotlin/    # MainActivity.kt, NoteKarAppWidgetProvider.kt
+├── assets/fonts/               # Bundled authentic Bebas Neue tall chronometer font
+├── fastlane/metadata/          # Structured Play Store metadata and changelogs
 ├── lib/
-│   ├── dialogs/                # Apple HIG modal bottom sheets & dialogs
+│   ├── dialogs/                # Apple HIG modal bottom sheets, Life Audit & changelog dialogs
 │   │   └── settings/           # 24 modular settings pages (Bridges, Backups, Icons, etc.)
-│   ├── l10n/                   # ARB translation files & static multilingual dictionaries
+│   ├── l10n/                   # 7 offline locales (EN, HI, ES, FR, DE, JA, RU) & ARB files
 │   ├── models/                 # Domain models (Moment, Palette, SobrietyTheme, Backup)
 │   ├── screens/                # Core views (NoteKarHome, WelcomeScreen)
 │   ├── services/               # Decoupled services (NotificationEngine, UpdateService)
-│   ├── utils/                  # Cryptography, moment repository, and sync services
-│   └── widgets/                # Reusable UI widgets (PressableScale, IosPillToast, Glass)
+│   ├── utils/                  # Cryptography, time wastage engine, moment repository
+│   └── widgets/                # Reusable UI widgets (ClockFace, PressableScale, Glass)
+├── releases/                   # Signed release notes & distribution artifacts
 ├── versions/                   # Structured JSON version archive (changelog.json)
-└── test/                       # 100% passing unit and widget test suites
+└── test/                       # 100% passing unit, widget & sensory test suites
 ```
 
 ---

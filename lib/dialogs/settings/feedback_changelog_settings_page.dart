@@ -23,103 +23,103 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.3.3',
-    date: 'September 06, 2026',
-    edition: 'Physical Swipe Geometry & Sovereign Signal',
-    badgeColor: Color(0xFF0A84FF),
+    version: '7.4.0',
+    date: 'September 08, 2026',
+    edition: 'Life Audit & Spatial Harmony',
+    badgeColor: Color(0xFF7000FF),
     innovations: [
       (
-        title: 'Pinch-to-Density Physics',
-        category: 'SENSORY HARDWARE',
-        headline: 'Two Fingers. Infinite Depth.',
+        title: 'Life Audit & The Void',
+        category: 'EXISTENTIAL COMPASS',
+        headline: 'Every Second Accounted. The Void Revealed.',
         desc:
-            'History timeline now responds to multi-touch pinch gestures, scaling fluidly between high-information density and spacious ivory tiles with continuous tactile resistance.',
-        icon: Icons.pinch_rounded,
-        badgeColor: Color(0xFF0A84FF),
-        specs: 'Fluid Zoom · Dynamic Rail Nodes · 2x Density',
-      ),
-      (
-        title: 'Physical Swipe & Bed of Red',
-        category: 'GESTURE CRAFT',
-        headline: 'Pure Geometry. Solid Ground.',
-        desc:
-            'Swiping cards uncovers a solid red bed underneath with exact corner geometry matching the moving card, paired with the floating Dynamic Island undo capsule.',
-        icon: Icons.swipe_rounded,
-        badgeColor: Color(0xFFFF3B30),
-        specs: '100% Solid Bed · Dynamic Island · 5s Countdown Ring',
-      ),
-      (
-        title: 'Cupertino Alert Architecture',
-        category: 'APPLE HIG STANDARD',
-        headline: 'Zero Truncation. Native Dialogs.',
-        desc:
-            'All confirmation dialogs, external navigation warnings, and conflict resolvers rebuilt to native Cupertino modal standards with tactile haptic clicks.',
-        icon: Icons.chat_bubble_outline_rounded,
-        badgeColor: Color(0xFFAF52DE),
-        specs: 'Cupertino Engine · Action Stacking · Haptic Weight',
-      ),
-      (
-        title: 'Executive Intelligence Hub',
-        category: 'OFFLINE INTELLIGENCE',
-        headline: 'Circadian Clarity.',
-        desc:
-            'Grounded Daily Rhythm hourly charts, 90-day activity intensity grid, and responsive habit metrics computed entirely on-device with zero telemetry.',
-        icon: Icons.insights_rounded,
-        badgeColor: Color(0xFF34C759),
-        specs: '90-Day Matrix · Rhythm Bar Chart · 100% Offline',
-      ),
-      (
-        title: 'Official Bulletins Engine',
-        category: 'SOVEREIGN SIGNAL',
-        headline: 'Public Feed. Absolute Privacy.',
-        desc:
-            'Direct release bulletins and security advisories fetched from static GitHub releases with socket-level offline verification and 1-second activity feedback.',
-        icon: Icons.campaign_rounded,
+            'Uncompromising 24-hour conscious partition architecture confronting the cost of unaccounted time across 6 multi-horizons from today to a full solar year.',
+        icon: Icons.auto_graph_rounded,
         badgeColor: Color(0xFFFF9500),
-        specs: 'Zero Identifiers · Static JSON · Socket DNS Check',
+        specs: '24h Partitions · 6 Horizons · Seneca Reality Colophon',
+      ),
+      (
+        title: 'Spatial Bebas Neue Clock',
+        category: 'SPATIAL HARMONY',
+        headline: 'Optical Midpoint. Authentic Tall Type.',
+        desc:
+            'Chronometer face is mathematically centered within the usable viewport, paired with authentic, bundled open-source Bebas Neue tall numerals.',
+        icon: Icons.schedule_rounded,
+        badgeColor: Color(0xFF0A84FF),
+        specs: 'Usable Viewport Centered · Bebas Neue 144pt · Tabular Figures',
+      ),
+      (
+        title: 'Two-Way Session Continuity',
+        category: 'STATE ENGINE',
+        headline: 'Unbroken Focus. Zero State Loss.',
+        desc:
+            'Switch dynamically between Single and Two-Way modes mid-session without resetting stopwatch clocks, losing elapsed intervals, or dropping note state.',
+        icon: Icons.sync_alt_rounded,
+        badgeColor: Color(0xFF34C759),
+        specs: 'Live Continuity · Seamless Transition · Dual Timer Guard',
+      ),
+      (
+        title: 'WhatsApp-Grade Note Input',
+        category: 'TEXT ENGINE',
+        headline: 'Typing on Glass. Zero Latency.',
+        desc:
+            'Re-engineered note dialogue with sentence auto-capitalization, composition truncation guards, and decoupled character state updates for zero input lag.',
+        icon: Icons.edit_note_rounded,
+        badgeColor: Color(0xFFAF52DE),
+        specs: 'Zero Input Lag · Composition Safe · Sentences Capped',
+      ),
+      (
+        title: 'Smart Onboarding & 7 Locales',
+        category: 'SYSTEM ARCHITECTURE',
+        headline: 'Contextual Discovery. Global Reach.',
+        desc:
+            'Feature tours unified into onboarding, standalone unseen cards for updating users, and comprehensive 7-language offline localizations.',
+        icon: Icons.translate_rounded,
+        badgeColor: Color(0xFFFF2D55),
+        specs: '7 Offline Locales · Unseen Update Cards · Devanagari Type',
       ),
     ],
     highlights: [
       (
-        title: 'Physical Bed of Red',
+        title: 'Life Audit & The Void',
         desc:
-            'Dedicated swipe background bed matching exact card corner radii to eliminate gaps during dismiss gestures.',
-        icon: Icons.swipe_rounded,
-        tag: 'Gestures',
+            'Daily 24h partition engine confronting unaccounted hours across 6 temporal horizons.',
+        icon: Icons.auto_graph_rounded,
+        tag: 'Existential',
       ),
       (
-        title: 'Keynote What’s New Hub',
+        title: 'Spatial Bebas Neue Clock',
         desc:
-            'Standardized settings-width cards, proportional keynote badges, and refined typography without overflow.',
-        icon: Icons.auto_awesome_rounded,
+            'Optically centered usable-viewport chronometer face with authentic tall typography.',
+        icon: Icons.schedule_rounded,
         tag: 'Design',
       ),
       (
-        title: 'Sovereign Official Bulletins',
+        title: 'Two-Way Session Continuity',
         desc:
-            'Official releases and advisories notice center coupled directly with App Notices toggle and offline verification.',
-        icon: Icons.campaign_rounded,
-        tag: 'Notices',
+            'Seamless live stopwatch and note state preservation across Single and Two-Way modes.',
+        icon: Icons.sync_alt_rounded,
+        tag: 'Engine',
       ),
       (
-        title: 'Refined App Philosophy',
+        title: 'WhatsApp-Grade Note Input',
         desc:
-            'Streamlined About manifesto with focused typography and zero redundant subtitles or cluttered descriptions.',
-        icon: Icons.lightbulb_outline_rounded,
-        tag: 'Manifesto',
+            'Zero-latency text editing with sentence capitalization and composition protection.',
+        icon: Icons.edit_note_rounded,
+        tag: 'Typing',
       ),
     ],
     items: [
-      '+ Re-engineer swipe-to-delete with SwipeableCardBed matching exact 16pt/12pt card corner radii',
-      '+ Eliminate background straight-line cutouts and gaps behind sliding session and single moment cards',
-      '+ Standardize What’s New keynote hero card and innovation cards to flush settings group bounds',
-      '+ Align keynote pill tags, release edition badges, and date metadata to eliminate horizontal overflows',
-      '+ Couple Official Bulletins visibility with App Notices preference switch in Notifications & Updates',
-      '+ Add 1-second deliberate activity feedback spinner and socket-level DNS verification to bulletin checks',
-      '+ Refine App Philosophy card in About with elevated typography, removing redundant subtitle copy',
-      '+ Simplify Reset page description to minimal text and subtle warning icon',
-      '+ Update in-app guides, help FAQs, and settings search indexing for recent sovereign feature additions',
-      '* Full automated test suite coverage for physical swipe geometry, bulletins sheet, and keynote views',
+      '+ Add Life Audit time wastage engine with 24-hour conscious partitions and 6 temporal horizons',
+      '+ Implement The Cost of the Void existential metrics: Waking Days Lost and Earth Days Lost',
+      '+ Introduce Executive Dashboard Life Audit card with dynamic horizon indicators and overflow guards',
+      '+ Optically center main clock within usable viewport between top insights and bottom toolbar',
+      '+ Bundle authentic Bebas Neue tall typography for chronometer and active session countdowns',
+      '+ Guarantee Two-Way session continuity across Single and Two-Way mode toggles with zero state loss',
+      '+ Overhaul NoteDialog with WhatsApp-grade zero-lag input, sentence capitalization, and composition safety',
+      '+ Migrate feature tours from settings to onboarding, adding standalone unseen cards for updating users',
+      '+ Expand offline multilingual localizations across 7 languages (EN, HI, ES, FR, DE, JA, RU)',
+      '* Full automated test suite passing across all unit, widget, and state continuity verifications',
     ],
   );
 
@@ -266,7 +266,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'We didn’t just write features. We obsessed over how the pixels move, how the dial turns, and how the glass resonates.'
+                'NoteKar has revisioned itself. Moving beyond a minimalist clicker, NoteKar elevates into an existential compass: accounting for finite human conscious hours, confronting the cost of the unaccounted void, and perfecting sensory chronometer craft.'
                     .localized(context),
                 style: TextStyle(
                   color: p.text2,

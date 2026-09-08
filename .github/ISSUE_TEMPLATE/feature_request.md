@@ -25,7 +25,7 @@ If you have a sketch, screenshot, or reference app that demonstrates the idea, a
 <details>
 <summary><b>Device Details</b></summary>
 
-- **App Version**: <!-- e.g. v4.1.0 (212) -->
+- **App Version**: <!-- e.g. v7.4.0 (26PR0908) -->
 - **Device**: <!-- e.g. Pixel 7, Samsung Galaxy S22 -->
 - **OS**: <!-- e.g. Android 14 (API 34) -->
 

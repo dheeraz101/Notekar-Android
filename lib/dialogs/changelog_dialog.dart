@@ -27,51 +27,51 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.3.3',
-    date: 'September 06, 2026',
-    edition: 'Physical Swipe Geometry & Sovereign Signal',
-    badgeColor: Color(0xFF0A84FF),
+    version: '7.4.0',
+    date: 'September 08, 2026',
+    edition: 'Life Audit & Spatial Harmony',
+    badgeColor: Color(0xFF7000FF),
     highlights: [
       (
-        title: 'Physical Bed of Red',
+        title: 'Life Audit & The Void',
         desc:
-            'Dedicated swipe background bed matching exact card corner radii to eliminate gaps during dismiss gestures.',
-        icon: Icons.swipe_rounded,
-        tag: 'Gestures',
+            'Daily 24h partition engine confronting unaccounted hours across 6 temporal horizons.',
+        icon: Icons.auto_graph_rounded,
+        tag: 'Existential',
       ),
       (
-        title: 'Keynote What’s New Hub',
+        title: 'Spatial Bebas Neue Clock',
         desc:
-            'Standardized settings-width cards, proportional keynote badges, and refined typography without overflow.',
-        icon: Icons.auto_awesome_rounded,
+            'Optically centered usable-viewport chronometer face with authentic tall typography.',
+        icon: Icons.schedule_rounded,
         tag: 'Design',
       ),
       (
-        title: 'Sovereign Official Bulletins',
+        title: 'Two-Way Session Continuity',
         desc:
-            'Official releases and advisories notice center coupled directly with App Notices toggle and offline verification.',
-        icon: Icons.campaign_rounded,
-        tag: 'Notices',
+            'Seamless live stopwatch and note state preservation across Single and Two-Way modes.',
+        icon: Icons.sync_alt_rounded,
+        tag: 'Engine',
       ),
       (
-        title: 'Refined App Philosophy',
+        title: 'WhatsApp-Grade Note Input',
         desc:
-            'Streamlined About manifesto with focused typography and zero redundant subtitles or cluttered descriptions.',
-        icon: Icons.lightbulb_outline_rounded,
-        tag: 'Manifesto',
+            'Zero-latency text editing with sentence capitalization and composition protection.',
+        icon: Icons.edit_note_rounded,
+        tag: 'Typing',
       ),
     ],
     items: [
-      '+ Re-engineer swipe-to-delete with SwipeableCardBed matching exact 16pt/12pt card corner radii',
-      '+ Eliminate background straight-line cutouts and gaps behind sliding session and single moment cards',
-      '+ Standardize What’s New keynote hero card and innovation cards to flush settings group bounds',
-      '+ Align keynote pill tags, release edition badges, and date metadata to eliminate horizontal overflows',
-      '+ Couple Official Bulletins visibility with App Notices preference switch in Notifications & Updates',
-      '+ Add 1-second deliberate activity feedback spinner and socket-level DNS verification to bulletin checks',
-      '+ Refine App Philosophy card in About with elevated typography, removing redundant subtitle copy',
-      '+ Simplify Reset page description to minimal text and subtle warning icon',
-      '+ Update in-app guides, help FAQs, and settings search indexing for recent sovereign feature additions',
-      '* Full automated test suite coverage for physical swipe geometry, bulletins sheet, and keynote views',
+      '+ Add Life Audit time wastage engine with 24-hour conscious partitions and 6 temporal horizons',
+      '+ Implement The Cost of the Void existential metrics: Waking Days Lost and Earth Days Lost',
+      '+ Introduce Executive Dashboard Life Audit card with dynamic horizon indicators and overflow guards',
+      '+ Optically center main clock within usable viewport between top insights and bottom toolbar',
+      '+ Bundle authentic Bebas Neue tall typography for chronometer and active session countdowns',
+      '+ Guarantee Two-Way session continuity across Single and Two-Way mode toggles with zero state loss',
+      '+ Overhaul NoteDialog with WhatsApp-grade zero-lag input, sentence capitalization, and composition safety',
+      '+ Migrate feature tours from settings to onboarding, adding standalone unseen cards for updating users',
+      '+ Expand offline multilingual localizations across 7 languages (EN, HI, ES, FR, DE, JA, RU)',
+      '* Full automated test suite passing across all unit, widget, and state continuity verifications',
     ],
   );
 
