@@ -13,7 +13,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     '100% offline-first. zero trackers. zero data collection':
         '100% hors ligne. Zéro traqueur. Zéro collecte de données',
     '16-week habit activity grid': '16-Wochen-Gewohnheitsaktivitätsraster',
+    '24-hour daily partition': 'Partition quotidienne de 24h',
+    '24-hour horizon': 'Horizon de 24 heures',
     '5-4-3-2-1 grounding': '5-4-3-2-1 Erdungstechnik',
+    '6 months': '6 mois',
+    '6 weeks': '6 sem.',
+    '6-horizon trajectory': 'Trajectoire à 6 horizons',
     'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.':
         'Un rappel conscient plein écran qui transforme votre téléphone en point d\'ancrage d\'attention tout au long de la journée.',
     'a new hour has passed. take a mindful pause and reflect.':
@@ -34,6 +39,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Laden Sie ABI-optimierte Binärdateien direkt von der Release-Seite herunter.',
     'accessibility': 'Accessibilité',
     'accessibilitycategory': 'Accessibilité',
+    'accounted': 'Comptabilisé',
     'acknowledge the elapsed hour': 'Prenez conscience de l\'heure écoulée',
     'active': 'Actif',
     'active issue tracking': 'Aktives Issue-Tracking',
@@ -104,6 +110,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Armee-Elite. Jeder saubere Tag ist eine gewonnene Schlacht.',
     'at': 'um',
     'attack on titan': 'Attack on Titan',
+    'audit': 'Audit',
     'aurora': 'Aurora',
     'aurora borealis': 'Aurore boréale',
     'auto-start & background activity':
@@ -196,6 +203,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'confirm': 'Confirmer',
     'confirm delete': 'Löschen bestätigen',
     'confirm passcode': 'Code bestätigen',
+    'conscious window': 'Fenêtre consciente',
     'continue': 'Weiter',
     'continue mindfully': 'Continuer en pleine conscience',
     'continuous': 'Continu',
@@ -210,9 +218,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Sicherungsdatei konnte nicht geöffnet werden',
     'create quick local backup': 'Schnelle lokale Sicherung erstellen',
     'crimson': 'Karminrot',
+    'critical life void': 'Vide vital critique',
     'current message': 'Aktuelle Nachricht',
     'cursed spirit to satoru gojo.': 'Fluchgeist bis Satoru Gojo.',
     'custom start date': 'Benutzerdefiniertes Startdatum',
+    'daily ledger breakdown': 'Détail du journal quotidien',
     'daily neuroscience insight': 'Aperçu quotidien en neurosciences',
     'daily reminder': 'Tägliche Erinnerung',
     'daily reminder message': 'Tägliche Erinnerungsnachricht',
@@ -225,8 +235,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'data health': 'Daten-Zustand',
     'database export': 'Exportation de la base de données',
     'database integrity': 'Intégrité de la base de données',
+    'day': 'jour',
     'day of month': 'Tag des Monats',
+    'days': 'jours',
     'days of week': 'Wochentage',
+    'days total': 'jours au total',
     'death note': 'Death Note',
     'delete': 'Supprimer',
     'delete all moments?': 'Alle Momente löschen?',
@@ -254,6 +267,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'disable reduce motion first': '最初に「視覚効果を減らす」を無効にしてください',
     'disable use numbers in single?': 'Désactiver la numérotation unique ?',
     'disabled': 'Désactivé',
+    'disciplined presence': 'Présence disciplinée',
     'dismiss': 'Ignorer',
     'display': 'Affichage',
     'display & typography': 'Affichage et typographie',
@@ -269,6 +283,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'dragon ball': 'Dragon Ball',
     'e-rank sung jinwoo to shadow monarch.':
         'E-Rang Sung Jinwoo bis zum Schattenmonarchen.',
+    'earth (24h) days': 'Jours terrestres (24h)',
+    'earth (24h) days lost': 'Jours terrestres (24h) perdus',
     'east blue coby to the pirate king gol d. roger.':
         'East Blue Corby bis zum Piratenkönig Gol D. Roger.',
     'edit': 'Bearbeiten',
@@ -318,8 +334,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Lokale Sicherungsdatei konnte nicht gelesen werden',
     'faq': 'Häufige Fragen',
     'fatigue': 'Ermüdung',
+    'feature tours': 'VISITES GUIDÉES',
     'feedback': 'Commentaires',
     'feedback & bug report': 'Commentaires et rapport de bug',
+    'focus': 'Focus',
+    'food, commute & logistics': 'Repas, trajets et logistique',
     'french': 'Français',
     'frequency interval': 'Intervalle de fréquence',
     'fri': 'Fr',
@@ -331,6 +350,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'full online terms': 'Vollständige Online-Bedingungen',
     'full title & purpose': 'Vollständiger Titel & Zweck',
     'fullmetal alchemist': 'Fullmetal Alchemist',
+    'fully accounted': 'Entièrement comptabilisé',
     'german': 'Allemand',
     'get started': 'Loslegen',
     'gintama': 'Gintama',
@@ -343,6 +363,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Gloire grecque et romaine. Élevez-vous de mortel à olympien.',
     'grey matter to alien x.': 'Graue Eminenz bis Alien X.',
     'guides': 'Anleitungen',
+    'half of your mortal window slipped by without a record or dedicated session.':
+        'La moitié de votre temps conscient s\'est écoulée sans trace ni session.',
     'happy': 'Glücklich',
     'hardware security': 'Sécurité matérielle',
     'hardware-backed encryption': 'Hardware-gestützte Verschlüsselung',
@@ -358,11 +380,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'hold for notes': 'Maintenir pour les notes',
     'hour': 'Stunde',
     'hourly mindfulness': 'Pleine conscience horaire',
-    'hours': 'Stunden',
+    'hours': 'heures',
     'how to use it effectively': 'Comment l\'utiliser efficacement',
     'html editor to turing award winner.':
         'HTML-Editor bis zum Turing-Preisträger.',
     'hunter x hunter': 'Hunter x Hunter',
+    'if you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.':
+        'Sans sessions délibérées, vos heures conscientes sont considérées comme perdues dans le vide.',
     'imperial': 'Kaiserlich',
     'imperial gold': 'Or impérial',
     'import backup': 'Sicherung importieren',
@@ -381,6 +405,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'integrity check failed: checksum mismatch':
         'Integritätsprüfung fehlgeschlagen: Prüfsummenfehler',
     'intelligent risk radar': 'Radar intelligent des risques',
+    'interactive baseline controls': 'Contrôles interactifs',
+    'interactive onboarding walkthrough of the life audit time wastage system':
+        'Visite interactive du système de gaspillage de temps et d\'audit de vie',
     'invalid backup file': 'Ungültige Sicherungsdatei',
     'is notekar private?': 'Ist NoteKar privat?',
     'is notekar safe to use?': 'Ist NoteKar sicher zu verwenden?',
@@ -400,6 +427,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'legal & open source notices': 'Avis légaux et open source',
     'less': 'Moins',
     'licenses': 'Lizenzen',
+    'life audit': 'Audit de vie',
+    'life audit tour': 'Visite de l\'audit de vie',
+    'life audit: unaccounted time': 'Audit de vie : Temps perdu',
     'light': 'Clair',
     'limited connectivity': 'Begrenzte Verbindung',
     'link copied': 'Link kopiert',
@@ -418,11 +448,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'log current moment': 'Enregistrer le moment actuel',
     'logging': 'Enregistrement',
     'logging reminders': 'Protokoll-Erinnerungen',
+    'logistics': 'Logistique',
     'logs': 'Protokolle',
     'loneliness': 'Einsamkeit',
     'lonely': 'Einsam',
     'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.':
         'Revisitez les 60 dernières minutes avec bienveillance. Avez-vous agi avec intention ou le temps a-t-il filé ? La prise de conscience est la première étape vers la liberté.',
+    'lost': 'perdu',
     'magikarp to the creator god arceus.':
         'Karpador bis zum Schöpfergott Arceus.',
     'manage': 'Verwalten',
@@ -459,6 +491,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'monthly reminder message': 'Monatliche Erinnerungsnachricht',
     'more': 'Plus',
     'morning': 'Morgen',
+    'mortal horizons': 'HORIZONS MORTELS',
     'motion sensor unavailable': 'Bewegungssensor nicht verfügbar',
     'muggle to merlin.': 'Muggel bis Merlin.',
     'murata to yoriichi tsugikuni.': 'Murata bis Yoriichi Tsugikuni.',
@@ -644,7 +677,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'shinpachi to utsuro.': 'Shinpachi bis Utsuro.',
     'shirley to emperor lelouch vi britannia.':
         'Shirley bis Kaiser Lelouch vi Britannia.',
+    'show all': 'Tout afficher',
     'show more': 'Mehr anzeigen',
+    'show recent 7 days': 'Afficher les 7 derniers jours',
     'show seconds': 'Afficher les secondes',
     'shows 00–99 counters instead of static icons in history.':
         'Zeigt 00–99 Zähler anstelle von statischen Symbolen im Verlauf an.',
@@ -655,6 +690,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'single mode': 'Einzel-Modus',
     'single moment numbering': 'Numérotation des moments uniques',
     'skip': 'Überspringen',
+    'sleep': 'Sommeil',
+    'sleep & rest': 'Sommeil et repos',
     'smaller, optimized apks': 'Kleinere, optimierte APKs',
     'smart bandwidth saver': 'Économiseur intelligent de bande passante',
     'sobriety companion': 'Compagnon de sobriété',
@@ -690,6 +727,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'stressed': 'Gestresst',
     'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.':
         'Reichen Sie Fehlerberichte und Feature-Wünsche direkt im neuen Issue-Tracker ein.',
+    'substantial mortal drift': 'Dérive temporelle notable',
     'suggest a new idea or improvement.':
         'Schlagen Sie eine neue Idee oder Verbesserung vor.',
     'sun': 'So',
@@ -728,8 +766,10 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Alerte de test dans 3s : verrouillez votre téléphone pour tester l\'alarme plein écran !',
     'test full-screen alarm alert': 'Tester l\'alerte d\'alarme plein écran',
     'test now': 'Tester maintenant',
+    'the cost of the void': 'Le coût du vide',
     'the current features on this page are under beta stage.':
         'Les fonctionnalités actuelles de cette page sont en phase bêta.',
+    'the stoic reality': 'LA RÉALITÉ STOÏCIENNE',
     'theme': 'Thème',
     'theme description': 'Themenbeschreibung',
     'theme mode': 'Design-Modus',
@@ -831,8 +871,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'vinland saga': 'Vinland Saga',
     'virustotal safety scan': 'VirusTotal-Sicherheitsüberprüfung',
     'virustotal scan': 'Analyse VirusTotal',
+    'visceral days lost': 'Jours perdus concrets',
+    'void': 'Vide',
     'vt report': 'VirusTotal-Bericht',
+    'waking days lost': 'Jours éveillés perdus',
+    'waking days void': 'j. éveillés vides',
     'warrior': 'Krieger',
+    'wasted': 'Perdu',
     'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:':
         'Wir haben unsere Codebasis offiziell verlegt. Alle zukünftigen Releases werden hier verwaltet:',
     'wed': 'Mi',
@@ -860,6 +905,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Holzschaufel bis zum Gott des Kreativmodus.',
     'yamcha to the omni-king zeno.': 'Yamchu bis zum Allkönig Zeno.',
     'yoki to the ultimate truth.': 'Yoki bis zur ultimativen Wahrheit.',
+    'you are commanding your conscious hours with intention and discipline.':
+        'Vous maîtrisez vos heures conscientes avec intention et rigueur.',
     'you are up to date': 'Sie sind auf dem neuesten Stand',
     'your clean streak is active and running.':
         'Ihre Serie ist aktiv und läuft.',
@@ -870,6 +917,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'your privacy matters': 'Ihre Privatsphäre ist wichtig',
     'zero telemetry & offline integrity':
         'Zéro télémétrie et intégrité hors ligne',
+    '“it is not that we have a short time to live, but that we waste a lot of it. life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”':
+        '« Ce n’est pas que nous disposions de peu de temps, c’est plutôt que nous en perdons beaucoup. »',
   },
   'es': {
     '* have suggestions or found a bug?':
@@ -881,7 +930,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     '100% offline integrity': 'Integridad 100% sin conexión',
     '16-week habit activity grid':
         'Cuadrícula de actividad de hábitos de 16 semanas',
+    '24-hour daily partition': 'División diaria de 24 horas',
+    '24-hour horizon': 'Horizonte de 24 horas',
     '5-4-3-2-1 grounding': 'Técnica de anclaje 5-4-3-2-1',
+    '6 months': '6 meses',
+    '6 weeks': '6 sem.',
+    '6-horizon trajectory': 'Trayectoria de 6 horizontes',
     '8 luxury app icon editions': '8 ediciones de iconos de lujo',
     'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.':
         'Un recordatorio consciente en pantalla completa que convierte tu teléfono en un ancla de atención durante el día.',
@@ -897,6 +951,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'accept': 'Aceptar',
     'access split-per-abi optimized binaries and google play appbundles directly from the release page.':
         'Acceda a binarios optimizados por ABI y Google Play AppBundles directamente desde la página de lanzamiento.',
+    'accounted': 'Registrado',
     'acknowledge the elapsed hour': 'Reconoce la hora transcurrida',
     'active': 'Activo',
     'active issue tracking': 'Seguimiento de problemas activo',
@@ -968,6 +1023,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'attach context without slowing the app down.':
         'Añade contexto sin ralentizar la aplicación.',
     'attack on titan': 'Ataque a los Titanes',
+    'audit': 'Auditar',
     'aurora borealis': 'Aurora Boreal',
     'auto-start & background activity':
         'Inicio automático y actividad en segundo plano',
@@ -1042,6 +1098,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'configure a dedicated 4-digit passcode.':
         'Configura un código de acceso dedicado de 4 dígitos.',
     'confirm passcode': 'Confirmar código de acceso',
+    'conscious window': 'Ventana consciente',
     'continue': 'Continuar',
     'continue mindfully': 'Continuar conscientemente',
     'continuous': 'Continuo',
@@ -1055,9 +1112,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'could not open backup file': 'No se pudo abrir el archivo de respaldo',
     'count on save': 'Contador al guardar',
     'create quick local backup': 'Crear copia de seguridad local rápida',
+    'critical life void': 'Vacío vital crítico',
     'current message': 'Mensaje actual',
     'cursed spirit to satoru gojo.': 'De espíritu maldito a Satoru Gojo.',
     'custom start date': 'Fecha de Inicio Personalizada',
+    'daily ledger breakdown': 'Desglose del diario',
     'daily logging reminder': 'Recordatorio de registro diario',
     'daily neuroscience insight': 'Información diaria de neurociencia',
     'daily reminder': 'Recordatorio diario',
@@ -1070,8 +1129,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'data health': 'Salud de datos',
     'database export': 'Exportación de base de datos',
     'database integrity': 'Integridad de la base de datos',
+    'day': 'día',
     'day of month': 'Día del mes',
+    'days': 'días',
     'days of week': 'Días de la semana',
+    'days total': 'días en total',
     'death note': 'Death Note',
     'delete all moments?': '¿Eliminar todos los momentos?',
     'delete backup?': '¿Eliminar copia de seguridad?',
@@ -1097,6 +1159,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'disable use numbers in single?':
         '¿Desactivar numeración en modo individual?',
     'disabled': 'Desactivado',
+    'disciplined presence': 'Presencia disciplinada',
     'dismiss': 'Descartar',
     'display & typography': 'Pantalla y tipografía',
     'docs': 'Documentación',
@@ -1109,6 +1172,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'dragon ball': 'Dragon Ball',
     'e-rank sung jinwoo to shadow monarch.':
         'De Sung Jinwoo de rango E al Monarca de las Sombras.',
+    'earth (24h) days': 'Días terrestres (24h)',
+    'earth (24h) days lost': 'Días terrestres (24h) perdidos',
     'east blue coby to the pirate king gol d. roger.':
         'De Coby del East Blue al Rey de los Piratas Gol D. Roger.',
     'edit message': 'Editar mensaje',
@@ -1155,8 +1220,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Error al leer archivo de respaldo local',
     'faq': 'Preguntas frecuentes',
     'fatigue': 'Fatiga',
+    'feature tours': 'RECORRIDOS GUIADOS',
     'feedback': 'Comentarios',
     'feedback & bug report': 'Comentarios y reporte de errores',
+    'focus': 'Enfoque',
+    'food, commute & logistics': 'Comida, trayectos y logística',
     'frequency interval': 'Intervalo de frecuencia',
     'fri': 'Vie',
     'friday': 'Viernes',
@@ -1167,6 +1235,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'full online terms': 'Términos online completos',
     'full title & purpose': 'Título completo y propósito',
     'fullmetal alchemist': 'Fullmetal Alchemist',
+    'fully accounted': 'Completamente registrado',
     'get started': 'Comenzar',
     'gintama': 'Gintama',
     'github': 'GitHub',
@@ -1176,6 +1245,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'grant permission': 'Conceder permiso',
     'grey matter to alien x.': 'De Materia Gris a Alien X.',
     'guides': 'Guías',
+    'half of your mortal window slipped by without a record or dedicated session.':
+        'La mitad de tu tiempo consciente pasó sin registro ni sesión.',
     'happy': 'Feliz',
     'hardware security': 'Seguridad de hardware',
     'hardware-backed encryption': 'Cifrado por hardware',
@@ -1193,6 +1264,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'html editor to turing award winner.':
         'De editor HTML a ganador del Premio Turing.',
     'hunter x hunter': 'Hunter x Hunter',
+    'if you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.':
+        'Si no registras tus horas conscientes con sesiones deliberadas, ese tiempo se pierde en el vacío.',
     'imperial gold': 'Oro Imperial',
     'import backup': 'Importar copia',
     'import cancelled': 'Importación cancelada',
@@ -1211,6 +1284,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'integrity check failed: checksum mismatch':
         'Fallo de integridad: suma de verificación no coincide',
     'intelligent risk radar': 'Radar de riesgo inteligente',
+    'interactive baseline controls': 'Controles interactivos',
+    'interactive onboarding walkthrough of the life audit time wastage system':
+        'Recorrido interactivo del sistema de auditoría y pérdida de tiempo',
     'invalid backup file': 'Archivo de respaldo no válido',
     'is notekar private?': '¿Es NoteKar privado?',
     'is notekar safe to use?': '¿Es seguro usar NoteKar?',
@@ -1227,6 +1303,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'legal & open source notices': 'Avisos legales y de código abierto',
     'less': 'Menos',
     'licenses': 'Licencias',
+    'life audit': 'Auditoría de vida',
+    'life audit tour': 'Recorrido de auditoría de vida',
+    'life audit: unaccounted time': 'Auditoría de vida: Tiempo perdido',
     'limited connectivity': 'Conectividad limitada',
     'link copied': 'Enlace copiado',
     'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.':
@@ -1244,11 +1323,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'logging': 'Registro',
     'logging reminder': 'Recordatorio de registro',
     'logging reminders': 'Recordatorios de registro',
+    'logistics': 'Logística',
     'logs': 'Registros',
     'loneliness': 'Soledad',
     'lonely': 'Solitario',
     'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.':
         'Mira hacia atrás a los últimos 60 minutos con amabilidad. ¿Los viviste con intención o el tiempo se esfumó? La conciencia es el primer paso.',
+    'lost': 'perdido',
     'magikarp to the creator god arceus.':
         'De Magikarp al dios creador Arceus.',
     'manage': 'Administrar',
@@ -1281,6 +1362,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'monthly reminder message': 'Mensaje de recordatorio mensual',
     'more': 'Más',
     'morning': 'Mañana',
+    'mortal horizons': 'HORIZONTES MORTALES',
     'motion sensor unavailable': 'Sensor de movimiento no disponible',
     'muggle to merlin.': 'De Muggle a Merlín.',
     'murata to yoriichi tsugikuni.': 'De Murata a Yoriichi Tsugikuni.',
@@ -1440,7 +1522,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'shinpachi to utsuro.': 'De Shinpachi a Utsuro.',
     'shirley to emperor lelouch vi britannia.':
         'De Shirley al Emperador Lelouch vi Britannia.',
+    'show all': 'Mostrar todos',
     'show more': 'Mostrar más',
+    'show recent 7 days': 'Mostrar últimos 7 días',
     'show seconds': 'Mostrar segundos',
     'shows sequential numbers (00, 01...) on the tap pulse animation.':
         'Muestra números secuenciales (00, 01...) en la animación de pulsación.',
@@ -1448,6 +1532,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'single': 'Individual',
     'single mode': 'Modo único',
     'single moment numbering': 'Numeración de momentos individuales',
+    'sleep': 'Sueño',
+    'sleep & rest': 'Sueño y descanso',
     'smaller, optimized apks': 'APKs más pequeñas y optimizadas',
     'smart bandwidth saver': 'Ahorro inteligente de datos',
     'sobriety companion': 'Compañero de Sobriedad',
@@ -1481,6 +1567,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'stressed': 'Estresado',
     'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.':
         'Envíe informes de errores, solicitudes de funciones y siga los cambios de código directamente en el nuevo rastreador de problemas.',
+    'substantial mortal drift': 'Deriva vital sustancial',
     'suggest a new idea or improvement.': 'Sugiere una nueva idea o mejora.',
     'sun': 'Dom',
     'sunday': 'Domingo',
@@ -1510,8 +1597,10 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'test full-screen alarm alert':
         'Probar alerta de alarma en pantalla completa',
     'test now': 'Probar ahora',
+    'the cost of the void': 'El costo del vacío',
     'the current features on this page are under beta stage.':
         'Las funciones actuales de esta página están en fase Beta.',
+    'the stoic reality': 'LA REALIDAD ESTOICA',
     'theme': 'Tema',
     'theme description': 'Descripción del tema',
     'theme mode': 'Modo de tema',
@@ -1606,8 +1695,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'vinland saga': 'Vinland Saga',
     'virustotal safety scan': 'Escaneo de seguridad de VirusTotal',
     'virustotal scan': 'Análisis de VirusTotal',
+    'visceral days lost': 'Días reales perdidos',
+    'void': 'Vacío',
     'vt report': 'Informe de VT',
+    'waking days lost': 'Días activos perdidos',
+    'waking days void': 'd. activos perdidos',
     'warrior': 'Guerrero',
+    'wasted': 'Perdido',
     'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:':
         'Hemos migrado oficialmente nuestro código base a un nuevo hogar. Todos los lanzamientos, actualizaciones y problemas futuros se gestionarán aquí:',
     'wed': 'Mié',
@@ -1635,6 +1729,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'De pala de madera a dios del modo creativo.',
     'yamcha to the omni-king zeno.': 'De Yamcha al Rey de Todo Zeno.',
     'yoki to the ultimate truth.': 'De Yoki a la Verdad última.',
+    'you are commanding your conscious hours with intention and discipline.':
+        'Dominas tus horas conscientes con intención y disciplina.',
     'you are up to date': 'Estás al día',
     'your clean streak is active and running.':
         'Tu racha limpia está activa y en marcha.',
@@ -1645,6 +1741,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'your privacy matters': 'Tu privacidad importa',
     'zero telemetry & offline integrity':
         'Cero telemetría e integridad sin conexión',
+    '“it is not that we have a short time to live, but that we waste a lot of it. life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”':
+        '«No tenemos poco tiempo, sino que perdemos mucho. La vida es larga si se sabe aprovechar.»',
   },
   'hi': {
     '* have suggestions or found a bug?':
@@ -1655,7 +1753,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     '100% offline database': '100% ऑफ़लाइन डेटाबेस',
     '100% offline integrity': '100% ऑफलाइन अखंडता',
     '16-week habit activity grid': '16-सप्ताह की आदत गतिविधि ग्रिड',
+    '24-hour daily partition': '24 घंटे का दैनिक विभाजन',
+    '24-hour horizon': '24 घंटे का क्षितिज',
     '5-4-3-2-1 grounding': '5-4-3-2-1 ग्राउंडिंग तकनीक',
+    '6 months': '6 महीने',
+    '6 weeks': '6 सप्ताह',
+    '6-horizon trajectory': '6 अवधियों का विश्लेषण',
     '8 luxury app icon editions': '8 लक्जरी ऐप आइकन संस्करण',
     'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.':
         'एक पूर्ण-स्क्रीन माइंडफुल रिमाइंडर जो आपके फ़ोन को दिन भर सचेत रहने का एक आधार बना देता है।',
@@ -1671,6 +1774,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'accept': 'स्वीकार करें',
     'access split-per-abi optimized binaries and google play appbundles directly from the release page.':
         'रिलीज़ पेज से सीधे स्प्लिट-प्रति-एबीआई अनुकूलित बायनेरिज़ और गूगल प्ले ऐपबंडल प्राप्त करें।',
+    'accounted': 'सार्थक',
     'acknowledge the elapsed hour': 'बीते घंटे को स्वीकारें',
     'active': 'सक्रिय',
     'active issue tracking': 'सक्रिय समस्या ट्रैकिंग',
@@ -1740,6 +1844,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'attach context without slowing the app down.':
         'ऐप को धीमा किए बिना संदर्भ जोड़ें।',
     'attack on titan': 'अटैक ऑन टाइटन',
+    'audit': 'ऑडिट',
     'aurora borealis': 'ऑरोरा बोरियालिस',
     'auto-start & background activity': 'ऑटो-स्टार्ट और बैकग्राउंड गतिविधि',
     'automated security scans': 'स्वचालित सुरक्षा स्कैन',
@@ -1812,6 +1917,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'configure a dedicated 4-digit passcode.':
         'एक समर्पित 4-अंकीय पासकोड कॉन्फ़िगर करें।',
     'confirm passcode': 'पासकोड की पुष्टि करें',
+    'conscious window': 'जागृत समय',
     'continue': 'जारी रखें',
     'continue mindfully': 'सचेत होकर जारी रखें',
     'continuous': 'निरंतर',
@@ -1825,9 +1931,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'could not open backup file': 'बैकअप फ़ाइल नहीं खोली जा सकी',
     'count on save': 'सहेजने पर गिनती',
     'create quick local backup': 'त्वरित स्थानीय बैकअप बनाएं',
+    'critical life void': 'गंभीर जीवन शून्यता',
     'current message': 'वर्तमान संदेश',
     'cursed spirit to satoru gojo.': 'शापित आत्मा से सटोरू गोजो तक।',
     'custom start date': 'कस्टम प्रारंभ तिथि',
+    'daily ledger breakdown': 'दैनिक ब्योरा',
     'daily logging reminder': 'दैनिक लॉगिंग अनुस्मारक',
     'daily neuroscience insight': 'दैनिक न्यूरोसाइंस अंतर्दृष्टि',
     'daily reminder': 'दैनिक अनुस्मारक',
@@ -1840,8 +1948,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'data health': 'डेटा स्वास्थ्य',
     'database export': 'डेटाबेस निर्यात',
     'database integrity': 'डेटाबेस अखंडता',
+    'day': 'दिन',
     'day of month': 'महीने का दिन',
+    'days': 'दिन',
     'days of week': 'सप्ताह के दिन',
+    'days total': 'कुल दिन',
     'death note': 'डेथ नोट',
     'delete all moments?': 'क्या सभी क्षण हटाएं?',
     'delete backup?': 'क्या बैकअप हटाएं?',
@@ -1867,6 +1978,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'disable use numbers in single?':
         'क्या सिंगल में नंबर का उपयोग अक्षम करें?',
     'disabled': 'अक्षम',
+    'disciplined presence': 'अनुशासित उपस्थिति',
     'dismiss': 'खारिज करें',
     'display & typography': 'प्रदर्शन और टाइपोग्राफी',
     'docs': 'दस्तावेज़',
@@ -1879,6 +1991,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'dragon ball': 'ड्रैगन बॉल',
     'e-rank sung jinwoo to shadow monarch.':
         'ई-रैंक सुंग जिनवू से शैडो मोनार्क तक।',
+    'earth (24h) days': '24 घंटे के दिन',
+    'earth (24h) days lost': '24 घंटे के दिन नष्ट',
     'east blue coby to the pirate king gol d. roger.':
         'ईस्ट ब्लू कोबी से समुद्री डाकू राजा गोल डी. रोजर तक।',
     'edit message': 'संदेश संपादित करें',
@@ -1924,8 +2038,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'failed to read local backup file': 'स्थानीय बैकअप फ़ाइल पढ़ने में विफल',
     'faq': 'अक्सर पूछे जाने वाले प्रश्न',
     'fatigue': 'थकान',
+    'feature tours': 'फीचर टूर',
     'feedback': 'प्रतिक्रिया',
     'feedback & bug report': 'प्रतिक्रिया और बग रिपोर्ट',
+    'focus': 'फोकस',
+    'food, commute & logistics': 'भोजन, यात्रा व दिनचर्या',
     'frequency interval': 'आवृत्ति अंतराल',
     'fri': 'शुक्र',
     'friday': 'शुक्रवार',
@@ -1936,6 +2053,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'full online terms': 'पूर्ण ऑनलाइन शर्तें',
     'full title & purpose': 'पूरा शीर्षक और उद्देश्य',
     'fullmetal alchemist': 'फुलमेटल अल्केमिस्ट',
+    'fully accounted': 'पूर्णतः सार्थक',
     'get started': 'शुरू करें',
     'gintama': 'गिंटामा',
     'github': 'GitHub',
@@ -1945,6 +2063,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'grant permission': 'अनुमति दें',
     'grey matter to alien x.': 'ग्रे मैटर से एलियन एक्स तक।',
     'guides': 'गाइड',
+    'half of your mortal window slipped by without a record or dedicated session.':
+        'आपका आधा जागृत समय बिना किसी सत्र या रिकॉर्ड के बीत गया।',
     'happy': 'खुश',
     'hardware security': 'हार्डवेयर सुरक्षा',
     'hardware-backed encryption': 'हार्डवेयर-समर्थित एन्क्रिप्शन',
@@ -1962,6 +2082,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'html editor to turing award winner.':
         'HTML संपादक से ट्यूरिंग पुरस्कार विजेता तक।',
     'hunter x hunter': 'हंटर एक्स हंटर',
+    'if you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.':
+        'यदि आप सचेत सत्रों से अपने जागृत समय का हिसाब नहीं रखते, तो वह समय व्यर्थ माना जाता है।',
     'imperial gold': 'इंपीरियल गोल्ड',
     'import backup': 'बैकअप आयात करें',
     'import cancelled': 'आयात रद्द किया गया',
@@ -1979,6 +2101,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'integrity check failed: checksum mismatch':
         'अखंडता जांच विफल: चेकसम बेमेल',
     'intelligent risk radar': 'इंटेलिजेंट रिस्क रडार',
+    'interactive baseline controls': 'इंटरैक्टिव नियंत्रण',
+    'interactive onboarding walkthrough of the life audit time wastage system':
+        'लाइफ ऑडिट और समय व्यर्थता प्रणाली का इंटरैक्टिव टूर',
     'invalid backup file': 'अमान्य बैकअप फ़ाइल',
     'is notekar private?': 'क्या NoteKar निजी है?',
     'is notekar safe to use?': 'क्या NoteKar उपयोग करने के लिए सुरक्षित है?',
@@ -1994,6 +2119,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'legal & open source notices': 'कानूनी और ओपन सोर्स नोटिस',
     'less': 'कम',
     'licenses': 'लाइसेंस',
+    'life audit': 'लाइफ ऑडिट',
+    'life audit tour': 'लाइफ ऑडिट टूर',
+    'life audit: unaccounted time': 'लाइफ ऑडिट: अनहिसाबी समय',
     'limited connectivity': 'सीमित कनेक्टिविटी',
     'link copied': 'लिंक कॉपी किया गया',
     'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.':
@@ -2010,11 +2138,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'logging': 'लॉगिंग',
     'logging reminder': 'लॉगिंग अनुस्मारक',
     'logging reminders': 'लॉगिंग अनुस्मारक',
+    'logistics': 'दैनिक कार्य',
     'logs': 'लॉग्स',
     'loneliness': 'अकेलापन',
     'lonely': 'अकेला',
     'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.':
         'पिछले 60 मिनट को बिना किसी पछतावे के देखें। क्या आपने समय का सही उपयोग किया, या वह बीत गया? जागरूकता ही स्वतंत्रता का पहला कदम है।',
+    'lost': 'नष्ट',
     'magikarp to the creator god arceus.':
         'मैजिकारप से निर्माता भगवान आर्सियस तक।',
     'manage': 'प्रबंधित करें',
@@ -2048,6 +2178,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'monthly reminder message': 'मासिक अनुस्मारक संदेश',
     'more': 'अधिक',
     'morning': 'सुबह',
+    'mortal horizons': 'जीवन क्षितिज',
     'motion sensor unavailable': 'गति संवेदक अनुपलब्ध',
     'muggle to merlin.': 'मगल से मर्लिन तक।',
     'murata to yoriichi tsugikuni.': 'मुराता से योरीइची सुगिकुनी तक।',
@@ -2207,7 +2338,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'shinpachi to utsuro.': 'शिनपाची से उत्सुरो तक।',
     'shirley to emperor lelouch vi britannia.':
         'शर्ली से सम्राट लेलौच वी ब्रिटानिया तक।',
+    'show all': 'सभी दिखाएं',
     'show more': 'अधिक दिखाएं',
+    'show recent 7 days': 'हाल के 7 दिन दिखाएं',
     'show seconds': 'सेकंड दिखाएं',
     'shows sequential numbers (00, 01...) on the tap pulse animation.':
         'टैप पल्स एनिमेशन पर अनुक्रमिक संख्याएं (00, 01...) दिखाता है।',
@@ -2215,6 +2348,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'single': 'सिंगल',
     'single mode': 'सिंगल मोड',
     'single moment numbering': 'सिंगल मोमेंट नंबरिंग',
+    'sleep': 'नींद',
+    'sleep & rest': 'नींद व विश्राम',
     'smaller, optimized apks': 'छोटे, अनुकूलित एपीके',
     'smart bandwidth saver': 'स्मार्ट बैंडविड्थ सेवर',
     'sobriety companion': 'संयम साथी',
@@ -2247,6 +2382,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'stressed': 'तनावग्रस्त',
     'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.':
         'सीधे नए रिपॉजिटरी इशू ट्रैकर में बग रिपोर्ट, फीचर अनुरोध सबमिट करें और कोड परिवर्तनों का पालन करें।',
+    'substantial mortal drift': 'पर्याप्त समय क्षरण',
     'suggest a new idea or improvement.': 'एक नया विचार या सुधार सुझाएं।',
     'sun': 'रवि',
     'sunday': 'रविवार',
@@ -2276,8 +2412,10 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'test full-screen alarm alert':
         'पूर्ण-स्क्रीन अलार्म चेतावनी का परीक्षण करें',
     'test now': 'अभी परीक्षण करें',
+    'the cost of the void': 'व्यर्थ समय की लागत',
     'the current features on this page are under beta stage.':
         'इस पृष्ठ की वर्तमान विशेषताएं बीटा चरण में हैं।',
+    'the stoic reality': 'स्टोइक यथार्थ',
     'theme': 'थीम',
     'theme description': 'थीम विवरण',
     'theme mode': 'थीम मोड',
@@ -2372,8 +2510,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'vinland saga': 'विनलैंड सागा',
     'virustotal safety scan': 'VirusTotal सुरक्षा स्कैन',
     'virustotal scan': 'VirusTotal स्कैन',
+    'visceral days lost': 'प्रत्यक्ष नष्ट दिन',
+    'void': 'व्यर्थ',
     'vt report': 'VT रिपोर्ट',
+    'waking days lost': 'जागृत दिन नष्ट',
+    'waking days void': 'जागृत दिन नष्ट',
     'warrior': 'योद्धा',
+    'wasted': 'नष्ट',
     'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:':
         'हमने आधिकारिक तौर पर अपने कोडबेस को एक नए घर में स्थानांतरित कर दिया है। सभी भविष्य के रिलीज, अपडेट और मुद्दे यहां प्रबंधित किए जाएंगे:',
     'wed': 'बुध',
@@ -2401,6 +2544,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'लकड़ी के बेलचे से क्रिएटिव मोड गॉड तक।',
     'yamcha to the omni-king zeno.': 'यामचा से ओम्नी-किंग ज़ेनो तक।',
     'yoki to the ultimate truth.': 'योकी से परम सत्य तक।',
+    'you are commanding your conscious hours with intention and discipline.':
+        'आप अपने जागृत समय को संकल्प और अनुशासन से संचालित कर रहे हैं।',
     'you are up to date': 'आप अप टू डेट हैं',
     'your clean streak is active and running.':
         'आपकी संयम यात्रा सक्रिय रूप से चल रही है।',
@@ -2410,6 +2555,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'आपकी होम स्क्रीन मील के पत्थर के बैज के साथ एक लाइव संयम कार्ड दिखाएगी। होम विजेट रीसेट और डायरी बटन दिखाने के लिए अनुकूलित हो जाएगा।',
     'your privacy matters': 'आपकी गोपनीयता मायने रखती है',
     'zero telemetry & offline integrity': 'शून्य टेलीमेट्री और ऑफ़लाइन अखंडता',
+    '“it is not that we have a short time to live, but that we waste a lot of it. life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”':
+        '«हमारे पास जीवन कम नहीं है, बल्कि हम इसका बहुत सा हिस्सा व्यर्थ गंवा देते हैं।»',
   },
   'de': {
     '* have suggestions or found a bug?':
@@ -2422,7 +2569,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     '100% offline-first. zero trackers. zero data collection':
         '100% Offline-First. Keine Tracker. Keine Datenerfassung',
     '16-week habit activity grid': '16-Wochen-Gewohnheitsaktivitätsraster',
+    '24-hour daily partition': '24-Stunden-Tagesaufteilung',
+    '24-hour horizon': '24-Stunden-Horizont',
     '5-4-3-2-1 grounding': '5-4-3-2-1 Erdungstechnik',
+    '6 months': '6 Mo.',
+    '6 weeks': '6 Wo.',
+    '6-horizon trajectory': '6-Horizonte-Entwicklung',
     '8 luxury app icon editions': '8 Luxus-App-Icon-Editionen',
     'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.':
         'Eine achtsame Vollbild-Erinnerung, die dein Smartphone über den Tag in einen Anker für Aufmerksamkeit verwandelt.',
@@ -2442,6 +2594,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Laden Sie ABI-optimierte Binärdateien direkt von der Release-Seite herunter.',
     'accessibility': 'Bedienungshilfen',
     'accessibilitycategory': 'Bedienungshilfen',
+    'accounted': 'Erfasst',
     'acknowledge the elapsed hour': 'Vergangene Stunde anerkennen',
     'active': 'Aktiv',
     'active issue tracking': 'Aktives Issue-Tracking',
@@ -2518,6 +2671,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'attach context without slowing the app down.':
         'Fügen Sie Kontext hinzu, ohne die App zu verlangsamen.',
     'attack on titan': 'Attack on Titan',
+    'audit': 'Audit',
     'aurora': 'Aurora',
     'aurora borealis': 'Nordlicht (Aurora)',
     'auto-start & background activity': 'Autostart & Hintergrundaktivität',
@@ -2609,6 +2763,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'confirm': 'Bestätigen',
     'confirm delete': 'Löschen bestätigen',
     'confirm passcode': 'Code bestätigen',
+    'conscious window': 'Bewusstes Zeitfenster',
     'continue': 'Weiter',
     'continue mindfully': 'Achtsam fortfahren',
     'continuous': 'Fortlaufend',
@@ -2624,9 +2779,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'count on save': 'Zähler beim Speichern',
     'create quick local backup': 'Schnelle lokale Sicherung erstellen',
     'crimson': 'Karminrot',
+    'critical life void': 'Kritische Lebensleere',
     'current message': 'Aktuelle Nachricht',
     'cursed spirit to satoru gojo.': 'Fluchgeist bis Satoru Gojo.',
     'custom start date': 'Benutzerdefiniertes Startdatum',
+    'daily ledger breakdown': 'Tägliche Übersicht',
     'daily logging reminder': 'Tägliche Protokoll-Erinnerung',
     'daily neuroscience insight': 'Täglicher Neurowissenschafts-Einblick',
     'daily reminder': 'Tägliche Erinnerung',
@@ -2639,8 +2796,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'data health': 'Daten-Zustand',
     'database export': 'Datenbank-Export',
     'database integrity': 'Datenbank-Integrität',
+    'day': 'Tag',
     'day of month': 'Tag des Monats',
+    'days': 'Tage',
     'days of week': 'Wochentage',
+    'days total': 'Tage gesamt',
     'death note': 'Death Note',
     'delete': 'Löschen',
     'delete all moments?': 'Alle Momente löschen?',
@@ -2669,6 +2829,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'disable use numbers in single?':
         'Nummerierung im Einzelmodus deaktivieren?',
     'disabled': 'Deaktiviert',
+    'disciplined presence': 'Disziplinierte Präsenz',
     'dismiss': 'Schließen',
     'display': 'Anzeige',
     'display & typography': 'Anzeige & Typografie',
@@ -2684,6 +2845,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'dragon ball': 'Dragon Ball',
     'e-rank sung jinwoo to shadow monarch.':
         'E-Rang Sung Jinwoo bis zum Schattenmonarchen.',
+    'earth (24h) days': '24h-Erden-Tage',
+    'earth (24h) days lost': '24h-Erden-Tage verloren',
     'east blue coby to the pirate king gol d. roger.':
         'East Blue Corby bis zum Piratenkönig Gol D. Roger.',
     'edit': 'Bearbeiten',
@@ -2734,8 +2897,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Lokale Sicherungsdatei konnte nicht gelesen werden',
     'faq': 'Häufige Fragen',
     'fatigue': 'Ermüdung',
+    'feature tours': 'FUNKTIONS-TOURS',
     'feedback': 'Feedback',
     'feedback & bug report': 'Feedback & Fehlerbericht',
+    'focus': 'Fokus',
+    'food, commute & logistics': 'Essen, Pendeln & Logistik',
     'frequency interval': 'Häufigkeitsintervall',
     'fri': 'Fr',
     'friday': 'Freitag',
@@ -2746,6 +2912,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'full online terms': 'Vollständige Online-Bedingungen',
     'full title & purpose': 'Vollständiger Titel & Zweck',
     'fullmetal alchemist': 'Fullmetal Alchemist',
+    'fully accounted': 'Vollständig erfasst',
     'german': 'Deutsch',
     'get started': 'Loslegen',
     'gintama': 'Gintama',
@@ -2758,6 +2925,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Griechischer und römischer Ruhm. Steige vom Sterblichen zum Olympier auf.',
     'grey matter to alien x.': 'Graue Eminenz bis Alien X.',
     'guides': 'Anleitungen',
+    'half of your mortal window slipped by without a record or dedicated session.':
+        'Die Hälfte Ihrer wachen Zeit verging ohne Eintrag oder Sitzung.',
     'happy': 'Glücklich',
     'hardware security': 'Hardware-Sicherheit',
     'hardware-backed encryption': 'Hardware-gestützte Verschlüsselung',
@@ -2777,6 +2946,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'html editor to turing award winner.':
         'HTML-Editor bis zum Turing-Preisträger.',
     'hunter x hunter': 'Hunter x Hunter',
+    'if you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.':
+        'Ohne gezielte Sitzungen gilt Ihre wache Zeit als in die Leere verloren.',
     'imperial': 'Kaiserlich',
     'imperial gold': 'Kaiserliches Gold',
     'import backup': 'Sicherung importieren',
@@ -2796,6 +2967,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'integrity check failed: checksum mismatch':
         'Integritätsprüfung fehlgeschlagen: Prüfsummenfehler',
     'intelligent risk radar': 'Intelligenter Risiko-Radar',
+    'interactive baseline controls': 'Interaktive Basiswerte',
+    'interactive onboarding walkthrough of the life audit time wastage system':
+        'Interaktive Einführung in das Lebens-Audit-System',
     'invalid backup file': 'Ungültige Sicherungsdatei',
     'is notekar private?': 'Ist NoteKar privat?',
     'is notekar safe to use?': 'Ist NoteKar sicher zu verwenden?',
@@ -2815,6 +2989,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'legal & open source notices': 'Rechtliche & Open-Source-Hinweise',
     'less': 'Weniger',
     'licenses': 'Lizenzen',
+    'life audit': 'Lebens-Audit',
+    'life audit tour': 'Lebens-Audit Tour',
+    'life audit: unaccounted time': 'Lebens-Audit: Verlorene Zeit',
     'limited connectivity': 'Begrenzte Verbindung',
     'link copied': 'Link kopiert',
     'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.':
@@ -2835,11 +3012,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'logging': 'Protokollierung',
     'logging reminder': 'Protokoll-Erinnerung',
     'logging reminders': 'Protokoll-Erinnerungen',
+    'logistics': 'Logistik',
     'logs': 'Protokolle',
     'loneliness': 'Einsamkeit',
     'lonely': 'Einsam',
     'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.':
         'Blicke voller Güte auf die letzten 60 Minuten zurück. Hast du sie bewusst genutzt oder verging die Zeit? Bewusstsein ist der erste Schritt.',
+    'lost': 'verloren',
     'magikarp to the creator god arceus.':
         'Karpador bis zum Schöpfergott Arceus.',
     'manage': 'Verwalten',
@@ -2877,6 +3056,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'monthly reminder message': 'Monatliche Erinnerungsnachricht',
     'more': 'Mehr',
     'morning': 'Morgen',
+    'mortal horizons': 'ZEITHORIZONTE',
     'motion sensor unavailable': 'Bewegungssensor nicht verfügbar',
     'muggle to merlin.': 'Muggel bis Merlin.',
     'murata to yoriichi tsugikuni.': 'Murata bis Yoriichi Tsugikuni.',
@@ -3055,7 +3235,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'shinpachi to utsuro.': 'Shinpachi bis Utsuro.',
     'shirley to emperor lelouch vi britannia.':
         'Shirley bis Kaiser Lelouch vi Britannia.',
+    'show all': 'Alle anzeigen',
     'show more': 'Mehr anzeigen',
+    'show recent 7 days': 'Letzte 7 Tage anzeigen',
     'show seconds': 'Sekunden anzeigen',
     'shows 00–99 counters instead of static icons in history.':
         'Zeigt 00–99 Zähler anstelle von statischen Symbolen im Verlauf an.',
@@ -3066,6 +3248,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'single mode': 'Einzel-Modus',
     'single moment numbering': 'Einzelmoment-Nummerierung',
     'skip': 'Überspringen',
+    'sleep': 'Schlaf',
+    'sleep & rest': 'Schlaf & Erholung',
     'smaller, optimized apks': 'Kleinere, optimierte APKs',
     'smart bandwidth saver': 'Smarter Datensparmodus',
     'sobriety companion': 'Nüchternheitsbegleiter',
@@ -3101,6 +3285,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'stressed': 'Gestresst',
     'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.':
         'Reichen Sie Fehlerberichte und Feature-Wünsche direkt im neuen Issue-Tracker ein.',
+    'substantial mortal drift': 'Erheblicher Zeitverlust',
     'suggest a new idea or improvement.':
         'Schlagen Sie eine neue Idee oder Verbesserung vor.',
     'sun': 'So',
@@ -3135,8 +3320,10 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Test-Alarm in 3s: Sperre dein Telefon, um den Vollbild-Alarm zu testen!',
     'test full-screen alarm alert': 'Vollbild-Alarmton testen',
     'test now': 'Jetzt testen',
+    'the cost of the void': 'Die Kosten der Leere',
     'the current features on this page are under beta stage.':
         'Die Funktionen auf dieser Seite befinden sich im Beta-Stadium.',
+    'the stoic reality': 'DIE STOISCHE REALITÄT',
     'theme': 'Design',
     'theme description': 'Themenbeschreibung',
     'theme mode': 'Design-Modus',
@@ -3236,8 +3423,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'vinland saga': 'Vinland Saga',
     'virustotal safety scan': 'VirusTotal-Sicherheitsüberprüfung',
     'virustotal scan': 'VirusTotal-Scan',
+    'visceral days lost': 'Spürbare Verlusttage',
+    'void': 'Leere',
     'vt report': 'VirusTotal-Bericht',
+    'waking days lost': 'Wachtage verloren',
+    'waking days void': 'Wachtage leer',
     'warrior': 'Krieger',
+    'wasted': 'Verloren',
     'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:':
         'Wir haben unsere Codebasis offiziell verlegt. Alle zukünftigen Releases werden hier verwaltet:',
     'wed': 'Mi',
@@ -3265,6 +3457,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Holzschaufel bis zum Gott des Kreativmodus.',
     'yamcha to the omni-king zeno.': 'Yamchu bis zum Allkönig Zeno.',
     'yoki to the ultimate truth.': 'Yoki bis zur ultimativen Wahrheit.',
+    'you are commanding your conscious hours with intention and discipline.':
+        'Sie nutzen Ihre wachen Stunden zielgerichtet und diszipliniert.',
     'you are up to date': 'Sie sind auf dem neuesten Stand',
     'your clean streak is active and running.':
         'Ihre Serie ist aktiv und läuft.',
@@ -3275,6 +3469,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'your privacy matters': 'Ihre Privatsphäre ist wichtig',
     'zero telemetry & offline integrity':
         'Keine Telemetrie & Offline-Integrität',
+    '“it is not that we have a short time to live, but that we waste a lot of it. life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”':
+        '„Wir haben nicht zu wenig Zeit, sondern wir vergeuden zu viel davon.“',
   },
   'ja': {
     '* have suggestions or found a bug?': '* ご意見やバグの報告がありますか？ ',
@@ -3286,7 +3482,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     '100% offline-first. zero trackers. zero data collection':
         '100% 完全オフライン設計。トラッカーゼロ。データ収集ゼロ',
     '16-week habit activity grid': '16週間の習慣アクティビティグリッド',
+    '24-hour daily partition': '24時間の一日分割',
+    '24-hour horizon': '24時間水平線',
     '5-4-3-2-1 grounding': '5-4-3-2-1 グラウンディング法',
+    '6 months': '6ヶ月',
+    '6 weeks': '6週間',
+    '6-horizon trajectory': '6つの時間軸の推移',
     '8 luxury app icon editions': '8つの高級アプリアイコン',
     'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.':
         'スマホを日常の意識のアンカーへと変える、全画面のマインドフル・リマインダー。',
@@ -3306,6 +3507,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         '最適化されたバイナリをリリース画面から直接入手できます。',
     'accessibility': 'アクセシビリティ',
     'accessibilitycategory': 'アクセシビリティ',
+    'accounted': '記録済',
     'acknowledge the elapsed hour': '経過した1時間を振り返る',
     'active': '有効',
     'active issue tracking': 'アクティブな課題管理',
@@ -3378,6 +3580,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'at': '',
     'attach context without slowing the app down.': 'アプリの動作を重くすることなくコンテキストを追加。',
     'attack on titan': '進撃の巨人',
+    'audit': '監査',
     'aurora': 'オーロラ',
     'aurora borealis': 'オーロラ・ボレアリス',
     'auto-start & background activity': '自動起動とバックグラウンド動作',
@@ -3462,6 +3665,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'confirm': '確認',
     'confirm delete': '削除前に確認',
     'confirm passcode': 'パスコードを再入力',
+    'conscious window': '意識の枠',
     'continue': '続ける',
     'continue mindfully': '意識して続ける',
     'continuous': '連続',
@@ -3476,9 +3680,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'count on save': '保存時カウント表示',
     'create quick local backup': 'クイックローカルバックアップを作成',
     'crimson': 'クリムゾン',
+    'critical life void': '重大な時間喪失',
     'current message': '現在のメッセージ',
     'cursed spirit to satoru gojo.': '呪霊から五条悟へ。',
     'custom start date': 'カスタム開始日',
+    'daily ledger breakdown': '日次記録内訳',
     'daily logging reminder': '毎日の記録リマインダー',
     'daily neuroscience insight': '今日の神経科学インサイト',
     'daily reminder': 'デイリーリマインダー',
@@ -3491,8 +3697,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'data health': 'データの健全性',
     'database export': 'データベースのエクスポート',
     'database integrity': 'データベースの整合性',
+    'day': '日',
     'day of month': '日付（毎月）',
+    'days': '日',
     'days of week': '曜日',
+    'days total': '日（合計）',
     'death note': 'デスノート',
     'delete': '削除',
     'delete all moments?': 'すべてのモーメントを削除しますか？',
@@ -3520,6 +3729,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'disable reduce motion first': '最初に「視覚効果を減らす」を無効にしてください',
     'disable use numbers in single?': 'シングル番号付けを無効にしますか？',
     'disabled': '無効',
+    'disciplined presence': '規律ある集中',
     'dismiss': '閉じる',
     'display': '画面表示',
     'display & typography': '表示とタイポグラフィ',
@@ -3534,6 +3744,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'downloading update...': 'アップデートをダウンロード中...',
     'dragon ball': 'ドラゴンボール',
     'e-rank sung jinwoo to shadow monarch.': 'E級ハンター水篠旬から影の君主へ。',
+    'earth (24h) days': '24時間地球日',
+    'earth (24h) days lost': '24時間地球日の喪失',
     'east blue coby to the pirate king gol d. roger.':
         'イーストブルーのコビーから海賊王ゴール・D・ロジャーへ。',
     'edit': '編集',
@@ -3581,8 +3793,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'failed to read local backup file': 'ローカルバックアップの読み込みに失敗しました',
     'faq': 'よくある質問',
     'fatigue': '倦怠感',
+    'feature tours': '機能ツアー',
     'feedback': 'フィードバック',
     'feedback & bug report': 'フィードバックと不具合報告',
+    'focus': '集中',
+    'food, commute & logistics': '食事・移動・生活実務',
     'frequency interval': '頻度間隔',
     'fri': '金',
     'friday': '金曜日',
@@ -3593,6 +3808,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'full online terms': '利用規約（オンライン）',
     'full title & purpose': '正式名称と目的',
     'fullmetal alchemist': '鋼の錬金術師',
+    'fully accounted': '完全記録',
     'german': 'ドイツ語',
     'get started': '始める',
     'gintama': '銀魂',
@@ -3605,6 +3821,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'ギリシャとローマの栄光。定命の者からオリュンポスの神へ。',
     'grey matter to alien x.': 'グレイマターからエイリアンXへ。',
     'guides': '使い方ガイド',
+    'half of your mortal window slipped by without a record or dedicated session.':
+        '意識的な時間の半分が記録や集中セッションなしに過ぎました。',
     'happy': '喜び',
     'hardware security': 'ハードウェアセキュリティ',
     'hardware-backed encryption': 'ハードウェア保護暗号化',
@@ -3622,6 +3840,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'how to use it effectively': '効果的な活用法',
     'html editor to turing award winner.': 'HTMLエディタからチューリング賞受賞者へ。',
     'hunter x hunter': 'HUNTER×HUNTER',
+    'if you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.':
+        '意図的なセッションで意識的な時間を記録しない場合、その時間は虚無に消えたと見なされます。',
     'imperial': 'インペリアル',
     'imperial gold': 'インペリアル・ゴールド',
     'import backup': 'バックアップを復元',
@@ -3639,6 +3859,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'installation failed to start': 'インストールの開始に失敗しました',
     'integrity check failed: checksum mismatch': '整合性チェック失敗: チェックサムが一致しません',
     'intelligent risk radar': 'リスクレーダー',
+    'interactive baseline controls': '対話型基準コントロール',
+    'interactive onboarding walkthrough of the life audit time wastage system':
+        'ライフ監査と時間浪費システムの対話型ツアー',
     'invalid backup file': '無効なバックアップファイルです',
     'is notekar private?': 'NoteKarはプライベートですか？',
     'is notekar safe to use?': 'NoteKarは安全に使用できますか？',
@@ -3657,6 +3880,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'legal & open source notices': '法的通知とオープンソースライセンス',
     'less': '少なく',
     'licenses': 'ライセンス',
+    'life audit': 'ライフ監査',
+    'life audit tour': 'ライフ監査ツアー',
+    'life audit: unaccounted time': 'ライフ監査：消失時間',
     'limited connectivity': '限定的な通信',
     'link copied': 'リンクをコピーしました',
     'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.':
@@ -3674,11 +3900,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'logging': '記録',
     'logging reminder': '記録リマインダー',
     'logging reminders': '記録リマインダー',
+    'logistics': '生活実務',
     'logs': 'ログ',
     'loneliness': '孤独感',
     'lonely': '孤独',
     'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.':
         '直前の60分を優しく振り返りましょう。意図を持って過ごせましたか？ 気づきこそが時間の主導権を握る第一歩です。',
+    'lost': '喪失',
     'magikarp to the creator god arceus.': 'コイキングから創造神アルセウスへ。',
     'manage': '管理',
     'manage moment notes': 'モーメントのメモ管理',
@@ -3712,6 +3940,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'monthly reminder message': '毎月のリマインダー文',
     'more': '多く',
     'morning': '朝',
+    'mortal horizons': '有限の時間軸',
     'motion sensor unavailable': 'モーションセンサーが利用できません',
     'muggle to merlin.': 'マグルからマーリンへ。',
     'murata to yoriichi tsugikuni.': '村田から継国縁壱へ。',
@@ -3880,7 +4109,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'share milestone peak': 'マイルストーンを共有',
     'shinpachi to utsuro.': '新八から虚へ。',
     'shirley to emperor lelouch vi britannia.': 'シャーリーから皇帝ルルーシュ・ヴィ・ブリタニアへ。',
+    'show all': 'すべて表示',
     'show more': 'さらに表示',
+    'show recent 7 days': '直近7日間を表示',
     'show seconds': '秒を表示',
     'shows 00–99 counters instead of static icons in history.':
         '履歴内で固定アイコンの代わりに00〜99のカウンターを表示します。',
@@ -3891,6 +4122,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'single mode': 'シングル記録モード',
     'single moment numbering': 'シングルモーメント番号付け',
     'skip': 'スキップ',
+    'sleep': '睡眠',
+    'sleep & rest': '睡眠と休息',
     'smaller, optimized apks': '軽量・最適化されたパッケージ',
     'smart bandwidth saver': '通信量節約モード',
     'sobriety companion': 'ソブリエティ・コンパニオン',
@@ -3921,6 +4154,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'stressed': 'ストレス',
     'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.':
         'バグ報告や機能要望を直接投稿できます。',
+    'substantial mortal drift': '大きな時間流出',
     'suggest a new idea or improvement.': '新しいアイデアや改善案を提案してください。',
     'sun': '日',
     'sunday': '日曜日',
@@ -3951,8 +4185,10 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         '3秒後にテスト通知: 画面をロックして全画面アラームをテストしてください！',
     'test full-screen alarm alert': '全画面アラーム通知をテスト',
     'test now': '今すぐテスト',
+    'the cost of the void': '虚無のコスト',
     'the current features on this page are under beta stage.':
         'このページの機能は現在ベータ版です。',
+    'the stoic reality': 'ストア派の真理',
     'theme': 'テーマ',
     'theme description': 'テーマの説明',
     'theme mode': 'テーマモード',
@@ -4047,8 +4283,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'vinland saga': 'ヴィンランド・サガ',
     'virustotal safety scan': 'VirusTotal セキュリティ検証',
     'virustotal scan': 'VirusTotal スキャン',
+    'visceral days lost': '実感される喪失日数',
+    'void': '虚無',
     'vt report': 'VirusTotal レポート',
+    'waking days lost': '活動日の喪失',
+    'waking days void': '活動日消失',
     'warrior': 'ウォリアー',
+    'wasted': '消失',
     'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:':
         'コードベースを新しいリポジトリへ移転しました。今後のリリースや更新はすべてこちらで管理されます:',
     'wed': '水',
@@ -4075,6 +4316,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'wooden shovel to creative mode god.': '木のシャベルからクリエイティブモードの神へ。',
     'yamcha to the omni-king zeno.': 'ヤムチャから全王様へ。',
     'yoki to the ultimate truth.': 'ヨキから真理へ。',
+    'you are commanding your conscious hours with intention and discipline.':
+        '意図と規律をもって意識的な時間を過ごせています。',
     'you are up to date': '最新バージョンです',
     'your clean streak is active and running.': '継続日数が進行中です。',
     'your data is 100% private and stays offline on this device. enabling this does not alter any existing logs.':
@@ -4083,6 +4326,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'ホーム画面にマイルストーンバッジ付きの日数カードが表示されます。',
     'your privacy matters': 'プライバシーの尊重',
     'zero telemetry & offline integrity': 'テレメトリゼロと完全オフライン保護',
+    '“it is not that we have a short time to live, but that we waste a lot of it. life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”':
+        '「われわれには生きる時間が短いのではなく、その多くを浪費しているのである。」',
   },
   'ru': {
     '* have suggestions or found a bug?':
@@ -4095,7 +4340,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     '100% offline-first. zero trackers. zero data collection':
         '100% автономность. Ноль трекеров. Ноль сбора данных',
     '16-week habit activity grid': 'Сетка активности привычек за 16 недель',
+    '24-hour daily partition': '24-часовое разбиение дня',
+    '24-hour horizon': '24-часовой горизонт',
     '5-4-3-2-1 grounding': 'Заземление 5-4-3-2-1',
+    '6 months': '6 мес.',
+    '6 weeks': '6 нед.',
+    '6-horizon trajectory': 'Траектория 6 горизонтов',
     '8 luxury app icon editions': '8 эксклюзивных иконок приложения',
     'a full-screen mindful reminder that turns your phone into an awareness anchor throughout the day.':
         'Полноэкранное напоминание, превращающее телефон в якорь осознанности в течение дня.',
@@ -4115,6 +4365,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Загружайте оптимизированные сборки прямо со страницы релизов.',
     'accessibility': 'Специальные возможности',
     'accessibilitycategory': 'Специальные возможности',
+    'accounted': 'Учтено',
     'acknowledge the elapsed hour': 'Осознайте прошедший час',
     'active': 'Активно',
     'active issue tracking': 'Отслеживание задач и багов',
@@ -4191,6 +4442,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'attach context without slowing the app down.':
         'Добавляйте контекст без замедления работы приложения.',
     'attack on titan': 'Атака титанов',
+    'audit': 'Аудит',
     'aurora': 'Аврора',
     'aurora borealis': 'Северное сияние',
     'auto-start & background activity': 'Автозапуск и фоновая активность',
@@ -4282,6 +4534,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'confirm': 'Подтвердить',
     'confirm delete': 'Подтверждение удаления',
     'confirm passcode': 'Подтвердите код доступа',
+    'conscious window': 'Осознанное время',
     'continue': 'Продолжить',
     'continue mindfully': 'Продолжить осознанно',
     'continuous': 'Непрерывно',
@@ -4296,9 +4549,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'count on save': 'Счетчик при сохранении',
     'create quick local backup': 'Создать быструю локальную копию',
     'crimson': 'Багровый',
+    'critical life void': 'Критическая потеря',
     'current message': 'Текущее сообщение',
     'cursed spirit to satoru gojo.': 'От проклятого духа до Сатору Годжо.',
     'custom start date': 'Своя дата начала',
+    'daily ledger breakdown': 'Ежедневный журнал',
     'daily logging reminder': 'Ежедневное напоминание о записи',
     'daily neuroscience insight': 'Ежедневный факт из нейробиологии',
     'daily reminder': 'Ежедневное напоминание',
@@ -4311,8 +4566,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'data health': 'Состояние данных',
     'database export': 'Экспорт базы данных',
     'database integrity': 'Целостность базы данных',
+    'day': 'день',
     'day of month': 'Число месяца',
+    'days': 'дней',
     'days of week': 'Дни недели',
+    'days total': 'дней всего',
     'death note': 'Тетрадь смерти',
     'delete': 'Удалить',
     'delete all moments?': 'Удалить все моменты?',
@@ -4340,6 +4598,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'disable reduce motion first': 'Сначала отключите «Уменьшение движения»',
     'disable use numbers in single?': 'Отключить нумерацию в одиночном режиме?',
     'disabled': 'Отключено',
+    'disciplined presence': 'Дисциплинированность',
     'dismiss': 'Закрыть',
     'display': 'Отображение',
     'display & typography': 'Отображение и типографика',
@@ -4355,6 +4614,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'dragon ball': 'Драконий жемчуг',
     'e-rank sung jinwoo to shadow monarch.':
         'От Сон Джинву E-ранга до Владыки Теней.',
+    'earth (24h) days': 'Суток Земли (24ч)',
+    'earth (24h) days lost': 'Суток (24ч) потеряно',
     'east blue coby to the pirate king gol d. roger.':
         'От Коби из Ист Блю до Короля пиратов Гол Д. Роджера.',
     'edit': 'Редактировать',
@@ -4405,8 +4666,11 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Не удалось прочитать локальный файл резервной копии',
     'faq': 'Частые вопросы',
     'fatigue': 'Утомление',
+    'feature tours': 'ОБЗОРНЫЕ ТУРЫ',
     'feedback': 'Обратная связь',
     'feedback & bug report': 'Отзывы и отчеты об ошибках',
+    'focus': 'Фокус',
+    'food, commute & logistics': 'Еда, дорога и быт',
     'frequency interval': 'Интервал частоты',
     'fri': 'Пт',
     'friday': 'Пятница',
@@ -4417,6 +4681,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'full online terms': 'Полные условия использования онлайн',
     'full title & purpose': 'Полное название и назначение',
     'fullmetal alchemist': 'Стальной алхимик',
+    'fully accounted': 'Полностью учтено',
     'german': 'Немецкий',
     'get started': 'Начать',
     'gintama': 'Гинтама',
@@ -4429,6 +4694,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Греческая и римская слава. Восстань из смертного в олимпийца.',
     'grey matter to alien x.': 'От Гуманоида до Пришельца Икс.',
     'guides': 'Руководства',
+    'half of your mortal window slipped by without a record or dedicated session.':
+        'Половина вашего времени бодрствования прошла бесследно.',
     'happy': 'Радость',
     'hardware security': 'Аппаратная безопасность',
     'hardware-backed encryption': 'Аппаратное шифрование',
@@ -4442,11 +4709,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'hold for notes': 'Удерживайте для заметок',
     'hour': 'час',
     'hourly mindfulness': 'Ежечасная осознанность',
-    'hours': 'часов',
+    'hours': 'ч.',
     'how to use it effectively': 'Как использовать эффективно',
     'html editor to turing award winner.':
         'От HTML-редактора до лауреата премии Тьюринга.',
     'hunter x hunter': 'Хантер х Хантер',
+    'if you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.':
+        'Без осознанных сессий время бодрствования считается безвозвратно утерянным.',
     'imperial': 'Империал',
     'imperial gold': 'Имперское золото',
     'import backup': 'Импорт копии',
@@ -4465,6 +4734,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'integrity check failed: checksum mismatch':
         'Ошибка проверки целостности: несовпадение контрольной суммы',
     'intelligent risk radar': 'Интеллектуальный радар рисков',
+    'interactive baseline controls': 'Интерактивные параметры',
+    'interactive onboarding walkthrough of the life audit time wastage system':
+        'Обзор системы аудита времени и неиспользованных ресурсов',
     'invalid backup file': 'Недопустимый файл резервной копии',
     'is notekar private?': 'NoteKar конфиденциален?',
     'is notekar safe to use?': 'Безопасно ли использовать NoteKar?',
@@ -4484,6 +4756,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'legal & open source notices': 'Правовые уведомления и открытый код',
     'less': 'Меньше',
     'licenses': 'Лицензии',
+    'life audit': 'Аудит жизни',
+    'life audit tour': 'Тур по аудиту жизни',
+    'life audit: unaccounted time': 'Аудит жизни: потерянное время',
     'limited connectivity': 'Ограниченное сетевое подключение',
     'link copied': 'Ссылка скопирована',
     'live activity tracking dashboard featuring real-time metric analysis, habit tracking grids, activity trends, and correlation intelligence calculated from your moments.':
@@ -4503,11 +4778,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'logging': 'Запись',
     'logging reminder': 'Напоминание о записи',
     'logging reminders': 'Напоминания о записи',
+    'logistics': 'Быт',
     'logs': 'Записи',
     'loneliness': 'Одиночество',
     'lonely': 'Одиночество',
     'look back at the last 60 minutes with kindness. did you spend it intentionally, or did time slip away? awareness is the first step to freedom.':
         'Оглянитесь на прошедшие 60 минут без самокритики. Провели ли вы их осознанно? Осознание — первый шаг к контролю времени.',
+    'lost': 'потеряно',
     'magikarp to the creator god arceus.':
         'От Мэджикарпа до создателя Аркеуса.',
     'manage': 'Управление',
@@ -4545,6 +4822,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'monthly reminder message': 'Текст ежемесячного напоминания',
     'more': 'Больше',
     'morning': 'Утро',
+    'mortal horizons': 'ГОРИЗОНТЫ ВРЕМЕНИ',
     'motion sensor unavailable': 'Датчик движения недоступен',
     'muggle to merlin.': 'От магла до Мерлина.',
     'murata to yoriichi tsugikuni.': 'От Мураты до Ёриити Цугикуни.',
@@ -4724,7 +5002,9 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'shinpachi to utsuro.': 'От Синпати до Уцуро.',
     'shirley to emperor lelouch vi britannia.':
         'От Ширли до императора Лелуша ви Британия.',
+    'show all': 'Показать все',
     'show more': 'Показать больше',
+    'show recent 7 days': 'Показать 7 дней',
     'show seconds': 'Показывать секунды',
     'shows 00–99 counters instead of static icons in history.':
         'Отображает счетчики 00–99 вместо статических иконок в истории.',
@@ -4735,6 +5015,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'single mode': 'Одиночный режим',
     'single moment numbering': 'Нумерация одиночных моментов',
     'skip': 'Пропустить',
+    'sleep': 'Сон',
+    'sleep & rest': 'Сон и отдых',
     'smaller, optimized apks': 'Оптимизированные пакеты APK',
     'smart bandwidth saver': 'Умная экономия трафика',
     'sobriety companion': 'Трекер трезвости',
@@ -4769,6 +5051,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'stressed': 'Стресс',
     'submit bug reports, feature requests, and follow code changes directly in the new repository issue tracker.':
         'Отправляйте отчеты об ошибках и предложения в трекер нового репозитория.',
+    'substantial mortal drift': 'Заметное упущение',
     'suggest a new idea or improvement.':
         'Предложите новую идею или улучшение.',
     'sun': 'Вс',
@@ -4803,8 +5086,10 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'Тестовый сигнал через 3с: заблокируйте телефон для проверки полноэкранного будильника!',
     'test full-screen alarm alert': 'Проверить полноэкранный будильник',
     'test now': 'Проверить сейчас',
+    'the cost of the void': 'Цена пустоты',
     'the current features on this page are under beta stage.':
         'Функции на этой странице находятся на стадии бета-тестирования.',
+    'the stoic reality': 'СТОИЧЕСКАЯ ИСТИНА',
     'theme': 'Тема',
     'theme description': 'Описание темы',
     'theme mode': 'Режим оформления',
@@ -4903,8 +5188,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'vinland saga': 'Сага о Винланде',
     'virustotal safety scan': 'Проверка безопасности VirusTotal',
     'virustotal scan': 'Проверка VirusTotal',
+    'visceral days lost': 'Потерянные дни',
+    'void': 'Пустота',
     'vt report': 'Отчет VirusTotal',
+    'waking days lost': 'Дней бодрств. потеряно',
+    'waking days void': 'бодр. дней впустую',
     'warrior': 'Воин',
+    'wasted': 'Впустую',
     'we have officially migrated our codebase to a new home. all future releases, updates, and issues will be managed here:':
         'Мы перенесли кодовую базу. Все будущие релизы и обновления будут публиковаться здесь:',
     'wed': 'Ср',
@@ -4932,6 +5222,8 @@ const Map<String, Map<String, String>> kL10nTranslations = {
         'От деревянной лопаты до бога Творческого режима.',
     'yamcha to the omni-king zeno.': 'От Ямчи до Короля Всего Зено.',
     'yoki to the ultimate truth.': 'От Йоки до абсолютной Истины.',
+    'you are commanding your conscious hours with intention and discipline.':
+        'Вы осознанно и дисциплинированно используете свое время.',
     'you are up to date': 'У вас актуальная версия',
     'your clean streak is active and running.':
         'Ваша непрерывная серия активна.',
@@ -4942,5 +5234,7 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'your privacy matters': 'Ваша конфиденциальность важна',
     'zero telemetry & offline integrity':
         'Ноль телеметрии и полная автономность',
+    '“it is not that we have a short time to live, but that we waste a lot of it. life is long enough, and a sufficiently generous estimate has been given to us for the highest achievements, if it were all well invested.”':
+        '«Мы не получаем короткую жизнь, а делаем ее такой; мы не бедны ею, а расточительны.»',
   },
 };

@@ -848,6 +848,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
               'app-icons',
               'security',
               'features',
+              'life-audit',
+              'history-redesign',
+              'dashboard-redesign',
               'mindfulness',
               'numbered-singles',
               'repo-move',
@@ -887,8 +890,66 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.singleNumberingWalkthroughSeen_v7', true);
       await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
       await prefs.setBool('notekar.mindfulnessWalkthroughSeen_v10', true);
+      await prefs.setBool('notekar.lifeAuditIntroSeen_v11', true);
+      await prefs.setBool('notekar.historyRedesignTourSeen_v11', true);
+      await prefs.setBool('notekar.dashboardRedesignTourSeen_v11', true);
     } else {
-      // 2. Upgraded Users: Update version tracking silently without interrupting the user
+      // 2. Upgraded Users: Check for newly introduced feature cards they haven't seen yet
+      final unseenPages = <String>[];
+      if (prefs.getBool('notekar.lifeAuditIntroSeen_v11') != true) {
+        unseenPages.add('life-audit');
+      }
+      if (prefs.getBool('notekar.historyRedesignTourSeen_v11') != true) {
+        unseenPages.add('history-redesign');
+      }
+      if (prefs.getBool('notekar.dashboardRedesignTourSeen_v11') != true) {
+        unseenPages.add('dashboard-redesign');
+      }
+
+      if (unseenPages.isNotEmpty) {
+        if (!mounted) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => WelcomeScreen(
+              p: p,
+              theme: _theme,
+              defaultMode: _defaultMode,
+              currentLocale: _locale,
+              appIconStyle: _appIconStyle,
+              useNumbersInSingle: _useNumbersInSingle,
+              resetSingleDaily: _resetSingleDaily,
+              countOnSave: _countOnSave,
+              enableSobrietyMode: _enableSobrietyMode,
+              sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
+              compactHistory: _compactHistory,
+              onLocaleChanged: (value) {
+                NoteKarApp.of(context)?.setLocale(value);
+                setState(() => _locale = value);
+              },
+              onTheme: (value) {
+                setState(() => _theme = value);
+                _saveSetting('m-theme', value);
+                _applySystemUiStyle();
+              },
+              onDefaultMode: (value) {
+                setState(() => _defaultMode = value);
+                _saveSetting('m-default-mode', value);
+              },
+              pages: unseenPages,
+            ),
+          ),
+        );
+        for (final page in unseenPages) {
+          if (page == 'life-audit') {
+            await prefs.setBool('notekar.lifeAuditIntroSeen_v11', true);
+          } else if (page == 'history-redesign') {
+            await prefs.setBool('notekar.historyRedesignTourSeen_v11', true);
+          } else if (page == 'dashboard-redesign') {
+            await prefs.setBool('notekar.dashboardRedesignTourSeen_v11', true);
+          }
+        }
+      }
+
       await prefs.setString(_lastSeenVersionKey, appVersion);
       await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
@@ -3722,15 +3783,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ),
             ),
           ),
-          IgnorePointer(
-            child: Center(
-              child: RepaintBoundary(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: spacing24,
-                    right: spacing24,
-                    bottom: 104 + bottomInset,
-                  ),
+          Positioned.fill(
+            top: MediaQuery.paddingOf(context).top + 64,
+            bottom: MediaQuery.paddingOf(context).bottom + 76,
+            left: spacing24,
+            right: spacing24,
+            child: IgnorePointer(
+              child: Center(
+                child: RepaintBoundary(
                   child: Stack(
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,

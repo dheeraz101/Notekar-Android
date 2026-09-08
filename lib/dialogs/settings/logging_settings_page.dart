@@ -40,6 +40,7 @@ class LoggingSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         SettingsGroup(
           p: p,
+          insetDividers: true,
           children: [
             SettingsRow(
               p: p,
@@ -49,12 +50,20 @@ class LoggingSettingsPage extends StatelessWidget {
               color: p.accent,
               onTap: () => onOpenCategory('Dashboard', parent: 'Logging'),
             ),
+            SettingsRow(
+              p: p,
+              icon: Icons.timelapse_rounded,
+              title: 'Life Audit',
+              status: 'Time Wastage',
+              color: p.red,
+              onTap: () => onOpenCategory('Life Audit', parent: 'Logging'),
+            ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Interactive summary dashboards, activity heatmaps, weekly trends, and intelligence insights.'
+              'Executive activity intelligence, time wastage auditing, 24-hour baseline accounting, and mortality insights.'
                   .localized(context),
         ),
         const SizedBox(height: 12),

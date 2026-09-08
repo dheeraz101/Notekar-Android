@@ -9,12 +9,10 @@ class HelpGuidesSettingsPage extends StatelessWidget {
     super.key,
     required this.p,
     required this.onOpenCategory,
-    this.onOpenTour,
   });
 
   final Palette p;
   final void Function(String category, {required String parent}) onOpenCategory;
-  final void Function(List<String> pages)? onOpenTour;
 
   @override
   Widget build(BuildContext context) {

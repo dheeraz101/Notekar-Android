@@ -25,6 +25,7 @@ import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/integrations_settings_page.dart';
 import 'package:notekar/dialogs/settings/legal_about_settings_page.dart';
+import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
@@ -41,7 +42,6 @@ import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -359,6 +359,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   String sobrietyResetType = 'any';
   int? sobrietyCustomStartMs;
   String sobrietyMilestoneTheme = 'science';
+  double _timeAuditSleepHours = 10.0;
+  double _timeAuditEssentialsHours = 4.0;
 
   String _vtRatio = '0 / 60+ clean';
   String _vtStatus = 'Undetected';
@@ -506,6 +508,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
       sobrietyCustomStartMs = _prefs?.getInt('sobriety_custom_start_ms');
       sobrietyMilestoneTheme =
           _prefs?.getString('sobriety_milestone_theme') ?? 'science';
+      _timeAuditSleepHours =
+          _prefs?.getDouble('time_audit_sleep_hours') ?? 10.0;
+      _timeAuditEssentialsHours =
+          _prefs?.getDouble('time_audit_essentials_hours') ?? 4.0;
       _autoStartCardDismissed =
           _prefs?.getBool('notekar.autoStartCardDismissed') ?? false;
       _batteryOptimizationCardDismissed =
@@ -1380,40 +1386,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
-  void _openOnboardingTour(List<String> pages) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => WelcomeScreen(
-          p: paletteFor(
-            theme,
-            highContrast: highContrast,
-            accentName: accentColor,
-          ),
-          theme: theme,
-          defaultMode: defaultMode,
-          currentLocale: currentLocale,
-          appIconStyle: appIconStyle,
-          useNumbersInSingle: useNumbersInSingle,
-          resetSingleDaily: resetSingleDaily,
-          countOnSave: countOnSave,
-          enableSobrietyMode: enableSobrietyMode,
-          sobrietyMilestoneTheme: sobrietyMilestoneTheme,
-          compactHistory: compactHistory,
-          onLocaleChanged: (l) => widget.onLocaleChanged(l),
-          onTheme: (t) {
-            setState(() => theme = t);
-            widget.onTheme(t);
-          },
-          onDefaultMode: (m) {
-            setState(() => defaultMode = m);
-            widget.onDefaultMode(m);
-          },
-          pages: pages,
-        ),
-      ),
-    );
-  }
-
   String get _updateSubtitle {
     if (checkingUpdates) return 'Checking...';
     return updateStatus.isEmpty ? 'Up to date' : updateStatus;
@@ -2039,6 +2011,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: 'View',
       ),
       item(
+        title: 'Life Audit & Time Wastage',
+        subtitle:
+            'Confront the cost of unaccounted time across daily, weekly, and yearly horizons',
+        category: 'Life Audit',
+        icon: CupertinoIcons.circle_grid_hex,
+        keywords: [
+          'life audit',
+          'audit',
+          'time wastage',
+          'wasted',
+          'void',
+          'unaccounted',
+          'sleep',
+          'food',
+          'travel',
+          'commute',
+          'conscious',
+          'mortality',
+          'crucible',
+          'half quarter',
+          'half year',
+          '6 weeks',
+          '6 months',
+          'year',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Audit',
+      ),
+      item(
         title: 'App Philosophy',
         subtitle: 'Timeless craft and radical privacy',
         category: 'About',
@@ -2061,46 +2064,28 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: 'Manifesto',
       ),
       item(
-        title: 'Life Ledger Timeline Tour',
+        title: 'Life Audit',
         subtitle:
-            'Interactive onboarding walkthrough of the redesigned History',
-        category: 'Help & Guides',
-        icon: Icons.explore_rounded,
+            'Track unaccounted time, sleep, logistics, and productive hours across horizons',
+        category: 'Life Audit',
+        icon: Icons.timelapse_rounded,
         keywords: [
-          'tour',
-          'history tour',
-          'onboarding',
-          'welcome',
-          'guide',
-          'walkthrough',
-          'history guide',
-          'life ledger tour',
+          'life audit',
+          'audit',
+          'time waste',
+          'wastage',
+          'sleep',
+          'logistics',
+          'unaccounted',
+          'wasted time',
+          'horizons',
+          'reality check',
+          '24 hours',
         ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
-        status: 'Tour',
-      ),
-      item(
-        title: 'Executive Intelligence Hub Tour',
-        subtitle:
-            'Interactive onboarding walkthrough of the redesigned Dashboard',
-        category: 'Help & Guides',
-        icon: Icons.insights_rounded,
-        keywords: [
-          'tour',
-          'dashboard tour',
-          'onboarding',
-          'welcome',
-          'guide',
-          'walkthrough',
-          'analytics tour',
-          'intelligence hub tour',
-        ],
-        kind: 'nav',
-        boolValue: null,
-        onBoolChanged: null,
-        status: 'Tour',
+        status: 'Audit',
       ),
       item(
         title: 'Dashboard',
@@ -4548,22 +4533,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                                               return;
                                             }
                                             if (result.title ==
-                                                    'Life Ledger Timeline' ||
-                                                result.title ==
-                                                    'Life Ledger Timeline Tour') {
-                                              _openOnboardingTour([
-                                                'history-redesign',
-                                              ]);
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Executive Intelligence Hub Tour') {
-                                              _openOnboardingTour([
-                                                'dashboard-redesign',
-                                              ]);
-                                              return;
-                                            }
-                                            if (result.title ==
                                                 'Executive Intelligence Hub') {
                                               _openCategory('Dashboard');
                                               return;
@@ -4754,6 +4723,34 @@ ${stackTrace ?? 'No stack trace provided.'}
                               entries: entries,
                               enableSobrietyMode: enableSobrietyMode,
                               onLogNow: () => Navigator.of(context).pop('log'),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                              onOpenLifeAudit: () => _openCategory(
+                                'Life Audit',
+                                parent: 'Dashboard',
+                              ),
+                            ),
+                          ),
+                        if (show('Life Audit'))
+                          SliverToBoxAdapter(
+                            child: LifeAuditPage(
+                              p: p,
+                              entries: entries,
+                              sleepHours: _timeAuditSleepHours,
+                              essentialsHours: _timeAuditEssentialsHours,
+                              onSleepHoursChanged: (val) async {
+                                setState(() => _timeAuditSleepHours = val);
+                                await _prefs?.setDouble(
+                                  'time_audit_sleep_hours',
+                                  val,
+                                );
+                              },
+                              onEssentialsHoursChanged: (val) async {
+                                setState(() => _timeAuditEssentialsHours = val);
+                                await _prefs?.setDouble(
+                                  'time_audit_essentials_hours',
+                                  val,
+                                );
+                              },
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
@@ -6360,7 +6357,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
-                              onOpenTour: _openOnboardingTour,
                             ),
                           ),
                         if (show('App Philosophy'))

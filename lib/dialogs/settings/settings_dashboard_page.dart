@@ -5,6 +5,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/daily_wisdom_service.dart';
 import 'package:notekar/utils/dashboard_metrics_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/utils/risk_radar_service.dart';
 import 'package:notekar/utils/user_rank_service.dart';
 import 'package:notekar/widgets/executive_dashboard_widgets.dart';
@@ -20,6 +21,7 @@ class SettingsDashboardPage extends StatefulWidget {
     required this.enableSobrietyMode,
     required this.onLogNow,
     required this.onLearnMoreBeta,
+    this.onOpenLifeAudit,
   });
 
   final Palette p;
@@ -27,6 +29,7 @@ class SettingsDashboardPage extends StatefulWidget {
   final bool enableSobrietyMode;
   final VoidCallback onLogNow;
   final VoidCallback onLearnMoreBeta;
+  final VoidCallback? onOpenLifeAudit;
 
   @override
   State<SettingsDashboardPage> createState() => _SettingsDashboardPageState();
@@ -66,6 +69,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         ),
         _buildLifeNarrativeCard(context, dashboardData),
         AnomalyAlertCard(p: p, entries: entries, onLogNow: widget.onLogNow),
+        _buildLifeAuditCard(context),
         if (entries.isNotEmpty &&
             DateTime.now()
                     .difference(
@@ -649,6 +653,155 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLifeAuditCard(BuildContext context) {
+    final auditTimeframe = switch (_timeframe) {
+      DashboardTimeframe.today => LifeAuditTimeframe.today,
+      DashboardTimeframe.week => LifeAuditTimeframe.week,
+      DashboardTimeframe.month => LifeAuditTimeframe.month,
+      DashboardTimeframe.all => LifeAuditTimeframe.year,
+    };
+
+    final summary = LifeAuditService.calculate(
+      entries: entries,
+      timeframe: auditTimeframe,
+    );
+
+    final wasted = summary.formattedTotalWasted;
+    final wakingLost = summary.wakingDaysLostText;
+    final isSevere = summary.intentionalityRatio < 40.0;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: widget.onOpenLifeAudit,
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSevere
+                  ? p.red.withValues(alpha: 0.35)
+                  : p.border.withValues(alpha: 0.5),
+              width: 0.8,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.timelapse_rounded,
+                          size: 17,
+                          color: isSevere ? p.red : p.orange,
+                        ),
+                        const SizedBox(width: 7),
+                        Flexible(
+                          child: Text(
+                            'Life Audit'.localized(context).toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isSevere ? p.red : p.orange,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Audit'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: p.accent,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '$wasted ${'Lost'.localized(context)}',
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: isSevere ? p.red : p.text,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (isSevere ? p.red : p.orange).withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$wakingLost ${'waking days void'.localized(context)}',
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: isSevere ? p.red : p.orange,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Based on your daily conscious window ($wasted unaccounted for). Tap to customize sleep, logistics, and explore multi-horizon mortality statistics.'
+                    .localized(context),
+                style: TextStyle(color: p.text2, fontSize: 12, height: 1.35),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -22,15 +22,14 @@ class HomeClockSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Center(
-        child: RepaintBoundary(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 24,
-              right: 24,
-              bottom: 104 + bottomInset,
-            ),
+    return Positioned.fill(
+      top: MediaQuery.paddingOf(context).top + 64,
+      bottom: MediaQuery.paddingOf(context).bottom + 76,
+      left: 24,
+      right: 24,
+      child: IgnorePointer(
+        child: Center(
+          child: RepaintBoundary(
             child: LiveClockFace(
               p: p,
               pulseToken: savedPulseToken,

@@ -130,6 +130,96 @@ extension LocalizedString on String {
         _ => 'Deleted $typeLoc moment',
       };
     }
+    if (normKey != 'waking days lost' &&
+        normKey != 'earth (24h) days lost' &&
+        normKey.endsWith(' lost')) {
+      final lead = key.substring(0, key.length - 5).trim();
+      return switch (l10n.localeName) {
+        'fr' => '$lead perdu',
+        'es' => '$lead perdido',
+        'hi' => '$lead नष्ट',
+        'de' => '$lead verloren',
+        'ja' => '$lead 喪失',
+        'ru' => '$lead потеряно',
+        _ => '$lead lost',
+      };
+    }
+    if (normKey.endsWith(' waking days void')) {
+      final lead = key.substring(0, key.length - 17).trim();
+      return switch (l10n.localeName) {
+        'fr' => '$lead j. éveillés vides',
+        'es' => '$lead d. activos perdidos',
+        'hi' => '$lead जागृत दिन नष्ट',
+        'de' => '$lead Wachtage leer',
+        'ja' => '$lead 活動日消失',
+        'ru' => '$lead бодр. дней впустую',
+        _ => '$lead waking days void',
+      };
+    }
+    if (normKey.endsWith(' wasted this week')) {
+      final lead = key.substring(0, key.length - 17).trim();
+      return switch (l10n.localeName) {
+        'fr' => '$lead perdus cette semaine',
+        'es' => '$lead perdidas esta semana',
+        'hi' => 'इस सप्ताह $lead नष्ट',
+        'de' => '$lead diese Woche verloren',
+        'ja' => '今週 $lead 消失',
+        'ru' => '$lead потрачено за неделю',
+        _ => '$lead wasted this week',
+      };
+    }
+    if (normKey != 'waking days lost' &&
+        normKey != 'earth (24h) days lost' &&
+        normKey.endsWith(' days lost')) {
+      final lead = key.substring(0, key.length - 10).trim();
+      return switch (l10n.localeName) {
+        'fr' => '$lead jours perdus',
+        'es' => '$lead días perdidos',
+        'hi' => '$lead दिन नष्ट',
+        'de' => '$lead Tage verloren',
+        'ja' => '$lead 日消失',
+        'ru' => '$lead дней потеряно',
+        _ => '$lead days lost',
+      };
+    }
+    if (normKey.startsWith('over ') &&
+        normKey.endsWith(
+          '% of your waking existence dissolved into unaccounted void.',
+        )) {
+      final pct = normKey.substring(5, normKey.indexOf('%')).trim();
+      return switch (l10n.localeName) {
+        'fr' =>
+          'Plus de $pct% de votre existence éveillée a été perdue dans le vide.',
+        'es' => 'Más del $pct% de tu tiempo despierto se perdió en el vacío.',
+        'hi' => 'आपके जागृत जीवन का $pct% से अधिक समय व्यर्थ चला गया।',
+        'de' => 'Über $pct% Ihres Wachlebens gingen spurlos verloren.',
+        'ja' => '覚醒時間の $pct% 以上が未記録のまま失われました。',
+        'ru' => 'Более $pct% времени бодрствования потрачено впустую.',
+        _ =>
+          'Over $pct% of your waking existence dissolved into unaccounted void.',
+      };
+    }
+    if (normKey.startsWith('based on your daily conscious window (') &&
+        normKey.contains(' unaccounted for)')) {
+      final startIndex = 'based on your daily conscious window ('.length;
+      final endIndex = normKey.indexOf(' unaccounted for)');
+      final wastedPart = key.substring(startIndex, endIndex).trim();
+      return switch (l10n.localeName) {
+        'fr' =>
+          'Basé sur votre fenêtre de conscience ($wastedPart non comptabilisées). Touchez pour explorer.',
+        'es' =>
+          'Basado en tu ventana consciente ($wastedPart no registradas). Toca para explorar.',
+        'hi' =>
+          'आपकी दैनिक जागृत सीमा पर आधारित ($wastedPart का हिसाब नहीं)। अधिक देखने के लिए स्पर्श करें।',
+        'de' =>
+          'Basierend auf Ihrem bewussten Zeitfenster ($wastedPart ungenutzt). Tippen für Details.',
+        'ja' => '日々の意識時間に基づきます（$wastedPart 未記録）。タップして統計を確認。',
+        'ru' =>
+          'На основе времени бодрствования ($wastedPart не учтено). Нажмите для настроек.',
+        _ =>
+          'Based on your daily conscious window ($wastedPart unaccounted for). Tap to customize sleep, logistics, and explore multi-horizon mortality statistics.',
+      };
+    }
 
     final translation = kL10nTranslations[l10n.localeName]?[normKey];
     return translation ?? this;

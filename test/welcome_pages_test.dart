@@ -101,9 +101,52 @@ void main() {
         expect(find.text('Done'), findsOneWidget);
       },
     );
+
+    testWidgets('Renders Life Audit (Time Wastage System) standalone page', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: WelcomeScreen(
+              p: p,
+              theme: 'dark',
+              defaultMode: 'two-way',
+              currentLocale: 'en',
+              onLocaleChanged: (_) {},
+              onTheme: (_) {},
+              onDefaultMode: (_) {},
+              pages: const ['life-audit'],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify header
+      expect(find.text('Life Audit: Unaccounted Time'), findsOneWidget);
+
+      // Verify interactive mockup elements
+      expect(find.text('24-Hour Horizon'), findsOneWidget);
+      expect(find.text('Sleep (10h)'), findsOneWidget);
+      expect(find.text('Logistics (4h)'), findsOneWidget);
+      expect(find.text('Focus (3h)'), findsOneWidget);
+      expect(find.text('Void (7h)'), findsOneWidget);
+      expect(find.text('56h Wasted This Week'), findsOneWidget);
+      expect(find.text('5.6 Days Lost'), findsOneWidget);
+
+      // Verify core feature highlights
+      expect(find.text('24-Hour Daily Partition'), findsOneWidget);
+      expect(find.text('Visceral Days Lost'), findsOneWidget);
+      expect(find.text('6-Horizon Trajectory'), findsOneWidget);
+      expect(find.text('Interactive Baseline Controls'), findsOneWidget);
+      // Verify button says Done for single standalone page
+      expect(find.text('Done'), findsOneWidget);
+    });
   });
 
-  group('HelpGuidesSettingsPage Philosophy Tests', () {
+  group('HelpGuidesSettingsPage Philosophy & Tour Tests', () {
     testWidgets('Renders App Philosophy card and handles tap', (tester) async {
       String? openedCategory;
       String? openedParent;
@@ -136,5 +179,54 @@ void main() {
       expect(openedCategory, 'App Philosophy');
       expect(openedParent, 'Help & Guides');
     });
+
+    testWidgets('Does not render tours in HelpGuidesSettingsPage', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: HelpGuidesSettingsPage(
+                p: p,
+                onOpenCategory: (_, {required parent}) {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('FEATURE TOURS'), findsNothing);
+      expect(find.text('Life Audit Tour'), findsNothing);
+      expect(find.text('Executive Intelligence Hub Tour'), findsNothing);
+      expect(find.text('Life Ledger Timeline Tour'), findsNothing);
+    });
+
+    testWidgets(
+      'Updating user seeing unseen cards presents standalone view with Done button',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: WelcomeScreen(
+              p: p,
+              theme: 'dark',
+              defaultMode: 'single',
+              currentLocale: 'en',
+              onLocaleChanged: (_) {},
+              onTheme: (_) {},
+              onDefaultMode: (_) {},
+              pages: const ['life-audit'],
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Life Audit: Unaccounted Time'), findsOneWidget);
+        expect(find.text('Done'), findsOneWidget);
+      },
+    );
   });
 }

@@ -57,5 +57,57 @@ void main() {
         ),
       );
     });
+
+    testWidgets('localizes Life Audit and void metrics in Hindi', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('hi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              expect('Life Audit'.localized(context), 'लाइफ ऑडिट');
+              expect(
+                'The Cost of the Void'.localized(context),
+                'व्यर्थ समय की लागत',
+              );
+              expect('Waking Days Lost'.localized(context), 'जागृत दिन नष्ट');
+              expect('5h 30m lost'.localized(context), '5h 30m नष्ट');
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+    });
+
+    testWidgets('localizes Life Audit and void metrics in German', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              expect('Life Audit'.localized(context), 'Lebens-Audit');
+              expect(
+                'The Cost of the Void'.localized(context),
+                'Die Kosten der Leere',
+              );
+              expect(
+                'Waking Days Lost'.localized(context),
+                'Wachtage verloren',
+              );
+              expect('Earth (24h) Days'.localized(context), '24h-Erden-Tage');
+              expect('4h lost'.localized(context), '4h verloren');
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+    });
   });
 }

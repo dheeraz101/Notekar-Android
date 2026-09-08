@@ -2386,6 +2386,221 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
+  Widget _buildMockHorizonPill(Palette p, Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: p.text2,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLifeAuditIntroPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: p.red.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: p.red.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(Icons.timelapse_rounded, color: p.red, size: 38),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              'Life Audit: Unaccounted Time'.localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'If you do not account for your mortal conscious hours through deliberate sessions, that time is recognized as wasted into the void.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Interactive Visual Card Mockup for Life Audit
+          Glass(
+            p: p,
+            radius: 20,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 24h Horizon Bar Simulation
+                Text(
+                  '24-Hour Horizon'.localized(context),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: SizedBox(
+                    height: 10,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 10,
+                          child: Container(color: Colors.blueGrey.shade700),
+                        ),
+                        const SizedBox(width: 1.5),
+                        Expanded(
+                          flex: 4,
+                          child: Container(color: Colors.amber.shade700),
+                        ),
+                        const SizedBox(width: 1.5),
+                        Expanded(flex: 3, child: Container(color: p.green)),
+                        const SizedBox(width: 1.5),
+                        Expanded(flex: 7, child: Container(color: p.red)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _buildMockHorizonPill(
+                      p,
+                      Colors.blueGrey.shade700,
+                      'Sleep (10h)',
+                    ),
+                    _buildMockHorizonPill(
+                      p,
+                      Colors.amber.shade700,
+                      'Logistics (4h)',
+                    ),
+                    _buildMockHorizonPill(p, p.green, 'Focus (3h)'),
+                    _buildMockHorizonPill(p, p.red, 'Void (7h)'),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Divider(height: 1, color: p.border.withValues(alpha: 0.4)),
+                const SizedBox(height: 14),
+
+                // Wasted Metric Simulation
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '56h Wasted This Week',
+                      style: TextStyle(
+                        color: p.red,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.red.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '5.6 Days Lost',
+                        style: TextStyle(
+                          color: p.red,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Core Highlights
+          SettingsGroup(
+            p: p,
+            children: [
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.pie_chart_rounded,
+                iconColor: p.accent,
+                title: '24-Hour Daily Partition',
+                text:
+                    'Sleep and logistics are biological baseline. The remaining 10 hours is your entire conscious capacity on Earth.',
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.warning_amber_rounded,
+                iconColor: p.red,
+                title: 'Visceral Days Lost',
+                text:
+                    'Converts abstract lost hours into conscious waking days and 24h celestial earth days.',
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.date_range_rounded,
+                iconColor: p.green,
+                title: '6-Horizon Trajectory',
+                text:
+                    'Audit your mortal trajectory across Today, 1 Week, 1 Month, 6 Weeks, 6 Months, and 1 Year.',
+              ),
+              _buildFeatureRow(
+                p: p,
+                icon: Icons.tune_rounded,
+                iconColor: p.orange,
+                title: 'Interactive Baseline Controls',
+                text:
+                    'Tailor sleep and travel sliders with real-time conscious crucible recalculation.',
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = paletteFor(theme);
@@ -2488,6 +2703,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'dashboard' || key == 'dashboard-redesign') {
                     return _buildDashboardRedesignPage(p);
+                  }
+                  if (key == 'life-audit' ||
+                      key == 'life-audit-intro' ||
+                      key == 'time-waste') {
+                    return _buildLifeAuditIntroPage(p);
                   }
                   return const SizedBox.shrink();
                 }).toList(),
