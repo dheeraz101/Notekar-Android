@@ -10,6 +10,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/notice_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 class OfficialBulletinsSheet extends StatelessWidget {
   const OfficialBulletinsSheet({
@@ -17,24 +18,31 @@ class OfficialBulletinsSheet extends StatelessWidget {
     required this.p,
     required this.onOpenLink,
     this.onBack,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
   final void Function(String url) onOpenLink;
   final VoidCallback? onBack;
+  final VoidCallback? onLearnMoreBeta;
 
   static Future<void> show(
     BuildContext context, {
     required Palette p,
     required void Function(String url) onOpenLink,
     VoidCallback? onBack,
+    VoidCallback? onLearnMoreBeta,
   }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          OfficialBulletinsSheet(p: p, onOpenLink: onOpenLink, onBack: onBack),
+      builder: (context) => OfficialBulletinsSheet(
+        p: p,
+        onOpenLink: onOpenLink,
+        onBack: onBack,
+        onLearnMoreBeta: onLearnMoreBeta,
+      ),
     );
   }
 
@@ -49,7 +57,11 @@ class OfficialBulletinsSheet extends StatelessWidget {
         height: MediaQuery.sizeOf(context).height * 0.78,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          child: OfficialBulletinsContent(p: p, onOpenLink: onOpenLink),
+          child: OfficialBulletinsContent(
+            p: p,
+            onOpenLink: onOpenLink,
+            onLearnMoreBeta: onLearnMoreBeta,
+          ),
         ),
       ),
     );
@@ -61,10 +73,12 @@ class OfficialBulletinsContent extends StatefulWidget {
     super.key,
     required this.p,
     required this.onOpenLink,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
   final void Function(String url) onOpenLink;
+  final VoidCallback? onLearnMoreBeta;
 
   @override
   State<OfficialBulletinsContent> createState() =>
@@ -443,6 +457,8 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
           ],
         ],
 
+        const SizedBox(height: 16),
+        SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

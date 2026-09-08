@@ -681,13 +681,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
           ],
         ),
         if (onLearnMoreBeta != null)
-          SettingsBetaNote(
-            p: p,
-            text:
-                'Hourly Time Reflection & Mindfulness features are currently under Beta stage.'
-                    .localized(context),
-            onLearnMore: onLearnMoreBeta!,
-          ),
+          SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta!),
         const SizedBox(height: 48),
       ],
     );

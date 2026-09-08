@@ -103,6 +103,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
               'These settings refine the interface aesthetic and do not modify your saved data.'
                   .localized(context),
         ),
+        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

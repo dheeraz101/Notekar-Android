@@ -356,12 +356,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
           text: 'Technical stats about your device and the Adaptive Engine.'
               .localized(context),
         ),
-        SettingsBetaNote(
-          p: widget.p,
-          text: 'The current features on this page are under Beta stage.'
-              .localized(context),
-          onLearnMore: widget.onLearnMoreBeta,
-        ),
+        SettingsBetaNote(p: widget.p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

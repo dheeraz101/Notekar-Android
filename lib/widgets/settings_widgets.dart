@@ -974,22 +974,177 @@ class SettingsPageDescription extends StatelessWidget {
   }
 }
 
+void showBetaInfoPopup(
+  BuildContext context,
+  Palette p, {
+  VoidCallback? onFeedback,
+}) {
+  showGeneralDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    barrierDismissible: true,
+    barrierLabel: 'Dismiss',
+    transitionDuration: const Duration(milliseconds: 150),
+    pageBuilder: (_, anim1, _) => ScaleTransition(
+      scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 320,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: p.border.withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
+                      const SizedBox(width: 5),
+                      Text(
+                        'BETA REFINEMENT'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Early Access Innovation'.localized(context),
+                  style: TextStyle(
+                    color: p.text,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Features marked as Beta are fully functional, stable, and production-grade, but actively undergoing continuous refinement and polish based on real-world usage. All calculations, data, and security policies remain strictly offline and private to your device.'
+                      .localized(context),
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: p.text2,
+                    fontSize: 13,
+                    height: 1.45,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 12.5,
+                      height: 1.45,
+                      letterSpacing: -0.1,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '* Have feedback or found an edge case? '
+                            .localized(context),
+                      ),
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.baseline,
+                        baseline: TextBaseline.alphabetic,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                            onFeedback?.call();
+                          },
+                          child: Text(
+                            'Give Feedback'.localized(context),
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                              decorationColor: p.accent.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+                PressableScale(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: double.infinity,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: p.accent,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      'Got It'.localized(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class SettingsBetaNote extends StatelessWidget {
   const SettingsBetaNote({
     super.key,
     required this.p,
-    required this.text,
-    required this.onLearnMore,
+    this.text,
+    this.onLearnMore,
     this.bottomPadding = 16.0,
   });
 
   final Palette p;
-  final String text;
-  final VoidCallback onLearnMore;
+  final String? text;
+  final VoidCallback? onLearnMore;
   final double bottomPadding;
+
+  static const String defaultBetaDescription =
+      'Features on this page are in active development and continuous refinement.';
 
   @override
   Widget build(BuildContext context) {
+    final displayText = text ?? defaultBetaDescription;
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 5, 20, bottomPadding),
       child: Text.rich(
@@ -1004,7 +1159,7 @@ class SettingsBetaNote extends StatelessWidget {
             letterSpacing: -0.05,
           ),
           children: [
-            TextSpan(text: '${text.localized(context)} '),
+            TextSpan(text: '${displayText.localized(context)} '),
             TextSpan(
               text: 'Learn More'.localized(context),
               style: const TextStyle(
@@ -1016,7 +1171,8 @@ class SettingsBetaNote extends StatelessWidget {
                 fontVariations: [FontVariation('wght', 400)],
                 decoration: TextDecoration.none,
               ),
-              recognizer: TapGestureRecognizer()..onTap = onLearnMore,
+              recognizer: TapGestureRecognizer()
+                ..onTap = onLearnMore ?? () => showBetaInfoPopup(context, p),
             ),
           ],
         ),

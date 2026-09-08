@@ -380,12 +380,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          find.textContaining('Life Audit mathematical models'),
+          find.textContaining('active development and continuous refinement'),
           findsOneWidget,
         );
         expect(find.textContaining('Learn More'), findsOneWidget);
         final betaNoteWidget = tester.widget<SettingsBetaNote>(betaNoteFinder);
-        betaNoteWidget.onLearnMore();
+        betaNoteWidget.onLearnMore?.call();
         await tester.pumpAndSettle();
         expect(betaClicked, isTrue);
       },

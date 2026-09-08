@@ -528,12 +528,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           bottomPadding: spacing16,
         ),
         const SizedBox(height: spacing8),
-        SettingsBetaNote(
-          p: p,
-          text: 'The current features on this page are under Beta stage.'
-              .localized(context),
-          onLearnMore: widget.onLearnMoreBeta,
-        ),
+        SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );
@@ -1084,13 +1079,7 @@ class BuildTrackSelectPage extends StatelessWidget {
             ],
           ),
         ),
-        SettingsBetaNote(
-          p: p,
-          text:
-              'The features on this track receive priority updates and active testing. Beta users also receive all stable releases.'
-                  .localized(context),
-          onLearnMore: onLearnMoreBeta,
-        ),
+        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );
@@ -1303,12 +1292,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               'View release highlights, version logs, and bug fix summaries for NoteKar.'
                   .localized(context),
         ),
-        SettingsBetaNote(
-          p: p,
-          text: 'The current features on this page are under Beta stage.'
-              .localized(context),
-          onLearnMore: onLearnMoreBeta,
-        ),
+        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

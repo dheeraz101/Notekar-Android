@@ -238,12 +238,7 @@ class AppLockSettingsPage extends StatelessWidget {
             ],
           ),
         ),
-        SettingsBetaNote(
-          p: p,
-          text: 'The current features on this page are under Beta stage.'
-              .localized(context),
-          onLearnMore: onLearnMoreBeta,
-        ),
+        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

@@ -23,7 +23,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.4.0',
+    version: '7.5.0',
     date: 'September 08, 2026',
     edition: 'Life Audit & Spatial Harmony',
     badgeColor: Color(0xFF7000FF),
@@ -78,8 +78,40 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         badgeColor: Color(0xFFFF2D55),
         specs: '7 Offline Locales · Unseen Update Cards · Devanagari Type',
       ),
+      (
+        title: 'Official Bulletins & Calibration',
+        category: 'SOVEREIGN NOTICE ENGINE',
+        headline: 'Zero-Tracking Resilience. True Historical Bounds.',
+        desc:
+            'Notice engine hardened across 7 languages with non-blocking offline feedback, paired with calibrated existential void metrics and unified settings navigation.',
+        icon: Icons.campaign_rounded,
+        badgeColor: Color(0xFF0A84FF),
+        specs:
+            '7 Languages · Security Shield · Bounded Metrics · Zero Telemetry',
+      ),
     ],
     highlights: [
+      (
+        title: 'Hardened Official Bulletins',
+        desc:
+            'Native 7-language parity, dedicated security section, non-blocking offline toast & silent auto-sync.',
+        icon: Icons.campaign_rounded,
+        tag: 'Notices',
+      ),
+      (
+        title: 'Life Ledger History Calibration',
+        desc:
+            'Existential void calculations strictly bounded to verified history, eliminating phantom void hours.',
+        icon: Icons.auto_graph_rounded,
+        tag: 'Precision',
+      ),
+      (
+        title: 'Unified Settings Navigation',
+        desc:
+            'Seamless bulletin category navigation stack and universal back handlers across all modal sheets.',
+        icon: Icons.settings_rounded,
+        tag: 'UX Flow',
+      ),
       (
         title: 'Life Audit & The Void',
         desc:
@@ -110,6 +142,19 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       ),
     ],
     items: [
+      '• NoteKar has revisioned itself — honoring the truth of human history.',
+      '+ Add native 7-language support (EN, HI, ES, DE, FR, JA, RU) to AppNotice and local-first NoticeService defaults',
+      '+ Introduce full notification hierarchy: Critical, Security (dedicated section), Release Bulletins, and Curated Tips',
+      '+ Remove status circle dot next to "Notice Engine Active" for clean visual hierarchy',
+      '+ Replace blocking modal alerts with non-blocking Apple-style iOS pill toast on manual refresh',
+      '+ Implement silent background auto-sync for stale cache (> 4h) and automatic recovery from corrupted cache',
+      '+ Add contextual action routing and localized action button labels (releases, settings, audit, history, web links)',
+      '+ Calibrate existential wastage metrics to recorded history bounds, preventing uncalibrated void hours for new users',
+      '+ Equalize card dimensions for Waking Days and Earth Days lost under "The Cost of Void"',
+      '+ Resolve text truncation and header collision in Life Audit dashboard card',
+      '+ Integrate Official Bulletins into Settings category navigation stack with seamless back button routing',
+      '+ Add universal back handlers to all secondary modal dialogs and bottom sheets',
+      '+ Harden CI/CD GitHub Action workflow for VirusTotal verification link injection in release notes',
       '+ Add Life Audit time wastage engine with 24-hour conscious partitions and 6 temporal horizons',
       '+ Implement The Cost of the Void existential metrics: Waking Days Lost and Earth Days Lost',
       '+ Introduce Executive Dashboard Life Audit card with dynamic horizon indicators and overflow guards',
@@ -119,7 +164,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       '+ Overhaul NoteDialog with WhatsApp-grade zero-lag input, sentence capitalization, and composition safety',
       '+ Migrate feature tours from settings to onboarding, adding standalone unseen cards for updating users',
       '+ Expand offline multilingual localizations across 7 languages (EN, HI, ES, FR, DE, JA, RU)',
-      '* Full automated test suite passing across all unit, widget, and state continuity verifications',
+      '* Full automated test suite passing across all 115 unit and widget verifications',
     ],
   );
 

@@ -84,13 +84,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         // 6. Beta Refinement Note
         if (widget.onLearnMoreBeta != null) ...[
           const SizedBox(height: 16),
-          SettingsBetaNote(
-            p: p,
-            text:
-                'Life Audit mathematical models and conscious partitions are in active refinement. Unaccounted void metrics are continuously calibrated for precision.'
-                    .localized(context),
-            onLearnMore: widget.onLearnMoreBeta!,
-          ),
+          SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta!),
         ],
         const SizedBox(height: spacing48),
       ],

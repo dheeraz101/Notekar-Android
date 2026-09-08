@@ -403,6 +403,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             context,
             p: p,
             onOpenLink: widget.onOpenLink,
+            onLearnMoreBeta: () => _showBetaInfoPopup(p),
           );
         },
         child: Container(
@@ -3354,154 +3355,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _showBetaInfoPopup(Palette p) {
-    showGeneralDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      transitionDuration: const Duration(milliseconds: 150),
-      pageBuilder: (_, anim1, _) => ScaleTransition(
-        scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
-        child: Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: 310,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              decoration: BoxDecoration(
-                color: p.surface2,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: p.border.withValues(alpha: 0.5)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.sparkles,
-                          size: 13,
-                          color: p.accent,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'BETA REFINEMENT'.localized(context),
-                          style: TextStyle(
-                            color: p.accent,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Early Access Innovation'.localized(context),
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Features marked as Beta are fully functional, stable, and production-grade, but actively undergoing mathematical calibration and ergonomic tuning based on real-world usage.'
-                        .localized(context),
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: 13,
-                      height: 1.45,
-                      letterSpacing: -0.1,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '• Priority Updates: Enhancements ship first to beta testers before wide public stabilization.\n• 100% Offline & Private: Zero telemetry or cloud syncing. All calculations, data, and security policies remain strictly on your device.'
-                        .localized(context),
-                    style: TextStyle(
-                      color: p.text3,
-                      fontSize: 12,
-                      height: 1.5,
-                      letterSpacing: -0.1,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        '* Have feedback or found an edge case? '.localized(
-                          context,
-                        ),
-                        style: TextStyle(color: p.text2, fontSize: 13),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                          _openFeedback();
-                        },
-                        child: Text(
-                          'Give Feedback'.localized(context),
-                          style: TextStyle(
-                            color: p.accent,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  PressableScale(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: double.infinity,
-                      height: 48,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: p.accent,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'Got It'.localized(context),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    showBetaInfoPopup(context, p, onFeedback: _openFeedback);
   }
 
   Future<void> _loadNetworkLogs() async {
@@ -6161,6 +6015,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               child: OfficialBulletinsContent(
                                 p: p,
                                 onOpenLink: widget.onOpenLink,
+                                onLearnMoreBeta: () => _showBetaInfoPopup(p),
                               ),
                             ),
                           ),

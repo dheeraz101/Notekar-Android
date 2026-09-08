@@ -1,5 +1,52 @@
 [
   {
+    "version": "7.5.0",
+    "buildNumber": "26PR0908a",
+    "releaseDate": "2026-09-08",
+    "channel": "priority",
+    "channelTag": "[Priority]",
+    "isBeta": false,
+    "edition": "Official Bulletins \u0026 Life Ledger Calibration",
+    "badgeColor": "#0A84FF",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Hardened Official Bulletins",
+        "description": "7-language localization parity, dedicated security section, non-blocking offline toast, and silent freshness sync.",
+        "icon": "campaign_rounded"
+      },
+      {
+        "title": "Life Ledger History Calibration",
+        "description": "Existential void calculations strictly bounded to verified history, eliminating phantom void hours.",
+        "icon": "auto_graph_rounded"
+      },
+      {
+        "title": "Unified Settings Navigation",
+        "description": "Seamless bulletin category navigation stack and universal back handlers across all modal sheets.",
+        "icon": "settings_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "NoteKar has revisioned itself — honoring the truth of human history.",
+      "Add native 7-language support (EN, HI, ES, DE, FR, JA, RU) to AppNotice and local-first NoticeService defaults",
+      "Introduce full notification hierarchy: Critical, Security (dedicated section), Release Bulletins, and Curated Tips",
+      "Remove status circle dot next to 'Notice Engine Active' for clean visual hierarchy",
+      "Replace blocking modal alerts with non-blocking Apple-style iOS pill toast on manual refresh",
+      "Implement silent background auto-sync for stale cache (> 4h) and automatic recovery from corrupted cache",
+      "Add contextual action routing and localized action button labels (releases, settings, audit, history, web links)",
+      "Calibrate existential wastage metrics to recorded history bounds, preventing uncalibrated void hours for new users",
+      "Equalize card dimensions for Waking Days and Earth Days lost under 'The Cost of Void'",
+      "Resolve text truncation and header collision in Life Audit dashboard card",
+      "Integrate Official Bulletins into Settings category navigation stack with seamless back button routing",
+      "Add universal back handlers to all secondary modal dialogs and bottom sheets",
+      "Harden CI/CD GitHub Action workflow for VirusTotal verification link injection in release notes"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.0/NoteKar-v7.5.0-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.0/NoteKar-v7.5.0-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.4.0",
     "buildNumber": "26PR0908",
     "releaseDate": "2026-09-08",
@@ -8,7 +55,7 @@
     "isBeta": false,
     "edition": "Life Audit, Spatial Harmony \u0026 Sovereign Signal",
     "badgeColor": "#7000FF",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Life Audit \u0026 The Void",

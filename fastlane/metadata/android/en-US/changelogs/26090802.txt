@@ -1,0 +1,6 @@
+Update to v7.5.0 (Priority Update):
+• NoteKar has revisioned itself — honoring the truth of human history.
+• Official Bulletins: 7-language support, security advisories, non-blocking offline toast & silent auto-sync.
+• Life Ledger: Calibrated existential void engine to user history bounds, eliminating phantom void hours.
+• Design & UI: Equalized Cost of Void cards, anti-collision headers, and universal back navigation.
+• Security: Automated VirusTotal verification on all releases.

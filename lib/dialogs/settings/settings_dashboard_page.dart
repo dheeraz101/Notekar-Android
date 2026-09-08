@@ -91,12 +91,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         DailyRhythmBarChart(p: p, data: dashboardData.dailyRhythm),
         FocusTagBreakdownCard(p: p, data: dashboardData.focusBreakdown),
         YearlyActivityGridCard(p: p, stats: dashboardData.gridStats),
-        SettingsBetaNote(
-          p: p,
-          text: 'The current features on this page are under Beta stage.'
-              .localized(context),
-          onLearnMore: widget.onLearnMoreBeta,
-        ),
+        SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

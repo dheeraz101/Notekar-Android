@@ -7,6 +7,50 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.0] - 2026-09-08 (versionCode 26PR0908a) [PR]
+
+> *NoteKar has revisioned itself.* A sovereign tool does not merely log time; it honors the truth of
+> human history. This Priority Update hardens our zero-tracking notice architecture across 7
+> languages, calibrates existential boundaries to eliminate phantom void calculations, and unifies
+> modal navigation into an unbroken flow.
+
+### What's New
+
+- **Hardened Official Bulletins & Zero-Tracking Notice Architecture**:
+    - **7-Language Localization Parity**: App notices, advisories, and system notifications now
+      resolve natively in 7 languages (English, Hindi with Devanagari numerals, Spanish, German,
+      French, Japanese, Russian).
+    - **Hierarchical Priority Categories**: Explicit categorizations for Critical Advisories,
+      Security Advisories (with dedicated shield branding), Release Bulletins, and Curated Tips.
+    - **Offline-First Tactile Feedback**: Eliminated intrusive blocking dialogs; network offline
+      states now trigger an elegant, non-blocking Apple-style iOS pill toast (`showIosPillToast`).
+    - **Silent Background Freshness Sync**: Stale bulletins (> 4 hours) sync quietly in the
+      background without UI interruption; corrupted local caches automatically self-heal and restore
+      defaults.
+    - **Context-Aware Smart Actions**: Bulletin action buttons dynamically adapt their title and
+      iconography ("View Release", "Open Life Audit", "Go to Settings", "Open History") with strict
+      6-second timeout guards.
+
+- **Life Ledger History Calibration**:
+    - **Boundary-Anchored Wastage Engine**: Life Audit existential void hours and waking loss
+      metrics are strictly bounded to the user's recorded tracking span, completely eliminating
+      edge-case phantom void hours on new or variable-history accounts.
+    - **Symmetrical Cost of Void Layout**: Equalized dimensions and visual weight for "Waking Days
+      Lost" and "Earth Days Lost" subcards with harmonized inner padding.
+    - **Collision-Proof Typography**: Refined header spacing and text containers to guarantee clean
+      negative space and zero text clipping across all screen sizes.
+
+- **Universal Settings Navigation & Flow Unification**:
+    - **Seamless Settings Navigation**: Integrated Official Bulletins directly into the Settings
+      category stack with natural back-button routing.
+    - **Universal Modal Back Handlers**: Added explicit `onBack` handlers to all modal dialogs,
+      secondary inspection sheets, Milestone Peak celebrations, and reset workflows.
+
+- **CI/CD Automation & Security Hardening**:
+    - Hardened automated GitHub Actions release workflow with deterministic fallback regex,
+      guaranteeing automated VirusTotal anti-malware verification links are permanently injected
+      into every published release note.
+
 ## [7.4.0] - 2026-09-08 (versionCode 26PR0908) [PR]
 
 > *NoteKar has revisioned itself.* Moving beyond a minimalist clicker, NoteKar elevates into an

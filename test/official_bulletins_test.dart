@@ -6,6 +6,7 @@ import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/notice_service.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -39,7 +40,7 @@ void main() {
         expect(notice['body_ja'], isNotEmpty);
         expect(notice['body_ru'], isNotEmpty);
         expect(notice['minVersion'], '7.0.0');
-        expect(notice['maxVersion'], '7.4.0');
+        expect(notice['maxVersion'], '7.5.0');
         expect(notice['priority'], 'normal');
       },
     );
@@ -235,6 +236,47 @@ void main() {
         expect(find.text('SECURITY ADVISORIES'), findsOneWidget);
         expect(find.text('Test Security Patch'), findsOneWidget);
         expect(find.text('SECURITY'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Renders standard SettingsBetaNote on OfficialBulletinsContent and triggers callback',
+      (tester) async {
+        bool betaClicked = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: OfficialBulletinsContent(
+                  p: p,
+                  onOpenLink: (_) {},
+                  onLearnMoreBeta: () => betaClicked = true,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final betaFinder = find.byType(SettingsBetaNote);
+        await tester.scrollUntilVisible(
+          betaFinder,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+
+        expect(betaFinder, findsOneWidget);
+        expect(
+          find.textContaining('active development and continuous refinement'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('Learn More'), findsOneWidget);
+
+        final betaWidget = tester.widget<SettingsBetaNote>(betaFinder);
+        betaWidget.onLearnMore?.call();
+        await tester.pumpAndSettle();
+        expect(betaClicked, isTrue);
       },
     );
   });

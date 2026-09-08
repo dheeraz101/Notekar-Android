@@ -604,7 +604,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('KEYNOTE RELEASE'), findsOneWidget);
-        expect(find.text('v7.4.0 Update'), findsOneWidget);
+        expect(
+          find.text(
+            'v${FeedbackChangelogSettingsPage.latestRelease.version} Update',
+          ),
+          findsOneWidget,
+        );
         expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
         expect(find.text('Life Audit & The Void'), findsOneWidget);
         expect(find.text('Spatial Bebas Neue Clock'), findsOneWidget);
