@@ -20,7 +20,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
     required this.onLocaleChanged,
     required this.onAccentColorChanged,
     required this.onOpenCategory,
-    required this.onLearnMoreBeta,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -35,7 +35,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
   final ValueChanged<String> onLocaleChanged;
   final ValueChanged<String> onAccentColorChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
-  final VoidCallback onLearnMoreBeta;
+  final VoidCallback? onLearnMoreBeta;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +103,6 @@ class PersonalizationSettingsPage extends StatelessWidget {
               'These settings refine the interface aesthetic and do not modify your saved data.'
                   .localized(context),
         ),
-        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

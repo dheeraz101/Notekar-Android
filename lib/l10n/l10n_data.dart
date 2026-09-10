@@ -769,6 +769,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'the cost of the void': 'Le coût du vide',
     'the current features on this page are under beta stage.':
         'Les fonctionnalités actuelles de cette page sont en phase bêta.',
+    'about beta features': 'À propos des fonctionnalités bêta',
+    'features on this page are in beta and continuously improving.':
+        'Les fonctionnalités de cette page sont en version bêta et s\'améliorent continuellement.',
+    'this feature is ready to use and actively being refined. all your data stays private and stored securely on your device.':
+        'Cette fonctionnalité est prête à l\'emploi et activement peaufinée. Toutes vos données restent privées et stockées en sécurité sur votre appareil.',
+    '* have feedback or noticed an issue? ':
+        '* Un avis ou un problème constaté ? ',
     'the stoic reality': 'LA RÉALITÉ STOÏCIENNE',
     'theme': 'Thème',
     'theme description': 'Themenbeschreibung',
@@ -1600,6 +1607,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'the cost of the void': 'El costo del vacío',
     'the current features on this page are under beta stage.':
         'Las funciones actuales de esta página están en fase Beta.',
+    'about beta features': 'Acerca de las funciones Beta',
+    'features on this page are in beta and continuously improving.':
+        'Las funciones de esta página están en beta y mejoran continuamente.',
+    'this feature is ready to use and actively being refined. all your data stays private and stored securely on your device.':
+        'Esta función está lista para usarse y se perfecciona activamente. Todos tus datos permanecen privados y almacenados de forma segura en tu dispositivo.',
+    '* have feedback or noticed an issue? ':
+        '* ¿Tienes comentarios o encontraste un problema? ',
     'the stoic reality': 'LA REALIDAD ESTOICA',
     'theme': 'Tema',
     'theme description': 'Descripción del tema',
@@ -2415,6 +2429,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'the cost of the void': 'व्यर्थ समय की लागत',
     'the current features on this page are under beta stage.':
         'इस पृष्ठ की वर्तमान विशेषताएं बीटा चरण में हैं।',
+    'about beta features': 'बीटा सुविधाओं के बारे में',
+    'features on this page are in beta and continuously improving.':
+        'इस पृष्ठ की सुविधाएँ बीटा में हैं और लगातार बेहतर हो रही हैं।',
+    'this feature is ready to use and actively being refined. all your data stays private and stored securely on your device.':
+        'यह सुविधा उपयोग के लिए तैयार है और इसमें लगातार सुधार किया जा रहा है। आपका सारा डेटा आपके डिवाइस पर निजी और सुरक्षित रहता है।',
+    '* have feedback or noticed an issue? ': '* कोई प्रतिक्रिया या समस्या है? ',
     'the stoic reality': 'स्टोइक यथार्थ',
     'theme': 'थीम',
     'theme description': 'थीम विवरण',
@@ -3323,6 +3343,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'the cost of the void': 'Die Kosten der Leere',
     'the current features on this page are under beta stage.':
         'Die Funktionen auf dieser Seite befinden sich im Beta-Stadium.',
+    'about beta features': 'Über Beta-Funktionen',
+    'features on this page are in beta and continuously improving.':
+        'Funktionen auf dieser Seite sind in der Beta-Phase und werden kontinuierlich verbessert.',
+    'this feature is ready to use and actively being refined. all your data stays private and stored securely on your device.':
+        'Diese Funktion ist einsatzbereit und wird aktiv verfeinert. Alle Ihre Daten bleiben privat und sicher auf Ihrem Gerät gespeichert.',
+    '* have feedback or noticed an issue? ':
+        '* Haben Sie Feedback oder ein Problem bemerkt? ',
     'the stoic reality': 'DIE STOISCHE REALITÄT',
     'theme': 'Design',
     'theme description': 'Themenbeschreibung',
@@ -4188,6 +4215,12 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'the cost of the void': '虚無のコスト',
     'the current features on this page are under beta stage.':
         'このページの機能は現在ベータ版です。',
+    'about beta features': 'ベータ版機能について',
+    'features on this page are in beta and continuously improving.':
+        'このページの機能はベータ版であり、継続的に改善されています。',
+    'this feature is ready to use and actively being refined. all your data stays private and stored securely on your device.':
+        'この機能はすぐに利用でき、継続的に改善されています。すべてのデータは非公開のまま端末に安全に保存されます。',
+    '* have feedback or noticed an issue? ': '* ご意見や問題の報告はこちら: ',
     'the stoic reality': 'ストア派の真理',
     'theme': 'テーマ',
     'theme description': 'テーマの説明',
@@ -5089,6 +5122,13 @@ const Map<String, Map<String, String>> kL10nTranslations = {
     'the cost of the void': 'Цена пустоты',
     'the current features on this page are under beta stage.':
         'Функции на этой странице находятся на стадии бета-тестирования.',
+    'about beta features': 'О бета-функциях',
+    'features on this page are in beta and continuously improving.':
+        'Функции на этой странице находятся в бета-версии и постоянно улучшаются.',
+    'this feature is ready to use and actively being refined. all your data stays private and stored securely on your device.':
+        'Эта функция готова к использованию и активно дорабатывается. Все ваши данные остаются приватными и надежно хранятся на устройстве.',
+    '* have feedback or noticed an issue? ':
+        '* Есть отзыв или заметили проблему? ',
     'the stoic reality': 'СТОИЧЕСКАЯ ИСТИНА',
     'theme': 'Тема',
     'theme description': 'Описание темы',

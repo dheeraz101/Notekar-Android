@@ -18,7 +18,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
     required this.obfuscateInRecents,
     required this.onObfuscateInRecentsChanged,
     required this.onOpenCategory,
-    required this.onLearnMoreBeta,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -30,7 +30,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
   final bool obfuscateInRecents;
   final ValueChanged<bool> onObfuscateInRecentsChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
-  final VoidCallback onLearnMoreBeta;
+  final VoidCallback? onLearnMoreBeta;
 
   @override
   Widget build(BuildContext context) {
@@ -212,8 +212,6 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
               'Requires user consent. When enabled, your sensitive moments and notes cannot be viewed from the app switcher.'
                   .localized(context),
         ),
-
-        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

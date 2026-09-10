@@ -380,7 +380,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          find.textContaining('active development and continuous refinement'),
+          find.textContaining('in beta and continuously improving'),
           findsOneWidget,
         );
         expect(find.textContaining('Learn More'), findsOneWidget);

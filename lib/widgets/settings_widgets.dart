@@ -1024,7 +1024,7 @@ void showBetaInfoPopup(
                       Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
                       const SizedBox(width: 5),
                       Text(
-                        'BETA REFINEMENT'.localized(context),
+                        'BETA'.localized(context),
                         style: TextStyle(
                           color: p.accent,
                           fontSize: 10.5,
@@ -1037,7 +1037,7 @@ void showBetaInfoPopup(
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Early Access Innovation'.localized(context),
+                  'About Beta Features'.localized(context),
                   style: TextStyle(
                     color: p.text,
                     fontSize: 18,
@@ -1047,7 +1047,7 @@ void showBetaInfoPopup(
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Features marked as Beta are fully functional, stable, and production-grade, but actively undergoing continuous refinement and polish based on real-world usage. All calculations, data, and security policies remain strictly offline and private to your device.'
+                  'This feature is ready to use and actively being refined. All your data stays private and stored securely on your device.'
                       .localized(context),
                   textAlign: TextAlign.left,
                   style: TextStyle(
@@ -1068,8 +1068,9 @@ void showBetaInfoPopup(
                     ),
                     children: [
                       TextSpan(
-                        text: '* Have feedback or found an edge case? '
-                            .localized(context),
+                        text: '* Have feedback or noticed an issue? '.localized(
+                          context,
+                        ),
                       ),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.baseline,
@@ -1106,7 +1107,7 @@ void showBetaInfoPopup(
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      'Got It'.localized(context),
+                      'Done'.localized(context),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -1131,16 +1132,18 @@ class SettingsBetaNote extends StatelessWidget {
     required this.p,
     this.text,
     this.onLearnMore,
+    this.onFeedback,
     this.bottomPadding = 16.0,
   });
 
   final Palette p;
   final String? text;
   final VoidCallback? onLearnMore;
+  final VoidCallback? onFeedback;
   final double bottomPadding;
 
   static const String defaultBetaDescription =
-      'Features on this page are in active development and continuous refinement.';
+      'Features on this page are in beta and continuously improving.';
 
   @override
   Widget build(BuildContext context) {
@@ -1172,7 +1175,9 @@ class SettingsBetaNote extends StatelessWidget {
                 decoration: TextDecoration.none,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = onLearnMore ?? () => showBetaInfoPopup(context, p),
+                ..onTap =
+                    onLearnMore ??
+                    () => showBetaInfoPopup(context, p, onFeedback: onFeedback),
             ),
           ],
         ),

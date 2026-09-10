@@ -10,7 +10,6 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/notice_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
-import 'package:notekar/widgets/settings_widgets.dart';
 
 class OfficialBulletinsSheet extends StatelessWidget {
   const OfficialBulletinsSheet({
@@ -457,8 +456,6 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
           ],
         ],
 
-        const SizedBox(height: 16),
-        SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

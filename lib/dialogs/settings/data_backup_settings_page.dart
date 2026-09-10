@@ -27,7 +27,7 @@ class DataBackupSettingsPage extends StatelessWidget {
     required this.onRestoreBackupFromString,
     required this.onSaveQuickBackup,
     required this.onOpenCategory,
-    required this.onLearnMoreBeta,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -45,7 +45,7 @@ class DataBackupSettingsPage extends StatelessWidget {
   final Future<bool> Function(String content) onRestoreBackupFromString;
   final VoidCallback onSaveQuickBackup;
   final void Function(String category, {required String parent}) onOpenCategory;
-  final VoidCallback onLearnMoreBeta;
+  final VoidCallback? onLearnMoreBeta;
 
   @override
   Widget build(BuildContext context) {
@@ -289,8 +289,6 @@ class DataBackupSettingsPage extends StatelessWidget {
               'Planned cloud features will provide direct cloud synchronization across your personal devices.'
                   .localized(context),
         ),
-
-        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

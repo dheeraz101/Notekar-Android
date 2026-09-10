@@ -19,7 +19,7 @@ class AppLockSettingsPage extends StatelessWidget {
     required this.onPrivacyLockDelayChanged,
     required this.onOpenCategory,
     required this.onPopCategory,
-    required this.onLearnMoreBeta,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -35,7 +35,7 @@ class AppLockSettingsPage extends StatelessWidget {
   final ValueChanged<int> onPrivacyLockDelayChanged;
   final void Function(String category) onOpenCategory;
   final VoidCallback onPopCategory;
-  final VoidCallback onLearnMoreBeta;
+  final VoidCallback? onLearnMoreBeta;
 
   @override
   Widget build(BuildContext context) {
@@ -238,7 +238,6 @@ class AppLockSettingsPage extends StatelessWidget {
             ],
           ),
         ),
-        SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
     );

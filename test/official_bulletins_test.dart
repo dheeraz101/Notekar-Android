@@ -240,18 +240,13 @@ void main() {
     );
 
     testWidgets(
-      'Renders standard SettingsBetaNote on OfficialBulletinsContent and triggers callback',
+      'Does not render SettingsBetaNote on OfficialBulletinsContent',
       (tester) async {
-        bool betaClicked = false;
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(
-                child: OfficialBulletinsContent(
-                  p: p,
-                  onOpenLink: (_) {},
-                  onLearnMoreBeta: () => betaClicked = true,
-                ),
+                child: OfficialBulletinsContent(p: p, onOpenLink: (_) {}),
               ),
             ),
           ),
@@ -259,24 +254,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final betaFinder = find.byType(SettingsBetaNote);
-        await tester.scrollUntilVisible(
-          betaFinder,
-          200,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.pumpAndSettle();
-
-        expect(betaFinder, findsOneWidget);
-        expect(
-          find.textContaining('active development and continuous refinement'),
-          findsOneWidget,
-        );
-        expect(find.textContaining('Learn More'), findsOneWidget);
-
-        final betaWidget = tester.widget<SettingsBetaNote>(betaFinder);
-        betaWidget.onLearnMore?.call();
-        await tester.pumpAndSettle();
-        expect(betaClicked, isTrue);
+        expect(betaFinder, findsNothing);
       },
     );
   });
