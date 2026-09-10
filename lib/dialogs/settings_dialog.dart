@@ -6008,15 +6008,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
                         if (show('Official Bulletins'))
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                              ),
-                              child: OfficialBulletinsContent(
-                                p: p,
-                                onOpenLink: widget.onOpenLink,
-                                onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                              ),
+                            child: OfficialBulletinsContent(
+                              p: p,
+                              onOpenLink: widget.onOpenLink,
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Data & Backup'))

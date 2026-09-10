@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,8 @@ class OfficialBulletinsSheet extends StatelessWidget {
       docked: true,
       onBack: onBack ?? () => Navigator.of(context).pop(),
       child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.78,
+        width: 410,
+        height: math.min(MediaQuery.sizeOf(context).height * 0.78, 680),
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: OfficialBulletinsContent(
@@ -213,6 +215,7 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const SizedBox(height: spacing8),
         // 1. Control & Status Pill Bar
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
