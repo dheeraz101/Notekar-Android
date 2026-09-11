@@ -89,6 +89,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
   String? _notice;
   VoidCallback? _noticeUndo;
   Timer? _noticeTimer;
+  int _noticeToken = 0;
+  static const _noticeDuration = Duration(milliseconds: 3500);
   int _visibleCount = _pageSize;
   final _scrollController = ScrollController();
   bool _enableNoteOnClick = false;
@@ -260,8 +262,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
     setState(() {
       _notice = text;
       _noticeUndo = onUndo;
+      _noticeToken++;
     });
-    _noticeTimer = Timer(const Duration(milliseconds: 3500), () {
+    _noticeTimer = Timer(_noticeDuration, () {
       if (mounted) {
         setState(() {
           _notice = null;
@@ -986,91 +989,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 },
                 child: _notice == null
                     ? const SizedBox.shrink()
-                    : Container(
-                        key: const ValueKey('notice-bar'),
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: widget.p.name == 'amoled'
-                              ? const Color(0xFF121212)
-                              : widget.p.surface2,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: widget.p.border.withValues(alpha: 0.6),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.18),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color:
-                                    (_noticeUndo == null
-                                            ? widget.p.red
-                                            : widget.p.accent)
-                                        .withValues(alpha: 0.16),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                _noticeUndo == null
-                                    ? Icons.delete_outline_rounded
-                                    : Icons.info_outline_rounded,
-                                color: _noticeUndo == null
-                                    ? widget.p.red
-                                    : widget.p.accent,
-                                size: 16,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _notice!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            if (_noticeUndo != null) ...[
-                              const SizedBox(width: 10),
-                              PressableScale(
-                                onTap: _noticeUndo,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 7,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: widget.p.accent,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: const Text(
-                                    'Undo',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
+                    : _HistoryNoticePill(
+                        key: ValueKey('notice-pill-$_noticeToken'),
+                        p: widget.p,
+                        notice: _notice!,
+                        onUndo: _noticeUndo,
+                        token: _noticeToken,
+                        duration: _noticeDuration,
                       ),
               ),
             ),
@@ -1692,6 +1617,141 @@ class MomentOptionPill extends StatelessWidget {
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryNoticePill extends StatefulWidget {
+  const _HistoryNoticePill({
+    super.key,
+    required this.p,
+    required this.notice,
+    this.onUndo,
+    required this.token,
+    this.duration = const Duration(milliseconds: 3500),
+  });
+
+  final Palette p;
+  final String notice;
+  final VoidCallback? onUndo;
+  final int token;
+  final Duration duration;
+
+  @override
+  State<_HistoryNoticePill> createState() => _HistoryNoticePillState();
+}
+
+class _HistoryNoticePillState extends State<_HistoryNoticePill>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration)
+      ..forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HistoryNoticePill oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.token != widget.token) {
+      _controller
+        ..reset()
+        ..forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: widget.p.name == 'amoled'
+            ? const Color(0xFF121212)
+            : widget.p.surface2,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (_, _) {
+                  return FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: (1 - _controller.value).clamp(0.0, 1.0),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: widget.p.accent.withValues(alpha: 0.12),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.notice,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: widget.p.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  if (widget.onUndo != null) ...[
+                    const SizedBox(width: 10),
+                    PressableScale(
+                      onTap: widget.onUndo,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.accent,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'Undo'.localized(context),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -569,5 +570,70 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
       expect(find.text('Delete'), findsOneWidget);
     });
+
+    testWidgets(
+      'HistoryDialog shows undo pill with progress bar and without icon on delete, and tapping Undo restores',
+      (tester) async {
+        final now = DateTime.now();
+        final moment = Moment(
+          id: 101,
+          timestamp: now.millisecondsSinceEpoch,
+          type: 'single',
+          date: dateKey(now),
+          note: 'Task to undo',
+        );
+
+        int? deletedId;
+        Moment? restoredMoment;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: HistoryDialog(
+                p: p,
+                entries: [moment],
+                compactRows: false,
+                largeText: false,
+                minimalMomentOptions: false,
+                confirmDelete: false,
+                onDelete: (id) async => deletedId = id,
+                onRestore: (m) async => restoredMoment = m,
+                onUpdateNote: (_, _) async {},
+                onDuration: (_, _) {},
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Drag to delete the item
+        await tester.drag(
+          find.byType(TimelineSingleTile),
+          const Offset(-500, 0),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(deletedId, 101);
+        expect(find.text('Moment removed'), findsOneWidget);
+        expect(find.text('Undo'), findsOneWidget);
+
+        // Verify that the old icon is removed
+        expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+        expect(find.byIcon(Icons.info_outline_rounded), findsNothing);
+
+        // Verify that the progress bar exists (FractionallySizedBox)
+        expect(find.byType(FractionallySizedBox), findsWidgets);
+
+        // Tap Undo
+        await tester.tap(find.text('Undo'));
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        expect(restoredMoment?.id, 101);
+        expect(find.text('Moment removed'), findsNothing);
+      },
+    );
   });
 }
