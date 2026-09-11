@@ -357,6 +357,7 @@ class SearchNotesBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -368,18 +369,31 @@ class SearchNotesBox extends StatelessWidget {
         focusNode: focusNode,
         autofocus: true,
         onChanged: onChanged,
+        textAlignVertical: TextAlignVertical.center,
         style: TextStyle(color: p.text, fontSize: 14),
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          icon: Icon(Icons.search_rounded, color: p.text3, size: 20),
+          prefixIcon: Icon(Icons.search_rounded, color: p.text3, size: 20),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
           suffixIcon: controller.text.isEmpty
               ? null
-              : IconButton(
-                  onPressed: onClear,
-                  icon: Icon(Icons.close_rounded, color: p.text3, size: 18),
+              : GestureDetector(
+                  onTap: onClear,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(Icons.close_rounded, color: p.text3, size: 18),
+                  ),
                 ),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
           hintText: 'Search notes',
-          hintStyle: TextStyle(color: p.text3),
+          hintStyle: TextStyle(color: p.text3, fontSize: 14),
           border: InputBorder.none,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 13),

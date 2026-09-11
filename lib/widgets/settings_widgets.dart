@@ -1209,6 +1209,7 @@ class SettingsSearchBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -1220,10 +1221,14 @@ class SettingsSearchBox extends StatelessWidget {
         onChanged: onChanged,
         focusNode: focusNode,
         onTap: onTap,
+        textAlignVertical: TextAlignVertical.center,
         style: TextStyle(color: p.text, fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.search_rounded, color: p.text3, size: 20),
-          prefixIconConstraints: const BoxConstraints(minWidth: 32),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
           suffixIcon: controller.text.isEmpty
               ? null
               : GestureDetector(
@@ -1239,7 +1244,7 @@ class SettingsSearchBox extends StatelessWidget {
             minHeight: 32,
           ),
           hintText: 'Search settings',
-          hintStyle: TextStyle(color: p.text3),
+          hintStyle: TextStyle(color: p.text3, fontSize: 14),
           border: InputBorder.none,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 13),
