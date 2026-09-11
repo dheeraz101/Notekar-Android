@@ -22,6 +22,8 @@ class DataBackupSettingsPage extends StatelessWidget {
     required this.onExportCsv,
     required this.onExportRecentCsv,
     required this.onExportJson,
+    this.onExportMarkdown,
+    this.onExportCalendar,
     required this.onExportBackup,
     required this.onImportBackup,
     required this.onRestoreBackupFromString,
@@ -40,6 +42,8 @@ class DataBackupSettingsPage extends StatelessWidget {
   final VoidCallback onExportCsv;
   final VoidCallback onExportRecentCsv;
   final VoidCallback onExportJson;
+  final VoidCallback? onExportMarkdown;
+  final VoidCallback? onExportCalendar;
   final VoidCallback onExportBackup;
   final VoidCallback onImportBackup;
   final Future<bool> Function(String content) onRestoreBackupFromString;
@@ -182,6 +186,50 @@ class DataBackupSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Export moments to developer-friendly JSON format for advanced integrations and data portability.'
+                  .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Markdown Journal',
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.article_rounded,
+              title: 'Export Journal (.md)'.localized(context),
+              status: 'Markdown'.localized(context),
+              color: const Color(0xFF7000FF),
+              rowKind: 'link',
+              onTap: onExportMarkdown,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Generates date-grouped Markdown tables compatible with Obsidian, Logseq, and Notion.'
+                  .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Calendar Sessions',
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.calendar,
+              title: 'Export Calendar (.ics)'.localized(context),
+              status: 'Calendar'.localized(context),
+              color: p.orange,
+              rowKind: 'link',
+              onTap: onExportCalendar,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Converts Two-Way intervals into standard calendar events for Google Calendar, Outlook, and Samsung Calendar.'
                   .localized(context),
         ),
 

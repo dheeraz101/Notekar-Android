@@ -952,7 +952,7 @@ class AnomalyAlertCard extends StatelessWidget {
     final days = difference.inDays;
 
     return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 0),
+      margin: const EdgeInsets.only(top: 8, bottom: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: p.red.withValues(alpha: 0.08),

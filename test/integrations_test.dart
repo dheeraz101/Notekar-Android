@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/integrations_settings_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -138,10 +139,6 @@ void main() {
         expect(find.text('SYSTEM BRIDGES'), findsOneWidget);
         expect(find.text('Text Selection Menu'), findsOneWidget);
         expect(find.text('Share Target'), findsOneWidget);
-        expect(find.text('MARKDOWN JOURNAL'), findsOneWidget);
-        expect(find.text('Export Journal (.md)'), findsOneWidget);
-        expect(find.text('CALENDAR SESSIONS'), findsOneWidget);
-        expect(find.text('Export Calendar (.ics)'), findsOneWidget);
         expect(find.text('AUTOMATION BROADCAST API'), findsOneWidget);
         expect(find.text('Log Moment Intent'), findsOneWidget);
         expect(
@@ -157,6 +154,61 @@ void main() {
 
         expect(triggeredScheme, 'notekar://log?type=single&note=Quick%20Log');
         await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'DataBackupSettingsPage renders Markdown Journal and Calendar export sections under Backup & Export',
+      (tester) async {
+        final p = paletteFor('dark');
+        bool exportedMarkdown = false;
+        bool exportedCalendar = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DataBackupSettingsPage(
+                  p: p,
+                  subCategory: 'Backup & Export',
+                  entriesCount: 10,
+                  dataHealthStatus: '100% Healthy',
+                  backupReminderDays: 7,
+                  onBackupReminderDaysChanged: (_) {},
+                  onExportCsv: () {},
+                  onExportRecentCsv: () {},
+                  onExportJson: () {},
+                  onExportMarkdown: () => exportedMarkdown = true,
+                  onExportCalendar: () => exportedCalendar = true,
+                  onExportBackup: () {},
+                  onImportBackup: () {},
+                  onRestoreBackupFromString: (_) async => true,
+                  onSaveQuickBackup: () {},
+                  onOpenCategory: (_, {required parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('MARKDOWN JOURNAL'), findsOneWidget);
+        expect(find.text('Export Journal (.md)'), findsOneWidget);
+        expect(find.text('CALENDAR SESSIONS'), findsOneWidget);
+        expect(find.text('Export Calendar (.ics)'), findsOneWidget);
+
+        final journalBtn = find.text('Export Journal (.md)');
+        await tester.ensureVisible(journalBtn);
+        await tester.pumpAndSettle();
+        await tester.tap(journalBtn);
+        await tester.pump();
+        expect(exportedMarkdown, isTrue);
+
+        final calendarBtn = find.text('Export Calendar (.ics)');
+        await tester.ensureVisible(calendarBtn);
+        await tester.pumpAndSettle();
+        await tester.tap(calendarBtn);
+        await tester.pump();
+        expect(exportedCalendar, isTrue);
       },
     );
   });

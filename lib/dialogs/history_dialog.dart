@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -35,6 +36,7 @@ class HistoryDialog extends StatefulWidget {
     required this.onDuration,
     this.onOpenTrash,
     this.onClearAll,
+    this.onOpenSearchNotes,
     this.blur = false,
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
@@ -52,6 +54,7 @@ class HistoryDialog extends StatefulWidget {
   final void Function(Moment a, Moment b) onDuration;
   final VoidCallback? onOpenTrash;
   final Future<void> Function()? onClearAll;
+  final VoidCallback? onOpenSearchNotes;
   final bool blur;
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
@@ -416,6 +419,32 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ),
             ),
           ),
+          if (widget.onOpenSearchNotes != null) ...[
+            const SizedBox(width: 8),
+            Tooltip(
+              message: 'Search Notes'.localized(context),
+              child: PressableScale(
+                onTap: () {
+                  NotekarHaptics.selection('standard');
+                  widget.onOpenSearchNotes!();
+                },
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: widget.p.surface3,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    CupertinoIcons.search,
+                    color: widget.p.text3,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
       child: SizedBox(

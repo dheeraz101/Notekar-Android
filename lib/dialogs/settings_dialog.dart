@@ -45,7 +45,9 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/calendar_sync_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/markdown_sync_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/utils/notice_service.dart';
@@ -3354,6 +3356,58 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  Future<void> _exportMarkdown() async {
+    HapticFeedback.mediumImpact();
+    final moments = widget.entriesNotifier.value;
+    final exportOp = const MarkdownSyncService().exportMarkdownFile(moments);
+    final delayOp = Future.delayed(const Duration(milliseconds: 1000));
+    final results = await Future.wait([exportOp, delayOp]);
+    final savedFileName = results[0];
+    if (mounted) {
+      if (savedFileName != null) {
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Saved to Downloads/$savedFileName'.localized(context),
+          icon: Icons.check_circle_rounded,
+        );
+      } else {
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Failed to export Markdown journal.'.localized(context),
+          icon: Icons.error_outline_rounded,
+        );
+      }
+    }
+  }
+
+  Future<void> _exportCalendar() async {
+    HapticFeedback.mediumImpact();
+    final moments = widget.entriesNotifier.value;
+    final exportOp = const CalendarSyncService().exportCalendarFile(moments);
+    final delayOp = Future.delayed(const Duration(milliseconds: 1000));
+    final results = await Future.wait([exportOp, delayOp]);
+    final savedFileName = results[0];
+    if (mounted) {
+      if (savedFileName != null) {
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Saved to Downloads/$savedFileName'.localized(context),
+          icon: Icons.check_circle_rounded,
+        );
+      } else {
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Failed to export Calendar sessions.'.localized(context),
+          icon: Icons.error_outline_rounded,
+        );
+      }
+    }
+  }
+
   void _showBetaInfoPopup(Palette p) {
     showBetaInfoPopup(context, p, onFeedback: _openFeedback);
   }
@@ -6038,6 +6092,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onExportJson: () => unawaited(
                                 _runExport('JSON', widget.onExportJson),
                               ),
+                              onExportMarkdown: () => unawaited(
+                                _runExport('Markdown', _exportMarkdown),
+                              ),
+                              onExportCalendar: () => unawaited(
+                                _runExport('Calendar', _exportCalendar),
+                              ),
                               onExportBackup: () => unawaited(
                                 _runExport('Backup', widget.onExportBackup),
                               ),
@@ -6074,6 +6134,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onExportJson: () => unawaited(
                                 _runExport('JSON', widget.onExportJson),
                               ),
+                              onExportMarkdown: () => unawaited(
+                                _runExport('Markdown', _exportMarkdown),
+                              ),
+                              onExportCalendar: () => unawaited(
+                                _runExport('Calendar', _exportCalendar),
+                              ),
                               onExportBackup: () => unawaited(
                                 _runExport('Backup', widget.onExportBackup),
                               ),
@@ -6109,6 +6175,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                               ),
                               onExportJson: () => unawaited(
                                 _runExport('JSON', widget.onExportJson),
+                              ),
+                              onExportMarkdown: () => unawaited(
+                                _runExport('Markdown', _exportMarkdown),
+                              ),
+                              onExportCalendar: () => unawaited(
+                                _runExport('Calendar', _exportCalendar),
                               ),
                               onExportBackup: () => unawaited(
                                 _runExport('Backup', widget.onExportBackup),

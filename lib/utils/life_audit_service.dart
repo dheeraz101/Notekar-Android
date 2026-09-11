@@ -192,6 +192,7 @@ class LifeAuditService {
     double sleepHours = defaultSleepHours,
     double essentialsHours = defaultEssentialsHours,
     DateTime? referenceNow,
+    int? activeSessionStart,
   }) {
     final now = referenceNow ?? DateTime.now();
     final consciousHours = computeConsciousHours(
@@ -251,7 +252,36 @@ class LifeAuditService {
     final daySections = buildTimelineDaySections(entries);
     final Map<String, Duration> trackedByDateKey = {};
     for (final section in daySections) {
-      trackedByDateKey[section.dateKey] = section.totalTrackedDuration;
+      int sectionTrackedMs = 0;
+      bool hasOngoingSession = false;
+      for (final it in section.items) {
+        if (it is TimelineSessionItem) {
+          if (it.outMoment == null) {
+            hasOngoingSession = true;
+            final effectiveEnd = (referenceNow ?? now).millisecondsSinceEpoch;
+            final elapsed = math.max(0, effectiveEnd - it.inMoment.timestamp);
+            sectionTrackedMs += elapsed;
+          } else {
+            sectionTrackedMs += it.duration.inMilliseconds;
+          }
+        } else if (it is TimelineSingleItem) {
+          // Calibrated focus credit for deliberate single moments (15 minutes default)
+          sectionTrackedMs += const Duration(minutes: 15).inMilliseconds;
+        }
+      }
+      // If today and activeSessionStart is provided without an ongoing TimelineSessionItem
+      if (section.dateKey == dateKey(now) &&
+          !hasOngoingSession &&
+          activeSessionStart != null) {
+        final elapsed = math.max(
+          0,
+          now.millisecondsSinceEpoch - activeSessionStart,
+        );
+        sectionTrackedMs += elapsed;
+      }
+      trackedByDateKey[section.dateKey] = Duration(
+        milliseconds: sectionTrackedMs,
+      );
     }
 
     // Determine if user has sufficient history for this macro horizon.

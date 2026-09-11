@@ -1,14 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
-import 'package:notekar/utils/calendar_sync_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/utils/markdown_sync_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -30,9 +26,6 @@ class IntegrationsSettingsPage extends StatefulWidget {
 }
 
 class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
-  bool _exportingMarkdown = false;
-  bool _exportingCalendar = false;
-
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.selectionClick();
@@ -42,72 +35,6 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
       message: '$label copied'.localized(context),
       icon: Icons.copy_rounded,
     );
-  }
-
-  void _showSavedToast({required bool success, required String message}) {
-    if (!mounted) return;
-    showIosPillToast(
-      context: context,
-      p: widget.p,
-      message: message,
-      icon: success ? Icons.check_circle_rounded : Icons.error_outline_rounded,
-    );
-  }
-
-  Future<void> _exportMarkdown() async {
-    if (_exportingMarkdown) return;
-    setState(() => _exportingMarkdown = true);
-    HapticFeedback.mediumImpact();
-
-    final moments = widget.entriesNotifier.value;
-    final exportOp = const MarkdownSyncService().exportMarkdownFile(moments);
-    final delayOp = Future.delayed(const Duration(milliseconds: 1500));
-
-    final results = await Future.wait([exportOp, delayOp]);
-    final savedFileName = results[0];
-
-    if (mounted) {
-      setState(() => _exportingMarkdown = false);
-      if (savedFileName != null) {
-        _showSavedToast(
-          success: true,
-          message: 'Saved to Downloads/$savedFileName'.localized(context),
-        );
-      } else {
-        _showSavedToast(
-          success: false,
-          message: 'Failed to export Markdown journal.'.localized(context),
-        );
-      }
-    }
-  }
-
-  Future<void> _exportCalendar() async {
-    if (_exportingCalendar) return;
-    setState(() => _exportingCalendar = true);
-    HapticFeedback.mediumImpact();
-
-    final moments = widget.entriesNotifier.value;
-    final exportOp = const CalendarSyncService().exportCalendarFile(moments);
-    final delayOp = Future.delayed(const Duration(milliseconds: 1500));
-
-    final results = await Future.wait([exportOp, delayOp]);
-    final savedFileName = results[0];
-
-    if (mounted) {
-      setState(() => _exportingCalendar = false);
-      if (savedFileName != null) {
-        _showSavedToast(
-          success: true,
-          message: 'Saved to Downloads/$savedFileName'.localized(context),
-        );
-      } else {
-        _showSavedToast(
-          success: false,
-          message: 'Failed to export Calendar sessions.'.localized(context),
-        );
-      }
-    }
   }
 
   @override
@@ -221,60 +148,6 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
           p: p,
           text:
               'Capture quotes, reading notes, and links directly from Chrome, WhatsApp, or other apps.'
-                  .localized(context),
-        ),
-
-        const SizedBox(height: spacing16),
-
-        // Obsidian & Markdown Journal
-        SettingsGroup(
-          p: p,
-          title: 'Markdown Journal'.localized(context).toUpperCase(),
-          children: [
-            SettingsRow(
-              p: p,
-              icon: Icons.article_rounded,
-              title: 'Export Journal (.md)'.localized(context),
-              status: _exportingMarkdown ? null : 'Export'.localized(context),
-              trailing: _exportingMarkdown
-                  ? const CupertinoActivityIndicator(radius: 9)
-                  : null,
-              color: const Color(0xFF7000FF),
-              onTap: _exportingMarkdown ? null : _exportMarkdown,
-            ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Generates date-grouped Markdown tables compatible with Obsidian, Logseq, and Notion.'
-                  .localized(context),
-        ),
-
-        const SizedBox(height: spacing16),
-
-        // Calendar Sessions (.ics)
-        SettingsGroup(
-          p: p,
-          title: 'Calendar Sessions'.localized(context).toUpperCase(),
-          children: [
-            SettingsRow(
-              p: p,
-              icon: CupertinoIcons.calendar,
-              title: 'Export Calendar (.ics)'.localized(context),
-              status: _exportingCalendar ? null : 'Export'.localized(context),
-              trailing: _exportingCalendar
-                  ? const CupertinoActivityIndicator(radius: 9)
-                  : null,
-              color: p.orange,
-              onTap: _exportingCalendar ? null : _exportCalendar,
-            ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Converts Two-Way intervals into standard calendar events for Google Calendar, Outlook, and Samsung Calendar.'
                   .localized(context),
         ),
 

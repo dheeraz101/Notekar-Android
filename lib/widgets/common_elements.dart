@@ -580,6 +580,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                 child: ScaleTransition(
                   scale: _scaleAnimation,
                   child: Container(
+                    constraints: const BoxConstraints(minWidth: 176),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 11,
@@ -605,6 +606,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(widget.icon, color: p.accent, size: 18),
                         const SizedBox(width: 10),

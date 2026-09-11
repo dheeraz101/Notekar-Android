@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NoteDialog extends StatefulWidget {
@@ -162,6 +163,61 @@ class _NoteDialogState extends State<NoteDialog> {
                   max: maxNoteLength,
                 );
               },
+            ),
+            const SizedBox(height: spacing12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  for (final tag in const [
+                    '#work',
+                    '#study',
+                    '#play',
+                    '#health',
+                    '#focus',
+                    '#routine',
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: PressableScale(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          final text = _controller.text;
+                          final spacer = text.isEmpty || text.endsWith(' ')
+                              ? ''
+                              : ' ';
+                          final newText = '$text$spacer$tag ';
+                          _controller.text = newText;
+                          _controller.selection = TextSelection.fromPosition(
+                            TextPosition(offset: newText.length),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.p.surface2,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: widget.p.border.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          child: Text(
+                            tag,
+                            style: TextStyle(
+                              color: widget.p.text2,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             if (_sobrietyMode) ...[
               const SizedBox(height: 14),

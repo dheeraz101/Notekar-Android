@@ -6,6 +6,7 @@ import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/home_top_insights_pill.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
@@ -107,7 +108,7 @@ void main() {
             id: 1,
             timestamp: now.millisecondsSinceEpoch,
             type: 'single',
-            date: '2026-09-08',
+            date: dateKey(now),
             note: 'Coffee meeting',
           ),
         ];

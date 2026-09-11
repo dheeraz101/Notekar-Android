@@ -1310,6 +1310,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.remove('sobriety_custom_start_ms');
     await _prefs?.setInt('streak_shields', 1);
     await _prefs?.setInt('last_shield_granted_threshold', 0);
+    await _prefs?.remove('recent_note_searches');
+    await _prefs?.remove('notekar.categories_v1');
+    await _prefs?.remove('m-last-backup-at');
     await _repository.clearAll();
     await _repository.clearTrash();
     _trashNotifier.value = [];
@@ -1467,14 +1470,41 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-update-status',
         'm-last-update-check',
         'reminder_daily_enabled',
+        'reminder_daily_hour',
+        'reminder_daily_minute',
+        'reminder_daily_body',
         'reminder_inactivity_enabled',
+        'reminder_inactivity_interval_mins',
         'reminder_weekly_enabled',
+        'reminder_weekly_days',
+        'reminder_weekly_hour',
+        'reminder_weekly_minute',
+        'reminder_weekly_body',
         'reminder_monthly_enabled',
+        'reminder_monthly_day',
+        'reminder_monthly_hour',
+        'reminder_monthly_minute',
+        'reminder_monthly_body',
+        'reminder_reflection_enabled',
+        'reminder_reflection_interval_mins',
+        'reminder_reflection_sound',
+        'reminder_reflection_body',
+        'reminder_reflection_start_hour',
+        'reminder_reflection_start_minute',
+        'reminder_reflection_end_hour',
+        'reminder_reflection_end_minute',
         'enable_note_on_click',
         'obfuscate_in_recents',
         'show_persistent_notification',
         'recent_settings_searches',
         'recent_note_searches',
+        'time_audit_sleep_hours',
+        'time_audit_essentials_hours',
+        'notekar.batteryOptimizationCardDismissed',
+        'notekar.categories_v1',
+        'god_mode_unlocked',
+        'use_12h_format',
+        'm-use-12h',
         'notekar.commits_cache',
         'notekar.commits_cache_time',
       ]) {
@@ -1628,11 +1658,41 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
     await _prefs?.setString('m-locale', _locale);
     await _prefs?.remove('reminder_daily_enabled');
+    await _prefs?.remove('reminder_daily_hour');
+    await _prefs?.remove('reminder_daily_minute');
+    await _prefs?.remove('reminder_daily_body');
     await _prefs?.remove('reminder_inactivity_enabled');
+    await _prefs?.remove('reminder_inactivity_interval_mins');
     await _prefs?.remove('reminder_weekly_enabled');
+    await _prefs?.remove('reminder_weekly_days');
+    await _prefs?.remove('reminder_weekly_hour');
+    await _prefs?.remove('reminder_weekly_minute');
+    await _prefs?.remove('reminder_weekly_body');
     await _prefs?.remove('reminder_monthly_enabled');
+    await _prefs?.remove('reminder_monthly_day');
+    await _prefs?.remove('reminder_monthly_hour');
+    await _prefs?.remove('reminder_monthly_minute');
+    await _prefs?.remove('reminder_monthly_body');
+    await _prefs?.remove('reminder_reflection_enabled');
+    await _prefs?.remove('reminder_reflection_interval_mins');
+    await _prefs?.remove('reminder_reflection_sound');
+    await _prefs?.remove('reminder_reflection_body');
+    await _prefs?.remove('reminder_reflection_start_hour');
+    await _prefs?.remove('reminder_reflection_start_minute');
+    await _prefs?.remove('reminder_reflection_end_hour');
+    await _prefs?.remove('reminder_reflection_end_minute');
+    await _prefs?.remove('time_audit_sleep_hours');
+    await _prefs?.remove('time_audit_essentials_hours');
+    await _prefs?.remove('notekar.autoStartCardDismissed');
+    await _prefs?.remove('notekar.batteryOptimizationCardDismissed');
+    await _prefs?.remove('notekar.categories_v1');
     await _prefs?.remove('recent_settings_searches');
     await _prefs?.remove('recent_note_searches');
+    await _prefs?.remove('enable_note_on_click');
+    await _prefs?.remove('obfuscate_in_recents');
+    await _prefs?.remove('show_persistent_notification');
+    await _prefs?.remove('use_12h_format');
+    await _prefs?.remove('m-use-12h');
     await _setAppIconStyle('default', showToast: false);
     if (mounted) {
       NoteKarApp.of(context)?.setLocale(_locale);
@@ -1889,6 +1949,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onDuration: _showDuration,
         onOpenTrash: _showRecentlyDeleted,
         onClearAll: _clearStoredEntries,
+        onOpenSearchNotes: () {
+          Navigator.pop(context);
+          unawaited(_openSettings(initialCategory: 'Search Notes'));
+        },
       ),
     );
     if (mounted) setState(() {});
@@ -3881,33 +3945,27 @@ class _NoteKarHomeState extends State<NoteKarHome>
             right: spacing16,
             bottom: spacing16 + bottomInset,
             child: RepaintBoundary(
-              child: ValueListenableBuilder<Offset>(
-                valueListenable: _motion,
-                builder: (context, motion, _) {
-                  return Toolbar(
-                    p: palette,
-                    mode: _mode,
-                    onMode: _toggleMode,
-                    onHistory: _openHistory,
-                    onSettings: _openSettings,
-                    showLabels: _buttonLabels,
-                    largeControls: _largeControls,
-                    showBackgroundPill: _homeMenuPill,
-                    animateIcons: _homeMenuAnimations && !_reduceMotion,
-                    motionX: motion.dx,
-                    motionY: motion.dy,
-                    showHistoryText: _showHistoryText,
-                    lastTimestamp: _mode == 'two-way' && _sessionStart != null
-                        ? formatTimeShort(DateTime.now().millisecondsSinceEpoch)
-                        : (_entries.isNotEmpty
-                              ? formatTimeShort(_entries.first.timestamp)
-                              : null),
-                    blur:
-                        _enableTranslucency &&
-                        AdaptiveEngine().supportsBlur &&
-                        !_reduceMotion,
-                  );
-                },
+              child: Toolbar(
+                p: palette,
+                mode: _mode,
+                onMode: _toggleMode,
+                onHistory: _openHistory,
+                onSettings: _openSettings,
+                showLabels: _buttonLabels,
+                largeControls: _largeControls,
+                showBackgroundPill: _homeMenuPill,
+                animateIcons: _homeMenuAnimations && !_reduceMotion,
+                motionNotifier: _motion,
+                showHistoryText: _showHistoryText,
+                lastTimestamp: _mode == 'two-way' && _sessionStart != null
+                    ? formatTimeShort(DateTime.now().millisecondsSinceEpoch)
+                    : (_entries.isNotEmpty
+                          ? formatTimeShort(_entries.first.timestamp)
+                          : null),
+                blur:
+                    _enableTranslucency &&
+                    AdaptiveEngine().supportsBlur &&
+                    !_reduceMotion,
               ),
             ),
           ),

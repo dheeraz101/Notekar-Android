@@ -28,6 +28,20 @@ class SearchNotesSettingsPage {
     required VoidCallback onClearRecentSearches,
   }) {
     final q = settingsQuery.trim().toLowerCase();
+    final hashtagRegex = RegExp(r'#([A-Za-z0-9_]+)');
+    final Set<String> allTagsSet = {};
+    for (final e in entries) {
+      if (e.note.isNotEmpty) {
+        for (final m in hashtagRegex.allMatches(e.note)) {
+          final tag = m.group(0)!;
+          if (!tag.toLowerCase().contains('godmode')) {
+            allTagsSet.add(tag);
+          }
+        }
+      }
+    }
+    final allTags = allTagsSet.toList()..sort();
+
     final notes =
         entries
             .where(
@@ -50,7 +64,7 @@ class SearchNotesSettingsPage {
       SliverPersistentHeader(
         pinned: true,
         delegate: SliverStickyHeaderDelegate(
-          height: 80,
+          height: 72,
           child: Container(
             color: p.surface.withValues(
               alpha:
@@ -60,12 +74,7 @@ class SearchNotesSettingsPage {
                   ? 0.65
                   : 1.0,
             ),
-            padding: const EdgeInsets.fromLTRB(
-              spacing16,
-              spacing8,
-              spacing16,
-              spacing12,
-            ),
+            padding: const EdgeInsets.fromLTRB(0, spacing8, 0, spacing8),
             child: SearchNotesBox(
               p: p,
               controller: settingsSearchController,
@@ -77,11 +86,56 @@ class SearchNotesSettingsPage {
         ),
       ),
 
+      // Hashtags horizontal filter pills (only appears if any hashtag is present in notes)
+      if (allTags.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  _SearchTagPill(
+                    p: p,
+                    label: 'All Notes',
+                    selected:
+                        q.isEmpty || !allTags.any((t) => t.toLowerCase() == q),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onClearQuery();
+                    },
+                  ),
+                  for (final tag in allTags)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: _SearchTagPill(
+                        p: p,
+                        label: tag,
+                        selected: q == tag.toLowerCase(),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          if (q == tag.toLowerCase()) {
+                            onClearQuery();
+                          } else {
+                            settingsSearchController.text = tag;
+                            onQueryChanged(tag);
+                            onSaveRecentSearch(tag);
+                          }
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
       // Recent searches horizontal chips if query is empty
       if (q.isEmpty && recentSearches.isNotEmpty) ...[
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -112,7 +166,7 @@ class SearchNotesSettingsPage {
         SliverToBoxAdapter(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Row(
               children: [
                 for (final term in recentSearches)
@@ -187,7 +241,7 @@ class SearchNotesSettingsPage {
         // Header note count summary
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
             child: Text(
               q.isEmpty
                   ? 'ALL NOTES (${notes.length})'
@@ -203,12 +257,7 @@ class SearchNotesSettingsPage {
         ),
         // Full length notes list
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-            spacing16,
-            0,
-            spacing16,
-            spacing24,
-          ),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, spacing24),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index >= notes.length) return null;
@@ -270,9 +319,11 @@ class SearchNotesSettingsPage {
                                 children: [
                                   Icon(
                                     entry.type == 'in'
-                                        ? Icons.south_west_rounded
-                                        : Icons.north_east_rounded,
-                                    size: 11,
+                                        ? Icons.login_rounded
+                                        : (entry.type == 'out'
+                                              ? Icons.logout_rounded
+                                              : Icons.touch_app_rounded),
+                                    size: 13,
                                     color: momentColor(p, entry.type),
                                   ),
                                   const SizedBox(width: 4),
@@ -326,5 +377,56 @@ class SearchNotesSettingsPage {
         ),
       ],
     ];
+  }
+}
+
+class _SearchTagPill extends StatelessWidget {
+  const _SearchTagPill({
+    required this.p,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final Palette p;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? p.accent : p.surface2,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? p.accent : p.border.withValues(alpha: 0.6),
+            width: 0.8,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: p.accent.withValues(alpha: 0.25),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected
+                ? (p.name == 'light' ? Colors.white : Colors.black)
+                : p.text2,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
   }
 }

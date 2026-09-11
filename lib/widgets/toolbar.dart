@@ -19,8 +19,9 @@ class Toolbar extends StatelessWidget {
     required this.largeControls,
     required this.showBackgroundPill,
     required this.animateIcons,
-    required this.motionX,
-    required this.motionY,
+    this.motionNotifier,
+    this.motionX = 0,
+    this.motionY = 0,
     required this.showHistoryText,
     this.lastTimestamp,
     this.blur = false,
@@ -35,6 +36,7 @@ class Toolbar extends StatelessWidget {
   final bool largeControls;
   final bool showBackgroundPill;
   final bool animateIcons;
+  final ValueNotifier<Offset>? motionNotifier;
   final double motionX;
   final double motionY;
   final bool showHistoryText;
@@ -101,6 +103,7 @@ class Toolbar extends StatelessWidget {
             mode: mode,
             large: largeControls,
             blur: blur,
+            motionNotifier: animateIcons ? motionNotifier : null,
             motionX: animateIcons ? motionX : 0,
             motionY: animateIcons ? motionY : 0,
             onTap: onMode,
@@ -112,8 +115,9 @@ class Toolbar extends StatelessWidget {
               p: p,
               blur: blur,
               radius: 999,
-              padding: EdgeInsets.symmetric(
-                horizontal: showHistoryText ? spacing16 : 0,
+              padding: EdgeInsets.only(
+                left: showHistoryText ? (largeControls ? 10 : 8) : 0,
+                right: showHistoryText ? spacing16 : 0,
               ),
               child: SizedBox(
                 width: showHistoryText ? null : (largeControls ? 56 : 48),
@@ -134,6 +138,9 @@ class Toolbar extends StatelessWidget {
                               icon: CupertinoIcons.clock,
                               color: p.text,
                               size: largeControls ? 20 : 18,
+                              motionNotifier: animateIcons
+                                  ? motionNotifier
+                                  : null,
                               motionX: animateIcons ? motionX : 0,
                               motionY: animateIcons ? motionY : 0,
                             ),
@@ -163,6 +170,9 @@ class Toolbar extends StatelessWidget {
                             icon: CupertinoIcons.clock,
                             color: p.text,
                             size: largeControls ? 20 : 18,
+                            motionNotifier: animateIcons
+                                ? motionNotifier
+                                : null,
                             motionX: animateIcons ? motionX : 0,
                             motionY: animateIcons ? motionY : 0,
                           ),
@@ -179,6 +189,7 @@ class Toolbar extends StatelessWidget {
             label: showLabels ? 'Settings' : null,
             size: largeControls ? 56 : 48,
             blur: blur,
+            motionNotifier: animateIcons ? motionNotifier : null,
             motionX: animateIcons ? motionX : 0,
             motionY: animateIcons ? motionY : 0,
             onTap: onSettings,
@@ -244,6 +255,7 @@ class AnimatedHomeIcon extends StatefulWidget {
     required this.icon,
     required this.color,
     required this.size,
+    this.motionNotifier,
     this.motionX = 0,
     this.motionY = 0,
   });
@@ -251,6 +263,7 @@ class AnimatedHomeIcon extends StatefulWidget {
   final IconData icon;
   final Color color;
   final double size;
+  final ValueNotifier<Offset>? motionNotifier;
   final double motionX;
   final double motionY;
 
@@ -261,16 +274,14 @@ class AnimatedHomeIcon extends StatefulWidget {
 class _AnimatedHomeIconState extends State<AnimatedHomeIcon> {
   double _displayAngle = 0;
 
-  double _targetAngle() {
-    final strength = math.sqrt(
-      widget.motionX * widget.motionX + widget.motionY * widget.motionY,
-    );
+  double _targetAngle(double x, double y) {
+    final strength = math.sqrt(x * x + y * y);
 
     if (strength < 0.10) {
       return 0;
     }
 
-    return math.atan2(-widget.motionX, widget.motionY);
+    return math.atan2(-x, y);
   }
 
   double _nearestEquivalentAngle(double current, double target) {
@@ -287,9 +298,8 @@ class _AnimatedHomeIconState extends State<AnimatedHomeIcon> {
     return adjusted;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final target = _nearestEquivalentAngle(_displayAngle, _targetAngle());
+  Widget _buildRotated(double x, double y, Widget iconChild) {
+    final target = _nearestEquivalentAngle(_displayAngle, _targetAngle(x, y));
 
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: _displayAngle, end: target),
@@ -307,8 +317,26 @@ class _AnimatedHomeIconState extends State<AnimatedHomeIcon> {
           child: child,
         );
       },
+      child: iconChild,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final iconChild = RepaintBoundary(
       child: Icon(widget.icon, color: widget.color, size: widget.size),
     );
+
+    if (widget.motionNotifier != null) {
+      return ValueListenableBuilder<Offset>(
+        valueListenable: widget.motionNotifier!,
+        builder: (context, motion, _) {
+          return _buildRotated(motion.dx, motion.dy, iconChild);
+        },
+      );
+    }
+
+    return _buildRotated(widget.motionX, widget.motionY, iconChild);
   }
 }
 
@@ -365,6 +393,7 @@ class CircleToolButton extends StatelessWidget {
     this.label,
     this.size = 48,
     this.animation,
+    this.motionNotifier,
     this.motionX = 0,
     this.motionY = 0,
     required this.onTap,
@@ -377,6 +406,7 @@ class CircleToolButton extends StatelessWidget {
   final String? label;
   final double size;
   final HomeIconAnimation? animation;
+  final ValueNotifier<Offset>? motionNotifier;
   final VoidCallback onTap;
   final double motionX;
   final double motionY;
@@ -410,6 +440,7 @@ class CircleToolButton extends StatelessWidget {
                       icon: icon,
                       color: color,
                       size: isLarge ? 20 : 18,
+                      motionNotifier: motionNotifier,
                       motionX: motionX,
                       motionY: motionY,
                     ),
@@ -430,6 +461,7 @@ class CircleToolButton extends StatelessWidget {
                         icon: icon,
                         color: color,
                         size: isLarge ? 20 : 18,
+                        motionNotifier: motionNotifier,
                         motionX: motionX,
                         motionY: motionY,
                       ),
@@ -458,6 +490,7 @@ class ModeToolButton extends StatelessWidget {
     required this.mode,
     required this.large,
     this.animation,
+    this.motionNotifier,
     this.motionX = 0,
     this.motionY = 0,
     required this.onTap,
@@ -468,6 +501,7 @@ class ModeToolButton extends StatelessWidget {
   final String mode;
   final bool large;
   final HomeIconAnimation? animation;
+  final ValueNotifier<Offset>? motionNotifier;
   final double motionX;
   final double motionY;
   final VoidCallback onTap;
@@ -538,6 +572,7 @@ class ModeToolButton extends StatelessWidget {
                         : CupertinoIcons.arrow_up_arrow_down,
                     color: color,
                     size: large ? 20 : 18,
+                    motionNotifier: motionNotifier,
                     motionX: motionX,
                     motionY: motionY,
                   ),
