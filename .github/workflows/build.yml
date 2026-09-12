@@ -330,92 +330,55 @@ jobs:
             VT_STATUS="Detected by ${MALICIOUS} / ${TOTAL} engines"
           fi
 
-          # Format Integrity and Security sections in /tmp/release_notes.md using Python
+          # Format Integrity and Security sections in /tmp/release_notes.md
           export VT_STATUS="$VT_STATUS"
           export VT_URL="$VT_URL"
           export SCAN_DATE_STR="$SCAN_DATE_STR"
-          python3 -c '
-  import os, re
-  
-  notes_path = "/tmp/release_notes.md"
-with open(notes_path, "r", encoding="utf-8") as f:
-  text = f.read()
-  
-  status = os.environ.get("VT_STATUS", "Undetected by 60+ engines")
-  url = os.environ.get("VT_URL", "")
-  date = os.environ.get("SCAN_DATE_STR", "")
-  
-  # 1. Remove placeholder or existing VirusTotal lines from the top Integrity section
-  text = re.sub(r"(?mi)^[ \t]*[-*]?[ \t]*\**VirusTotal[^\r\n]*\r?\n?", "", text)
-  
-  # 2. Rename Security and Integrity heading to Integrity
-  text = re.sub(r"(?m)^###? (?:Security and Integrity|Integrity and Security|Integrity and Verification)", "### Integrity", text)
+          python3 scripts/format_release_notes.py /tmp/release_notes.md
 
-# 3. Construct clean Security section
-security_block = f"## Security\n\n🛡️ **VirusTotal Status**: `{ status }`  \n🔗 [View Full Report]({url})  \n📅 Last scanned: { date }\n"
-  
-  # 4. If a standalone Security block already exists, update it; otherwise insert after Integrity or append
-                                                                                                                             sec_pattern = r"(?ms)^##+ Security\s*?\r?\n.*?(?=\r?\n---|(?:\r?\n##+ )|\Z)"
-if re.search(sec_pattern, text):
-  text = re.sub(sec_pattern, security_block, text)
-else:
-  integ_match = re.search(r"(?ms)(^### Integrity\b.*?(?=\r?\n---|(?:\r?\n##+ )|\Z))", text)
-  if integ_match:
-    integ_end = integ_match.end()
-    text = text[:integ_end].rstrip() + "\n\n---\n\n" + security_block + text[integ_end:].lstrip()
-  else:
-    text = text.rstrip() + "\n\n---\n\n" + security_block
+          # Always append the APK install guide + verify block at the bottom
+          printf "\n---\n\n### Assets\n\n| File | Use when |\n|------|----------|\n| \`notekar-VERSION-universal.apk\` | Not sure? Use this — works on all devices |\n| \`notekar-VERSION-arm64-v8a.apk\` | Most modern phones (recommended, smaller) |\n| \`notekar-VERSION-armeabi-v7a.apk\` | Older 32-bit phones |\n| \`notekar-VERSION-x86_64.apk\` | x86_64 emulators / devices |\n\n### Verifying\n\nDownload \`sha256.txt\` alongside any APK and run:\n\`\`\`bash\nsha256sum --check sha256.txt\n\`\`\`\n" >> /tmp/release_notes.md
 
-  # Clean up any duplicate horizontal rules
-  text = re.sub(r"(\r?\n---[ \t]*){2,}", "\n---", text)
+          # Swap VERSION placeholder with actual version
+          sed -i "s/VERSION/${VER}/g" /tmp/release_notes.md
 
-with open(notes_path, "w", encoding="utf-8") as f:
-  f.write(text.rstrip() + "\n")
-  '
-  
-  # Always append the APK install guide + verify block at the bottom
-  printf "\n---\n\n### Assets\n\n| File | Use when |\n|------|----------|\n| \`notekar-VERSION-universal.apk\` | Not sure? Use this — works on all devices |\n| \`notekar-VERSION-arm64-v8a.apk\` | Most modern phones (recommended, smaller) |\n| \`notekar-VERSION-armeabi-v7a.apk\` | Older 32-bit phones |\n| \`notekar-VERSION-x86_64.apk\` | x86_64 emulators / devices |\n\n### Verifying\n\nDownload \`sha256.txt\` alongside any APK and run:\n\`\`\`bash\nsha256sum --check sha256.txt\n\`\`\`\n" >> /tmp/release_notes.md
-  
-  # Swap VERSION placeholder with actual version
-  sed -i "s/VERSION/${VER}/g" /tmp/release_notes.md
-  
-  # Append dynamic SHA256 checksums of the actual artifacts
-  echo "" >> /tmp/release_notes.md
-  echo "### SHA256 Checksums" >> /tmp/release_notes.md
-  echo "\`\`\`text" >> /tmp/release_notes.md
-  cat "$APK_DIR/sha256.txt" >> /tmp/release_notes.md
-  echo "\`\`\`" >> /tmp/release_notes.md
-  
-  # Append support options
-  echo "" >> /tmp/release_notes.md
-  echo "---" >> /tmp/release_notes.md
-  echo "" >> /tmp/release_notes.md
-  echo "## ☕ Support the Project" >> /tmp/release_notes.md
-  echo "" >> /tmp/release_notes.md
-  echo "If you like NoteKar and want to support future updates:" >> /tmp/release_notes.md
-  echo "" >> /tmp/release_notes.md
-  echo "[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/dheeraz)" >> /tmp/release_notes.md
-  
-  echo "📋 Release notes preview:"
-  cat /tmp/release_notes.md
-  
-  # ── 12. Create GitHub Release with all files ──────────────────────────
-  - name: Create GitHub Release
-    uses: softprops/action-gh-release@v2
-    with:
-      tag_name: ${{ steps.version.outputs.tag }}
-      name: ${{ (github.ref_name == 'priority' || github.ref_name == 'security') && format('Notekar {0} (Priority Release)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag)) }}
-      make_latest: ${{ github.ref_name == 'release' || github.ref_name == 'priority' || github.ref_name == 'security' }}
-      prerelease: ${{ github.ref_name == 'beta' }}
-      body_path: /tmp/release_notes.md
-      files: |
-        build/app/outputs/flutter-apk/notekar-*.apk
-        build/app/outputs/flutter-apk/sha256.txt
-        build/app/outputs/flutter-apk/version.json
+          # Append dynamic SHA256 checksums of the actual artifacts
+          echo "" >> /tmp/release_notes.md
+          echo "### SHA256 Checksums" >> /tmp/release_notes.md
+          echo "\`\`\`text" >> /tmp/release_notes.md
+          cat "$APK_DIR/sha256.txt" >> /tmp/release_notes.md
+          echo "\`\`\`" >> /tmp/release_notes.md
 
-  # ── 13. Clean up keystore (security) ─────────────────────────────────
-  - name: Remove keystore files
-    if: always()
-    run: |
-      rm -f android/app/keystore.jks android/key.properties
-      echo "🔒 Keystore cleaned up"
+          # Append support options
+          echo "" >> /tmp/release_notes.md
+          echo "---" >> /tmp/release_notes.md
+          echo "" >> /tmp/release_notes.md
+          echo "## ☕ Support the Project" >> /tmp/release_notes.md
+          echo "" >> /tmp/release_notes.md
+          echo "If you like NoteKar and want to support future updates:" >> /tmp/release_notes.md
+          echo "" >> /tmp/release_notes.md
+          echo "[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/dheeraz)" >> /tmp/release_notes.md
+
+          echo "📋 Release notes preview:"
+          cat /tmp/release_notes.md
+
+      # ── 12. Create GitHub Release with all files ──────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ (github.ref_name == 'priority' || github.ref_name == 'security') && format('Notekar {0} (Priority Release)', steps.version.outputs.tag) || (github.ref_name == 'beta' && format('Notekar {0} (Beta)', steps.version.outputs.tag) || format('Notekar {0}', steps.version.outputs.tag)) }}
+          make_latest: ${{ github.ref_name == 'release' || github.ref_name == 'priority' || github.ref_name == 'security' }}
+          prerelease: ${{ github.ref_name == 'beta' }}
+          body_path: /tmp/release_notes.md
+          files: |
+            build/app/outputs/flutter-apk/notekar-*.apk
+            build/app/outputs/flutter-apk/sha256.txt
+            build/app/outputs/flutter-apk/version.json
+
+      # ── 13. Clean up keystore (security) ─────────────────────────────────
+      - name: Remove keystore files
+        if: always()
+        run: |
+          rm -f android/app/keystore.jks android/key.properties
+          echo "🔒 Keystore cleaned up"
