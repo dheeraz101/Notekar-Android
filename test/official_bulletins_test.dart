@@ -40,7 +40,7 @@ void main() {
         expect(notice['body_ja'], isNotEmpty);
         expect(notice['body_ru'], isNotEmpty);
         expect(notice['minVersion'], '7.0.0');
-        expect(notice['maxVersion'], '7.5.0');
+        expect(notice['maxVersion'], '7.5.1');
         expect(notice['priority'], 'normal');
       },
     );

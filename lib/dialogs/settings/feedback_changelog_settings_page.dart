@@ -23,11 +23,22 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.0',
-    date: 'September 08, 2026',
-    edition: 'Life Audit & Spatial Harmony',
-    badgeColor: Color(0xFF7000FF),
+    version: '7.5.1',
+    date: 'September 12, 2026',
+    edition: 'Universal Themes & Spatial Modes',
+    badgeColor: Color(0xFFFF9F0A),
     innovations: [
+      (
+        title: 'Universal Themes & Modes',
+        category: 'DESIGN HARMONY',
+        headline: 'Every Pixel Tailored. Every Mode Sovereign.',
+        desc:
+            'Universal Light, Dark, and AMOLED theme parity across all popups, pickers, and sheets, paired with dedicated mode workspaces, 3 Android Home widgets, and silky 120Hz motion decoupling.',
+        icon: Icons.palette_rounded,
+        badgeColor: Color(0xFFFF9F0A),
+        specs:
+            'Light/Dark/AMOLED · Dedicated Modes · 3 Home Widgets · 120Hz Decoupled',
+      ),
       (
         title: 'Life Audit & The Void',
         category: 'EXISTENTIAL COMPASS',
@@ -91,6 +102,34 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       ),
     ],
     highlights: [
+      (
+        title: 'Universal Theme Harmony',
+        desc:
+            'Full Light, Dark, and AMOLED theme parity across all popups, pickers, and alerts.',
+        icon: Icons.palette_rounded,
+        tag: 'Theming',
+      ),
+      (
+        title: 'Dedicated Mode Workspaces',
+        desc:
+            'Individual mode settings pages with native back routing, 15-char limit & iOS confirmation.',
+        icon: Icons.tune_rounded,
+        tag: 'Modes',
+      ),
+      (
+        title: 'Android Home Widgets',
+        desc:
+            '3 dedicated launcher widgets (Quick Capture, Sobriety, Life Audit) & dynamic notification.',
+        icon: Icons.widgets_rounded,
+        tag: 'Android',
+      ),
+      (
+        title: '120Hz Decoupled Motion',
+        desc:
+            'Silky high-refresh rendering, ergonomic touch safety zone, and 80/20 Search Notes.',
+        icon: Icons.speed_rounded,
+        tag: 'Performance',
+      ),
       (
         title: 'Hardened Official Bulletins',
         desc:

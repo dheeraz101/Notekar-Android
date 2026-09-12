@@ -1,0 +1,9 @@
+Update to 7.5.1 (build 26BR0912):
+• Universal Light, Dark & AMOLED theme support across all popups, pickers, and alerts
+• Dedicated Modes settings pages with 15-char naming limit and iOS confirmation dialogs
+• 3 new Android Home widgets: Quick Capture, Sobriety Companion, and Life Audit
+• Dynamic persistent notification showing live session status and daily counters
+• Ergonomic touch safety zone to prevent accidental ghost taps
+• Redesigned Search Notes with 80/20 layout, #hashtag filter pills, and smooth transitions
+• Silky 120Hz high-refresh performance with decoupled motion rendering
+• Depleting animated progress bar for note undo pills
