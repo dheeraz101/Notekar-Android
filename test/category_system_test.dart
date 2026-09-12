@@ -239,12 +239,12 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Modes & Categories'), findsOneWidget);
+        expect(find.text('Modes'), findsOneWidget);
         expect(find.text('Work'), findsOneWidget);
         expect(find.text('Deep Focus'), findsOneWidget);
-        expect(find.text('Create New Category / Mode'), findsOneWidget);
+        expect(find.text('Create New Mode'), findsOneWidget);
 
-        // Tap Work to open category detail sheet
+        // Tap Work to open category detail view inline (no popup)
         await tester.tap(find.text('Work'));
         await tester.pumpAndSettle();
 
@@ -252,6 +252,14 @@ void main() {
         expect(find.text('SESSIONS'), findsOneWidget);
         expect(find.text('CATEGORY TIMELINE'), findsOneWidget);
         expect(find.text('CATEGORY INSIGHTS'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+
+        // Tap Cancel to return back to Modes list
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Create New Mode'), findsOneWidget);
+        expect(find.text('Work'), findsOneWidget);
       },
     );
   });

@@ -289,19 +289,11 @@ class TimelineSessionCard extends StatelessWidget {
                   ],
                 ),
 
-                // Category Capsule Badge
-                if (session.category != null &&
-                    session.category!.trim().isNotEmpty) ...[
-                  SizedBox(height: compact ? 4 : 6),
-                  _SessionCategoryBadge(
-                    p: p,
-                    category: session.category!,
-                    compact: compact,
-                  ),
-                ],
-
-                // Note Content / Tap to Add Note area
-                if (hasNote || !compact) ...[
+                // Note Content / Mode & Note area
+                if (hasNote ||
+                    !compact ||
+                    (session.category != null &&
+                        session.category!.trim().isNotEmpty)) ...[
                   SizedBox(height: compact ? 6 : 10),
                   GestureDetector(
                     onTap: onEditNote,
@@ -322,18 +314,30 @@ class TimelineSessionCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            hasNote
-                                ? Icons.notes_rounded
-                                : Icons.add_comment_outlined,
-                            size: compact ? 12 : 14,
-                            color: hasNote ? p.accent : p.text3,
-                          ),
-                          SizedBox(width: compact ? 6 : 8),
+                          if (session.category != null &&
+                              session.category!.trim().isNotEmpty) ...[
+                            _SessionCategoryBadge(
+                              p: p,
+                              category: session.category!,
+                              compact: compact,
+                            ),
+                            SizedBox(width: compact ? 5 : 7),
+                          ] else ...[
+                            Icon(
+                              hasNote
+                                  ? Icons.notes_rounded
+                                  : Icons.add_comment_outlined,
+                              size: compact ? 12 : 14,
+                              color: hasNote ? p.accent : p.text3,
+                            ),
+                            SizedBox(width: compact ? 6 : 8),
+                          ],
                           Expanded(
                             child: hasNote
                                 ? IosEmojiText(
                                     session.note,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: p.text,
                                       fontSize: compact ? 11.5 : 12.5,
@@ -388,8 +392,8 @@ class _SessionCategoryBadge extends StatelessWidget {
     final meta = getCategoryMeta(category, p);
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: compact ? 6 : 8,
-        vertical: compact ? 2 : 3,
+        horizontal: compact ? 5 : 7,
+        vertical: compact ? 1.5 : 2.5,
       ),
       decoration: BoxDecoration(
         color: meta.color.withValues(alpha: 0.12),
@@ -402,13 +406,13 @@ class _SessionCategoryBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(meta.icon, size: compact ? 10 : 12, color: meta.color),
-          const SizedBox(width: 4),
+          Icon(meta.icon, size: compact ? 9 : 11, color: meta.color),
+          const SizedBox(width: 3.5),
           Text(
             category,
             style: TextStyle(
               color: meta.color,
-              fontSize: compact ? 10 : 11,
+              fontSize: compact ? 9.5 : 10.5,
               fontWeight: FontWeight.w700,
             ),
           ),

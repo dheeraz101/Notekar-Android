@@ -3854,17 +3854,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: Icons.category_rounded,
-                                    title: 'Modes & Categories'.localized(
-                                      context,
-                                    ),
-                                    status: 'Focus Modes',
-                                    color: p.accent,
-                                    onTap: () =>
-                                        _openCategory('Modes & Categories'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
                                     icon: CupertinoIcons.shield,
                                     title: 'Privacy & Security',
                                     status: privacyLock ? 'On' : 'Off',
@@ -5339,7 +5328,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               sobrietyResetType: sobrietyResetType,
                             ),
                           ),
-                        if (show('Modes & Categories'))
+                        if (show('Modes') || show('Modes & Categories'))
                           SliverToBoxAdapter(
                             child: ModesCategoriesSettingsPage(
                               p: p,

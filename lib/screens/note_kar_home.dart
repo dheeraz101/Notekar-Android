@@ -4015,9 +4015,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   activeCategory: _activeCategory,
                   onSelectCategory: _setActiveCategory,
                   onAddCategory: _showAddCategoryDialog,
-                  onManageCategories: () => unawaited(
-                    _openSettings(initialCategory: 'Modes & Categories'),
-                  ),
+                  onManageCategories: () =>
+                      unawaited(_openSettings(initialCategory: 'Modes')),
                 ),
               ],
             ),

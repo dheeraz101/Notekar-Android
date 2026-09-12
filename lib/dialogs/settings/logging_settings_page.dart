@@ -91,11 +91,10 @@ class LoggingSettingsPage extends StatelessWidget {
             SettingsRow(
               p: p,
               icon: Icons.category_rounded,
-              title: 'Modes & Categories'.localized(context),
+              title: 'Modes'.localized(context),
               status: 'Focus Modes',
               color: p.accent,
-              onTap: () =>
-                  onOpenCategory('Modes & Categories', parent: 'Logging'),
+              onTap: () => onOpenCategory('Modes', parent: 'Logging'),
             ),
             SettingsRow(
               p: p,

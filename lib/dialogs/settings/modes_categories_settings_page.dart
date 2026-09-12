@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart'
         CupertinoTextField;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -40,6 +39,7 @@ class _ModesCategoriesSettingsPageState
     extends State<ModesCategoriesSettingsPage> {
   final CategoryService _categoryService = CategoryService();
   List<String> _categories = ['Work', 'Deep Focus'];
+  String? _selectedCategory;
   bool _loading = true;
 
   @override
@@ -79,13 +79,13 @@ class _ModesCategoriesSettingsPageState
     final created = await showDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: Text('New Mode / Category'.localized(ctx)),
+        title: Text('New Mode'.localized(ctx)),
         content: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: CupertinoTextField(
             controller: textController,
             autofocus: true,
-            placeholder: 'Category Name (e.g. Study, Gym, Reading)',
+            placeholder: 'Mode Name (e.g. Study, Gym, Reading)',
             textCapitalization: TextCapitalization.words,
             maxLength: 30,
             style: TextStyle(color: widget.p.text),
@@ -123,7 +123,7 @@ class _ModesCategoriesSettingsPageState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Delete Category?'.localized(ctx)),
+        title: Text('Delete Mode?'.localized(ctx)),
         content: Text(
           'Are you sure you want to remove "$category"? Existing logged moments will retain their history.'
               .localized(ctx),
@@ -144,6 +144,9 @@ class _ModesCategoriesSettingsPageState
 
     if (confirmed == true) {
       await _categoryService.deleteCategory(category);
+      if (_selectedCategory == category) {
+        _selectedCategory = null;
+      }
       await _loadCategories();
       widget.onCategoriesChanged?.call();
     }
@@ -151,23 +154,9 @@ class _ModesCategoriesSettingsPageState
 
   void _openCategoryDetail(String category) {
     HapticFeedback.selectionClick();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AppSheet(
-        p: widget.p,
-        title: category,
-        child: SizedBox(
-          height: MediaQuery.sizeOf(sheetContext).height * 0.75,
-          child: _CategoryDetailSheet(
-            p: widget.p,
-            category: category,
-            entries: widget.entries,
-          ),
-        ),
-      ),
-    );
+    setState(() {
+      _selectedCategory = category;
+    });
   }
 
   @override
@@ -176,6 +165,109 @@ class _ModesCategoriesSettingsPageState
       return const Padding(
         padding: EdgeInsets.all(24.0),
         child: Center(child: CircularProgressIndicator.adaptive()),
+      );
+    }
+
+    if (_selectedCategory != null) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            setState(() => _selectedCategory = null);
+          }
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: spacing8),
+            // Top Navigation Bar: Back & Cancel buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: spacing16,
+                vertical: 4,
+              ),
+              child: Row(
+                children: [
+                  // Back Button: Chevron + Modes
+                  PressableScale(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedCategory = null);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: widget.p.surface2,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: widget.p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.chevron_left_rounded,
+                            size: 18,
+                            color: widget.p.accent,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            'Modes'.localized(context),
+                            style: TextStyle(
+                              color: widget.p.accent,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Cancel Button
+                  PressableScale(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedCategory = null);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: widget.p.surface2,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: widget.p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel'.localized(context),
+                        style: TextStyle(
+                          color: widget.p.text2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: spacing8),
+            _CategoryDetailSheet(
+              p: widget.p,
+              category: _selectedCategory!,
+              entries: widget.entries,
+            ),
+            const SizedBox(height: spacing24),
+          ],
+        ),
       );
     }
 
@@ -223,7 +315,7 @@ class _ModesCategoriesSettingsPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Modes & Categories'.localized(context),
+                      'Modes'.localized(context),
                       style: TextStyle(
                         color: widget.p.text,
                         fontSize: 15,
@@ -273,7 +365,7 @@ class _ModesCategoriesSettingsPageState
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Create New Category / Mode'.localized(context),
+                    'Create New Mode'.localized(context),
                     style: TextStyle(
                       color: widget.p.accent,
                       fontSize: 13,
@@ -435,9 +527,8 @@ class _CategoryDetailSheet extends StatelessWidget {
         ? (categoryTotalMs ~/ 1000 ~/ 60 ~/ categoryTotalLogs)
         : 0;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
