@@ -165,105 +165,113 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         final p = widget.p;
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return CupertinoAlertDialog(
-              title: Text('Network Warning'.localized(context)),
-              content: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Warning!: The current update will be downloaded via your mobile data, if you wish to switch to Wifi please do so and continue to download the update over Wifi.'
-                          .localized(context),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13, height: 1.35),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Download Size: '.localized(context),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          sizeText,
-                          style: TextStyle(
-                            color: p.accent,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: () {
-                        setDialogState(() {
-                          dontShowCheckbox = !dontShowCheckbox;
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              dontShowCheckbox
-                                  ? CupertinoIcons.check_mark_circled_solid
-                                  : CupertinoIcons.circle,
-                              size: 18,
-                              color: dontShowCheckbox
-                                  ? p.accent
-                                  : CupertinoColors.systemGrey,
+            return CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: p.name == 'light'
+                    ? Brightness.light
+                    : Brightness.dark,
+                primaryColor: p.accent,
+              ),
+              child: CupertinoAlertDialog(
+                title: Text('Network Warning'.localized(context)),
+                content: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Warning!: The current update will be downloaded via your mobile data, if you wish to switch to Wifi please do so and continue to download the update over Wifi.'
+                            .localized(context),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 13, height: 1.35),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Download Size: '.localized(context),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                "Don't show this warning again".localized(
-                                  context,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                          ),
+                          Text(
+                            sizeText,
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () {
+                          setDialogState(() {
+                            dontShowCheckbox = !dontShowCheckbox;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                dontShowCheckbox
+                                    ? CupertinoIcons.check_mark_circled_solid
+                                    : CupertinoIcons.circle,
+                                size: 18,
+                                color: dontShowCheckbox
+                                    ? p.accent
+                                    : CupertinoColors.systemGrey,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  "Don't show this warning again".localized(
+                                    context,
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                actions: [
+                  CupertinoDialogAction(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel'.localized(context)),
+                  ),
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    onPressed: () async {
+                      HapticFeedback.mediumImpact();
+                      final navigator = Navigator.of(context);
+                      if (dontShowCheckbox) {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('dont_show_update_warning', true);
+                      }
+                      if (mounted) {
+                        navigator.pop();
+                        unawaited(_startDownload());
+                      }
+                    },
+                    child: Text('Download'.localized(context)),
+                  ),
+                ],
               ),
-              actions: [
-                CupertinoDialogAction(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel'.localized(context)),
-                ),
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  onPressed: () async {
-                    HapticFeedback.mediumImpact();
-                    final navigator = Navigator.of(context);
-                    if (dontShowCheckbox) {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setBool('dont_show_update_warning', true);
-                    }
-                    if (mounted) {
-                      navigator.pop();
-                      unawaited(_startDownload());
-                    }
-                  },
-                  child: Text('Download'.localized(context)),
-                ),
-              ],
             );
           },
         );

@@ -1731,17 +1731,29 @@ class _HistoryNoticePillState extends State<_HistoryNoticePill>
       width: double.infinity,
       decoration: BoxDecoration(
         color: widget.p.name == 'amoled'
-            ? const Color(0xFF121212)
-            : widget.p.surface2,
+            ? Colors.black
+            : (widget.p.name == 'light'
+                  ? Colors.white.withValues(alpha: 0.96)
+                  : widget.p.surface2),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.18),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        border: Border.all(
+          color: widget.p.name == 'light'
+              ? widget.p.border
+              : (widget.p.name == 'amoled'
+                    ? widget.p.border
+                    : widget.p.border.withValues(alpha: 0.6)),
+        ),
+        boxShadow: widget.p.name == 'amoled'
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: widget.p.name == 'light' ? 0.08 : 0.18,
+                  ),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(999),

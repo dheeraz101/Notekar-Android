@@ -29,26 +29,32 @@ class GodModeSettingsPage extends StatelessWidget {
     HapticFeedback.mediumImpact();
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Revoke God Mode?'.localized(ctx)),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            'This will deactivate secret themes, lock the VIP badge, and remove the God Mode card from history.'
-                .localized(ctx),
-          ),
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          primaryColor: p.accent,
         ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel'.localized(ctx)),
+        child: CupertinoAlertDialog(
+          title: Text('Revoke God Mode?'.localized(ctx)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'This will deactivate secret themes, lock the VIP badge, and remove the God Mode card from history.'
+                  .localized(ctx),
+            ),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Revoke God Mode'.localized(ctx)),
-          ),
-        ],
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text('Cancel'.localized(ctx)),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text('Revoke God Mode'.localized(ctx)),
+            ),
+          ],
+        ),
       ),
     );
 

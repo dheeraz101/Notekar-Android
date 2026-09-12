@@ -1,6 +1,8 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart'
+    show CupertinoAlertDialog, CupertinoIcons, CupertinoTheme;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
@@ -328,6 +330,8 @@ void main() {
         expect(find.text('CATEGORY TIMELINE'), findsOneWidget);
         expect(find.text('CATEGORY INSIGHTS'), findsOneWidget);
         expect(find.text('Delete Mode'), findsOneWidget);
+        // Verify beta note description is removed from individual mode page
+        expect(find.byType(SettingsBetaNote), findsNothing);
 
         // Tap Delete Mode button
         await tester.tap(find.text('Delete Mode'));
@@ -478,5 +482,45 @@ void main() {
       );
       expect(persistentRow.icon, isNull);
     });
+
+    testWidgets(
+      'ActionConfirmSheet and ExternalLinkConfirmSheet render with palette-aware CupertinoTheme in Light, Dark, and AMOLED',
+      (tester) async {
+        for (final themeName in ['light', 'dark', 'amoled']) {
+          final palette = paletteFor(themeName);
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: Builder(
+                  builder: (ctx) => ActionConfirmSheet(
+                    p: palette,
+                    title: 'Test Confirmation',
+                    message: 'Theme verification',
+                    confirmLabel: 'Confirm',
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.byType(CupertinoTheme), findsWidgets);
+          expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+          expect(find.text('Test Confirmation'), findsOneWidget);
+
+          final cupertinoTheme = tester.widget<CupertinoTheme>(
+            find.descendant(
+              of: find.byType(ActionConfirmSheet),
+              matching: find.byType(CupertinoTheme),
+            ),
+          );
+          expect(
+            cupertinoTheme.data.brightness,
+            themeName == 'light' ? Brightness.light : Brightness.dark,
+          );
+        }
+      },
+    );
   });
 }

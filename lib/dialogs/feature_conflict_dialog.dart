@@ -17,29 +17,35 @@ Future<bool> showFeatureConflictDialog(
   final result = await showCupertinoDialog<bool>(
     context: context,
     builder: (BuildContext dialogContext) {
-      return CupertinoAlertDialog(
-        title: Text(title.localized(dialogContext)),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(message.localized(dialogContext)),
+      return CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          primaryColor: p.accent,
         ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              Navigator.of(dialogContext).pop(false);
-            },
-            child: Text('Cancel'.localized(dialogContext)),
+        child: CupertinoAlertDialog(
+          title: Text(title.localized(dialogContext)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(message.localized(dialogContext)),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              Navigator.of(dialogContext).pop(true);
-            },
-            child: Text(confirmLabel.localized(dialogContext)),
-          ),
-        ],
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: Text('Cancel'.localized(dialogContext)),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: Text(confirmLabel.localized(dialogContext)),
+            ),
+          ],
+        ),
       );
     },
   );

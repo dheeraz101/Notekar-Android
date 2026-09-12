@@ -861,6 +861,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     height: 200,
                     child: CupertinoTheme(
                       data: CupertinoThemeData(
+                        brightness: p.name == 'light'
+                            ? Brightness.light
+                            : Brightness.dark,
+                        primaryColor: p.accent,
                         textTheme: CupertinoTextThemeData(
                           dateTimePickerTextStyle: TextStyle(
                             color: p.text,
@@ -974,6 +978,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     height: 200,
                     child: CupertinoTheme(
                       data: CupertinoThemeData(
+                        brightness: p.name == 'light'
+                            ? Brightness.light
+                            : Brightness.dark,
+                        primaryColor: p.accent,
                         textTheme: CupertinoTextThemeData(
                           dateTimePickerTextStyle: TextStyle(
                             color: p.text,
@@ -3514,10 +3522,50 @@ class _SettingsDialogState extends State<SettingsDialog> {
     VoidCallback? onConfirm,
     String cancelLabel = 'Close',
   }) {
+    final cupertinoThemeData = CupertinoThemeData(
+      brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+      primaryColor: p.accent,
+    );
+
     if (confirmLabel != null && onConfirm != null) {
       return showCupertinoDialog<void>(
         context: context,
-        builder: (ctx) => CupertinoAlertDialog(
+        builder: (ctx) => CupertinoTheme(
+          data: cupertinoThemeData,
+          child: CupertinoAlertDialog(
+            title: Text(title.localized(ctx)),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(message.localized(ctx)),
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () {
+                  NotekarHaptics.selection('standard');
+                  Navigator.pop(ctx);
+                },
+                child: Text(cancelLabel.localized(ctx)),
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {
+                  NotekarHaptics.selection('standard');
+                  Navigator.pop(ctx);
+                  onConfirm();
+                },
+                child: Text(confirmLabel.localized(ctx)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoTheme(
+        data: cupertinoThemeData,
+        child: CupertinoAlertDialog(
           title: Text(title.localized(ctx)),
           content: Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -3525,44 +3573,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           actions: [
             CupertinoDialogAction(
+              isDefaultAction: true,
               onPressed: () {
                 NotekarHaptics.selection('standard');
                 Navigator.pop(ctx);
               },
               child: Text(cancelLabel.localized(ctx)),
             ),
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              onPressed: () {
-                NotekarHaptics.selection('standard');
-                Navigator.pop(ctx);
-                onConfirm();
-              },
-              child: Text(confirmLabel.localized(ctx)),
-            ),
           ],
         ),
-      );
-    }
-
-    return showCupertinoDialog<void>(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text(title.localized(ctx)),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(message.localized(ctx)),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              NotekarHaptics.selection('standard');
-              Navigator.pop(ctx);
-            },
-            child: Text(cancelLabel.localized(ctx)),
-          ),
-        ],
       ),
     );
   }
@@ -5421,7 +5440,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onCategoriesChanged: () {
                                 setState(() {});
                               },
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Search Notes'))

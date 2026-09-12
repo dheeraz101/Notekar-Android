@@ -377,6 +377,12 @@ class RemindersSettingsPage extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return SimpleDialog(
+                        backgroundColor: p.surface2,
+                        titleTextStyle: TextStyle(
+                          color: p.text,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                         title: Text(
                           'Remind If Inactive For'.localized(context),
                         ),
@@ -452,68 +458,76 @@ class RemindersSettingsPage extends StatelessWidget {
                     builder: (context) {
                       return StatefulBuilder(
                         builder: (context, setDialogState) {
-                          return CupertinoAlertDialog(
-                            title: Text('Days of Week'.localized(context)),
-                            content: Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: days.map((day) {
-                                      final name = switch (day) {
-                                        1 => 'Sunday'.localized(context),
-                                        2 => 'Monday'.localized(context),
-                                        3 => 'Tuesday'.localized(context),
-                                        4 => 'Wednesday'.localized(context),
-                                        5 => 'Thursday'.localized(context),
-                                        6 => 'Friday'.localized(context),
-                                        7 => 'Saturday'.localized(context),
-                                        _ => '',
-                                      };
-                                      final contains = selectedDays.contains(
-                                        day,
-                                      );
-                                      return CheckboxListTile(
-                                        title: Text(
-                                          name,
-                                          style: TextStyle(color: p.text),
-                                        ),
-                                        value: contains,
-                                        activeColor: p.accent,
-                                        onChanged: (val) {
-                                          setDialogState(() {
-                                            if (val == true) {
-                                              selectedDays.add(day);
-                                            } else {
-                                              selectedDays.remove(day);
-                                            }
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
+                          return CupertinoTheme(
+                            data: CupertinoThemeData(
+                              brightness: p.name == 'light'
+                                  ? Brightness.light
+                                  : Brightness.dark,
+                              primaryColor: p.accent,
+                            ),
+                            child: CupertinoAlertDialog(
+                              title: Text('Days of Week'.localized(context)),
+                              content: Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: days.map((day) {
+                                        final name = switch (day) {
+                                          1 => 'Sunday'.localized(context),
+                                          2 => 'Monday'.localized(context),
+                                          3 => 'Tuesday'.localized(context),
+                                          4 => 'Wednesday'.localized(context),
+                                          5 => 'Thursday'.localized(context),
+                                          6 => 'Friday'.localized(context),
+                                          7 => 'Saturday'.localized(context),
+                                          _ => '',
+                                        };
+                                        final contains = selectedDays.contains(
+                                          day,
+                                        );
+                                        return CheckboxListTile(
+                                          title: Text(
+                                            name,
+                                            style: TextStyle(color: p.text),
+                                          ),
+                                          value: contains,
+                                          activeColor: p.accent,
+                                          onChanged: (val) {
+                                            setDialogState(() {
+                                              if (val == true) {
+                                                selectedDays.add(day);
+                                              } else {
+                                                selectedDays.remove(day);
+                                              }
+                                            });
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ),
+                              actions: [
+                                CupertinoDialogAction(
+                                  onPressed: () {
+                                    NotekarHaptics.selection('standard');
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Cancel'.localized(context)),
+                                ),
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  onPressed: () {
+                                    NotekarHaptics.selection('standard');
+                                    Navigator.pop(context, selectedDays);
+                                  },
+                                  child: Text('Done'.localized(context)),
+                                ),
+                              ],
                             ),
-                            actions: [
-                              CupertinoDialogAction(
-                                onPressed: () {
-                                  NotekarHaptics.selection('standard');
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Cancel'.localized(context)),
-                              ),
-                              CupertinoDialogAction(
-                                isDefaultAction: true,
-                                onPressed: () {
-                                  NotekarHaptics.selection('standard');
-                                  Navigator.pop(context, selectedDays);
-                                },
-                                child: Text('Done'.localized(context)),
-                              ),
-                            ],
                           );
                         },
                       );
@@ -574,6 +588,12 @@ class RemindersSettingsPage extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return SimpleDialog(
+                        backgroundColor: p.surface2,
+                        titleTextStyle: TextStyle(
+                          color: p.text,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                         title: Text('Day of Month'.localized(context)),
                         children: [
                           for (int day = 1; day <= 28; day++)

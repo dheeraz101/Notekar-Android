@@ -5,7 +5,9 @@ import 'package:flutter/cupertino.dart'
         CupertinoAlertDialog,
         CupertinoDialogAction,
         CupertinoIcons,
-        CupertinoTextField;
+        CupertinoTextField,
+        CupertinoTheme,
+        CupertinoThemeData;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -81,31 +83,51 @@ class _ModesCategoriesSettingsPageState
 
     final created = await showDialog<bool>(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('New Mode'.localized(ctx)),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CupertinoTextField(
-            controller: textController,
-            autofocus: true,
-            placeholder: 'Mode Name (e.g. Study, Gym)',
-            textCapitalization: TextCapitalization.words,
-            maxLength: 15,
-            inputFormatters: [LengthLimitingTextInputFormatter(15)],
-            style: TextStyle(color: widget.p.text),
-          ),
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: widget.p.name == 'light'
+              ? Brightness.light
+              : Brightness.dark,
+          primaryColor: widget.p.accent,
         ),
-        actions: [
-          CupertinoDialogAction(
-            child: Text('Cancel'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, false),
+        child: CupertinoAlertDialog(
+          title: Text('New Mode'.localized(ctx)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: CupertinoTextField(
+              controller: textController,
+              autofocus: true,
+              placeholder: 'Mode Name (e.g. Study, Gym)',
+              placeholderStyle: TextStyle(color: widget.p.text3),
+              textCapitalization: TextCapitalization.words,
+              maxLength: 15,
+              inputFormatters: [LengthLimitingTextInputFormatter(15)],
+              style: TextStyle(color: widget.p.text),
+              decoration: BoxDecoration(
+                color: widget.p.name == 'light'
+                    ? const Color(0xFFE5E5EA)
+                    : (widget.p.name == 'amoled'
+                          ? const Color(0xFF161616)
+                          : widget.p.surface3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text('Create'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
+          actions: [
+            CupertinoDialogAction(
+              child: Text('Cancel'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, false),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: Text('Create'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -300,7 +322,6 @@ class ModeDetailSettingsPage extends StatelessWidget {
     required this.entries,
     this.onDelete,
     this.onCategoriesChanged,
-    this.onLearnMoreBeta,
   });
 
   final Palette p;
@@ -308,7 +329,6 @@ class ModeDetailSettingsPage extends StatelessWidget {
   final List<Moment> entries;
   final VoidCallback? onDelete;
   final VoidCallback? onCategoriesChanged;
-  final VoidCallback? onLearnMoreBeta;
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -328,23 +348,29 @@ class ModeDetailSettingsPage extends StatelessWidget {
     HapticFeedback.heavyImpact();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Delete Mode?'.localized(ctx)),
-        content: Text(
-          'Are you sure you want to remove "$category"? Existing logged moments will retain their history.'
-              .localized(ctx),
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          primaryColor: p.accent,
         ),
-        actions: [
-          CupertinoDialogAction(
-            child: Text('Cancel'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, false),
+        child: CupertinoAlertDialog(
+          title: Text('Delete Mode?'.localized(ctx)),
+          content: Text(
+            'Are you sure you want to remove "$category"? Existing logged moments will retain their history.'
+                .localized(ctx),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text('Delete'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
+          actions: [
+            CupertinoDialogAction(
+              child: Text('Cancel'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, false),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text('Delete'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -639,15 +665,8 @@ class ModeDetailSettingsPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: spacing16),
+            const SizedBox(height: spacing24),
           ],
-
-          // Beta Note
-          if (onLearnMoreBeta != null) ...[
-            const SizedBox(height: spacing8),
-            SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta!),
-          ],
-          const SizedBox(height: spacing24),
         ],
       ),
     );

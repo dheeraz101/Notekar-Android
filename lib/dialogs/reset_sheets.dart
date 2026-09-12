@@ -353,30 +353,38 @@ class ActionConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoAlertDialog(
-      title: Text(title.localized(context)),
-      content: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text(message.localized(context)),
+    return CupertinoTheme(
+      data: CupertinoThemeData(
+        brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+        primaryColor: p.accent,
+        scaffoldBackgroundColor: p.bg,
+        barBackgroundColor: p.surface2,
       ),
-      actions: [
-        CupertinoDialogAction(
-          onPressed: () {
-            NotekarHaptics.selection('standard');
-            Navigator.pop(context, false);
-          },
-          child: Text(cancelLabel.localized(context)),
+      child: CupertinoAlertDialog(
+        title: Text(title.localized(context)),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(message.localized(context)),
         ),
-        CupertinoDialogAction(
-          isDestructiveAction: isDestructive,
-          isDefaultAction: !isDestructive,
-          onPressed: () {
-            NotekarHaptics.selection('standard');
-            Navigator.pop(context, true);
-          },
-          child: Text(confirmLabel.localized(context)),
-        ),
-      ],
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () {
+              NotekarHaptics.selection('standard');
+              Navigator.pop(context, false);
+            },
+            child: Text(cancelLabel.localized(context)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: isDestructive,
+            isDefaultAction: !isDestructive,
+            onPressed: () {
+              NotekarHaptics.selection('standard');
+              Navigator.pop(context, true);
+            },
+            child: Text(confirmLabel.localized(context)),
+          ),
+        ],
+      ),
     );
   }
 }

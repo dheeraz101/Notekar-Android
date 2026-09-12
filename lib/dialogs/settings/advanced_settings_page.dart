@@ -298,30 +298,38 @@ class AdvancedSettingsPage extends StatelessWidget {
                 if (val && systemScale >= 1.15) {
                   showCupertinoDialog<void>(
                     context: context,
-                    builder: (ctx) => CupertinoAlertDialog(
-                      title: Text('System Text Size Active'.localized(ctx)),
-                      content: Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          'Your device already has larger text enabled in system settings. Enabling additional in-app enlargement may alter layout proportions.'
-                              .localized(ctx),
-                        ),
+                    builder: (ctx) => CupertinoTheme(
+                      data: CupertinoThemeData(
+                        brightness: p.name == 'light'
+                            ? Brightness.light
+                            : Brightness.dark,
+                        primaryColor: p.accent,
                       ),
-                      actions: [
-                        CupertinoDialogAction(
-                          isDefaultAction: true,
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: Text('Keep System Default'.localized(ctx)),
+                      child: CupertinoAlertDialog(
+                        title: Text('System Text Size Active'.localized(ctx)),
+                        content: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Your device already has larger text enabled in system settings. Enabling additional in-app enlargement may alter layout proportions.'
+                                .localized(ctx),
+                          ),
                         ),
-                        CupertinoDialogAction(
-                          isDestructiveAction: false,
-                          onPressed: () {
-                            Navigator.of(ctx).pop();
-                            onLargeTextChanged(true);
-                          },
-                          child: Text('Enable Anyway'.localized(ctx)),
-                        ),
-                      ],
+                        actions: [
+                          CupertinoDialogAction(
+                            isDefaultAction: true,
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: Text('Keep System Default'.localized(ctx)),
+                          ),
+                          CupertinoDialogAction(
+                            isDestructiveAction: false,
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                              onLargeTextChanged(true);
+                            },
+                            child: Text('Enable Anyway'.localized(ctx)),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 } else {

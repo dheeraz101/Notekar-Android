@@ -6,7 +6,12 @@ import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart'
-    show CupertinoAlertDialog, CupertinoDialogAction, CupertinoTextField;
+    show
+        CupertinoAlertDialog,
+        CupertinoDialogAction,
+        CupertinoTextField,
+        CupertinoTheme,
+        CupertinoThemeData;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -823,6 +828,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _locale = value);
             },
             onTheme: (value) {
+              NoteKarApp.of(context)?.setTheme(value);
               setState(() => _theme = value);
               _saveSetting('m-theme', value);
               _applySystemUiStyle();
@@ -944,6 +950,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 setState(() => _locale = value);
               },
               onTheme: (value) {
+                NoteKarApp.of(context)?.setTheme(value);
                 setState(() => _theme = value);
                 _saveSetting('m-theme', value);
                 _applySystemUiStyle();
@@ -1232,31 +1239,47 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     final created = await showDialog<bool>(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('New Mode / Category'.localized(ctx)),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CupertinoTextField(
-            controller: textController,
-            autofocus: true,
-            placeholder: 'Category Name (e.g. Study, Gym)',
-            textCapitalization: TextCapitalization.words,
-            maxLength: 15,
-            inputFormatters: [LengthLimitingTextInputFormatter(15)],
-            style: TextStyle(color: p.text),
-          ),
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          primaryColor: p.accent,
         ),
-        actions: [
-          CupertinoDialogAction(
-            child: Text('Cancel'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, false),
+        child: CupertinoAlertDialog(
+          title: Text('New Mode / Category'.localized(ctx)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: CupertinoTextField(
+              controller: textController,
+              autofocus: true,
+              placeholder: 'Category Name (e.g. Study, Gym)',
+              placeholderStyle: TextStyle(color: p.text3),
+              textCapitalization: TextCapitalization.words,
+              maxLength: 15,
+              inputFormatters: [LengthLimitingTextInputFormatter(15)],
+              style: TextStyle(color: p.text),
+              decoration: BoxDecoration(
+                color: p.name == 'light'
+                    ? const Color(0xFFE5E5EA)
+                    : (p.name == 'amoled'
+                          ? const Color(0xFF161616)
+                          : p.surface3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: p.border.withValues(alpha: 0.5)),
+              ),
+            ),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text('Create'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
+          actions: [
+            CupertinoDialogAction(
+              child: Text('Cancel'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, false),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: Text('Create'.localized(ctx)),
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -2183,6 +2206,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         lastDeletedPreview: lastDeletedPreview,
         trashEntriesNotifier: _trashNotifier,
         onTheme: (value) {
+          NoteKarApp.of(context)?.setTheme(value);
           setState(() => _theme = value);
           _saveSetting('m-theme', value);
           _applySystemUiStyle();
@@ -2198,6 +2222,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _saveSetting('m-delay', value);
         },
         onAccentColor: (value) {
+          NoteKarApp.of(context)?.setAccent(value);
           setState(() => _accentColor = value);
           _saveSetting('m-accent-color', value);
         },
@@ -2243,6 +2268,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _prefs?.setBool('m-large-text', value);
         },
         onHighContrast: (value) {
+          NoteKarApp.of(context)?.setHighContrast(value);
           setState(() => _highContrast = value);
           _prefs?.setBool('m-high-contrast', value);
         },

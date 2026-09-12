@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:notekar/l10n/app_localizations.dart';
+import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/note_kar_home.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,11 +51,17 @@ class NoteKarApp extends StatefulWidget {
 
 class NoteKarAppState extends State<NoteKarApp> {
   late String _locale;
+  late String _theme;
+  late String _accent;
+  late bool _highContrast;
 
   @override
   void initState() {
     super.initState();
     _locale = widget.prefs?.getString('m-locale') ?? 'system';
+    _theme = widget.prefs?.getString('m-theme') ?? 'dark';
+    _accent = widget.prefs?.getString('m-accent-color') ?? 'blue';
+    _highContrast = widget.prefs?.getBool('m-high-contrast') ?? false;
     final obfuscate = widget.prefs?.getBool('obfuscate_in_recents') ?? false;
     if (obfuscate) {
       const MethodChannel(
@@ -70,6 +77,105 @@ class NoteKarAppState extends State<NoteKarApp> {
     widget.prefs?.setString('m-locale', locale);
   }
 
+  void setTheme(String theme) {
+    if (_theme != theme) {
+      setState(() => _theme = theme);
+    }
+  }
+
+  void setAccent(String accent) {
+    if (_accent != accent) {
+      setState(() => _accent = accent);
+    }
+  }
+
+  void setHighContrast(bool highContrast) {
+    if (_highContrast != highContrast) {
+      setState(() => _highContrast = highContrast);
+    }
+  }
+
+  ThemeData _buildThemeData(String theme, String accent, bool highContrast) {
+    final p = paletteFor(theme, accentName: accent, highContrast: highContrast);
+    final isLight = theme == 'light';
+    final isAmoled = theme == 'amoled';
+    final brightness = isLight ? Brightness.light : Brightness.dark;
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      scaffoldBackgroundColor: p.bg,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: p.accent,
+        brightness: brightness,
+        surface: p.surface2,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: p.surface2,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: p.border.withValues(alpha: isAmoled ? 0.8 : 0.4),
+          ),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: p.accent,
+          foregroundColor: Colors.white,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: p.accent,
+          side: BorderSide(color: p.border),
+        ),
+      ),
+      fontFamily: 'Inter',
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(
+          color: p.text,
+          fontVariations: const [FontVariation('wght', 400)],
+        ),
+        bodyMedium: TextStyle(
+          color: p.text,
+          fontVariations: const [FontVariation('wght', 400)],
+        ),
+        titleLarge: TextStyle(
+          color: p.text,
+          fontVariations: const [FontVariation('wght', 600)],
+        ),
+      ),
+      cupertinoOverrideTheme: CupertinoThemeData(
+        brightness: brightness,
+        primaryColor: p.accent,
+        scaffoldBackgroundColor: p.bg,
+        barBackgroundColor: p.surface2,
+        textTheme: CupertinoTextThemeData(
+          primaryColor: p.accent,
+          textStyle: TextStyle(fontFamily: 'Inter', color: p.text),
+          actionTextStyle: TextStyle(
+            fontFamily: 'Inter',
+            color: p.accent,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
+      splashFactory: NoSplash.splashFactory,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,37 +184,8 @@ class NoteKarAppState extends State<NoteKarApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: _locale == 'system' ? null : Locale(_locale),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0A84FF),
-          brightness: Brightness.dark,
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF0A84FF),
-            foregroundColor: Colors.white,
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF0A84FF),
-          ),
-        ),
-        fontFamily: 'Inter',
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontVariations: [FontVariation('wght', 400)]),
-          bodyMedium: TextStyle(fontVariations: [FontVariation('wght', 400)]),
-          titleLarge: TextStyle(fontVariations: [FontVariation('wght', 600)]),
-        ),
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-          },
-        ),
-        splashFactory: NoSplash.splashFactory,
-      ),
+      themeMode: _theme == 'light' ? ThemeMode.light : ThemeMode.dark,
+      theme: _buildThemeData(_theme, _accent, _highContrast),
       builder: (context, child) {
         final media = MediaQuery.of(context);
         final clampedScaler = media.textScaler.clamp(
