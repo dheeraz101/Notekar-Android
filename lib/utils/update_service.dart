@@ -647,23 +647,58 @@ class UpdateService {
     return null;
   }
 
-  Future<void> clearCachedBuilds() async {
+  /// Returns the total cumulative size of all downloaded installer files (.apk, .part, .tmp) in MB.
+  Future<double> getTotalCacheSizeMb() async {
     try {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
-      if (cacheDir == null) return;
+      if (cacheDir == null) return 0.0;
+      final dir = Directory(cacheDir);
+      if (!await dir.exists()) return 0.0;
+
+      int totalBytes = 0;
+      final files = dir.listSync();
+      for (final entity in files) {
+        if (entity is File) {
+          final p = entity.path.toLowerCase();
+          if (p.endsWith('.apk') ||
+              p.contains('.apk.part') ||
+              p.endsWith('.apk.tmp')) {
+            totalBytes += await entity.length();
+          }
+        }
+      }
+      return totalBytes / (1024 * 1024);
+    } catch (e, stack) {
+      _logger.error('Failed to compute total cache size', e, stack);
+      return 0.0;
+    }
+  }
+
+  Future<int> clearCachedBuilds() async {
+    int deletedCount = 0;
+    try {
+      final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
+      if (cacheDir == null) return 0;
       final dir = Directory(cacheDir);
       if (await dir.exists()) {
         final files = dir.listSync();
         for (final entity in files) {
-          if (entity is File && entity.path.endsWith('.apk')) {
-            await entity.delete();
-            _logger.info('Deleted cached APK: ${entity.path}');
+          if (entity is File) {
+            final p = entity.path.toLowerCase();
+            if (p.endsWith('.apk') ||
+                p.contains('.apk.part') ||
+                p.endsWith('.apk.tmp')) {
+              await entity.delete();
+              deletedCount++;
+              _logger.info('Deleted cached APK/installer file: ${entity.path}');
+            }
           }
         }
       }
     } catch (e, stack) {
       _logger.error('Failed to clear cached builds', e, stack);
     }
+    return deletedCount;
   }
 
   bool isUpdateAvailable(String latest, String current) {

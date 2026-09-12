@@ -355,6 +355,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   SharedPreferences? _prefs;
 
   bool _betaTrack = false;
+  bool _autoDeleteUpdateCache = false;
   bool obfuscateInRecents = false;
   bool showPersistentNotification = false;
   bool enableNoteOnClick = false;
@@ -511,6 +512,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
     setState(() {
       _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
+      _autoDeleteUpdateCache =
+          _prefs?.getBool('auto_delete_update_cache') ?? false;
       obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
       showPersistentNotification =
           _prefs?.getBool('show_persistent_notification') ?? false;
@@ -1297,6 +1300,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _onEntriesChanged() {
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  Future<void> _handleAutoDeleteUpdateCache(bool value, Palette p) async {
+    setState(() => _autoDeleteUpdateCache = value);
+    await _prefs?.setBool('auto_delete_update_cache', value);
+    if (value) {
+      final deleted = await UpdateService().clearCachedBuilds();
+      if (!mounted) return;
+      showIosPillToast(
+        context: context,
+        p: p,
+        message: deleted > 0
+            ? 'Update cache cleared ($deleted files)'.localized(context)
+            : 'Update cache cleared'.localized(context),
+        icon: Icons.cleaning_services_rounded,
+      );
     }
   }
 
@@ -2509,6 +2529,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: _betaTrack ? 'Beta' : 'Stable',
+      ),
+      item(
+        title: 'Auto Delete Update Cache',
+        subtitle: 'Automatically delete update packages as they are installed',
+        category: 'Updates & Notices',
+        icon: Icons.auto_delete_outlined,
+        keywords: [
+          'auto delete',
+          'cache',
+          'update cache',
+          'delete cache',
+          'storage',
+          'installers',
+          'clean',
+        ],
+        kind: 'switch',
+        boolValue: _autoDeleteUpdateCache,
+        onBoolChanged: (val) => _handleAutoDeleteUpdateCache(val, p),
+        status: _autoDeleteUpdateCache ? 'On' : 'Off',
       ),
       item(
         title: 'Official Bulletins',
@@ -6215,6 +6254,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   _openCategory(category, parent: parent),
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
                               onOpenLink: widget.onOpenLink,
+                              autoDeleteUpdateCache: _autoDeleteUpdateCache,
+                              onAutoDeleteUpdateCacheChanged: (value) =>
+                                  _handleAutoDeleteUpdateCache(value, p),
                             ),
                           ),
                         if (show('Official Bulletins'))

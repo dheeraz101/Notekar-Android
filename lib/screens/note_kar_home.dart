@@ -356,6 +356,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         unawaited(_checkRemoteNoticeOnOpen());
       }
 
+      if (_prefs?.getBool('auto_delete_update_cache') ?? false) {
+        unawaited(_updateService.clearCachedBuilds());
+      }
+
       if (_shouldLockOnResume()) {
         setState(() => _privacyUnlocked = false);
         _syncPrivacyOverlay();

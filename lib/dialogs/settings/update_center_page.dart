@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -80,45 +79,24 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   }
 
   Future<void> _checkCache() async {
-    if (widget.updateInfo == null) return;
     try {
-      final path = await _updateService.getCachedApkPath(
-        widget.updateInfo!.version,
-      );
-      if (path != null) {
-        final file = File(path);
-        if (await file.exists()) {
-          final len = await file.length();
-          if (mounted) {
-            setState(() {
-              _downloadedApkPath = path;
-              _cacheSizeMb = len / (1024 * 1024);
-              _verificationStatus = 'verified';
-            });
-          }
-          return;
-        }
+      final totalMb = await _updateService.getTotalCacheSizeMb();
+      String? currentPath;
+      if (widget.updateInfo != null) {
+        currentPath = await _updateService.getCachedApkPath(
+          widget.updateInfo!.version,
+        );
       }
-      final channel = const MethodChannel('notekar/files');
-      final cacheDir = await channel.invokeMethod<String>('appCacheDir');
-      if (cacheDir != null) {
-        final dir = Directory(cacheDir);
-        double size = 0.0;
-        if (await dir.exists()) {
-          final files = dir.listSync();
-          for (final entity in files) {
-            if (entity is File && entity.path.endsWith('.apk')) {
-              size += await entity.length();
-            }
-          }
-        }
-        if (mounted) {
-          setState(() {
-            _downloadedApkPath = null;
-            _cacheSizeMb = size / (1024 * 1024);
+      if (mounted) {
+        setState(() {
+          _cacheSizeMb = totalMb;
+          _downloadedApkPath = currentPath;
+          if (currentPath != null) {
+            _verificationStatus = 'verified';
+          } else {
             _verificationStatus = 'idle';
-          });
-        }
+          }
+        });
       }
     } catch (_) {}
   }
@@ -929,11 +907,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   }
 
   Widget _buildCacheCard(Palette p) {
-    if (_cacheSizeMb <= 0.0) return const SizedBox.shrink();
     final blurEnabled =
         !widget.reduceMotion &&
         widget.enableTranslucency &&
         AdaptiveEngine().supportsBlur;
+    final hasCache = _cacheSizeMb > 0.0;
 
     return Glass(
       p: p,
@@ -945,7 +923,13 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         children: [
           Row(
             children: [
-              Icon(Icons.cleaning_services_rounded, color: p.orange, size: 20),
+              Icon(
+                hasCache
+                    ? Icons.cleaning_services_rounded
+                    : Icons.check_circle_outline_rounded,
+                color: hasCache ? p.orange : p.green,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -961,8 +945,10 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'
-                          .localized(context),
+                      hasCache
+                          ? '${_cacheSizeMb.toStringAsFixed(2)} MB of temporary installers'
+                                .localized(context)
+                          : '0.00 MB (No cached installers)'.localized(context),
                       style: TextStyle(color: p.text3, fontSize: 12),
                     ),
                   ],
@@ -973,16 +959,18 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           const SizedBox(height: 16),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: p.red.withValues(alpha: 0.15),
-              foregroundColor: p.red,
+              backgroundColor: hasCache
+                  ? p.red.withValues(alpha: 0.15)
+                  : p.surface3,
+              foregroundColor: hasCache ? p.red : p.text3,
               minimumSize: const Size.fromHeight(44),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
-            onPressed: _clearCache,
+            onPressed: hasCache ? _clearCache : null,
             child: Text(
-              'Delete Cache'.localized(context),
+              (hasCache ? 'Delete Cache' : 'Cache Clean').localized(context),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -1136,6 +1124,8 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
     required this.onOpenCategory,
     required this.onLearnMoreBeta,
     this.onOpenLink,
+    this.autoDeleteUpdateCache = false,
+    this.onAutoDeleteUpdateCacheChanged,
   });
 
   final Palette p;
@@ -1147,6 +1137,8 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
   final void Function(String category, {required String parent}) onOpenCategory;
   final VoidCallback onLearnMoreBeta;
   final void Function(String url)? onOpenLink;
+  final bool autoDeleteUpdateCache;
+  final ValueChanged<bool>? onAutoDeleteUpdateCacheChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1211,12 +1203,21 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               onTap: () =>
                   onOpenCategory('Build Choose', parent: 'Updates & Notices'),
             ),
+            if (onAutoDeleteUpdateCacheChanged != null)
+              SettingsSwitchRow(
+                p: p,
+                icon: Icons.auto_delete_outlined,
+                title: 'Auto Delete Update Cache',
+                color: p.orange,
+                value: autoDeleteUpdateCache,
+                onChanged: onAutoDeleteUpdateCacheChanged!,
+              ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Keep NoteKar up to date with the latest features and security patches.'
+              'Automatically deletes update packages upon installation to prevent installer cache build-up.'
                   .localized(context),
         ),
         SettingsGroup(
