@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -171,6 +172,15 @@ class TimelineSingleTile extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: compact ? 6 : 8),
+                        if (moment.category != null &&
+                            moment.category!.trim().isNotEmpty) ...[
+                          _SingleCategoryBadge(
+                            p: p,
+                            category: moment.category!,
+                            compact: compact,
+                          ),
+                          SizedBox(width: compact ? 5 : 7),
+                        ],
                         Expanded(
                           child: hasNote
                               ? IosEmojiText(
@@ -214,6 +224,52 @@ class TimelineSingleTile extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SingleCategoryBadge extends StatelessWidget {
+  const _SingleCategoryBadge({
+    required this.p,
+    required this.category,
+    required this.compact,
+  });
+
+  final Palette p;
+  final String category;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final meta = getCategoryMeta(category, p);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 5 : 7,
+        vertical: compact ? 1.5 : 2.5,
+      ),
+      decoration: BoxDecoration(
+        color: meta.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: meta.color.withValues(alpha: 0.35),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(meta.icon, size: compact ? 9.5 : 11, color: meta.color),
+          const SizedBox(width: 3.5),
+          Text(
+            category,
+            style: TextStyle(
+              color: meta.color,
+              fontSize: compact ? 9.5 : 10.5,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

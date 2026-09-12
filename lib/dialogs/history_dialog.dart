@@ -762,101 +762,131 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                     spacing16,
                                     _compactRows ? 4 : spacing8,
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.calendar_today_rounded,
-                                              size: 12,
-                                              color: widget.p.text3,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.calendar_today_rounded,
+                                                  size: 12,
+                                                  color: widget.p.text3,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  sec.displayTitle.localized(
+                                                    context,
+                                                  ),
+                                                  style: TextStyle(
+                                                    color: widget.p.text2,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
+                                                    letterSpacing: 0.2,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 7,
+                                                        vertical: 2,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: widget.p.surface2,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          999,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: widget.p.border,
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    '${sec.totalLogs} logs'
+                                                        .localized(context),
+                                                    style: TextStyle(
+                                                      color: widget.p.text3,
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              sec.displayTitle.localized(
-                                                context,
-                                              ),
-                                              style: TextStyle(
-                                                color: widget.p.text2,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700,
-                                                letterSpacing: 0.2,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
+                                          ),
+                                          if (sec
+                                                  .totalTrackedDuration
+                                                  .inSeconds >
+                                              0)
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: 7,
-                                                    vertical: 2,
+                                                    horizontal: 8,
+                                                    vertical: 2.5,
                                                   ),
                                               decoration: BoxDecoration(
-                                                color: widget.p.surface2,
+                                                color: const Color(
+                                                  0xFF30D158,
+                                                ).withValues(alpha: 0.12),
                                                 borderRadius:
                                                     BorderRadius.circular(999),
                                                 border: Border.all(
-                                                  color: widget.p.border,
+                                                  color: const Color(
+                                                    0xFF30D158,
+                                                  ).withValues(alpha: 0.3),
                                                 ),
                                               ),
-                                              child: Text(
-                                                '${sec.totalLogs} logs'
-                                                    .localized(context),
-                                                style: TextStyle(
-                                                  color: widget.p.text3,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.timelapse_rounded,
+                                                    size: 11,
+                                                    color: Color(0xFF30D158),
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    sec.formattedTrackedDuration,
+                                                    style: const TextStyle(
+                                                      color: Color(0xFF30D158),
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontFeatures: [
+                                                        FontFeature.tabularFigures(),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
-                                      if (sec.totalTrackedDuration.inSeconds >
-                                          0)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2.5,
+                                      if (sec.categorySummaryText != null) ...[
+                                        const SizedBox(height: 4),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 18,
                                           ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(
-                                              0xFF30D158,
-                                            ).withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(
-                                              999,
+                                          child: Text(
+                                            sec.categorySummaryText!,
+                                            style: TextStyle(
+                                              color: widget.p.text3,
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.2,
                                             ),
-                                            border: Border.all(
-                                              color: const Color(
-                                                0xFF30D158,
-                                              ).withValues(alpha: 0.3),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.timelapse_rounded,
-                                                size: 11,
-                                                color: Color(0xFF30D158),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                sec.formattedTrackedDuration,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF30D158),
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontFeatures: [
-                                                    FontFeature.tabularFigures(),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
                                           ),
                                         ),
+                                      ],
                                     ],
                                   ),
                                 );

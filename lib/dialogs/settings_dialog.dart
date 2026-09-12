@@ -27,6 +27,7 @@ import 'package:notekar/dialogs/settings/integrations_settings_page.dart';
 import 'package:notekar/dialogs/settings/legal_about_settings_page.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
+import 'package:notekar/dialogs/settings/modes_categories_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
@@ -3853,6 +3854,17 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
+                                    icon: Icons.category_rounded,
+                                    title: 'Modes & Categories'.localized(
+                                      context,
+                                    ),
+                                    status: 'Focus Modes',
+                                    color: p.accent,
+                                    onTap: () =>
+                                        _openCategory('Modes & Categories'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
                                     icon: CupertinoIcons.shield,
                                     title: 'Privacy & Security',
                                     status: privacyLock ? 'On' : 'Off',
@@ -5325,6 +5337,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                               entries: entries,
                               sobrietyCustomStartMs: sobrietyCustomStartMs,
                               sobrietyResetType: sobrietyResetType,
+                            ),
+                          ),
+                        if (show('Modes & Categories'))
+                          SliverToBoxAdapter(
+                            child: ModesCategoriesSettingsPage(
+                              p: p,
+                              entries: entries,
+                              onCategoriesChanged: () {
+                                setState(() {});
+                              },
                             ),
                           ),
                         if (show('Search Notes'))

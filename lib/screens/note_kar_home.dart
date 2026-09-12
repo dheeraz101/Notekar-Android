@@ -5,6 +5,8 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/cupertino.dart'
+    show CupertinoAlertDialog, CupertinoDialogAction, CupertinoTextField;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -28,12 +30,14 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/backup_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
+import 'package:notekar/widgets/home_category_pills.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
 import 'package:notekar/widgets/home_top_insights_pill.dart';
@@ -62,6 +66,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   final _logger = AppLogger();
   final _repository = MomentRepository();
   final _updateService = UpdateService();
+  final _categoryService = CategoryService();
+  List<String> _categories = ['Work', 'Deep Focus'];
+  String _activeCategory = 'All';
 
   SharedPreferences? _prefs;
   Timer? _undoTimer;
@@ -442,9 +449,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final prefs =
         widget.preloadedPrefs ?? await SharedPreferences.getInstance();
 
+    final initialCategories = await _categoryService.getCategories(
+      prefs: prefs,
+    );
+    final initialActiveCategory = await _categoryService.getActiveCategory(
+      prefs: prefs,
+    );
+
     // Phase 1: Load non-DB settings instantly so the UI can paint immediately
     setState(() {
       _prefs = prefs;
+      _categories = initialCategories;
+      _activeCategory = initialActiveCategory;
       _hasTappedBefore = prefs.getBool('notekar.has_tapped_before') ?? false;
       _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
       _enableSobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
@@ -1049,12 +1065,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ? '⚡ Reward Unlocked: #godmode • Sovereign Access Granted'
         : (note?.trim() ?? '');
 
+    final resolvedCategory =
+        _activeCategory != 'All' && _activeCategory.trim().isNotEmpty
+        ? _activeCategory.trim()
+        : null;
+
     final entry = Moment(
       id: _nextId,
       timestamp: now.millisecondsSinceEpoch,
       type: type,
       date: dateKey(now),
       note: finalNoteText,
+      category: resolvedCategory,
     );
 
     _hasTappedBefore = true;
@@ -1191,6 +1213,65 @@ class _NoteKarHomeState extends State<NoteKarHome>
       message: text.localized(context),
       icon: warning ? Icons.warning_amber_rounded : Icons.check_circle_rounded,
     );
+  }
+
+  Future<void> _setActiveCategory(String category) async {
+    setState(() {
+      _activeCategory = category;
+    });
+    await _categoryService.setActiveCategory(category, prefs: _prefs);
+    if (category != 'All') {
+      _showToast('$category Mode');
+    }
+  }
+
+  Future<void> _showAddCategoryDialog() async {
+    HapticFeedback.lightImpact();
+    final textController = TextEditingController();
+
+    final created = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text('New Mode / Category'.localized(ctx)),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CupertinoTextField(
+            controller: textController,
+            autofocus: true,
+            placeholder: 'Category Name (e.g. Study, Gym)',
+            textCapitalization: TextCapitalization.words,
+            maxLength: 30,
+            style: TextStyle(color: p.text),
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Cancel'.localized(ctx)),
+            onPressed: () => Navigator.pop(ctx, false),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text('Create'.localized(ctx)),
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+
+    if (created == true) {
+      final name = textController.text.trim();
+      if (name.isNotEmpty) {
+        final success = await _categoryService.addCategory(name, prefs: _prefs);
+        if (success) {
+          final updated = await _categoryService.getCategories(prefs: _prefs);
+          setState(() {
+            _categories = updated;
+          });
+          await _setActiveCategory(name);
+          _showToast('$name added');
+        }
+      }
+    }
   }
 
   void _showUndo() {
@@ -3832,18 +3913,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
       color: palette.bg,
       child: Stack(
         children: [
-          Positioned.fill(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              color: palette.bg,
-              child: Semantics(
-                label: 'Log a new moment',
-                button: true,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapUp: _handleTap,
-                  onLongPress: _openNote,
-                ),
+          // Ergonomic Safety Zone: Tap target bounded vertically to the clock band, full width edge-to-edge
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 144,
+            bottom: MediaQuery.paddingOf(context).bottom + 85,
+            left: 0,
+            right: 0,
+            child: Semantics(
+              label: 'Log a new moment',
+              button: true,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapUp: _handleTap,
+                onLongPress: _openNote,
               ),
             ),
           ),
@@ -3924,6 +4006,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         !_reduceMotion,
                     onTap: () =>
                         unawaited(_openSettings(initialCategory: 'Dashboard')),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                HomeCategoryPills(
+                  p: palette,
+                  categories: _categories,
+                  activeCategory: _activeCategory,
+                  onSelectCategory: _setActiveCategory,
+                  onAddCategory: _showAddCategoryDialog,
+                  onManageCategories: () => unawaited(
+                    _openSettings(initialCategory: 'Modes & Categories'),
                   ),
                 ),
               ],

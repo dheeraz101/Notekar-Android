@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -288,6 +289,17 @@ class TimelineSessionCard extends StatelessWidget {
                   ],
                 ),
 
+                // Category Capsule Badge
+                if (session.category != null &&
+                    session.category!.trim().isNotEmpty) ...[
+                  SizedBox(height: compact ? 4 : 6),
+                  _SessionCategoryBadge(
+                    p: p,
+                    category: session.category!,
+                    compact: compact,
+                  ),
+                ],
+
                 // Note Content / Tap to Add Note area
                 if (hasNote || !compact) ...[
                   SizedBox(height: compact ? 6 : 10),
@@ -355,6 +367,52 @@ class TimelineSessionCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SessionCategoryBadge extends StatelessWidget {
+  const _SessionCategoryBadge({
+    required this.p,
+    required this.category,
+    required this.compact,
+  });
+
+  final Palette p;
+  final String category;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final meta = getCategoryMeta(category, p);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 6 : 8,
+        vertical: compact ? 2 : 3,
+      ),
+      decoration: BoxDecoration(
+        color: meta.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: meta.color.withValues(alpha: 0.35),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(meta.icon, size: compact ? 10 : 12, color: meta.color),
+          const SizedBox(width: 4),
+          Text(
+            category,
+            style: TextStyle(
+              color: meta.color,
+              fontSize: compact ? 10 : 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

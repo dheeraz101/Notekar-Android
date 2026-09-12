@@ -90,6 +90,15 @@ class LoggingSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
+              icon: Icons.category_rounded,
+              title: 'Modes & Categories'.localized(context),
+              status: 'Focus Modes',
+              color: p.accent,
+              onTap: () =>
+                  onOpenCategory('Modes & Categories', parent: 'Logging'),
+            ),
+            SettingsRow(
+              p: p,
               icon: Icons.notifications_active_outlined,
               title: 'Reminders',
               status: remindersStatus,

@@ -6,6 +6,8 @@ sealed class TimelineItem {
   int get primaryTimestamp;
 
   String get note;
+
+  String? get category;
 }
 
 /// A connected Two-Way session interval (paired IN and OUT moments, or ongoing IN).
@@ -40,6 +42,24 @@ class TimelineSessionItem extends TimelineItem {
     return '';
   }
 
+  @override
+  String? get category {
+    if (inMoment.category != null && inMoment.category!.trim().isNotEmpty) {
+      return inMoment.category!.trim();
+    }
+    if (outMoment != null &&
+        outMoment!.category != null &&
+        outMoment!.category!.trim().isNotEmpty) {
+      return outMoment!.category!.trim();
+    }
+    final inTag = extractHashtagCategory(inMoment.note);
+    if (inTag != null) return inTag;
+    if (outMoment != null) {
+      return extractHashtagCategory(outMoment!.note);
+    }
+    return null;
+  }
+
   /// Moment IDs associated with this session.
   List<int> get momentIds => [
     inMoment.id,
@@ -59,6 +79,14 @@ class TimelineSingleItem extends TimelineItem {
   @override
   String get note => moment.note.trim();
 
+  @override
+  String? get category {
+    if (moment.category != null && moment.category!.trim().isNotEmpty) {
+      return moment.category!.trim();
+    }
+    return extractHashtagCategory(moment.note);
+  }
+
   int get id => moment.id;
 
   String get type => moment.type;
@@ -73,7 +101,9 @@ class TimelineDaySection {
     required this.totalTrackedDuration,
     required this.totalLogs,
     required this.items,
-  });
+    Map<String, Duration>? categoryBreakdown,
+  }) : categoryBreakdown =
+           categoryBreakdown ?? _calculateCategoryBreakdown(items);
 
   final String dateKey;
   final DateTime date;
@@ -81,6 +111,42 @@ class TimelineDaySection {
   final Duration totalTrackedDuration;
   final int totalLogs;
   final List<TimelineItem> items;
+  final Map<String, Duration> categoryBreakdown;
+
+  static Map<String, Duration> _calculateCategoryBreakdown(
+    List<TimelineItem> items,
+  ) {
+    final Map<String, int> msMap = {};
+    for (final it in items) {
+      final cat = it.category ?? 'General';
+      final itemMs = switch (it) {
+        TimelineSessionItem s => s.duration.inMilliseconds,
+        TimelineSingleItem _ => const Duration(minutes: 15).inMilliseconds,
+      };
+      msMap[cat] = (msMap[cat] ?? 0) + itemMs;
+    }
+    return msMap.map((k, v) => MapEntry(k, Duration(milliseconds: v)));
+  }
+
+  String? get categorySummaryText {
+    if (categoryBreakdown.isEmpty) return null;
+    final entries = categoryBreakdown.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final parts = <String>[];
+    for (final e in entries) {
+      final totalMins = e.value.inMinutes;
+      if (totalMins <= 0) continue;
+      final hours = totalMins ~/ 60;
+      final mins = totalMins % 60;
+      final dur = hours > 0 && mins > 0
+          ? '${hours}h ${mins}m'
+          : hours > 0
+          ? '${hours}h'
+          : '${mins}m';
+      parts.add('${e.key} $dur');
+    }
+    return parts.isEmpty ? null : parts.join(' • ');
+  }
 
   String get formattedTrackedDuration {
     final totalMinutes = totalTrackedDuration.inMinutes;
