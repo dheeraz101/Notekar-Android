@@ -66,28 +66,31 @@ class HelpRow extends StatelessWidget {
         dividerColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
       ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-        childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-        iconColor: p.accent,
-        collapsedIconColor: p.text3,
-        title: Text(
-          question.localized(context),
-          style: TextStyle(
-            color: p.text,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              answer.localized(context),
-              style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
+      child: Material(
+        color: Colors.transparent,
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          iconColor: p.accent,
+          collapsedIconColor: p.text3,
+          title: Text(
+            question.localized(context),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
             ),
           ),
-        ],
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                answer.localized(context),
+                style: TextStyle(color: p.text2, fontSize: 13, height: 1.45),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

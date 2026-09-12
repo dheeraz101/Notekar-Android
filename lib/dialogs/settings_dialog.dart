@@ -2531,18 +2531,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: _betaTrack ? 'Beta' : 'Stable',
       ),
       item(
-        title: 'Auto Delete Update Cache',
+        title: 'Rm -rf Cache',
         subtitle: 'Automatically delete update packages as they are installed',
         category: 'Updates & Notices',
         icon: Icons.auto_delete_outlined,
         keywords: [
+          'rm -rf cache',
+          'rm -rf',
+          'rm',
+          'auto delete update cache',
           'auto delete',
           'cache',
           'update cache',
           'delete cache',
+          'clear cache',
           'storage',
           'installers',
+          'apk',
           'clean',
+          'purge',
+          'free space',
         ],
         kind: 'switch',
         boolValue: _autoDeleteUpdateCache,
@@ -3626,25 +3634,28 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _showErrorReporterDialog(dynamic error, dynamic stackTrace) {
-    final p = paletteFor(
-      theme,
-      highContrast: highContrast,
-      accentName: accentColor,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final p = paletteFor(
+        theme,
+        highContrast: highContrast,
+        accentName: accentColor,
+      );
 
-    _showCustomAlert(
-      p: p,
-      title: 'System Error',
-      message:
-          'NoteKar encountered an unexpected error: $error\n\nWould you like to automatically report this crash details to our developer team?',
-      icon: Icons.error_outline_rounded,
-      iconColor: p.red,
-      confirmLabel: 'Report',
-      cancelLabel: 'Cancel',
-      onConfirm: () {
-        _submitAutoCrashReport(error, stackTrace, p);
-      },
-    );
+      _showCustomAlert(
+        p: p,
+        title: 'System Error',
+        message:
+            'NoteKar encountered an unexpected error: $error\n\nWould you like to automatically report this crash details to our developer team?',
+        icon: Icons.error_outline_rounded,
+        iconColor: p.red,
+        confirmLabel: 'Report',
+        cancelLabel: 'Cancel',
+        onConfirm: () {
+          _submitAutoCrashReport(error, stackTrace, p);
+        },
+      );
+    });
   }
 
   void _submitAutoCrashReport(dynamic error, dynamic stackTrace, Palette p) {
@@ -4315,7 +4326,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                       result.title ==
                                                           'Confirm Delete'
                                                       ? p.red
-                                                      : p.accent,
+                                                      : (result.title ==
+                                                                'Rm -rf Cache'
+                                                            ? p.orange
+                                                            : p.accent),
                                                 ),
                                               ];
                                             } else {
@@ -4506,7 +4520,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                           color:
                                               result.title == 'Confirm Delete'
                                               ? p.red
-                                              : p.accent,
+                                              : (result.title == 'Rm -rf Cache'
+                                                    ? p.orange
+                                                    : p.accent),
                                         )
                                       else
                                         SettingsRow(
@@ -5815,6 +5831,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     text:
                                         'Trigger offline background moment logging via the system broadcast intent app.notekar.notekar.ACTION_LOG_MOMENT with extras type (single, in, out, note) and note.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.auto_delete_outlined,
+                                    title: 'Rm -rf Cache (Update Clean)',
+                                    text:
+                                        'Enable "Rm -rf Cache" in Updates & Notices to automatically purge update APK installer files and cache upon installation, keeping app storage lightweight.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -6116,6 +6139,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         'How do I export my Sobriety Milestones?',
                                     answer:
                                         'Open Settings > Personalization > Sobriety Tracker, tap on any unlocked milestone badge in the milestones gallery, and tap "Export Milestone Card" to share a high-res image directly.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'What is "Rm -rf Cache" and how does it work?',
+                                    answer:
+                                        'Inspired by the Unix clean command, "Rm -rf Cache" automatically deletes downloaded update packages and temporary build artifacts upon installation or when turned on. It prevents installer files from accumulating in device storage without affecting your private notes or logs.',
                                   ),
                                 ],
                               ),

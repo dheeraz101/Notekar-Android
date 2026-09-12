@@ -1207,7 +1207,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               SettingsSwitchRow(
                 p: p,
                 icon: Icons.auto_delete_outlined,
-                title: 'Auto Delete Update Cache',
+                title: 'Rm -rf Cache',
                 color: p.orange,
                 value: autoDeleteUpdateCache,
                 onChanged: onAutoDeleteUpdateCacheChanged!,

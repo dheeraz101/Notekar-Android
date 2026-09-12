@@ -95,51 +95,50 @@ void main() {
     );
   });
 
-  group('UpdatesNoticesSettingsPage Auto Delete Switch', () {
-    testWidgets(
-      'renders Auto Delete Update Cache switch row and handles toggle',
-      (tester) async {
-        bool switchVal = false;
+  group('UpdatesNoticesSettingsPage Rm -rf Cache Switch', () {
+    testWidgets('renders Rm -rf Cache switch row and handles toggle', (
+      tester,
+    ) async {
+      bool switchVal = false;
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: UpdatesNoticesSettingsPage(
-                  p: p,
-                  checkingUpdates: false,
-                  updateInfo: null,
-                  betaTrack: false,
-                  remoteNotices: true,
-                  onRemoteNoticesChanged: (_) {},
-                  onOpenCategory: (_, {required parent}) {},
-                  onLearnMoreBeta: () {},
-                  autoDeleteUpdateCache: switchVal,
-                  onAutoDeleteUpdateCacheChanged: (val) {
-                    switchVal = val;
-                  },
-                ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: UpdatesNoticesSettingsPage(
+                p: p,
+                checkingUpdates: false,
+                updateInfo: null,
+                betaTrack: false,
+                remoteNotices: true,
+                onRemoteNoticesChanged: (_) {},
+                onOpenCategory: (_, {required parent}) {},
+                onLearnMoreBeta: () {},
+                autoDeleteUpdateCache: switchVal,
+                onAutoDeleteUpdateCacheChanged: (val) {
+                  switchVal = val;
+                },
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        expect(find.text('Auto Delete Update Cache'), findsOneWidget);
-        expect(
-          find.text(
-            'Automatically deletes update packages upon installation to prevent installer cache build-up.',
-          ),
-          findsOneWidget,
-        );
+      expect(find.text('Rm -rf Cache'), findsOneWidget);
+      expect(
+        find.text(
+          'Automatically deletes update packages upon installation to prevent installer cache build-up.',
+        ),
+        findsOneWidget,
+      );
 
-        // Tap switch row to toggle
-        await tester.tap(find.text('Auto Delete Update Cache'));
-        await tester.pumpAndSettle();
+      // Tap switch row to toggle
+      await tester.tap(find.text('Rm -rf Cache'));
+      await tester.pumpAndSettle();
 
-        expect(switchVal, isTrue);
-      },
-    );
+      expect(switchVal, isTrue);
+    });
   });
 
   group('UpdateCenterView Persistent Cache Card', () {
