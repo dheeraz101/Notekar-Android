@@ -1084,6 +1084,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   Future<void> _openDirectNoteEditor(Moment entry) async {
     final isAdd = entry.note.trim().isEmpty;
+    final previousNote = entry.note;
     final title = (isAdd ? 'Add Note' : 'Edit Note').localized(context);
     final saveLabel = (isAdd ? 'Add Note' : 'Save').localized(context);
     final addedNotice = 'Note added'.localized(context);
@@ -1107,7 +1108,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
     if (note == null || !mounted) return;
     await _updateEntryNote(entry, note);
-    _showNotice(isAdd ? addedNotice : updatedNotice);
+    _showNotice(
+      isAdd ? addedNotice : updatedNotice,
+      onUndo: () {
+        unawaited(_updateEntryNote(entry, previousNote));
+        _showNotice(
+          isAdd
+              ? 'Note removed'.localized(context)
+              : 'Note restored'.localized(context),
+        );
+      },
+    );
   }
 
   void _removeSession(TimelineSessionItem session) {
@@ -1266,6 +1277,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
         onAddOrEditNote: () async {
           Navigator.pop(context);
 
+          final isAdd = entry.note.trim().isEmpty;
+          final previousNote = entry.note;
+          final addedNotice = (isAdd ? 'Note added' : 'Note updated').localized(
+            context,
+          );
+          final removedNotice = (isAdd ? 'Note removed' : 'Note restored')
+              .localized(context);
           final note = await showGeneralDialog<String>(
             context: context,
             barrierColor: Colors.black.withValues(alpha: 0.42),
@@ -1275,17 +1293,21 @@ class _HistoryDialogState extends State<HistoryDialog> {
             pageBuilder: (_, _, _) => NoteDialog(
               p: widget.p,
               initialNote: entry.note,
-              title: entry.note.trim().isEmpty ? 'Add Note' : 'Edit Note',
-              saveLabel: entry.note.trim().isEmpty ? 'Add Note' : 'Save',
+              title: isAdd ? 'Add Note' : 'Edit Note',
+              saveLabel: isAdd ? 'Add Note' : 'Save',
               allowEmpty: false,
             ),
           );
 
-          if (note == null) return;
+          if (note == null || !mounted) return;
 
           await _updateEntryNote(entry, note);
           _showNotice(
-            entry.note.trim().isEmpty ? 'Note added' : 'Note updated',
+            addedNotice,
+            onUndo: () {
+              unawaited(_updateEntryNote(entry, previousNote));
+              _showNotice(removedNotice);
+            },
           );
         },
         onDeleteNote: entry.note.trim().isEmpty

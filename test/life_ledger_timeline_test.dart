@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
+import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
+import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -633,6 +635,173 @@ void main() {
 
         expect(restoredMoment?.id, 101);
         expect(find.text('Moment removed'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'HistoryDialog shows undo pill when note is added and tapping Undo reverts note',
+      (tester) async {
+        final now = DateTime.now();
+        final moment = Moment(
+          id: 202,
+          timestamp: now.millisecondsSinceEpoch,
+          type: 'single',
+          date: dateKey(now),
+          note: '',
+        );
+
+        String? updatedNote;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: HistoryDialog(
+                p: p,
+                entries: [moment],
+                compactRows: false,
+                largeText: false,
+                minimalMomentOptions: false,
+                confirmDelete: false,
+                onDelete: (_) async {},
+                onRestore: (_) async {},
+                onUpdateNote: (id, note) async => updatedNote = note,
+                onDuration: (_, _) {},
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Tap the tap-to-add-note area on the tile
+        await tester.tap(find.text('Tap to add quick note...'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NoteDialog), findsOneWidget);
+
+        // Enter note text and tap Add Note
+        await tester.enterText(find.byType(TextField), 'Deep focus session');
+        await tester.tap(find.byType(FilledButton));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(updatedNote, 'Deep focus session');
+        expect(find.text('Note added'), findsOneWidget);
+        expect(find.text('Undo'), findsOneWidget);
+        expect(find.byType(FractionallySizedBox), findsWidgets);
+
+        // Tap Undo
+        await tester.tap(find.text('Undo'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(updatedNote, '');
+        expect(find.text('Note removed'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'SearchNotesSettingsPage displays 80% notes and 20% mode info (Single vs 2-Way with in/out times and duration)',
+      (tester) async {
+        final day = DateTime(2026, 9, 12, 10, 0);
+        final inTime = DateTime(2026, 9, 12, 9, 0);
+        final outTime = DateTime(2026, 9, 12, 10, 30); // 1h 30m
+        final singleTime = DateTime(2026, 9, 12, 14, 0);
+
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: inTime.millisecondsSinceEpoch,
+            type: 'in',
+            date: dateKey(day),
+            note: 'Morning architecture planning',
+          ),
+          Moment(
+            id: 2,
+            timestamp: outTime.millisecondsSinceEpoch,
+            type: 'out',
+            date: dateKey(day),
+            note: '',
+          ),
+          Moment(
+            id: 3,
+            timestamp: singleTime.millisecondsSinceEpoch,
+            type: 'single',
+            date: dateKey(day),
+            note: 'Reviewed pull request #ios',
+          ),
+        ];
+
+        final searchController = TextEditingController();
+        final searchFocus = FocusNode();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  return CustomScrollView(
+                    slivers: SearchNotesSettingsPage.buildSlivers(
+                      context: context,
+                      p: p,
+                      entries: entries,
+                      settingsQuery: '',
+                      onQueryChanged: (_) {},
+                      onClearQuery: () {},
+                      settingsSearchController: searchController,
+                      settingsSearchFocusNode: searchFocus,
+                      compactHistory: false,
+                      reduceMotion: false,
+                      enableTranslucency: false,
+                      recentSearches: [],
+                      onSaveRecentSearch: (_) {},
+                      onClearRecentSearches: () {},
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // 2-Way badge and timing for the paired session
+        expect(find.text('2-WAY'), findsOneWidget);
+        expect(
+          find.text(
+            'IN ${timeOnly(inTime.millisecondsSinceEpoch)}',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            'OUT ${timeOnly(outTime.millisecondsSinceEpoch)}',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('1h 30m'), findsOneWidget);
+        expect(
+          find.text('Morning architecture planning', findRichText: true),
+          findsOneWidget,
+        );
+
+        // Single badge and timing for the single moment
+        expect(find.text('SINGLE'), findsOneWidget);
+        expect(
+          find.text(
+            timeOnly(singleTime.millisecondsSinceEpoch),
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Reviewed pull request #ios', findRichText: true),
+          findsOneWidget,
+        );
       },
     );
   });

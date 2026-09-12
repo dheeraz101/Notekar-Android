@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
+import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -42,6 +43,19 @@ class SearchNotesSettingsPage {
     }
     final allTags = allTagsSet.toList()..sort();
 
+    final daySections = buildTimelineDaySections(entries);
+    final Map<int, TimelineSessionItem> sessionLookup = {};
+    for (final sec in daySections) {
+      for (final item in sec.items) {
+        if (item is TimelineSessionItem) {
+          sessionLookup[item.inMoment.id] = item;
+          if (item.outMoment != null) {
+            sessionLookup[item.outMoment!.id] = item;
+          }
+        }
+      }
+    }
+
     final notes =
         entries
             .where(
@@ -52,10 +66,19 @@ class SearchNotesSettingsPage {
             )
             .where((e) {
               if (q.isEmpty) return true;
+              final session = sessionLookup[e.id];
+              final isTwoWay =
+                  e.type == 'in' || e.type == 'out' || session != null;
+              final modeKeywords = isTwoWay ? '2-way two-way twoway' : 'single';
+              final sessionDetails = session != null
+                  ? '${timeOnly(session.startTimestamp)} ${session.outMoment != null ? timeOnly(session.outMoment!.timestamp) : 'ongoing'} ${_formatDuration(session.duration)}'
+                  : '';
               return e.note.toLowerCase().contains(q) ||
                   datePretty(e.timestamp).toLowerCase().contains(q) ||
                   timeOnly(e.timestamp).toLowerCase().contains(q) ||
-                  e.type.toLowerCase().contains(q);
+                  e.type.toLowerCase().contains(q) ||
+                  modeKeywords.contains(q) ||
+                  sessionDetails.toLowerCase().contains(q);
             })
             .toList()
           ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -262,6 +285,27 @@ class SearchNotesSettingsPage {
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index >= notes.length) return null;
               final entry = notes[index];
+              final session = sessionLookup[entry.id];
+              final isTwoWay =
+                  entry.type == 'in' || entry.type == 'out' || session != null;
+
+              final startTs = session != null
+                  ? session.startTimestamp
+                  : (entry.type == 'in' ? entry.timestamp : null);
+              final endTs = session != null
+                  ? session.outMoment?.timestamp
+                  : (entry.type == 'out' ? entry.timestamp : null);
+              final isOngoing = session != null
+                  ? session.isOngoing
+                  : (entry.type == 'in');
+              final duration = session != null
+                  ? session.duration
+                  : (startTs != null
+                        ? Duration(
+                            milliseconds:
+                                DateTime.now().millisecondsSinceEpoch - startTs,
+                          )
+                        : Duration.zero);
 
               return Padding(
                 padding: EdgeInsets.only(bottom: compactHistory ? 10 : 14),
@@ -300,63 +344,195 @@ class SearchNotesSettingsPage {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // 20% Top Metadata Header
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            // Mode Pill
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
-                                vertical: 4,
+                                vertical: 3.5,
                               ),
                               decoration: BoxDecoration(
-                                color: momentColor(
-                                  p,
-                                  entry.type,
-                                ).withValues(alpha: 0.12),
+                                color:
+                                    (isTwoWay
+                                            ? p.accent
+                                            : momentColor(p, 'single'))
+                                        .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color:
+                                      (isTwoWay
+                                              ? p.accent
+                                              : momentColor(p, 'single'))
+                                          .withValues(alpha: 0.25),
+                                  width: 0.7,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    entry.type == 'in'
-                                        ? Icons.login_rounded
-                                        : (entry.type == 'out'
-                                              ? Icons.logout_rounded
-                                              : Icons.touch_app_rounded),
-                                    size: 13,
-                                    color: momentColor(p, entry.type),
+                                    isTwoWay
+                                        ? Icons.sync_alt_rounded
+                                        : Icons.touch_app_rounded,
+                                    size: 11,
+                                    color: isTwoWay
+                                        ? p.accent
+                                        : momentColor(p, 'single'),
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 4.5),
                                   Text(
-                                    entry.type.toUpperCase(),
+                                    isTwoWay ? '2-WAY' : 'SINGLE',
                                     style: TextStyle(
-                                      color: momentColor(p, entry.type),
+                                      color: isTwoWay
+                                          ? p.accent
+                                          : momentColor(p, 'single'),
                                       fontSize: 10,
                                       fontWeight: FontWeight.w900,
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 0.6,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                '${datePretty(entry.timestamp)} • ${timeOnly(entry.timestamp)}',
+                            // Date
+                            Text(
+                              datePretty(startTs ?? entry.timestamp),
+                              style: TextStyle(
+                                color: p.text3,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Sub-row: Times & Counter / Duration
+                        if (isTwoWay) ...[
+                          Row(
+                            children: [
+                              // IN node
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: p.green,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                startTs != null
+                                    ? 'IN ${timeOnly(startTs)}'
+                                    : 'IN —',
                                 style: TextStyle(
-                                  color: p.text3,
-                                  fontSize: 12,
+                                  color: p.text2,
+                                  fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
                                   fontFeatures: const [
                                     FontFeature.tabularFigures(),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 11,
+                                color: p.text3,
+                              ),
+                              const SizedBox(width: 8),
+                              // OUT node
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: isOngoing ? p.green : p.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                isOngoing
+                                    ? 'ONGOING'.localized(context)
+                                    : (endTs != null
+                                          ? 'OUT ${timeOnly(endTs)}'
+                                          : 'OUT —'),
+                                style: TextStyle(
+                                  color: isOngoing ? p.green : p.text2,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              // Duration count pill
+                              if (duration > Duration.zero || isOngoing)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2.5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: (isOngoing ? p.green : p.accent)
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    _formatDuration(duration),
+                                    style: TextStyle(
+                                      color: isOngoing ? p.green : p.accent,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ] else ...[
+                          Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: momentColor(p, 'single'),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                timeOnly(entry.timestamp),
+                                style: TextStyle(
+                                  color: p.text2,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+
+                        const SizedBox(height: 10),
+                        Container(
+                          height: 0.6,
+                          color: p.border.withValues(alpha: 0.35),
                         ),
-                        const SizedBox(height: 12),
-                        // Complete note text displayed in full length
+                        const SizedBox(height: 10),
+
+                        // 80% Hero Content: Full Note
                         IosEmojiText(
                           entry.note,
                           style: TextStyle(
@@ -377,6 +553,20 @@ class SearchNotesSettingsPage {
         ),
       ],
     ];
+  }
+
+  static String _formatDuration(Duration d) {
+    final totalMinutes = d.inMinutes;
+    if (totalMinutes <= 0) return '< 1m';
+    final hours = totalMinutes ~/ 60;
+    final mins = totalMinutes % 60;
+    if (hours > 0 && mins > 0) {
+      return '${hours}h ${mins}m';
+    } else if (hours > 0) {
+      return '${hours}h';
+    } else {
+      return '${mins}m';
+    }
   }
 }
 
