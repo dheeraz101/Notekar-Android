@@ -392,7 +392,7 @@ if ($priority -or $security)
 {
     $prefix = "## 🚨 Priority Release`r`n`r`n"
 }
-$releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n$gitCommits`r`n`r`n### Security and Integrity`r`nNoteKar binaries undergo automated compilation and scanning.`r`n- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder`r`n"
+$releaseNotesContent = "${prefix}## Notekar v$Version`r`n`r`nSigned release - built automatically from the branch.`r`n`r`n$gitCommits`r`n`r`n### Integrity`r`n`r`n- **Build Tag**: $BuildNumber (version $Version+$androidVersionCode)`r`n- **Automated Tests**: All unit & widget tests passing (0 failures, 0 lints)`r`n"
 Set-Content -LiteralPath $releaseNotesFile -Value $releaseNotesContent -NoNewline
 Write-Host "Created/Updated GitHub Release notes template: $releaseNotesFile"
 

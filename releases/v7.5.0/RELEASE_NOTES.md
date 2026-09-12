@@ -43,8 +43,7 @@
 
 ---
 
-### Security and Integrity
+### Integrity
 
 - **Build Tag**: `26PR0908a` (version `7.5.0+26090802`)
 - **Automated Tests**: 115 unit & widget tests passing (0 failures, 0 lints)
-- **VirusTotal Report**: https://www.virustotal.com/gui/file/placeholder
