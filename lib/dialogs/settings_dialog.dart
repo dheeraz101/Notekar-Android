@@ -3753,7 +3753,9 @@ ${stackTrace ?? 'No stack trace provided.'}
       },
       child: AppSheet(
         p: p,
-        title: category == 'Reminder Message'
+        title: category?.startsWith('Mode: ') == true
+            ? category!.substring(6)
+            : category == 'Reminder Message'
             ? (_editingReminderType == 'daily'
                   ? 'Daily Reminder Message'.localized(context)
                   : (_editingReminderType == 'weekly'
@@ -5398,9 +5400,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                             child: ModesCategoriesSettingsPage(
                               p: p,
                               entries: entries,
+                              onOpenCategory: (cat, {parent}) =>
+                                  _openCategory(cat, parent: parent),
                               onCategoriesChanged: () {
                                 setState(() {});
                               },
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
+                          ),
+                        if (category != null && category!.startsWith('Mode: '))
+                          SliverToBoxAdapter(
+                            child: ModeDetailSettingsPage(
+                              p: p,
+                              category: category!.substring(6),
+                              entries: entries,
+                              onDelete: () {
+                                _popCategory();
+                                setState(() {});
+                              },
+                              onCategoriesChanged: () {
+                                setState(() {});
+                              },
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
                         if (show('Search Notes'))

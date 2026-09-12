@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
@@ -82,6 +83,10 @@ void main() {
 
         final withCustom = await service.getCategories(prefs: prefs);
         expect(withCustom, contains('Reading'));
+
+        // 15-character length restriction
+        expect(await service.addCategory('A' * 16, prefs: prefs), isFalse);
+        expect(await service.addCategory('A' * 15, prefs: prefs), isTrue);
 
         // Duplicate prevention
         final dup = await service.addCategory('reading', prefs: prefs);
@@ -232,11 +237,18 @@ void main() {
           ),
         ];
 
+        String? openedCategory;
+        bool betaClicked = false;
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(
-                child: ModesCategoriesSettingsPage(p: p, entries: entries),
+                child: ModesCategoriesSettingsPage(
+                  p: p,
+                  entries: entries,
+                  onOpenCategory: (cat, {parent}) => openedCategory = cat,
+                  onLearnMoreBeta: () => betaClicked = true,
+                ),
               ),
             ),
           ),
@@ -248,23 +260,88 @@ void main() {
         expect(find.text('Work'), findsOneWidget);
         expect(find.text('Deep Focus'), findsOneWidget);
         expect(find.text('Create New Mode'), findsOneWidget);
+        // Mode rows do not have delete/trash icons in the row
+        expect(find.byIcon(CupertinoIcons.trash), findsNothing);
+        // Default beta note is rendered on Modes page
+        expect(find.byType(SettingsBetaNote), findsOneWidget);
+        final betaNote = tester.widget<SettingsBetaNote>(
+          find.byType(SettingsBetaNote),
+        );
+        expect(betaNote.onLearnMore, isNotNull);
+        betaNote.onLearnMore!();
+        expect(betaClicked, isTrue);
 
-        // Tap Work to open category detail view inline (no popup)
+        // Tap Work triggers onOpenCategory with 'Mode: Work'
         await tester.tap(find.text('Work'));
         await tester.pumpAndSettle();
+        expect(openedCategory, 'Mode: Work');
+      },
+    );
 
+    testWidgets(
+      'ModeDetailSettingsPage renders metrics, insights, and dedicated bottom delete button for custom modes',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({
+          CategoryService.keyCustomCategories: ['Reading'],
+        });
+        final p = paletteFor('dark', highContrast: false, accentName: 'blue');
+        final now = DateTime.now();
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: now
+                .subtract(const Duration(hours: 1))
+                .millisecondsSinceEpoch,
+            type: 'in',
+            date: '2026-09-12',
+            category: 'Reading',
+          ),
+          Moment(
+            id: 2,
+            timestamp: now.millisecondsSinceEpoch,
+            type: 'out',
+            date: '2026-09-12',
+          ),
+        ];
+
+        bool deleted = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ModeDetailSettingsPage(
+                  p: p,
+                  category: 'Reading',
+                  entries: entries,
+                  onDelete: () => deleted = true,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Reading'), findsOneWidget);
         expect(find.text('TOTAL FOCUS'), findsOneWidget);
         expect(find.text('SESSIONS'), findsOneWidget);
         expect(find.text('CATEGORY TIMELINE'), findsOneWidget);
         expect(find.text('CATEGORY INSIGHTS'), findsOneWidget);
-        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Delete Mode'), findsOneWidget);
 
-        // Tap Cancel to return back to Modes list
-        await tester.tap(find.text('Cancel'));
+        // Tap Delete Mode button
+        await tester.tap(find.text('Delete Mode'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Create New Mode'), findsOneWidget);
-        expect(find.text('Work'), findsOneWidget);
+        // Expect Apple-style confirmation dialog
+        expect(find.text('Delete Mode?'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Delete'), findsOneWidget);
+
+        // Tap Delete
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+        expect(deleted, isTrue);
       },
     );
   });
@@ -272,37 +349,37 @@ void main() {
   group('UI Cleanups & Settings Verification Tests', () {
     final p = paletteFor('dark', highContrast: false, accentName: 'blue');
 
-    testWidgets(
-      'AdvancedSettingsPage renames Bridges & Automation to Automation',
-      (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: AdvancedSettingsPage(
-                  p: p,
-                  subCategory: 'Advanced',
-                  hapticStyle: 'default',
-                  reduceMotion: false,
-                  largeText: false,
-                  highContrast: false,
-                  healthStatus: 'Good',
-                  onHapticStyleChanged: (_) {},
-                  onReduceMotionChanged: (_) {},
-                  onLargeTextChanged: (_) {},
-                  onHighContrastChanged: (_) {},
-                  onResetSettings: () async {},
-                  onResetAllData: () async {},
-                  onFactoryReset: () async {},
-                  onOpenCategory: (_, {required parent}) {},
-                ),
+    testWidgets('AdvancedSettingsPage displays Automation with status Bridge', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AdvancedSettingsPage(
+                p: p,
+                subCategory: 'Advanced',
+                hapticStyle: 'default',
+                reduceMotion: false,
+                largeText: false,
+                highContrast: false,
+                healthStatus: 'Good',
+                onHapticStyleChanged: (_) {},
+                onReduceMotionChanged: (_) {},
+                onLargeTextChanged: (_) {},
+                onHighContrastChanged: (_) {},
+                onResetSettings: () async {},
+                onResetAllData: () async {},
+                onFactoryReset: () async {},
+                onOpenCategory: (_, {required parent}) {},
               ),
             ),
           ),
-        );
-        expect(find.text('Automation'), findsNWidgets(2));
-      },
-    );
+        ),
+      );
+      expect(find.text('Automation'), findsOneWidget);
+      expect(find.text('Bridge'), findsOneWidget);
+    });
 
     testWidgets('HelpGuidesSettingsPage App Philosophy card has no icon', (
       tester,

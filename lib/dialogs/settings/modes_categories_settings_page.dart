@@ -24,11 +24,15 @@ class ModesCategoriesSettingsPage extends StatefulWidget {
     required this.p,
     required this.entries,
     this.onCategoriesChanged,
+    this.onOpenCategory,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
   final List<Moment> entries;
   final VoidCallback? onCategoriesChanged;
+  final void Function(String category, {String? parent})? onOpenCategory;
+  final VoidCallback? onLearnMoreBeta;
 
   @override
   State<ModesCategoriesSettingsPage> createState() =>
@@ -39,7 +43,6 @@ class _ModesCategoriesSettingsPageState
     extends State<ModesCategoriesSettingsPage> {
   final CategoryService _categoryService = CategoryService();
   List<String> _categories = ['Work', 'Deep Focus'];
-  String? _selectedCategory;
   bool _loading = true;
 
   @override
@@ -85,9 +88,10 @@ class _ModesCategoriesSettingsPageState
           child: CupertinoTextField(
             controller: textController,
             autofocus: true,
-            placeholder: 'Mode Name (e.g. Study, Gym, Reading)',
+            placeholder: 'Mode Name (e.g. Study, Gym)',
             textCapitalization: TextCapitalization.words,
-            maxLength: 30,
+            maxLength: 15,
+            inputFormatters: [LengthLimitingTextInputFormatter(15)],
             style: TextStyle(color: widget.p.text),
           ),
         ),
@@ -118,156 +122,12 @@ class _ModesCategoriesSettingsPageState
     }
   }
 
-  Future<void> _confirmDeleteCategory(String category) async {
-    HapticFeedback.heavyImpact();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Delete Mode?'.localized(ctx)),
-        content: Text(
-          'Are you sure you want to remove "$category"? Existing logged moments will retain their history.'
-              .localized(ctx),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: Text('Cancel'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, false),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text('Delete'.localized(ctx)),
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await _categoryService.deleteCategory(category);
-      if (_selectedCategory == category) {
-        _selectedCategory = null;
-      }
-      await _loadCategories();
-      widget.onCategoriesChanged?.call();
-    }
-  }
-
-  void _openCategoryDetail(String category) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _selectedCategory = category;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(24.0),
         child: Center(child: CircularProgressIndicator.adaptive()),
-      );
-    }
-
-    if (_selectedCategory != null) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) {
-            setState(() => _selectedCategory = null);
-          }
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: spacing8),
-            // Top Navigation Bar: Back & Cancel buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: spacing16,
-                vertical: 4,
-              ),
-              child: Row(
-                children: [
-                  // Back Button: Chevron + Modes
-                  PressableScale(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedCategory = null);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.p.surface2,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: widget.p.border.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.chevron_left_rounded,
-                            size: 18,
-                            color: widget.p.accent,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            'Modes'.localized(context),
-                            style: TextStyle(
-                              color: widget.p.accent,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  // Cancel Button
-                  PressableScale(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedCategory = null);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.p.surface2,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: widget.p.border.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        'Cancel'.localized(context),
-                        style: TextStyle(
-                          color: widget.p.text2,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: spacing8),
-            _CategoryDetailSheet(
-              p: widget.p,
-              category: _selectedCategory!,
-              entries: widget.entries,
-            ),
-            const SizedBox(height: spacing24),
-          ],
-        ),
       );
     }
 
@@ -390,13 +250,17 @@ class _ModesCategoriesSettingsPageState
               _buildCategoryRow(
                 category: category,
                 duration: durationsMap[category] ?? Duration.zero,
-                isDefault: CategoryService.defaultCategories.any(
-                  (d) => d.toLowerCase() == category.toLowerCase(),
-                ),
               ),
             ],
           ],
         ),
+
+        // Beta Page Note
+        if (widget.onLearnMoreBeta != null) ...[
+          const SizedBox(height: spacing12),
+          SettingsBetaNote(p: widget.p, onLearnMore: widget.onLearnMoreBeta!),
+        ],
+        const SizedBox(height: spacing16),
       ],
     );
   }
@@ -404,7 +268,6 @@ class _ModesCategoriesSettingsPageState
   Widget _buildCategoryRow({
     required String category,
     required Duration duration,
-    required bool isDefault,
   }) {
     final meta = getCategoryMeta(category, widget.p);
     final durStr = _formatDuration(duration);
@@ -415,37 +278,37 @@ class _ModesCategoriesSettingsPageState
       color: meta.color,
       title: category,
       status: durStr,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!isDefault)
-            IconButton(
-              icon: Icon(
-                CupertinoIcons.trash,
-                size: 16,
-                color: widget.p.red.withValues(alpha: 0.7),
-              ),
-              onPressed: () => _confirmDeleteCategory(category),
-            ),
-          Icon(Icons.chevron_right_rounded, color: widget.p.text3, size: 18),
-        ],
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: widget.p.text3,
+        size: 18,
       ),
-      onTap: () => _openCategoryDetail(category),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        widget.onOpenCategory?.call('Mode: $category', parent: 'Modes');
+      },
     );
   }
 }
 
-/// Detailed inspection sheet for a selected Category showing timeline and bottom insights.
-class _CategoryDetailSheet extends StatelessWidget {
-  const _CategoryDetailSheet({
+/// Dedicated Settings Page for an inspected Mode / Category.
+class ModeDetailSettingsPage extends StatelessWidget {
+  const ModeDetailSettingsPage({
+    super.key,
     required this.p,
     required this.category,
     required this.entries,
+    this.onDelete,
+    this.onCategoriesChanged,
+    this.onLearnMoreBeta,
   });
 
   final Palette p;
   final String category;
   final List<Moment> entries;
+  final VoidCallback? onDelete;
+  final VoidCallback? onCategoriesChanged;
+  final VoidCallback? onLearnMoreBeta;
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -458,6 +321,39 @@ class _CategoryDetailSheet extends StatelessWidget {
       return '${hours}h';
     } else {
       return '${mins}m';
+    }
+  }
+
+  Future<void> _confirmDeleteCategory(BuildContext context) async {
+    HapticFeedback.heavyImpact();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text('Delete Mode?'.localized(ctx)),
+        content: Text(
+          'Are you sure you want to remove "$category"? Existing logged moments will retain their history.'
+              .localized(ctx),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('Cancel'.localized(ctx)),
+            onPressed: () => Navigator.pop(ctx, false),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text('Delete'.localized(ctx)),
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await CategoryService().deleteCategory(category);
+      if (success) {
+        onCategoriesChanged?.call();
+        onDelete?.call();
+      }
     }
   }
 
@@ -526,6 +422,10 @@ class _CategoryDetailSheet extends StatelessWidget {
     final avgSessionMins = categoryTotalLogs > 0
         ? (categoryTotalMs ~/ 1000 ~/ 60 ~/ categoryTotalLogs)
         : 0;
+
+    final isDefault = CategoryService.defaultCategories.any(
+      (d) => d.toLowerCase() == category.toLowerCase(),
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
@@ -708,6 +608,46 @@ class _CategoryDetailSheet extends StatelessWidget {
               ],
             ),
           ),
+
+          // Dedicated Bottom Delete Button for custom modes
+          if (!isDefault) ...[
+            const SizedBox(height: spacing24),
+            PressableScale(
+              onTap: () => _confirmDeleteCategory(context),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: p.red.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: p.red.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(CupertinoIcons.trash, size: 18, color: p.red),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Delete Mode'.localized(context),
+                      style: TextStyle(
+                        color: p.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: spacing16),
+          ],
+
+          // Beta Note
+          if (onLearnMoreBeta != null) ...[
+            const SizedBox(height: spacing8),
+            SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta!),
+          ],
+          const SizedBox(height: spacing24),
         ],
       ),
     );

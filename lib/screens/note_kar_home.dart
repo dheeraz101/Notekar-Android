@@ -1241,7 +1241,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
             autofocus: true,
             placeholder: 'Category Name (e.g. Study, Gym)',
             textCapitalization: TextCapitalization.words,
-            maxLength: 30,
+            maxLength: 15,
+            inputFormatters: [LengthLimitingTextInputFormatter(15)],
             style: TextStyle(color: p.text),
           ),
         ),
@@ -2010,7 +2011,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _showToast('Loading database...', warning: true);
       return;
     }
-    await showModalBottomSheet<void>(
+    final result = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.42),
@@ -2021,7 +2022,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         duration: Duration(milliseconds: 180),
         reverseDuration: Duration(milliseconds: 170),
       ),
-      builder: (_) => HistoryDialog(
+      builder: (sheetContext) => HistoryDialog(
         p: p,
         entries: _entries,
         compactRows: _compactHistory,
@@ -2041,11 +2042,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onOpenTrash: _showRecentlyDeleted,
         onClearAll: _clearStoredEntries,
         onOpenSearchNotes: () {
-          Navigator.pop(context);
-          unawaited(_openSettings(initialCategory: 'Search Notes'));
+          Navigator.pop(sheetContext, 'search_notes');
         },
       ),
     );
+    if (result == 'search_notes' && mounted) {
+      await _openSettings(initialCategory: 'Search Notes');
+    }
     if (mounted) setState(() {});
   }
 

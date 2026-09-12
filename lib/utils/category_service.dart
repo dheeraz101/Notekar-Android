@@ -106,7 +106,7 @@ class CategoryService {
 
   Future<bool> addCategory(String name, {SharedPreferences? prefs}) async {
     final clean = name.trim();
-    if (clean.isEmpty || clean.length > 30) return false;
+    if (clean.isEmpty || clean.length > 15) return false;
     final p = await _getPrefs(prefs: prefs);
     final all = await getCategories(prefs: p);
     if (all.any((e) => e.toLowerCase() == clean.toLowerCase())) {
