@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="130dp"
+    android:viewportWidth="280"
+    android:viewportHeight="130">
+
+    <!-- Card Background -->
+    <path
+        android:pathData="M24,4 H256 A20,20 0 0 1 276,24 V106 A20,20 0 0 1 256,126 H24 A20,20 0 0 1 4,106 V24 A20,20 0 0 1 24,4 Z"
+        android:fillColor="#141518"
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1" />
+
+    <!-- Left Column: Focus Ratio Container Badge -->
+    <path
+        android:pathData="M24,18 H86 A12,12 0 0 1 98,30 V56 A12,12 0 0 1 86,68 H24 A12,12 0 0 1 12,56 V30 A12,12 0 0 1 24,18 Z"
+        android:fillColor="#1C1D22"
+        android:strokeColor="#2630D158"
+        android:strokeWidth="1" />
+
+    <!-- Ratio text representation: 78% in Emerald Green -->
+    <path
+        android:pathData="M30,28 H50 V48 H30 Z M54,28 H74 V48 H54 Z M78,32 H86 V48 H78 Z"
+        android:fillColor="#30D158" />
+    <path
+        android:pathData="M38,54 H72 V58 H38 Z"
+        android:fillColor="#80FFFFFF" />
+
+    <!-- Right Column: Details -->
+    <!-- Header: LIFE AUDIT • TODAY (Emerald Green) -->
+    <path
+        android:pathData="M112,22 H208 V28 H112 Z"
+        android:fillColor="#30D158" />
+
+    <!-- Intentional Tracked Time -->
+    <path
+        android:pathData="M112,36 H240 V44 H112 Z"
+        android:fillColor="#FFFFFFFF" />
+    <path
+        android:pathData="M112,48 H184 V54 H112 Z"
+        android:fillColor="#B3FFFFFF" />
+
+    <!-- 3 Bottom Action Buttons: IN, OUT, NOTE -->
+    <path
+        android:pathData="M22,78 H94 A8,8 0 0 1 102,86 V110 A8,8 0 0 1 94,118 H22 A8,8 0 0 1 14,110 V86 A8,8 0 0 1 22,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M44,95 H72 V101 H44 Z"
+        android:fillColor="#30D158" />
+
+    <path
+        android:pathData="M108,78 H180 A8,8 0 0 1 188,86 V110 A8,8 0 0 1 180,118 H108 A8,8 0 0 1 100,110 V86 A8,8 0 0 1 108,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M130,95 H158 V101 H130 Z"
+        android:fillColor="#FF453A" />
+
+    <path
+        android:pathData="M194,78 H264 A8,8 0 0 1 272,86 V110 A8,8 0 0 1 264,118 H194 A8,8 0 0 1 186,110 V86 A8,8 0 0 1 194,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M216,95 H244 V101 H216 Z"
+        android:fillColor="#0A84FF" />
+
+</vector>

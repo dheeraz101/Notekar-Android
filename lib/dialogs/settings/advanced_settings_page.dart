@@ -102,8 +102,8 @@ class AdvancedSettingsPage extends StatelessWidget {
             SettingsRow(
               p: p,
               icon: CupertinoIcons.link,
-              title: 'Bridges & Automation'.localized(context),
-              status: 'Bridges'.localized(context),
+              title: 'Automation'.localized(context),
+              status: 'Automation'.localized(context),
               color: p.accent,
               onTap: () => onOpenCategory(
                 'Integrations & Automation',

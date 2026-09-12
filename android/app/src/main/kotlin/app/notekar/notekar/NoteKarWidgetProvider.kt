@@ -47,7 +47,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             appWidgetId,
             newOptions
         )
-
         updateWidget(context, appWidgetManager, appWidgetId)
     }
 
@@ -63,8 +62,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val ACTION_LOG_BG = "app.notekar.notekar.ACTION_LOG_BG"
         const val EXTRA_LOG_TYPE = "log_type"
 
-        private const val ACTION_OPEN =
-            "app.notekar.notekar.ACTION_OPEN"
+        private const val ACTION_OPEN = "app.notekar.notekar.ACTION_OPEN"
 
         const val PREFS_NAME = "notekar_widget_state"
         const val KEY_TODAY_COUNT = "today_count"
@@ -78,8 +76,12 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_STREAK_DAYS = "streak_days"
         const val KEY_STREAK_MILESTONE = "streak_milestone"
         const val KEY_LAST_RELAPSE_TIME = "last_relapse_time"
+        const val KEY_ACTIVE_CATEGORY = "active_category"
+        const val KEY_FOCUS_RATIO = "focus_ratio"
+        const val KEY_TOTAL_TRACKED = "total_tracked"
+        const val KEY_TOTAL_WASTED = "total_wasted"
 
-        private fun launchIntent(
+        fun launchIntent(
             context: Context,
             requestCode: Int,
             actionName: String,
@@ -94,7 +96,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                     MainActivity.EXTRA_LAUNCH_ACTION,
                     launchAction
                 )
-
                 flags =
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                             Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -109,7 +110,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        private fun launchBackgroundLogIntent(
+        fun launchBackgroundLogIntent(
             context: Context,
             requestCode: Int,
             logType: String
@@ -126,7 +127,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        private fun launchQuickNoteActivityIntent(
+        fun launchQuickNoteActivityIntent(
             context: Context,
             requestCode: Int
         ): PendingIntent {
@@ -183,12 +184,12 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             // Write to pending queue inside Flutter's default SharedPreferences file
             val bgPrefs =
                 context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val currentCount = bgPrefs.getInt("flutter.pending_count", 0)
+            val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)
             val logString = "$now|$type|$note"
 
             bgPrefs.edit()
-                .putString("flutter.log_$currentCount", logString)
-                .putInt("flutter.pending_count", currentCount + 1)
+                .putString("flutter.log_$currentPendingCount", logString)
+                .putInt("flutter.pending_count", currentPendingCount + 1)
                 .apply()
 
             // Toast feedback
@@ -213,11 +214,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
             val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
             val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
-
-            val sobrietyEnabled = prefs.getBoolean(KEY_SOBRIETY_ENABLED, false)
-            val streakDays = prefs.getString(KEY_STREAK_DAYS, "0h") ?: "0h"
-            val streakMilestone = prefs.getString(KEY_STREAK_MILESTONE, "") ?: ""
-            val lastRelapseTime = prefs.getString(KEY_LAST_RELAPSE_TIME, "") ?: ""
+            val activeCategory = prefs.getString(KEY_ACTIVE_CATEGORY, "All") ?: "All"
 
             val options = manager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(
@@ -226,98 +223,80 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             val compact = minWidth < 200
 
-            val views = RemoteViews(
-                context.packageName,
-                if (sobrietyEnabled) R.layout.notekar_sobriety_widget else R.layout.notekar_widget
-            )
+            val views = RemoteViews(context.packageName, R.layout.notekar_widget)
 
-            if (sobrietyEnabled) {
-                // Sobriety Layout Binding
-                views.setTextViewText(R.id.widget_streak_days, streakDays)
+            // Normal Layout Binding
+            views.setViewVisibility(R.id.widget_in, View.VISIBLE)
+            views.setViewVisibility(R.id.widget_out, View.VISIBLE)
+            views.setTextViewText(R.id.widget_single, "TAP")
+            views.setTextViewText(R.id.widget_note, "NOTE")
 
-                if (compact) {
-                    views.setViewVisibility(R.id.widget_details_container, View.GONE)
-                    views.setViewVisibility(R.id.widget_spacer, View.GONE)
+            val modeText = if (activeCategory != "All" && activeCategory.isNotEmpty()) {
+                if (mode == "single") {
+                    "SINGLE • ${activeCategory.uppercase(Locale.ROOT)}"
                 } else {
-                    views.setViewVisibility(R.id.widget_details_container, View.VISIBLE)
-                    views.setViewVisibility(R.id.widget_spacer, View.VISIBLE)
-
-                    views.setTextViewText(
-                        R.id.widget_streak_milestone,
-                        if (streakMilestone.isNotEmpty()) streakMilestone else "Clean Streak"
-                    )
-                    views.setTextViewText(
-                        R.id.widget_last_relapse_time,
-                        if (lastRelapseTime.isNotEmpty()) "Last reset: $lastRelapseTime" else "No relapse recorded"
-                    )
+                    "${nextAction.uppercase(Locale.ROOT)} • ${activeCategory.uppercase(Locale.ROOT)}"
                 }
             } else {
-                // Normal Layout Binding
-                views.setViewVisibility(R.id.widget_in, View.VISIBLE)
-                views.setViewVisibility(R.id.widget_out, View.VISIBLE)
-                views.setTextViewText(R.id.widget_single, "TAP")
-                views.setTextViewText(R.id.widget_note, "NOTE")
-                views.setTextViewText(
-                    R.id.widget_mode,
-                    if (mode == "single") {
-                        "SINGLE MODE"
-                    } else {
-                        "NEXT: ${nextAction.uppercase(Locale.ROOT)}"
-                    }
-                )
-
-                // Bind history stack
-                val historyString = prefs.getString(KEY_HISTORY, "") ?: ""
-                val historyLines =
-                    if (historyString.isEmpty()) emptyList() else historyString.split("\n")
-
-                if (compact) {
-                    views.setViewVisibility(R.id.widget_clock, View.GONE)
-                    views.setViewVisibility(R.id.widget_history_card, View.GONE)
+                if (mode == "single") {
+                    "SINGLE MODE"
                 } else {
-                    views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
-                    views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
+                    "NEXT: ${nextAction.uppercase(Locale.ROOT)}"
+                }
+            }
+            views.setTextViewText(R.id.widget_mode, modeText)
 
-                    // Show total logs on the right end of the top line
-                    views.setTextViewText(R.id.widget_total_logs, "$todayCount Logs")
+            // Bind history stack
+            val historyString = prefs.getString(KEY_HISTORY, "") ?: ""
+            val historyLines =
+                if (historyString.isEmpty()) emptyList() else historyString.split("\n")
 
-                    if (historyLines.isNotEmpty()) {
-                        val parts = historyLines[0].split("|")
-                        if (parts.size >= 2) {
-                            val timestamp = parts[0].toLongOrNull() ?: 0L
-                            val type = parts[1]
-                            val note = if (parts.size > 2) parts[2] else ""
+            if (compact) {
+                views.setViewVisibility(R.id.widget_clock, View.GONE)
+                views.setViewVisibility(R.id.widget_history_card, View.GONE)
+            } else {
+                views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
+                views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
 
-                            val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
-                                Date(timestamp)
-                            )
+                // Show total logs on the right end of the top line
+                views.setTextViewText(R.id.widget_total_logs, "$todayCount Logs")
 
-                            val typeLabel = when (type.lowercase(Locale.ROOT)) {
-                                "in" -> "📥 IN"
-                                "out" -> "📤 OUT"
-                                "single" -> "⚡ TAP"
-                                "note" -> "📝 NOTE"
-                                else -> type.uppercase(Locale.ROOT)
-                            }
+                if (historyLines.isNotEmpty()) {
+                    val parts = historyLines[0].split("|")
+                    if (parts.size >= 2) {
+                        val timestamp = parts[0].toLongOrNull() ?: 0L
+                        val type = parts[1]
+                        val note = if (parts.size > 2) parts[2] else ""
 
-                            views.setTextViewText(R.id.widget_last_log_info, "$typeLabel • $time")
-
-                            if (note.isNotEmpty()) {
-                                views.setTextViewText(R.id.widget_last_log_note, note)
-                            } else {
-                                views.setTextViewText(
-                                    R.id.widget_last_log_note,
-                                    "No note details..."
-                                )
-                            }
-                        }
-                    } else {
-                        views.setTextViewText(R.id.widget_last_log_info, "No logs today")
-                        views.setTextViewText(
-                            R.id.widget_last_log_note,
-                            "Tap buttons below to start log"
+                        val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(
+                            Date(timestamp)
                         )
+
+                        val typeLabel = when (type.lowercase(Locale.ROOT)) {
+                            "in" -> "📥 IN"
+                            "out" -> "📤 OUT"
+                            "single" -> "⚡ TAP"
+                            "note" -> "📝 NOTE"
+                            else -> type.uppercase(Locale.ROOT)
+                        }
+
+                        views.setTextViewText(R.id.widget_last_log_info, "$typeLabel • $time")
+
+                        if (note.isNotEmpty()) {
+                            views.setTextViewText(R.id.widget_last_log_note, note)
+                        } else {
+                            views.setTextViewText(
+                                R.id.widget_last_log_note,
+                                "No note details..."
+                            )
+                        }
                     }
+                } else {
+                    views.setTextViewText(R.id.widget_last_log_info, "No logs today")
+                    views.setTextViewText(
+                        R.id.widget_last_log_note,
+                        "Tap buttons below to start log"
+                    )
                 }
             }
 
@@ -337,17 +316,15 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 launchBackgroundLogIntent(context, appWidgetId + 10, "single")
             )
 
-            if (!sobrietyEnabled) {
-                views.setOnClickPendingIntent(
-                    R.id.widget_in,
-                    launchBackgroundLogIntent(context, appWidgetId + 20, "in")
-                )
+            views.setOnClickPendingIntent(
+                R.id.widget_in,
+                launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+            )
 
-                views.setOnClickPendingIntent(
-                    R.id.widget_out,
-                    launchBackgroundLogIntent(context, appWidgetId + 30, "out")
-                )
-            }
+            views.setOnClickPendingIntent(
+                R.id.widget_out,
+                launchBackgroundLogIntent(context, appWidgetId + 30, "out")
+            )
 
             views.setOnClickPendingIntent(
                 R.id.widget_note,
@@ -360,17 +337,45 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         fun updateAllWidgets(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
 
-            val component = ComponentName(
+            // 1. Update Core Capture Widgets
+            val mainComponent = ComponentName(
                 context,
                 NoteKarWidgetProvider::class.java
             )
-
-            val ids = manager.getAppWidgetIds(component)
-
-            if (ids.isEmpty()) return
-
-            for (id in ids) {
+            val mainIds = manager.getAppWidgetIds(mainComponent)
+            for (id in mainIds) {
                 updateWidget(context, manager, id)
+            }
+
+            // 2. Update Sobriety Widgets
+            val sobrietyComponent = ComponentName(
+                context,
+                SobrietyWidgetProvider::class.java
+            )
+            val sobrietyIds = manager.getAppWidgetIds(sobrietyComponent)
+            for (id in sobrietyIds) {
+                SobrietyWidgetProvider.updateWidget(context, manager, id)
+            }
+
+            // 3. Update Life Audit Widgets
+            val lifeAuditComponent = ComponentName(
+                context,
+                LifeAuditWidgetProvider::class.java
+            )
+            val lifeAuditIds = manager.getAppWidgetIds(lifeAuditComponent)
+            for (id in lifeAuditIds) {
+                LifeAuditWidgetProvider.updateWidget(context, manager, id)
+            }
+
+            // 4. Also refresh persistent control panel if enabled
+            try {
+                val prefs =
+                    context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val showPanel = prefs.getBoolean("flutter.show_persistent_notification", false)
+                if (showPanel) {
+                    MainActivity.showPersistentControlPanel(context)
+                }
+            } catch (_: Exception) {
             }
         }
     }

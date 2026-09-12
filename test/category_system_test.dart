@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
+import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
+import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/modes_categories_settings_page.dart';
+import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -262,5 +267,139 @@ void main() {
         expect(find.text('Work'), findsOneWidget);
       },
     );
+  });
+
+  group('UI Cleanups & Settings Verification Tests', () {
+    final p = paletteFor('dark', highContrast: false, accentName: 'blue');
+
+    testWidgets(
+      'AdvancedSettingsPage renames Bridges & Automation to Automation',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AdvancedSettingsPage(
+                  p: p,
+                  subCategory: 'Advanced',
+                  hapticStyle: 'default',
+                  reduceMotion: false,
+                  largeText: false,
+                  highContrast: false,
+                  healthStatus: 'Good',
+                  onHapticStyleChanged: (_) {},
+                  onReduceMotionChanged: (_) {},
+                  onLargeTextChanged: (_) {},
+                  onHighContrastChanged: (_) {},
+                  onResetSettings: () async {},
+                  onResetAllData: () async {},
+                  onFactoryReset: () async {},
+                  onOpenCategory: (_, {required parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(find.text('Automation'), findsNWidgets(2));
+      },
+    );
+
+    testWidgets('HelpGuidesSettingsPage App Philosophy card has no icon', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: HelpGuidesSettingsPage(
+                p: p,
+                onOpenCategory: (_, {required parent}) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('App Philosophy'), findsOneWidget);
+      final appPhilRow = tester.widget<SettingsRow>(
+        find.ancestor(
+          of: find.text('App Philosophy'),
+          matching: find.byType(SettingsRow),
+        ),
+      );
+      expect(appPhilRow.icon, isNull);
+    });
+
+    testWidgets(
+      'PrivacySecuritySettingsPage Safety Verified and Hide App Content cards have no icons',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: PrivacySecuritySettingsPage(
+                  p: p,
+                  vtRatio: '0/70',
+                  vtStatus: 'Clean',
+                  vtScanDate: 'Today',
+                  vtUrl: 'https://virustotal.com',
+                  privacyLock: false,
+                  obfuscateInRecents: false,
+                  onObfuscateInRecentsChanged: (_) {},
+                  onOpenCategory: (_, {required parent}) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(find.text('Safety Verified'), findsOneWidget);
+        final safetyRow = tester.widget<SettingsRow>(
+          find.ancestor(
+            of: find.text('Safety Verified'),
+            matching: find.byType(SettingsRow),
+          ),
+        );
+        expect(safetyRow.icon, isNull);
+
+        expect(find.text('Hide App Content'), findsOneWidget);
+        final hideRow = tester.widget<SettingsSwitchRow>(
+          find.ancestor(
+            of: find.text('Hide App Content'),
+            matching: find.byType(SettingsSwitchRow),
+          ),
+        );
+        expect(hideRow.icon, isNull);
+      },
+    );
+
+    testWidgets('LoggingSettingsPage Persistent Control card has no icon', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: LoggingSettingsPage(
+                p: p,
+                defaultMode: 'two-way',
+                entriesCount: 5,
+                remindersStatus: 'Off',
+                enableSobrietyMode: false,
+                showPersistentNotification: true,
+                onShowPersistentNotificationChanged: (_) {},
+                onOpenCategory: (_, {required parent}) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Persistent Control'), findsOneWidget);
+      final persistentRow = tester.widget<SettingsSwitchRow>(
+        find.ancestor(
+          of: find.text('Persistent Control'),
+          matching: find.byType(SettingsSwitchRow),
+        ),
+      );
+      expect(persistentRow.icon, isNull);
+    });
   });
 }

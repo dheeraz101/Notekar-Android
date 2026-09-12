@@ -1009,7 +1009,6 @@ class BuildTrackSelectPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.check_circle_outline_rounded,
               title: 'Stable Build',
               subtitle: 'Recommended for standard users.'.localized(context),
               trailing: !betaTrack
@@ -1019,7 +1018,6 @@ class BuildTrackSelectPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.track_changes_rounded,
               title: 'Beta Build',
               subtitle:
                   'Priority updates and early access to active development features.'
@@ -1227,7 +1225,6 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
             if (remoteNotices)
               SettingsRow(
                 p: p,
-                icon: Icons.campaign_rounded,
                 title: 'Official Bulletins',
                 color: p.accent,
                 status: null,

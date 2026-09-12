@@ -25,6 +25,8 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : FlutterActivity() {
@@ -187,6 +189,10 @@ class MainActivity : FlutterActivity() {
                         val streakDays = call.argument<String>("streakDays") ?: "0h"
                         val streakMilestone = call.argument<String>("streakMilestone") ?: ""
                         val lastRelapseTime = call.argument<String>("lastRelapseTime") ?: ""
+                        val activeCategory = call.argument<String>("activeCategory") ?: "All"
+                        val focusRatio = call.argument<Int>("focusRatio") ?: 0
+                        val totalTracked = call.argument<String>("totalTracked") ?: "0m"
+                        val totalWasted = call.argument<String>("totalWasted") ?: "0m"
 
                         val prefs = getSharedPreferences(
                             NoteKarWidgetProvider.PREFS_NAME,
@@ -205,9 +211,20 @@ class MainActivity : FlutterActivity() {
                             .putString(NoteKarWidgetProvider.KEY_STREAK_DAYS, streakDays)
                             .putString(NoteKarWidgetProvider.KEY_STREAK_MILESTONE, streakMilestone)
                             .putString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, lastRelapseTime)
+                            .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, activeCategory)
+                            .putInt(NoteKarWidgetProvider.KEY_FOCUS_RATIO, focusRatio)
+                            .putString(NoteKarWidgetProvider.KEY_TOTAL_TRACKED, totalTracked)
+                            .putString(NoteKarWidgetProvider.KEY_TOTAL_WASTED, totalWasted)
                             .apply()
 
                         NoteKarWidgetProvider.updateAllWidgets(this)
+
+                        val fp =
+                            getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                        if (fp.getBoolean("flutter.show_persistent_notification", false)) {
+                            showPersistentControlPanel(this)
+                        }
+
                         result.success(null)
                     } catch (e: Exception) {
                         result.error("WIDGET_UPDATE_FAILED", e.message, null)
@@ -1064,83 +1081,6 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun showPersistentControlPanel(context: Context) {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "notekar_persistent_control"
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Persistent Control Panel",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Quick actions to log check-in/out or compose notes from lock screen"
-                setShowBadge(false)
-            }
-            manager.createNotificationChannel(channel)
-        }
-
-        val inIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
-            action = NoteKarWidgetProvider.ACTION_LOG_BG
-            putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "in")
-        }
-        val inPending = PendingIntent.getBroadcast(
-            context,
-            1001,
-            inIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val outIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
-            action = NoteKarWidgetProvider.ACTION_LOG_BG
-            putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "out")
-        }
-        val outPending = PendingIntent.getBroadcast(
-            context,
-            1002,
-            outIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val noteIntent = Intent(context, QuickNoteActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        }
-        val notePending = PendingIntent.getActivity(
-            context,
-            1003,
-            noteIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val mainIntent = Intent(context, MainActivity::class.java)
-        val mainPending = PendingIntent.getActivity(
-            context,
-            1000,
-            mainIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_stat_notekar)
-            .setContentTitle("NoteKar Control Panel")
-            .setContentText("Tap to open. Use quick actions below to log instantly.")
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setContentIntent(mainPending)
-            .setOngoing(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(R.drawable.ic_stat_notekar, "Log IN", inPending)
-            .addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
-            .addAction(R.drawable.ic_stat_notekar, "Quick NOTE", notePending)
-            .build()
-
-        manager.notify(PERSISTENT_NOTIFICATION_ID, notification)
-    }
-
-    private fun cancelPersistentControlPanel(context: Context) {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.cancel(PERSISTENT_NOTIFICATION_ID)
-    }
-
     companion object {
         private const val OPEN_TEXT_FILE_REQUEST = 4021
         private const val NOTIFICATION_PERMISSION_REQUEST = 4022
@@ -1148,6 +1088,7 @@ class MainActivity : FlutterActivity() {
         private const val UPDATE_NOTIFICATION_ID = 3100
         private const val PERSISTENT_NOTIFICATION_ID = 3105
         private const val UPDATE_CHANNEL_ID = "notekar_updates"
+        private const val PERSISTENT_CHANNEL_ID = "notekar_persistent_control"
         const val EXTRA_LAUNCH_ACTION = "app.notekar.notekar.extra.LAUNCH_ACTION"
         const val ACTION_NOTE = "app.notekar.notekar.ACTION_NOTE"
         const val ACTION_MOMENT = "app.notekar.notekar.ACTION_MOMENT"
@@ -1155,5 +1096,160 @@ class MainActivity : FlutterActivity() {
         const val ACTION_IN = "app.notekar.notekar.ACTION_IN"
         const val ACTION_OUT = "app.notekar.notekar.ACTION_OUT"
         const val ACTION_HISTORY = "app.notekar.notekar.ACTION_HISTORY"
+
+        fun showPersistentControlPanel(context: Context) {
+            val manager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    PERSISTENT_CHANNEL_ID,
+                    "Persistent Control Panel",
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    description =
+                        "Quick actions to log check-in/out or compose notes from lock screen"
+                    setShowBadge(false)
+                }
+                manager.createNotificationChannel(channel)
+            }
+
+            val widgetPrefs = context.getSharedPreferences(
+                NoteKarWidgetProvider.PREFS_NAME,
+                Context.MODE_PRIVATE
+            )
+            val todayCount = widgetPrefs.getInt(NoteKarWidgetProvider.KEY_TODAY_COUNT, 0)
+            val mode = widgetPrefs.getString(NoteKarWidgetProvider.KEY_MODE, "two-way") ?: "two-way"
+            val nextAction =
+                widgetPrefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
+            val lastTimestamp = widgetPrefs.getLong(NoteKarWidgetProvider.KEY_LAST_TIMESTAMP, 0L)
+            val activeCategory =
+                widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, "All") ?: "All"
+            val sobrietyEnabled =
+                widgetPrefs.getBoolean(NoteKarWidgetProvider.KEY_SOBRIETY_ENABLED, false)
+            val streakDays = widgetPrefs.getString(NoteKarWidgetProvider.KEY_STREAK_DAYS, "") ?: ""
+
+            val inIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                action = NoteKarWidgetProvider.ACTION_LOG_BG
+                putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "in")
+            }
+            val inPending = PendingIntent.getBroadcast(
+                context,
+                1001,
+                inIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val outIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                action = NoteKarWidgetProvider.ACTION_LOG_BG
+                putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "out")
+            }
+            val outPending = PendingIntent.getBroadcast(
+                context,
+                1002,
+                outIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val singleIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                action = NoteKarWidgetProvider.ACTION_LOG_BG
+                putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "single")
+            }
+            val singlePending = PendingIntent.getBroadcast(
+                context,
+                1004,
+                singleIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val noteIntent = Intent(context, QuickNoteActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            val notePending = PendingIntent.getActivity(
+                context,
+                1003,
+                noteIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val mainIntent = Intent(context, MainActivity::class.java)
+            val mainPending = PendingIntent.getActivity(
+                context,
+                1000,
+                mainIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val isTwoWay = mode == "two-way"
+            val isCurrentlyIn = isTwoWay && nextAction == "out"
+
+            val categorySuffix =
+                if (activeCategory != "All" && activeCategory.isNotEmpty()) " • $activeCategory" else ""
+
+            val title = when {
+                isCurrentlyIn -> "🟢 IN$categorySuffix"
+                isTwoWay -> "⚪ Ready$categorySuffix"
+                else -> "⚡ Single Mode$categorySuffix"
+            }
+
+            val formattedTime = if (lastTimestamp > 0L) {
+                SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(lastTimestamp))
+            } else ""
+
+            val contentText = when {
+                isCurrentlyIn && formattedTime.isNotEmpty() -> "Active session since $formattedTime • $todayCount moments today"
+                sobrietyEnabled && streakDays.isNotEmpty() -> "Clean streak: $streakDays • $todayCount moments today"
+                todayCount > 0 -> "$todayCount moments logged today • Ready for next capture"
+                else -> "Ready to log • Tap actions below to record instantly"
+            }
+
+            val expandedText = buildString {
+                append("Status: ").append(if (isCurrentlyIn) "Active Session" else "Standby")
+                if (categorySuffix.isNotEmpty()) append(" ($activeCategory)")
+                append("\n")
+                if (formattedTime.isNotEmpty()) {
+                    append(if (isCurrentlyIn) "Session started: " else "Last recorded: ").append(
+                        formattedTime
+                    ).append("\n")
+                }
+                append("Today's Total: ").append(todayCount).append(" moments")
+                if (sobrietyEnabled && streakDays.isNotEmpty()) {
+                    append("\nSobriety streak: ").append(streakDays)
+                }
+            }
+
+            val builder = NotificationCompat.Builder(context, PERSISTENT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stat_notekar)
+                .setContentTitle(title)
+                .setContentText(contentText)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(expandedText))
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setContentIntent(mainPending)
+                .setOngoing(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+            if (isTwoWay) {
+                if (isCurrentlyIn) {
+                    builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "Moment", singlePending)
+                } else {
+                    builder.addAction(R.drawable.ic_stat_notekar, "Log IN", inPending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "Moment", singlePending)
+                }
+            } else {
+                builder.addAction(R.drawable.ic_stat_notekar, "Log Moment", singlePending)
+                builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
+            }
+
+            manager.notify(PERSISTENT_NOTIFICATION_ID, builder.build())
+        }
+
+        fun cancelPersistentControlPanel(context: Context) {
+            val manager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.cancel(PERSISTENT_NOTIFICATION_ID)
+        }
     }
 }

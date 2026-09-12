@@ -2149,6 +2149,71 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: defaultMode == 'single' ? 'Single' : 'Two-Way',
       ),
       item(
+        title: 'Modes',
+        subtitle:
+            'Focus categories, custom modes, and category history breakdown',
+        category: 'Modes',
+        icon: Icons.category_rounded,
+        keywords: [
+          'modes',
+          'mode',
+          'category',
+          'categories',
+          'work',
+          'deep focus',
+          'custom mode',
+          'focus',
+          'tagging',
+          'badges',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Manage',
+      ),
+      item(
+        title: 'Ergonomic Tap Zone',
+        subtitle:
+            'Clock-centered hit box with edge-to-edge width to prevent ghost touches',
+        category: 'Logging',
+        icon: Icons.touch_app_rounded,
+        keywords: [
+          'ergonomic',
+          'tap zone',
+          'safety zone',
+          'tap area',
+          'ghost touch',
+          'accidental tap',
+          'dead zone',
+          'clock',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Active',
+      ),
+      item(
+        title: 'Android Home Screen Widgets',
+        subtitle:
+            'Quick Log, Sobriety Companion, and Life Audit widgets for home screen',
+        category: 'Logging',
+        icon: Icons.widgets_rounded,
+        keywords: [
+          'widget',
+          'widgets',
+          'launcher',
+          'home screen',
+          'quick log widget',
+          'sobriety widget',
+          'life audit widget',
+          'lock screen',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: '3 Widgets',
+      ),
+      item(
         title: 'Startup Mode',
         subtitle: 'Default mode when opening the app',
         category: 'Capture',
@@ -3695,7 +3760,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                         ? 'Weekly Reminder Message'.localized(context)
                         : 'Monthly Reminder Message'.localized(context)))
             : category == 'Integrations & Automation'
-            ? 'Bridges & Automation'.localized(context)
+            ? 'Automation'.localized(context)
             : (category ?? 'Settings').localized(context),
         onBack: category != null ? _popCategory : null,
         docked: true,
@@ -5402,6 +5467,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   GuideRow(
                                     p: p,
+                                    icon: Icons.category_rounded,
+                                    title: 'Modes & Categories',
+                                    text:
+                                        'Select an active mode like Work or Deep Focus from the home screen pills carousel to automatically tag all subsequent moments and sessions.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.touch_app_rounded,
+                                    title: 'Ergonomic Tap Zone',
+                                    text:
+                                        'The tap logging zone is vertically centered on the clock band with full-width reach, eliminating accidental taps on status bars and navigation gestures.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.widgets_rounded,
+                                    title: 'Android Home Screen Widgets',
+                                    text:
+                                        'Place NoteKar Quick Log, Sobriety Companion, and Life Audit widgets on your launcher for instant logging and live statistics without opening the app.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
                                     icon: Icons.auto_stories_rounded,
                                     title: 'Life Ledger Timeline',
                                     text:
@@ -5669,6 +5755,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How do Modes & Focus Categories work?',
+                                    answer:
+                                        'Tap any category pill on the home screen carousel (e.g. Work, Deep Focus) to tag upcoming moments and sessions. In Settings > Logging > Modes, you can create custom modes, view tracked hours, and explore dedicated category histories.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Why does tapping the very top or bottom of the screen not log?',
+                                    answer:
+                                        'NoteKar features an intentional Ergonomic Safety Zone centered around the clock face (+ buffer). This allows full-width one-handed thumb tapping while preventing accidental logs when pulling down notification shades or performing navigation gestures.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'What Android Home Screen Widgets are supported?',
+                                    answer:
+                                        'NoteKar provides 3 dedicated widgets: Quick Log (1-tap IN/OUT/Moment capture & mode status), Sobriety Companion (clean streak & milestone progress), and Life Audit (daily waking focus ratio). Add them by long-pressing your home screen launcher and selecting Widgets > NoteKar.',
+                                  ),
                                   HelpRow(
                                     p: p,
                                     question:

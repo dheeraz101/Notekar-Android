@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="130dp"
+    android:viewportWidth="280"
+    android:viewportHeight="130">
+
+    <!-- Card Background -->
+    <path
+        android:pathData="M24,4 H256 A20,20 0 0 1 276,24 V106 A20,20 0 0 1 256,126 H24 A20,20 0 0 1 4,106 V24 A20,20 0 0 1 24,4 Z"
+        android:fillColor="#141518"
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1" />
+
+    <!-- Left Column: Streak Container Badge -->
+    <path
+        android:pathData="M24,18 H86 A12,12 0 0 1 98,30 V56 A12,12 0 0 1 86,68 H24 A12,12 0 0 1 12,56 V30 A12,12 0 0 1 24,18 Z"
+        android:fillColor="#1C1D22"
+        android:strokeColor="#26FFD60A"
+        android:strokeWidth="1" />
+
+    <!-- Streak text representation: 14d in Amber -->
+    <path
+        android:pathData="M32,28 H40 V48 H32 Z M46,28 H66 V48 H46 Z M70,36 H80 V48 H70 Z"
+        android:fillColor="#FFD60A" />
+    <path
+        android:pathData="M38,54 H72 V58 H38 Z"
+        android:fillColor="#80FFFFFF" />
+
+    <!-- Right Column: Details -->
+    <!-- Header: SOBRIETY ACTIVE (Amber) -->
+    <path
+        android:pathData="M112,22 H200 V28 H112 Z"
+        android:fillColor="#FF9F0A" />
+
+    <!-- Milestone: Clean Streak Progress -->
+    <path
+        android:pathData="M112,36 H248 V44 H112 Z"
+        android:fillColor="#FFFFFFFF" />
+    <path
+        android:pathData="M112,48 H190 V54 H112 Z"
+        android:fillColor="#B3FFFFFF" />
+
+    <!-- Bottom Actions: RESET STREAK (Red) & ADD DIARY (Blue) -->
+    <path
+        android:pathData="M22,78 H134 A8,8 0 0 1 142,86 V110 A8,8 0 0 1 134,118 H22 A8,8 0 0 1 14,110 V86 A8,8 0 0 1 22,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M44,95 H112 V101 H44 Z"
+        android:fillColor="#FF453A" />
+
+    <path
+        android:pathData="M152,78 H264 A8,8 0 0 1 272,86 V110 A8,8 0 0 1 264,118 H152 A8,8 0 0 1 144,110 V86 A8,8 0 0 1 152,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M174,95 H242 V101 H174 Z"
+        android:fillColor="#0A84FF" />
+
+</vector>

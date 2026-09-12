@@ -26,7 +26,6 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.auto_awesome_rounded,
               title: 'App Philosophy'.localized(context),
               color: p.accent,
               status: 'Manifesto'.localized(context),
@@ -73,7 +72,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Explore interactive tutorials for tap logging, duration calculations, and troubleshooting.'
+              'Explore interactive tutorials for tap logging, modes, widgets, duration calculations, and troubleshooting.'
                   .localized(context),
         ),
 

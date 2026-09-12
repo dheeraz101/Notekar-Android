@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="130dp"
+    android:viewportWidth="280"
+    android:viewportHeight="130">
+
+    <!-- Card Background -->
+    <path
+        android:pathData="M24,4 H256 A20,20 0 0 1 276,24 V106 A20,20 0 0 1 256,126 H24 A20,20 0 0 1 4,106 V24 A20,20 0 0 1 24,4 Z"
+        android:fillColor="#141518"
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1" />
+
+    <!-- Clock / Status representation -->
+    <path
+        android:pathData="M18,24 H42 V38 H18 Z M46,24 H50 V38 H46 Z M54,24 H78 V38 H54 Z"
+        android:fillColor="#FFFFFFFF" />
+    <path
+        android:pathData="M82,30 H94 V38 H82 Z"
+        android:fillColor="#99FFFFFF" />
+
+    <!-- Mode Pill Badge: TWO-WAY • WORK (Cyan) -->
+    <path
+        android:pathData="M22,46 H76 A4,4 0 0 1 80,50 V54 A4,4 0 0 1 76,58 H22 A4,4 0 0 1 18,54 V50 A4,4 0 0 1 22,46 Z"
+        android:fillColor="#1A64D2FF" />
+    <path
+        android:pathData="M24,50 H74 V54 H24 Z"
+        android:fillColor="#FF64D2FF" />
+
+    <!-- History preview card (Right side) -->
+    <path
+        android:pathData="M110,18 H260 A10,10 0 0 1 270,28 V56 A10,10 0 0 1 260,66 H110 A10,10 0 0 1 100,56 V28 A10,10 0 0 1 110,18 Z"
+        android:fillColor="#1C1D22"
+        android:strokeColor="#1FFFFFFF"
+        android:strokeWidth="1" />
+
+    <!-- History content bars -->
+    <path
+        android:pathData="M112,28 H170 V34 H112 Z"
+        android:fillColor="#30D158" />
+    <path
+        android:pathData="M230,28 H258 V34 H230 Z"
+        android:fillColor="#80FFFFFF" />
+    <path
+        android:pathData="M112,42 H240 V48 H112 Z"
+        android:fillColor="#B3FFFFFF" />
+    <path
+        android:pathData="M112,52 H180 V56 H112 Z"
+        android:fillColor="#66FFFFFF" />
+
+    <!-- 4 Bottom Action Buttons -->
+    <path
+        android:pathData="M22,78 H74 A8,8 0 0 1 82,86 V110 A8,8 0 0 1 74,118 H22 A8,8 0 0 1 14,110 V86 A8,8 0 0 1 22,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M36,94 H60 V102 H36 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <path
+        android:pathData="M88,78 H140 A8,8 0 0 1 148,86 V110 A8,8 0 0 1 140,118 H88 A8,8 0 0 1 80,86 V110 A8,8 0 0 1 88,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M102,94 H126 V102 H102 Z"
+        android:fillColor="#30D158" />
+
+    <path
+        android:pathData="M154,78 H206 A8,8 0 0 1 214,86 V110 A8,8 0 0 1 206,118 H154 A8,8 0 0 1 146,86 V110 A8,8 0 0 1 154,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M168,94 H192 V102 H168 Z"
+        android:fillColor="#FF453A" />
+
+    <path
+        android:pathData="M220,78 H262 A8,8 0 0 1 270,86 V110 A8,8 0 0 1 262,118 H220 A8,8 0 0 1 212,86 V110 A8,8 0 0 1 220,78 Z"
+        android:fillColor="#22242B"
+        android:strokeColor="#26FFFFFF"
+        android:strokeWidth="1" />
+    <path
+        android:pathData="M230,94 H252 V102 H230 Z"
+        android:fillColor="#0A84FF" />
+
+</vector>

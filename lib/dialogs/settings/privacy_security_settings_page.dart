@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -42,7 +41,6 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.checkmark_shield_fill,
               title: 'Safety Verified',
               subtitle: 'Verified clean of malicious activity',
               color: p.green,
@@ -196,7 +194,6 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
           children: [
             SettingsSwitchRow(
               p: p,
-              icon: Icons.screenshot_rounded,
               title: 'Hide App Content',
               subtitle:
                   'Obfuscate application screens and block screenshots in the system recents switcher.',

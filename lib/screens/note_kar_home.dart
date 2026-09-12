@@ -32,6 +32,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/backup_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
@@ -1889,6 +1890,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ? timeOnly(latestRelapse.millisecondsSinceEpoch)
         : '';
 
+    final todayAudit = LifeAuditService.calculate(
+      entries: _entries,
+      timeframe: LifeAuditTimeframe.today,
+    );
+
     try {
       await _fileChannel.invokeMethod<void>('updateWidgetState', {
         'todayCount': todayCount,
@@ -1902,6 +1908,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'streakDays': streakDays,
         'streakMilestone': streakMilestone,
         'lastRelapseTime': lastRelapseTime,
+        'activeCategory': _activeCategory,
+        'focusRatio': (todayAudit.intentionalityRatio * 100).round(),
+        'totalTracked': todayAudit.formattedTotalTracked,
+        'totalWasted': todayAudit.formattedTotalWasted,
       });
     } catch (_) {
       // Widget updates must never affect logging.

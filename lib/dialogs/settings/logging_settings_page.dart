@@ -219,7 +219,6 @@ class LoggingSettingsPage extends StatelessWidget {
           children: [
             SettingsSwitchRow(
               p: p,
-              icon: Icons.notification_important_rounded,
               title: 'Persistent Control',
               subtitle:
                   'Show a sticky notification in the drawer to log check-in/out directly from the lock screen.'

@@ -180,6 +180,8 @@
 
         <receiver
             android:name=".NoteKarWidgetProvider"
+            android:label="@string/widget_title"
+            android:icon="@mipmap/ic_launcher"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -188,6 +190,32 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/notekar_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".SobrietyWidgetProvider"
+            android:label="@string/widget_sobriety_title"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.notekar.notekar.ACTION_LOG_BG" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/notekar_sobriety_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".LifeAuditWidgetProvider"
+            android:label="@string/widget_life_audit_title"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.notekar.notekar.ACTION_LOG_BG" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/notekar_life_audit_widget_info" />
         </receiver>
         <receiver
             android:name=".RemoteNoticeReceiver"
