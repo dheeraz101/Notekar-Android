@@ -27,53 +27,52 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.1',
-    date: 'September 12, 2026',
-    edition: 'Universal Themes & Spatial Modes',
+    version: '7.5.2',
+    date: 'September 16, 2026',
+    edition: 'Plus Notes & Spatial Widgets',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'Universal Theme Harmony',
+        title: 'Plus Notes & Journaling',
         desc:
-            'Full Light, Dark, and AMOLED theme parity across all popups, pickers, and alerts.',
-        icon: Icons.palette_rounded,
-        tag: 'Theming',
+            'Unrestricted long-form canvas with dedicated Plus button, history editing parity, and customizable hashtags.',
+        icon: Icons.note_add_rounded,
+        tag: 'Notes',
       ),
       (
-        title: 'Dedicated Mode Workspaces',
+        title: 'Home Screen Widgets Restored',
         desc:
-            'Individual mode settings pages with native back routing, 15-char limit & iOS confirmation.',
-        icon: Icons.tune_rounded,
-        tag: 'Modes',
-      ),
-      (
-        title: 'Android Home Widgets',
-        desc:
-            '3 dedicated launcher widgets (Quick Capture, Sobriety, Life Audit) & dynamic notification.',
+            'Sobriety and Life Audit launcher widgets fixed with zero-state prompts, deep linking & crash immunity.',
         icon: Icons.widgets_rounded,
-        tag: 'Android',
+        tag: 'Widgets',
       ),
       (
-        title: '120Hz Decoupled Motion',
+        title: 'Pure 12H Clock & Single Tactile Touch',
         desc:
-            'Silky high-refresh rendering, ergonomic touch safety zone, and 80/20 Search Notes.',
-        icon: Icons.speed_rounded,
-        tag: 'Performance',
+            'Clean digits without AM/PM clutter on home clock face, paired with unified single-burst haptic clicks.',
+        icon: Icons.schedule_rounded,
+        tag: 'Interface',
+      ),
+      (
+        title: 'Condensed 5-Page Onboarding',
+        desc:
+            'Streamlined welcome sheet featuring a unified Permissions & System Reliability center.',
+        icon: Icons.verified_user_rounded,
+        tag: 'Experience',
       ),
     ],
     items: [
-      '• Elegance inside and out — universal themes, dedicated modes, and tactile home widgets.',
-      '+ Full Light, Dark, and AMOLED theme support across all popups, Cupertino sheets, pickers, and pills',
-      '+ Dedicated settings pages for logging modes with native back routing and 15-character naming limit',
-      '+ Apple-style destructive deletion confirmation dialog relocated to individual mode pages',
-      '+ 3 dedicated Android Home Screen widgets: Quick Capture, Sobriety Companion, and Life Audit',
-      '+ Dynamic persistent notification reflecting live session state, check-in time, and daily counts',
-      '+ Ergonomic tap safety zone to prevent accidental ghost touches while maintaining full edge reach',
-      '+ 120Hz high-refresh motion decoupling with RepaintBoundary for stutter-free chronometer animations',
-      '+ Redesigned Search Notes into an 80/20 layout with single/two-way metadata and dynamic #hashtag pills',
-      '+ Depleting animated progress bar for note undo pills with instant single-tap restoration',
-      '+ Smooth, jitter-free sheet transitions from History timeline directly into Search Notes',
-      '* Full automated test suite passing across all 136 unit and widget verifications',
+      '• Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free timekeeping.',
+      '+ Plus Notes: Dedicated long-form writing canvas with top-left Plus button and unrestricted character capacity',
+      '+ History Note Editing: Fixed note retrieval in timeline session cards with seamless editing for long entries',
+      '+ Customizable Hashtags: Long-press any quick tag in the note dialog to customize shortcuts for your workflow',
+      '+ Home Screen Widgets: Resolved RemoteViews layout inflation crash for Sobriety and Life Audit widgets',
+      '+ Widget Intelligence: Added graceful zero-states, compact sizing fixes, and direct settings deep-linking',
+      '+ Distraction-Free Clock: Pure 12-hour clock face digits with explicit AM/PM tags in History and Search Notes',
+      '+ Single Tactile Touch: Unified crisp single-burst haptic feedback across all buttons, eliminating double bursts',
+      '+ 5-Page Welcome Onboarding: Streamlined setup with consolidated Notifications, Battery, and Update permissions',
+      '+ Settings Update Center: Added "Rm -rf Cache" switch for instant installer cleanup with search indexing',
+      '* All 160 automated unit and widget test suites passing with zero lints and 100% offline security',
     ],
   );
 

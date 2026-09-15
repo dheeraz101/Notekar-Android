@@ -1,0 +1,9 @@
+Update to 7.5.2 (build 26BR0916):
+- Plus Notes: Dedicated long-form writing canvas with top-left Plus button and unrestricted capacity
+- History Notes: Seamless editing parity for existing timeline notes without data loss
+- Customizable Hashtags: Long-press quick tag chips in note dialog to customize shortcuts
+- Widgets: Fixed RemoteViews crash and initial compact sizing for Sobriety & Life Audit
+- Clock: Distraction-free 12-hour clock face digits with explicit AM/PM tags in History
+- Tactile: Unified crisp single-burst haptic clicks across all buttons, removing double bursts
+- Onboarding: Condensed 15-page welcome flow into 5 high-impact pages with unified permissions
+- Settings: "Rm -rf Cache" switch for instant installer cleanup with search indexing

@@ -1,14 +1,63 @@
 [
   {
+    "version": "7.5.2",
+    "buildNumber": "26BR0916",
+    "releaseDate": "2026-09-16",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Plus Notes & Spatial Widgets",
+    "badgeColor": "#FF9F0A",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Plus Notes & Journaling",
+        "description": "Unrestricted long-form canvas with dedicated Plus button, history editing parity, and customizable hashtags.",
+        "icon": "note_add_rounded"
+      },
+      {
+        "title": "Home Screen Widgets Restored",
+        "description": "Sobriety and Life Audit launcher widgets fixed with zero-state prompts, deep linking & crash immunity.",
+        "icon": "widgets_rounded"
+      },
+      {
+        "title": "Pure 12H Clock & Single Tactile Touch",
+        "description": "Clean digits without AM/PM clutter on home clock face, paired with unified single-burst haptic clicks.",
+        "icon": "schedule_rounded"
+      },
+      {
+        "title": "Condensed 5-Page Onboarding",
+        "description": "Streamlined welcome sheet featuring a unified Permissions & System Reliability center.",
+        "icon": "verified_user_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Plus Notes: Dedicated long-form writing canvas with top-left Plus button and unrestricted character capacity",
+      "+ History Note Editing: Fixed note retrieval in timeline session cards with seamless editing for long entries",
+      "+ Customizable Hashtags: Long-press any quick tag in the note dialog to customize shortcuts for your workflow",
+      "+ Home Screen Widgets: Resolved RemoteViews layout inflation crash for Sobriety and Life Audit widgets",
+      "+ Widget Intelligence: Added graceful zero-states, compact sizing fixes, and direct settings deep-linking",
+      "+ Distraction-Free Clock: Pure 12-hour clock face digits with explicit AM/PM tags in History and Search Notes",
+      "+ Single Tactile Touch: Unified crisp single-burst haptic feedback across all buttons, eliminating double bursts",
+      "+ 5-Page Welcome Onboarding: Streamlined setup with consolidated Notifications, Battery, and Update permissions",
+      "+ Settings Update Center: Added \"Rm -rf Cache\" switch for instant installer cleanup with search indexing",
+      "* All 160 automated unit and widget test suites passing with zero lints and 100% offline security"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.2/NoteKar-v7.5.2-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.2/NoteKar-v7.5.2-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.5.1",
     "buildNumber": "26BR0912",
     "releaseDate": "2026-09-12",
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Universal Themes & Spatial Modes",
+    "edition": "Universal Themes \u0026 Spatial Modes",
     "badgeColor": "#FF9F0A",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Universal Theme Harmony",
@@ -80,12 +129,12 @@
       "NoteKar has revisioned itself — honoring the truth of human history.",
       "Add native 7-language support (EN, HI, ES, DE, FR, JA, RU) to AppNotice and local-first NoticeService defaults",
       "Introduce full notification hierarchy: Critical, Security (dedicated section), Release Bulletins, and Curated Tips",
-      "Remove status circle dot next to 'Notice Engine Active' for clean visual hierarchy",
+      "Remove status circle dot next to \u0027Notice Engine Active\u0027 for clean visual hierarchy",
       "Replace blocking modal alerts with non-blocking Apple-style iOS pill toast on manual refresh",
-      "Implement silent background auto-sync for stale cache (> 4h) and automatic recovery from corrupted cache",
+      "Implement silent background auto-sync for stale cache (\u003e 4h) and automatic recovery from corrupted cache",
       "Add contextual action routing and localized action button labels (releases, settings, audit, history, web links)",
       "Calibrate existential wastage metrics to recorded history bounds, preventing uncalibrated void hours for new users",
-      "Equalize card dimensions for Waking Days and Earth Days lost under 'The Cost of Void'",
+      "Equalize card dimensions for Waking Days and Earth Days lost under \u0027The Cost of Void\u0027",
       "Resolve text truncation and header collision in Life Audit dashboard card",
       "Integrate Official Bulletins into Settings category navigation stack with seamless back button routing",
       "Add universal back handlers to all secondary modal dialogs and bottom sheets",

@@ -23,85 +23,82 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.1',
-    date: 'September 12, 2026',
-    edition: 'Universal Themes & Spatial Modes',
+    version: '7.5.2',
+    date: 'September 16, 2026',
+    edition: 'Plus Notes & Spatial Widgets',
     badgeColor: Color(0xFFFF9F0A),
     innovations: [
       (
-        title: 'Universal Themes & Modes',
-        category: 'DESIGN HARMONY',
-        headline: 'Every Pixel Tailored. Every Mode Sovereign.',
+        title: 'Plus Notes & Journaling',
+        category: 'NOTE ARCHITECTURE',
+        headline: 'Unrestricted Canvas. Seamless History Editing.',
         desc:
-            'Universal Light, Dark, and AMOLED theme parity across all popups, pickers, and sheets, paired with dedicated mode workspaces, 3 Android Home widgets, and silky 120Hz motion decoupling.',
-        icon: Icons.palette_rounded,
+            'Dedicated long-form writing canvas with top-left Plus button, combined with full history editing parity and customizable quick hashtags.',
+        icon: Icons.note_add_rounded,
         badgeColor: Color(0xFFFF9F0A),
         specs:
-            'Light/Dark/AMOLED · Dedicated Modes · 3 Home Widgets · 120Hz Decoupled',
+            'Unrestricted Canvas · Plus Button · History Note Parity · Custom Tags',
       ),
       (
-        title: 'Life Audit & The Void',
-        category: 'EXISTENTIAL COMPASS',
-        headline: 'Every Second Accounted. The Void Revealed.',
+        title: 'Resilient Home Widgets',
+        category: 'ANDROID SUBSYSTEM',
+        headline: 'RemoteViews Restored. Zero Crash Guarantee.',
         desc:
-            'Uncompromising 24-hour conscious partition architecture confronting the cost of unaccounted time across 6 multi-horizons from today to a full solar year.',
-        icon: Icons.auto_graph_rounded,
-        badgeColor: Color(0xFFFF9500),
-        specs: '24h Partitions · 6 Horizons · Seneca Reality Colophon',
+            'Sobriety and Life Audit launcher widgets completely revitalized with FrameLayout layouts, initial placement sizing fixes, graceful zero-states, and direct settings deep-linking.',
+        icon: Icons.widgets_rounded,
+        badgeColor: Color(0xFF34C759),
+        specs: 'FrameLayout RemoteViews · Deep Linking · Zero-State Support',
       ),
       (
-        title: 'Spatial Bebas Neue Clock',
-        category: 'SPATIAL HARMONY',
-        headline: 'Optical Midpoint. Authentic Tall Type.',
+        title: 'Pure 12H Clock & Tactile Haptics',
+        category: 'SENSORY PRECISION',
+        headline: 'Uncluttered Digits. Single Tactile Response.',
         desc:
-            'Chronometer face is mathematically centered within the usable viewport, paired with authentic, bundled open-source Bebas Neue tall numerals.',
+            'Eliminated AM/PM text clutter on the home screen clock face while preserving explicit AM/PM tags across timeline history, paired with single-burst haptic clicks.',
         icon: Icons.schedule_rounded,
         badgeColor: Color(0xFF0A84FF),
-        specs: 'Usable Viewport Centered · Bebas Neue 144pt · Tabular Figures',
+        specs: 'Pure 12H Digits · Single Haptic Pulse · Explicit Timeline Tags',
       ),
       (
-        title: 'Two-Way Session Continuity',
-        category: 'STATE ENGINE',
-        headline: 'Unbroken Focus. Zero State Loss.',
+        title: 'Streamlined 5-Page Onboarding',
+        category: 'ONBOARDING EXPEDITION',
+        headline: 'Essential Focus. Consolidated Reliability.',
         desc:
-            'Switch dynamically between Single and Two-Way modes mid-session without resetting stopwatch clocks, losing elapsed intervals, or dropping note state.',
-        icon: Icons.sync_alt_rounded,
-        badgeColor: Color(0xFF34C759),
-        specs: 'Live Continuity · Seamless Transition · Dual Timer Guard',
-      ),
-      (
-        title: 'WhatsApp-Grade Note Input',
-        category: 'TEXT ENGINE',
-        headline: 'Typing on Glass. Zero Latency.',
-        desc:
-            'Re-engineered note dialogue with sentence auto-capitalization, composition truncation guards, and decoupled character state updates for zero input lag.',
-        icon: Icons.edit_note_rounded,
+            'Condensed the multi-page welcome flow into 5 high-impact pages, featuring a unified Permissions & System Reliability setup hub.',
+        icon: Icons.verified_user_rounded,
         badgeColor: Color(0xFFAF52DE),
-        specs: 'Zero Input Lag · Composition Safe · Sentences Capped',
-      ),
-      (
-        title: 'Smart Onboarding & 7 Locales',
-        category: 'SYSTEM ARCHITECTURE',
-        headline: 'Contextual Discovery. Global Reach.',
-        desc:
-            'Feature tours unified into onboarding, standalone unseen cards for updating users, and comprehensive 7-language offline localizations.',
-        icon: Icons.translate_rounded,
-        badgeColor: Color(0xFFFF2D55),
-        specs: '7 Offline Locales · Unseen Update Cards · Devanagari Type',
-      ),
-      (
-        title: 'Official Bulletins & Calibration',
-        category: 'SOVEREIGN NOTICE ENGINE',
-        headline: 'Zero-Tracking Resilience. True Historical Bounds.',
-        desc:
-            'Notice engine hardened across 7 languages with non-blocking offline feedback, paired with calibrated existential void metrics and unified settings navigation.',
-        icon: Icons.campaign_rounded,
-        badgeColor: Color(0xFF0A84FF),
-        specs:
-            '7 Languages · Security Shield · Bounded Metrics · Zero Telemetry',
+        specs: '5-Page Tour · Consolidated Permissions · Battery & Updates Hub',
       ),
     ],
     highlights: [
+      (
+        title: 'Plus Notes & Journaling',
+        desc:
+            'Unrestricted long-form canvas with dedicated Plus button, history editing parity, and customizable hashtags.',
+        icon: Icons.note_add_rounded,
+        tag: 'Notes',
+      ),
+      (
+        title: 'Home Screen Widgets Restored',
+        desc:
+            'Sobriety and Life Audit launcher widgets fixed with zero-state prompts, deep linking & crash immunity.',
+        icon: Icons.widgets_rounded,
+        tag: 'Widgets',
+      ),
+      (
+        title: 'Pure 12H Clock & Single Tactile Touch',
+        desc:
+            'Clean digits without AM/PM clutter on home clock face, paired with unified single-burst haptic clicks.',
+        icon: Icons.schedule_rounded,
+        tag: 'Interface',
+      ),
+      (
+        title: 'Condensed 5-Page Onboarding',
+        desc:
+            'Streamlined welcome sheet featuring a unified Permissions & System Reliability center.',
+        icon: Icons.verified_user_rounded,
+        tag: 'Experience',
+      ),
       (
         title: 'Universal Theme Harmony',
         desc:
@@ -110,100 +107,25 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         tag: 'Theming',
       ),
       (
-        title: 'Dedicated Mode Workspaces',
-        desc:
-            'Individual mode settings pages with native back routing, 15-char limit & iOS confirmation.',
-        icon: Icons.tune_rounded,
-        tag: 'Modes',
-      ),
-      (
-        title: 'Android Home Widgets',
-        desc:
-            '3 dedicated launcher widgets (Quick Capture, Sobriety, Life Audit) & dynamic notification.',
-        icon: Icons.widgets_rounded,
-        tag: 'Android',
-      ),
-      (
         title: '120Hz Decoupled Motion',
         desc:
             'Silky high-refresh rendering, ergonomic touch safety zone, and 80/20 Search Notes.',
         icon: Icons.speed_rounded,
         tag: 'Performance',
       ),
-      (
-        title: 'Hardened Official Bulletins',
-        desc:
-            'Native 7-language parity, dedicated security section, non-blocking offline toast & silent auto-sync.',
-        icon: Icons.campaign_rounded,
-        tag: 'Notices',
-      ),
-      (
-        title: 'Life Ledger History Calibration',
-        desc:
-            'Existential void calculations strictly bounded to verified history, eliminating phantom void hours.',
-        icon: Icons.auto_graph_rounded,
-        tag: 'Precision',
-      ),
-      (
-        title: 'Unified Settings Navigation',
-        desc:
-            'Seamless bulletin category navigation stack and universal back handlers across all modal sheets.',
-        icon: Icons.settings_rounded,
-        tag: 'UX Flow',
-      ),
-      (
-        title: 'Life Audit & The Void',
-        desc:
-            'Daily 24h partition engine confronting unaccounted hours across 6 temporal horizons.',
-        icon: Icons.auto_graph_rounded,
-        tag: 'Existential',
-      ),
-      (
-        title: 'Spatial Bebas Neue Clock',
-        desc:
-            'Optically centered usable-viewport chronometer face with authentic tall typography.',
-        icon: Icons.schedule_rounded,
-        tag: 'Design',
-      ),
-      (
-        title: 'Two-Way Session Continuity',
-        desc:
-            'Seamless live stopwatch and note state preservation across Single and Two-Way modes.',
-        icon: Icons.sync_alt_rounded,
-        tag: 'Engine',
-      ),
-      (
-        title: 'WhatsApp-Grade Note Input',
-        desc:
-            'Zero-latency text editing with sentence capitalization and composition protection.',
-        icon: Icons.edit_note_rounded,
-        tag: 'Typing',
-      ),
     ],
     items: [
-      '• NoteKar has revisioned itself — honoring the truth of human history.',
-      '+ Add native 7-language support (EN, HI, ES, DE, FR, JA, RU) to AppNotice and local-first NoticeService defaults',
-      '+ Introduce full notification hierarchy: Critical, Security (dedicated section), Release Bulletins, and Curated Tips',
-      '+ Remove status circle dot next to "Notice Engine Active" for clean visual hierarchy',
-      '+ Replace blocking modal alerts with non-blocking Apple-style iOS pill toast on manual refresh',
-      '+ Implement silent background auto-sync for stale cache (> 4h) and automatic recovery from corrupted cache',
-      '+ Add contextual action routing and localized action button labels (releases, settings, audit, history, web links)',
-      '+ Calibrate existential wastage metrics to recorded history bounds, preventing uncalibrated void hours for new users',
-      '+ Equalize card dimensions for Waking Days and Earth Days lost under "The Cost of Void"',
-      '+ Resolve text truncation and header collision in Life Audit dashboard card',
-      '+ Integrate Official Bulletins into Settings category navigation stack with seamless back button routing',
-      '+ Add universal back handlers to all secondary modal dialogs and bottom sheets',
-      '+ Harden CI/CD GitHub Action workflow for VirusTotal verification link injection in release notes',
-      '+ Add Life Audit time wastage engine with 24-hour conscious partitions and 6 temporal horizons',
-      '+ Implement The Cost of the Void existential metrics: Waking Days Lost and Earth Days Lost',
-      '+ Introduce Executive Dashboard Life Audit card with dynamic horizon indicators and overflow guards',
-      '+ Optically center main clock within usable viewport between top insights and bottom toolbar',
-      '+ Bundle authentic Bebas Neue tall typography for chronometer and active session countdowns',
-      '+ Guarantee Two-Way session continuity across Single and Two-Way mode toggles with zero state loss',
-      '+ Overhaul NoteDialog with WhatsApp-grade zero-lag input, sentence capitalization, and composition safety',
-      '+ Migrate feature tours from settings to onboarding, adding standalone unseen cards for updating users',
-      '+ Expand offline multilingual localizations across 7 languages (EN, HI, ES, FR, DE, JA, RU)',
-      '* Full automated test suite passing across all 115 unit and widget verifications',
+      '• Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free timekeeping.',
+      '+ Plus Notes: Dedicated long-form writing canvas with top-left Plus button and unrestricted character capacity',
+      '+ History Note Editing: Fixed note retrieval in timeline session cards with seamless editing for long entries',
+      '+ Customizable Hashtags: Long-press any quick tag in the note dialog to customize shortcuts for your workflow',
+      '+ Home Screen Widgets: Resolved RemoteViews layout inflation crash for Sobriety and Life Audit widgets',
+      '+ Widget Intelligence: Added graceful zero-states, compact sizing fixes, and direct settings deep-linking',
+      '+ Distraction-Free Clock: Pure 12-hour clock face digits with explicit AM/PM tags in History and Search Notes',
+      '+ Single Tactile Touch: Unified crisp single-burst haptic feedback across all buttons, eliminating double bursts',
+      '+ 5-Page Welcome Onboarding: Streamlined setup with consolidated Notifications, Battery, and Update permissions',
+      '+ Settings Update Center: Added "Rm -rf Cache" switch for instant installer cleanup with search indexing',
+      '* All 160 automated unit and widget test suites passing with zero lints and 100% offline security',
     ],
   );
 

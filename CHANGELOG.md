@@ -7,6 +7,60 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.2] - 2026-09-16 (versionCode 26BR0916) [BR]
+
+> *Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free
+timekeeping.*
+
+### What's New
+
+- **Plus Notes & Long-Form Journaling**:
+    - Dedicated long-form writing canvas ("Plus Note") with dedicated top-left `Plus` button on the
+      note sheet.
+    - Zero character lockout on extended notes and thoughts.
+    - Historical note editing parity: Fixed note retrieval in timeline session cards (`noteMoment`
+      resolution) so existing notes can be viewed and edited without data loss.
+- **Customizable Quick Hashtags**:
+    - Quick hashtag pills (`#workout`, `#deepwork`, `#meeting`, etc.) can now be customized directly
+      via long press on any tag chip in the note sheet.
+    - Dynamic persistence and automatic indexing in Search Notes.
+- **Pure 12-Hour Distraction-Free Clock**:
+    - Clean digits on the home screen clock face without visual clutter from AM/PM labels in 12-hour
+      mode.
+    - Explicit `AM` and `PM` tags preserved in History timeline cards, interval rows, and Search
+      Notes.
+    - Polished settings subtitle copy: *"Show time in 24-hour format instead of 12-hour AM/PM across
+      timeline and history"*.
+- **Crisp Single Tactile Touch**:
+    - Unified single-burst haptic clicks across all interactive elements, completely eliminating
+      accidental double-burst vibration feedback.
+
+### Improvements
+
+- **Streamlined 5-Page Welcome Onboarding**:
+    - Condensed the 15-page welcome sheet into 5 essential, high-impact pages: Welcome, Language,
+      Features, Permissions, and Security.
+    - Consolidated device permissions into a unified Permissions & System Reliability hub covering
+      Notifications, Battery Optimization Exemption, and Direct OTA Updates.
+- **Settings Update Center "Rm -rf Cache"**:
+    - Renamed the auto-delete installer package toggle to `"Rm -rf Cache"` for clarity.
+    - Added full search indexing in Settings search, and updated Guides and Help FAQ sections.
+
+### Bug Fixes
+
+- **Sobriety & Life Audit Home Screen Widgets**:
+    - Resolved `android.view.InflateException: Class not allowed to be inflated android.view.View`
+      by replacing disallowed `<View>` spacer elements with `<FrameLayout>` in widget layouts.
+    - Fixed compact mode evaluation bug (`minWidth in 1..199`) that caused widgets to collapse to
+      empty on initial placement.
+    - Gracefully handle zero/disabled states: Sobriety displays a clean setup prompt when disabled,
+      and Life Audit prompts to log the first moment when daily count is 0.
+    - Routed widget body clicks directly to their respective settings pages (`Sobriety Tracker` and
+      `Life Audit`).
+    - Routed Sobriety widget "RESET STREAK" button to the in-app confirmation screen with shield
+      protections rather than blindly logging a moment.
+    - Protected widget updates with comprehensive error handling to guarantee launcher stability.
+
 ## [7.5.1] - 2026-09-12 (versionCode 26BR0912) [BR]
 
 > *Elegance is when the inside is as beautiful as the outside.* This release brings absolute harmony
