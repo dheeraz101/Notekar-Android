@@ -69,6 +69,56 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         badgeColor: Color(0xFFAF52DE),
         specs: '5-Page Tour · Consolidated Permissions · Battery & Updates Hub',
       ),
+      (
+        title: 'Life Audit & The Void',
+        category: 'EXISTENTIAL COMPASS',
+        headline: 'Every Second Accounted. The Void Revealed.',
+        desc:
+            'Uncompromising 24-hour conscious partition architecture confronting the cost of unaccounted time across 6 multi-horizons from today to a full solar year.',
+        icon: Icons.auto_graph_rounded,
+        badgeColor: Color(0xFFFF9500),
+        specs: '24h Partitions · 6 Horizons · Seneca Reality Colophon',
+      ),
+      (
+        title: 'Spatial Bebas Neue Clock',
+        category: 'SPATIAL HARMONY',
+        headline: 'Optical Midpoint. Authentic Tall Type.',
+        desc:
+            'Chronometer face is mathematically centered within the usable viewport, paired with authentic, bundled open-source Bebas Neue tall numerals.',
+        icon: Icons.schedule_rounded,
+        badgeColor: Color(0xFF0A84FF),
+        specs: 'Usable Viewport Centered · Bebas Neue 144pt · Tabular Figures',
+      ),
+      (
+        title: 'Two-Way Session Continuity',
+        category: 'STATE ENGINE',
+        headline: 'Unbroken Focus. Zero State Loss.',
+        desc:
+            'Switch dynamically between Single and Two-Way modes mid-session without resetting stopwatch clocks, losing elapsed intervals, or dropping note state.',
+        icon: Icons.sync_alt_rounded,
+        badgeColor: Color(0xFF34C759),
+        specs: 'Live Continuity · Seamless Transition · Dual Timer Guard',
+      ),
+      (
+        title: 'WhatsApp-Grade Note Input',
+        category: 'TEXT ENGINE',
+        headline: 'Typing on Glass. Zero Latency.',
+        desc:
+            'Re-engineered note dialogue with sentence auto-capitalization, composition truncation guards, and decoupled character state updates for zero input lag.',
+        icon: Icons.edit_note_rounded,
+        badgeColor: Color(0xFFAF52DE),
+        specs: 'Zero Input Lag · Composition Safe · Sentences Capped',
+      ),
+      (
+        title: 'Smart Onboarding & 7 Locales',
+        category: 'SYSTEM ARCHITECTURE',
+        headline: 'Contextual Discovery. Global Reach.',
+        desc:
+            'Feature tours unified into onboarding, standalone unseen cards for updating users, and comprehensive 7-language offline localizations.',
+        icon: Icons.translate_rounded,
+        badgeColor: Color(0xFFFF2D55),
+        specs: '7 Offline Locales · Unseen Update Cards · Devanagari Type',
+      ),
     ],
     highlights: [
       (
