@@ -2590,9 +2590,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await _openSettings(initialCategory: 'Stats');
         } else if (pageParam == 'sobriety') {
           await _openSettings(initialCategory: 'Sobriety Tracker');
+        } else if (pageParam == 'life-audit' ||
+            pageParam == 'lifeaudit' ||
+            pageParam == 'audit') {
+          await _openSettings(initialCategory: 'Life Audit');
         } else if (pageParam == 'integrations') {
           await _openSettings(initialCategory: 'Integrations & Automation');
         }
+      case 'sobriety':
+        await _openSettings(initialCategory: 'Sobriety Tracker');
+      case 'life-audit':
+      case 'lifeaudit':
+      case 'audit':
+        await _openSettings(initialCategory: 'Life Audit');
       case 'reflection':
       case 'reflect':
         final isLocked =
@@ -2609,10 +2619,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _handleIncomingUrlScheme(String url) async {
     final uri = Uri.tryParse(url);
-    if (uri == null) return;
+    if (uri == null || uri.scheme != 'notekar') return;
     final action = uri.host.isNotEmpty
-        ? uri.host.toLowerCase()
-        : uri.path.replaceAll('/', '').toLowerCase();
+        ? uri.host
+        : uri.pathSegments.firstOrNull;
+    if (action == null || action.isEmpty) return;
     final note =
         uri.queryParameters['note'] ??
         uri.queryParameters['text'] ??
@@ -2621,7 +2632,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final typeParam = uri.queryParameters['type']?.toLowerCase();
     final pageParam = uri.queryParameters['page']?.toLowerCase();
 
-    switch (action) {
+    switch (action.toLowerCase()) {
       case 'log':
         final type = typeParam == 'in'
             ? 'in'
@@ -2664,9 +2675,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await _openSettings(initialCategory: 'Stats');
         } else if (pageParam == 'sobriety') {
           await _openSettings(initialCategory: 'Sobriety Tracker');
+        } else if (pageParam == 'life-audit' ||
+            pageParam == 'lifeaudit' ||
+            pageParam == 'audit') {
+          await _openSettings(initialCategory: 'Life Audit');
         } else if (pageParam == 'integrations') {
           await _openSettings(initialCategory: 'Integrations & Automation');
         }
+      case 'sobriety':
+        await _openSettings(initialCategory: 'Sobriety Tracker');
+      case 'life-audit':
+      case 'lifeaudit':
+      case 'audit':
+        await _openSettings(initialCategory: 'Life Audit');
       case 'reflect':
       case 'reflection':
         await _showStandaloneMindfulness();

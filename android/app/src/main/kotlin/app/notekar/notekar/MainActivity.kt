@@ -737,6 +737,11 @@ class MainActivity : FlutterActivity() {
                     "page" to "sobriety"
                 )
 
+                "life-audit", "lifeaudit", "audit" -> mapOf(
+                    "action" to "open",
+                    "page" to "life-audit"
+                )
+
                 else -> {
                     val normalized = normalizeAction(actionKey)
                     if (normalized != null) {
@@ -789,6 +794,8 @@ class MainActivity : FlutterActivity() {
             "in", "check-in", "clock-in" -> "in"
             "out", "check-out", "clock-out" -> "out"
             "updates", "update", "releases", "release" -> "releases"
+            "sobriety" -> "sobriety"
+            "life-audit", "lifeaudit", "audit" -> "life-audit"
             else -> null
         }
     }

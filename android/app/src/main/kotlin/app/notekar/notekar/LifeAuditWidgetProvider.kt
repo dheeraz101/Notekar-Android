@@ -97,62 +97,84 @@ class LifeAuditWidgetProvider : AppWidgetProvider() {
             manager: AppWidgetManager,
             appWidgetId: Int
         ) {
-            val prefs = context.getSharedPreferences(
-                NoteKarWidgetProvider.PREFS_NAME,
-                Context.MODE_PRIVATE
-            )
-
-            val focusRatio = prefs.getInt(NoteKarWidgetProvider.KEY_FOCUS_RATIO, 0)
-            val totalTracked =
-                prefs.getString(NoteKarWidgetProvider.KEY_TOTAL_TRACKED, "0m") ?: "0m"
-            val totalWasted = prefs.getString(NoteKarWidgetProvider.KEY_TOTAL_WASTED, "0m") ?: "0m"
-
-            val options = manager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            val compact = minWidth < 200
-
-            val views = RemoteViews(context.packageName, R.layout.notekar_life_audit_widget)
-
-            views.setTextViewText(R.id.widget_audit_ratio, "$focusRatio%")
-
-            if (compact) {
-                views.setViewVisibility(R.id.widget_audit_details, View.GONE)
-                views.setViewVisibility(R.id.widget_audit_spacer, View.GONE)
-            } else {
-                views.setViewVisibility(R.id.widget_audit_details, View.VISIBLE)
-                views.setViewVisibility(R.id.widget_audit_spacer, View.VISIBLE)
-
-                views.setTextViewText(
-                    R.id.widget_audit_tracked,
-                    "$totalTracked intentional tracked"
+            try {
+                val prefs = context.getSharedPreferences(
+                    NoteKarWidgetProvider.PREFS_NAME,
+                    Context.MODE_PRIVATE
                 )
-                views.setTextViewText(
-                    R.id.widget_audit_wasted,
-                    "Void: $totalWasted unrecorded"
+
+                val todayCount = prefs.getInt(NoteKarWidgetProvider.KEY_TODAY_COUNT, 0)
+                val focusRatio = prefs.getInt(NoteKarWidgetProvider.KEY_FOCUS_RATIO, 0)
+                val totalTracked =
+                    prefs.getString(NoteKarWidgetProvider.KEY_TOTAL_TRACKED, "0m") ?: "0m"
+                val totalWasted =
+                    prefs.getString(NoteKarWidgetProvider.KEY_TOTAL_WASTED, "0m") ?: "0m"
+
+                val options = manager.getAppWidgetOptions(appWidgetId)
+                val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+                val compact = minWidth in 1..199
+
+                val views = RemoteViews(context.packageName, R.layout.notekar_life_audit_widget)
+
+                views.setTextViewText(R.id.widget_audit_ratio, "$focusRatio%")
+
+                if (compact) {
+                    views.setViewVisibility(R.id.widget_audit_details, View.GONE)
+                    views.setViewVisibility(R.id.widget_audit_spacer, View.GONE)
+                } else {
+                    views.setViewVisibility(R.id.widget_audit_details, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_audit_spacer, View.VISIBLE)
+
+                    if (todayCount == 0) {
+                        views.setTextViewText(
+                            R.id.widget_audit_tracked,
+                            "No moments logged today"
+                        )
+                        views.setTextViewText(
+                            R.id.widget_audit_wasted,
+                            "Tap IN to start tracking"
+                        )
+                    } else {
+                        views.setTextViewText(
+                            R.id.widget_audit_tracked,
+                            "$totalTracked intentional tracked"
+                        )
+                        views.setTextViewText(
+                            R.id.widget_audit_wasted,
+                            "Void: $totalWasted unrecorded"
+                        )
+                    }
+                }
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_root,
+                    launchIntent(
+                        context,
+                        appWidgetId,
+                        "app.notekar.notekar.ACTION_OPEN",
+                        "life-audit"
+                    )
                 )
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_in,
+                    launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+                )
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_out,
+                    launchBackgroundLogIntent(context, appWidgetId + 30, "out")
+                )
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_note,
+                    launchQuickNoteActivityIntent(context, appWidgetId + 40)
+                )
+
+                manager.updateAppWidget(appWidgetId, views)
+            } catch (e: Exception) {
+                android.util.Log.e("LifeAuditWidget", "Failed to update Life Audit widget", e)
             }
-
-            views.setOnClickPendingIntent(
-                R.id.widget_root,
-                launchIntent(context, appWidgetId, "app.notekar.notekar.ACTION_OPEN", "open")
-            )
-
-            views.setOnClickPendingIntent(
-                R.id.widget_in,
-                launchBackgroundLogIntent(context, appWidgetId + 20, "in")
-            )
-
-            views.setOnClickPendingIntent(
-                R.id.widget_out,
-                launchBackgroundLogIntent(context, appWidgetId + 30, "out")
-            )
-
-            views.setOnClickPendingIntent(
-                R.id.widget_note,
-                launchQuickNoteActivityIntent(context, appWidgetId + 40)
-            )
-
-            manager.updateAppWidget(appWidgetId, views)
         }
     }
 }

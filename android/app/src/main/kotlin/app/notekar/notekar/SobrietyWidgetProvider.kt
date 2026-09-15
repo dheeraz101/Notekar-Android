@@ -97,58 +97,98 @@ class SobrietyWidgetProvider : AppWidgetProvider() {
             manager: AppWidgetManager,
             appWidgetId: Int
         ) {
-            val prefs = context.getSharedPreferences(
-                NoteKarWidgetProvider.PREFS_NAME,
-                Context.MODE_PRIVATE
-            )
-
-            val streakDays = prefs.getString(NoteKarWidgetProvider.KEY_STREAK_DAYS, "0h") ?: "0h"
-            val streakMilestone =
-                prefs.getString(NoteKarWidgetProvider.KEY_STREAK_MILESTONE, "") ?: ""
-            val lastRelapseTime =
-                prefs.getString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, "") ?: ""
-
-            val options = manager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            val compact = minWidth < 200
-
-            val views = RemoteViews(context.packageName, R.layout.notekar_sobriety_widget)
-
-            views.setTextViewText(R.id.widget_streak_days, streakDays)
-
-            if (compact) {
-                views.setViewVisibility(R.id.widget_details_container, View.GONE)
-                views.setViewVisibility(R.id.widget_spacer, View.GONE)
-            } else {
-                views.setViewVisibility(R.id.widget_details_container, View.VISIBLE)
-                views.setViewVisibility(R.id.widget_spacer, View.VISIBLE)
-
-                views.setTextViewText(
-                    R.id.widget_streak_milestone,
-                    if (streakMilestone.isNotEmpty()) streakMilestone else "Clean Streak"
+            try {
+                val prefs = context.getSharedPreferences(
+                    NoteKarWidgetProvider.PREFS_NAME,
+                    Context.MODE_PRIVATE
                 )
-                views.setTextViewText(
-                    R.id.widget_last_relapse_time,
-                    if (lastRelapseTime.isNotEmpty()) "Last reset: $lastRelapseTime" else "No relapse recorded"
+
+                val sobrietyEnabled = prefs.getBoolean(
+                    NoteKarWidgetProvider.KEY_SOBRIETY_ENABLED,
+                    false
                 )
+                val rawStreakDays =
+                    prefs.getString(NoteKarWidgetProvider.KEY_STREAK_DAYS, "0h") ?: "0h"
+                val streakDays = rawStreakDays.replace(" Clean", "").replace(" clean", "").trim()
+                val streakMilestone =
+                    prefs.getString(NoteKarWidgetProvider.KEY_STREAK_MILESTONE, "") ?: ""
+                val lastRelapseTime =
+                    prefs.getString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, "") ?: ""
+
+                val options = manager.getAppWidgetOptions(appWidgetId)
+                val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+                val compact = minWidth in 1..199
+
+                val views = RemoteViews(context.packageName, R.layout.notekar_sobriety_widget)
+
+                if (!sobrietyEnabled) {
+                    views.setTextViewText(R.id.widget_streak_days, "--")
+                    views.setTextViewText(R.id.widget_streak_label, "SETUP")
+
+                    if (compact) {
+                        views.setViewVisibility(R.id.widget_details_container, View.GONE)
+                        views.setViewVisibility(R.id.widget_spacer, View.GONE)
+                    } else {
+                        views.setViewVisibility(R.id.widget_details_container, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_spacer, View.VISIBLE)
+                        views.setTextViewText(R.id.widget_sobriety_header, "SOBRIETY TRACKER")
+                        views.setTextViewText(R.id.widget_streak_milestone, "Sobriety mode off")
+                        views.setTextViewText(
+                            R.id.widget_last_relapse_time,
+                            "Tap to set up in NoteKar"
+                        )
+                    }
+                } else {
+                    views.setTextViewText(R.id.widget_streak_days, streakDays)
+                    views.setTextViewText(R.id.widget_streak_label, "CLEAN")
+
+                    if (compact) {
+                        views.setViewVisibility(R.id.widget_details_container, View.GONE)
+                        views.setViewVisibility(R.id.widget_spacer, View.GONE)
+                    } else {
+                        views.setViewVisibility(R.id.widget_details_container, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_spacer, View.VISIBLE)
+                        views.setTextViewText(R.id.widget_sobriety_header, "SOBRIETY ACTIVE")
+                        views.setTextViewText(
+                            R.id.widget_streak_milestone,
+                            if (streakMilestone.isNotEmpty()) streakMilestone else "Clean Streak"
+                        )
+                        views.setTextViewText(
+                            R.id.widget_last_relapse_time,
+                            if (lastRelapseTime.isNotEmpty()) "Last reset: $lastRelapseTime" else "No relapse recorded"
+                        )
+                    }
+                }
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_root,
+                    launchIntent(
+                        context,
+                        appWidgetId,
+                        "app.notekar.notekar.ACTION_OPEN",
+                        "sobriety"
+                    )
+                )
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_single,
+                    launchIntent(
+                        context,
+                        appWidgetId + 10,
+                        "app.notekar.notekar.ACTION_OPEN",
+                        "sobriety"
+                    )
+                )
+
+                views.setOnClickPendingIntent(
+                    R.id.widget_note,
+                    launchQuickNoteActivityIntent(context, appWidgetId + 40)
+                )
+
+                manager.updateAppWidget(appWidgetId, views)
+            } catch (e: Exception) {
+                android.util.Log.e("SobrietyWidget", "Failed to update Sobriety widget", e)
             }
-
-            views.setOnClickPendingIntent(
-                R.id.widget_root,
-                launchIntent(context, appWidgetId, "app.notekar.notekar.ACTION_OPEN", "open")
-            )
-
-            views.setOnClickPendingIntent(
-                R.id.widget_single,
-                launchBackgroundLogIntent(context, appWidgetId + 10, "single")
-            )
-
-            views.setOnClickPendingIntent(
-                R.id.widget_note,
-                launchQuickNoteActivityIntent(context, appWidgetId + 40)
-            )
-
-            manager.updateAppWidget(appWidgetId, views)
         }
     }
 }
