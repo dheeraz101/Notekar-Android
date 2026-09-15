@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -187,11 +185,13 @@ class _NoteDialogState extends State<NoteDialog> {
       builder: (ctx) => BigNoteDialog(
         p: widget.p,
         initialNote: _controller.text,
+        title: 'Plus Note',
         blur: widget.blur,
         largeText: widget.largeText,
       ),
     );
     if (result != null && mounted) {
+      _controller.text = result;
       Navigator.pop(context, result);
     }
   }
@@ -241,7 +241,9 @@ class _NoteDialogState extends State<NoteDialog> {
               controller: _controller,
               focusNode: _focusNode,
               autofocus: true,
-              maxLength: math.max(maxNoteLength, widget.initialNote.length),
+              maxLength: widget.initialNote.length > maxNoteLength
+                  ? null
+                  : maxNoteLength,
               maxLengthEnforcement:
                   MaxLengthEnforcement.truncateAfterCompositionEnds,
               minLines: 4,
@@ -547,26 +549,22 @@ class _NoteDialogState extends State<NoteDialog> {
       title: widget.title,
       blur: widget.blur,
       largeText: widget.largeText,
-      trailingAction: PressableScale(
+      leadingAction: PressableScale(
         onTap: _openBigNote,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: widget.p.surface2,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+            color: widget.p.accent.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: widget.p.accent.withValues(alpha: 0.3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                CupertinoIcons.arrow_up_left_arrow_down_right,
-                size: 12,
-                color: widget.p.accent,
-              ),
+              Icon(CupertinoIcons.plus_app, size: 13, color: widget.p.accent),
               const SizedBox(width: 4),
               Text(
-                'Big Note',
+                'Plus',
                 style: TextStyle(
                   color: widget.p.accent,
                   fontSize: 12,

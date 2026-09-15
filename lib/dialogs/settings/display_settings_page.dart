@@ -158,7 +158,9 @@ class DisplaySettingsPage extends StatelessWidget {
             SettingsSwitchRow(
               p: p,
               title: '24-Hour Time',
-              subtitle: 'Display time in 24-hour format or 12-hour AM/PM.',
+              subtitle:
+                  'Show time in 24-hour format instead of 12-hour AM/PM across timeline and history.'
+                      .localized(context),
               color: p.accent,
               value: use24HourFormat,
               onChanged: (value) => onUse24HourFormatChanged?.call(value),

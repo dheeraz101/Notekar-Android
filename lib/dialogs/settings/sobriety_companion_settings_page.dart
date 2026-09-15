@@ -133,7 +133,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
                 icon: Icons.calendar_today_rounded,
                 title: 'Set Sobriety Start Date'.localized(context),
                 subtitle: sobrietyCustomStartMs != null
-                    ? '${"From".localized(context)} ${datePretty(sobrietyCustomStartMs!)} ${"at".localized(context)} ${timeOnly(sobrietyCustomStartMs!).substring(0, 5)}'
+                    ? '${"From".localized(context)} ${datePretty(sobrietyCustomStartMs!)} ${"at".localized(context)} ${formatTimeShort(sobrietyCustomStartMs!)}'
                     : 'Not set: using last log or relapse tag'.localized(
                         context,
                       ),

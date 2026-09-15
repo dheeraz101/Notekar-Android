@@ -1801,7 +1801,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
       item(
         title: '24-Hour Time',
-        subtitle: 'Display time in 24-hour format or 12-hour AM/PM',
+        subtitle:
+            'Show time in 24-hour format instead of 12-hour AM/PM across timeline and history',
         category: 'Display',
         icon: Icons.schedule_rounded,
         keywords: [
@@ -2309,6 +2310,49 @@ class _SettingsDialogState extends State<SettingsDialog> {
           widget.onRequireLongPressNote(value);
         },
         status: null,
+      ),
+      item(
+        title: 'Plus Notes',
+        subtitle: 'Unrestricted long-form journaling and meeting logs',
+        category: 'Moments',
+        icon: CupertinoIcons.plus_app,
+        keywords: [
+          'plus',
+          'plus note',
+          'big note',
+          'journal',
+          'journaling',
+          'writing',
+          'long note',
+          'notes',
+          'character limit',
+          'unrestricted',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Unrestricted',
+      ),
+      item(
+        title: 'Customizable Hashtags',
+        subtitle: 'Tailor quick tag chips in note editor with long press',
+        category: 'Moments',
+        icon: Icons.tag_rounded,
+        keywords: [
+          'tag',
+          'tags',
+          'hashtag',
+          'hashtags',
+          'custom tags',
+          'quick tags',
+          'chips',
+          'notes',
+          'edit tags',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Custom',
       ),
       item(
         title: 'Compact History',
@@ -5869,6 +5913,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     text:
                                         'Enable "Rm -rf Cache" in Updates & Notices to automatically purge update APK installer files and cache upon installation, keeping app storage lightweight.',
                                   ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: CupertinoIcons.plus_app,
+                                    title:
+                                        'Plus Notes (Unrestricted Journaling)',
+                                    text:
+                                        'When a quick micro-note isn\'t enough, tap "Plus" in the note editor to write expansive journals, reflections, or meeting logs with an unrestricted character limit.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.schedule_rounded,
+                                    title: '12-Hour vs 24-Hour Time Format',
+                                    text:
+                                        'Toggle 24-Hour Time in Settings > Personalization > Display. In 12-hour mode, the home screen shows clean hours and minutes, while History and Search Notes display explicit AM/PM tags.',
+                                  ),
+                                  GuideRow(
+                                    p: p,
+                                    icon: Icons.tag_rounded,
+                                    title: 'Customizable Hashtags',
+                                    text:
+                                        'Long press any quick tag pill in the note editor to customize or replace it with your own personal tags, allowing tailored one-tap categorization for moments.',
+                                  ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -6177,6 +6243,27 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         'What is "Rm -rf Cache" and how does it work?',
                                     answer:
                                         'Inspired by the Unix clean command, "Rm -rf Cache" automatically deletes downloaded update packages and temporary build artifacts upon installation or when turned on. It prevents installer files from accumulating in device storage without affecting your private notes or logs.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'What is a Plus Note and how does it differ from a standard note?',
+                                    answer:
+                                        'Standard notes are lightweight micro-captures (up to 500 characters) designed for rapid logging. Plus Notes let you write long-form journals, memos, and multi-paragraph entries without character restrictions. Tap "Plus" on the left side of any note dialog to open the full editor.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'How does the 12/24-hour time setting affect the app?',
+                                    answer:
+                                        'Under Settings > Personalization > Display, you can switch between 12-hour and 24-hour time. In 12-hour mode, the home clock face remains distraction-free without an AM/PM label, while History, Search Notes, and detail dialogs clearly display AM or PM tags.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'Can I customize the hashtag suggestions in the note editor?',
+                                    answer:
+                                        'Yes! In the note dialog, long-press any hashtag chip to edit it. You can define your own frequent tags to quickly categorize moments with a single tap.',
                                   ),
                                 ],
                               ),

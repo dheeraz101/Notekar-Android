@@ -33,7 +33,7 @@ void main() {
         expect(find.text('#writing'), findsOneWidget);
         expect(find.text('#journal'), findsOneWidget);
         expect(find.text('Tag'), findsOneWidget);
-        expect(find.text('Big Note'), findsOneWidget);
+        expect(find.text('Plus'), findsOneWidget);
       },
     );
 
@@ -52,7 +52,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Big Note'), findsOneWidget);
+        expect(find.text('Plus Note'), findsOneWidget);
         expect(find.text('Done'), findsOneWidget);
         expect(find.text('14 words'), findsOneWidget);
         expect(find.text('${longNote.length} chars'), findsOneWidget);
@@ -61,6 +61,25 @@ void main() {
         expect(find.text('Bullet'), findsOneWidget);
         expect(find.text('Checklist'), findsOneWidget);
         expect(find.text('Clear'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'NoteDialog preserves long initial note without character lock',
+      (tester) async {
+        final longNote = 'A' * 600;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoteDialog(p: p, initialNote: longNote),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Plus'), findsOneWidget);
+        expect(find.text(longNote), findsOneWidget);
       },
     );
   });

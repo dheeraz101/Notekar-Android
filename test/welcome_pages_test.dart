@@ -228,5 +228,33 @@ void main() {
         expect(find.text('Done'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'Renders Permissions & Reliability consolidated page with all 3 setup cards',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: WelcomeScreen(
+              p: p,
+              theme: 'dark',
+              defaultMode: 'single',
+              currentLocale: 'en',
+              onLocaleChanged: (_) {},
+              onTheme: (_) {},
+              onDefaultMode: (_) {},
+              pages: const ['permissions'],
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Permissions & Reliability'), findsOneWidget);
+        expect(find.text('Notifications & Alerts'), findsOneWidget);
+        expect(find.text('Battery Optimization Exemption'), findsOneWidget);
+        expect(find.text('Direct In-App Updates'), findsOneWidget);
+        expect(find.text('Done'), findsOneWidget);
+      },
+    );
   });
 }

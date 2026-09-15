@@ -161,7 +161,7 @@ class _ClockFaceState extends State<ClockFace> {
       } else {
         final h = widget.now.hour % 12 == 0 ? 12 : widget.now.hour % 12;
         hm = '$h:${widget.now.minute.toString().padLeft(2, '0')}';
-        period = widget.now.hour >= 12 ? 'PM' : 'AM';
+        period = '';
       }
       sec = '.${widget.now.second.toString().padLeft(2, '0')}';
     }

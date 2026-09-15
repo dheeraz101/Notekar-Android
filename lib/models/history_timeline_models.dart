@@ -42,6 +42,17 @@ class TimelineSessionItem extends TimelineItem {
     return '';
   }
 
+  /// The moment within this session that holds the user's note.
+  /// If the note was logged on OUT, returns outMoment; if on IN, returns inMoment.
+  /// If neither has a note, returns outMoment if completed, otherwise inMoment.
+  Moment get noteMoment {
+    if (inMoment.note.trim().isNotEmpty) return inMoment;
+    if (outMoment != null && outMoment!.note.trim().isNotEmpty) {
+      return outMoment!;
+    }
+    return outMoment ?? inMoment;
+  }
+
   @override
   String? get category {
     if (inMoment.category != null && inMoment.category!.trim().isNotEmpty) {

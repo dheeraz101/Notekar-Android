@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
@@ -863,45 +864,51 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 6),
           Center(
             child: Text(
-              'Everything is stored locally and private to your device'
+              'Crafted for rapid logging, deep focus, and total privacy'
                   .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: p.text2, fontSize: 14),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
           SettingsGroup(
             p: p,
             children: [
               _buildFeatureRow(
                 p: p,
                 icon: Icons.touch_app_rounded,
-                title: 'Tap to save'.localized(context),
-                text: 'Log a moment instantly from the main screen.'.localized(
-                  context,
-                ),
+                iconColor: p.accent,
+                title: 'Ergonomic Tap Logging'.localized(context),
+                text:
+                    'Log a moment instantly with one touch. Track start/stop intervals in Two-Way mode with 1-tap live session endings.'
+                        .localized(context),
               ),
               _buildFeatureRow(
                 p: p,
-                icon: Icons.swap_vert_rounded,
-                title: 'Track starts and stops'.localized(context),
-                text: 'Use Single or Two-Way mode based on your flow.'
-                    .localized(context),
+                icon: CupertinoIcons.plus_app,
+                iconColor: p.green,
+                title: 'Life Ledger & Plus Notes'.localized(context),
+                text:
+                    'Connected session timelines with calendar picker, customizable hashtags, and unrestricted Plus notes for expansive journaling.'
+                        .localized(context),
               ),
               _buildFeatureRow(
                 p: p,
-                icon: Icons.edit_note_rounded,
-                title: 'Hold for notes'.localized(context),
-                text: 'Attach context without slowing the app down.'.localized(
-                  context,
-                ),
+                icon: Icons.dashboard_customize_rounded,
+                iconColor: p.orange,
+                title: 'Intelligence Hub & Sobriety'.localized(context),
+                text:
+                    'Groundbreaking daily rhythms, 90-day activity heatmap, waking focus audit, and clean streak milestone cards.'
+                        .localized(context),
               ),
               _buildFeatureRow(
                 p: p,
-                icon: Icons.history_rounded,
-                title: 'Review and export'.localized(context),
-                text: 'Filter history, compare moments, export, or backup.'
-                    .localized(context),
+                icon: Icons.widgets_rounded,
+                iconColor: p.accent,
+                title: 'Widgets & Integrations'.localized(context),
+                text:
+                    'Launcher widgets, persistent lock screen control, global text selection capture, and Obsidian Markdown journal exports.'
+                        .localized(context),
               ),
             ],
           ),
@@ -1653,6 +1660,107 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             onAction: () async {
               HapticFeedback.selectionClick();
               await _fileChannel.invokeMethod('openAutoStartSettings');
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionsPage(Palette p) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 16),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: p.accent.withValues(alpha: 0.25)),
+            ),
+            child: Icon(Icons.shield_outlined, color: p.accent, size: 36),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Permissions & Reliability'.localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Configure core permissions to ensure timely reminders, background reliability, and direct in-app updates.'
+                .localized(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: p.text2, fontSize: 14, height: 1.45),
+          ),
+          const SizedBox(height: 28),
+
+          // Setup Card 1: Notification Permission
+          _buildPermissionSetupCard(
+            p: p,
+            icon: Icons.notifications_rounded,
+            title: 'Notifications & Alerts'.localized(context),
+            subtitle:
+                'Required for scheduled reminders, mindful reflection, and update bulletins.'
+                    .localized(context),
+            isConfigured: _notificationGranted,
+            buttonText: 'Grant Permission'.localized(context),
+            onAction: () async {
+              HapticFeedback.selectionClick();
+              final granted =
+                  await _fileChannel.invokeMethod<bool>(
+                    'requestNotificationPermission',
+                  ) ??
+                  false;
+              if (granted) _checkPermissions();
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Setup Card 2: Battery Optimization
+          _buildPermissionSetupCard(
+            p: p,
+            icon: Icons.battery_saver_rounded,
+            title: 'Battery Optimization Exemption'.localized(context),
+            subtitle:
+                'Prevents Android from freezing background timers and skipping scheduled alarms.'
+                    .localized(context),
+            isConfigured: _batteryExempt,
+            buttonText: 'Set Unrestricted'.localized(context),
+            onAction: () async {
+              HapticFeedback.selectionClick();
+              await _fileChannel.invokeMethod(
+                'requestIgnoreBatteryOptimizations',
+              );
+              _checkPermissions();
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Setup Card 3: Install Unknown Apps
+          _buildPermissionSetupCard(
+            p: p,
+            icon: Icons.install_mobile_rounded,
+            title: 'Direct In-App Updates'.localized(context),
+            subtitle:
+                'Allows seamless offline-first OTA updates directly within NoteKar without app stores.'
+                    .localized(context),
+            isConfigured: _installGranted,
+            buttonText: 'Configure Settings'.localized(context),
+            onAction: () async {
+              HapticFeedback.selectionClick();
+              await _fileChannel.invokeMethod('openInstallPermissionSettings');
             },
           ),
           const SizedBox(height: 16),
@@ -2673,6 +2781,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   }
                   if (key == 'features') {
                     return _buildFeaturesPage(p);
+                  }
+                  if (key == 'permissions') {
+                    return _buildPermissionsPage(p);
                   }
                   if (key == 'app-icons') {
                     return _buildAppIconsPage(p);

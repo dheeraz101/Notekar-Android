@@ -70,7 +70,7 @@ void main() {
       expect(find.text('PM'), findsNothing);
     });
 
-    testWidgets('renders 12-hour time and AM/PM label correctly', (
+    testWidgets('renders 12-hour time cleanly without AM/PM label', (
       tester,
     ) async {
       final afternoonDt = DateTime(2026, 9, 15, 14, 30, 45);
@@ -94,10 +94,12 @@ void main() {
 
       expect(find.text('2:30'), findsOneWidget);
       expect(find.text('.45'), findsOneWidget);
-      expect(find.text('PM'), findsOneWidget);
+      expect(find.text('PM'), findsNothing);
     });
 
-    testWidgets('renders 12-hour midnight with 12 and AM', (tester) async {
+    testWidgets('renders 12-hour midnight with 12:05 without AM label', (
+      tester,
+    ) async {
       final midnightDt = DateTime(2026, 9, 15, 0, 5, 10);
 
       await tester.pumpWidget(
@@ -119,7 +121,7 @@ void main() {
 
       expect(find.text('12:05'), findsOneWidget);
       expect(find.text('.10'), findsNothing);
-      expect(find.text('AM'), findsOneWidget);
+      expect(find.text('AM'), findsNothing);
     });
   });
 }

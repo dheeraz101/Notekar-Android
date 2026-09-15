@@ -908,8 +908,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                     session: session,
                                     selected: isSelected,
                                     compact: _compactRows,
-                                    onEditNote: () =>
-                                        _openDirectNoteEditor(session.inMoment),
+                                    onEditNote: () => _openDirectNoteEditor(
+                                      session.noteMoment,
+                                    ),
                                     onDeleteSession: () =>
                                         _removeSession(session),
                                     onEndSession: session.isOngoing
@@ -922,14 +923,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           )
                                         : (_enableNoteOnClick
                                               ? () => _openDirectNoteEditor(
-                                                  session.inMoment,
+                                                  session.noteMoment,
                                                 )
                                               : () => _handleSelection(
                                                   session.inMoment,
                                                   isSelected,
                                                 )),
                                     onLongPressCard: () =>
-                                        _showMomentDetails(session.inMoment),
+                                        _showMomentDetails(session.noteMoment),
                                   ),
                                 );
                               }

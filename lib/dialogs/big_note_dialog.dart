@@ -16,7 +16,7 @@ class BigNoteDialog extends StatefulWidget {
     super.key,
     required this.p,
     this.initialNote = '',
-    this.title = 'Big Note',
+    this.title = 'Plus Note',
     this.saveLabel = 'Done',
     this.allowEmpty = true,
     this.blur = false,
