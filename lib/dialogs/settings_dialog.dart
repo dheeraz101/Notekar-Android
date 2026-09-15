@@ -82,6 +82,7 @@ class SettingsDialog extends StatefulWidget {
     required this.confirmDelete,
     required this.showSeconds,
     required this.highlightSeconds,
+    this.use24Hour = true,
     required this.buttonLabels,
     required this.largeControls,
     required this.homeMenuPill,
@@ -121,6 +122,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onConfirmDelete,
     required this.onShowSeconds,
     required this.onHighlightSeconds,
+    this.onUse24Hour,
     required this.onButtonLabels,
     required this.onLargeControls,
     required this.onHomeMenuPill,
@@ -191,6 +193,7 @@ class SettingsDialog extends StatefulWidget {
   final bool confirmDelete;
   final bool showSeconds;
   final bool highlightSeconds;
+  final bool use24Hour;
   final bool buttonLabels;
   final bool largeControls;
   final bool homeMenuPill;
@@ -236,6 +239,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<bool> onConfirmDelete;
   final ValueChanged<bool> onShowSeconds;
   final ValueChanged<bool> onHighlightSeconds;
+  final ValueChanged<bool>? onUse24Hour;
   final ValueChanged<bool> onButtonLabels;
   final ValueChanged<bool> onLargeControls;
   final ValueChanged<bool> onHomeMenuPill;
@@ -299,6 +303,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool confirmDelete;
   late bool showSeconds;
   late bool highlightSeconds;
+  late bool use24Hour;
   late bool buttonLabels;
   late bool largeControls;
   late bool homeMenuPill;
@@ -1116,6 +1121,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     confirmDelete = widget.confirmDelete;
     showSeconds = widget.showSeconds;
     highlightSeconds = widget.highlightSeconds;
+    use24Hour = widget.use24Hour;
     buttonLabels = widget.buttonLabels;
     largeControls = widget.largeControls;
     homeMenuPill = widget.homeMenuPill;
@@ -1374,7 +1380,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _openCategory(String name, {String? parent}) {
-    NotekarHaptics.selection(hapticStyle);
     if (name == 'Network Monitor') {
       _loadNetworkLogs();
     }
@@ -1791,6 +1796,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: (bool value) {
           setState(() => highlightSeconds = value);
           widget.onHighlightSeconds(value);
+        },
+        status: null,
+      ),
+      item(
+        title: '24-Hour Time',
+        subtitle: 'Display time in 24-hour format or 12-hour AM/PM',
+        category: 'Display',
+        icon: Icons.schedule_rounded,
+        keywords: [
+          '24-hour',
+          '12-hour',
+          'am pm',
+          'clock',
+          'time format',
+          'hours',
+        ],
+        kind: 'switch',
+        boolValue: use24Hour,
+        onBoolChanged: (bool value) {
+          setState(() => use24Hour = value);
+          widget.onUse24Hour?.call(value);
         },
         status: null,
       ),
@@ -4689,6 +4715,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               theme: theme,
                               showSeconds: showSeconds,
                               highlightSeconds: highlightSeconds,
+                              use24HourFormat: use24Hour,
                               buttonLabels: buttonLabels,
                               showHistoryText: showHistoryText,
                               largeControls: largeControls,
@@ -4708,6 +4735,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onHighlightSecondsChanged: (val) {
                                 setState(() => highlightSeconds = val);
                                 widget.onHighlightSeconds(val);
+                              },
+                              onUse24HourFormatChanged: (val) {
+                                setState(() => use24Hour = val);
+                                widget.onUse24Hour?.call(val);
                               },
                               onFeedback: widget.onFeedback,
                               onButtonLabelsChanged: (val) {

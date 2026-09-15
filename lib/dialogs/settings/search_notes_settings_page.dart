@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
@@ -348,54 +349,96 @@ class SearchNotesSettingsPage {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Mode Pill
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    (isTwoWay
-                                            ? p.accent
-                                            : momentColor(p, 'single'))
-                                        .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color:
-                                      (isTwoWay
-                                              ? p.accent
-                                              : momentColor(p, 'single'))
-                                          .withValues(alpha: 0.25),
-                                  width: 0.7,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isTwoWay
-                                        ? Icons.sync_alt_rounded
-                                        : Icons.touch_app_rounded,
-                                    size: 11,
-                                    color: isTwoWay
-                                        ? p.accent
-                                        : momentColor(p, 'single'),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Mode Pill
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3.5,
                                   ),
-                                  const SizedBox(width: 4.5),
-                                  Text(
-                                    isTwoWay ? '2-WAY' : 'SINGLE',
-                                    style: TextStyle(
-                                      color: isTwoWay
-                                          ? p.accent
-                                          : momentColor(p, 'single'),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 0.6,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (isTwoWay
+                                                ? p.accent
+                                                : momentColor(p, 'single'))
+                                            .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color:
+                                          (isTwoWay
+                                                  ? p.accent
+                                                  : momentColor(p, 'single'))
+                                              .withValues(alpha: 0.25),
+                                      width: 0.7,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isTwoWay
+                                            ? Icons.sync_alt_rounded
+                                            : Icons.touch_app_rounded,
+                                        size: 11,
+                                        color: isTwoWay
+                                            ? p.accent
+                                            : momentColor(p, 'single'),
+                                      ),
+                                      const SizedBox(width: 4.5),
+                                      Text(
+                                        isTwoWay ? '2-WAY' : 'SINGLE',
+                                        style: TextStyle(
+                                          color: isTwoWay
+                                              ? p.accent
+                                              : momentColor(p, 'single'),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0.6,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (entry.note.length > 500) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 3.5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: p.accent.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: p.accent.withValues(alpha: 0.25),
+                                        width: 0.7,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.doc_text,
+                                          size: 10,
+                                          color: p.accent,
+                                        ),
+                                        const SizedBox(width: 3.5),
+                                        Text(
+                                          '${entry.note.trim().split(RegExp(r'\s+')).length} words',
+                                          style: TextStyle(
+                                            color: p.accent,
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ),
+                              ],
                             ),
                             // Date
                             Text(

@@ -634,12 +634,12 @@ class UpdateService {
       final cleanVersion = version.split('-').first;
       final suffix = _getDeviceSuffix();
       var file = File('$cacheDir/notekar-$cleanVersion-$suffix.apk');
-      if (await file.exists()) {
+      if (file.existsSync()) {
         return file.path;
       }
       if (suffix != 'universal') {
         file = File('$cacheDir/notekar-$cleanVersion-universal.apk');
-        if (await file.exists()) {
+        if (file.existsSync()) {
           return file.path;
         }
       }
@@ -653,7 +653,7 @@ class UpdateService {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
       if (cacheDir == null) return 0.0;
       final dir = Directory(cacheDir);
-      if (!await dir.exists()) return 0.0;
+      if (!dir.existsSync()) return 0.0;
 
       int totalBytes = 0;
       final files = dir.listSync();
@@ -663,7 +663,7 @@ class UpdateService {
           if (p.endsWith('.apk') ||
               p.contains('.apk.part') ||
               p.endsWith('.apk.tmp')) {
-            totalBytes += await entity.length();
+            totalBytes += entity.lengthSync();
           }
         }
       }
@@ -680,7 +680,7 @@ class UpdateService {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
       if (cacheDir == null) return 0;
       final dir = Directory(cacheDir);
-      if (await dir.exists()) {
+      if (dir.existsSync()) {
         final files = dir.listSync();
         for (final entity in files) {
           if (entity is File) {
@@ -688,7 +688,11 @@ class UpdateService {
             if (p.endsWith('.apk') ||
                 p.contains('.apk.part') ||
                 p.endsWith('.apk.tmp')) {
-              await entity.delete();
+              try {
+                entity.deleteSync();
+              } catch (_) {
+                await entity.delete();
+              }
               deletedCount++;
               _logger.info('Deleted cached APK/installer file: ${entity.path}');
             }

@@ -109,6 +109,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _confirmDelete = false;
   bool _showSeconds = true;
   bool _highlightSeconds = true;
+  bool _use24HourFormat = true;
   bool _buttonLabels = true;
   bool _largeControls = false;
   bool _homeMenuPill = true;
@@ -513,6 +514,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _confirmDelete = prefs.getBool('m-confirm-delete') ?? false;
       _showSeconds = prefs.getBool('m-show-seconds') ?? true;
       _highlightSeconds = prefs.getBool('m-highlight-seconds') ?? true;
+      _use24HourFormat = prefs.getBool('m-use-24-hour') ?? true;
+      setGlobalUse24Hour(_use24HourFormat);
       _buttonLabels = prefs.getBool('m-button-labels') ?? false;
       _largeControls = prefs.getBool('m-large-controls') ?? false;
       _homeMenuPill = prefs.getBool('m-home-menu-pill') ?? true;
@@ -1209,15 +1212,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
     _saveSetting('m-mode', _mode);
     NotekarHaptics.selection(_hapticStyle);
-    _showToast(_mode == 'two-way' ? 'Two-Way Mode' : 'Single Mode');
+    _showToast(
+      _mode == 'two-way' ? 'Two-Way Mode' : 'Single Mode',
+      withHaptic: false,
+    );
     unawaited(_updateAndroidWidget());
   }
 
-  void _showToast(String text, {bool warning = false}) {
-    if (warning) {
-      HapticFeedback.heavyImpact();
-    } else {
-      HapticFeedback.mediumImpact();
+  void _showToast(String text, {bool warning = false, bool withHaptic = true}) {
+    if (withHaptic) {
+      if (warning) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.mediumImpact();
+      }
     }
     showIosPillToast(
       context: context,
@@ -1233,7 +1241,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
     await _categoryService.setActiveCategory(category, prefs: _prefs);
     if (category != 'All') {
-      _showToast('$category Mode');
+      _showToast('$category Mode', withHaptic: false);
     }
   }
 
@@ -1467,6 +1475,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _confirmDelete = false;
       _showSeconds = true;
       _highlightSeconds = true;
+      _use24HourFormat = true;
       _buttonLabels = true;
       _largeControls = false;
       _homeMenuPill = true;
@@ -1752,6 +1761,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-confirm-delete', _confirmDelete);
     await _prefs?.setBool('m-show-seconds', _showSeconds);
     await _prefs?.setBool('m-highlight-seconds', _highlightSeconds);
+    await _prefs?.setBool('m-use-24-hour', _use24HourFormat);
     await _prefs?.setBool('m-button-labels', _buttonLabels);
     await _prefs?.setBool('m-large-controls', _largeControls);
     await _prefs?.setBool('m-home-menu-pill', _homeMenuPill);
@@ -2178,6 +2188,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         confirmDelete: _confirmDelete,
         showSeconds: _showSeconds,
         highlightSeconds: _highlightSeconds,
+        use24Hour: _use24HourFormat,
         buttonLabels: _buttonLabels,
         largeControls: _largeControls,
         homeMenuPill: _homeMenuPill,
@@ -2299,6 +2310,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
           }
           setState(() => _highlightSeconds = value);
           _prefs?.setBool('m-highlight-seconds', value);
+        },
+        onUse24Hour: (value) {
+          setState(() => _use24HourFormat = value);
+          setGlobalUse24Hour(value);
+          _prefs?.setBool('m-use-24-hour', value);
         },
         onButtonLabels: (value) {
           setState(() => _buttonLabels = value);
@@ -3990,6 +4006,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         pulseType: _lastSavedType,
                         showSeconds: _showSeconds,
                         highlightSeconds: _highlightSeconds,
+                        use24HourFormat: _use24HourFormat,
                         sessionStart: _mode == 'two-way' ? _sessionStart : null,
                       ),
                       if (_startupComplete &&

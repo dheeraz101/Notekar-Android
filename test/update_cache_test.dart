@@ -28,9 +28,11 @@ void main() {
   tearDown(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
-    if (await tempDir.exists()) {
-      await tempDir.delete(recursive: true);
-    }
+    try {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    } catch (_) {}
   });
 
   group('UpdateService Cache Calculations', () {
@@ -179,11 +181,30 @@ void main() {
     testWidgets(
       'displays cumulative cache size and enables Delete Cache when cache exists',
       (tester) async {
-        // Seed two APK files totaling 25 MB
-        final apk1 = File('${tempDir.path}/notekar-7.5.0-arm64-v8a.apk');
-        await apk1.writeAsBytes(List.filled(1024 * 1024 * 12, 1));
-        final apk2 = File('${tempDir.path}/notekar-7.5.1-arm64-v8a.apk');
-        await apk2.writeAsBytes(List.filled(1024 * 1024 * 13, 2));
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'appCacheDir') {
+              return tempDir.path;
+            }
+            return null;
+          },
+        );
+
+        // Seed two APK files totaling 2 MB
+        final apk1Path = '${tempDir.path}/notekar-7.5.0-arm64-v8a.apk';
+        final f1 = File(apk1Path);
+        f1.createSync(recursive: true);
+        final raf1 = f1.openSync(mode: FileMode.write);
+        raf1.truncateSync(1024 * 1024);
+        raf1.closeSync();
+
+        final apk2Path = '${tempDir.path}/notekar-7.5.1-arm64-v8a.apk';
+        final f2 = File(apk2Path);
+        f2.createSync(recursive: true);
+        final raf2 = f2.openSync(mode: FileMode.write);
+        raf2.truncateSync(1024 * 1024);
+        raf2.closeSync();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -197,7 +218,6 @@ void main() {
                   onOpenLink: (_) {},
                   onCheckUpdates: () {},
                   updateInfo: null,
-                  // Even when up to date!
                   checkingUpdates: false,
                   updateStatus: 'idle',
                   currentBuildChannel: 'stable',
@@ -210,7 +230,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Build Cache Size'), findsOneWidget);
-        expect(find.text('25.00 MB of temporary installers'), findsOneWidget);
+        expect(find.text('2.00 MB of temporary installers'), findsOneWidget);
         expect(find.text('Delete Cache'), findsOneWidget);
       },
     );

@@ -12,6 +12,7 @@ class LiveClockFace extends StatefulWidget {
     required this.pulseType,
     required this.showSeconds,
     required this.highlightSeconds,
+    this.use24HourFormat = true,
     this.sessionStart,
   });
 
@@ -20,6 +21,7 @@ class LiveClockFace extends StatefulWidget {
   final String pulseType;
   final bool showSeconds;
   final bool highlightSeconds;
+  final bool use24HourFormat;
   final int? sessionStart;
 
   @override
@@ -73,6 +75,7 @@ class _LiveClockFaceState extends State<LiveClockFace> {
       minimal: false,
       showSeconds: widget.showSeconds,
       highlightSeconds: widget.highlightSeconds,
+      use24HourFormat: widget.use24HourFormat,
       sessionElapsed: sessionElapsed,
     );
   }
@@ -88,6 +91,7 @@ class ClockFace extends StatefulWidget {
     required this.minimal,
     required this.showSeconds,
     required this.highlightSeconds,
+    this.use24HourFormat = true,
     this.sessionElapsed,
   });
 
@@ -98,6 +102,7 @@ class ClockFace extends StatefulWidget {
   final bool minimal;
   final bool showSeconds;
   final bool highlightSeconds;
+  final bool use24HourFormat;
   final Duration? sessionElapsed;
 
   @override
@@ -131,8 +136,10 @@ class _ClockFaceState extends State<ClockFace> {
     final isSessionActive = widget.sessionElapsed != null;
     final String hm;
     final String sec;
+    final String period;
 
     if (isSessionActive) {
+      period = '';
       final elapsed = widget.sessionElapsed!;
       if (elapsed.inHours > 0) {
         final hours = elapsed.inHours.toString().padLeft(2, '0');
@@ -147,8 +154,15 @@ class _ClockFaceState extends State<ClockFace> {
         sec = '';
       }
     } else {
-      hm =
-          '${widget.now.hour.toString().padLeft(2, '0')}:${widget.now.minute.toString().padLeft(2, '0')}';
+      if (widget.use24HourFormat) {
+        hm =
+            '${widget.now.hour.toString().padLeft(2, '0')}:${widget.now.minute.toString().padLeft(2, '0')}';
+        period = '';
+      } else {
+        final h = widget.now.hour % 12 == 0 ? 12 : widget.now.hour % 12;
+        hm = '$h:${widget.now.minute.toString().padLeft(2, '0')}';
+        period = widget.now.hour >= 12 ? 'PM' : 'AM';
+      }
       sec = '.${widget.now.second.toString().padLeft(2, '0')}';
     }
 
@@ -218,6 +232,28 @@ class _ClockFaceState extends State<ClockFace> {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
+              if (!widget.minimal && period.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Text(
+                  period,
+                  style: TextStyle(
+                    color: _bright
+                        ? actionColor.withValues(alpha: 0.75)
+                        : secondsColor,
+                    fontFamily: 'BebasNeue',
+                    fontFamilyFallback: const [
+                      'Roboto Condensed',
+                      'sans-serif-condensed',
+                      'Arial Narrow',
+                      'sans-serif',
+                    ],
+                    fontSize: 32,
+                    fontWeight: FontWeight.w400,
+                    height: 1,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

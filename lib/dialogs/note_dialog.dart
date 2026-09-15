@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/dialogs/big_note_dialog.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -43,11 +46,21 @@ class _NoteDialogState extends State<NoteDialog> {
   int _availableShields = 0;
   bool _shieldActivated = false;
 
+  List<String> _tags = const [
+    '#work',
+    '#study',
+    '#play',
+    '#health',
+    '#focus',
+    '#routine',
+  ];
+
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
     _loadSobrietyMode();
+    _loadCustomTags();
     // Pre-check if note already contains relapse or tags
     if (widget.initialNote.contains('#relapse')) {
       _relapseSelected = true;
@@ -59,6 +72,128 @@ class _NoteDialogState extends State<NoteDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+  }
+
+  Future<void> _loadCustomTags() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList('custom_note_tags');
+    if (saved != null && saved.isNotEmpty) {
+      if (mounted) setState(() => _tags = saved);
+    }
+  }
+
+  Future<void> _saveCustomTags(List<String> tags) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('custom_note_tags', tags);
+    if (mounted) setState(() => _tags = tags);
+  }
+
+  Future<void> _showAddTagDialog() async {
+    HapticFeedback.lightImpact();
+    final textController = TextEditingController();
+    final created = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: widget.p.surface2,
+        title: Text(
+          'New Hashtag',
+          style: TextStyle(
+            color: widget.p.text,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: TextField(
+          controller: textController,
+          autofocus: true,
+          style: TextStyle(color: widget.p.text),
+          decoration: InputDecoration(
+            hintText: 'tag (e.g. #deepwork, #ideas)',
+            hintStyle: TextStyle(color: widget.p.text3),
+            prefixText: textController.text.startsWith('#') ? null : '#',
+            prefixStyle: TextStyle(
+              color: widget.p.accent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: TextStyle(color: widget.p.text2)),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: widget.p.accent),
+            onPressed: () {
+              final raw = textController.text.trim();
+              if (raw.isEmpty) return;
+              final clean = raw.startsWith('#') ? raw : '#$raw';
+              Navigator.pop(ctx, clean);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+
+    if (created != null && created.isNotEmpty && !_tags.contains(created)) {
+      final updated = List<String>.from(_tags)..add(created);
+      await _saveCustomTags(updated);
+    }
+  }
+
+  Future<void> _confirmDeleteTag(String tag) async {
+    HapticFeedback.mediumImpact();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: widget.p.surface2,
+        title: Text(
+          'Remove $tag?',
+          style: TextStyle(
+            color: widget.p.text,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Do you want to remove this tag from your quick list?',
+          style: TextStyle(color: widget.p.text2, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel', style: TextStyle(color: widget.p.text2)),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: widget.p.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final updated = List<String>.from(_tags)..remove(tag);
+      await _saveCustomTags(updated);
+    }
+  }
+
+  Future<void> _openBigNote() async {
+    HapticFeedback.selectionClick();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => BigNoteDialog(
+        p: widget.p,
+        initialNote: _controller.text,
+        blur: widget.blur,
+        largeText: widget.largeText,
+      ),
+    );
+    if (result != null && mounted) {
+      Navigator.pop(context, result);
+    }
   }
 
   Future<void> _loadSobrietyMode() async {
@@ -106,7 +241,7 @@ class _NoteDialogState extends State<NoteDialog> {
               controller: _controller,
               focusNode: _focusNode,
               autofocus: true,
-              maxLength: maxNoteLength,
+              maxLength: math.max(maxNoteLength, widget.initialNote.length),
               maxLengthEnforcement:
                   MaxLengthEnforcement.truncateAfterCompositionEnds,
               minLines: 4,
@@ -170,14 +305,7 @@ class _NoteDialogState extends State<NoteDialog> {
               physics: const BouncingScrollPhysics(),
               child: Row(
                 children: [
-                  for (final tag in const [
-                    '#work',
-                    '#study',
-                    '#play',
-                    '#health',
-                    '#focus',
-                    '#routine',
-                  ])
+                  for (final tag in _tags)
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: PressableScale(
@@ -193,6 +321,7 @@ class _NoteDialogState extends State<NoteDialog> {
                             TextPosition(offset: newText.length),
                           );
                         },
+                        onLongPress: () => _confirmDeleteTag(tag),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -216,6 +345,44 @@ class _NoteDialogState extends State<NoteDialog> {
                         ),
                       ),
                     ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: PressableScale(
+                      onTap: _showAddTagDialog,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: widget.p.accent.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.add,
+                              size: 12,
+                              color: widget.p.accent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Tag',
+                              style: TextStyle(
+                                color: widget.p.accent,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -380,6 +547,36 @@ class _NoteDialogState extends State<NoteDialog> {
       title: widget.title,
       blur: widget.blur,
       largeText: widget.largeText,
+      trailingAction: PressableScale(
+        onTap: _openBigNote,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+          decoration: BoxDecoration(
+            color: widget.p.surface2,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                CupertinoIcons.arrow_up_left_arrow_down_right,
+                size: 12,
+                color: widget.p.accent,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Big Note',
+                style: TextStyle(
+                  color: widget.p.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -184,16 +184,34 @@ String monthLabel(DateTime value) {
   return '${months[value.month - 1]} ${value.year}';
 }
 
-String timeOnly(int timestamp) {
+bool _globalUse24Hour = true;
+
+void setGlobalUse24Hour(bool value) => _globalUse24Hour = value;
+
+bool get globalUse24Hour => _globalUse24Hour;
+
+String timeOnly(int timestamp, {bool? use24Hour}) {
+  final effective24 = use24Hour ?? _globalUse24Hour;
   final d = DateTime.fromMillisecondsSinceEpoch(timestamp);
-  return '${d.hour.toString().padLeft(2, '0')}:'
-      '${d.minute.toString().padLeft(2, '0')}:'
-      '${d.second.toString().padLeft(2, '0')}';
+  if (effective24) {
+    return '${d.hour.toString().padLeft(2, '0')}:'
+        '${d.minute.toString().padLeft(2, '0')}:'
+        '${d.second.toString().padLeft(2, '0')}';
+  }
+  final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
+  final period = d.hour >= 12 ? 'PM' : 'AM';
+  return '$hour:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')} $period';
 }
 
-String formatTimeShort(int timestamp) {
+String formatTimeShort(int timestamp, {bool? use24Hour}) {
+  final effective24 = use24Hour ?? _globalUse24Hour;
   final d = DateTime.fromMillisecondsSinceEpoch(timestamp);
-  return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+  if (effective24) {
+    return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+  }
+  final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
+  final period = d.hour >= 12 ? 'PM' : 'AM';
+  return '$hour:${d.minute.toString().padLeft(2, '0')} $period';
 }
 
 String datePretty(int timestamp) {
@@ -364,13 +382,7 @@ class NotekarHaptics {
       return;
     }
 
-    if (type == 'out') {
-      HapticFeedback.mediumImpact().then((_) {
-        Future.delayed(const Duration(milliseconds: 70), () {
-          HapticFeedback.lightImpact();
-        });
-      });
-    } else if (type == 'in') {
+    if (type == 'out' || type == 'in') {
       HapticFeedback.mediumImpact();
     } else {
       HapticFeedback.lightImpact();
@@ -385,18 +397,10 @@ class NotekarHaptics {
   static void successDouble(String style) {
     if (style == 'off') return;
     if (style == 'light') {
-      HapticFeedback.selectionClick().then((_) {
-        Future.delayed(const Duration(milliseconds: 60), () {
-          HapticFeedback.selectionClick();
-        });
-      });
+      HapticFeedback.selectionClick();
       return;
     }
-    HapticFeedback.mediumImpact().then((_) {
-      Future.delayed(const Duration(milliseconds: 80), () {
-        HapticFeedback.lightImpact();
-      });
-    });
+    HapticFeedback.mediumImpact();
   }
 
   static void heavy(String style) {

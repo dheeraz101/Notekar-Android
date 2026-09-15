@@ -13,6 +13,7 @@ class DisplaySettingsPage extends StatelessWidget {
     required this.theme,
     required this.showSeconds,
     required this.highlightSeconds,
+    this.use24HourFormat = true,
     required this.buttonLabels,
     required this.showHistoryText,
     required this.largeControls,
@@ -24,6 +25,7 @@ class DisplaySettingsPage extends StatelessWidget {
     required this.onThemeChanged,
     required this.onShowSecondsChanged,
     required this.onHighlightSecondsChanged,
+    this.onUse24HourFormatChanged,
     required this.onFeedback,
     required this.onButtonLabelsChanged,
     required this.onShowHistoryTextChanged,
@@ -39,6 +41,7 @@ class DisplaySettingsPage extends StatelessWidget {
   final String theme;
   final bool showSeconds;
   final bool highlightSeconds;
+  final bool use24HourFormat;
   final bool buttonLabels;
   final bool showHistoryText;
   final bool largeControls;
@@ -51,6 +54,7 @@ class DisplaySettingsPage extends StatelessWidget {
   final ValueChanged<String> onThemeChanged;
   final ValueChanged<bool> onShowSecondsChanged;
   final ValueChanged<bool> onHighlightSecondsChanged;
+  final ValueChanged<bool>? onUse24HourFormatChanged;
   final ValueChanged<String> onFeedback;
   final ValueChanged<bool> onButtonLabelsChanged;
   final ValueChanged<bool> onShowHistoryTextChanged;
@@ -150,6 +154,14 @@ class DisplaySettingsPage extends StatelessWidget {
                 if (!showSeconds) return;
                 onHighlightSecondsChanged(value);
               },
+            ),
+            SettingsSwitchRow(
+              p: p,
+              title: '24-Hour Time',
+              subtitle: 'Display time in 24-hour format or 12-hour AM/PM.',
+              color: p.accent,
+              value: use24HourFormat,
+              onChanged: (value) => onUse24HourFormatChanged?.call(value),
             ),
           ],
         ),
