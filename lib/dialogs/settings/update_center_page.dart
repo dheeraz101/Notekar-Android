@@ -55,6 +55,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   // Download & verification state
   double _downloadProgress = 0.0;
   bool _downloading = false;
+  bool _installing = false;
   bool _fetchingApkSize = false;
   String? _downloadedApkPath;
   String _verificationStatus = 'idle'; // idle, verifying, verified, failed
@@ -328,42 +329,62 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
   }
 
   Future<void> _installApk() async {
-    if (_downloadedApkPath == null) return;
-    final channel = const MethodChannel('notekar/files');
+    if (_downloadedApkPath == null || _installing || _downloading) return;
+    setState(() => _installing = true);
 
-    final canInstall =
-        await channel.invokeMethod<bool>('canInstallPackages') ?? false;
-    if (!canInstall) {
-      if (!mounted) return;
-      await showGeneralDialog<void>(
-        context: context,
-        barrierColor: Colors.black.withValues(alpha: 0.42),
-        barrierDismissible: true,
-        barrierLabel: 'Close permissions setup',
-        transitionDuration: const Duration(milliseconds: 120),
-        pageBuilder: (_, _, _) => UpdatePermissionSheet(
-          p: widget.p,
-          blur:
-              !widget.reduceMotion &&
-              widget.enableTranslucency &&
-              AdaptiveEngine().supportsBlur,
-        ),
-      );
-      final canInstallNow =
+    try {
+      final channel = const MethodChannel('notekar/files');
+
+      final canInstall =
           await channel.invokeMethod<bool>('canInstallPackages') ?? false;
-      if (!canInstallNow) return;
-    }
+      if (!canInstall) {
+        if (!mounted) return;
+        await showGeneralDialog<void>(
+          context: context,
+          barrierColor: Colors.black.withValues(alpha: 0.42),
+          barrierDismissible: true,
+          barrierLabel: 'Close permissions setup',
+          transitionDuration: const Duration(milliseconds: 120),
+          pageBuilder: (_, _, _) => UpdatePermissionSheet(
+            p: widget.p,
+            blur:
+                !widget.reduceMotion &&
+                widget.enableTranslucency &&
+                AdaptiveEngine().supportsBlur,
+          ),
+        );
+        final canInstallNow =
+            await channel.invokeMethod<bool>('canInstallPackages') ?? false;
+        if (!canInstallNow) {
+          if (mounted) {
+            setState(() => _installing = false);
+          }
+          return;
+        }
+      }
 
-    final success = await channel.invokeMethod<bool>('installApk', {
-      'filePath': _downloadedApkPath,
-    });
-    if (success == false && mounted) {
-      showIosPillToast(
-        context: context,
-        p: widget.p,
-        message: 'Installation failed to start'.localized(context),
-        icon: Icons.error_outline_rounded,
-      );
+      final success = await channel.invokeMethod<bool>('installApk', {
+        'filePath': _downloadedApkPath,
+      });
+      if (success == false && mounted) {
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Installation failed to start'.localized(context),
+          icon: Icons.error_outline_rounded,
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _installing = false);
+      }
+    } finally {
+      // Retain _installing for 2500ms so the OS package installer sheet presents smoothly without button flashing
+      Future.delayed(const Duration(milliseconds: 2500), () {
+        if (mounted) {
+          setState(() => _installing = false);
+        }
+      });
     }
   }
 
@@ -775,6 +796,54 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                 ),
               ],
             ),
+          ] else if (_verificationStatus == 'verifying') ...[
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: p.border),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CupertinoActivityIndicator(radius: 8, color: p.accent),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Verifying package integrity...'.localized(context),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else if (_installing) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: p.border),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CupertinoActivityIndicator(radius: 8, color: p.green),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Preparing system installer...'.localized(context),
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ] else if (_downloadedApkPath != null &&
               _verificationStatus == 'verified') ...[
             Column(
@@ -839,19 +908,6 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               ],
             ),
           ] else ...[
-            if (_verificationStatus == 'verifying') ...[
-              Row(
-                children: [
-                  CupertinoActivityIndicator(radius: 7, color: p.accent),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Verifying integrity checksum...'.localized(context),
-                    style: TextStyle(color: p.text2, fontSize: 13),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: p.accent,
@@ -884,7 +940,9 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              onPressed: () => widget.onOpenLink(githubReleases),
+              onPressed: _fetchingApkSize
+                  ? null
+                  : () => widget.onOpenLink(githubReleases),
               child: Text('Download from GitHub'.localized(context)),
             ),
             const SizedBox(height: 8),
@@ -897,7 +955,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              onPressed: widget.onCheckUpdates,
+              onPressed: _fetchingApkSize ? null : widget.onCheckUpdates,
               child: Text('Check for updates'.localized(context)),
             ),
           ],

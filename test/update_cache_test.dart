@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/update_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -234,5 +236,136 @@ void main() {
         expect(find.text('Delete Cache'), findsOneWidget);
       },
     );
+  });
+
+  group('UpdateService Architecture Resolution', () {
+    test(
+      'prioritizes arm64-v8a over armeabi-v7a when both are reported in abis',
+      () {
+        expect(
+          UpdateService.resolveDeviceSuffix(['armeabi-v7a', 'arm64-v8a']),
+          'arm64-v8a',
+        );
+        expect(
+          UpdateService.resolveDeviceSuffix([
+            'arm64-v8a',
+            'armeabi-v7a',
+            'armeabi',
+          ]),
+          'arm64-v8a',
+        );
+        expect(UpdateService.resolveDeviceSuffix(['aarch64']), 'arm64-v8a');
+      },
+    );
+
+    test('selects armeabi-v7a when device only supports 32-bit ARM', () {
+      expect(
+        UpdateService.resolveDeviceSuffix(['armeabi-v7a', 'armeabi']),
+        'armeabi-v7a',
+      );
+      expect(UpdateService.resolveDeviceSuffix(['armv7l']), 'armeabi-v7a');
+    });
+
+    test('selects x86_64 and x86 appropriately', () {
+      expect(UpdateService.resolveDeviceSuffix(['x86_64']), 'x86_64');
+      expect(UpdateService.resolveDeviceSuffix(['x86']), 'x86');
+    });
+
+    test('falls back to universal when abis is empty', () {
+      expect(UpdateService.resolveDeviceSuffix([]), 'universal');
+    });
+
+    test(
+      'AdaptiveEngine caches and loads supportedAbis from SharedPreferences',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'device_supported_abis': ['arm64-v8a', 'armeabi-v7a'],
+        });
+        final prefs = await SharedPreferences.getInstance();
+        final engine = AdaptiveEngine();
+        await engine.initialize(prefs: prefs);
+
+        expect(engine.supportedAbis, ['arm64-v8a', 'armeabi-v7a']);
+        expect(
+          UpdateService.resolveDeviceSuffix(engine.supportedAbis),
+          'arm64-v8a',
+        );
+      },
+    );
+  });
+
+  group('UpdateCenterView Action States', () {
+    testWidgets('renders checking updates state without download buttons', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: UpdateCenterView(
+                p: p,
+                appVersion: '7.5.1',
+                enableTranslucency: true,
+                reduceMotion: false,
+                onOpenLink: (_) {},
+                onCheckUpdates: () {},
+                updateInfo: null,
+                checkingUpdates: true,
+                updateStatus: 'Checking...',
+                currentBuildChannel: 'stable',
+                onLearnMoreBeta: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Checking for updates...'), findsOneWidget);
+      expect(find.text('Download & Install'), findsNothing);
+      expect(find.text('Install Now'), findsNothing);
+    });
+
+    testWidgets('renders Download & Install when updateInfo is present', (
+      tester,
+    ) async {
+      final info = AppUpdateInfo(
+        version: '7.5.2',
+        tagName: 'v7.5.2-beta',
+        body: 'New features',
+        isSecurity: false,
+        isImportant: false,
+        type: 'Beta Update',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: UpdateCenterView(
+                p: p,
+                appVersion: '7.5.1',
+                enableTranslucency: true,
+                reduceMotion: false,
+                onOpenLink: (_) {},
+                onCheckUpdates: () {},
+                updateInfo: info,
+                checkingUpdates: false,
+                updateStatus: 'Update available',
+                currentBuildChannel: 'stable',
+                onLearnMoreBeta: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Update Available'), findsOneWidget);
+      expect(find.text('Download & Install'), findsOneWidget);
+      expect(find.text('Install Now'), findsNothing);
+      expect(find.text('Verifying package integrity...'), findsNothing);
+      expect(find.text('Preparing system installer...'), findsNothing);
+    });
   });
 }

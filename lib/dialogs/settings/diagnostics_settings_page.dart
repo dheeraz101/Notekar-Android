@@ -334,7 +334,13 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
               p: widget.p,
               label: 'Architecture',
               value: engine.supportedAbis.isNotEmpty
-                  ? engine.supportedAbis.first
+                  ? (engine.supportedAbis.any(
+                          (a) =>
+                              a.toLowerCase().contains('arm64') ||
+                              a.toLowerCase().contains('aarch64'),
+                        )
+                        ? 'arm64-v8a'
+                        : engine.supportedAbis.first)
                   : 'arm64-v8a',
             ),
             DiagnosticRow(

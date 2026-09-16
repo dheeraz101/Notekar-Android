@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -327,18 +328,38 @@ class UpdateService {
     }
   }
 
-  String _getDeviceSuffix() {
-    final abis = AdaptiveEngine().supportedAbis;
+  static String resolveDeviceSuffix(List<String> abis) {
     if (abis.isEmpty) return 'universal';
-    final primary = abis.first.toLowerCase();
-    if (primary.contains('arm64')) {
+    final lowerAbis = abis.map((a) => a.toLowerCase()).toList();
+    if (lowerAbis.any((a) => a.contains('arm64') || a.contains('aarch64'))) {
       return 'arm64-v8a';
-    } else if (primary.contains('armeabi') || primary.contains('armv7')) {
+    } else if (lowerAbis.any(
+      (a) => a.contains('armeabi') || a.contains('armv7') || a.contains('arm'),
+    )) {
       return 'armeabi-v7a';
-    } else if (primary.contains('x86_64')) {
+    } else if (lowerAbis.any((a) => a.contains('x86_64'))) {
       return 'x86_64';
+    } else if (lowerAbis.any((a) => a.contains('x86'))) {
+      return 'x86';
     }
     return 'universal';
+  }
+
+  Future<String> _getDeviceSuffix() async {
+    List<String> abis = AdaptiveEngine().supportedAbis;
+    if (abis.isEmpty) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        abis = prefs.getStringList('device_supported_abis') ?? [];
+      } catch (_) {}
+    }
+    if (abis.isEmpty && Platform.isAndroid) {
+      try {
+        final info = await DeviceInfoPlugin().androidInfo;
+        abis = info.supportedAbis;
+      } catch (_) {}
+    }
+    return resolveDeviceSuffix(abis);
   }
 
   Future<String?> downloadApk(
@@ -348,7 +369,7 @@ class UpdateService {
     final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
     if (cacheDir == null) return null;
 
-    String suffix = _getDeviceSuffix();
+    String suffix = await _getDeviceSuffix();
     final cleanVersion = info.version.split('-').first;
     final url =
         'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';
@@ -632,7 +653,7 @@ class UpdateService {
       final cacheDir = await _channel.invokeMethod<String>('appCacheDir');
       if (cacheDir == null) return null;
       final cleanVersion = version.split('-').first;
-      final suffix = _getDeviceSuffix();
+      final suffix = await _getDeviceSuffix();
       var file = File('$cacheDir/notekar-$cleanVersion-$suffix.apk');
       if (file.existsSync()) {
         return file.path;
@@ -713,7 +734,7 @@ class UpdateService {
     final client = _createHttpClient(timeout: const Duration(seconds: 5));
     try {
       final cleanVersion = info.version.split('-').first;
-      final suffix = _getDeviceSuffix();
+      final suffix = await _getDeviceSuffix();
 
       var url =
           'https://github.com/dheeraz101/Notekar-Android/releases/download/${info.tagName}/notekar-$cleanVersion-$suffix.apk';

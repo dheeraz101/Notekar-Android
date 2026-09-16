@@ -123,10 +123,13 @@ jobs:
       # ── 5. Build — Universal APK ─────────────────────────────────────────
       - name: Build universal release APK
         run: |
+          APK_DIR=build/app/outputs/flutter-apk
+          VER=${{ steps.version.outputs.version }}
           flutter build apk --release \
             --build-name ${{ steps.version.outputs.version }} \
             --build-number ${{ steps.version.outputs.version_code }}
-          echo "✅ Universal APK built"
+          mv "$APK_DIR/app-release.apk" "$APK_DIR/notekar-${VER}-universal.apk"
+          echo "✅ Universal APK built: notekar-${VER}-universal.apk"
 
       # ── 6. Build — Split-per-ABI APKs (arm64, armeabi-v7a, x86_64) ──────
       - name: Build split-per-ABI release APKs
@@ -136,13 +139,12 @@ jobs:
             --build-number ${{ steps.version.outputs.version_code }}
           echo "✅ Split APKs built"
 
-      # ── 7. Rename all APKs with version + arch ───────────────────────────
-      - name: Rename APKs
+      # ── 7. Rename split APKs with version + arch ─────────────────────────
+      - name: Rename split APKs
         run: |
           APK_DIR=build/app/outputs/flutter-apk
           VER=${{ steps.version.outputs.version }}
 
-          mv "$APK_DIR/app-release.apk"          "$APK_DIR/notekar-${VER}-universal.apk"
           mv "$APK_DIR/app-arm64-v8a-release.apk"    "$APK_DIR/notekar-${VER}-arm64-v8a.apk"
           mv "$APK_DIR/app-armeabi-v7a-release.apk"  "$APK_DIR/notekar-${VER}-armeabi-v7a.apk"
           mv "$APK_DIR/app-x86_64-release.apk"       "$APK_DIR/notekar-${VER}-x86_64.apk"

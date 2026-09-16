@@ -27,9 +27,12 @@ Signed release — built automatically from the branch.
 - **Sobriety & Life Audit Launcher Widgets**: Resolved RemoteViews layout crash (`<View>` to
   `<FrameLayout>`), fixed initial placement compact sizing, added graceful zero/disabled state
   prompts, and enabled direct settings deep-linking.
+- **Update Center Installation & ABI Matching**: Eliminated button state flashing during integrity
+  verification and installer launch; hardened ABI detection in `AdaptiveEngine` and `UpdateService`
+  to persistently prioritize 64-bit ARM (`arm64-v8a`) on modern devices.
 
 ### Integrity
 
 - **Build Tag**: 26BR0916 (version 7.5.2+26091601)
-- **Automated Tests**: All 160 unit & widget tests passing (0 failures, 0 lints)
+- **Automated Tests**: All 167 unit & widget tests passing (0 failures, 0 lints)
 - **Architecture**: 100% offline-first, zero telemetry, local sandboxed storage

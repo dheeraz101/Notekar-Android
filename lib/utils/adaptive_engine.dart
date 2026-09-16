@@ -45,9 +45,13 @@ class AdaptiveEngine {
     final effectivePrefs = prefs ?? await SharedPreferences.getInstance();
     final deviceInfo = DeviceInfoPlugin();
 
-    // Try to load cached RAM and sensor state
+    // Try to load cached RAM, sensor state, and supported ABIs
     _ramGb = effectivePrefs.getInt('device_total_ram_gb') ?? 0;
     _cachedSensorAvailable = effectivePrefs.getBool('device_sensor_available');
+    final cachedAbis = effectivePrefs.getStringList('device_supported_abis');
+    if (cachedAbis != null && cachedAbis.isNotEmpty) {
+      _supportedAbis = cachedAbis;
+    }
 
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
@@ -55,6 +59,10 @@ class AdaptiveEngine {
       _osVersion = 'Android ${androidInfo.version.release}';
       _processors = Platform.numberOfProcessors;
       _supportedAbis = androidInfo.supportedAbis;
+      await effectivePrefs.setStringList(
+        'device_supported_abis',
+        _supportedAbis,
+      );
 
       // If RAM is not cached, detect it
       if (_ramGb == 0) {

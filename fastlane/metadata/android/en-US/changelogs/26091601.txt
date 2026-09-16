@@ -7,3 +7,4 @@ Update to 7.5.2 (build 26BR0916):
 - Tactile: Unified crisp single-burst haptic clicks across all buttons, removing double bursts
 - Onboarding: Condensed 15-page welcome flow into 5 high-impact pages with unified permissions
 - Settings: "Rm -rf Cache" switch for instant installer cleanup with search indexing
+- Update Center: Zero-flicker installation flow and hardened ARM64 architecture selection

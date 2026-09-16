@@ -346,22 +346,24 @@ if ($NoTreeShake)
 
 & $flutter pub get
 & $flutter build apk --release --build-name $Version --build-number $versionCode @extraFlags
+$universalDest = Join-Path $releaseDir "notekar-$Version-universal.apk"
+Copy-Apk -Source (Join-Path $apkOutputDir 'app-release.apk') -Destination $universalDest
+
 & $flutter build apk --release --split-per-abi --build-name $Version --build-number $versionCode @extraFlags
 
-$apkMap = @(
+$splitMap = @(
     @{ Source = 'app-arm64-v8a-release.apk'; Destination = "notekar-$Version-arm64-v8a.apk" }
     @{ Source = 'app-armeabi-v7a-release.apk'; Destination = "notekar-$Version-armeabi-v7a.apk" }
-    @{ Source = 'app-release.apk'; Destination = "notekar-$Version-universal.apk" }
     @{ Source = 'app-x86_64-release.apk'; Destination = "notekar-$Version-x86_64.apk" }
 )
 
-$releaseApks = foreach ($apk in $apkMap)
+$releaseApks = @($universalDest) + (foreach ($apk in $splitMap)
 {
     $source = Join-Path $apkOutputDir $apk.Source
     $destination = Join-Path $releaseDir $apk.Destination
     Copy-Apk -Source $source -Destination $destination
     $destination
-}
+})
 
 $hashLines = Write-HashFiles -ApkPaths $releaseApks -HashFilePaths @(
     (Join-Path $releaseDir 'sha256.txt'),
