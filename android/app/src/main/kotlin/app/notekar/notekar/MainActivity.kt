@@ -790,6 +790,7 @@ class MainActivity : FlutterActivity() {
             "whats-new", "whatsnew", "what-is-new", "new" -> "whats-new"
             "changelog", "changes" -> "changelog"
             "note", "new-note" -> "note"
+            "log_with_note", "log-with-note", "moment_note" -> "log_with_note"
             "moment", "new-moment", "log", "single" -> "single"
             "in", "check-in", "clock-in" -> "in"
             "out", "check-out", "clock-out" -> "out"
@@ -1158,14 +1159,14 @@ class MainActivity : FlutterActivity() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val singleIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
-                action = NoteKarWidgetProvider.ACTION_LOG_BG
-                putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "single")
+            val logNoteIntent = Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra(EXTRA_LAUNCH_ACTION, "log_with_note")
             }
-            val singlePending = PendingIntent.getBroadcast(
+            val logNotePending = PendingIntent.getActivity(
                 context,
                 1004,
-                singleIntent,
+                logNoteIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
@@ -1235,18 +1236,27 @@ class MainActivity : FlutterActivity() {
                 .setOngoing(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
+            if (isCurrentlyIn && lastTimestamp > 0L) {
+                builder.setUsesChronometer(true)
+                builder.setWhen(lastTimestamp)
+                builder.setShowWhen(true)
+            } else {
+                builder.setUsesChronometer(false)
+                builder.setShowWhen(false)
+            }
+
             if (isTwoWay) {
                 if (isCurrentlyIn) {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "Moment", singlePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "Log", logNotePending)
                 } else {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log IN", inPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "Moment", singlePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "Log", logNotePending)
                 }
             } else {
-                builder.addAction(R.drawable.ic_stat_notekar, "Log Moment", singlePending)
+                builder.addAction(R.drawable.ic_stat_notekar, "Log", logNotePending)
                 builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
             }
 

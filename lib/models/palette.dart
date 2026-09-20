@@ -19,6 +19,42 @@ class Palette {
     required this.blue,
   });
 
+  Palette copyWith({
+    String? name,
+    Color? bg,
+    Color? surface,
+    Color? surface2,
+    Color? surface3,
+    Color? border,
+    Color? text,
+    Color? text2,
+    Color? text3,
+    Color? clock,
+    Color? accent,
+    Color? green,
+    Color? orange,
+    Color? red,
+    Color? blue,
+  }) {
+    return Palette(
+      name: name ?? this.name,
+      bg: bg ?? this.bg,
+      surface: surface ?? this.surface,
+      surface2: surface2 ?? this.surface2,
+      surface3: surface3 ?? this.surface3,
+      border: border ?? this.border,
+      text: text ?? this.text,
+      text2: text2 ?? this.text2,
+      text3: text3 ?? this.text3,
+      clock: clock ?? this.clock,
+      accent: accent ?? this.accent,
+      green: green ?? this.green,
+      orange: orange ?? this.orange,
+      red: red ?? this.red,
+      blue: blue ?? this.blue,
+    );
+  }
+
   final String name;
   final Color bg;
   final Color surface;

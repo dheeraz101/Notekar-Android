@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -88,12 +89,15 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   final FocusNode _focusNode = FocusNode();
   int _visibleCount = _pageSize;
   String _query = '';
+  String? _selectedTag;
   late List<_NoteSearchRow> _searchRows;
+  late List<String> _knownTags;
 
   @override
   void initState() {
     super.initState();
     _searchRows = _buildSearchRows(widget.entries);
+    _knownTags = TagService.instance.getAllKnownTags(widget.entries);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -104,6 +108,7 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.entries, widget.entries)) {
       _searchRows = _buildSearchRows(widget.entries);
+      _knownTags = TagService.instance.getAllKnownTags(widget.entries);
     }
   }
 
@@ -115,10 +120,20 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   }
 
   List<Moment> get _matches {
-    if (_query.trim().isEmpty) return widget.entries;
-    final q = _query.toLowerCase();
+    final q = _query.trim().toLowerCase();
     return _searchRows
-        .where((r) => r.searchText.contains(q))
+        .where((r) {
+          if (q.isNotEmpty && !r.searchText.contains(q)) {
+            return false;
+          }
+          if (_selectedTag != null) {
+            final target = TagService.stripHash(_selectedTag!).toLowerCase();
+            if (!r.entry.effectiveTags.contains(target)) {
+              return false;
+            }
+          }
+          return true;
+        })
         .map((r) => r.entry)
         .toList();
   }
@@ -135,8 +150,8 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
           (entry) => _NoteSearchRow(
             entry: entry,
             searchText:
-                '${entry.note} ${datePretty(entry.timestamp)} '
-                        '${timeOnly(entry.timestamp)} ${entry.type}'
+                '${entry.note} ${entry.effectiveTags.map((t) => '#$t').join(' ')} ${datePretty(entry.timestamp)} '
+                        '${timeOnly(entry.timestamp)} ${entry.type} ${entry.category ?? ''}'
                     .toLowerCase(),
           ),
         )
@@ -166,6 +181,102 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
             _visibleCount = _pageSize;
           }),
         ),
+        if (_knownTags.isNotEmpty) ...[
+          const SizedBox(height: spacing8),
+          SizedBox(
+            height: 32,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: spacing16),
+              itemCount: _knownTags.length + (_selectedTag != null ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (_selectedTag != null && index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: PressableScale(
+                      onTap: () => setState(() {
+                        _selectedTag = null;
+                        _visibleCount = _pageSize;
+                      }),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.p.surface3,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: widget.p.border),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.close_rounded,
+                              size: 12,
+                              color: widget.p.text2,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Clear Tag',
+                              style: TextStyle(
+                                color: widget.p.text2,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                final tagIndex = _selectedTag != null ? index - 1 : index;
+                final tag = _knownTags[tagIndex];
+                final isSelected = _selectedTag == tag;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: PressableScale(
+                    onTap: () => setState(() {
+                      _selectedTag = isSelected ? null : tag;
+                      _visibleCount = _pageSize;
+                    }),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? widget.p.accent.withValues(alpha: 0.18)
+                            : widget.p.surface2,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: isSelected
+                              ? widget.p.accent
+                              : widget.p.border.withValues(alpha: 0.6),
+                          width: isSelected ? 1.2 : 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        tag,
+                        style: TextStyle(
+                          color: isSelected ? widget.p.accent : widget.p.text2,
+                          fontSize: 11.5,
+                          fontWeight: isSelected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
         const SizedBox(height: spacing8),
         if (_query.trim().isEmpty && rows.isNotEmpty)
           Padding(

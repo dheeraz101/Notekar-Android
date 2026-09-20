@@ -3,11 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Dedicated Apple HIG Journal / Big Note canvas for expansive thoughts,
 /// reflections, and long-form notes attached to moments.
@@ -39,37 +40,22 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
 
-  List<String> _tags = const [
-    '#work',
-    '#study',
-    '#play',
-    '#health',
-    '#focus',
-    '#routine',
-  ];
+  List<String> _tags = const [];
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
-    _loadCustomTags();
+    _loadTags();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
   }
 
-  Future<void> _loadCustomTags() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList('custom_note_tags');
-    if (saved != null && saved.isNotEmpty) {
-      if (mounted) setState(() => _tags = saved);
-    }
-  }
-
-  Future<void> _saveCustomTags(List<String> tags) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('custom_note_tags', tags);
-    if (mounted) setState(() => _tags = tags);
+  Future<void> _loadTags() async {
+    final tagService = TagService.instance;
+    await tagService.load();
+    if (mounted) setState(() => _tags = tagService.customTags);
   }
 
   @override
@@ -146,9 +132,11 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
       ),
     );
 
-    if (created != null && created.isNotEmpty && !_tags.contains(created)) {
-      final updated = List<String>.from(_tags)..add(created);
-      await _saveCustomTags(updated);
+    if (created != null && created.isNotEmpty) {
+      final added = await TagService.instance.addCustomTag(created);
+      if (added && mounted) {
+        setState(() => _tags = TagService.instance.customTags);
+      }
     }
   }
 
@@ -185,8 +173,10 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     );
 
     if (confirmed == true) {
-      final updated = List<String>.from(_tags)..remove(tag);
-      await _saveCustomTags(updated);
+      await TagService.instance.removeCustomTag(tag);
+      if (mounted) {
+        setState(() => _tags = TagService.instance.customTags);
+      }
     }
   }
 
@@ -213,7 +203,23 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   void _save() {
     HapticFeedback.mediumImpact();
     final text = _controller.text.trim();
-    Navigator.pop(context, text);
+
+    // Extract tags from the final note text
+    final tagRegex = RegExp(r'#([a-zA-Z0-9_-]+)');
+    final extractedTags = tagRegex
+        .allMatches(text)
+        .map((m) => m.group(1)!.toLowerCase())
+        .toSet()
+        .toList();
+
+    // Record usage of these tags
+    if (extractedTags.isNotEmpty) {
+      TagService.instance.recordUsages(
+        extractedTags.map((t) => '#$t').toList(),
+      );
+    }
+
+    Navigator.pop(context, NoteResult(text, extractedTags));
   }
 
   @override

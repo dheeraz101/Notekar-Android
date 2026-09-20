@@ -18,6 +18,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/backup_dialogs.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
+import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
@@ -39,6 +40,8 @@ import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
+import 'package:notekar/utils/tag_migration_service.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
@@ -176,9 +179,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
   final ValueNotifier<Offset> _motion = ValueNotifier(Offset.zero);
 
   int _lastMotionMs = 0;
+  bool _adaptiveModeColor = false;
 
-  Palette get p =>
-      paletteFor(_theme, highContrast: _highContrast, accentName: _accentColor);
+  Palette get p {
+    final base = paletteFor(
+      _theme,
+      highContrast: _highContrast,
+      accentName: _accentColor,
+    );
+    if (_adaptiveModeColor && _activeCategory != 'All') {
+      final categoryMeta = getCategoryMeta(_activeCategory, base);
+      return base.copyWith(accent: categoryMeta.color);
+    }
+    return base;
+  }
 
   @override
   void initState() {
@@ -512,6 +526,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _highContrast = prefs.getBool('m-high-contrast') ?? false;
       _compactHistory = savedCompact;
       _confirmDelete = prefs.getBool('m-confirm-delete') ?? false;
+      _adaptiveModeColor =
+          prefs.getBool('m-adaptive-color') ??
+          prefs.getBool('adaptive_mode_color') ??
+          false;
       _showSeconds = prefs.getBool('m-show-seconds') ?? true;
       _highlightSeconds = prefs.getBool('m-highlight-seconds') ?? true;
       _use24HourFormat = prefs.getBool('m-use-24-hour') ?? true;
@@ -594,6 +612,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
       // Initialize MomentRepository and load database entries
       await _repository.initialize(preloadedPrefs: prefs);
+      await TagMigrationService.migrateIfNeeded();
+      await TagService.instance.load();
       final migrated = await _repository.migrateLegacyData();
       final entries = _repository.getAllMoments();
       final trash = _repository.getTrashMoments();
@@ -984,6 +1004,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _logEntry({
     String? note,
+    List<String>? tags,
     Offset? position,
     String? forcedType,
     int? timestamp,
@@ -1082,6 +1103,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       date: dateKey(now),
       note: finalNoteText,
       category: resolvedCategory,
+      tags: tags ?? const [],
     );
 
     _hasTappedBefore = true;
@@ -1380,17 +1402,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
-  Future<void> _updateMomentNote(int id, String note) async {
+  Future<void> _updateMomentNote(
+    int id,
+    String note, {
+    List<String>? tags,
+  }) async {
     final index = _entries.indexWhere((item) => item.id == id);
     if (index < 0) return;
 
     final oldMoment = _entries[index];
-    final updatedMoment = Moment(
-      id: oldMoment.id,
-      timestamp: oldMoment.timestamp,
-      type: oldMoment.type,
-      date: oldMoment.date,
+    final updatedMoment = oldMoment.copyWith(
       note: note.trim(),
+      tags: tags ?? oldMoment.tags,
     );
 
     setState(() {
@@ -1999,14 +2022,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
-  Future<void> _openNote({Offset? position, String? initialText}) async {
+  Future<void> _openNote({
+    Offset? position,
+    String? initialText,
+    String? hintText,
+    String? title,
+    String? forcedType,
+  }) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
       return;
     }
     if (_isDelayBlocked()) return;
     NotekarHaptics.light(_hapticStyle);
-    final note = await showGeneralDialog<String>(
+    final result = await showGeneralDialog<NoteResult>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.42),
       barrierDismissible: true,
@@ -2015,6 +2044,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (_, _, _) => NoteDialog(
         p: p,
         initialNote: initialText ?? '',
+        title: title ?? 'Add Note',
+        hintText: hintText,
         blur:
             _enableTranslucency &&
             AdaptiveEngine().supportsBlur &&
@@ -2022,13 +2053,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
         largeText: _largeText,
       ),
     );
-    if (note != null) {
-      if (_requireLongPressNote && note.trim().isEmpty) {
+    if (result != null) {
+      if (_requireLongPressNote && result.note.trim().isEmpty) {
         _showToast('Add a note to save', warning: true);
         return;
       }
       unawaited(
-        _logEntry(note: note.isEmpty ? null : note, position: position),
+        _logEntry(
+          forcedType: forcedType,
+          note: result.note.isEmpty ? null : result.note,
+          tags: result.tags,
+          position: position,
+        ),
       );
     }
   }
@@ -2038,7 +2074,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _showToast('Loading database...', warning: true);
       return;
     }
-    final result = await showModalBottomSheet<String>(
+    final result = await showModalBottomSheet<dynamic>(
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.42),
@@ -2071,12 +2107,110 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onOpenSearchNotes: () {
           Navigator.pop(sheetContext, 'search_notes');
         },
+        onOpenManualEntry: ({prefilledStartTime, prefilledEndTime}) {
+          Navigator.pop(sheetContext, {
+            'action': 'manual_entry',
+            'start': prefilledStartTime,
+            'end': prefilledEndTime,
+          });
+        },
       ),
     );
     if (result == 'search_notes' && mounted) {
       await _openSettings(initialCategory: 'Search Notes');
+    } else if (result == 'manual_entry' && mounted) {
+      await _openManualEntry();
+    } else if (result is Map && result['action'] == 'manual_entry' && mounted) {
+      await _openManualEntry(
+        prefilledStartTime: result['start'] as DateTime?,
+        prefilledEndTime: result['end'] as DateTime?,
+      );
     }
     if (mounted) setState(() {});
+  }
+
+  Future<void> _openManualEntry({
+    DateTime? prefilledStartTime,
+    DateTime? prefilledEndTime,
+  }) async {
+    if (!_startupComplete) {
+      _showToast('Loading database...', warning: true);
+      return;
+    }
+    final result = await showModalBottomSheet<ManualEntryResult>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      enableDrag: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      sheetAnimationStyle: const AnimationStyle(
+        duration: Duration(milliseconds: 180),
+        reverseDuration: Duration(milliseconds: 170),
+      ),
+      builder: (ctx) => ManualEntryDialog(
+        p: p,
+        categories: _categories,
+        initialCategory: _activeCategory,
+        prefilledStartTime: prefilledStartTime,
+        prefilledEndTime: prefilledEndTime,
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    if (result.isSession && result.endDateTime != null) {
+      // Create IN and OUT moments for the session
+      final inMoment = Moment(
+        id: _nextId,
+        timestamp: result.startDateTime.millisecondsSinceEpoch,
+        type: 'in',
+        date: dateKey(result.startDateTime),
+        note: result.note,
+        tags: result.tags,
+        category: result.category,
+      );
+      final outMoment = Moment(
+        id: _nextId + 1,
+        timestamp: result.endDateTime!.millisecondsSinceEpoch,
+        type: 'out',
+        date: dateKey(result.endDateTime!),
+        note: '',
+        tags: const [],
+        category: result.category,
+      );
+
+      _nextId += 2;
+      await _repository.saveMoment(inMoment);
+      await _repository.saveMoment(outMoment);
+
+      setState(() {
+        _entries = [outMoment, inMoment, ..._entries]
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      });
+      _showToast('Session logged manually');
+    } else {
+      // Single moment
+      final moment = Moment(
+        id: _nextId,
+        timestamp: result.startDateTime.millisecondsSinceEpoch,
+        type: 'single',
+        date: dateKey(result.startDateTime),
+        note: result.note,
+        tags: result.tags,
+        category: result.category,
+      );
+      _nextId++;
+      await _repository.saveMoment(moment);
+
+      setState(() {
+        _entries = [moment, ..._entries]
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      });
+      _showToast('Moment logged manually');
+    }
+
+    unawaited(_updateAndroidWidget());
   }
 
   Future<void> _showRecentlyDeleted() async {
@@ -2230,6 +2364,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
           NoteKarApp.of(context)?.setAccent(value);
           setState(() => _accentColor = value);
           _saveSetting('m-accent-color', value);
+        },
+        onAdaptiveColorChanged: (value) {
+          setState(() => _adaptiveModeColor = value);
+          _saveSetting('m-adaptive-color', value);
         },
         onAppIconStyle: (value) async {
           setState(() => _appIconStyle = value);
@@ -2533,6 +2671,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         await _openChangelog();
       case 'note':
         await _openNote(initialText: note.isNotEmpty ? note : null);
+      case 'log_with_note':
+        await _openNote(
+          forcedType: 'single',
+          title: 'What happened?',
+          hintText: 'What happened?',
+          initialText: note.isNotEmpty ? note : null,
+        );
       case 'share':
         await _openNote(initialText: note.isNotEmpty ? note : null);
       case 'moment':
@@ -4088,6 +4233,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   onAddCategory: _showAddCategoryDialog,
                   onManageCategories: () =>
                       unawaited(_openSettings(initialCategory: 'Modes')),
+                  onLongPressCategory: (cat) =>
+                      unawaited(_openSettings(initialCategory: 'Mode: $cat')),
                 ),
               ],
             ),

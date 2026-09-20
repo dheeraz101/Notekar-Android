@@ -174,15 +174,21 @@ class CategoryService {
           extractCategory(s.inMoment) ??
               (s.outMoment != null ? extractCategory(s.outMoment!) : null),
         TimelineSingleItem s => extractCategory(s.moment),
+        TimelineGapItem _ => null,
       };
+
+      if (cat == null && item is TimelineGapItem) continue;
 
       final categoryLabel = cat ?? 'General';
       final itemMs = switch (item) {
         TimelineSessionItem s => s.duration.inMilliseconds,
         TimelineSingleItem _ => const Duration(minutes: 15).inMilliseconds,
+        TimelineGapItem _ => 0,
       };
 
-      durationMs[categoryLabel] = (durationMs[categoryLabel] ?? 0) + itemMs;
+      if (itemMs > 0) {
+        durationMs[categoryLabel] = (durationMs[categoryLabel] ?? 0) + itemMs;
+      }
     }
 
     return durationMs.map((k, v) => MapEntry(k, Duration(milliseconds: v)));

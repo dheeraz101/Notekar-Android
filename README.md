@@ -16,7 +16,7 @@
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![F-Droid Compatible](https://img.shields.io/badge/F--Droid-100%25%20Compliant-brightgreen.svg?style=flat-square&logo=f-droid&logoColor=white)](https://f-droid.org)
-[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://dheeraz101.github.io/Notekar/privacy.html)
+[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://notekarapp.vercel.app/privacy.html)
 [![Translations](https://img.shields.io/badge/l10n-7%20Live%20%7C%2050%2B%20Target-orange.svg?style=flat-square&logo=googletranslate&logoColor=white)](TRANSLATIONS.md)
 [![GitHub Stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/issues)
@@ -454,6 +454,23 @@ flutter test
 # 4. Launch on your connected device
 flutter run
 ```
+
+---
+
+## 🔮 Upcoming Features (Roadmap)
+
+- **🎙️ Voice Notes & Spoken Reflections**:
+    - Record hands-free ambient or verbal notes attached to any moment or session.
+    - **100% Offline Multilingual Transcription**: Speech recognition processed on-device without
+      cloud dependencies, respecting NoteKar's strict zero-telemetry sovereign ethos.
+    - Multi-language support covering English, Hindi, Spanish, French, German, Japanese, and
+      Russian.
+- **📅 Visual Day-Swipe Timeline**:
+    - Full-screen chronological day calendar swipe view complementing the classic list ledger.
+- **🧩 Adaptive Color Accents**:
+    - Mode-specific accent overrides automatically tinting clock and highlights based on active
+      focus
+      category.
 
 ---
 

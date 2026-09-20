@@ -14,6 +14,7 @@ class HomeCategoryPills extends StatelessWidget {
     required this.onSelectCategory,
     required this.onAddCategory,
     this.onManageCategories,
+    this.onLongPressCategory,
   });
 
   final Palette p;
@@ -22,6 +23,7 @@ class HomeCategoryPills extends StatelessWidget {
   final ValueChanged<String> onSelectCategory;
   final VoidCallback onAddCategory;
   final VoidCallback? onManageCategories;
+  final void Function(String category)? onLongPressCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +99,12 @@ class HomeCategoryPills extends StatelessWidget {
                   onSelectCategory(category);
                 }
               },
+              onLongPress: onLongPressCategory != null
+                  ? () {
+                      HapticFeedback.mediumImpact();
+                      onLongPressCategory!(category);
+                    }
+                  : null,
             ),
             const SizedBox(width: 6),
           ],
@@ -146,12 +154,14 @@ class _CategoryPillItem extends StatelessWidget {
     required this.category,
     required this.isSelected,
     required this.onTap,
+    this.onLongPress,
   });
 
   final Palette p;
   final String category;
   final bool isSelected;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +169,7 @@ class _CategoryPillItem extends StatelessWidget {
 
     return PressableScale(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -183,13 +184,27 @@ class TimelineSingleTile extends StatelessWidget {
                         ],
                         Expanded(
                           child: hasNote
-                              ? IosEmojiText(
-                                  moment.note,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: p.text2,
-                                    fontSize: compact ? 11 : 12,
+                              ? GestureDetector(
+                                  onTap: () {
+                                    NotePreviewSheet.show(
+                                      context,
+                                      p: p,
+                                      note: moment.note,
+                                      title: 'Moment Note',
+                                      category: moment.category,
+                                      onEdit: onEditNote,
+                                    );
+                                  },
+                                  onLongPress: onEditNote,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: IosEmojiText(
+                                    moment.note,
+                                    maxLines: compact ? 1 : 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: p.text2,
+                                      fontSize: compact ? 11 : 12,
+                                    ),
                                   ),
                                 )
                               : GestureDetector(

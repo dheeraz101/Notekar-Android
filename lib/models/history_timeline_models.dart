@@ -103,6 +103,27 @@ class TimelineSingleItem extends TimelineItem {
   String get type => moment.type;
 }
 
+/// Represents an untracked gap between sessions or moments.
+class TimelineGapItem extends TimelineItem {
+  TimelineGapItem({required this.startTimestamp, required this.endTimestamp});
+
+  final int startTimestamp;
+  final int endTimestamp;
+
+  @override
+  int get primaryTimestamp => endTimestamp;
+
+  @override
+  String get note => '';
+
+  @override
+  String? get category => null;
+
+  Duration get duration => Duration(
+    milliseconds: (endTimestamp - startTimestamp).clamp(0, 86400000),
+  );
+}
+
 /// Represents a day section in the History Life Ledger.
 class TimelineDaySection {
   TimelineDaySection({
@@ -133,8 +154,11 @@ class TimelineDaySection {
       final itemMs = switch (it) {
         TimelineSessionItem s => s.duration.inMilliseconds,
         TimelineSingleItem _ => const Duration(minutes: 15).inMilliseconds,
+        TimelineGapItem _ => 0,
       };
-      msMap[cat] = (msMap[cat] ?? 0) + itemMs;
+      if (itemMs > 0) {
+        msMap[cat] = (msMap[cat] ?? 0) + itemMs;
+      }
     }
     return msMap.map((k, v) => MapEntry(k, Duration(milliseconds: v)));
   }
@@ -184,7 +208,10 @@ class TimelineDaySection {
 }
 
 /// Converts a flat list of moments into chronological day sections of Life Ledger timeline items.
-List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
+List<TimelineDaySection> buildTimelineDaySections(
+  List<Moment> entries, {
+  bool includeGaps = false,
+}) {
   if (entries.isEmpty) return [];
 
   // 1. Sort all moments chronologically ascending (earliest to latest) to pair sessions globally
@@ -229,6 +256,9 @@ List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
     final dKey = switch (item) {
       TimelineSessionItem s => s.inMoment.date,
       TimelineSingleItem s => s.moment.date,
+      TimelineGapItem g => dateKey(
+        DateTime.fromMillisecondsSinceEpoch(g.startTimestamp),
+      ),
     };
     groupedByDate.putIfAbsent(dKey, () => []).add(item);
   }
@@ -246,6 +276,40 @@ List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
   for (final dKey in sortedDates) {
     final dayItems = groupedByDate[dKey]!;
 
+    if (includeGaps && dayItems.isNotEmpty) {
+      dayItems.sort((a, b) => a.primaryTimestamp.compareTo(b.primaryTimestamp));
+      final List<TimelineItem> itemsWithGaps = [];
+      for (int i = 0; i < dayItems.length; i++) {
+        final current = dayItems[i];
+        itemsWithGaps.add(current);
+        if (i < dayItems.length - 1) {
+          final next = dayItems[i + 1];
+          final currentEnd = switch (current) {
+            TimelineSessionItem s => s.endTimestamp ?? s.startTimestamp,
+            TimelineSingleItem s => s.moment.timestamp,
+            TimelineGapItem g => g.endTimestamp,
+          };
+          final nextStart = switch (next) {
+            TimelineSessionItem s => s.startTimestamp,
+            TimelineSingleItem s => s.moment.timestamp,
+            TimelineGapItem g => g.startTimestamp,
+          };
+          final gapMs = nextStart - currentEnd;
+          if (gapMs >= 15 * 60 * 1000) {
+            itemsWithGaps.add(
+              TimelineGapItem(
+                startTimestamp: currentEnd,
+                endTimestamp: nextStart,
+              ),
+            );
+          }
+        }
+      }
+      dayItems
+        ..clear()
+        ..addAll(itemsWithGaps);
+    }
+
     // Sort items descending so newest moments/sessions within the day appear at the top
     dayItems.sort((a, b) => b.primaryTimestamp.compareTo(a.primaryTimestamp));
 
@@ -255,7 +319,7 @@ List<TimelineDaySection> buildTimelineDaySections(List<Moment> entries) {
       if (it is TimelineSessionItem) {
         totalTrackedMs += it.duration.inMilliseconds;
         totalLogs += it.momentIds.length;
-      } else {
+      } else if (it is TimelineSingleItem) {
         totalLogs += 1;
       }
     }

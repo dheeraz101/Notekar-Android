@@ -34,8 +34,14 @@ class SettingsController extends ChangeNotifier {
   bool _highContrast = false;
   String _historyDensity = 'comfortable';
   bool _godModeUnlocked = false;
+  bool _adaptiveModeColor = false;
+  bool _showGapCards = false;
 
   // Getters
+  bool get adaptiveModeColor => _adaptiveModeColor;
+
+  bool get showGapCards => _showGapCards;
+
   String get theme => _theme;
 
   String get locale => _locale;
@@ -112,6 +118,11 @@ class SettingsController extends ChangeNotifier {
     _highContrast = _prefs.getBool('high_contrast') ?? false;
     _historyDensity = _prefs.getString('history_density') ?? 'comfortable';
     _godModeUnlocked = _prefs.getBool('god_mode_unlocked') ?? false;
+    _adaptiveModeColor =
+        _prefs.getBool('m-adaptive-color') ??
+        _prefs.getBool('adaptive_mode_color') ??
+        false;
+    _showGapCards = _prefs.getBool('show_gap_cards') ?? false;
   }
 
   Future<void> setGodModeUnlocked(bool value) async {
@@ -291,6 +302,21 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setAdaptiveModeColor(bool value) async {
+    if (_adaptiveModeColor == value) return;
+    _adaptiveModeColor = value;
+    await _prefs.setBool('m-adaptive-color', value);
+    await _prefs.setBool('adaptive_mode_color', value);
+    notifyListeners();
+  }
+
+  Future<void> setShowGapCards(bool value) async {
+    if (_showGapCards == value) return;
+    _showGapCards = value;
+    await _prefs.setBool('show_gap_cards', value);
+    notifyListeners();
+  }
+
   Future<void> resetAllSettings() async {
     _theme = 'dark';
     _accentColor = 'blue';
@@ -315,6 +341,8 @@ class SettingsController extends ChangeNotifier {
     _largeText = false;
     _highContrast = false;
     _historyDensity = 'comfortable';
+    _adaptiveModeColor = false;
+    _showGapCards = false;
 
     await _prefs.clear();
     notifyListeners();

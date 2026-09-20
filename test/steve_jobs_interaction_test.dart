@@ -108,7 +108,7 @@ void main() {
     );
 
     testWidgets(
-      'HistoryDialog supports inline lens density toggle button in sticky header',
+      'HistoryDialog supports view mode segmented control in header',
       (tester) async {
         final now = DateTime.now();
         final entries = [
@@ -142,16 +142,18 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // Density toggle button with tooltip 'Compact view'
-        final toggleFinder = find.byTooltip('Compact view');
-        expect(toggleFinder, findsOneWidget);
+        // Mode segments: 'List' and 'Timeline'
+        expect(find.text('List'), findsOneWidget);
+        expect(find.text('Timeline'), findsOneWidget);
 
-        // Tap inline density toggle to switch to compact
-        await tester.tap(toggleFinder);
+        // Tap Timeline segment
+        await tester.tap(find.text('Timeline'));
         await tester.pumpAndSettle();
 
-        // Now tooltip should update to 'Comfortable view'
-        expect(find.byTooltip('Comfortable view'), findsOneWidget);
+        // Switch back to List
+        await tester.tap(find.text('List'));
+        await tester.pumpAndSettle();
+        expect(find.text('List'), findsOneWidget);
       },
     );
 

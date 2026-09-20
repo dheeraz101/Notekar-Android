@@ -167,8 +167,10 @@ class SettingsDialog extends StatefulWidget {
     required this.onLocaleChanged,
     this.initialCategory,
     this.onTriggerUrlScheme,
+    this.onAdaptiveColorChanged,
   });
 
+  final ValueChanged<bool>? onAdaptiveColorChanged;
   final ValueChanged<String>? onTriggerUrlScheme;
   final String currentLocale;
   final ValueChanged<String> onLocaleChanged;
@@ -5554,6 +5556,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onCategoriesChanged: () {
                                 setState(() {});
                               },
+                              onAdaptiveColorChanged:
+                                  widget.onAdaptiveColorChanged,
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
                             ),
                           ),
@@ -6064,6 +6068,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         'Does NoteKar support offline languages?',
                                     answer:
                                         'Yes! NoteKar includes 7 built-in language localizations (English, French, Spanish, Hindi, German, Japanese, and Russian) that work 100% offline without requiring any internet connection or file downloads.',
+                                  ),
+                                  HelpRow(
+                                    p: p,
+                                    question:
+                                        'What features are upcoming in NoteKar?',
+                                    answer:
+                                        'Upcoming capabilities on the roadmap include Hands-free Voice Notes with 100% offline multi-language speech transcription (English, Hindi, Spanish, French, German, Japanese, Russian), calendar-based day-swipe visual timeline, and adaptive mode-based color accents.',
                                   ),
                                   HelpRow(
                                     p: p,

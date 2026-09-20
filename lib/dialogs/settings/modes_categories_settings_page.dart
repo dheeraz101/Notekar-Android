@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart'
         CupertinoAlertDialog,
         CupertinoDialogAction,
         CupertinoIcons,
+        CupertinoSwitch,
         CupertinoTextField,
         CupertinoTheme,
         CupertinoThemeData;
@@ -19,6 +20,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ModesCategoriesSettingsPage extends StatefulWidget {
   const ModesCategoriesSettingsPage({
@@ -28,6 +30,7 @@ class ModesCategoriesSettingsPage extends StatefulWidget {
     this.onCategoriesChanged,
     this.onOpenCategory,
     this.onLearnMoreBeta,
+    this.onAdaptiveColorChanged,
   });
 
   final Palette p;
@@ -35,6 +38,7 @@ class ModesCategoriesSettingsPage extends StatefulWidget {
   final VoidCallback? onCategoriesChanged;
   final void Function(String category, {String? parent})? onOpenCategory;
   final VoidCallback? onLearnMoreBeta;
+  final ValueChanged<bool>? onAdaptiveColorChanged;
 
   @override
   State<ModesCategoriesSettingsPage> createState() =>
@@ -46,11 +50,25 @@ class _ModesCategoriesSettingsPageState
   final CategoryService _categoryService = CategoryService();
   List<String> _categories = ['Work', 'Deep Focus'];
   bool _loading = true;
+  bool _adaptiveColor = false;
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _loadAdaptiveColor();
+  }
+
+  Future<void> _loadAdaptiveColor() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _adaptiveColor =
+            prefs.getBool('m-adaptive-color') ??
+            prefs.getBool('adaptive_mode_color') ??
+            false;
+      });
+    }
   }
 
   Future<void> _loadCategories() async {
@@ -274,6 +292,38 @@ class _ModesCategoriesSettingsPageState
                 duration: durationsMap[category] ?? Duration.zero,
               ),
             ],
+          ],
+        ),
+
+        const SizedBox(height: spacing16),
+
+        // Mode Behavior & Theming
+        SettingsGroup(
+          p: widget.p,
+          title: 'MODE BEHAVIOR'.localized(context),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: widget.p,
+              icon: Icons.palette_outlined,
+              color: widget.p.accent,
+              title: 'Adaptive Color'.localized(context),
+              subtitle:
+                  'Tint app accents using the active mode color (Off by default)'
+                      .localized(context),
+              trailing: CupertinoSwitch(
+                value: _adaptiveColor,
+                activeTrackColor: widget.p.accent,
+                onChanged: (val) async {
+                  HapticFeedback.selectionClick();
+                  setState(() => _adaptiveColor = val);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('m-adaptive-color', val);
+                  await prefs.setBool('adaptive_mode_color', val);
+                  widget.onAdaptiveColorChanged?.call(val);
+                },
+              ),
+            ),
           ],
         ),
 

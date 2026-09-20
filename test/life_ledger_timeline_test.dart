@@ -288,7 +288,7 @@ void main() {
         );
         expect(find.text('1h 45m'), findsOneWidget);
 
-        await tester.tap(
+        await tester.longPress(
           find.byWidgetPredicate(
             (w) => w is IosEmojiText && w.text == 'Fixed auth token bug',
           ),

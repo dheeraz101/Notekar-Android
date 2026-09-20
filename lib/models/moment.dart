@@ -26,6 +26,7 @@ class Moment {
     required this.date,
     this.note = '',
     this.category,
+    this.tags = const [],
   });
 
   final int id;
@@ -34,6 +35,7 @@ class Moment {
   final String date;
   final String note;
   final String? category;
+  final List<String> tags;
 
   factory Moment.fromJson(Map<String, dynamic> json) {
     final type = (json['type'] as String?) ?? 'single';
@@ -57,6 +59,7 @@ class Moment {
       date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
       note: note,
       category: resolvedCategory,
+      tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
     );
   }
 
@@ -71,6 +74,40 @@ class Moment {
     return true;
   }
 
+  /// Returns the union of explicit tags and inline #hashtags from note.
+  /// Used for filtering, search, and display.
+  List<String> get effectiveTags {
+    final result = <String>{...tags};
+    final regex = RegExp(r'#([a-zA-Z0-9_-]+)');
+    for (final match in regex.allMatches(note)) {
+      final tag = match.group(1);
+      if (tag != null && tag.isNotEmpty) {
+        result.add(tag.toLowerCase());
+      }
+    }
+    return result.toList();
+  }
+
+  Moment copyWith({
+    int? id,
+    int? timestamp,
+    String? type,
+    String? date,
+    String? note,
+    String? category,
+    List<String>? tags,
+  }) {
+    return Moment(
+      id: id ?? this.id,
+      timestamp: timestamp ?? this.timestamp,
+      type: type ?? this.type,
+      date: date ?? this.date,
+      note: note ?? this.note,
+      category: category ?? this.category,
+      tags: tags ?? this.tags,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'timestamp': timestamp,
@@ -79,7 +116,17 @@ class Moment {
     'note': note,
     if (category != null && category!.trim().isNotEmpty)
       'category': category!.trim(),
+    if (tags.isNotEmpty) 'tags': tags,
   };
+}
+
+/// Return type for NoteDialog and BigNoteDialog.
+/// Contains both the note text and explicitly selected tags.
+class NoteResult {
+  const NoteResult(this.note, this.tags);
+
+  final String note;
+  final List<String> tags;
 }
 
 class HistoryListItem {

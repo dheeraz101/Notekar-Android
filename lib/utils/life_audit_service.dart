@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 
 /// Time horizons supported by the Life Audit & Time Wastage engine.
 enum LifeAuditTimeframe {
@@ -131,6 +132,9 @@ class LifeAuditSummary {
     this.availableHistoryDays = 0,
     this.requiredDays = 1,
     this.firstLogDate,
+    this.categoryBreakdown = const {},
+    this.currentStreak = 0,
+    this.peakHour,
   });
 
   final LifeAuditTimeframe timeframe;
@@ -150,6 +154,9 @@ class LifeAuditSummary {
   final int availableHistoryDays;
   final int requiredDays;
   final DateTime? firstLogDate;
+  final Map<String, Duration> categoryBreakdown;
+  final int currentStreak;
+  final int? peakHour;
 
   String get formattedTotalTracked =>
       DayAuditRecord._formatDuration(totalTrackedDuration);
@@ -423,6 +430,50 @@ class LifeAuditService {
       100.0,
     );
 
+    // Category Breakdown across timeframe items
+    final timeframeStartMs = todayStart
+        .subtract(Duration(days: requiredDays - 1))
+        .millisecondsSinceEpoch;
+    final List<TimelineItem> timeframeItems = [];
+    for (final s in daySections) {
+      for (final it in s.items) {
+        if (it.primaryTimestamp >= timeframeStartMs) {
+          timeframeItems.add(it);
+        }
+      }
+    }
+    final categoryBreakdown = CategoryService.computeCategoryDurations(
+      timeframeItems,
+    );
+
+    // Calculate current logging streak
+    int streak = 0;
+    for (int i = 0; i < 365; i++) {
+      final dayDate = todayStart.subtract(Duration(days: i));
+      final k = dateKey(dayDate);
+      final tracked = trackedByDateKey[k] ?? Duration.zero;
+      if (tracked.inMinutes > 0) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+
+    // Peak hour calculation
+    final Map<int, int> hourCounts = {};
+    for (final it in timeframeItems) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(it.primaryTimestamp);
+      hourCounts[dt.hour] = (hourCounts[dt.hour] ?? 0) + 1;
+    }
+    int? peakHour;
+    int maxCount = 0;
+    hourCounts.forEach((hour, count) {
+      if (count > maxCount) {
+        maxCount = count;
+        peakHour = hour;
+      }
+    });
+
     return LifeAuditSummary(
       timeframe: timeframe,
       daysCount: requiredDays,
@@ -441,6 +492,9 @@ class LifeAuditService {
       availableHistoryDays: availableHistoryDays,
       requiredDays: requiredDays,
       firstLogDate: firstLogDate,
+      categoryBreakdown: categoryBreakdown,
+      currentStreak: streak,
+      peakHour: peakHour,
     );
   }
 

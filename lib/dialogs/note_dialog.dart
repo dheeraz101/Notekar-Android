@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,6 +20,7 @@ class NoteDialog extends StatefulWidget {
     this.allowEmpty = true,
     this.blur = false,
     this.largeText = false,
+    this.hintText,
   });
 
   final Palette p;
@@ -27,6 +30,7 @@ class NoteDialog extends StatefulWidget {
   final bool allowEmpty;
   final bool blur;
   final bool largeText;
+  final String? hintText;
 
   @override
   State<NoteDialog> createState() => _NoteDialogState();
@@ -44,21 +48,14 @@ class _NoteDialogState extends State<NoteDialog> {
   int _availableShields = 0;
   bool _shieldActivated = false;
 
-  List<String> _tags = const [
-    '#work',
-    '#study',
-    '#play',
-    '#health',
-    '#focus',
-    '#routine',
-  ];
+  List<String> _tags = const [];
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
     _loadSobrietyMode();
-    _loadCustomTags();
+    _loadTags();
     // Pre-check if note already contains relapse or tags
     if (widget.initialNote.contains('#relapse')) {
       _relapseSelected = true;
@@ -72,18 +69,10 @@ class _NoteDialogState extends State<NoteDialog> {
     });
   }
 
-  Future<void> _loadCustomTags() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList('custom_note_tags');
-    if (saved != null && saved.isNotEmpty) {
-      if (mounted) setState(() => _tags = saved);
-    }
-  }
-
-  Future<void> _saveCustomTags(List<String> tags) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('custom_note_tags', tags);
-    if (mounted) setState(() => _tags = tags);
+  Future<void> _loadTags() async {
+    final tagService = TagService.instance;
+    await tagService.load();
+    if (mounted) setState(() => _tags = tagService.customTags);
   }
 
   Future<void> _showAddTagDialog() async {
@@ -134,9 +123,11 @@ class _NoteDialogState extends State<NoteDialog> {
       ),
     );
 
-    if (created != null && created.isNotEmpty && !_tags.contains(created)) {
-      final updated = List<String>.from(_tags)..add(created);
-      await _saveCustomTags(updated);
+    if (created != null && created.isNotEmpty) {
+      final added = await TagService.instance.addCustomTag(created);
+      if (added && mounted) {
+        setState(() => _tags = TagService.instance.customTags);
+      }
     }
   }
 
@@ -173,14 +164,16 @@ class _NoteDialogState extends State<NoteDialog> {
     );
 
     if (confirmed == true) {
-      final updated = List<String>.from(_tags)..remove(tag);
-      await _saveCustomTags(updated);
+      await TagService.instance.removeCustomTag(tag);
+      if (mounted) {
+        setState(() => _tags = TagService.instance.customTags);
+      }
     }
   }
 
   Future<void> _openBigNote() async {
     HapticFeedback.selectionClick();
-    final result = await showDialog<String>(
+    final result = await showDialog<NoteResult>(
       context: context,
       builder: (ctx) => BigNoteDialog(
         p: widget.p,
@@ -191,7 +184,7 @@ class _NoteDialogState extends State<NoteDialog> {
       ),
     );
     if (result != null && mounted) {
-      _controller.text = result;
+      _controller.text = result.note;
       Navigator.pop(context, result);
     }
   }
@@ -258,7 +251,8 @@ class _NoteDialogState extends State<NoteDialog> {
               style: TextStyle(color: widget.p.text),
               decoration: InputDecoration(
                 counterText: '',
-                hintText: 'What should this moment remember?',
+                hintText:
+                    widget.hintText ?? 'What should this moment remember?',
                 hintStyle: TextStyle(color: widget.p.text3),
                 filled: true,
                 fillColor: widget.p.surface3,
@@ -602,7 +596,7 @@ class _NoteDialogState extends State<NoteDialog> {
                   ),
                   onPressed: () {
                     if (widget.allowEmpty) {
-                      Navigator.pop(context, '');
+                      Navigator.pop(context, const NoteResult('', []));
                     } else {
                       Navigator.pop(context);
                     }
@@ -703,7 +697,22 @@ class _NoteDialogState extends State<NoteDialog> {
       return;
     }
 
-    Navigator.pop(context, note);
+    // Extract tags from the final note text for the NoteResult
+    final tagRegex = RegExp(r'#([a-zA-Z0-9_-]+)');
+    final extractedTags = tagRegex
+        .allMatches(note)
+        .map((m) => m.group(1)!.toLowerCase())
+        .toSet()
+        .toList();
+
+    // Record usage of these tags
+    if (extractedTags.isNotEmpty) {
+      TagService.instance.recordUsages(
+        extractedTags.map((t) => '#$t').toList(),
+      );
+    }
+
+    Navigator.pop(context, NoteResult(note, extractedTags));
   }
 }
 

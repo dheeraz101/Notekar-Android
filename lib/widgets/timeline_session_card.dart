@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -296,7 +297,21 @@ class TimelineSessionCard extends StatelessWidget {
                         session.category!.trim().isNotEmpty)) ...[
                   SizedBox(height: compact ? 6 : 10),
                   GestureDetector(
-                    onTap: onEditNote,
+                    onTap: () {
+                      if (hasNote) {
+                        NotePreviewSheet.show(
+                          context,
+                          p: p,
+                          note: session.note,
+                          title: 'Session Note',
+                          category: session.category,
+                          onEdit: onEditNote,
+                        );
+                      } else {
+                        onEditNote();
+                      }
+                    },
+                    onLongPress: onEditNote,
                     behavior: HitTestBehavior.opaque,
                     child: Container(
                       width: double.infinity,
@@ -313,6 +328,7 @@ class TimelineSessionCard extends StatelessWidget {
                         ),
                       ),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (session.category != null &&
                               session.category!.trim().isNotEmpty) ...[
@@ -323,12 +339,15 @@ class TimelineSessionCard extends StatelessWidget {
                             ),
                             SizedBox(width: compact ? 5 : 7),
                           ] else ...[
-                            Icon(
-                              hasNote
-                                  ? Icons.notes_rounded
-                                  : Icons.add_comment_outlined,
-                              size: compact ? 12 : 14,
-                              color: hasNote ? p.accent : p.text3,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Icon(
+                                hasNote
+                                    ? Icons.notes_rounded
+                                    : Icons.add_comment_outlined,
+                                size: compact ? 12 : 14,
+                                color: hasNote ? p.accent : p.text3,
+                              ),
                             ),
                             SizedBox(width: compact ? 6 : 8),
                           ],
@@ -336,7 +355,7 @@ class TimelineSessionCard extends StatelessWidget {
                             child: hasNote
                                 ? IosEmojiText(
                                     session.note,
-                                    maxLines: 1,
+                                    maxLines: compact ? 1 : 3,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: p.text,
@@ -357,10 +376,13 @@ class TimelineSessionCard extends StatelessWidget {
                                     ),
                                   ),
                           ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            size: compact ? 13 : 15,
-                            color: p.text3.withValues(alpha: 0.6),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1),
+                            child: Icon(
+                              Icons.chevron_right_rounded,
+                              size: compact ? 13 : 15,
+                              color: p.text3.withValues(alpha: 0.6),
+                            ),
                           ),
                         ],
                       ),

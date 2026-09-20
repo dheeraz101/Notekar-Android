@@ -103,11 +103,112 @@ class QuickNoteActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                bottomMargin = (20 * density).toInt()
+                bottomMargin = (12 * density).toInt()
             }
             layoutParams = lp
         }
         card.addView(input)
+
+        // Quick Tag Chips
+        try {
+            val flutterPrefs =
+                getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val customTags = mutableListOf<String>()
+
+            // Flutter StringList is stored in JSON or prefix set
+            val stringSet = flutterPrefs.getStringSet("flutter.custom_note_tags", null)
+            if (stringSet != null && stringSet.isNotEmpty()) {
+                customTags.addAll(stringSet)
+            } else {
+                val jsonString = flutterPrefs.getString("flutter.custom_note_tags", null)
+                if (jsonString != null && jsonString.startsWith("[")) {
+                    val cleaned = jsonString.removeSurrounding("[", "]").replace("\"", "")
+                    if (cleaned.isNotEmpty()) {
+                        customTags.addAll(cleaned.split(",").map { it.trim() })
+                    }
+                }
+            }
+
+            if (customTags.isEmpty()) {
+                customTags.addAll(
+                    listOf(
+                        "#work",
+                        "#study",
+                        "#play",
+                        "#health",
+                        "#focus",
+                        "#routine"
+                    )
+                )
+            }
+
+            val tagScroll = android.widget.HorizontalScrollView(this).apply {
+                overScrollMode = View.OVER_SCROLL_NEVER
+                isHorizontalScrollBarEnabled = false
+                val lp = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = (16 * density).toInt()
+                }
+                layoutParams = lp
+            }
+
+            val tagRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            for (tag in customTags) {
+                val cleanTag = if (tag.startsWith("#")) tag else "#$tag"
+                val chip = TextView(this).apply {
+                    text = cleanTag
+                    setTextColor(Color.parseColor("#CCFFFFFF"))
+                    textSize = 12f
+                    gravity = Gravity.CENTER
+                    background = StateListDrawable().apply {
+                        addState(
+                            intArrayOf(android.R.attr.state_pressed),
+                            GradientDrawable().apply {
+                                setColor(Color.parseColor("#33FFFFFF"))
+                                cornerRadius = 14 * density
+                            })
+                        addState(intArrayOf(), GradientDrawable().apply {
+                            setColor(Color.parseColor("#1FFFFFFF"))
+                            cornerRadius = 14 * density
+                            setStroke((1 * density).toInt(), Color.parseColor("#26FFFFFF"))
+                        })
+                    }
+                    val hPad = (10 * density).toInt()
+                    val vPad = (5 * density).toInt()
+                    setPadding(hPad, vPad, hPad, vPad)
+
+                    val chipLp = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        marginEnd = (6 * density).toInt()
+                    }
+                    layoutParams = chipLp
+
+                    setOnClickListener {
+                        val currentText = input.text.toString()
+                        val separator =
+                            if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
+                        val newText = "$currentText$separator$cleanTag "
+                        input.setText(newText)
+                        input.setSelection(newText.length)
+                    }
+                }
+                tagRow.addView(chip)
+            }
+            tagScroll.addView(tagRow)
+            card.addView(tagScroll)
+        } catch (_: Exception) {
+        }
 
         // Buttons Layout
         val buttonsContainer = LinearLayout(this).apply {
