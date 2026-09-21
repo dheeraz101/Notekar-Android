@@ -24,6 +24,7 @@ import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
+import 'package:notekar/dialogs/smart_trim_sheet.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
@@ -40,6 +41,7 @@ import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
+import 'package:notekar/utils/streak_guardian_service.dart';
 import 'package:notekar/utils/tag_migration_service.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
@@ -665,6 +667,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _startupComplete = true; // DB operations ready
       });
       unawaited(_updateStreakShields());
+      unawaited(_evaluateStreakGuardian(entries));
 
       // Run quick actions and notifications check
       _initQuickActions();
@@ -1111,6 +1114,33 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
 
+    DateTime effectiveNow = now;
+    if (type == 'out' && oldSessionStart != null && mounted) {
+      final sessionStartDt = DateTime.fromMillisecondsSinceEpoch(
+        oldSessionStart,
+      );
+      final sessionDuration = now.difference(sessionStartDt);
+      if (sessionDuration.inMinutes >= 180) {
+        final p = paletteFor(
+          _theme,
+          highContrast: _highContrast,
+          accentName: _accentColor,
+        );
+        final trimmed = await showSmartTrimSheet(
+          context,
+          p: p,
+          startDateTime: sessionStartDt,
+          originalEndDateTime: now,
+          category: _activeCategory,
+          blur: !_reduceMotion && _enableTranslucency,
+          largeText: _largeText,
+        );
+        if (trimmed != null) {
+          effectiveNow = trimmed;
+        }
+      }
+    }
+
     final isGodModeTrigger =
         (note?.toLowerCase().contains('#godmode') ?? false);
     final finalNoteText = isGodModeTrigger
@@ -1124,9 +1154,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     final entry = Moment(
       id: _nextId,
-      timestamp: now.millisecondsSinceEpoch,
+      timestamp: effectiveNow.millisecondsSinceEpoch,
       type: type,
-      date: dateKey(now),
+      date: dateKey(effectiveNow),
       note: finalNoteText,
       category: resolvedCategory,
       tags: tags ?? const [],
@@ -1141,7 +1171,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _nextId++;
       _lastId = entry.id;
       _lastDeletedPreview = null;
-      _lastTapTime = now.millisecondsSinceEpoch;
+      _lastTapTime = effectiveNow.millisecondsSinceEpoch;
       _lastTapPosition = position;
       _lastSavedType = type;
       _lastSingleCount = singleCount;
@@ -2141,6 +2171,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             'end': prefilledEndTime,
           });
         },
+        onClaimRest: _claimRestGap,
       ),
     );
     if (result == 'search_notes' && mounted) {
@@ -2238,6 +2269,49 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     unawaited(_updateAndroidWidget());
+  }
+
+  Future<void> _claimRestGap(DateTime start, DateTime end) async {
+    final startMoment = Moment(
+      id: _nextId++,
+      timestamp: start.millisecondsSinceEpoch,
+      type: 'in',
+      date: dateKey(start),
+      note: 'Rest & Recovery',
+      category: 'Rest',
+      tags: const ['rest'],
+    );
+    final endMoment = Moment(
+      id: _nextId++,
+      timestamp: end.millisecondsSinceEpoch,
+      type: 'out',
+      date: dateKey(end),
+      note: 'Rest & Recovery',
+      category: 'Rest',
+      tags: const ['rest'],
+    );
+    setState(() {
+      _entries = [endMoment, startMoment, ..._entries]
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _lastId = endMoment.id;
+    });
+    await _repository.saveMoment(startMoment);
+    await _repository.saveMoment(endMoment);
+    unawaited(_updateAndroidWidget());
+    if (mounted) {
+      _showToast('🌿 Rest & Recovery logged');
+    }
+  }
+
+  Future<void> _evaluateStreakGuardian(List<Moment> moments) async {
+    try {
+      final status = await StreakGuardianService().evaluateStreak(moments);
+      if (status.graceAppliedToday && mounted) {
+        _showToast('🌿 Mindful rest day honored • Streak protected');
+      }
+    } catch (e) {
+      _logger.warn('StreakGuardian check skipped: $e');
+    }
   }
 
   Future<void> _showRecentlyDeleted() async {

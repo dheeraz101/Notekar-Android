@@ -41,6 +41,7 @@ class HistoryDialog extends StatefulWidget {
     this.onClearAll,
     this.onOpenSearchNotes,
     this.onOpenManualEntry,
+    this.onClaimRest,
     this.blur = false,
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
@@ -64,6 +65,7 @@ class HistoryDialog extends StatefulWidget {
     DateTime? prefilledEndTime,
   })?
   onOpenManualEntry;
+  final Future<void> Function(DateTime start, DateTime end)? onClaimRest;
   final bool blur;
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
@@ -1038,6 +1040,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                 ),
                                           );
                                         },
+                                        onClaimRest: widget.onClaimRest != null
+                                            ? () => widget.onClaimRest!(
+                                                DateTime.fromMillisecondsSinceEpoch(
+                                                  gap.startTimestamp,
+                                                ),
+                                                DateTime.fromMillisecondsSinceEpoch(
+                                                  gap.endTimestamp,
+                                                ),
+                                              )
+                                            : null,
                                       );
                                     }
                                     if (elem.item is TimelineSessionItem) {

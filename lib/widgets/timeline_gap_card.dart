@@ -12,12 +12,14 @@ class TimelineGapCard extends StatelessWidget {
     required this.startTimestamp,
     required this.endTimestamp,
     this.onTap,
+    this.onClaimRest,
   });
 
   final Palette p;
   final int startTimestamp;
   final int endTimestamp;
   final VoidCallback? onTap;
+  final VoidCallback? onClaimRest;
 
   Duration get duration => Duration(
     milliseconds: (endTimestamp - startTimestamp).clamp(0, 86400000),
@@ -94,6 +96,48 @@ class TimelineGapCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onClaimRest != null && duration.inMinutes >= 15) ...[
+                PressableScale(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onClaimRest!();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.moon_stars_fill,
+                          size: 11,
+                          color: p.accent,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Rest',
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
               if (onTap != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(

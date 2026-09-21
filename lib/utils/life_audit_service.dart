@@ -200,6 +200,7 @@ class LifeAuditService {
     double essentialsHours = defaultEssentialsHours,
     DateTime? referenceNow,
     int? activeSessionStart,
+    String? protectedGraceDate,
   }) {
     final now = referenceNow ?? DateTime.now();
     final consciousHours = computeConsciousHours(
@@ -452,7 +453,8 @@ class LifeAuditService {
       final dayDate = todayStart.subtract(Duration(days: i));
       final k = dateKey(dayDate);
       final tracked = trackedByDateKey[k] ?? Duration.zero;
-      if (tracked.inMinutes > 0) {
+      if (tracked.inMinutes > 0 ||
+          (protectedGraceDate != null && k == protectedGraceDate)) {
         streak++;
       } else if (i > 0) {
         break;
