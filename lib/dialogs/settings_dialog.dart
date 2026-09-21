@@ -38,6 +38,7 @@ import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
 import 'package:notekar/dialogs/settings/time_reflection_settings_page.dart';
 import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
+import 'package:notekar/dialogs/settings/upcoming_features_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
@@ -2131,6 +2132,28 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: 'Manifesto',
+      ),
+      item(
+        title: 'Upcoming Features',
+        subtitle: 'Roadmap, voice notes, AI insights, and P2P sync',
+        category: 'About',
+        icon: CupertinoIcons.sparkles,
+        keywords: [
+          'upcoming',
+          'features',
+          'roadmap',
+          'voice notes',
+          'speech to text',
+          'ai',
+          'whisper',
+          'sync',
+          'future',
+          'about',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Roadmap',
       ),
       item(
         title: 'Life Audit',
@@ -4499,6 +4522,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                       return;
                                                     }
                                                     if (result.title ==
+                                                        'Upcoming Features') {
+                                                      _openCategory(
+                                                        'Upcoming Features',
+                                                        parent: 'About',
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
                                                         'Network Monitor') {
                                                       _openCategory(
                                                         'Network Monitor',
@@ -6706,6 +6737,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               appVersion: appVersion,
                             ),
+                          ),
+                        if (show('Upcoming Features'))
+                          SliverToBoxAdapter(
+                            child: UpcomingFeaturesSettingsPage(p: p),
                           ),
                         if (show('Advanced'))
                           SliverToBoxAdapter(

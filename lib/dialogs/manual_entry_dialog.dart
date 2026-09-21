@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -170,6 +171,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
   late String _activeCategory;
+  late List<String> _categories;
 
   final TextEditingController _noteController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -190,8 +192,74 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
     _startTime = TimeOfDay(hour: start.hour, minute: start.minute);
     _endTime = TimeOfDay(hour: end.hour, minute: end.minute);
 
+    _categories = List<String>.from(widget.categories);
     _activeCategory = widget.initialCategory ?? 'All';
     _loadTags();
+  }
+
+  Future<void> _showAddCategoryDialog() async {
+    HapticFeedback.lightImpact();
+    final textController = TextEditingController();
+
+    final created = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: widget.p.name == 'light'
+              ? Brightness.light
+              : Brightness.dark,
+          primaryColor: widget.p.accent,
+        ),
+        child: CupertinoAlertDialog(
+          title: const Text('New Mode'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: CupertinoTextField(
+              controller: textController,
+              autofocus: true,
+              placeholder: 'Mode Name (e.g. Study, Gym)',
+              placeholderStyle: TextStyle(color: widget.p.text3),
+              textCapitalization: TextCapitalization.words,
+              style: TextStyle(color: widget.p.text),
+              decoration: BoxDecoration(
+                color: widget.p.surface3,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.pop(ctx, false),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Create'),
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (created == true) {
+      final name = textController.text.trim();
+      if (name.isNotEmpty) {
+        final success = await CategoryService().addCategory(name);
+        if (success && mounted) {
+          HapticFeedback.mediumImpact();
+          setState(() {
+            if (!_categories.contains(name)) {
+              _categories.add(name);
+            }
+            _activeCategory = name;
+          });
+        }
+      }
+    }
   }
 
   Future<void> _loadTags() async {
@@ -584,12 +652,12 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
           const SizedBox(height: spacing8),
           HomeCategoryPills(
             p: p,
-            categories: widget.categories,
+            categories: _categories,
             activeCategory: _activeCategory,
             onSelectCategory: (cat) {
               setState(() => _activeCategory = cat);
             },
-            onAddCategory: () {},
+            onAddCategory: _showAddCategoryDialog,
           ),
 
           const SizedBox(height: spacing16),

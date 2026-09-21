@@ -74,6 +74,7 @@
 - [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
 - [💻 Building & Running Locally](#-building--running-locally)
 - [🔑 Release Signing & Keystore Setup](#-release-signing--keystore-setup)
+- [🚀 Product Roadmap & Upcoming Innovations](#-product-roadmap--upcoming-innovations)
 - [☕ Support & Community](#-support--community)
 - [📄 License & Attribution](#-license--attribution)
 
@@ -499,6 +500,63 @@ To generate a signed release APK or App Bundle (`.aab`):
    flutter build apk --release
    ```
    *The generated APK will be output to `build/app/outputs/flutter-apk/app-release.apk`.*
+
+---
+
+## 🚀 Product Roadmap & Upcoming Innovations
+
+NoteKar's architectural evolution balances Apple HIG sensory minimalism, uncompromising offline
+sovereignty, and conscious temporal intelligence. The following innovations are actively in
+development:
+
+### 🎙️ 1. Multi-Language Hands-Free Voice Notes & Edge Whisper STT
+
+- **Sovereign On-Device Speech-to-Text**: Transcribe spontaneous thoughts directly into moments
+  without cloud round-trips using quantized offline Whisper models.
+- **7-Language Native Support**: English, Hindi, Spanish, French, German, Japanese, and Russian.
+- **Autonomous Auto-Stop & Silence Detection**: Intelligent voice-activity detection (VAD) finishes
+  and categorizes notes hands-free.
+
+### 🧠 2. AI Temporal Insights & Circadian Narrative Engine
+
+- **Local Micro-LLM / On-Device Embeddings**: High-fidelity contextual understanding running
+  completely on silicon (zero telemetry, zero server egress).
+- **Circadian Velocity & Horizon Forecasting**: Actionable circadian rhythm analysis detecting deep
+  focus peaks and drift hours.
+- **Contextual Retrospectives**: Daily, weekly, and monthly reflective narratives woven from your
+  conscious logbook.
+
+### 🔔 3. Dynamic Live Activities & Interactive Lockscreen
+
+- **Apple HIG-Grade Live Island**: Real-time persistent elapsed ticker with mode-tinted ring and
+  quick pause/resume controls.
+- **Lockscreen Quick Capture**: Directly log thoughts or switch modes without unlocking the device.
+- **Dynamic Color Harmony**: Lockscreen widget gracefully inherits the current active mode palette.
+
+### 🧩 4. Micro-Chrono Interactive Widgets (2x2 & 4x2)
+
+- **Compact Chronometer Capsule**: High-precision stopwatch readout directly on your home screen.
+- **1-Tap Quick Capture**: Log timestamps and quick tags directly from the Android home screen
+  launcher.
+- **Circadian Progress Ring**: Visual 24-hour conscious timeline disc showing focus vs. void in real
+  time.
+
+### 📡 5. Sovereign Peer-to-Peer Local LAN Sync
+
+- **AirDrop-Style Offline Mesh**: Encrypted local WiFi / Wi-Fi Direct synchronization across phones,
+  tablets, and desktop workstations.
+- **Zero Third-Party Servers**: No centralized accounts, no cloud relays, no subscription fees.
+- **Conflict-Free Replicated Data Types (CRDTs)**: Mathematically proven deterministic merge
+  guarantees across devices without data loss.
+
+### 🏷️ 6. Chrono-Tag Association Matrix & Visual Graph
+
+- **Interactive Force-Directed Node Graph**: Explore temporal connections between tags, modes, and
+  life categories.
+- **Co-Occurrence Matrix**: Uncover hidden habit patterns (e.g., how "Late Night" correlates with "
+  Deep Focus" or "Wasted Void").
+- **Multi-Dimensional Horizon Filtering**: Filter and inspect tag clusters across 7-day, 30-day, and
+  90-day timeframes.
 
 ---
 

@@ -187,7 +187,6 @@ class _ModesCategoriesSettingsPageState
 
         // Hero Card
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: spacing16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: widget.p.surface2,
@@ -242,38 +241,35 @@ class _ModesCategoriesSettingsPageState
         const SizedBox(height: spacing16),
 
         // Action: Add Category Button
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: spacing16),
-          child: PressableScale(
-            onTap: _showAddCategoryDialog,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: widget.p.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: widget.p.accent.withValues(alpha: 0.35),
+        PressableScale(
+          onTap: _showAddCategoryDialog,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: widget.p.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: widget.p.accent.withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.plus_circle_fill,
+                  size: 18,
+                  color: widget.p.accent,
                 ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    CupertinoIcons.plus_circle_fill,
-                    size: 18,
+                const SizedBox(width: 8),
+                Text(
+                  'Create New Mode'.localized(context),
+                  style: TextStyle(
                     color: widget.p.accent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Create New Mode'.localized(context),
-                    style: TextStyle(
-                      color: widget.p.accent,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -309,7 +305,7 @@ class _ModesCategoriesSettingsPageState
               color: widget.p.accent,
               title: 'Adaptive Color'.localized(context),
               subtitle:
-                  'Tint app accents using the active mode color (Off by default)'
+                  'Harmonizes the home background and clock digits with your active mode'
                       .localized(context),
               trailing: CupertinoSwitch(
                 value: _adaptiveColor,
@@ -504,7 +500,7 @@ class ModeDetailSettingsPage extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      padding: const EdgeInsets.fromLTRB(0, 4, 0, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

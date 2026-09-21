@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -73,6 +74,34 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Explore interactive tutorials for tap logging, modes, widgets, duration calculations, and troubleshooting.'
+                  .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Roadmap'.localized(context),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.sparkles,
+              title: 'Upcoming Features'.localized(context),
+              color: p.accent,
+              status: 'Roadmap'.localized(context),
+              trailing: Icon(
+                CupertinoIcons.chevron_right,
+                color: p.text3,
+                size: 16,
+              ),
+              onTap: () =>
+                  onOpenCategory('Upcoming Features', parent: 'Help & Guides'),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Preview planned innovations including offline multi-language voice notes, on-device AI temporal insights, and peer-to-peer sync.'
                   .localized(context),
         ),
 

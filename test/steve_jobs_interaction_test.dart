@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
+import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_philosophy_settings_page.dart';
 import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
+import 'package:notekar/dialogs/settings/upcoming_features_settings_page.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -736,6 +738,96 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(deleteCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'ManualEntryDialog enables adding a new mode via Cupertino dialog and updates pills',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({});
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ManualEntryDialog(
+                  p: p,
+                  categories: const ['Work', 'Deep Focus'],
+                  initialCategory: 'Work',
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Verify "Add" button is present in category pills
+        final addFinder = find.byIcon(CupertinoIcons.plus);
+        expect(addFinder, findsOneWidget);
+
+        // Tap "Add"
+        await tester.tap(addFinder);
+        await tester.pumpAndSettle();
+
+        // Verify CupertinoAlertDialog appears with title "New Mode"
+        expect(find.text('New Mode'), findsOneWidget);
+        final dialogTextField = find.descendant(
+          of: find.byType(CupertinoAlertDialog),
+          matching: find.byType(CupertinoTextField),
+        );
+        expect(dialogTextField, findsOneWidget);
+
+        // Enter new mode name
+        await tester.enterText(dialogTextField, 'Meditation');
+        await tester.pump();
+
+        // Tap "Create"
+        await tester.tap(find.text('Create'));
+        await tester.pumpAndSettle();
+
+        // Verify "Meditation" is now present in the categories list and selected
+        expect(find.text('Meditation'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'UpcomingFeaturesSettingsPage renders planned innovations roadmap with Apple HIG cards',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: UpcomingFeaturesSettingsPage(p: p),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Roadmap & Upcoming'), findsOneWidget);
+        expect(
+          find.text('Multi-Language Hands-Free Voice Notes'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('AI Temporal Synthesis & Circadian Narrative'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Dynamic Live Activities & Interactive Lockscreen'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Micro-Chrono Interactive Widgets (2x2 & 4x2)'),
+          findsOneWidget,
+        );
+        expect(find.text('Sovereign Peer-to-Peer LAN Sync'), findsOneWidget);
+        expect(
+          find.text('Chrono-Tag Association Matrix & Graph'),
+          findsOneWidget,
+        );
       },
     );
   });
