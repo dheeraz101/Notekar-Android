@@ -98,6 +98,7 @@ class _ModesCategoriesSettingsPageState
   Future<void> _showAddCategoryDialog() async {
     HapticFeedback.lightImpact();
     final textController = TextEditingController();
+    Color selectedColor = CategoryService.appleHigColors[0];
 
     final created = await showDialog<bool>(
       context: context,
@@ -108,43 +109,102 @@ class _ModesCategoriesSettingsPageState
               : Brightness.dark,
           primaryColor: widget.p.accent,
         ),
-        child: CupertinoAlertDialog(
-          title: Text('New Mode'.localized(ctx)),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: CupertinoTextField(
-              controller: textController,
-              autofocus: true,
-              placeholder: 'Mode Name (e.g. Study, Gym)',
-              placeholderStyle: TextStyle(color: widget.p.text3),
-              textCapitalization: TextCapitalization.words,
-              maxLength: 15,
-              inputFormatters: [LengthLimitingTextInputFormatter(15)],
-              style: TextStyle(color: widget.p.text),
-              decoration: BoxDecoration(
-                color: widget.p.name == 'light'
-                    ? const Color(0xFFE5E5EA)
-                    : (widget.p.name == 'amoled'
-                          ? const Color(0xFF161616)
-                          : widget.p.surface3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: widget.p.border.withValues(alpha: 0.5),
+        child: StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            return CupertinoAlertDialog(
+              title: Text('New Mode'.localized(ctx)),
+              content: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CupertinoTextField(
+                      controller: textController,
+                      autofocus: true,
+                      placeholder: 'Mode Name (e.g. Study, Gym)',
+                      placeholderStyle: TextStyle(color: widget.p.text3),
+                      textCapitalization: TextCapitalization.words,
+                      maxLength: 15,
+                      inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                      style: TextStyle(color: widget.p.text),
+                      decoration: BoxDecoration(
+                        color: widget.p.name == 'light'
+                            ? const Color(0xFFE5E5EA)
+                            : (widget.p.name == 'amoled'
+                                  ? const Color(0xFF161616)
+                                  : widget.p.surface3),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: widget.p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (final col in CategoryService.appleHigColors) ...[
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setDialogState(() => selectedColor = col);
+                              },
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: col,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selectedColor == col
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: selectedColor == col
+                                      ? [
+                                          BoxShadow(
+                                            color: col.withValues(alpha: 0.5),
+                                            blurRadius: 6,
+                                            spreadRadius: 1,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: selectedColor == col
+                                    ? const Icon(
+                                        Icons.check_rounded,
+                                        size: 15,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              child: Text('Cancel'.localized(ctx)),
-              onPressed: () => Navigator.pop(ctx, false),
-            ),
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: Text('Create'.localized(ctx)),
-              onPressed: () => Navigator.pop(ctx, true),
-            ),
-          ],
+              actions: [
+                CupertinoDialogAction(
+                  child: Text('Cancel'.localized(ctx)),
+                  onPressed: () => Navigator.pop(ctx, false),
+                ),
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: Text('Create'.localized(ctx)),
+                  onPressed: () => Navigator.pop(ctx, true),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -152,7 +212,10 @@ class _ModesCategoriesSettingsPageState
     if (created == true) {
       final name = textController.text.trim();
       if (name.isNotEmpty) {
-        final success = await _categoryService.addCategory(name);
+        final success = await _categoryService.addCategory(
+          name,
+          color: selectedColor,
+        );
         if (success) {
           HapticFeedback.mediumImpact();
           await _loadCategories();

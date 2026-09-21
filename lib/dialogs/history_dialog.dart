@@ -468,9 +468,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ),
             ),
           ],
-          if (widget.onOpenSearchNotes != null) ...[
-            const SizedBox(width: 8),
-            Tooltip(
+        ],
+      ),
+      trailingAction: widget.onOpenSearchNotes != null
+          ? Tooltip(
               message: 'Search Notes'.localized(context),
               child: PressableScale(
                 onTap: () {
@@ -492,10 +493,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   ),
                 ),
               ),
-            ),
-          ],
-        ],
-      ),
+            )
+          : null,
       child: SizedBox(
         width: 410,
         height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
@@ -751,6 +750,36 @@ class _HistoryDialogState extends State<HistoryDialog> {
                               ),
                             ),
                           ),
+                          () {
+                            final todayK = dateKey(DateTime.now());
+                            final activeSec = _daySections
+                                .where(
+                                  (s) =>
+                                      s.dateKey == (_selectedDateKey ?? todayK),
+                                )
+                                .firstOrNull;
+                            if (activeSec != null &&
+                                activeSec.items.isNotEmpty &&
+                                _viewMode != 'calendar') {
+                              return SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    spacing16,
+                                    0,
+                                    spacing16,
+                                    spacing12,
+                                  ),
+                                  child: _TodayInlineInsightCard(
+                                    p: widget.p,
+                                    section: activeSec,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SliverToBoxAdapter(
+                              child: SizedBox.shrink(),
+                            );
+                          }(),
                           if (_timelineRows.isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,
@@ -1986,6 +2015,271 @@ class _HistoryNoticePillState extends State<_HistoryNoticePill>
                     ),
                   ],
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TodayInlineInsightCard extends StatelessWidget {
+  const _TodayInlineInsightCard({required this.p, required this.section});
+
+  final Palette p;
+  final TimelineDaySection section;
+
+  String _formatDuration(Duration d) {
+    final totalMins = d.inMinutes;
+    if (totalMins <= 0) return '0m';
+    final hours = totalMins ~/ 60;
+    final mins = totalMins % 60;
+    if (hours > 0 && mins > 0) return '${hours}h ${mins}m';
+    if (hours > 0) return '${hours}h';
+    return '${mins}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dayItems = section.items;
+    int morningMs = 0;
+    int afternoonMs = 0;
+    int eveningMs = 0;
+    int nightMs = 0;
+    int longestSessionMs = 0;
+    final Map<int, int> hourActivity = {};
+
+    for (final it in dayItems) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(it.primaryTimestamp);
+      final hour = dt.hour;
+      hourActivity[hour] = (hourActivity[hour] ?? 0) + 1;
+
+      final int durMs;
+      if (it is TimelineSessionItem) {
+        durMs = it.duration.inMilliseconds;
+        longestSessionMs = math.max(longestSessionMs, durMs);
+      } else if (it is TimelineSingleItem) {
+        durMs = 15 * 60 * 1000;
+      } else {
+        durMs = 0;
+      }
+
+      if (hour >= 6 && hour < 12) {
+        morningMs += durMs;
+      } else if (hour >= 12 && hour < 17) {
+        afternoonMs += durMs;
+      } else if (hour >= 17 && hour < 21) {
+        eveningMs += durMs;
+      } else {
+        nightMs += durMs;
+      }
+    }
+
+    int? peakHour;
+    int maxHourCount = 0;
+    hourActivity.forEach((hour, count) {
+      if (count > maxHourCount) {
+        maxHourCount = count;
+        peakHour = hour;
+      }
+    });
+
+    final totalTracked = section.totalTrackedDuration;
+    const consciousWindow = Duration(hours: 10);
+    final intentionalityRatio = consciousWindow.inMilliseconds > 0
+        ? (totalTracked.inMilliseconds / consciousWindow.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          )
+        : 0.0;
+
+    final isToday = section.dateKey == dateKey(DateTime.now());
+    final title = isToday
+        ? "TODAY'S INSIGHTS".localized(context)
+        : "${section.displayTitle.toUpperCase()} INSIGHTS";
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${(intentionalityRatio * 100).toStringAsFixed(0)}% Intentional',
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: intentionalityRatio,
+              minHeight: 5,
+              backgroundColor: p.surface3,
+              valueColor: AlwaysStoppedAnimation<Color>(p.accent),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetric(
+                  'Tracked',
+                  _formatDuration(totalTracked),
+                  p.accent,
+                ),
+              ),
+              Container(
+                width: 0.5,
+                height: 24,
+                color: p.border.withValues(alpha: 0.4),
+              ),
+              Expanded(
+                child: _buildMetric(
+                  'Longest Flow',
+                  longestSessionMs > 0
+                      ? _formatDuration(
+                          Duration(milliseconds: longestSessionMs),
+                        )
+                      : '--',
+                  p.green,
+                ),
+              ),
+              Container(
+                width: 0.5,
+                height: 24,
+                color: p.border.withValues(alpha: 0.4),
+              ),
+              Expanded(
+                child: _buildMetric(
+                  'Peak Hour',
+                  peakHour != null ? '${peakHour!}:00' : '--',
+                  p.orange,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _buildRhythmSegment('Morning', morningMs, p.orange),
+              const SizedBox(width: 4),
+              _buildRhythmSegment('Afternoon', afternoonMs, p.accent),
+              const SizedBox(width: 4),
+              _buildRhythmSegment(
+                'Evening',
+                eveningMs,
+                const Color(0xFFAF52DE),
+              ),
+              const SizedBox(width: 4),
+              _buildRhythmSegment('Night', nightMs, const Color(0xFF30B0C7)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetric(String label, String value, Color col) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: p.text3,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            color: col,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRhythmSegment(String label, int ms, Color col) {
+    final active = ms > 0;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: active
+              ? col.withValues(alpha: 0.15)
+              : p.surface3.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: active ? col : p.text3,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              _formatDuration(Duration(milliseconds: ms)),
+              style: TextStyle(
+                color: active ? p.text : p.text3.withValues(alpha: 0.6),
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],

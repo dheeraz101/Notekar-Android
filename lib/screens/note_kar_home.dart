@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart'
     show
         CupertinoAlertDialog,
         CupertinoDialogAction,
+        CupertinoIcons,
         CupertinoTextField,
         CupertinoTheme,
         CupertinoThemeData;
@@ -25,6 +26,7 @@ import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
 import 'package:notekar/dialogs/smart_trim_sheet.dart';
+import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
@@ -47,11 +49,11 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/dynamic_header_capsule.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
-import 'package:notekar/widgets/home_category_pills.dart';
+import 'package:notekar/widgets/home_clock_complication.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
-import 'package:notekar/widgets/home_top_insights_pill.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
@@ -135,6 +137,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   DateTime? _sobrietyCustomStart;
   String _sobrietyMilestoneTheme = 'science';
   bool _showHistoryText = true;
+  bool _headerExpanded = false;
+  String _complicationStyle = 'intentionality';
+  String _toolbarAppearance = 'standard';
   int _streakShields = 0;
   bool _showLastSavedHint = true;
   bool _requireLongPressNote = false;
@@ -574,6 +579,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _resetSingleDaily = prefs.getBool('m-reset-single-daily') ?? false;
       _countOnSave = prefs.getBool('m-count-on-save') ?? false;
       _showHistoryText = prefs.getBool('m-show-history-text') ?? true;
+      _complicationStyle =
+          prefs.getString('home_clock_complication') ?? 'intentionality';
+      _toolbarAppearance = prefs.getString('toolbar_appearance') ?? 'standard';
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
       _requireLongPressNote =
           prefs.getBool('m-require-long-press-note') ?? false;
@@ -1262,6 +1270,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _handleTap(TapUpDetails details) {
+    if (_headerExpanded) {
+      setState(() => _headerExpanded = false);
+      return;
+    }
     if (_isDelayBlocked()) return;
     if (_mode == 'single') {
       unawaited(_openNote(position: details.globalPosition));
@@ -1272,6 +1284,105 @@ class _NoteKarHomeState extends State<NoteKarHome>
         unawaited(_logEntry(position: details.globalPosition));
       }
     }
+  }
+
+  void _cycleComplication() {
+    const styles = ['intentionality', 'streak', 'circadian', 'void'];
+    final idx = styles.indexOf(_complicationStyle);
+    final next = styles[(idx + 1) % styles.length];
+    setState(() => _complicationStyle = next);
+    _prefs?.setString('home_clock_complication', next);
+    final label = switch (next) {
+      'streak' => 'Streak Complication',
+      'circadian' => 'Circadian Complication',
+      'void' => 'Pure Void (Complication Hidden)',
+      _ => 'Intentionality Complication',
+    };
+    _showToast(label, withHaptic: false);
+  }
+
+  Future<void> _openSundayDispatch() async {
+    HapticFeedback.lightImpact();
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => SundayDispatchSheet(p: p, entries: _entries),
+    );
+  }
+
+  Widget _buildMinimalToolbarCapsule(Palette palette, double bottomInset) {
+    return Container(
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: palette.surface2.withValues(
+          alpha: _enableTranslucency && AdaptiveEngine().supportsBlur
+              ? 0.75
+              : 0.95,
+        ),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: palette.border.withValues(alpha: 0.35),
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PressableScale(
+            onTap: _toggleMode,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(
+                _mode == 'single'
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.all_inclusive_rounded,
+                size: 16,
+                color: palette.accent,
+              ),
+            ),
+          ),
+          Container(
+            width: 0.5,
+            height: 16,
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            color: palette.border.withValues(alpha: 0.4),
+          ),
+          PressableScale(
+            onTap: _openHistory,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(CupertinoIcons.clock, size: 16, color: palette.text),
+            ),
+          ),
+          Container(
+            width: 0.5,
+            height: 16,
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            color: palette.border.withValues(alpha: 0.4),
+          ),
+          PressableScale(
+            onTap: _openSettings,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(
+                CupertinoIcons.gear_alt,
+                size: 16,
+                color: palette.text2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _toggleMode() {
@@ -4240,6 +4351,21 @@ class _NoteKarHomeState extends State<NoteKarHome>
       color: palette.bg,
       child: Stack(
         children: [
+          // Fluid Spatial Gestures: Swipe Up on lower third to smoothly pull up Life Ledger (History)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: MediaQuery.sizeOf(context).height * 0.33,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onVerticalDragEnd: (details) {
+                if ((details.primaryVelocity ?? 0) < -260) {
+                  _openHistory();
+                }
+              },
+            ),
+          ),
           // Ergonomic Safety Zone: Tap target bounded vertically to the clock band, full width edge-to-edge
           Positioned(
             top: MediaQuery.paddingOf(context).top + 144,
@@ -4253,6 +4379,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 behavior: HitTestBehavior.opaque,
                 onTapUp: _handleTap,
                 onLongPress: _openNote,
+                onHorizontalDragEnd: (details) {
+                  if (details.primaryVelocity != null &&
+                      details.primaryVelocity!.abs() > 200) {
+                    _toggleMode();
+                  }
+                },
               ),
             ),
           ),
@@ -4291,6 +4423,26 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ),
             ),
           ),
+          // Apple Watch-Grade Complication beneath the clock
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom:
+                MediaQuery.paddingOf(context).bottom +
+                (_toolbarAppearance == 'hidden' ? 36 : 82),
+            child: Center(
+              child: HomeClockComplication(
+                p: palette,
+                style: _complicationStyle,
+                entries: _entries,
+                streak: StreakGuardianService.calculateStreak(
+                  _entries.map((e) => e.date).toSet(),
+                ),
+                onTap: _cycleComplication,
+                onLongPress: _openSundayDispatch,
+              ),
+            ),
+          ),
           if (_lastTapPosition != null && !_reduceMotion)
             IgnorePointer(
               child: Stack(
@@ -4313,40 +4465,40 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ),
             ),
 
+          // Dynamic Header Capsule (Dynamic Island-inspired)
           Positioned(
             top: spacing16 + MediaQuery.paddingOf(context).top,
-            left: spacing16,
-            right: spacing16,
+            left: 0,
+            right: 0,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (_enableSobrietyMode) ...[
-                  _buildSobrietyStreakCard(palette),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: spacing16),
+                    child: _buildSobrietyStreakCard(palette),
+                  ),
                   const SizedBox(height: spacing8),
                 ],
-                RepaintBoundary(
-                  child: HomeTopInsightsPill(
-                    p: palette,
-                    entries: _entries,
-                    blur:
-                        _enableTranslucency &&
-                        AdaptiveEngine().supportsBlur &&
-                        !_reduceMotion,
-                    onTap: () =>
-                        unawaited(_openSettings(initialCategory: 'Dashboard')),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                HomeCategoryPills(
+                DynamicHeaderCapsule(
                   p: palette,
+                  entries: _entries,
                   categories: _categories,
                   activeCategory: _activeCategory,
+                  isExpanded: _headerExpanded,
+                  onExpansionChanged: (expanded) {
+                    setState(() => _headerExpanded = expanded);
+                  },
                   onSelectCategory: _setActiveCategory,
                   onAddCategory: _showAddCategoryDialog,
                   onManageCategories: () =>
                       unawaited(_openSettings(initialCategory: 'Modes')),
                   onLongPressCategory: (cat) =>
                       unawaited(_openSettings(initialCategory: 'Mode: $cat')),
+                  blur:
+                      _enableTranslucency &&
+                      AdaptiveEngine().supportsBlur &&
+                      !_reduceMotion,
                 ),
               ],
             ),
@@ -4362,35 +4514,61 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 token: _lastId ?? 0,
               ),
             ),
-          Positioned(
-            left: spacing16,
-            right: spacing16,
-            bottom: spacing16 + bottomInset,
-            child: RepaintBoundary(
-              child: Toolbar(
-                p: palette,
-                mode: _mode,
-                onMode: _toggleMode,
-                onHistory: _openHistory,
-                onSettings: _openSettings,
-                showLabels: _buttonLabels,
-                largeControls: _largeControls,
-                showBackgroundPill: _homeMenuPill,
-                animateIcons: _homeMenuAnimations && !_reduceMotion,
-                motionNotifier: _motion,
-                showHistoryText: _showHistoryText,
-                lastTimestamp: _mode == 'two-way' && _sessionStart != null
-                    ? formatTimeShort(DateTime.now().millisecondsSinceEpoch)
-                    : (_entries.isNotEmpty
-                          ? formatTimeShort(_entries.first.timestamp)
-                          : null),
-                blur:
-                    _enableTranslucency &&
-                    AdaptiveEngine().supportsBlur &&
-                    !_reduceMotion,
+          if (_toolbarAppearance == 'standard')
+            Positioned(
+              left: spacing16,
+              right: spacing16,
+              bottom: spacing16 + bottomInset,
+              child: RepaintBoundary(
+                child: Toolbar(
+                  p: palette,
+                  mode: _mode,
+                  onMode: _toggleMode,
+                  onHistory: _openHistory,
+                  onSettings: _openSettings,
+                  showLabels: _buttonLabels,
+                  largeControls: _largeControls,
+                  showBackgroundPill: _homeMenuPill,
+                  animateIcons: _homeMenuAnimations && !_reduceMotion,
+                  motionNotifier: _motion,
+                  showHistoryText: _showHistoryText,
+                  lastTimestamp: _mode == 'two-way' && _sessionStart != null
+                      ? formatTimeShort(DateTime.now().millisecondsSinceEpoch)
+                      : (_entries.isNotEmpty
+                            ? formatTimeShort(_entries.first.timestamp)
+                            : null),
+                  blur:
+                      _enableTranslucency &&
+                      AdaptiveEngine().supportsBlur &&
+                      !_reduceMotion,
+                ),
+              ),
+            )
+          else if (_toolbarAppearance == 'minimal_capsule')
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: spacing16 + bottomInset,
+              child: Center(
+                child: _buildMinimalToolbarCapsule(palette, bottomInset),
+              ),
+            )
+          else
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: bottomInset + 8,
+              child: Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: palette.text3.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
               ),
             ),
-          ),
           if (_lastDeletedPreview != null)
             Positioned(
               left: spacing16,
