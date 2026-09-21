@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -142,18 +143,23 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // Mode segments: 'List' and 'Timeline'
-        expect(find.text('List'), findsOneWidget);
-        expect(find.text('Timeline'), findsOneWidget);
+        // Minimal view mode icon button toggles between Timeline and List views
+        expect(find.byTooltip('Timeline view'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.calendar), findsOneWidget);
 
-        // Tap Timeline segment
-        await tester.tap(find.text('Timeline'));
+        // Tap toggle button to switch to Timeline view
+        await tester.tap(find.byTooltip('Timeline view'));
         await tester.pumpAndSettle();
 
-        // Switch back to List
-        await tester.tap(find.text('List'));
+        expect(find.byTooltip('List view'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.list_bullet), findsOneWidget);
+
+        // Tap again to switch back to List view
+        await tester.tap(find.byTooltip('List view'));
         await tester.pumpAndSettle();
-        expect(find.text('List'), findsOneWidget);
+
+        expect(find.byTooltip('Timeline view'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.calendar), findsOneWidget);
       },
     );
 

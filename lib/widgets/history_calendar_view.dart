@@ -305,8 +305,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           ),
                           const SizedBox(width: 3),
                           Icon(
-                            Icons.chevron_right_rounded,
-                            size: 14,
+                            CupertinoIcons.chevron_right,
+                            size: 12,
                             color: widget.p.accent,
                           ),
                         ],

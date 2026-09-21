@@ -363,62 +363,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
-  Widget _buildViewModeSegment({
-    required String mode,
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-  }) {
-    return PressableScale(
-      onTap: () {
-        if (_viewMode == mode) return;
-        HapticFeedback.selectionClick();
-        setState(() => _viewMode = mode);
-        unawaited(
-          SharedPreferences.getInstance().then(
-            (prefs) => prefs.setString('history_view_mode', mode),
-          ),
-        );
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? widget.p.surface2 : Colors.transparent,
-          borderRadius: BorderRadius.circular(7),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? widget.p.accent : widget.p.text3,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? widget.p.text : widget.p.text3,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final hasOlderRows = _hasOlderRows;
@@ -449,38 +393,51 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.delete_outline_rounded,
+                  CupertinoIcons.trash,
                   color: widget.p.text3,
-                  size: 20,
+                  size: 18,
                 ),
               ),
             ),
             const SizedBox(width: 8),
           ],
-          // View Mode Segmented Control: List | Timeline
-          Container(
-            height: 34,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: widget.p.surface3.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildViewModeSegment(
-                  mode: 'list',
-                  icon: CupertinoIcons.list_bullet,
-                  label: 'List',
-                  isSelected: _viewMode == 'list',
+          // View Mode Toggle: minimal single icon button (List <-> Timeline)
+          Tooltip(
+            message: _viewMode == 'list' ? 'Timeline view' : 'List view',
+            child: PressableScale(
+              onTap: () {
+                NotekarHaptics.selection('standard');
+                final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
+                setState(() => _viewMode = nextMode);
+                unawaited(
+                  SharedPreferences.getInstance().then(
+                    (prefs) => prefs.setString('history_view_mode', nextMode),
+                  ),
+                );
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  shape: BoxShape.circle,
                 ),
-                _buildViewModeSegment(
-                  mode: 'calendar',
-                  icon: CupertinoIcons.calendar,
-                  label: 'Timeline',
-                  isSelected: _viewMode == 'calendar',
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) => ScaleTransition(
+                    scale: animation,
+                    child: FadeTransition(opacity: animation, child: child),
+                  ),
+                  child: Icon(
+                    _viewMode == 'list'
+                        ? CupertinoIcons.calendar
+                        : CupertinoIcons.list_bullet,
+                    key: ValueKey(_viewMode),
+                    size: 19,
+                    color: widget.p.text,
+                  ),
                 ),
-              ],
+              ),
             ),
           ),
           if (widget.onOpenManualEntry != null) ...[

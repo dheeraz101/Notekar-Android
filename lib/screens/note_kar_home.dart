@@ -181,15 +181,41 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int _lastMotionMs = 0;
   bool _adaptiveModeColor = false;
 
+  Color? get _activeAdaptiveColor {
+    if (!_adaptiveModeColor) return null;
+    final base = paletteFor(
+      _theme,
+      highContrast: _highContrast,
+      accentName: _accentColor,
+    );
+    if (_activeCategory != 'All') {
+      return getCategoryMeta(_activeCategory, base).color;
+    }
+    final isSessionActive =
+        _mode == 'two-way' && (_sessionStart != null || _inout == 'out');
+    if (isSessionActive) {
+      return base.green;
+    }
+    return null;
+  }
+
   Palette get p {
     final base = paletteFor(
       _theme,
       highContrast: _highContrast,
       accentName: _accentColor,
     );
-    if (_adaptiveModeColor && _activeCategory != 'All') {
-      final categoryMeta = getCategoryMeta(_activeCategory, base);
-      return base.copyWith(accent: categoryMeta.color);
+    final adaptive = _activeAdaptiveColor;
+    if (adaptive != null) {
+      final lum = adaptive.computeLuminance();
+      final contrastClock = lum > 0.45
+          ? const Color(0xFF000000)
+          : const Color(0xFFFFFFFF);
+      return base.copyWith(
+        bg: adaptive,
+        clock: contrastClock,
+        accent: adaptive,
+      );
     }
     return base;
   }
@@ -1251,6 +1277,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() {
       _activeCategory = category;
     });
+    _applySystemUiStyle();
     await _categoryService.setActiveCategory(category, prefs: _prefs);
     if (category != 'All') {
       _showToast('$category Mode', withHaptic: false);
@@ -3971,6 +3998,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   void _applySystemUiStyle() {
     final light = _theme == 'light';
+    final adaptive = _activeAdaptiveColor;
+    final bool isDarkIcons;
+    if (adaptive != null) {
+      isDarkIcons = adaptive.computeLuminance() > 0.45;
+    } else {
+      isDarkIcons = light;
+    }
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -3978,8 +4012,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarDividerColor: Colors.transparent,
         systemNavigationBarContrastEnforced: false,
-        statusBarIconBrightness: light ? Brightness.dark : Brightness.light,
-        systemNavigationBarIconBrightness: light
+        statusBarIconBrightness: isDarkIcons
+            ? Brightness.dark
+            : Brightness.light,
+        systemNavigationBarIconBrightness: isDarkIcons
             ? Brightness.dark
             : Brightness.light,
       ),
@@ -4124,7 +4160,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final lastSaved = _lastId != null;
 
-    Widget body = ColoredBox(
+    Widget body = AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       color: palette.bg,
       child: Stack(
         children: [

@@ -166,10 +166,19 @@ class _ClockFaceState extends State<ClockFace> {
       sec = '.${widget.now.second.toString().padLeft(2, '0')}';
     }
 
-    final actionColor = isSessionActive
-        ? widget.p.green
-        : momentColor(widget.p, widget.pulseType);
-    final baseClockColor = isSessionActive ? widget.p.green : widget.p.clock;
+    final bool isContrastClock =
+        widget.p.clock == const Color(0xFFFFFFFF) ||
+        widget.p.clock == const Color(0xFF000000);
+    final baseClockColor = isContrastClock
+        ? widget.p.clock
+        : (isSessionActive ? widget.p.green : widget.p.clock);
+    final actionColor = isContrastClock
+        ? (widget.p.clock == const Color(0xFF000000)
+              ? const Color(0xDD000000)
+              : const Color(0xFFFFFFFF))
+        : (isSessionActive
+              ? widget.p.green
+              : momentColor(widget.p, widget.pulseType));
     final clockColor = _bright
         ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)
         : baseClockColor;

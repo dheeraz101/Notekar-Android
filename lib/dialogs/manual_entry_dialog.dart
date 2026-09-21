@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors, TimeOfDay;
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
@@ -24,6 +24,122 @@ class ManualEntryResult {
   final String note;
   final List<String> tags;
   final String? category;
+}
+
+/// Reusable Apple HIG Cupertino Date & Time picker bottom sheet.
+Future<DateTime?> showCupertinoDatePickerSheet(
+  BuildContext context, {
+  required Palette p,
+  required DateTime initialDateTime,
+  required CupertinoDatePickerMode mode,
+  DateTime? minimumDate,
+  DateTime? maximumDate,
+  required String title,
+}) {
+  DateTime selected = initialDateTime;
+  return showCupertinoModalPopup<DateTime>(
+    context: context,
+    barrierColor: const Color(0x66000000),
+    builder: (BuildContext sheetContext) {
+      return Container(
+        decoration: BoxDecoration(
+          color: p.surface2,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border.all(color: p.border.withValues(alpha: 0.6)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 8, bottom: 4),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: p.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(sheetContext, null),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(sheetContext, selected),
+                      child: Text(
+                        'Done',
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(height: 0.5, color: p.border.withValues(alpha: 0.5)),
+              SizedBox(
+                height: 220,
+                child: CupertinoTheme(
+                  data: CupertinoThemeData(
+                    brightness: p.name == 'light'
+                        ? Brightness.light
+                        : Brightness.dark,
+                    primaryColor: p.accent,
+                    textTheme: CupertinoTextThemeData(
+                      dateTimePickerTextStyle: TextStyle(
+                        color: p.text,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  child: CupertinoDatePicker(
+                    mode: mode,
+                    initialDateTime: initialDateTime,
+                    minimumDate: minimumDate,
+                    maximumDate: maximumDate,
+                    onDateTimeChanged: (val) {
+                      HapticFeedback.selectionClick();
+                      selected = val;
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// Apple HIG Manual Entry Sheet allowing users to retroactively log
@@ -98,33 +214,31 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
+  String _formatTimeOfDay(TimeOfDay t) {
+    final dt = DateTime(2026, 1, 1, t.hour, t.minute);
+    return timeOnly(dt.millisecondsSinceEpoch);
+  }
+
   Future<void> _selectDate() async {
     HapticFeedback.selectionClick();
     final now = DateTime.now();
     final earliest = now.subtract(const Duration(days: 30));
 
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate.isBefore(earliest) ? earliest : _selectedDate,
-      firstDate: DateTime(earliest.year, earliest.month, earliest.day),
-      lastDate: DateTime(now.year, now.month, now.day),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData(
-            colorScheme: ColorScheme.dark(
-              primary: widget.p.accent,
-              surface: widget.p.surface2,
-              onSurface: widget.p.text,
-            ),
-          ),
-          child: child!,
-        );
-      },
+    final picked = await showCupertinoDatePickerSheet(
+      context,
+      p: widget.p,
+      title: 'Select Date',
+      mode: CupertinoDatePickerMode.date,
+      initialDateTime: _selectedDate.isBefore(earliest)
+          ? earliest
+          : _selectedDate,
+      minimumDate: DateTime(earliest.year, earliest.month, earliest.day),
+      maximumDate: DateTime(now.year, now.month, now.day, 23, 59, 59),
     );
 
     if (picked != null && mounted) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = DateTime(picked.year, picked.month, picked.day);
         _errorMessage = null;
       });
     }
@@ -133,30 +247,29 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
   Future<void> _selectTime({required bool isStart}) async {
     HapticFeedback.selectionClick();
     final current = isStart ? _startTime : _endTime;
+    final initialDt = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      current.hour,
+      current.minute,
+    );
 
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: current,
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData(
-            colorScheme: ColorScheme.dark(
-              primary: widget.p.accent,
-              surface: widget.p.surface2,
-              onSurface: widget.p.text,
-            ),
-          ),
-          child: child!,
-        );
-      },
+    final picked = await showCupertinoDatePickerSheet(
+      context,
+      p: widget.p,
+      title: isStart ? 'Select Start Time' : 'Select End Time',
+      mode: CupertinoDatePickerMode.time,
+      initialDateTime: initialDt,
     );
 
     if (picked != null && mounted) {
       setState(() {
+        final newTime = TimeOfDay(hour: picked.hour, minute: picked.minute);
         if (isStart) {
-          _startTime = picked;
+          _startTime = newTime;
         } else {
-          _endTime = picked;
+          _endTime = newTime;
         }
         _errorMessage = null;
       });
@@ -357,7 +470,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.chevron_right_rounded, size: 18, color: p.text3),
+                  Icon(CupertinoIcons.chevron_right, size: 14, color: p.text3),
                 ],
               ),
             ),
@@ -397,7 +510,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _startTime.format(context),
+                          _formatTimeOfDay(_startTime),
                           style: TextStyle(
                             color: p.text,
                             fontSize: 15,
@@ -440,7 +553,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _endTime.format(context),
+                            _formatTimeOfDay(_endTime),
                             style: TextStyle(
                               color: p.text,
                               fontSize: 15,
@@ -492,30 +605,19 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
             ),
           ),
           const SizedBox(height: spacing8),
-          TextField(
+          CupertinoTextField(
             controller: _noteController,
             focusNode: _focusNode,
             maxLines: 3,
             minLines: 2,
             style: TextStyle(color: p.text, fontSize: 14),
-            decoration: InputDecoration(
-              hintText: 'What happened during this period?',
-              hintStyle: TextStyle(color: p.text3, fontSize: 13.5),
-              filled: true,
-              fillColor: p.surface3,
-              contentPadding: const EdgeInsets.all(12),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: p.border.withValues(alpha: 0.6)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: p.border.withValues(alpha: 0.6)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: p.accent),
-              ),
+            placeholder: 'What happened during this period?',
+            placeholderStyle: TextStyle(color: p.text3, fontSize: 13.5),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: p.surface3,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
             ),
           ),
 
@@ -590,34 +692,48 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: p.text2,
-                    side: BorderSide(color: p.border),
+                child: PressableScale(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: p.surface3,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: p.text2,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: p.accent,
-                    foregroundColor: Colors.white,
+                child: PressableScale(
+                  onTap: _submit,
+                  child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: p.accent,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
-                  onPressed: _submit,
-                  child: const Text(
-                    'Save Log',
-                    style: TextStyle(fontWeight: FontWeight.w800),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Save Log',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ),
               ),
