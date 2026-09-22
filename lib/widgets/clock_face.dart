@@ -14,6 +14,7 @@ class LiveClockFace extends StatefulWidget {
     required this.highlightSeconds,
     this.use24HourFormat = true,
     this.sessionStart,
+    this.fontFamily = 'BebasNeue',
   });
 
   final Palette p;
@@ -23,6 +24,7 @@ class LiveClockFace extends StatefulWidget {
   final bool highlightSeconds;
   final bool use24HourFormat;
   final int? sessionStart;
+  final String fontFamily;
 
   @override
   State<LiveClockFace> createState() => _LiveClockFaceState();
@@ -77,6 +79,7 @@ class _LiveClockFaceState extends State<LiveClockFace> {
       highlightSeconds: widget.highlightSeconds,
       use24HourFormat: widget.use24HourFormat,
       sessionElapsed: sessionElapsed,
+      fontFamily: widget.fontFamily,
     );
   }
 }
@@ -93,6 +96,7 @@ class ClockFace extends StatefulWidget {
     required this.highlightSeconds,
     this.use24HourFormat = true,
     this.sessionElapsed,
+    this.fontFamily = 'BebasNeue',
   });
 
   final DateTime now;
@@ -104,6 +108,7 @@ class ClockFace extends StatefulWidget {
   final bool highlightSeconds;
   final bool use24HourFormat;
   final Duration? sessionElapsed;
+  final String fontFamily;
 
   @override
   State<ClockFace> createState() => _ClockFaceState();
@@ -190,6 +195,30 @@ class _ClockFaceState extends State<ClockFace> {
       minScaleFactor: 0.85,
       maxScaleFactor: 1.25,
     );
+    final isApple =
+        widget.fontFamily == 'Inter' || widget.fontFamily == 'SF Pro Display';
+    final clockFamily = widget.fontFamily;
+    final hmFontSize = isApple ? 106.0 : 144.0;
+    final hmFontWeight = isApple ? FontWeight.w800 : FontWeight.w400;
+    final hmLetterSpacing = isApple ? -2.5 : 1.0;
+
+    final secFontSize = isApple ? 42.0 : 52.0;
+    final secFontWeight = isApple ? FontWeight.w700 : FontWeight.w400;
+    final secLetterSpacing = isApple ? -1.0 : 0.5;
+
+    final periodFontSize = isApple ? 26.0 : 32.0;
+    final periodFontWeight = isApple ? FontWeight.w700 : FontWeight.w400;
+    final periodLetterSpacing = isApple ? -0.5 : 1.0;
+
+    final fallbacks = isApple
+        ? const ['Inter', 'SF Pro Display', 'Roboto', 'sans-serif']
+        : const [
+            'Roboto Condensed',
+            'sans-serif-condensed',
+            'Arial Narrow',
+            'sans-serif',
+          ];
+
     return MediaQuery(
       data: mediaQuery.copyWith(textScaler: clampedScaler),
       child: AnimatedScale(
@@ -206,17 +235,12 @@ class _ClockFaceState extends State<ClockFace> {
                 hm,
                 style: TextStyle(
                   color: clockColor,
-                  fontFamily: 'BebasNeue',
-                  fontFamilyFallback: const [
-                    'Roboto Condensed',
-                    'sans-serif-condensed',
-                    'Arial Narrow',
-                    'sans-serif',
-                  ],
-                  fontSize: 144,
-                  fontWeight: FontWeight.w400,
+                  fontFamily: clockFamily,
+                  fontFamilyFallback: fallbacks,
+                  fontSize: hmFontSize,
+                  fontWeight: hmFontWeight,
                   height: 1,
-                  letterSpacing: 1.0,
+                  letterSpacing: hmLetterSpacing,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -227,17 +251,12 @@ class _ClockFaceState extends State<ClockFace> {
                     color: _bright
                         ? actionColor.withValues(alpha: 0.75)
                         : secondsColor,
-                    fontFamily: 'BebasNeue',
-                    fontFamilyFallback: const [
-                      'Roboto Condensed',
-                      'sans-serif-condensed',
-                      'Arial Narrow',
-                      'sans-serif',
-                    ],
-                    fontSize: 52,
-                    fontWeight: FontWeight.w400,
+                    fontFamily: clockFamily,
+                    fontFamilyFallback: fallbacks,
+                    fontSize: secFontSize,
+                    fontWeight: secFontWeight,
                     height: 1,
-                    letterSpacing: 0.5,
+                    letterSpacing: secLetterSpacing,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
@@ -249,17 +268,12 @@ class _ClockFaceState extends State<ClockFace> {
                     color: _bright
                         ? actionColor.withValues(alpha: 0.75)
                         : secondsColor,
-                    fontFamily: 'BebasNeue',
-                    fontFamilyFallback: const [
-                      'Roboto Condensed',
-                      'sans-serif-condensed',
-                      'Arial Narrow',
-                      'sans-serif',
-                    ],
-                    fontSize: 32,
-                    fontWeight: FontWeight.w400,
+                    fontFamily: clockFamily,
+                    fontFamilyFallback: fallbacks,
+                    fontSize: periodFontSize,
+                    fontWeight: periodFontWeight,
                     height: 1,
-                    letterSpacing: 1.0,
+                    letterSpacing: periodLetterSpacing,
                   ),
                 ),
               ],

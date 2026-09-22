@@ -4,6 +4,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class DisplaySettingsPage extends StatelessWidget {
@@ -14,6 +15,8 @@ class DisplaySettingsPage extends StatelessWidget {
     required this.showSeconds,
     required this.highlightSeconds,
     this.use24HourFormat = true,
+    this.clockFont = 'BebasNeue',
+    this.onClockFontChanged,
     required this.buttonLabels,
     required this.showHistoryText,
     required this.largeControls,
@@ -42,6 +45,7 @@ class DisplaySettingsPage extends StatelessWidget {
   final bool showSeconds;
   final bool highlightSeconds;
   final bool use24HourFormat;
+  final String clockFont;
   final bool buttonLabels;
   final bool showHistoryText;
   final bool largeControls;
@@ -55,6 +59,7 @@ class DisplaySettingsPage extends StatelessWidget {
   final ValueChanged<bool> onShowSecondsChanged;
   final ValueChanged<bool> onHighlightSecondsChanged;
   final ValueChanged<bool>? onUse24HourFormatChanged;
+  final ValueChanged<String>? onClockFontChanged;
   final ValueChanged<String> onFeedback;
   final ValueChanged<bool> onButtonLabelsChanged;
   final ValueChanged<bool> onShowHistoryTextChanged;
@@ -171,6 +176,124 @@ class DisplaySettingsPage extends StatelessWidget {
           p: p,
           text: 'Configure the home screen clock and visual feedback.'
               .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Clock Typography',
+          showDividers: false,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        if (clockFont == 'BebasNeue') return;
+                        AppHaptics.select();
+                        onClockFontChanged?.call('BebasNeue');
+                      },
+                      child: Container(
+                        height: 76,
+                        decoration: BoxDecoration(
+                          color: clockFont == 'BebasNeue'
+                              ? p.surface3
+                              : p.surface2,
+                          borderRadius: BorderRadius.circular(20),
+                          border: clockFont == 'BebasNeue'
+                              ? Border.all(color: p.accent, width: 1.5)
+                              : Border.all(
+                                  color: p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '10:42',
+                              style: TextStyle(
+                                fontFamily: 'BebasNeue',
+                                fontSize: 26,
+                                color: clockFont == 'BebasNeue'
+                                    ? p.text
+                                    : p.text2,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Athletic (Bebas)'.localized(context),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: clockFont == 'BebasNeue'
+                                    ? p.text
+                                    : p.text3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        if (clockFont == 'Inter') return;
+                        AppHaptics.select();
+                        onClockFontChanged?.call('Inter');
+                      },
+                      child: Container(
+                        height: 76,
+                        decoration: BoxDecoration(
+                          color: clockFont == 'Inter' ? p.surface3 : p.surface2,
+                          borderRadius: BorderRadius.circular(20),
+                          border: clockFont == 'Inter'
+                              ? Border.all(color: p.accent, width: 1.5)
+                              : Border.all(
+                                  color: p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '10:42',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -1.2,
+                                color: clockFont == 'Inter' ? p.text : p.text2,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Apple Lockscreen'.localized(context),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: clockFont == 'Inter' ? p.text : p.text3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Choose between athletic condensed Bebas or Apple iOS lockscreen typography for the home clock.'
+                  .localized(context),
         ),
 
         SettingsGroup(

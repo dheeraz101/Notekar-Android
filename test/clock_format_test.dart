@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/clock_face.dart';
+import 'package:notekar/widgets/top_fade_blur.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -122,6 +123,67 @@ void main() {
       expect(find.text('12:05'), findsOneWidget);
       expect(find.text('.10'), findsNothing);
       expect(find.text('AM'), findsNothing);
+    });
+  });
+
+  group('Apple HIG Enhancements', () {
+    testWidgets(
+      'ClockFace respects fontFamily Inter for Apple Lockscreen style',
+      (tester) async {
+        final dt = DateTime(2026, 9, 15, 10, 42, 0);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ClockFace(
+                now: dt,
+                p: p,
+                pulseToken: 0,
+                pulseType: 'single',
+                minimal: false,
+                showSeconds: false,
+                highlightSeconds: false,
+                use24HourFormat: true,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+        );
+
+        final textFinder = find.text('10:42');
+        expect(textFinder, findsOneWidget);
+        final Text textWidget = tester.widget(textFinder);
+        expect(textWidget.style?.fontFamily, 'Inter');
+        expect(textWidget.style?.letterSpacing, -2.5);
+      },
+    );
+
+    testWidgets('TopFadeBlur renders with ShaderMask and Scrim when enabled', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Stack(children: [TopFadeBlur(p: p, enabled: true)]),
+          ),
+        ),
+      );
+
+      expect(find.byType(TopFadeBlur), findsOneWidget);
+    });
+
+    testWidgets('TopFadeBlur renders SizedBox.shrink when disabled', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Stack(children: [TopFadeBlur(p: p, enabled: false)]),
+          ),
+        ),
+      );
+
+      expect(find.byType(TopFadeBlur), findsOneWidget);
     });
   });
 }

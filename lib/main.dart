@@ -143,17 +143,59 @@ class NoteKarAppState extends State<NoteKarApp> {
       ),
       fontFamily: 'Inter',
       textTheme: TextTheme(
-        bodyLarge: TextStyle(
+        displayLarge: TextStyle(
           color: p.text,
-          fontVariations: const [FontVariation('wght', 400)],
+          fontSize: 34,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.8,
         ),
-        bodyMedium: TextStyle(
+        headlineLarge: TextStyle(
           color: p.text,
-          fontVariations: const [FontVariation('wght', 400)],
+          fontSize: 30,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.7,
+        ),
+        headlineMedium: TextStyle(
+          color: p.text,
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.4,
         ),
         titleLarge: TextStyle(
           color: p.text,
-          fontVariations: const [FontVariation('wght', 600)],
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.3,
+        ),
+        titleMedium: TextStyle(
+          color: p.text,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.2,
+        ),
+        bodyLarge: TextStyle(
+          color: p.text,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -0.15,
+        ),
+        bodyMedium: TextStyle(
+          color: p.text,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -0.1,
+        ),
+        labelMedium: TextStyle(
+          color: p.text2,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.0,
+        ),
+        labelSmall: TextStyle(
+          color: p.text3,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
         ),
       ),
       cupertinoOverrideTheme: CupertinoThemeData(
@@ -166,12 +208,14 @@ class NoteKarAppState extends State<NoteKarApp> {
           textStyle: TextStyle(
             fontFamily: 'Inter',
             color: p.text,
+            letterSpacing: -0.2,
             decoration: TextDecoration.none,
           ),
           actionTextStyle: TextStyle(
             fontFamily: 'Inter',
             color: p.accent,
             fontWeight: FontWeight.w600,
+            letterSpacing: -0.2,
             decoration: TextDecoration.none,
           ),
           dateTimePickerTextStyle: TextStyle(

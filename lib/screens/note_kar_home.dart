@@ -57,6 +57,7 @@ import 'package:notekar/widgets/home_pin_setup_overlay.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
+import 'package:notekar/widgets/top_fade_blur.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -117,6 +118,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _showSeconds = true;
   bool _highlightSeconds = true;
   bool _use24HourFormat = true;
+  String _clockFont = 'BebasNeue';
   bool _buttonLabels = true;
   bool _largeControls = false;
   bool _homeMenuPill = true;
@@ -569,6 +571,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _highlightSeconds = prefs.getBool('m-highlight-seconds') ?? true;
       _use24HourFormat = prefs.getBool('m-use-24-hour') ?? true;
       setGlobalUse24Hour(_use24HourFormat);
+      _clockFont = prefs.getString('m-clock-font') ?? 'BebasNeue';
       _buttonLabels = prefs.getBool('m-button-labels') ?? false;
       _largeControls = prefs.getBool('m-large-controls') ?? false;
       _homeMenuPill = prefs.getBool('m-home-menu-pill') ?? true;
@@ -2623,6 +2626,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         showSeconds: _showSeconds,
         highlightSeconds: _highlightSeconds,
         use24Hour: _use24HourFormat,
+        clockFont: _clockFont,
+        onClockFontChanged: (value) {
+          setState(() => _clockFont = value);
+          _saveSetting('m-clock-font', value);
+        },
         buttonLabels: _buttonLabels,
         largeControls: _largeControls,
         homeMenuPill: _homeMenuPill,
@@ -4531,6 +4539,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         highlightSeconds: _highlightSeconds,
                         use24HourFormat: _use24HourFormat,
                         sessionStart: _mode == 'two-way' ? _sessionStart : null,
+                        fontFamily: _clockFont,
                       ),
                       if (_startupComplete &&
                           _entries.isEmpty &&
@@ -4593,6 +4602,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 ],
               ),
             ),
+
+          // Progressive Frosted Top Bar Blur (Apple HIG TopFadeBlur)
+          TopFadeBlur(
+            p: palette,
+            enabled:
+                _enableTranslucency &&
+                AdaptiveEngine().supportsBlur &&
+                !_reduceMotion,
+          ),
 
           // Dynamic Header Capsule (Dynamic Island-inspired)
           Positioned(

@@ -84,6 +84,8 @@ class SettingsDialog extends StatefulWidget {
     required this.showSeconds,
     required this.highlightSeconds,
     this.use24Hour = true,
+    this.clockFont = 'BebasNeue',
+    this.onClockFontChanged,
     required this.buttonLabels,
     required this.largeControls,
     required this.homeMenuPill,
@@ -243,6 +245,8 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<bool> onShowSeconds;
   final ValueChanged<bool> onHighlightSeconds;
   final ValueChanged<bool>? onUse24Hour;
+  final String clockFont;
+  final ValueChanged<String>? onClockFontChanged;
   final ValueChanged<bool> onButtonLabels;
   final ValueChanged<bool> onLargeControls;
   final ValueChanged<bool> onHomeMenuPill;
@@ -307,6 +311,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool showSeconds;
   late bool highlightSeconds;
   late bool use24Hour;
+  late String clockFont;
   late bool buttonLabels;
   late bool largeControls;
   late bool homeMenuPill;
@@ -1135,6 +1140,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     showSeconds = widget.showSeconds;
     highlightSeconds = widget.highlightSeconds;
     use24Hour = widget.use24Hour;
+    clockFont = widget.clockFont;
     buttonLabels = widget.buttonLabels;
     largeControls = widget.largeControls;
     homeMenuPill = widget.homeMenuPill;
@@ -4803,6 +4809,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               showSeconds: showSeconds,
                               highlightSeconds: highlightSeconds,
                               use24HourFormat: use24Hour,
+                              clockFont: clockFont,
                               buttonLabels: buttonLabels,
                               showHistoryText: showHistoryText,
                               largeControls: largeControls,
@@ -4826,6 +4833,10 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onUse24HourFormatChanged: (val) {
                                 setState(() => use24Hour = val);
                                 widget.onUse24Hour?.call(val);
+                              },
+                              onClockFontChanged: (val) {
+                                setState(() => clockFont = val);
+                                widget.onClockFontChanged?.call(val);
                               },
                               onFeedback: widget.onFeedback,
                               onButtonLabelsChanged: (val) {

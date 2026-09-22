@@ -81,9 +81,11 @@ Palette paletteFor(
   if (theme == 'light') {
     return Palette(
       name: 'light',
-      bg: const Color(0xFFF2F2F7), // Official iOS Inset Grouped Background
+      bg: const Color(0xFFF2F2F7),
+      // Official iOS Inset Grouped Background
       surface: const Color(0xFFF2F2F7),
-      surface2: const Color(0xFFFFFFFF), // Official iOS Card color
+      surface2: const Color(0xFFFFFFFF),
+      // Official iOS Card color
       surface3: const Color(0xFFE5E5EA),
       border: highContrast ? const Color(0xFFB8B8B8) : const Color(0xFFE4E4E4),
       text: const Color(0xFF000000),
@@ -144,27 +146,30 @@ Palette paletteFor(
   final amoled = theme == 'amoled';
   return Palette(
     name: theme,
-    bg: amoled ? Colors.black : const Color(0xFF121212),
-    surface: amoled ? Colors.black : const Color(0xFF121212),
-    surface2: amoled ? const Color(0xFF0A0A0A) : const Color(0xFF1C1C1E),
-    surface3: amoled ? const Color(0xFF1C1C1E) : const Color(0xFF2C2C2E),
+    // Apple Dark: Pure OLED Black background creates luminous contrast for glass surfaces
+    bg: amoled ? Colors.black : const Color(0xFF000000),
+    surface: amoled ? Colors.black : const Color(0xFF000000),
+    // Apple Secondary Grouped Background: #1C1C1E
+    surface2: amoled ? const Color(0xFF0A0A0C) : const Color(0xFF1C1C1E),
+    // Apple Tertiary Grouped Background: #2C2C2E
+    surface3: amoled ? const Color(0xFF18181A) : const Color(0xFF2C2C2E),
+    // Apple Hairline Separator: #2C2C2E / #38383A
     border: amoled
-        ? (highContrast ? const Color(0xFF444444) : const Color(0xFF1F1F1F))
-        : (highContrast ? const Color(0xFF777777) : const Color(0xFF343434)),
+        ? (highContrast ? const Color(0xFF555555) : const Color(0xFF202022))
+        : (highContrast ? const Color(0xFF777777) : const Color(0xFF2C2C2E)),
     text: const Color(0xFFFFFFFF),
-    text2: highContrast
-        ? const Color(0xFFE5E5E5)
-        : const Color(0xFFEBEBF5).withValues(alpha: 0.6),
-    text3: highContrast
-        ? const Color(0xFFBDBDBD)
-        : const Color(0xFFEBEBF5).withValues(alpha: 0.3),
+    // Apple Secondary Label: #8E8E93
+    text2: highContrast ? const Color(0xFFE5E5E5) : const Color(0xFF8E8E93),
+    // Apple Tertiary Label: #636366
+    text3: highContrast ? const Color(0xFFBDBDBD) : const Color(0xFF636366),
     clock: amoled
-        ? (highContrast ? const Color(0xFF636366) : const Color(0xFF3A3A3C))
-        : (highContrast ? const Color(0xFF7C7C80) : const Color(0xFF48484A)),
+        ? (highContrast ? const Color(0xFF8E8E93) : const Color(0xFF48484A))
+        : (highContrast ? const Color(0xFF98989D) : const Color(0xFF5A5A5E)),
     accent: accent,
     green: amoled ? const Color(0xFF30D158) : const Color(0xFF34C759),
     orange: amoled ? const Color(0xFFFF9F0A) : const Color(0xFFFF9500),
-    red: amoled ? const Color(0xFFFF453A) : const Color(0xFFFF3B30),
+    red: amoled ? const Color(0xFFFF453A) : const Color(0xFFFA2D48),
+    // Apple Music Accent Red
     blue: amoled ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
   );
 }

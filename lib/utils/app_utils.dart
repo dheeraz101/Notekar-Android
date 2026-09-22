@@ -74,6 +74,7 @@ const termsUrl = 'https://notekarapp.vercel.app/terms.html';
 const githubRepo = 'https://github.com/dheeraz101/Notekar-Android';
 
 class AppHaptics {
+  // Legacy methods preserved for complete backward compatibility
   static void light() => HapticFeedback.lightImpact();
 
   static void medium() => HapticFeedback.mediumImpact();
@@ -83,6 +84,41 @@ class AppHaptics {
   static void heavyImpact() => HapticFeedback.heavyImpact();
 
   static void selection() => HapticFeedback.selectionClick();
+
+  // Apple HIG & BitChord Intent-Based Haptic Rhythms (all patterns <= 65ms)
+
+  /// The lightest single beat, for drags crossing tab boundaries or slider scrubbing.
+  static void tick() => HapticFeedback.selectionClick();
+
+  /// A plain button press with no state behind it: More, Back, Action.
+  static void tap() => HapticFeedback.lightImpact();
+
+  /// A discrete choice landing: a tab, a filter pill, the end of a scrub.
+  static void select() => HapticFeedback.selectionClick();
+
+  /// Switching something on: a light lead-in rising into a crisp beat.
+  static void toggleOn() {
+    HapticFeedback.lightImpact();
+    Future.delayed(const Duration(milliseconds: 35), () {
+      HapticFeedback.selectionClick();
+    });
+  }
+
+  /// Switching something off: a crisp beat falling into subtle release.
+  static void toggleOff() {
+    HapticFeedback.selectionClick();
+    Future.delayed(const Duration(milliseconds: 30), () {
+      HapticFeedback.lightImpact();
+    });
+  }
+
+  /// Successful save, milestone or completion: confident double-tap.
+  static void confirm() {
+    HapticFeedback.mediumImpact();
+    Future.delayed(const Duration(milliseconds: 55), () {
+      HapticFeedback.lightImpact();
+    });
+  }
 }
 
 const githubIssues = 'https://github.com/dheeraz101/Notekar-Android/issues';

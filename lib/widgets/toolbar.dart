@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -84,13 +85,29 @@ class Toolbar extends StatelessWidget {
           ),
         ),
       );
+      final content = showBackgroundPill
+          ? (blur
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                      child: DecoratedBox(
+                        decoration: _bottomNavDecoration(p, blur),
+                        child: labeledRow,
+                      ),
+                    ),
+                  )
+                : DecoratedBox(
+                    decoration: _bottomNavDecoration(p, blur),
+                    child: labeledRow,
+                  ))
+          : labeledRow;
+
       return Center(
-        child: showBackgroundPill
-            ? DecoratedBox(
-                decoration: _bottomNavDecoration(p, blur),
-                child: labeledRow,
-              )
-            : labeledRow,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: content,
+        ),
       );
     }
     final iconRow = Padding(
@@ -152,6 +169,7 @@ class Toolbar extends StatelessWidget {
                               color: p.text,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
+                              letterSpacing: -0.2,
                             ),
                           ),
                           const SizedBox(width: 4),
@@ -197,34 +215,63 @@ class Toolbar extends StatelessWidget {
         ],
       ),
     );
+
+    final content = showBackgroundPill
+        ? (blur
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                    child: DecoratedBox(
+                      decoration: _bottomNavDecoration(p, blur),
+                      child: iconRow,
+                    ),
+                  ),
+                )
+              : DecoratedBox(
+                  decoration: _bottomNavDecoration(p, blur),
+                  child: iconRow,
+                ))
+        : iconRow;
+
     return Center(
-      child: showBackgroundPill
-          ? DecoratedBox(
-              decoration: _bottomNavDecoration(p, blur),
-              child: iconRow,
-            )
-          : iconRow,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: content,
+      ),
     );
   }
 }
 
 BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
-  final surfaceColor = p.name == 'light'
-      ? const Color(0xFFF2F2F7)
-      : p.surface.withValues(alpha: p.name == 'amoled' ? 0.96 : 0.94);
+  final isLight = p.name == 'light';
+  final isAmoled = p.name == 'amoled';
+
+  final surfaceColor = isLight
+      ? const Color(0xFFFFFFFF).withValues(alpha: blur ? 0.72 : 0.95)
+      : (isAmoled
+            ? const Color(0xFF000000).withValues(alpha: blur ? 0.85 : 0.98)
+            : const Color(0xFF1C1C1E).withValues(alpha: blur ? 0.70 : 0.94));
+
+  final topRimColor = isLight
+      ? Colors.white.withValues(alpha: 0.65)
+      : Colors.white.withValues(alpha: isAmoled ? 0.18 : 0.24);
+
   return BoxDecoration(
-    color: blur ? surfaceColor.withValues(alpha: 0.65) : surfaceColor,
+    color: surfaceColor,
     borderRadius: BorderRadius.circular(999),
-    border: Border.all(color: p.border, width: p.name == 'amoled' ? 0.8 : 1.0),
-    boxShadow: (p.name == 'amoled' || blur)
+    border: Border.all(
+      color: blur ? topRimColor : p.border.withValues(alpha: 0.6),
+      width: 0.6,
+    ),
+    boxShadow: (isAmoled && !blur)
         ? null
         : [
             BoxShadow(
-              color: Colors.black.withValues(
-                alpha: p.name == 'light' ? 0.08 : 0.20,
-              ),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: isLight ? 0.08 : 0.35),
+              blurRadius: blur ? 28 : 18,
+              spreadRadius: blur ? -3 : -1,
+              offset: const Offset(0, 8),
             ),
           ],
   );
