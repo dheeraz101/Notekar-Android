@@ -158,19 +158,20 @@ void main() {
       },
     );
 
-    testWidgets('TopFadeBlur renders with ShaderMask and Scrim when enabled', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Stack(children: [TopFadeBlur(p: p, enabled: true)]),
+    testWidgets(
+      'TopFadeBlur renders with safe ClipRect and Scrim when enabled',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Stack(children: [TopFadeBlur(p: p, enabled: true)]),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(TopFadeBlur), findsOneWidget);
-    });
+        expect(find.byType(TopFadeBlur), findsOneWidget);
+      },
+    );
 
     testWidgets('TopFadeBlur renders SizedBox.shrink when disabled', (
       tester,

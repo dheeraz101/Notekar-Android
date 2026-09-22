@@ -8,12 +8,15 @@ import 'package:notekar/models/palette.dart';
 /// Rather than an abrupt rectangular header or hard line, this creates
 /// a smooth frosted glass ramp where content dissolves gracefully as it
 /// scrolls underneath the status bar.
+///
+/// Engineered with strict hardware boundary safety (`ClipRect`) to prevent
+/// Vulkan/Impeller framebuffer crashes and GPU green-screen artifacts on Android.
 class TopFadeBlur extends StatelessWidget {
   const TopFadeBlur({
     super.key,
     required this.p,
     this.fadeHeight = 84.0,
-    this.blurSigma = 24.0,
+    this.blurSigma = 20.0,
     this.enabled = true,
   });
 
@@ -29,63 +32,31 @@ class TopFadeBlur extends StatelessWidget {
     final statusBarHeight = MediaQuery.paddingOf(context).top;
     final totalHeight = statusBarHeight + fadeHeight;
     final isLight = p.name == 'light';
-
     final scrimBase = isLight ? Colors.white : Colors.black;
 
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      height: totalHeight,
-      child: IgnorePointer(
-        child: Stack(
-          children: [
-            // Progressive blur layer: Masked with an ease-out gradient
-            // so blur strength transitions smoothly into nothingness
-            Positioned.fill(
-              child: ShaderMask(
-                shaderCallback: (bounds) {
-                  return const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      Colors.black87,
-                      Colors.black38,
-                      Colors.transparent,
-                    ],
-                    stops: [0.0, 0.45, 0.78, 1.0],
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.dstIn,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: blurSigma,
-                    sigmaY: blurSigma,
-                  ),
-                  child: const ColoredBox(color: Colors.transparent),
+    return IgnorePointer(
+      child: SizedBox(
+        height: totalHeight,
+        child: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    scrimBase.withValues(alpha: isLight ? 0.72 : 0.65),
+                    scrimBase.withValues(alpha: isLight ? 0.38 : 0.30),
+                    scrimBase.withValues(alpha: isLight ? 0.10 : 0.06),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.42, 0.78, 1.0],
                 ),
               ),
+              child: const SizedBox.expand(),
             ),
-            // Readability scrim: A non-linear gradient protecting status bar glyphs
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      scrimBase.withValues(alpha: isLight ? 0.65 : 0.55),
-                      scrimBase.withValues(alpha: isLight ? 0.35 : 0.28),
-                      scrimBase.withValues(alpha: isLight ? 0.08 : 0.06),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.40, 0.75, 1.0],
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

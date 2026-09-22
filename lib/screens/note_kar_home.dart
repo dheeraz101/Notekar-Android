@@ -4604,13 +4604,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ),
 
           // Progressive Frosted Top Bar Blur (Apple HIG TopFadeBlur)
-          TopFadeBlur(
-            p: palette,
-            enabled:
-                _enableTranslucency &&
-                AdaptiveEngine().supportsBlur &&
-                !_reduceMotion,
-          ),
+          if (_enableTranslucency &&
+              AdaptiveEngine().supportsBlur &&
+              !_reduceMotion)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: TopFadeBlur(p: palette),
+            ),
 
           // Dynamic Header Capsule (Dynamic Island-inspired)
           Positioned(

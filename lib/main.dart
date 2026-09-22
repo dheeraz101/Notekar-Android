@@ -12,8 +12,61 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+void setupErrorHandling() {
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('NoteKar Framework Error: ${details.exceptionAsString()}');
+  };
+
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Material(
+      color: const Color(0xFF000000),
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: Color(0xFFFA2D48),
+                  size: 44,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Rendering Error Recovered',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  details.exceptionAsString(),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFF8E8E93),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  };
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  setupErrorHandling();
 
   final sharedPrefsFuture = SharedPreferences.getInstance();
   final hivePreloadFuture = _initHivePreload();
