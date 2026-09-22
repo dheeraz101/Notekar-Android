@@ -163,11 +163,21 @@ class NoteKarAppState extends State<NoteKarApp> {
         barBackgroundColor: p.surface2,
         textTheme: CupertinoTextThemeData(
           primaryColor: p.accent,
-          textStyle: TextStyle(fontFamily: 'Inter', color: p.text),
+          textStyle: TextStyle(
+            fontFamily: 'Inter',
+            color: p.text,
+            decoration: TextDecoration.none,
+          ),
           actionTextStyle: TextStyle(
             fontFamily: 'Inter',
             color: p.accent,
             fontWeight: FontWeight.w600,
+            decoration: TextDecoration.none,
+          ),
+          dateTimePickerTextStyle: TextStyle(
+            fontFamily: 'Inter',
+            color: p.text,
+            decoration: TextDecoration.none,
           ),
         ),
       ),

@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
+import 'package:notekar/dialogs/settings/modes_categories_settings_page.dart';
 import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
+import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -348,5 +350,205 @@ void main() {
       );
       await tester.pump();
     });
+  });
+
+  group('Manual Entry & Timeline Pairing Bug Fixes', () {
+    test(
+      'buildTimelineDaySections handles simultaneous in and out timestamps cleanly without creating zombie live session',
+      () {
+        final now = DateTime.now();
+        final ms = now.millisecondsSinceEpoch;
+        final day = dateKey(now);
+
+        final entries = [
+          Moment(
+            id: 1,
+            type: 'in',
+            timestamp: ms,
+            note: 'Focus #Work',
+            date: day,
+            category: 'Work',
+          ),
+          Moment(
+            id: 2,
+            type: 'out',
+            timestamp: ms,
+            note: '',
+            date: day,
+            category: 'Work',
+          ),
+        ];
+
+        final sections = buildTimelineDaySections(entries);
+        expect(sections.length, 1);
+        final items = sections.first.items;
+        expect(items.length, 1);
+        expect(items.first, isA<TimelineSessionItem>());
+        final session = items.first as TimelineSessionItem;
+        expect(session.isOngoing, isFalse);
+        expect(session.endTimestamp, ms);
+        expect(session.momentIds, containsAll([1, 2]));
+      },
+    );
+
+    test(
+      'buildTimelineDaySections auto-closes past unclosed session when subsequent sessions exist',
+      () {
+        final now = DateTime.now();
+        final ms1 = now
+            .subtract(const Duration(hours: 3))
+            .millisecondsSinceEpoch;
+        final ms2 = now
+            .subtract(const Duration(hours: 2))
+            .millisecondsSinceEpoch;
+        final ms3 = now
+            .subtract(const Duration(hours: 1))
+            .millisecondsSinceEpoch;
+        final day = dateKey(now);
+
+        final entries = [
+          Moment(
+            id: 1,
+            type: 'in',
+            timestamp: ms1,
+            note: 'Old unclosed',
+            date: day,
+            category: 'Work',
+          ),
+          Moment(
+            id: 2,
+            type: 'in',
+            timestamp: ms2,
+            note: 'New session',
+            date: day,
+            category: 'Deep Focus',
+          ),
+          Moment(
+            id: 3,
+            type: 'out',
+            timestamp: ms3,
+            note: '',
+            date: day,
+            category: 'Deep Focus',
+          ),
+        ];
+
+        final sections = buildTimelineDaySections(entries);
+        expect(sections.length, 1);
+        final items = sections.first.items;
+        expect(items.length, 2);
+
+        // Newest session is first (reverse chrono): started at ms2, closed at ms3
+        final newSession = items[0] as TimelineSessionItem;
+        expect(newSession.isOngoing, isFalse);
+        expect(newSession.endTimestamp, ms3);
+
+        // Oldest session is second: started at ms1, remains ongoing until ended explicitly
+        final oldSession = items[1] as TimelineSessionItem;
+        expect(oldSession.isOngoing, isTrue);
+        expect(oldSession.outMoment, isNull);
+      },
+    );
+
+    testWidgets(
+      'HistoryDialog triggers onEndLiveSession when End button tapped on live session',
+      (tester) async {
+        final now = DateTime.now();
+        final ms = now.millisecondsSinceEpoch;
+        final day = dateKey(now);
+
+        Moment? endedOutMoment;
+
+        final entries = [
+          Moment(
+            id: 1,
+            type: 'in',
+            timestamp: ms,
+            note: 'Current live session',
+            date: day,
+            category: 'Work',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: HistoryDialog(
+                p: testPalette,
+                entries: entries,
+                compactRows: false,
+                largeText: false,
+                minimalMomentOptions: false,
+                confirmDelete: false,
+                onDelete: (_) async {},
+                onRestore: (_) async {},
+                onEndLiveSession: (inMomentId, outEntry) async {
+                  endedOutMoment = outEntry;
+                },
+                onUpdateNote: (_, _) async {},
+                onDuration: (_, _) {},
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final endButton = find.text('End');
+        expect(endButton, findsOneWidget);
+
+        await tester.tap(endButton);
+        await tester.pumpAndSettle();
+
+        expect(endedOutMoment, isNotNull);
+        expect(endedOutMoment!.type, 'out');
+        expect(endedOutMoment!.category, 'Work');
+      },
+    );
+  });
+
+  group('Mode Color Customization in Settings', () {
+    testWidgets(
+      'ModeDetailSettingsPage renders Apple HIG colors and allows changing color',
+      (tester) async {
+        bool changedNotified = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ModeDetailSettingsPage(
+                  p: testPalette,
+                  category: 'Work',
+                  entries: const [],
+                  onCategoriesChanged: () => changedNotified = true,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('MODE COLOR'), findsOneWidget);
+        expect(find.text('CATEGORY TIMELINE'), findsOneWidget);
+
+        // Tap Indigo swatch (#5856D6)
+        final indigoSwatch = find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.decoration is BoxDecoration &&
+              (w.decoration as BoxDecoration).color ==
+                  CategoryService.appleHigColors[1],
+        );
+        expect(indigoSwatch, findsOneWidget);
+        await tester.tap(indigoSwatch);
+        await tester.pumpAndSettle();
+
+        expect(changedNotified, isTrue);
+        expect(
+          CategoryService().getCategoryColor('Work'),
+          CategoryService.appleHigColors[1],
+        );
+      },
+    );
   });
 }

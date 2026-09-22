@@ -396,6 +396,107 @@ class _ModesCategoriesSettingsPageState
     );
   }
 
+  Future<void> _showChangeColorDialog(String category) async {
+    HapticFeedback.selectionClick();
+    final currentMeta = getCategoryMeta(category, widget.p);
+    Color selectedColor = currentMeta.color;
+
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => CupertinoTheme(
+          data: CupertinoThemeData(
+            brightness: widget.p.name == 'light'
+                ? Brightness.light
+                : Brightness.dark,
+            primaryColor: selectedColor,
+          ),
+          child: CupertinoAlertDialog(
+            title: Text('Mode Color'.localized(ctx)),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Choose a color for "$category"'.localized(ctx),
+                    style: TextStyle(fontSize: 13, color: widget.p.text2),
+                  ),
+                  const SizedBox(height: 14),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (final col in CategoryService.appleHigColors) ...[
+                          GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setDialogState(() => selectedColor = col);
+                            },
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                color: col,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: selectedColor == col
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  width: 2.5,
+                                ),
+                                boxShadow: selectedColor == col
+                                    ? [
+                                        BoxShadow(
+                                          color: col.withValues(alpha: 0.5),
+                                          blurRadius: 6,
+                                          spreadRadius: 1,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: selectedColor == col
+                                  ? const Icon(
+                                      Icons.check_rounded,
+                                      size: 15,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: Text('Cancel'.localized(ctx)),
+                onPressed: () => Navigator.pop(ctx, false),
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Text('Save'.localized(ctx)),
+                onPressed: () => Navigator.pop(ctx, true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (changed == true) {
+      await _categoryService.setCategoryColor(category, selectedColor);
+      HapticFeedback.mediumImpact();
+      await _loadCategories();
+      widget.onCategoriesChanged?.call();
+    }
+  }
+
   Widget _buildCategoryRow({
     required String category,
     required Duration duration,
@@ -409,10 +510,33 @@ class _ModesCategoriesSettingsPageState
       color: meta.color,
       title: category,
       status: durStr,
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: widget.p.text3,
-        size: 18,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => _showChangeColorDialog(category),
+            child: Container(
+              width: 22,
+              height: 22,
+              margin: const EdgeInsets.only(right: 6),
+              decoration: BoxDecoration(
+                color: meta.color,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: meta.color.withValues(alpha: 0.4),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: widget.p.text3, size: 18),
+        ],
       ),
       onTap: () {
         HapticFeedback.selectionClick();
@@ -423,7 +547,7 @@ class _ModesCategoriesSettingsPageState
 }
 
 /// Dedicated Settings Page for an inspected Mode / Category.
-class ModeDetailSettingsPage extends StatelessWidget {
+class ModeDetailSettingsPage extends StatefulWidget {
   const ModeDetailSettingsPage({
     super.key,
     required this.p,
@@ -438,6 +562,27 @@ class ModeDetailSettingsPage extends StatelessWidget {
   final List<Moment> entries;
   final VoidCallback? onDelete;
   final VoidCallback? onCategoriesChanged;
+
+  @override
+  State<ModeDetailSettingsPage> createState() => _ModeDetailSettingsPageState();
+}
+
+class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
+  late Color _currentColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentColor = getCategoryMeta(widget.category, widget.p).color;
+  }
+
+  @override
+  void didUpdateWidget(covariant ModeDetailSettingsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.category != widget.category || oldWidget.p != widget.p) {
+      _currentColor = getCategoryMeta(widget.category, widget.p).color;
+    }
+  }
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -459,13 +604,15 @@ class ModeDetailSettingsPage extends StatelessWidget {
       context: context,
       builder: (ctx) => CupertinoTheme(
         data: CupertinoThemeData(
-          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
-          primaryColor: p.accent,
+          brightness: widget.p.name == 'light'
+              ? Brightness.light
+              : Brightness.dark,
+          primaryColor: widget.p.accent,
         ),
         child: CupertinoAlertDialog(
           title: Text('Delete Mode?'.localized(ctx)),
           content: Text(
-            'Are you sure you want to remove "$category"? Existing logged moments will retain their history.'
+            'Are you sure you want to remove "${widget.category}"? Existing logged moments will retain their history.'
                 .localized(ctx),
           ),
           actions: [
@@ -484,20 +631,22 @@ class ModeDetailSettingsPage extends StatelessWidget {
     );
 
     if (confirmed == true) {
-      final success = await CategoryService().deleteCategory(category);
+      final success = await CategoryService().deleteCategory(widget.category);
       if (success) {
-        onCategoriesChanged?.call();
-        onDelete?.call();
+        widget.onCategoriesChanged?.call();
+        widget.onDelete?.call();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final p = widget.p;
+    final category = widget.category;
     final meta = getCategoryMeta(category, p);
 
     // Build timeline sections filtered to this category
-    final allSections = buildTimelineDaySections(entries);
+    final allSections = buildTimelineDaySections(widget.entries);
     final List<TimelineDaySection> filteredSections = [];
 
     int categoryTotalMs = 0;
@@ -571,9 +720,9 @@ class ModeDetailSettingsPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: meta.color.withValues(alpha: 0.12),
+              color: _currentColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: meta.color.withValues(alpha: 0.35)),
+              border: Border.all(color: _currentColor.withValues(alpha: 0.35)),
             ),
             child: Row(
               children: [
@@ -581,10 +730,10 @@ class ModeDetailSettingsPage extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: meta.color.withValues(alpha: 0.2),
+                    color: _currentColor.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(meta.icon, color: meta.color, size: 24),
+                  child: Icon(meta.icon, color: _currentColor, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -617,6 +766,94 @@ class ModeDetailSettingsPage extends StatelessWidget {
 
           const SizedBox(height: 14),
 
+          // Apple HIG Color Palette Card
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'MODE COLOR'.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: _currentColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    for (final col in CategoryService.appleHigColors) ...[
+                      GestureDetector(
+                        onTap: () async {
+                          HapticFeedback.selectionClick();
+                          setState(() => _currentColor = col);
+                          await CategoryService().setCategoryColor(
+                            widget.category,
+                            col,
+                          );
+                          widget.onCategoriesChanged?.call();
+                        },
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: col,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _currentColor == col
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              width: 2.5,
+                            ),
+                            boxShadow: _currentColor == col
+                                ? [
+                                    BoxShadow(
+                                      color: col.withValues(alpha: 0.5),
+                                      blurRadius: 6,
+                                      spreadRadius: 1,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: _currentColor == col
+                              ? const Icon(
+                                  Icons.check_rounded,
+                                  size: 17,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
           // 3 Metric Stat Capsules
           Row(
             children: [
@@ -627,7 +864,7 @@ class ModeDetailSettingsPage extends StatelessWidget {
                     Duration(milliseconds: categoryTotalMs),
                   ),
                   icon: Icons.timer_outlined,
-                  color: meta.color,
+                  color: _currentColor,
                 ),
               ),
               const SizedBox(width: 8),
@@ -720,7 +957,7 @@ class ModeDetailSettingsPage extends StatelessWidget {
                   value: '${focusSharePct.toStringAsFixed(1)}%',
                   detail: 'of total conscious tracked duration',
                   icon: Icons.pie_chart_outline_rounded,
-                  color: meta.color,
+                  color: _currentColor,
                 ),
                 Divider(color: p.border.withValues(alpha: 0.4), height: 16),
                 _buildInsightRow(
@@ -787,6 +1024,7 @@ class ModeDetailSettingsPage extends StatelessWidget {
     required IconData icon,
     required Color color,
   }) {
+    final p = widget.p;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
@@ -835,6 +1073,7 @@ class ModeDetailSettingsPage extends StatelessWidget {
   }
 
   Widget _buildDaySectionCard(TimelineDaySection sec) {
+    final p = widget.p;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -946,6 +1185,7 @@ class ModeDetailSettingsPage extends StatelessWidget {
     required IconData icon,
     required Color color,
   }) {
+    final p = widget.p;
     return Row(
       children: [
         Container(

@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 
@@ -62,6 +63,6 @@ class Glass extends StatelessWidget {
       );
     }
 
-    return content;
+    return Material(type: MaterialType.transparency, child: content);
   }
 }

@@ -74,7 +74,7 @@ class TimelineSessionItem extends TimelineItem {
   /// Moment IDs associated with this session.
   List<int> get momentIds => [
     inMoment.id,
-    if (outMoment != null) outMoment!.id,
+    if (outMoment != null && outMoment!.id > 0) outMoment!.id,
   ];
 }
 
@@ -214,9 +214,16 @@ List<TimelineDaySection> buildTimelineDaySections(
 }) {
   if (entries.isEmpty) return [];
 
-  // 1. Sort all moments chronologically ascending (earliest to latest) to pair sessions globally
+  // 1. Sort all moments chronologically ascending (earliest to latest) to pair sessions globally.
+  // When timestamps match exactly, 'in' MUST precede 'out' so sessions pair correctly.
   final chronoSorted = List<Moment>.from(entries)
-    ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    ..sort((a, b) {
+      final cmp = a.timestamp.compareTo(b.timestamp);
+      if (cmp != 0) return cmp;
+      if (a.type == 'in' && b.type != 'in') return -1;
+      if (b.type == 'in' && a.type != 'in') return 1;
+      return a.id.compareTo(b.id);
+    });
 
   final List<TimelineItem> allItems = [];
   final Set<int> consumedOutIds = {};
@@ -239,8 +246,12 @@ List<TimelineDaySection> buildTimelineDaySections(
         }
       }
 
-      final session = TimelineSessionItem(inMoment: m, outMoment: matchedOut);
-      allItems.add(session);
+      if (matchedOut != null) {
+        final session = TimelineSessionItem(inMoment: m, outMoment: matchedOut);
+        allItems.add(session);
+      } else {
+        allItems.add(TimelineSessionItem(inMoment: m, outMoment: null));
+      }
     } else if (m.type == 'out') {
       allItems.add(TimelineSingleItem(moment: m));
     } else {

@@ -42,6 +42,7 @@ class HistoryDialog extends StatefulWidget {
     this.onOpenSearchNotes,
     this.onOpenManualEntry,
     this.onClaimRest,
+    this.onEndLiveSession,
     this.blur = false,
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
@@ -66,6 +67,8 @@ class HistoryDialog extends StatefulWidget {
   })?
   onOpenManualEntry;
   final Future<void> Function(DateTime start, DateTime end)? onClaimRest;
+  final Future<void> Function(int inMomentId, Moment outEntry)?
+  onEndLiveSession;
   final bool blur;
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
@@ -1393,7 +1396,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
     final int effectiveTimestamp;
     if (laterSessionMoments.isNotEmpty) {
-      final nextSessionStart = laterSessionMoments.first.timestamp;
+      final nextMoment = laterSessionMoments.first;
+      // If the immediate next moment is already an unconsumed 'out', avoid creating duplicates
+      if (nextMoment.type == 'out') {
+        _rebuildMemoizedLists();
+        _showNotice('Session ended'.localized(context));
+        return;
+      }
+      final nextSessionStart = nextMoment.timestamp;
       final diff = nextSessionStart - session.startTimestamp;
       if (diff > 2000) {
         effectiveTimestamp = nextSessionStart - 1000;
@@ -1418,6 +1428,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       type: 'out',
       date: dateKey(DateTime.fromMillisecondsSinceEpoch(effectiveTimestamp)),
       note: '',
+      category: session.category,
     );
     setState(() {
       _entries = [outEntry, ..._entries]
@@ -1426,7 +1437,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _rebuildMemoizedLists();
     });
     _showNotice('Session ended'.localized(context));
-    await widget.onRestore(outEntry);
+    if (widget.onEndLiveSession != null) {
+      await widget.onEndLiveSession!(session.inMoment.id, outEntry);
+    } else {
+      await widget.onRestore(outEntry);
+    }
   }
 
   void _restoreRemovedEntries(List<Moment> moments) {

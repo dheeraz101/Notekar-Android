@@ -877,10 +877,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             : Brightness.dark,
                         primaryColor: p.accent,
                         textTheme: CupertinoTextThemeData(
+                          textStyle: TextStyle(
+                            color: p.text,
+                            decoration: TextDecoration.none,
+                          ),
                           dateTimePickerTextStyle: TextStyle(
                             color: p.text,
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),
@@ -994,10 +999,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             : Brightness.dark,
                         primaryColor: p.accent,
                         textTheme: CupertinoTextThemeData(
+                          textStyle: TextStyle(
+                            color: p.text,
+                            decoration: TextDecoration.none,
+                          ),
                           dateTimePickerTextStyle: TextStyle(
                             color: p.text,
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),

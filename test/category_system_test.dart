@@ -334,6 +334,7 @@ void main() {
         expect(find.byType(SettingsBetaNote), findsNothing);
 
         // Tap Delete Mode button
+        await tester.ensureVisible(find.text('Delete Mode'));
         await tester.tap(find.text('Delete Mode'));
         await tester.pumpAndSettle();
 
