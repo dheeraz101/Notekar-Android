@@ -551,4 +551,58 @@ void main() {
       },
     );
   });
+
+  group('New Apple HIG Refinements Tests', () {
+    test('DynamicHeaderCapsule defines Apple spring curve', () {
+      expect(DynamicHeaderCapsule.appleSpringCurve, isA<Cubic>());
+      final curve = DynamicHeaderCapsule.appleSpringCurve as Cubic;
+      expect(curve.a, 0.2);
+      expect(curve.b, 0.9);
+      expect(curve.c, 0.3);
+      expect(curve.d, 1.0);
+    });
+
+    testWidgets('HomeClockComplication renders live radial ambient glow', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HomeClockComplication(
+              p: testPalette,
+              style: 'intentionality',
+              entries: const [],
+              streak: 3,
+              isLiveSession: true,
+              liveSessionColor: const Color(0xFF007AFF),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check for presence of radial gradient ambient glow container
+      final ambientGlow = find.byWidgetPredicate((w) {
+        if (w is AnimatedContainer && w.decoration is BoxDecoration) {
+          final box = w.decoration as BoxDecoration;
+          return box.gradient is RadialGradient;
+        }
+        return false;
+      });
+      expect(ambientGlow, findsOneWidget);
+    });
+
+    test(
+      'CategoryService recognizes Rest and Recovery with Apple Teal color',
+      () {
+        final restMeta = getCategoryMeta('Rest', testPalette);
+        expect(restMeta.name, 'Rest');
+        expect(restMeta.color, const Color(0xFF30B0C7));
+
+        final recoveryMeta = getCategoryMeta('Recovery', testPalette);
+        expect(recoveryMeta.name, 'Recovery');
+        expect(recoveryMeta.color, const Color(0xFF30B0C7));
+      },
+    );
+  });
 }

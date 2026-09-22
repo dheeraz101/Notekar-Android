@@ -1073,7 +1073,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           );
                                         },
                                         onClaimRest: widget.onClaimRest != null
-                                            ? () => widget.onClaimRest!(
+                                            ? () => _claimRest(
                                                 DateTime.fromMillisecondsSinceEpoch(
                                                   gap.startTimestamp,
                                                 ),
@@ -1377,6 +1377,46 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
     for (final id in ids) {
       unawaited(widget.onDelete(id));
+    }
+  }
+
+  Future<void> _claimRest(DateTime start, DateTime end) async {
+    NotekarHaptics.success('standard');
+    final maxId = _entries.isEmpty
+        ? 0
+        : _entries.map((e) => e.id).reduce(math.max);
+    final inMoment = Moment(
+      id: math.max(maxId + 1, start.millisecondsSinceEpoch),
+      timestamp: start.millisecondsSinceEpoch,
+      type: 'in',
+      date: dateKey(start),
+      note: 'Rest & Recovery',
+      category: 'Rest',
+      tags: const ['rest'],
+    );
+    final outMoment = Moment(
+      id: math.max(maxId + 2, end.millisecondsSinceEpoch),
+      timestamp: end.millisecondsSinceEpoch,
+      type: 'out',
+      date: dateKey(end),
+      note: 'Rest & Recovery',
+      category: 'Rest',
+      tags: const ['rest'],
+    );
+    setState(() {
+      _entries = [outMoment, inMoment, ..._entries]
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _rebuildMemoizedLists();
+    });
+    _showNotice(
+      '🌿 Rest & Recovery accounted in Life Audit',
+      onUndo: () => _removeSession(
+        TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
+      ),
+    );
+    if (widget.onClaimRest != null) {
+      await widget.onClaimRest!(start, end);
     }
   }
 

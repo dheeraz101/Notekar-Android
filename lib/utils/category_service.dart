@@ -78,6 +78,12 @@ CategoryMeta getCategoryMeta(String categoryName, Palette p) {
       icon: Icons.repeat_rounded,
       color: const Color(0xFF30B0C7),
     );
+  } else if (lower == 'rest' || lower == 'recovery') {
+    return CategoryMeta(
+      name: clean,
+      icon: Icons.spa_rounded,
+      color: const Color(0xFF30B0C7),
+    );
   }
 
   const customColors = [

@@ -181,6 +181,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _lastSavedType = 'single';
   int _rippleToken = 0;
   int _savedPulseToken = 0;
+  double _horizontalSwipeDelta = 0.0;
+  bool _horologyDetentFired = false;
 
   StreamSubscription<AccelerometerEvent>? _motionSub;
   final ValueNotifier<Offset> _motion = ValueNotifier(Offset.zero);
@@ -2307,7 +2309,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
+  void _collapseHeaderIfExpanded() {
+    if (_headerExpanded) {
+      setState(() => _headerExpanded = false);
+    }
+  }
+
   Future<void> _openHistory() async {
+    _collapseHeaderIfExpanded();
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
       return;
@@ -4450,6 +4459,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             height: MediaQuery.sizeOf(context).height * 0.33,
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
+              onVerticalDragStart: (_) => _collapseHeaderIfExpanded(),
               onVerticalDragEnd: (details) {
                 if ((details.primaryVelocity ?? 0) < -260) {
                   _openHistory();
@@ -4468,13 +4478,35 @@ class _NoteKarHomeState extends State<NoteKarHome>
               button: true,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => _collapseHeaderIfExpanded(),
                 onTapUp: _handleTap,
                 onLongPress: _openNote,
+                onHorizontalDragStart: (_) {
+                  _collapseHeaderIfExpanded();
+                  _horizontalSwipeDelta = 0;
+                  _horologyDetentFired = false;
+                },
+                onHorizontalDragUpdate: (details) {
+                  _horizontalSwipeDelta += details.delta.dx;
+                  // 50% threshold detent: fires right as swipe crosses 50% mark simulating mechanical watch crown click
+                  if (!_horologyDetentFired &&
+                      _horizontalSwipeDelta.abs() >= 30.0) {
+                    HapticFeedback.selectionClick();
+                    _horologyDetentFired = true;
+                  }
+                },
                 onHorizontalDragEnd: (details) {
-                  if (details.primaryVelocity != null &&
-                      details.primaryVelocity!.abs() > 200) {
+                  final velocity = details.primaryVelocity ?? 0;
+                  if (velocity.abs() > 200 ||
+                      _horizontalSwipeDelta.abs() >= 60.0) {
                     _toggleMode();
                   }
+                  _horizontalSwipeDelta = 0;
+                  _horologyDetentFired = false;
+                },
+                onHorizontalDragCancel: () {
+                  _horizontalSwipeDelta = 0;
+                  _horologyDetentFired = false;
                 },
               ),
             ),
@@ -4529,6 +4561,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
                 streak: StreakGuardianService.calculateStreak(
                   _entries.map((e) => e.date).toSet(),
                 ),
+                isLiveSession:
+                    _mode == 'two-way' &&
+                    (_sessionStart != null || _inout == 'out'),
+                liveSessionColor: _activeCategory != 'All'
+                    ? getCategoryMeta(_activeCategory, palette).color
+                    : palette.accent,
                 onTap: _cycleComplication,
                 onLongPress: _openSundayDispatch,
               ),

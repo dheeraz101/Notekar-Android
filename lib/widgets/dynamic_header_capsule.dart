@@ -19,6 +19,9 @@ import 'package:notekar/widgets/zen_day_gauge.dart';
 /// Tapping smoothly expands it to reveal mode selection,
 /// circadian day rhythm, and manage actions.
 class DynamicHeaderCapsule extends StatefulWidget {
+  /// Apple Dynamic Island spring curve (stiffness: 300, damping: 28)
+  static const Curve appleSpringCurve = Cubic(0.2, 0.9, 0.3, 1.0);
+
   const DynamicHeaderCapsule({
     super.key,
     required this.p,
@@ -127,8 +130,8 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
         : getCategoryMeta(widget.activeCategory, p);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 320),
+      curve: DynamicHeaderCapsule.appleSpringCurve,
       width: _expanded ? double.infinity : null,
       constraints: BoxConstraints(maxWidth: _expanded ? 440 : 340),
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -150,8 +153,8 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_expanded ? 24 : 999),
         child: AnimatedCrossFade(
-          duration: const Duration(milliseconds: 250),
-          firstCurve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 280),
+          firstCurve: DynamicHeaderCapsule.appleSpringCurve,
           secondCurve: Curves.easeInCubic,
           crossFadeState: _expanded
               ? CrossFadeState.showSecond

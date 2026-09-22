@@ -21,6 +21,8 @@ class HomeClockComplication extends StatelessWidget {
     required this.style,
     required this.entries,
     required this.streak,
+    this.isLiveSession = false,
+    this.liveSessionColor,
     this.onTap,
     this.onLongPress,
   });
@@ -29,6 +31,8 @@ class HomeClockComplication extends StatelessWidget {
   final String style;
   final List<Moment> entries;
   final int streak;
+  final bool isLiveSession;
+  final Color? liveSessionColor;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
@@ -63,23 +67,50 @@ class HomeClockComplication extends StatelessWidget {
 
     return GestureDetector(
       onLongPress: onLongPress,
-      child: PressableScale(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap?.call();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-          decoration: BoxDecoration(
-            color: p.surface2.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: p.border.withValues(alpha: 0.18),
-              width: 0.5,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Live Dynamic Color Glow: 8% opacity radial ambient light behind complication when session is live
+          if (isLiveSession && liveSessionColor != null)
+            Positioned(
+              child: IgnorePointer(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  width: 220,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    gradient: RadialGradient(
+                      radius: 0.85,
+                      colors: [
+                        liveSessionColor!.withValues(alpha: 0.08),
+                        liveSessionColor!.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          PressableScale(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap?.call();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              decoration: BoxDecoration(
+                color: p.surface2.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: p.border.withValues(alpha: 0.18),
+                  width: 0.5,
+                ),
+              ),
+              child: content,
             ),
           ),
-          child: content,
-        ),
+        ],
       ),
     );
   }
