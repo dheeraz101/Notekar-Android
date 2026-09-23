@@ -1,0 +1,11 @@
+Update to 7.5.3 (build 26BR0923):
+- New: Apple HIG Dark Theme Harmony & monotonic gray surface layering (#1C1C1E / #2C2C2E / #3A3A3C)
+- New: Auto-collapsing dynamic header capsule on canvas touch and timeline scroll with 320ms spring physics
+- New: Swiss horology micro-tactile detent haptics on mode swipe threshold
+- New: One-tap "Rest" quick-claim on timeline gap cards to reclaim void time with undo
+- New: Live ambient radial glow behind complication capsule matching active mode color
+- New: Retrospective Single and Two-Way manual entry parity with inline custom mode creation
+- Fix: Pinned timeline filter header background dark mismatch and visible hairline borders
+- Fix: Eliminated yellow text underlines across all time pickers
+- Fix: Hardened GPU rendering pipeline against startup green screen glitches
+- All 201 automated unit and widget tests passing with 100% offline privacy

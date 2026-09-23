@@ -23,11 +23,73 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.2',
-    date: 'September 16, 2026',
-    edition: 'Plus Notes & Spatial Widgets',
+    version: '7.5.3',
+    date: 'September 23, 2026',
+    edition: 'Sensory Horology & Surface Harmony',
     badgeColor: Color(0xFFFF9F0A),
     innovations: [
+      (
+        title: 'Apple HIG Dark Surface Harmony',
+        category: 'DESIGN ARCHITECTURE',
+        headline: 'Monotonic Grays. Seamless Hairline Borders.',
+        desc:
+            'Harmonized dark theme across all modal sheets, cards, and dialogs. Pinned timeline filters now match modal sheets, and 0.6px Apple hairline separators prevent visual boundary clipping.',
+        icon: Icons.palette_rounded,
+        badgeColor: Color(0xFF0A84FF),
+        specs:
+            'Gray 6 (#1C1C1E) · Gray 5 (#2C2C2E) · Hairline Separators (#48484A)',
+      ),
+      (
+        title: 'Auto-Collapsing Capsule Pill',
+        category: 'DYNAMIC FLUIDITY',
+        headline: 'Spring Physics. Uninterrupted Canvas.',
+        desc:
+            'Engaging the clock canvas or scrolling the timeline automatically collapses the dynamic header capsule back to its resting 32px pill with soft 320ms Apple spring physics.',
+        icon: Icons.animation_rounded,
+        badgeColor: Color(0xFFFF9F0A),
+        specs: 'Spring Physics (300/28) · Auto-Collapse · Immersive Canvas',
+      ),
+      (
+        title: 'Swiss Horology Detent Haptics',
+        category: 'SENSORY PRECISION',
+        headline: 'Mechanical Detent. Tactile Feedback.',
+        desc:
+            'Horizontal swipes between Single and Two-Way logging modes trigger a micro-tactile detent click right as the swipe passes the 50% threshold, simulating a mechanical Swiss watch crown.',
+        icon: Icons.vibration_rounded,
+        badgeColor: Color(0xFF34C759),
+        specs: '50% Detent Threshold · Swiss Crown Feel · Tactile Selection',
+      ),
+      (
+        title: 'Timeline Gap Rest Quick-Claim',
+        category: 'EXISTENTIAL RECOVERY',
+        headline: 'Claim the Void. One-Tap Conscious Rest.',
+        desc:
+            'Timeline gaps of 15 minutes or longer now feature an inline one-tap "Rest" button, converting unaccounted void time into intentional restorative moments with instant undo support.',
+        icon: Icons.bedtime_rounded,
+        badgeColor: Color(0xFFAF52DE),
+        specs: '15m+ Gap Detection · One-Tap Recovery · Optimistic Morphing',
+      ),
+      (
+        title: 'Live Ambient Radial Glow',
+        category: 'SPATIAL OPTICS',
+        headline: '8% Ambient Aura. Category Chromatics.',
+        desc:
+            'A soft, diffused 8% radial glow radiates from behind the active complication pill, elegantly matching the color of the current category mode without cognitive distraction.',
+        icon: Icons.blur_on_rounded,
+        badgeColor: Color(0xFFFF2D55),
+        specs: 'Category Chromatics · 8% Radial Blur · Complication Backlight',
+      ),
+      (
+        title: 'Manual Entry & Session Parity',
+        category: 'SESSION RELIABILITY',
+        headline: 'Zero Underlines. Retrospective Parity.',
+        desc:
+            'Complete overhaul of retrospective single and two-way session recording with inline custom mode creation, end-button lifecycle fixes, and zero yellow underline artifacts on time pickers.',
+        icon: Icons.schedule_rounded,
+        badgeColor: Color(0xFF5856D6),
+        specs:
+            'Inline Mode Creation · Clean Cupertino Pickers · History Parity',
+      ),
       (
         title: 'Plus Notes & Journaling',
         category: 'NOTE ARCHITECTURE',
@@ -48,26 +110,6 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         icon: Icons.widgets_rounded,
         badgeColor: Color(0xFF34C759),
         specs: 'FrameLayout RemoteViews · Deep Linking · Zero-State Support',
-      ),
-      (
-        title: 'Pure 12H Clock & Tactile Haptics',
-        category: 'SENSORY PRECISION',
-        headline: 'Uncluttered Digits. Single Tactile Response.',
-        desc:
-            'Eliminated AM/PM text clutter on the home screen clock face while preserving explicit AM/PM tags across timeline history, paired with single-burst haptic clicks.',
-        icon: Icons.schedule_rounded,
-        badgeColor: Color(0xFF0A84FF),
-        specs: 'Pure 12H Digits · Single Haptic Pulse · Explicit Timeline Tags',
-      ),
-      (
-        title: 'Streamlined 5-Page Onboarding',
-        category: 'ONBOARDING EXPEDITION',
-        headline: 'Essential Focus. Consolidated Reliability.',
-        desc:
-            'Condensed the multi-page welcome flow into 5 high-impact pages, featuring a unified Permissions & System Reliability setup hub.',
-        icon: Icons.verified_user_rounded,
-        badgeColor: Color(0xFFAF52DE),
-        specs: '5-Page Tour · Consolidated Permissions · Battery & Updates Hub',
       ),
       (
         title: 'Life Audit & The Void',
@@ -122,60 +164,61 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     ],
     highlights: [
       (
-        title: 'Plus Notes & Journaling',
+        title: 'Apple HIG Dark Surface Harmony',
         desc:
-            'Unrestricted long-form canvas with dedicated Plus button, history editing parity, and customizable hashtags.',
-        icon: Icons.note_add_rounded,
-        tag: 'Notes',
-      ),
-      (
-        title: 'Home Screen Widgets Restored',
-        desc:
-            'Sobriety and Life Audit launcher widgets fixed with zero-state prompts, deep linking & crash immunity.',
-        icon: Icons.widgets_rounded,
-        tag: 'Widgets',
-      ),
-      (
-        title: 'Pure 12H Clock & Single Tactile Touch',
-        desc:
-            'Clean digits without AM/PM clutter on home clock face, paired with unified single-burst haptic clicks.',
-        icon: Icons.schedule_rounded,
-        tag: 'Interface',
-      ),
-      (
-        title: 'Condensed 5-Page Onboarding',
-        desc:
-            'Streamlined welcome sheet featuring a unified Permissions & System Reliability center.',
-        icon: Icons.verified_user_rounded,
-        tag: 'Experience',
-      ),
-      (
-        title: 'Universal Theme Harmony',
-        desc:
-            'Full Light, Dark, and AMOLED theme parity across all popups, pickers, and alerts.',
+            'Monotonic Gray surface hierarchy across modal sheets, cards, and controls with visible hairline borders.',
         icon: Icons.palette_rounded,
-        tag: 'Theming',
+        tag: 'Design',
       ),
       (
-        title: '120Hz Decoupled Motion',
+        title: 'Spring Capsule Collapse',
         desc:
-            'Silky high-refresh rendering, ergonomic touch safety zone, and 80/20 Search Notes.',
-        icon: Icons.speed_rounded,
-        tag: 'Performance',
+            'Auto-collapses header capsule on clock canvas touch or timeline scroll with 320ms spring physics.',
+        icon: Icons.animation_rounded,
+        tag: 'Interaction',
+      ),
+      (
+        title: 'Swiss Horology Detent Haptics',
+        desc:
+            'Tactile detent click when swiping between Single and Two-Way modes past the 50% threshold.',
+        icon: Icons.vibration_rounded,
+        tag: 'Sensory',
+      ),
+      (
+        title: 'Timeline Gap Rest Quick-Claim',
+        desc:
+            'Convert empty gaps ≥ 15m into conscious recovery moments with one-tap Rest button and undo.',
+        icon: Icons.bedtime_rounded,
+        tag: 'Life Ledger',
+      ),
+      (
+        title: 'Live Ambient Radial Glow',
+        desc:
+            'Soft 8% category-tinted ambient glow behind complication capsule without visual clutter.',
+        icon: Icons.blur_on_rounded,
+        tag: 'Optics',
+      ),
+      (
+        title: 'Manual Entry & History Parity',
+        desc:
+            'Full retrospective single and two-way session logging with inline mode creation and zero text underlines.',
+        icon: Icons.schedule_rounded,
+        tag: 'Reliability',
       ),
     ],
     items: [
-      '• Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free timekeeping.',
-      '+ Plus Notes: Dedicated long-form writing canvas with top-left Plus button and unrestricted character capacity',
-      '+ History Note Editing: Fixed note retrieval in timeline session cards with seamless editing for long entries',
-      '+ Customizable Hashtags: Long-press any quick tag in the note dialog to customize shortcuts for your workflow',
-      '+ Home Screen Widgets: Resolved RemoteViews layout inflation crash for Sobriety and Life Audit widgets',
-      '+ Widget Intelligence: Added graceful zero-states, compact sizing fixes, and direct settings deep-linking',
-      '+ Distraction-Free Clock: Pure 12-hour clock face digits with explicit AM/PM tags in History and Search Notes',
-      '+ Single Tactile Touch: Unified crisp single-burst haptic feedback across all buttons, eliminating double bursts',
-      '+ 5-Page Welcome Onboarding: Streamlined setup with consolidated Notifications, Battery, and Update permissions',
-      '+ Settings Update Center: Added "Rm -rf Cache" switch for instant installer cleanup with search indexing',
-      '* All 160 automated unit and widget test suites passing with zero lints and 100% offline security',
+      '• Harmonized dark surface hierarchy, Swiss horology haptics, and conscious rest quick-claim.',
+      '+ Dark Theme Harmony: Apple Secondary Grouped Background (#1C1C1E) for modal sheets and pinned timeline filter headers',
+      '+ Apple Surface Hierarchy: Monotonic layering from canvas (#000000) to sheets (#1C1C1E), cards (#2C2C2E), controls (#3A3A3C), and borders (#48484A)',
+      '+ Border Visibility: 0.6px Apple hairline separators on SettingsGroupCard, SettingsSearchBox, and timeline cards',
+      '+ Elevated Control Pills: Luminous fill and subtle ambient shadows for active segments in filters and dialogs',
+      '+ Auto-Collapsing Capsule: Smooth 320ms spring physics collapse to resting 32px pill on canvas touch or timeline scroll',
+      '+ Horology Detent Haptics: Tactile crown click at 50% swipe threshold between Single and Two-Way tracking modes',
+      '+ Rest Quick-Claim: One-tap button on gap cards ≥ 15m to reclaim void time as conscious restorative moments with undo',
+      '+ Complication Radial Glow: Soft 8% ambient light behind complication capsule matching active mode color',
+      '+ Retrospective Entry: Complete Single and Two-Way manual entry parity with inline custom mode creation and zero yellow underlines',
+      '+ Rendering Resilience: Hardened Android GPU pipeline and eliminated startup green screen anomalies',
+      '* All 201 automated unit and widget test suites passing with zero lints and 100% offline privacy',
     ],
   );
 

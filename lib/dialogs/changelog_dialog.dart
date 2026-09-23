@@ -27,52 +27,67 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.2',
-    date: 'September 16, 2026',
-    edition: 'Plus Notes & Spatial Widgets',
+    version: '7.5.3',
+    date: 'September 23, 2026',
+    edition: 'Sensory Horology & Surface Harmony',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'Plus Notes & Journaling',
+        title: 'Apple HIG Dark Surface Harmony',
         desc:
-            'Unrestricted long-form canvas with dedicated Plus button, history editing parity, and customizable hashtags.',
-        icon: Icons.note_add_rounded,
-        tag: 'Notes',
+            'Monotonic Gray surface hierarchy across modal sheets, cards, and controls with visible hairline borders.',
+        icon: Icons.palette_rounded,
+        tag: 'Design',
       ),
       (
-        title: 'Home Screen Widgets Restored',
+        title: 'Spring Capsule Collapse',
         desc:
-            'Sobriety and Life Audit launcher widgets fixed with zero-state prompts, deep linking & crash immunity.',
-        icon: Icons.widgets_rounded,
-        tag: 'Widgets',
+            'Auto-collapses header capsule on clock canvas touch or timeline scroll with 320ms spring physics.',
+        icon: Icons.animation_rounded,
+        tag: 'Interaction',
       ),
       (
-        title: 'Pure 12H Clock & Single Tactile Touch',
+        title: 'Swiss Horology Detent Haptics',
         desc:
-            'Clean digits without AM/PM clutter on home clock face, paired with unified single-burst haptic clicks.',
+            'Tactile detent click when swiping between Single and Two-Way modes past the 50% threshold.',
+        icon: Icons.vibration_rounded,
+        tag: 'Sensory',
+      ),
+      (
+        title: 'Timeline Gap Rest Quick-Claim',
+        desc:
+            'Convert empty gaps ≥ 15m into conscious recovery moments with one-tap Rest button and undo.',
+        icon: Icons.bedtime_rounded,
+        tag: 'Life Ledger',
+      ),
+      (
+        title: 'Live Ambient Radial Glow',
+        desc:
+            'Soft 8% category-tinted ambient glow behind complication capsule without visual clutter.',
+        icon: Icons.blur_on_rounded,
+        tag: 'Optics',
+      ),
+      (
+        title: 'Manual Entry & History Parity',
+        desc:
+            'Full retrospective single and two-way session logging with inline mode creation and zero text underlines.',
         icon: Icons.schedule_rounded,
-        tag: 'Interface',
-      ),
-      (
-        title: 'Condensed 5-Page Onboarding',
-        desc:
-            'Streamlined welcome sheet featuring a unified Permissions & System Reliability center.',
-        icon: Icons.verified_user_rounded,
-        tag: 'Experience',
+        tag: 'Reliability',
       ),
     ],
     items: [
-      '• Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free timekeeping.',
-      '+ Plus Notes: Dedicated long-form writing canvas with top-left Plus button and unrestricted character capacity',
-      '+ History Note Editing: Fixed note retrieval in timeline session cards with seamless editing for long entries',
-      '+ Customizable Hashtags: Long-press any quick tag in the note dialog to customize shortcuts for your workflow',
-      '+ Home Screen Widgets: Resolved RemoteViews layout inflation crash for Sobriety and Life Audit widgets',
-      '+ Widget Intelligence: Added graceful zero-states, compact sizing fixes, and direct settings deep-linking',
-      '+ Distraction-Free Clock: Pure 12-hour clock face digits with explicit AM/PM tags in History and Search Notes',
-      '+ Single Tactile Touch: Unified crisp single-burst haptic feedback across all buttons, eliminating double bursts',
-      '+ 5-Page Welcome Onboarding: Streamlined setup with consolidated Notifications, Battery, and Update permissions',
-      '+ Settings Update Center: Added "Rm -rf Cache" switch for instant installer cleanup with search indexing',
-      '* All 160 automated unit and widget test suites passing with zero lints and 100% offline security',
+      '• Harmonized dark surface hierarchy, Swiss horology haptics, and conscious rest quick-claim.',
+      '+ Dark Theme Harmony: Apple Secondary Grouped Background (#1C1C1E) for modal sheets and pinned timeline filter headers',
+      '+ Apple Surface Hierarchy: Monotonic layering from canvas (#000000) to sheets (#1C1C1E), cards (#2C2C2E), controls (#3A3A3C), and borders (#48484A)',
+      '+ Border Visibility: 0.6px Apple hairline separators on SettingsGroupCard, SettingsSearchBox, and timeline cards',
+      '+ Elevated Control Pills: Luminous fill and subtle ambient shadows for active segments in filters and dialogs',
+      '+ Auto-Collapsing Capsule: Smooth 320ms spring physics collapse to resting 32px pill on canvas touch or timeline scroll',
+      '+ Horology Detent Haptics: Tactile crown click at 50% swipe threshold between Single and Two-Way tracking modes',
+      '+ Rest Quick-Claim: One-tap button on gap cards ≥ 15m to reclaim void time as conscious restorative moments with undo',
+      '+ Complication Radial Glow: Soft 8% ambient light behind complication capsule matching active mode color',
+      '+ Retrospective Entry: Complete Single and Two-Way manual entry parity with inline custom mode creation and zero yellow underlines',
+      '+ Rendering Resilience: Hardened Android GPU pipeline and eliminated startup green screen anomalies',
+      '* All 201 automated unit and widget test suites passing with zero lints and 100% offline privacy',
     ],
   );
 

@@ -7,6 +7,66 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.3] - 2026-09-23 (versionCode 26BR0923) [BR]
+
+> *Harmonized Dark Surface Hierarchy, Liquid Glass Optics & Swiss Horology Haptics.*
+
+### What's New
+
+- **Apple HIG Dark Theme Harmony & Surface Layering**:
+    - Established strict monotonic Apple HIG Gray surface hierarchy: OLED Canvas (`bg` `#000000`) →
+      Modal Sheets / Headers (`surface` `#1C1C1E`) → Elevated Cards (`surface2` `#2C2C2E`) →
+      Controls / Input Fills (`surface3` `#3A3A3C`) → Hairline Borders (`border` `#48484A`).
+    - Harmonized pinned timeline filter header with modal sheet background, eliminating dark-on-dark
+      contrast mismatch.
+    - Synchronized `Glass` base surface tint with theme palette for physical translucency.
+    - Added crisp 0.6px Apple hairline separators to `SettingsGroupCard`, `SettingsSearchBox`, and
+      timeline cards, eliminating visual boundary ambiguity.
+    - Elevated active segment pills in `SettingsSegmentedControl`, `ManualEntryDialog`, and
+      `UrgeSurfingDialog` with luminous fill and ambient shadow.
+- **Auto-Collapsing Dynamic Header Capsule**:
+    - Smooth 320ms spring physics curve (`spring(stiffness: 300, damping: 28)`) auto-collapsing the
+      dynamic header capsule back to its resting 32px pill on clock canvas touch or timeline scroll.
+    - Provides a completely distraction-free, 100% immersive clock canvas.
+- **Swiss Horology Detent Haptic Feedback**:
+    - Integrated subtle micro-tactile crown click (`HapticFeedback.selectionClick()`) when swiping
+      between Single and Two-Way logging modes right as the swipe passes the 50% threshold.
+    - Simulates the precision tactile resistance of a high-end mechanical timepiece crown clicking
+      into place.
+- **Smart Timeline Gap "Claim as Rest" Quick-Action**:
+    - Empty timeline voids $\ge 15$ minutes now display an inline one-tap "Rest" quick-claim button
+      on gap cards.
+    - Seamlessly converts unaccounted void intervals into conscious restorative moments with
+      optimistic card morphing and instant undo support.
+- **Complication Ambient Radial Glow**:
+    - Soft, diffused 8% radial ambient glow radiating from behind the active complication pill,
+      dynamically matching the chromatic hue of the active category mode.
+- **Liquid Glass Optics & BitChord Aesthetics**:
+    - Pure Apple HIG Liquid Glass styling with TopFadeBlur gradients and BitChord visual harmony.
+
+### Improvements
+
+- **Manual Entry & Retrospective Session Parity**:
+    - Comprehensive support for manual retrospective entry across both Single and Two-Way session
+      modes.
+    - Inline custom category mode creation with live color picking and immediate state selection.
+    - Eliminated yellow underline text decoration artifacts across Cupertino time pickers.
+    - Fixed end-button lifecycle state handling during active session transitions.
+
+### Bug Fixes
+
+- **Rendering Pipeline & GPU Hardening**:
+    - Hardened Android GPU rendering pipeline, eliminating startup green screen glitches and texture
+      allocation races.
+- **Surface Contrast & Border Visibility**:
+    - Resolved card boundary clipping and dark color overlapping across settings pages, popups, and
+      dialogs.
+    - High-contrast border alignment across AMOLED, Dark, and Light themes.
+- **Session History Reliability**:
+    - Hardened state continuity across session switches and timeline date navigation.
+    - All 201 automated unit and widget test suites passing with zero lints and 100% offline
+      security.
+
 ## [7.5.2] - 2026-09-16 (versionCode 26BR0916) [BR]
 
 > *Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free
