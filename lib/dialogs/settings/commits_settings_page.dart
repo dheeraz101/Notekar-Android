@@ -360,7 +360,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: p.surface,
+                  color: p.surface2,
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(color: p.border),
                 ),
@@ -456,7 +456,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                   margin: const EdgeInsets.only(bottom: 12),
                   height: 60,
                   decoration: BoxDecoration(
-                    color: p.surface,
+                    color: p.surface2,
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(color: p.border),
                   ),

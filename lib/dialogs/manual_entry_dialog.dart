@@ -524,12 +524,18 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
                       duration: const Duration(milliseconds: 180),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
-                        color: !_isSession ? p.surface2 : Colors.transparent,
+                        color: !_isSession
+                            ? (p.name == 'light'
+                                  ? Colors.white
+                                  : (p.name == 'amoled'
+                                        ? const Color(0xFF28282C)
+                                        : const Color(0xFF48484A)))
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: !_isSession
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.08),
+                                  color: Colors.black.withValues(alpha: 0.12),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -562,12 +568,18 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
                       duration: const Duration(milliseconds: 180),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
-                        color: _isSession ? p.surface2 : Colors.transparent,
+                        color: _isSession
+                            ? (p.name == 'light'
+                                  ? Colors.white
+                                  : (p.name == 'amoled'
+                                        ? const Color(0xFF28282C)
+                                        : const Color(0xFF48484A)))
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: _isSession
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.08),
+                                  color: Colors.black.withValues(alpha: 0.12),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),

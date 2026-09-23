@@ -554,11 +554,11 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   color: useTranslucency
-                      ? widget.p.surface.withValues(alpha: 0.4)
+                      ? widget.p.surface2.withValues(alpha: 0.6)
                       : widget.p.surface2,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: widget.p.border.withValues(alpha: 0.2),
+                    color: widget.p.border.withValues(alpha: 0.4),
                   ),
                 ),
                 child: InkWell(

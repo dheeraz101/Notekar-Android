@@ -622,9 +622,9 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: p.surface.withValues(alpha: 0.5),
+        color: p.surface2,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: p.border.withValues(alpha: 0.35)),
+        border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.6),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

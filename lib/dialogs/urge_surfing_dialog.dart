@@ -160,13 +160,17 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: _mode == UrgeMode.boxBreathing
-                            ? p.surface
+                            ? (p.name == 'light'
+                                  ? Colors.white
+                                  : (p.name == 'amoled'
+                                        ? const Color(0xFF28282C)
+                                        : const Color(0xFF48484A)))
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: _mode == UrgeMode.boxBreathing
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
+                                  color: Colors.black.withValues(alpha: 0.12),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -197,13 +201,17 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: _mode == UrgeMode.grounding
-                            ? p.surface
+                            ? (p.name == 'light'
+                                  ? Colors.white
+                                  : (p.name == 'amoled'
+                                        ? const Color(0xFF28282C)
+                                        : const Color(0xFF48484A)))
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: _mode == UrgeMode.grounding
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
+                                  color: Colors.black.withValues(alpha: 0.12),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),

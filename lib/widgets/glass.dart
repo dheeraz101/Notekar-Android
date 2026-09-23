@@ -37,9 +37,7 @@ class Glass extends StatelessWidget {
     final isAmoled = p.name == 'amoled';
 
     // Base surface tint tuned for physical translucency
-    final baseSurface = isLight
-        ? const Color(0xFFFFFFFF)
-        : (isAmoled ? const Color(0xFF0C0C0E) : const Color(0xFF1C1C1E));
+    final baseSurface = isLight ? const Color(0xFFFFFFFF) : p.surface;
 
     final effectiveAlpha = blur ? (isLight ? 0.72 : 0.68) : 1.0;
     final surfaceColor = baseSurface.withValues(

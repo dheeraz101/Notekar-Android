@@ -150,7 +150,7 @@ class TimelineSingleTile extends StatelessWidget {
                       border: Border.all(
                         color: selected
                             ? p.accent.withValues(alpha: 0.4)
-                            : p.border.withValues(alpha: 0.4),
+                            : p.border.withValues(alpha: 0.55),
                       ),
                     ),
                     child: Row(

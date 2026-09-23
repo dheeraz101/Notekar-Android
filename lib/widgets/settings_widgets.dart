@@ -58,9 +58,14 @@ class SettingsGroup extends StatelessWidget {
           decoration: BoxDecoration(
             color: p.surface2,
             borderRadius: BorderRadius.circular(32), // iOS 26 High-Radius style
-            border: p.name == 'amoled'
-                ? Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8)
-                : null,
+            border: Border.all(
+              color: p.border.withValues(
+                alpha: p.name == 'amoled'
+                    ? 0.5
+                    : (p.name == 'light' ? 0.35 : 0.45),
+              ),
+              width: 0.6,
+            ),
           ),
           child: Builder(
             builder: (context) {
@@ -363,7 +368,13 @@ class SegmentedSetting extends StatelessWidget {
                       duration: const Duration(milliseconds: 140),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: active ? p.surface : Colors.transparent,
+                        color: active
+                            ? (p.name == 'light'
+                                  ? Colors.white
+                                  : (p.name == 'amoled'
+                                        ? const Color(0xFF28282C)
+                                        : const Color(0xFF48484A)))
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: active
                             ? [
@@ -1214,6 +1225,7 @@ class SettingsSearchBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: p.surface2,
         borderRadius: BorderRadius.circular(32), // iOS 26 High-Radius style
+        border: Border.all(color: p.border.withValues(alpha: 0.6), width: 0.6),
       ),
       child: TextField(
         controller: controller,
