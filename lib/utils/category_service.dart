@@ -22,66 +22,72 @@ CategoryMeta getCategoryMeta(String categoryName, Palette p) {
   final clean = categoryName.trim();
   final lower = clean.toLowerCase();
 
-  // Check custom persisted color first
+  final customIcon = CategoryService().getCategoryIcon(clean);
   final customColor = CategoryService().getCategoryColor(clean);
+
+  IconData defaultIcon = Icons.label_outline_rounded;
+  if (lower == 'work') {
+    defaultIcon = Icons.work_outline_rounded;
+  } else if (lower == 'deep focus' || lower == 'focus') {
+    defaultIcon = Icons.bolt_rounded;
+  } else if (lower == 'study') {
+    defaultIcon = Icons.school_outlined;
+  } else if (lower == 'health' || lower == 'fitness' || lower == 'gym') {
+    defaultIcon = Icons.fitness_center_rounded;
+  } else if (lower == 'play') {
+    defaultIcon = Icons.sports_esports_outlined;
+  } else if (lower == 'routine') {
+    defaultIcon = Icons.repeat_rounded;
+  } else if (lower == 'rest' || lower == 'recovery') {
+    defaultIcon = Icons.spa_rounded;
+  }
+
+  final icon = customIcon ?? defaultIcon;
+
   if (customColor != null) {
-    IconData icon = Icons.label_outline_rounded;
-    if (lower == 'work') {
-      icon = Icons.work_outline_rounded;
-    } else if (lower == 'deep focus' || lower == 'focus') {
-      icon = Icons.bolt_rounded;
-    } else if (lower == 'study') {
-      icon = Icons.school_outlined;
-    } else if (lower == 'health' || lower == 'fitness' || lower == 'gym') {
-      icon = Icons.fitness_center_rounded;
-    } else if (lower == 'play') {
-      icon = Icons.sports_esports_outlined;
-    } else if (lower == 'routine') {
-      icon = Icons.repeat_rounded;
-    }
     return CategoryMeta(name: clean, icon: icon, color: customColor);
   }
 
   if (lower == 'work') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.work_outline_rounded,
+      icon: icon,
       color: const Color(0xFF007AFF),
     );
   } else if (lower == 'deep focus' || lower == 'focus') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.bolt_rounded,
+      icon: icon,
       color: const Color(0xFF5856D6),
     );
   } else if (lower == 'study') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.school_outlined,
+      icon: icon,
       color: const Color(0xFFAF52DE),
     );
   } else if (lower == 'health' || lower == 'fitness' || lower == 'gym') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.fitness_center_rounded,
+      icon: icon,
       color: const Color(0xFF34C759),
     );
   } else if (lower == 'play') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.sports_esports_outlined,
+      icon: icon,
       color: const Color(0xFFFF2D55),
     );
   } else if (lower == 'routine') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.repeat_rounded,
+      icon: icon,
       color: const Color(0xFF30B0C7),
     );
   } else if (lower == 'rest' || lower == 'recovery') {
     return CategoryMeta(
       name: clean,
-      icon: Icons.spa_rounded,
+      icon: icon,
       color: const Color(0xFF30B0C7),
     );
   }
@@ -97,11 +103,7 @@ CategoryMeta getCategoryMeta(String categoryName, Palette p) {
     Color(0xFF00C7BE),
   ];
   final color = customColors[clean.hashCode.abs() % customColors.length];
-  return CategoryMeta(
-    name: clean,
-    icon: Icons.label_outline_rounded,
-    color: color,
-  );
+  return CategoryMeta(name: clean, icon: icon, color: color);
 }
 
 class CategoryService {
@@ -127,15 +129,59 @@ class CategoryService {
   static const String keyActiveCategory = 'notekar.active_category';
   static const String keyCustomCategoryColors =
       'notekar.custom_category_colors';
+  static const String keyCustomCategoryIcons = 'notekar.custom_category_icons';
 
   final Map<String, int> _customColorCache = {};
+  final Map<String, int> _customIconCache = {};
   bool _colorsLoaded = false;
+  bool _iconsLoaded = false;
+
+  /// Curated list of minimal Apple HIG style glyph icons
+  static const List<IconData> minimalGlyphIcons = [
+    Icons.label_outline_rounded,
+    Icons.bolt_rounded,
+    Icons.work_outline_rounded,
+    Icons.school_outlined,
+    Icons.fitness_center_rounded,
+    Icons.spa_rounded,
+    Icons.code_rounded,
+    Icons.book_outlined,
+    Icons.sports_esports_outlined,
+    Icons.palette_outlined,
+    Icons.music_note_rounded,
+    Icons.flight_rounded,
+    Icons.local_cafe_outlined,
+    Icons.favorite_border_rounded,
+    Icons.lightbulb_outline_rounded,
+    Icons.explore_outlined,
+    Icons.flag_outlined,
+    Icons.timer_outlined,
+  ];
 
   Future<SharedPreferences> _getPrefs({SharedPreferences? prefs}) async {
     return prefs ?? await SharedPreferences.getInstance();
   }
 
+  Future<void> ensureIconsLoaded({SharedPreferences? prefs}) async {
+    if (_iconsLoaded && prefs == null) return;
+    final p = await _getPrefs(prefs: prefs);
+    final raw = p.getString(keyCustomCategoryIcons);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw) as Map<String, dynamic>;
+        _customIconCache.clear();
+        for (final entry in decoded.entries) {
+          if (entry.value is int) {
+            _customIconCache[entry.key.toLowerCase()] = entry.value as int;
+          }
+        }
+      } catch (_) {}
+    }
+    _iconsLoaded = true;
+  }
+
   Future<void> ensureColorsLoaded({SharedPreferences? prefs}) async {
+    await ensureIconsLoaded(prefs: prefs);
     if (_colorsLoaded && prefs == null) return;
     final p = await _getPrefs(prefs: prefs);
     final raw = p.getString(keyCustomCategoryColors);
@@ -162,6 +208,18 @@ class CategoryService {
     return null;
   }
 
+  IconData? getCategoryIcon(String name) {
+    final lower = name.trim().toLowerCase();
+    final val = _customIconCache[lower];
+    if (val != null) {
+      for (final ic in minimalGlyphIcons) {
+        if (ic.codePoint == val) return ic;
+      }
+      return minimalGlyphIcons.first;
+    }
+    return null;
+  }
+
   Future<void> setCategoryColor(
     String name,
     Color color, {
@@ -183,6 +241,27 @@ class CategoryService {
     await p.setString(keyCustomCategoryColors, jsonEncode(map));
   }
 
+  Future<void> setCategoryIcon(
+    String name,
+    IconData icon, {
+    SharedPreferences? prefs,
+  }) async {
+    final clean = name.trim();
+    if (clean.isEmpty) return;
+    _customIconCache[clean.toLowerCase()] = icon.codePoint;
+    _iconsLoaded = true;
+    final p = await _getPrefs(prefs: prefs);
+    final raw = p.getString(keyCustomCategoryIcons);
+    Map<String, dynamic> map = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        map = jsonDecode(raw) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+    map[clean.toLowerCase()] = icon.codePoint;
+    await p.setString(keyCustomCategoryIcons, jsonEncode(map));
+  }
+
   Future<List<String>> getCategories({SharedPreferences? prefs}) async {
     await ensureColorsLoaded(prefs: prefs);
     final p = await _getPrefs(prefs: prefs);
@@ -201,6 +280,7 @@ class CategoryService {
   Future<bool> addCategory(
     String name, {
     Color? color,
+    IconData? icon,
     SharedPreferences? prefs,
   }) async {
     final clean = name.trim();
@@ -215,6 +295,9 @@ class CategoryService {
     await p.setStringList(keyCustomCategories, stored);
     if (color != null) {
       await setCategoryColor(clean, color, prefs: p);
+    }
+    if (icon != null) {
+      await setCategoryIcon(clean, icon, prefs: p);
     }
     return true;
   }
@@ -231,6 +314,26 @@ class CategoryService {
         .where((e) => e.trim().toLowerCase() != clean.toLowerCase())
         .toList();
     await p.setStringList(keyCustomCategories, updated);
+
+    // Clean up cached color and icon
+    _customColorCache.remove(clean.toLowerCase());
+    _customIconCache.remove(clean.toLowerCase());
+    final rawColors = p.getString(keyCustomCategoryColors);
+    if (rawColors != null) {
+      try {
+        final map = jsonDecode(rawColors) as Map<String, dynamic>;
+        map.remove(clean.toLowerCase());
+        await p.setString(keyCustomCategoryColors, jsonEncode(map));
+      } catch (_) {}
+    }
+    final rawIcons = p.getString(keyCustomCategoryIcons);
+    if (rawIcons != null) {
+      try {
+        final map = jsonDecode(rawIcons) as Map<String, dynamic>;
+        map.remove(clean.toLowerCase());
+        await p.setString(keyCustomCategoryIcons, jsonEncode(map));
+      } catch (_) {}
+    }
 
     // If active category was deleted, reset to 'All'
     final active = await getActiveCategory(prefs: p);

@@ -69,6 +69,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         ),
         _buildLifeNarrativeCard(context, dashboardData),
         AnomalyAlertCard(p: p, entries: entries, onLogNow: widget.onLogNow),
+        MementoMoriLifeHorizonCard(
+          p: p,
+          entries: entries,
+          timeframe: _timeframe,
+        ),
         _buildLifeAuditCard(context),
         if (entries.isNotEmpty &&
             DateTime.now()

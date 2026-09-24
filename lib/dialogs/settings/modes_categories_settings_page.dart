@@ -99,6 +99,7 @@ class _ModesCategoriesSettingsPageState
     HapticFeedback.lightImpact();
     final textController = TextEditingController();
     Color selectedColor = CategoryService.appleHigColors[0];
+    IconData selectedIcon = CategoryService.minimalGlyphIcons[0];
 
     final created = await showDialog<bool>(
       context: context,
@@ -189,6 +190,49 @@ class _ModesCategoriesSettingsPageState
                         ],
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (final ic
+                              in CategoryService.minimalGlyphIcons) ...[
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setDialogState(() => selectedIcon = ic);
+                              },
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 2.5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selectedIcon == ic
+                                      ? selectedColor.withValues(alpha: 0.22)
+                                      : widget.p.surface3,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selectedIcon == ic
+                                        ? selectedColor
+                                        : Colors.transparent,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Icon(
+                                  ic,
+                                  size: 15,
+                                  color: selectedIcon == ic
+                                      ? selectedColor
+                                      : widget.p.text2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -215,6 +259,7 @@ class _ModesCategoriesSettingsPageState
         final success = await _categoryService.addCategory(
           name,
           color: selectedColor,
+          icon: selectedIcon,
         );
         if (success) {
           HapticFeedback.mediumImpact();
@@ -364,12 +409,8 @@ class _ModesCategoriesSettingsPageState
           children: [
             SettingsRow(
               p: widget.p,
-              icon: Icons.palette_outlined,
-              color: widget.p.accent,
               title: 'Adaptive Color'.localized(context),
-              subtitle:
-                  'Harmonizes the home background and clock digits with your active mode'
-                      .localized(context),
+              subtitle: 'Match theme to active mode'.localized(context),
               trailing: CupertinoSwitch(
                 value: _adaptiveColor,
                 activeTrackColor: widget.p.accent,
@@ -400,6 +441,7 @@ class _ModesCategoriesSettingsPageState
     HapticFeedback.selectionClick();
     final currentMeta = getCategoryMeta(category, widget.p);
     Color selectedColor = currentMeta.color;
+    IconData selectedIcon = currentMeta.icon;
 
     final changed = await showDialog<bool>(
       context: context,
@@ -412,14 +454,14 @@ class _ModesCategoriesSettingsPageState
             primaryColor: selectedColor,
           ),
           child: CupertinoAlertDialog(
-            title: Text('Mode Color'.localized(ctx)),
+            title: Text('Mode Appearance'.localized(ctx)),
             content: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Choose a color for "$category"'.localized(ctx),
+                    'Choose color and icon for "$category"'.localized(ctx),
                     style: TextStyle(fontSize: 13, color: widget.p.text2),
                   ),
                   const SizedBox(height: 14),
@@ -437,7 +479,7 @@ class _ModesCategoriesSettingsPageState
                             child: Container(
                               width: 28,
                               height: 28,
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
                               decoration: BoxDecoration(
                                 color: col,
                                 shape: BoxShape.circle,
@@ -470,6 +512,48 @@ class _ModesCategoriesSettingsPageState
                       ],
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final ic in CategoryService.minimalGlyphIcons) ...[
+                          GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setDialogState(() => selectedIcon = ic);
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 2.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: selectedIcon == ic
+                                    ? selectedColor.withValues(alpha: 0.22)
+                                    : widget.p.surface3,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: selectedIcon == ic
+                                      ? selectedColor
+                                      : Colors.transparent,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Icon(
+                                ic,
+                                size: 15,
+                                color: selectedIcon == ic
+                                    ? selectedColor
+                                    : widget.p.text2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -491,6 +575,7 @@ class _ModesCategoriesSettingsPageState
 
     if (changed == true) {
       await _categoryService.setCategoryColor(category, selectedColor);
+      await _categoryService.setCategoryIcon(category, selectedIcon);
       HapticFeedback.mediumImpact();
       await _loadCategories();
       widget.onCategoriesChanged?.call();
@@ -516,22 +601,12 @@ class _ModesCategoriesSettingsPageState
           GestureDetector(
             onTap: () => _showChangeColorDialog(category),
             child: Container(
-              width: 22,
-              height: 22,
-              margin: const EdgeInsets.only(right: 6),
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 color: meta.color,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: meta.color.withValues(alpha: 0.4),
-                    blurRadius: 4,
-                  ),
-                ],
               ),
             ),
           ),
@@ -569,18 +644,23 @@ class ModeDetailSettingsPage extends StatefulWidget {
 
 class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
   late Color _currentColor;
+  late IconData _currentIcon;
 
   @override
   void initState() {
     super.initState();
-    _currentColor = getCategoryMeta(widget.category, widget.p).color;
+    final meta = getCategoryMeta(widget.category, widget.p);
+    _currentColor = meta.color;
+    _currentIcon = meta.icon;
   }
 
   @override
   void didUpdateWidget(covariant ModeDetailSettingsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.category != widget.category || oldWidget.p != widget.p) {
-      _currentColor = getCategoryMeta(widget.category, widget.p).color;
+      final meta = getCategoryMeta(widget.category, widget.p);
+      _currentColor = meta.color;
+      _currentIcon = meta.icon;
     }
   }
 
@@ -643,7 +723,6 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
   Widget build(BuildContext context) {
     final p = widget.p;
     final category = widget.category;
-    final meta = getCategoryMeta(category, p);
 
     // Build timeline sections filtered to this category
     final allSections = buildTimelineDaySections(widget.entries);
@@ -733,7 +812,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                     color: _currentColor.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(meta.icon, color: _currentColor, size: 24),
+                  child: Icon(_currentIcon, color: _currentColor, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -843,6 +922,78 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                                   color: Colors.white,
                                 )
                               : null,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Mode Glyph Icon Card
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'MODE ICON'.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(_currentIcon, size: 16, color: _currentColor),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final ic in CategoryService.minimalGlyphIcons) ...[
+                      GestureDetector(
+                        onTap: () async {
+                          HapticFeedback.selectionClick();
+                          setState(() => _currentIcon = ic);
+                          await CategoryService().setCategoryIcon(
+                            widget.category,
+                            ic,
+                          );
+                          widget.onCategoriesChanged?.call();
+                        },
+                        child: Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: _currentIcon == ic
+                                ? _currentColor.withValues(alpha: 0.2)
+                                : p.surface3.withValues(alpha: 0.5),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _currentIcon == ic
+                                  ? _currentColor
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            ic,
+                            size: 17,
+                            color: _currentIcon == ic ? _currentColor : p.text2,
+                          ),
                         ),
                       ),
                     ],

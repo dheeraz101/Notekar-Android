@@ -33,6 +33,45 @@ class DayDetailSheet extends StatelessWidget {
   })?
   onOpenManualEntry;
 
+  @override
+  Widget build(BuildContext context) {
+    return AppSheet(
+      p: p,
+      title: section.displayTitle,
+      child: DayDetailContent(
+        p: p,
+        section: section,
+        allEntries: allEntries,
+        onEditNote: onEditNote,
+        onOpenManualEntry: onOpenManualEntry,
+      ),
+    );
+  }
+}
+
+/// Full day detail and reflection content in Apple HIG style.
+class DayDetailContent extends StatelessWidget {
+  const DayDetailContent({
+    super.key,
+    required this.p,
+    required this.section,
+    required this.allEntries,
+    this.onEditNote,
+    this.onOpenManualEntry,
+    this.padding = const EdgeInsets.only(bottom: 24),
+  });
+
+  final Palette p;
+  final TimelineDaySection section;
+  final List<Moment> allEntries;
+  final ValueChanged<Moment>? onEditNote;
+  final void Function({
+    DateTime? prefilledStartTime,
+    DateTime? prefilledEndTime,
+  })?
+  onOpenManualEntry;
+  final EdgeInsets padding;
+
   String _formatDuration(Duration d) {
     final totalMins = d.inMinutes;
     if (totalMins <= 0) return '0m';
@@ -101,226 +140,223 @@ class DayDetailSheet extends StatelessWidget {
           )
         : 0.0;
 
-    return AppSheet(
-      p: p,
-      title: section.displayTitle,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                '${section.totalLogs} logs • ${_formatDuration(totalTracked)} tracked',
-                style: TextStyle(
-                  color: p.text2,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              '${section.totalLogs} logs • ${_formatDuration(totalTracked)} tracked',
+              style: TextStyle(
+                color: p.text2,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            // Top Summary Hero
+          ),
+          // Top Summary Hero
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'CONSCIOUS TRACKING'.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    Text(
+                      '${(intentionalityRatio * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: intentionalityRatio,
+                    minHeight: 8,
+                    backgroundColor: p.surface3,
+                    valueColor: AlwaysStoppedAnimation<Color>(p.accent),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSummaryMetric(
+                        label: 'Tracked',
+                        value: _formatDuration(totalTracked),
+                        color: p.accent,
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 28,
+                      color: p.border.withValues(alpha: 0.5),
+                    ),
+                    Expanded(
+                      child: _buildSummaryMetric(
+                        label: 'Longest Focus',
+                        value: longestSessionMs > 0
+                            ? _formatDuration(
+                                Duration(milliseconds: longestSessionMs),
+                              )
+                            : '--',
+                        color: p.green,
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 28,
+                      color: p.border.withValues(alpha: 0.5),
+                    ),
+                    Expanded(
+                      child: _buildSummaryMetric(
+                        label: 'Peak Hour',
+                        value: peakHour != null ? '${peakHour!}:00' : '--',
+                        color: p.orange,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Temporal Breakdown
+          Text(
+            'DAY RHYTHM'.localized(context),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          Row(
+            children: [
+              _buildTemporalTile(
+                label: 'Morning',
+                sub: '6am - 12pm',
+                duration: Duration(milliseconds: morningMs),
+                icon: CupertinoIcons.sunrise_fill,
+                color: p.orange,
+              ),
+              const SizedBox(width: 8),
+              _buildTemporalTile(
+                label: 'Afternoon',
+                sub: '12pm - 5pm',
+                duration: Duration(milliseconds: afternoonMs),
+                icon: CupertinoIcons.sun_max_fill,
+                color: p.accent,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildTemporalTile(
+                label: 'Evening',
+                sub: '5pm - 9pm',
+                duration: Duration(milliseconds: eveningMs),
+                icon: CupertinoIcons.sunset_fill,
+                color: p.blue,
+              ),
+              const SizedBox(width: 8),
+              _buildTemporalTile(
+                label: 'Night',
+                sub: '9pm - 6am',
+                duration: Duration(milliseconds: nightMs),
+                icon: CupertinoIcons.moon_stars_fill,
+                color: p.text2,
+              ),
+            ],
+          ),
+
+          // Category Breakdown
+          if (section.categoryBreakdown.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Text(
+              'MODES & CATEGORIES'.localized(context),
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: p.border.withValues(alpha: 0.6)),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'CONSCIOUS TRACKING'.localized(context),
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        '${(intentionalityRatio * 100).toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: intentionalityRatio,
-                      minHeight: 8,
-                      backgroundColor: p.surface3,
-                      valueColor: AlwaysStoppedAnimation<Color>(p.accent),
+                  for (final entry in section.categoryBreakdown.entries) ...[
+                    _buildCategoryRow(
+                      category: entry.key,
+                      duration: entry.value,
+                      totalDayDuration: totalTracked,
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildSummaryMetric(
-                          label: 'Tracked',
-                          value: _formatDuration(totalTracked),
-                          color: p.accent,
-                        ),
+                    if (entry.key != section.categoryBreakdown.keys.last)
+                      Divider(
+                        color: p.border.withValues(alpha: 0.4),
+                        height: 16,
                       ),
-                      Container(
-                        width: 1,
-                        height: 28,
-                        color: p.border.withValues(alpha: 0.5),
-                      ),
-                      Expanded(
-                        child: _buildSummaryMetric(
-                          label: 'Longest Focus',
-                          value: longestSessionMs > 0
-                              ? _formatDuration(
-                                  Duration(milliseconds: longestSessionMs),
-                                )
-                              : '--',
-                          color: p.green,
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 28,
-                        color: p.border.withValues(alpha: 0.5),
-                      ),
-                      Expanded(
-                        child: _buildSummaryMetric(
-                          label: 'Peak Hour',
-                          value: peakHour != null ? '${peakHour!}:00' : '--',
-                          color: p.orange,
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Temporal Breakdown
-            Text(
-              'DAY RHYTHM'.localized(context),
-              style: TextStyle(
-                color: p.text3,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            Row(
-              children: [
-                _buildTemporalTile(
-                  label: 'Morning',
-                  sub: '6am - 12pm',
-                  duration: Duration(milliseconds: morningMs),
-                  icon: CupertinoIcons.sunrise_fill,
-                  color: p.orange,
-                ),
-                const SizedBox(width: 8),
-                _buildTemporalTile(
-                  label: 'Afternoon',
-                  sub: '12pm - 5pm',
-                  duration: Duration(milliseconds: afternoonMs),
-                  icon: CupertinoIcons.sun_max_fill,
-                  color: p.accent,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _buildTemporalTile(
-                  label: 'Evening',
-                  sub: '5pm - 9pm',
-                  duration: Duration(milliseconds: eveningMs),
-                  icon: CupertinoIcons.sunset_fill,
-                  color: p.blue,
-                ),
-                const SizedBox(width: 8),
-                _buildTemporalTile(
-                  label: 'Night',
-                  sub: '9pm - 6am',
-                  duration: Duration(milliseconds: nightMs),
-                  icon: CupertinoIcons.moon_stars_fill,
-                  color: p.text2,
-                ),
-              ],
-            ),
-
-            // Category Breakdown
-            if (section.categoryBreakdown.isNotEmpty) ...[
-              const SizedBox(height: 18),
-              Text(
-                'MODES & CATEGORIES'.localized(context),
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: p.border.withValues(alpha: 0.6)),
-                ),
-                child: Column(
-                  children: [
-                    for (final entry in section.categoryBreakdown.entries) ...[
-                      _buildCategoryRow(
-                        category: entry.key,
-                        duration: entry.value,
-                        totalDayDuration: totalTracked,
-                      ),
-                      if (entry.key != section.categoryBreakdown.keys.last)
-                        Divider(
-                          color: p.border.withValues(alpha: 0.4),
-                          height: 16,
-                        ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 18),
-
-            // Timeline items preview for this day
-            Text(
-              'TIMELINE LOGS'.localized(context),
-              style: TextStyle(
-                color: p.text3,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            for (final it in dayItems) ...[
-              _buildTimelineItemRow(context, it),
-              const SizedBox(height: 6),
-            ],
           ],
-        ),
+
+          const SizedBox(height: 18),
+
+          // Timeline items preview for this day
+          Text(
+            'TIMELINE LOGS'.localized(context),
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          for (final it in dayItems) ...[
+            _buildTimelineItemRow(context, it),
+            const SizedBox(height: 6),
+          ],
+        ],
       ),
     );
   }

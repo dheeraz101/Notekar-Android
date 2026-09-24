@@ -21,6 +21,7 @@ import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
+import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -35,6 +36,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
 import 'package:notekar/screens/welcome_screen.dart';
+import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -556,6 +558,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final initialActiveCategory = await _categoryService.getActiveCategory(
       prefs: prefs,
     );
+    await UserProfileService().loadProfile(prefs: prefs);
 
     // Phase 1: Load non-DB settings instantly so the UI can paint immediately
     setState(() {
@@ -686,8 +689,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
           !appIconsWalkthroughSeen ||
           !singleNumberingWalkthroughSeen) {
         if (mounted) {
-          _showWelcomeIfNeeded(prefs);
+          await _showWelcomeIfNeeded(prefs);
         }
+      }
+      if (mounted) {
+        unawaited(_showPersonalizationSetupIfNeeded());
       }
 
       // Initialize MomentRepository and load database entries
@@ -905,6 +911,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (prefs == null) return;
     if (value is String) await prefs.setString(key, value);
     if (value is int) await prefs.setInt(key, value);
+  }
+
+  Future<void> _showPersonalizationSetupIfNeeded() async {
+    if (!mounted) return;
+    final profile = UserProfileService();
+    if (!profile.isOnboardingCompleted) {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
+      await PersonalizationSetupDialog.show(context, p: p, isFirstTime: true);
+    }
   }
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 
 class ShareableMilestoneSheet extends StatefulWidget {
@@ -37,9 +38,13 @@ class _ShareableMilestoneSheetState extends State<ShareableMilestoneSheet> {
     setState(() => _isExporting = true);
     try {
       HapticFeedback.heavyImpact();
+      final profile = UserProfileService();
+      final hasName = profile.name.trim().isNotEmpty;
+      final userName = hasName ? profile.name.trim() : null;
       final shareContent =
           '🎉 ${widget.milestoneTitle}\n'
-          'Target: ${widget.dayLabel} • ${widget.streakDays} Days Strong\n\n'
+          'Target: ${widget.dayLabel} • ${widget.streakDays} Days Strong\n'
+          '${userName != null ? 'Earned by: $userName\n' : ''}\n'
           'Logged with NoteKar — 100% Private, Zero Backend.';
 
       // Allow frame to render before capturing boundary
@@ -160,7 +165,55 @@ class _ShareableMilestoneSheetState extends State<ShareableMilestoneSheet> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 14),
+                  AnimatedBuilder(
+                    animation: UserProfileService(),
+                    builder: (context, _) {
+                      final profile = UserProfileService();
+                      if (profile.name.trim().isEmpty &&
+                          profile.avatarBytes == null &&
+                          profile.presetAvatarIndex == null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            profile.buildAvatarWidget(
+                              p: p,
+                              size: 20,
+                              showBorder: false,
+                            ),
+                            if (profile.name.trim().isNotEmpty) ...[
+                              const SizedBox(width: 7),
+                              Text(
+                                profile.name.trim(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,

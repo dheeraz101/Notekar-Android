@@ -1,7 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/personalization_setup_dialog.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/dashboard_metrics_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -951,6 +955,488 @@ class YearlyActivityGridCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Memento Mori & Life Horizon Card.
+/// Displays lived vs. remaining horizon in weeks & years, strictly capped at a 100-year ceiling,
+/// along with productive vs. rest vs. untracked time perspective.
+class MementoMoriLifeHorizonCard extends StatelessWidget {
+  const MementoMoriLifeHorizonCard({
+    super.key,
+    required this.p,
+    required this.entries,
+    required this.timeframe,
+    this.onConfigure,
+  });
+
+  final Palette p;
+  final List<Moment> entries;
+  final DashboardTimeframe timeframe;
+  final VoidCallback? onConfigure;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: UserProfileService(),
+      builder: (context, _) {
+        final profile = UserProfileService();
+        final horizon = profile.calculateLifeHorizon();
+        final now = DateTime.now();
+        final start = switch (timeframe) {
+          DashboardTimeframe.today => DateTime(now.year, now.month, now.day),
+          DashboardTimeframe.week => now.subtract(const Duration(days: 7)),
+          DashboardTimeframe.month => now.subtract(const Duration(days: 30)),
+          DashboardTimeframe.all => now.subtract(const Duration(days: 90)),
+        };
+        final productivity = profile.calculateProductivity(
+          entries: entries,
+          start: start,
+          end: now,
+        );
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: p.border.withValues(alpha: 0.6)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.hourglass,
+                      size: 16,
+                      color: p.accent,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'MEMENTO MORI'.localized(context),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                        Text(
+                          'Life Horizon'.localized(context),
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PressableScale(
+                    onTap: () {
+                      NotekarHaptics.selection('standard');
+                      if (onConfigure != null) {
+                        onConfigure!();
+                      } else {
+                        PersonalizationSetupDialog.show(context, p: p);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            horizon.hasDob
+                                ? '${horizon.targetYears}y max 100y'
+                                : 'Configure'.localized(context),
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(CupertinoIcons.pencil, size: 11, color: p.text3),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              if (horizon.hasDob) ...[
+                // Metric cards row
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMetricTile(
+                        icon: CupertinoIcons.sparkles,
+                        label: 'Lived So Far'.localized(context),
+                        value: '${horizon.livedWeeks} wks',
+                        subvalue:
+                            '${horizon.exactAgeYears.toStringAsFixed(1)} yrs (${(horizon.livedPercentage * 100).toStringAsFixed(1)}%)',
+                        color: p.accent,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildMetricTile(
+                        icon: CupertinoIcons.sunrise_fill,
+                        label: 'Horizon Left'.localized(context),
+                        value: '${horizon.remainingWeeks} wks',
+                        subvalue:
+                            '${horizon.remainingYears.toStringAsFixed(1)} yrs remaining',
+                        color: p.orange,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Life Horizon progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    height: 10,
+                    color: p.surface3,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final livedW =
+                            constraints.maxWidth * horizon.livedPercentage;
+                        return Stack(
+                          children: [
+                            Container(
+                              width: livedW,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [p.accent, p.orange],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Perspective Breakdown: Deep Focus vs Rest vs Untracked
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Allocation (${timeframe.label})'.localized(
+                              context,
+                            ),
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            'Focus • Rest • Drift',
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Segmented Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: SizedBox(
+                          height: 8,
+                          child: Row(
+                            children: [
+                              if (productivity.focusPercentage > 0)
+                                Expanded(
+                                  flex: math.max(
+                                    1,
+                                    (productivity.focusPercentage * 100)
+                                        .round(),
+                                  ),
+                                  child: Container(color: p.accent),
+                                ),
+                              if (productivity.restPercentage > 0)
+                                Expanded(
+                                  flex: math.max(
+                                    1,
+                                    (productivity.restPercentage * 100).round(),
+                                  ),
+                                  child: Container(color: p.green),
+                                ),
+                              if (productivity.untrackedPercentage > 0)
+                                Expanded(
+                                  flex: math.max(
+                                    1,
+                                    (productivity.untrackedPercentage * 100)
+                                        .round(),
+                                  ),
+                                  child: Container(
+                                    color: p.surface3.withValues(alpha: 0.9),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Mini Legend Row
+                      Row(
+                        children: [
+                          _buildLegendItem(
+                            color: p.accent,
+                            label: 'Focus',
+                            duration: productivity.trackedFocus,
+                            pct: productivity.focusPercentage,
+                          ),
+                          const Spacer(),
+                          _buildLegendItem(
+                            color: p.green,
+                            label: 'Rest',
+                            duration: productivity.claimedRest,
+                            pct: productivity.restPercentage,
+                          ),
+                          const Spacer(),
+                          _buildLegendItem(
+                            color: p.text3,
+                            label: 'Drift',
+                            duration: productivity.untrackedOrWasted,
+                            pct: productivity.untrackedPercentage,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Seneca Quote
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      CupertinoIcons.quote_bubble,
+                      size: 13,
+                      color: p.text3.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '“It is not that we have a short time to live, but that we waste a lot of it.” — Seneca'
+                            .localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // Unconfigured State
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.border.withValues(alpha: 0.35)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Set your birth date to unlock your personal life ledger: track weeks lived versus remaining horizon, strictly capped at a 100-year ceiling, and reflect on intentional time.'
+                            .localized(context),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 12.5,
+                          height: 1.45,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 38,
+                        child: FilledButton.tonal(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: p.accent.withValues(alpha: 0.15),
+                            foregroundColor: p.accent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            NotekarHaptics.selection('standard');
+                            PersonalizationSetupDialog.show(context, p: p);
+                          },
+                          child: Text(
+                            'Set Up Birth Date & Horizon'.localized(context),
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMetricTile({
+    required IconData icon,
+    required String label,
+    required String value,
+    required String subvalue,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: p.surface3.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: p.border.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 13, color: color),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subvalue,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: p.text3,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem({
+    required Color color,
+    required String label,
+    required Duration duration,
+    required double pct,
+  }) {
+    final hours = duration.inHours;
+    final mins = duration.inMinutes % 60;
+    final durStr = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 5),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$label (${(pct * 100).toStringAsFixed(0)}%)',
+              style: TextStyle(
+                color: p.text2,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              durStr,
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

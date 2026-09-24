@@ -23,6 +23,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.initialDateKey,
     this.onEditNote,
     this.onOpenManualEntry,
+    this.onOpenInsights,
   });
 
   final Palette p;
@@ -35,6 +36,7 @@ class HistoryCalendarView extends StatefulWidget {
     DateTime? prefilledEndTime,
   })?
   onOpenManualEntry;
+  final ValueChanged<TimelineDaySection>? onOpenInsights;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -255,18 +257,22 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             onTap: () {
               HapticFeedback.lightImpact();
               if (currentSection != null) {
-                showModalBottomSheet<void>(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
-                  builder: (_) => DayDetailSheet(
-                    p: widget.p,
-                    section: currentSection,
-                    allEntries: widget.allEntries,
-                    onEditNote: widget.onEditNote,
-                    onOpenManualEntry: widget.onOpenManualEntry,
-                  ),
-                );
+                if (widget.onOpenInsights != null) {
+                  widget.onOpenInsights!(currentSection);
+                } else {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    isScrollControlled: true,
+                    builder: (_) => DayDetailSheet(
+                      p: widget.p,
+                      section: currentSection,
+                      allEntries: widget.allEntries,
+                      onEditNote: widget.onEditNote,
+                      onOpenManualEntry: widget.onOpenManualEntry,
+                    ),
+                  );
+                }
               }
             },
             child: Container(

@@ -10,6 +10,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
+import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
@@ -45,6 +46,7 @@ import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/help_guide_data.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -516,6 +518,101 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAppleIdProfileCard(Palette p) {
+    return AnimatedBuilder(
+      animation: UserProfileService(),
+      builder: (context, _) {
+        final profile = UserProfileService();
+        final horizon = profile.calculateLifeHorizon();
+        final hasName = profile.name.trim().isNotEmpty;
+        final displayName = hasName
+            ? profile.name.trim()
+            : 'Your Identity'.localized(context);
+
+        String subtitle;
+        if (horizon.hasDob) {
+          subtitle = '  •  ';
+        } else {
+          subtitle = 'Set up name, photo & Memento Mori'.localized(context);
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: spacing12),
+          child: PressableScale(
+            onTap: () {
+              NotekarHaptics.selection('standard');
+              PersonalizationSetupDialog.show(
+                context,
+                p: p,
+                onSaved: () => setState(() {}),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: p.surface2,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: p.border.withValues(alpha: 0.5),
+                  width: 0.8,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  profile.buildAvatarWidget(p: p, size: 54),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    CupertinoIcons.chevron_forward,
+                    color: p.text3.withValues(alpha: 0.6),
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1527,6 +1624,63 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
 
     return [
+      item(
+        title: 'Personal Profile',
+        subtitle: 'Configure your name, photo, birth date, and avatar',
+        category: 'Personalization',
+        icon: CupertinoIcons.person_crop_circle,
+        keywords: [
+          'profile',
+          'personal profile',
+          'identity',
+          'name',
+          'avatar',
+          'photo',
+          'dob',
+          'birth date',
+          'picture',
+          'personalization',
+        ],
+        kind: 'action',
+        boolValue: null,
+        onBoolChanged: null,
+      ),
+      item(
+        title: 'Memento Mori Life Horizon',
+        subtitle:
+            'Visualize weeks lived vs remaining horizon, capped at 100 years',
+        category: 'Dashboard',
+        icon: CupertinoIcons.hourglass,
+        keywords: [
+          'memento mori',
+          'life horizon',
+          'age',
+          'weeks lived',
+          'remaining time',
+          'stoic',
+          'mortality',
+          '100 years',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+      ),
+      item(
+        title: 'Mode Glyph Icons',
+        subtitle: 'Select minimal glyph icons for active and custom modes',
+        category: 'Modes & Categories',
+        icon: CupertinoIcons.sparkles,
+        keywords: [
+          'mode icons',
+          'glyph',
+          'icon',
+          'category icon',
+          'minimal glyph',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+      ),
       item(
         title: 'App Version',
         subtitle: 'The current software version installed',
@@ -4103,6 +4257,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                             delegate: SliverChildListDelegate([
                               if (_criticalNotice != null)
                                 _buildCriticalAdvisoryBanner(p),
+                              _buildAppleIdProfileCard(p),
                               SettingsGroup(
                                 p: p,
                                 insetDividers: true,
@@ -4492,6 +4647,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                       result.title,
                                                     );
                                                     if (result.title ==
+                                                        'Personal Profile') {
+                                                      PersonalizationSetupDialog.show(
+                                                        context,
+                                                        p: p,
+                                                        onSaved: () =>
+                                                            setState(() {}),
+                                                      );
+                                                      return;
+                                                    }
+                                                    if (result.title ==
                                                         'App Version') {
                                                       showGeneralDialog(
                                                         context: context,
@@ -4695,6 +4860,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                 : p.accent,
                                             onTap: () {
                                               _saveRecentSearch(result.title);
+                                              if (result.title ==
+                                                  'Personal Profile') {
+                                                PersonalizationSetupDialog.show(
+                                                  context,
+                                                  p: p,
+                                                  onSaved: () =>
+                                                      setState(() {}),
+                                                );
+                                                return;
+                                              }
                                               if (result.title ==
                                                   'App Version') {
                                                 showGeneralDialog(

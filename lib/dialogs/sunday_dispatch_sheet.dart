@@ -7,6 +7,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
@@ -145,38 +146,84 @@ class SundayDispatchSheet extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Lead Tag
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'RETROSPECTIVE • $weekRange'.toUpperCase(),
-                  style: TextStyle(
-                    color: p.accent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
+              // Lead Tag & User Avatar Row
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'RETROSPECTIVE • $weekRange'.toUpperCase(),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                  AnimatedBuilder(
+                    animation: UserProfileService(),
+                    builder: (context, _) {
+                      final profile = UserProfileService();
+                      if (profile.name.trim().isEmpty &&
+                          profile.avatarBytes == null &&
+                          profile.presetAvatarIndex == null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          profile.buildAvatarWidget(
+                            p: p,
+                            size: 22,
+                            showBorder: false,
+                          ),
+                          if (profile.name.trim().isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              profile.name.trim(),
+                              style: TextStyle(
+                                color: p.text2,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
 
               // Headline
-              Text(
-                'A Week of Deliberate Focus',
-                style: TextStyle(
-                  color: p.text,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.6,
-                  fontFamily: 'Inter',
-                ),
+              AnimatedBuilder(
+                animation: UserProfileService(),
+                builder: (context, _) {
+                  final profile = UserProfileService();
+                  final title = profile.name.trim().isNotEmpty
+                      ? 'A Week of Deliberate Focus, ${profile.name.trim()}'
+                      : 'A Week of Deliberate Focus';
+                  return Text(
+                    title,
+                    style: TextStyle(
+                      color: p.text,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.6,
+                      fontFamily: 'Inter',
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 14),
 

@@ -111,6 +111,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   late bool _compactRows;
   String _viewMode = 'list';
   bool _showGapCards = false;
+  TimelineDaySection? _activeInsightsSection;
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -372,869 +373,935 @@ class _HistoryDialogState extends State<HistoryDialog> {
   Widget build(BuildContext context) {
     final hasOlderRows = _hasOlderRows;
 
-    return AppSheet(
-      p: widget.p,
-      title: 'History'.localized(context),
-      docked: true,
-      blur: widget.blur,
-      largeText: widget.largeText,
-      controller: _scrollController,
-      showLargeTitle: true,
-      removeBottomPadding: true,
-      leadingAction: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.onClearAll != null && _entries.isNotEmpty) ...[
-            PressableScale(
-              onTap: () {
-                AppHaptics.heavy();
-                _confirmDeleteAll();
-              },
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: widget.p.surface3,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  CupertinoIcons.trash,
-                  color: widget.p.text3,
-                  size: 18,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-          // View Mode Toggle: minimal single icon button (List <-> Timeline)
-          Tooltip(
-            message: _viewMode == 'list' ? 'Timeline view' : 'List view',
-            child: PressableScale(
-              onTap: () {
-                NotekarHaptics.selection('standard');
-                final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
-                setState(() => _viewMode = nextMode);
-                unawaited(
-                  SharedPreferences.getInstance().then(
-                    (prefs) => prefs.setString('history_view_mode', nextMode),
-                  ),
-                );
-              },
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: widget.p.surface3,
-                  shape: BoxShape.circle,
-                ),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) => ScaleTransition(
-                    scale: animation,
-                    child: FadeTransition(opacity: animation, child: child),
-                  ),
-                  child: Icon(
-                    _viewMode == 'list'
-                        ? CupertinoIcons.calendar
-                        : CupertinoIcons.list_bullet,
-                    key: ValueKey(_viewMode),
-                    size: 19,
-                    color: widget.p.text,
+    return PopScope(
+      canPop: _activeInsightsSection == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _activeInsightsSection != null) {
+          setState(() => _activeInsightsSection = null);
+        }
+      },
+      child: AppSheet(
+        p: widget.p,
+        title: _activeInsightsSection != null
+            ? _activeInsightsSection!.displayTitle
+            : 'History'.localized(context),
+        docked: true,
+        blur: widget.blur,
+        largeText: widget.largeText,
+        controller: _scrollController,
+        showLargeTitle: true,
+        removeBottomPadding: true,
+        leadingAction: _activeInsightsSection != null
+            ? Tooltip(
+                message: 'Back to History'.localized(context),
+                child: PressableScale(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _activeInsightsSection = null);
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.chevron_back,
+                      color: widget.p.text,
+                      size: 19,
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
-          if (widget.onOpenManualEntry != null) ...[
-            const SizedBox(width: 8),
-            Tooltip(
-              message: 'Manual Entry'.localized(context),
-              child: PressableScale(
-                onTap: () {
-                  NotekarHaptics.selection('standard');
-                  widget.onOpenManualEntry!();
-                },
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: widget.p.surface3,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    CupertinoIcons.add,
-                    color: widget.p.accent,
-                    size: 19,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-      trailingAction: widget.onOpenSearchNotes != null
-          ? Tooltip(
-              message: 'Search Notes'.localized(context),
-              child: PressableScale(
-                onTap: () {
-                  NotekarHaptics.selection('standard');
-                  widget.onOpenSearchNotes!();
-                },
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: widget.p.surface3,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    CupertinoIcons.search,
-                    color: widget.p.text3,
-                    size: 18,
-                  ),
-                ),
-              ),
-            )
-          : null,
-      child: SizedBox(
-        width: 410,
-        height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
-        child: _viewMode == 'calendar'
-            ? HistoryCalendarView(
-                p: widget.p,
-                sections: _daySections,
-                allEntries: _entries,
-                initialDateKey: _selectedDateKey,
-                onEditNote: _openDirectNoteEditor,
-                onOpenManualEntry: widget.onOpenManualEntry,
               )
-            : Stack(
+            : Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onScaleUpdate: (details) {
-                        if (details.pointerCount >= 2) {
-                          if (details.scale < 0.85 && !_compactRows) {
-                            NotekarHaptics.selection('standard');
-                            setState(() => _compactRows = true);
-                            unawaited(
-                              SharedPreferences.getInstance().then(
-                                (prefs) =>
-                                    prefs.setBool('m-compact-history', true),
-                              ),
-                            );
-                          } else if (details.scale > 1.15 && _compactRows) {
-                            NotekarHaptics.selection('standard');
-                            setState(() => _compactRows = false);
-                            unawaited(
-                              SharedPreferences.getInstance().then(
-                                (prefs) =>
-                                    prefs.setBool('m-compact-history', false),
-                              ),
-                            );
-                          }
-                        }
+                  if (widget.onClearAll != null && _entries.isNotEmpty) ...[
+                    PressableScale(
+                      onTap: () {
+                        AppHaptics.heavy();
+                        _confirmDeleteAll();
                       },
-                      child: CustomScrollView(
-                        controller: _scrollController,
-                        physics: const BouncingScrollPhysics(
-                          parent: AlwaysScrollableScrollPhysics(),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: widget.p.surface3,
+                          shape: BoxShape.circle,
                         ),
-                        slivers: [
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: spacing16,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: AppSheetLargeTitle(
-                                p: widget.p,
-                                title: 'History'.localized(context),
-                                scrollController: _scrollController,
+                        child: Icon(
+                          CupertinoIcons.trash,
+                          color: widget.p.text3,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  // View Mode Toggle: minimal single icon button (List <-> Timeline)
+                  Tooltip(
+                    message: _viewMode == 'list'
+                        ? 'Timeline view'
+                        : 'List view',
+                    child: PressableScale(
+                      onTap: () {
+                        NotekarHaptics.selection('standard');
+                        final nextMode = _viewMode == 'list'
+                            ? 'calendar'
+                            : 'list';
+                        setState(() => _viewMode = nextMode);
+                        unawaited(
+                          SharedPreferences.getInstance().then(
+                            (prefs) =>
+                                prefs.setString('history_view_mode', nextMode),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: widget.p.surface3,
+                          shape: BoxShape.circle,
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(
+                                scale: animation,
+                                child: FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                ),
+                              ),
+                          child: Icon(
+                            _viewMode == 'list'
+                                ? CupertinoIcons.calendar
+                                : CupertinoIcons.list_bullet,
+                            key: ValueKey(_viewMode),
+                            size: 19,
+                            color: widget.p.text,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (widget.onOpenManualEntry != null) ...[
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'Manual Entry'.localized(context),
+                      child: PressableScale(
+                        onTap: () {
+                          NotekarHaptics.selection('standard');
+                          widget.onOpenManualEntry!();
+                        },
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: widget.p.surface3,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CupertinoIcons.add,
+                            color: widget.p.accent,
+                            size: 19,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+        trailingAction: _activeInsightsSection != null
+            ? null
+            : (widget.onOpenSearchNotes != null
+                  ? Tooltip(
+                      message: 'Search Notes'.localized(context),
+                      child: PressableScale(
+                        onTap: () {
+                          NotekarHaptics.selection('standard');
+                          widget.onOpenSearchNotes!();
+                        },
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: widget.p.surface3,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CupertinoIcons.search,
+                            color: widget.p.text3,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    )
+                  : null),
+        child: SizedBox(
+          width: 410,
+          height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
+          child: _activeInsightsSection != null
+              ? DayDetailContent(
+                  p: widget.p,
+                  section: _activeInsightsSection!,
+                  allEntries: _entries,
+                  onEditNote: _openDirectNoteEditor,
+                  onOpenManualEntry: widget.onOpenManualEntry,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                )
+              : _viewMode == 'calendar'
+              ? HistoryCalendarView(
+                  p: widget.p,
+                  sections: _daySections,
+                  allEntries: _entries,
+                  initialDateKey: _selectedDateKey,
+                  onEditNote: _openDirectNoteEditor,
+                  onOpenManualEntry: widget.onOpenManualEntry,
+                  onOpenInsights: (sec) {
+                    setState(() => _activeInsightsSection = sec);
+                  },
+                )
+              : Stack(
+                  children: [
+                    Positioned.fill(
+                      child: GestureDetector(
+                        onScaleUpdate: (details) {
+                          if (details.pointerCount >= 2) {
+                            if (details.scale < 0.85 && !_compactRows) {
+                              NotekarHaptics.selection('standard');
+                              setState(() => _compactRows = true);
+                              unawaited(
+                                SharedPreferences.getInstance().then(
+                                  (prefs) =>
+                                      prefs.setBool('m-compact-history', true),
+                                ),
+                              );
+                            } else if (details.scale > 1.15 && _compactRows) {
+                              NotekarHaptics.selection('standard');
+                              setState(() => _compactRows = false);
+                              unawaited(
+                                SharedPreferences.getInstance().then(
+                                  (prefs) =>
+                                      prefs.setBool('m-compact-history', false),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: CustomScrollView(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: spacing16,
+                              ),
+                              sliver: SliverToBoxAdapter(
+                                child: AppSheetLargeTitle(
+                                  p: widget.p,
+                                  title: 'History'.localized(context),
+                                  scrollController: _scrollController,
+                                ),
                               ),
                             ),
-                          ),
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: SliverStickyHeaderDelegate(
-                              height:
-                                  56.0 + (_selected.isNotEmpty ? 52.0 : 0.0),
-                              child: Container(
-                                color: widget.p.surface.withValues(
-                                  alpha: widget.blur ? 0.65 : 1.0,
-                                ),
-                                padding: const EdgeInsets.only(
-                                  bottom: spacing8,
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: spacing16,
+                            SliverPersistentHeader(
+                              pinned: true,
+                              delegate: SliverStickyHeaderDelegate(
+                                height:
+                                    56.0 + (_selected.isNotEmpty ? 52.0 : 0.0),
+                                child: Container(
+                                  color: widget.p.surface.withValues(
+                                    alpha: widget.blur ? 0.65 : 1.0,
+                                  ),
+                                  padding: const EdgeInsets.only(
+                                    bottom: spacing8,
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: spacing16,
+                                                  ),
+                                              child: Row(
+                                                children: [
+                                                  for (final f in const [
+                                                    'all',
+                                                    'sessions',
+                                                    'single',
+                                                    'notes',
+                                                    'date',
+                                                  ])
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                            right: spacing8,
+                                                          ),
+                                                      child: ChipButton(
+                                                        p: widget.p,
+                                                        label: f == 'date'
+                                                            ? (_selectedDateKey !=
+                                                                          null &&
+                                                                      _selectedDateKey !=
+                                                                          dateKey(
+                                                                            DateTime.now(),
+                                                                          )
+                                                                  ? fullDateLabel(
+                                                                      _selectedDateKey!,
+                                                                    )
+                                                                  : null)
+                                                            : switch (f) {
+                                                                'all' =>
+                                                                  'All'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
+                                                                'sessions' =>
+                                                                  'Sessions'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
+                                                                'single' =>
+                                                                  'Singles'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
+                                                                'notes' =>
+                                                                  'With Notes'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
+                                                                _ => f,
+                                                              },
+                                                        icon: f == 'date'
+                                                            ? Icons
+                                                                  .calendar_today_rounded
+                                                            : null,
+                                                        active: _filter == f,
+                                                        onTap: f == 'date'
+                                                            ? () =>
+                                                                  _openDateFilter()
+                                                            : () {
+                                                                setState(() {
+                                                                  _filter = f;
+                                                                  _selectedDateKey =
+                                                                      null;
+                                                                  _visibleCount =
+                                                                      _pageSize;
+                                                                  _rebuildMemoizedLists();
+                                                                });
+                                                                if (_scrollController
+                                                                    .hasClients) {
+                                                                  _scrollController
+                                                                      .jumpTo(
+                                                                        0.0,
+                                                                      );
+                                                                }
+                                                              },
+                                                        onLongPress: f == 'date'
+                                                            ? _openDateFilter
+                                                            : null,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
                                             ),
-                                            child: Row(
-                                              children: [
-                                                for (final f in const [
-                                                  'all',
-                                                  'sessions',
-                                                  'single',
-                                                  'notes',
-                                                  'date',
-                                                ])
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          right: spacing8,
+                                          ),
+                                          const SizedBox(width: spacing8),
+                                          Tooltip(
+                                            message: 'Scroll to top',
+                                            child: PressableScale(
+                                              onTap: () {
+                                                if (!_scrollController
+                                                    .hasClients) {
+                                                  return;
+                                                }
+                                                _scrollController.animateTo(
+                                                  0,
+                                                  duration: const Duration(
+                                                    milliseconds: 250,
+                                                  ),
+                                                  curve: Curves.easeOutCubic,
+                                                );
+                                              },
+                                              child: Container(
+                                                width: 36,
+                                                height: 36,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                  color: widget.p.surface2,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: widget.p.border,
+                                                  ),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .keyboard_double_arrow_up_rounded,
+                                                  color: widget.p.text2,
+                                                  size: 19,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: spacing16),
+                                        ],
+                                      ),
+                                      AnimatedSize(
+                                        duration: const Duration(
+                                          milliseconds: 160,
+                                        ),
+                                        curve: Curves.easeOutCubic,
+                                        child: _selected.isEmpty
+                                            ? const SizedBox.shrink()
+                                            : Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                      spacing16,
+                                                      spacing8,
+                                                      spacing16,
+                                                      0,
+                                                    ),
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 8,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: widget.p.accent
+                                                        .withValues(
+                                                          alpha: 0.12,
                                                         ),
-                                                    child: ChipButton(
-                                                      p: widget.p,
-                                                      label: f == 'date'
-                                                          ? (_selectedDateKey !=
-                                                                        null &&
-                                                                    _selectedDateKey !=
-                                                                        dateKey(
-                                                                          DateTime.now(),
-                                                                        )
-                                                                ? fullDateLabel(
-                                                                    _selectedDateKey!,
-                                                                  )
-                                                                : null)
-                                                          : switch (f) {
-                                                              'all' =>
-                                                                'All'.localized(
-                                                                  context,
-                                                                ),
-                                                              'sessions' =>
-                                                                'Sessions'
-                                                                    .localized(
-                                                                      context,
-                                                                    ),
-                                                              'single' =>
-                                                                'Singles'
-                                                                    .localized(
-                                                                      context,
-                                                                    ),
-                                                              'notes' =>
-                                                                'With Notes'
-                                                                    .localized(
-                                                                      context,
-                                                                    ),
-                                                              _ => f,
-                                                            },
-                                                      icon: f == 'date'
-                                                          ? Icons
-                                                                .calendar_today_rounded
-                                                          : null,
-                                                      active: _filter == f,
-                                                      onTap: f == 'date'
-                                                          ? () =>
-                                                                _openDateFilter()
-                                                          : () {
-                                                              setState(() {
-                                                                _filter = f;
-                                                                _selectedDateKey =
-                                                                    null;
-                                                                _visibleCount =
-                                                                    _pageSize;
-                                                                _rebuildMemoizedLists();
-                                                              });
-                                                              if (_scrollController
-                                                                  .hasClients) {
-                                                                _scrollController
-                                                                    .jumpTo(
-                                                                      0.0,
-                                                                    );
-                                                              }
-                                                            },
-                                                      onLongPress: f == 'date'
-                                                          ? _openDateFilter
-                                                          : null,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          999,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: widget.p.accent
+                                                          .withValues(
+                                                            alpha: 0.20,
+                                                          ),
                                                     ),
                                                   ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: spacing8),
-                                        Tooltip(
-                                          message: 'Scroll to top',
-                                          child: PressableScale(
-                                            onTap: () {
-                                              if (!_scrollController
-                                                  .hasClients) {
-                                                return;
-                                              }
-                                              _scrollController.animateTo(
-                                                0,
-                                                duration: const Duration(
-                                                  milliseconds: 250,
-                                                ),
-                                                curve: Curves.easeOutCubic,
-                                              );
-                                            },
-                                            child: Container(
-                                              width: 36,
-                                              height: 36,
-                                              alignment: Alignment.center,
-                                              decoration: BoxDecoration(
-                                                color: widget.p.surface2,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: widget.p.border,
-                                                ),
-                                              ),
-                                              child: Icon(
-                                                Icons
-                                                    .keyboard_double_arrow_up_rounded,
-                                                color: widget.p.text2,
-                                                size: 19,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: spacing16),
-                                      ],
-                                    ),
-                                    AnimatedSize(
-                                      duration: const Duration(
-                                        milliseconds: 160,
-                                      ),
-                                      curve: Curves.easeOutCubic,
-                                      child: _selected.isEmpty
-                                          ? const SizedBox.shrink()
-                                          : Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                    spacing16,
-                                                    spacing8,
-                                                    spacing16,
-                                                    0,
+                                                  child: Text(
+                                                    'Selected ${_selected.length} of 2 for duration',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      color: widget.p.accent,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
                                                   ),
+                                                ),
+                                              ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            () {
+                              final todayK = dateKey(DateTime.now());
+                              final activeSec = _daySections
+                                  .where(
+                                    (s) =>
+                                        s.dateKey ==
+                                        (_selectedDateKey ?? todayK),
+                                  )
+                                  .firstOrNull;
+                              if (activeSec != null &&
+                                  activeSec.items.isNotEmpty &&
+                                  _viewMode != 'calendar') {
+                                return SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      spacing16,
+                                      0,
+                                      spacing16,
+                                      spacing12,
+                                    ),
+                                    child: _TodayInlineInsightCard(
+                                      p: widget.p,
+                                      section: activeSec,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return const SliverToBoxAdapter(
+                                child: SizedBox.shrink(),
+                              );
+                            }(),
+                            if (_timelineRows.isEmpty)
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: HIGEmptyState(
+                                  p: widget.p,
+                                  icon: _emptyIcon,
+                                  title: _emptyTitle,
+                                  message: _emptyMessage,
+                                  actionLabel: _filter == 'all'
+                                      ? 'Start Logging'
+                                      : 'Show All',
+                                  onAction: _filter == 'all'
+                                      ? () => Navigator.pop(context)
+                                      : () {
+                                          setState(() {
+                                            _filter = 'all';
+                                            _visibleCount = _pageSize;
+                                            _rebuildMemoizedLists();
+                                          });
+                                        },
+                                ),
+                              )
+                            else
+                              SliverPadding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  0,
+                                  0,
+                                  0,
+                                  spacing48,
+                                ),
+                                sliver: SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      if (index >= _timelineRows.length) {
+                                        if (hasOlderRows) {
+                                          return Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                              spacing16,
+                                              4,
+                                              spacing16,
+                                              8,
+                                            ),
+                                            child: PressableScale(
+                                              onTap: () => setState(() {
+                                                _visibleCount += _pageSize;
+                                                _updateVisibleItems();
+                                              }),
                                               child: Container(
-                                                width: double.infinity,
+                                                alignment: Alignment.center,
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                      vertical: 8,
+                                                      vertical: 12,
                                                     ),
                                                 decoration: BoxDecoration(
-                                                  color: widget.p.accent
-                                                      .withValues(alpha: 0.12),
+                                                  color: widget.p.surface2,
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                         999,
                                                       ),
                                                   border: Border.all(
-                                                    color: widget.p.accent
-                                                        .withValues(
-                                                          alpha: 0.20,
-                                                        ),
+                                                    color: widget.p.border,
                                                   ),
                                                 ),
                                                 child: Text(
-                                                  'Selected ${_selected.length} of 2 for duration',
-                                                  textAlign: TextAlign.center,
+                                                  'Load older moments'
+                                                      .localized(context),
                                                   style: TextStyle(
                                                     color: widget.p.accent,
-                                                    fontSize: 12,
+                                                    fontSize: 13,
                                                     fontWeight: FontWeight.w800,
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          () {
-                            final todayK = dateKey(DateTime.now());
-                            final activeSec = _daySections
-                                .where(
-                                  (s) =>
-                                      s.dateKey == (_selectedDateKey ?? todayK),
-                                )
-                                .firstOrNull;
-                            if (activeSec != null &&
-                                activeSec.items.isNotEmpty &&
-                                _viewMode != 'calendar') {
-                              return SliverToBoxAdapter(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    spacing16,
-                                    0,
-                                    spacing16,
-                                    spacing12,
-                                  ),
-                                  child: _TodayInlineInsightCard(
-                                    p: widget.p,
-                                    section: activeSec,
-                                  ),
-                                ),
-                              );
-                            }
-                            return const SliverToBoxAdapter(
-                              child: SizedBox.shrink(),
-                            );
-                          }(),
-                          if (_timelineRows.isEmpty)
-                            SliverFillRemaining(
-                              hasScrollBody: false,
-                              child: HIGEmptyState(
-                                p: widget.p,
-                                icon: _emptyIcon,
-                                title: _emptyTitle,
-                                message: _emptyMessage,
-                                actionLabel: _filter == 'all'
-                                    ? 'Start Logging'
-                                    : 'Show All',
-                                onAction: _filter == 'all'
-                                    ? () => Navigator.pop(context)
-                                    : () {
-                                        setState(() {
-                                          _filter = 'all';
-                                          _visibleCount = _pageSize;
-                                          _rebuildMemoizedLists();
-                                        });
-                                      },
-                              ),
-                            )
-                          else
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(
-                                0,
-                                0,
-                                0,
-                                spacing48,
-                              ),
-                              sliver: SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                    if (index >= _timelineRows.length) {
-                                      if (hasOlderRows) {
-                                        return Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                            spacing16,
-                                            4,
-                                            spacing16,
-                                            8,
-                                          ),
-                                          child: PressableScale(
-                                            onTap: () => setState(() {
-                                              _visibleCount += _pageSize;
-                                              _updateVisibleItems();
-                                            }),
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 12,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: widget.p.surface2,
-                                                borderRadius:
-                                                    BorderRadius.circular(999),
-                                                border: Border.all(
-                                                  color: widget.p.border,
-                                                ),
-                                              ),
-                                              child: Text(
-                                                'Load older moments'.localized(
-                                                  context,
-                                                ),
-                                                style: TextStyle(
-                                                  color: widget.p.accent,
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      return null;
-                                    }
-
-                                    final row = _timelineRows[index];
-                                    if (row is _SectionHeaderRow) {
-                                      final sec = row.section;
-                                      return GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
-                                        onTap: () {
-                                          HapticFeedback.lightImpact();
-                                          showModalBottomSheet<void>(
-                                            context: context,
-                                            backgroundColor: Colors.transparent,
-                                            isScrollControlled: true,
-                                            builder: (_) => DayDetailSheet(
-                                              p: widget.p,
-                                              section: sec,
-                                              allEntries: _entries,
-                                              onEditNote: _openDirectNoteEditor,
-                                              onOpenManualEntry:
-                                                  widget.onOpenManualEntry,
-                                            ),
                                           );
-                                        },
-                                        child: Padding(
-                                          padding: EdgeInsets.fromLTRB(
-                                            spacing16,
-                                            _compactRows ? 8 : spacing16,
-                                            spacing16,
-                                            _compactRows ? 4 : spacing8,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Expanded(
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .calendar_today_rounded,
-                                                          size: 12,
-                                                          color: widget.p.text3,
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 6,
-                                                        ),
-                                                        Expanded(
-                                                          child: Text(
-                                                            sec.displayTitle,
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                              color:
-                                                                  widget.p.text,
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                              letterSpacing:
-                                                                  -0.2,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 6,
-                                                                vertical: 2,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color: widget
-                                                                .p
-                                                                .surface3
-                                                                .withValues(
-                                                                  alpha: 0.5,
-                                                                ),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  999,
-                                                                ),
-                                                          ),
-                                                          child: Text(
-                                                            '${sec.totalLogs}',
-                                                            style: TextStyle(
-                                                              color: widget
-                                                                  .p
-                                                                  .text2,
-                                                              fontSize: 11,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                              fontFeatures: const [
-                                                                FontFeature.tabularFigures(),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  if (sec
-                                                          .totalTrackedDuration
-                                                          .inMinutes >
-                                                      0)
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 8,
-                                                            vertical: 2,
-                                                          ),
-                                                      decoration: BoxDecoration(
-                                                        color:
-                                                            const Color(
-                                                              0xFF30D158,
-                                                            ).withValues(
-                                                              alpha: 0.12,
-                                                            ),
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              999,
-                                                            ),
-                                                      ),
+                                        }
+                                        return null;
+                                      }
+
+                                      final row = _timelineRows[index];
+                                      if (row is _SectionHeaderRow) {
+                                        final sec = row.section;
+                                        return GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: () {
+                                            HapticFeedback.lightImpact();
+                                            setState(() {
+                                              _activeInsightsSection = sec;
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                              spacing16,
+                                              _compactRows ? 8 : spacing16,
+                                              spacing16,
+                                              _compactRows ? 4 : spacing8,
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Expanded(
                                                       child: Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
                                                         children: [
-                                                          const Icon(
+                                                          Icon(
                                                             Icons
-                                                                .timelapse_rounded,
-                                                            size: 11,
-                                                            color: Color(
-                                                              0xFF30D158,
+                                                                .calendar_today_rounded,
+                                                            size: 12,
+                                                            color:
+                                                                widget.p.text3,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Expanded(
+                                                            child: Text(
+                                                              sec.displayTitle,
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                color: widget
+                                                                    .p
+                                                                    .text,
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                letterSpacing:
+                                                                    -0.2,
+                                                              ),
                                                             ),
                                                           ),
                                                           const SizedBox(
-                                                            width: 4,
+                                                            width: 8,
                                                           ),
-                                                          Text(
-                                                            sec.formattedTrackedDuration,
-                                                            style: const TextStyle(
-                                                              color: Color(
-                                                                0xFF30D158,
+                                                          Container(
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  horizontal: 6,
+                                                                  vertical: 2,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              color: widget
+                                                                  .p
+                                                                  .surface3
+                                                                  .withValues(
+                                                                    alpha: 0.5,
+                                                                  ),
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    999,
+                                                                  ),
+                                                            ),
+                                                            child: Text(
+                                                              '${sec.totalLogs}',
+                                                              style: TextStyle(
+                                                                color: widget
+                                                                    .p
+                                                                    .text2,
+                                                                fontSize: 11,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                fontFeatures:
+                                                                    const [
+                                                                      FontFeature.tabularFigures(),
+                                                                    ],
                                                               ),
-                                                              fontSize: 11,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                              fontFeatures: [
-                                                                FontFeature.tabularFigures(),
-                                                              ],
                                                             ),
                                                           ),
                                                         ],
                                                       ),
                                                     ),
-                                                ],
-                                              ),
-                                              if (sec.categorySummaryText !=
-                                                  null) ...[
-                                                const SizedBox(height: 4),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                        left: 18,
+                                                    if (sec
+                                                            .totalTrackedDuration
+                                                            .inMinutes >
+                                                        0)
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 8,
+                                                              vertical: 2,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color:
+                                                              const Color(
+                                                                0xFF30D158,
+                                                              ).withValues(
+                                                                alpha: 0.12,
+                                                              ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                999,
+                                                              ),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            const Icon(
+                                                              Icons
+                                                                  .timelapse_rounded,
+                                                              size: 11,
+                                                              color: Color(
+                                                                0xFF30D158,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 4,
+                                                            ),
+                                                            Text(
+                                                              sec.formattedTrackedDuration,
+                                                              style: const TextStyle(
+                                                                color: Color(
+                                                                  0xFF30D158,
+                                                                ),
+                                                                fontSize: 11,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                fontFeatures: [
+                                                                  FontFeature.tabularFigures(),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
-                                                  child: Text(
-                                                    sec.categorySummaryText!,
-                                                    style: TextStyle(
-                                                      color: widget.p.text3,
-                                                      fontSize: 10.5,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      letterSpacing: 0.2,
+                                                  ],
+                                                ),
+                                                if (sec.categorySummaryText !=
+                                                    null) ...[
+                                                  const SizedBox(height: 4),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          left: 18,
+                                                        ),
+                                                    child: Text(
+                                                      sec.categorySummaryText!,
+                                                      style: TextStyle(
+                                                        color: widget.p.text3,
+                                                        fontSize: 10.5,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        letterSpacing: 0.2,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
+                                                ],
                                               ],
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    }
+                                        );
+                                      }
 
-                                    final elem = row as _TimelineElementRow;
-                                    if (elem.item is TimelineGapItem) {
-                                      final gap = elem.item as TimelineGapItem;
-                                      return TimelineGapCard(
-                                        p: widget.p,
-                                        startTimestamp: gap.startTimestamp,
-                                        endTimestamp: gap.endTimestamp,
-                                        onTap: () {
-                                          widget.onOpenManualEntry?.call(
-                                            prefilledStartTime:
-                                                DateTime.fromMillisecondsSinceEpoch(
-                                                  gap.startTimestamp,
+                                      final elem = row as _TimelineElementRow;
+                                      if (elem.item is TimelineGapItem) {
+                                        final gap =
+                                            elem.item as TimelineGapItem;
+                                        return TimelineGapCard(
+                                          p: widget.p,
+                                          startTimestamp: gap.startTimestamp,
+                                          endTimestamp: gap.endTimestamp,
+                                          onTap: () {
+                                            widget.onOpenManualEntry?.call(
+                                              prefilledStartTime:
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                    gap.startTimestamp,
+                                                  ),
+                                              prefilledEndTime:
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                    gap.endTimestamp,
+                                                  ),
+                                            );
+                                          },
+                                          onClaimRest:
+                                              widget.onClaimRest != null
+                                              ? () => _claimRest(
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                    gap.startTimestamp,
+                                                  ),
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                    gap.endTimestamp,
+                                                  ),
+                                                )
+                                              : null,
+                                        );
+                                      }
+                                      if (elem.item is TimelineSessionItem) {
+                                        final session =
+                                            elem.item as TimelineSessionItem;
+                                        final isSelected = _selected.any(
+                                          (m) =>
+                                              session.momentIds.contains(m.id),
+                                        );
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: spacing16,
+                                          ),
+                                          child: TimelineSessionCard(
+                                            p: widget.p,
+                                            session: session,
+                                            selected: isSelected,
+                                            compact: _compactRows,
+                                            onEditNote: () =>
+                                                _openDirectNoteEditor(
+                                                  session.noteMoment,
                                                 ),
-                                            prefilledEndTime:
-                                                DateTime.fromMillisecondsSinceEpoch(
-                                                  gap.endTimestamp,
+                                            onDeleteSession: () =>
+                                                _removeSession(session),
+                                            onEndSession: session.isOngoing
+                                                ? () => _endLiveSession(session)
+                                                : null,
+                                            onTapCard: _selected.isNotEmpty
+                                                ? () => _handleSelection(
+                                                    session.inMoment,
+                                                    isSelected,
+                                                  )
+                                                : (_enableNoteOnClick
+                                                      ? () =>
+                                                            _openDirectNoteEditor(
+                                                              session
+                                                                  .noteMoment,
+                                                            )
+                                                      : () => _handleSelection(
+                                                          session.inMoment,
+                                                          isSelected,
+                                                        )),
+                                            onLongPressCard: () =>
+                                                _showMomentDetails(
+                                                  session.noteMoment,
                                                 ),
-                                          );
-                                        },
-                                        onClaimRest: widget.onClaimRest != null
-                                            ? () => _claimRest(
-                                                DateTime.fromMillisecondsSinceEpoch(
-                                                  gap.startTimestamp,
-                                                ),
-                                                DateTime.fromMillisecondsSinceEpoch(
-                                                  gap.endTimestamp,
-                                                ),
-                                              )
-                                            : null,
-                                      );
-                                    }
-                                    if (elem.item is TimelineSessionItem) {
-                                      final session =
-                                          elem.item as TimelineSessionItem;
+                                          ),
+                                        );
+                                      }
+
+                                      final single =
+                                          elem.item as TimelineSingleItem;
+                                      final moment = single.moment;
                                       final isSelected = _selected.any(
-                                        (m) => session.momentIds.contains(m.id),
+                                        (m) => m.id == moment.id,
                                       );
+                                      final isGodMode =
+                                          moment.note.contains(
+                                            'God Mode Unlocked',
+                                          ) ||
+                                          moment.note.contains('#godmode');
+
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: spacing16,
                                         ),
-                                        child: TimelineSessionCard(
+                                        child: TimelineSingleTile(
                                           p: widget.p,
-                                          session: session,
+                                          moment: moment,
+                                          singleNumber:
+                                              _singleNumberMap[moment.id],
                                           selected: isSelected,
                                           compact: _compactRows,
+                                          isFirst: elem.isFirst,
+                                          isLast: elem.isLast,
                                           onEditNote: () =>
-                                              _openDirectNoteEditor(
-                                                session.noteMoment,
-                                              ),
-                                          onDeleteSession: () =>
-                                              _removeSession(session),
-                                          onEndSession: session.isOngoing
-                                              ? () => _endLiveSession(session)
-                                              : null,
-                                          onTapCard: _selected.isNotEmpty
+                                              _openDirectNoteEditor(moment),
+                                          onDelete: () => _removeEntry(moment),
+                                          onTap: _selected.isNotEmpty
                                               ? () => _handleSelection(
-                                                  session.inMoment,
+                                                  moment,
                                                   isSelected,
                                                 )
                                               : (_enableNoteOnClick
                                                     ? () =>
                                                           _openDirectNoteEditor(
-                                                            session.noteMoment,
+                                                            moment,
                                                           )
                                                     : () => _handleSelection(
-                                                        session.inMoment,
+                                                        moment,
                                                         isSelected,
                                                       )),
-                                          onLongPressCard: () =>
-                                              _showMomentDetails(
-                                                session.noteMoment,
-                                              ),
+                                          onLongPress: isGodMode
+                                              ? () =>
+                                                    showGodModeUnlockCelebrationDialog(
+                                                      context: context,
+                                                      p: widget.p,
+                                                    )
+                                              : () =>
+                                                    _showMomentDetails(moment),
                                         ),
                                       );
-                                    }
-
-                                    final single =
-                                        elem.item as TimelineSingleItem;
-                                    final moment = single.moment;
-                                    final isSelected = _selected.any(
-                                      (m) => m.id == moment.id,
-                                    );
-                                    final isGodMode =
-                                        moment.note.contains(
-                                          'God Mode Unlocked',
-                                        ) ||
-                                        moment.note.contains('#godmode');
-
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: spacing16,
-                                      ),
-                                      child: TimelineSingleTile(
-                                        p: widget.p,
-                                        moment: moment,
-                                        singleNumber:
-                                            _singleNumberMap[moment.id],
-                                        selected: isSelected,
-                                        compact: _compactRows,
-                                        isFirst: elem.isFirst,
-                                        isLast: elem.isLast,
-                                        onEditNote: () =>
-                                            _openDirectNoteEditor(moment),
-                                        onDelete: () => _removeEntry(moment),
-                                        onTap: _selected.isNotEmpty
-                                            ? () => _handleSelection(
-                                                moment,
-                                                isSelected,
-                                              )
-                                            : (_enableNoteOnClick
-                                                  ? () => _openDirectNoteEditor(
-                                                      moment,
-                                                    )
-                                                  : () => _handleSelection(
-                                                      moment,
-                                                      isSelected,
-                                                    )),
-                                        onLongPress: isGodMode
-                                            ? () =>
-                                                  showGodModeUnlockCelebrationDialog(
-                                                    context: context,
-                                                    p: widget.p,
-                                                  )
-                                            : () => _showMomentDetails(moment),
-                                      ),
-                                    );
-                                  },
-                                  childCount:
-                                      _timelineRows.length +
-                                      (hasOlderRows ? 1 : 0),
-                                  addAutomaticKeepAlives: false,
-                                  addRepaintBoundaries: true,
+                                    },
+                                    childCount:
+                                        _timelineRows.length +
+                                        (hasOlderRows ? 1 : 0),
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: true,
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom:
-                        spacing12, // Elevated to avoid touching the navigation area
-                    left: 16,
-                    right: 16,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      reverseDuration: const Duration(milliseconds: 250),
-                      switchInCurve: Curves.easeOutBack,
-                      // Professional iOS spring curve
-                      switchOutCurve: Curves.easeIn,
-                      transitionBuilder: (child, animation) {
-                        final slide = Tween<Offset>(
-                          begin: const Offset(0, 0.4),
-                          end: Offset.zero,
-                        ).animate(animation);
-                        final scale = Tween<double>(
-                          begin: 0.92,
-                          end: 1.0,
-                        ).animate(animation);
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: slide,
-                            child: ScaleTransition(scale: scale, child: child),
-                          ),
-                        );
-                      },
-                      child: _notice == null
-                          ? const SizedBox.shrink()
-                          : _HistoryNoticePill(
-                              key: ValueKey('notice-pill-$_noticeToken'),
-                              p: widget.p,
-                              notice: _notice!,
-                              onUndo: _noticeUndo,
-                              token: _noticeToken,
-                              duration: _noticeDuration,
+                    Positioned(
+                      bottom:
+                          spacing12, // Elevated to avoid touching the navigation area
+                      left: 16,
+                      right: 16,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        reverseDuration: const Duration(milliseconds: 250),
+                        switchInCurve: Curves.easeOutBack,
+                        // Professional iOS spring curve
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (child, animation) {
+                          final slide = Tween<Offset>(
+                            begin: const Offset(0, 0.4),
+                            end: Offset.zero,
+                          ).animate(animation);
+                          final scale = Tween<double>(
+                            begin: 0.92,
+                            end: 1.0,
+                          ).animate(animation);
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: slide,
+                              child: ScaleTransition(
+                                scale: scale,
+                                child: child,
+                              ),
                             ),
+                          );
+                        },
+                        child: _notice == null
+                            ? const SizedBox.shrink()
+                            : _HistoryNoticePill(
+                                key: ValueKey('notice-pill-$_noticeToken'),
+                                p: widget.p,
+                                notice: _notice!,
+                                onUndo: _noticeUndo,
+                                token: _noticeToken,
+                                duration: _noticeDuration,
+                              ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       ),
     );
   }

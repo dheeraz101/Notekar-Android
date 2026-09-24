@@ -864,6 +864,50 @@ const List<HelpGuideItem> allHelpFaqItems = [
     isFaq: true,
     keywords: ['customize hashtags', 'edit hashtags', 'chips', 'quick tags'],
   ),
+  HelpGuideItem(
+    title: 'How do I set up my personal profile, photo, and birth date?',
+    content:
+        'Under Settings, tap the Apple ID-style profile card at the top to configure your name, birth date, and avatar (upload a custom photo or choose from minimal curated presets). Your identity is reflected on Sunday Dispatches, Milestone cards, and lifetime horizons while remaining 100% private on your device.',
+    isFaq: true,
+    keywords: [
+      'personal profile',
+      'avatar',
+      'photo',
+      'dob',
+      'birth date',
+      'identity',
+      'profile card',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'What is the Memento Mori card in the Executive Dashboard?',
+    content:
+        'The Memento Mori card visualizes your lived weeks versus remaining horizon, strictly capped at a 100-year ceiling (customizable up to 100). It breaks down your time into deliberate focus, claimed rest, and untracked drift, grounded in Stoic reflection.',
+    isFaq: true,
+    keywords: [
+      'memento mori',
+      'life horizon',
+      'weeks lived',
+      'remaining time',
+      '100 years',
+      'stoic',
+      'executive dashboard',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'How do I choose custom glyph icons for my modes and categories?',
+    content:
+        'Under Settings > Modes & Categories, tap any mode to edit its minimal glyph icon and palette dot. NoteKar provides 18 curated minimal glyphs (e.g. Code, Reading, Fitness, Heart, Meditate, Star) that update seamlessly across your top capsule, history cards, and dashboard.',
+    isFaq: true,
+    keywords: [
+      'mode icons',
+      'glyph icons',
+      'custom icons',
+      'categories',
+      'minimal glyphs',
+      'capsule icons',
+    ],
+  ),
 ];
 
 /// Combined catalog for unified search
