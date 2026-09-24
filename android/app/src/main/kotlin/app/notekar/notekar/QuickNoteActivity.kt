@@ -61,9 +61,21 @@ class QuickNoteActivity : Activity() {
             }
         }
 
+        val isSession = intent.getBooleanExtra(EXTRA_IS_SESSION, false)
+        val explicitLogType = intent.getStringExtra(EXTRA_LOG_TYPE)
+
         // Title
         val title = TextView(this).apply {
-            text = "Quick Note"
+            text = if (isSession) {
+                val prefs =
+                    getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+                val nextAction =
+                    prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
+                val resolvedType = explicitLogType ?: nextAction
+                if (resolvedType == "out") "Log OUT Note" else "Log IN Note"
+            } else {
+                "Quick Note"
+            }
             setTextColor(Color.WHITE)
             textSize = 17f
             typeface =
@@ -219,9 +231,9 @@ class QuickNoteActivity : Activity() {
             )
         }
 
-        // Cancel Button
+        // Cancel / Skip Button
         val btnCancel = TextView(this).apply {
-            text = "Cancel"
+            text = if (isSession) "Skip" else "Cancel"
             setTextColor(Color.parseColor("#B3FFFFFF"))
             textSize = 14f
             gravity = Gravity.CENTER
@@ -241,6 +253,19 @@ class QuickNoteActivity : Activity() {
             }
             layoutParams = lp
             setOnClickListener {
+                if (isSession) {
+                    val prefs =
+                        getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+                    val nextAction =
+                        prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
+                    val logType = explicitLogType ?: nextAction
+
+                    NoteKarWidgetProvider.performBackgroundLog(
+                        this@QuickNoteActivity,
+                        logType,
+                        ""
+                    )
+                }
                 finish()
             }
         }
@@ -272,21 +297,17 @@ class QuickNoteActivity : Activity() {
             layoutParams = lp
             setOnClickListener {
                 val note = input.text.toString().trim()
-                if (note.isNotEmpty()) {
-                    val prefs =
-                        getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
-                    val mode =
-                        prefs.getString(NoteKarWidgetProvider.KEY_MODE, "two-way") ?: "two-way"
-                    val nextAction =
-                        prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
-                    val logType = if (mode == "single") "single" else nextAction
+                val prefs =
+                    getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+                val nextAction =
+                    prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
+                val logType = explicitLogType ?: if (isSession) nextAction else "single"
 
-                    NoteKarWidgetProvider.performBackgroundLog(
-                        this@QuickNoteActivity,
-                        logType,
-                        note
-                    )
-                }
+                NoteKarWidgetProvider.performBackgroundLog(
+                    this@QuickNoteActivity,
+                    logType,
+                    note
+                )
                 finish()
             }
         }
@@ -310,5 +331,10 @@ class QuickNoteActivity : Activity() {
             (r * density).toInt(),
             (b * density).toInt()
         )
+    }
+
+    companion object {
+        const val EXTRA_LOG_TYPE = "log_type"
+        const val EXTRA_IS_SESSION = "is_session"
     }
 }

@@ -236,7 +236,31 @@ class _NoteKarHomeState extends State<NoteKarHome>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _entriesNotifier.addListener(_updateStreakShields);
+    _setupMethodChannelHandlers();
     _load();
+  }
+
+  void _setupMethodChannelHandlers() {
+    _fileChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onBackgroundLogRecorded') {
+        if (_prefs != null) {
+          await _syncBackgroundLogs(_prefs!);
+          final savedInOut = _prefs!.getString('m-inout');
+          final savedSes = _prefs!.getInt('m-ses');
+          if (mounted) {
+            setState(() {
+              if (savedInOut != null) _inout = savedInOut;
+              _sessionStart = savedSes;
+            });
+          }
+        }
+      } else if (call.method == 'onModeChanged') {
+        final newMode = call.arguments as String?;
+        if (newMode != null && mounted) {
+          _setMode(newMode);
+        }
+      }
+    });
   }
 
   @override
@@ -400,6 +424,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      if (_prefs != null) {
+        unawaited(_syncBackgroundLogs(_prefs!));
+        final savedMode = _prefs!.getString('m-mode');
+        final savedInOut = _prefs!.getString('m-inout');
+        final savedSes = _prefs!.getInt('m-ses');
+        if (mounted) {
+          setState(() {
+            if (savedMode != null) _mode = savedMode;
+            if (savedInOut != null) _inout = savedInOut;
+            _sessionStart = savedSes;
+          });
+        }
+      }
+
       if (_startupComplete) {
         _startMotionIfNeeded();
       }
@@ -535,7 +573,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           prefs.getString('sobriety_milestone_theme') ?? 'science';
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
-      _mode = _defaultMode;
+      _mode = prefs.getString('m-mode') ?? _defaultMode;
       _inout = prefs.getString('m-inout') ?? 'in';
       _sessionStart = prefs.getInt('m-ses');
       _tapDelay = prefs.getInt('m-delay') ?? 0;
@@ -1198,8 +1236,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     try {
-      if (_mode == 'two-way') {
-        if (oldInOut == 'in') {
+      if (_mode == 'two-way' || type == 'in' || type == 'out') {
+        if (_sessionStart != null) {
           await _saveSetting('m-ses', _sessionStart!);
         } else {
           await _prefs?.remove('m-ses');
@@ -1390,9 +1428,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
   }
 
-  void _toggleMode() {
+  void _setMode(String targetMode) {
+    if (_mode == targetMode) return;
     setState(() {
-      _mode = _mode == 'two-way' ? 'single' : 'two-way';
+      _mode = targetMode;
     });
     _saveSetting('m-mode', _mode);
     NotekarHaptics.selection(_hapticStyle);
@@ -1401,6 +1440,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       withHaptic: false,
     );
     unawaited(_updateAndroidWidget());
+  }
+
+  void _toggleMode() {
+    _setMode(_mode == 'two-way' ? 'single' : 'two-way');
   }
 
   void _showToast(String text, {bool warning = false, bool withHaptic = true}) {
@@ -4635,6 +4678,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   categories: _categories,
                   activeCategory: _activeCategory,
                   isExpanded: _headerExpanded,
+                  mode: _mode,
+                  onModeChanged: _setMode,
                   onExpansionChanged: (expanded) {
                     setState(() => _headerExpanded = expanded);
                   },

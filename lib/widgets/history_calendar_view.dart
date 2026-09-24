@@ -42,6 +42,7 @@ class HistoryCalendarView extends StatefulWidget {
 
 class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   late PageController _pageController;
+  late ScrollController _stripScrollController;
   late int _currentIndex;
   late List<DateTime> _daysList;
   late Map<String, TimelineDaySection> _sectionMap;
@@ -56,13 +57,13 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // Build ordered list of days: today at index 0, yesterday at index 1, etc.
+    // Build ordered list of days chronologically: oldest at index 0, today at last index
     _daysList = List.generate(
       _daysRange,
-      (i) => today.subtract(Duration(days: i)),
+      (i) => today.subtract(Duration(days: (_daysRange - 1) - i)),
     );
 
-    int initialIdx = 0;
+    int initialIdx = _daysList.length - 1;
     if (widget.initialDateKey != null) {
       for (int i = 0; i < _daysList.length; i++) {
         if (dateKey(_daysList[i]) == widget.initialDateKey) {
@@ -74,6 +75,11 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
 
     _currentIndex = initialIdx;
     _pageController = PageController(initialPage: initialIdx);
+    _stripScrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentDay(animated: false);
+    });
   }
 
   @override
@@ -85,7 +91,29 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   @override
   void dispose() {
     _pageController.dispose();
+    _stripScrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToCurrentDay({bool animated = true}) {
+    if (!_stripScrollController.hasClients) return;
+    const itemWidth = 54.0;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final targetOffset =
+        (_currentIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+    final clamped = targetOffset.clamp(
+      0.0,
+      _stripScrollController.position.maxScrollExtent,
+    );
+    if (animated) {
+      _stripScrollController.animateTo(
+        clamped,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _stripScrollController.jumpTo(clamped);
+    }
   }
 
   void _onDaySelected(int index) {
@@ -97,6 +125,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOutCubic,
     );
+    _scrollToCurrentDay(animated: true);
   }
 
   String _formatDayLabel(DateTime d) {
@@ -144,9 +173,10 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
           height: 64,
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: ListView.builder(
+            controller: _stripScrollController,
             scrollDirection: Axis.horizontal,
-            reverse: true,
-            // Today is on right or leftmost depending on flow
+            reverse: false,
+            // Chronological order: past on left, today on right
             itemCount: _daysList.length,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             itemBuilder: (ctx, index) {
@@ -327,6 +357,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             onPageChanged: (idx) {
               HapticFeedback.selectionClick();
               setState(() => _currentIndex = idx);
+              _scrollToCurrentDay(animated: true);
             },
             itemBuilder: (ctx, pageIdx) {
               final d = _daysList[pageIdx];
@@ -354,7 +385,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Swipe left or tap + to log retroactively'.localized(
+                        'Swipe right or tap + to log retroactively'.localized(
                           context,
                         ),
                         style: TextStyle(color: widget.p.text3, fontSize: 12),

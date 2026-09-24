@@ -79,10 +79,12 @@ class MainActivity : FlutterActivity() {
             android.util.Log.e("MainActivity", "Failed to initialize persistent control panel", e)
         }
 
-        MethodChannel(
+        val channel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "notekar/files"
-        ).setMethodCallHandler { call, result ->
+        )
+        activeChannel = channel
+        channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "saveTextFile" -> {
                     val fileName = call.argument<String>("fileName") ?: "notekar-export.txt"
@@ -1090,6 +1092,30 @@ class MainActivity : FlutterActivity() {
     }
 
     companion object {
+        private var activeChannel: MethodChannel? = null
+
+        fun notifyBackgroundLogRecorded() {
+            try {
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    activeChannel?.invokeMethod("onBackgroundLogRecorded", null)
+                }
+            } catch (_: Exception) {
+            }
+        }
+
+        fun notifyModeChanged(newMode: String) {
+            try {
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    activeChannel?.invokeMethod("onModeChanged", newMode)
+                }
+            } catch (_: Exception) {
+            }
+        }
+
+        fun updatePersistentControlPanel(context: Context) {
+            showPersistentControlPanel(context)
+        }
+
         private const val OPEN_TEXT_FILE_REQUEST = 4021
         private const val NOTIFICATION_PERMISSION_REQUEST = 4022
         private const val PRIVACY_LOCK_REQUEST = 4023
@@ -1245,19 +1271,41 @@ class MainActivity : FlutterActivity() {
                 builder.setShowWhen(false)
             }
 
+            val toggleIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                action = NotificationActionReceiver.ACTION_TOGGLE_MODE
+            }
+            val togglePending = PendingIntent.getBroadcast(
+                context,
+                1006,
+                toggleIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val singleLogIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                action = NoteKarWidgetProvider.ACTION_LOG_BG
+                putExtra(NoteKarWidgetProvider.EXTRA_LOG_TYPE, "single")
+            }
+            val singleLogPending = PendingIntent.getBroadcast(
+                context,
+                1007,
+                singleLogIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             if (isTwoWay) {
                 if (isCurrentlyIn) {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "Log", logNotePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 } else {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log IN", inPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "Log", logNotePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 }
             } else {
-                builder.addAction(R.drawable.ic_stat_notekar, "Log", logNotePending)
+                builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogPending)
                 builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
+                builder.addAction(R.drawable.ic_stat_notekar, "⇄ Two-Way", togglePending)
             }
 
             manager.notify(PERSISTENT_NOTIFICATION_ID, builder.build())

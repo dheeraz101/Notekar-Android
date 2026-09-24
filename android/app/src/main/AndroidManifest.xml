@@ -239,6 +239,7 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="app.notekar.notekar.DISMISS_NOTICE" />
+                <action android:name="app.notekar.notekar.ACTION_TOGGLE_MODE" />
             </intent-filter>
         </receiver>
         <receiver

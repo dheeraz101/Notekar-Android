@@ -150,8 +150,11 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val newCount = todayCount + 1
             val now = System.currentTimeMillis()
 
+            val currentNextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
             val newNextAction = if (mode == "two-way") {
-                if (type == "in") "out" else "in"
+                if (type == "in") "out"
+                else if (type == "out") "in"
+                else currentNextAction
             } else {
                 "single"
             }
@@ -180,6 +183,12 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             // Update all widgets visually and instantly
             updateAllWidgets(context)
+
+            // Update persistent control panel notification
+            MainActivity.updatePersistentControlPanel(context)
+
+            // Notify running foreground activity
+            MainActivity.notifyBackgroundLogRecorded()
 
             // Write to pending queue inside Flutter's default SharedPreferences file
             val bgPrefs =
