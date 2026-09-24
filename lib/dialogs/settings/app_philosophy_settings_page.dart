@@ -87,7 +87,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing24),
 
-        // 2. The Steve Jobs Conviction Callout
+        // 2. The Craftsmanship Creed Callout
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -131,7 +131,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '— Steve Jobs',
+                '— Timeless Design Creed',
                 style: TextStyle(
                   color: p.accent,
                   fontSize: 12.5,
@@ -217,11 +217,11 @@ class AppPhilosophySettingsPage extends StatelessWidget {
           number: '04',
           icon: Icons.brush_rounded,
           iconColor: const Color(0xFFAF52DE),
-          // Apple Purple
+          // Deep Violet Accent
           tag: 'UNCOMPROMISING CRAFT'.localized(context),
           title: 'The Back of the Mahogany Cabinet'.localized(context),
           body:
-              'Steve Jobs\' father taught him that the back of a cabinet must be finished as beautifully as the front, even if nobody will ever see it. We obsess over the hidden details: sub-millisecond local queries, tactile mechanical haptics, and clean architecture.'
+              'A master craftsman taught that the back of a cabinet must be finished as beautifully as the front, even if nobody will ever see it. We obsess over the hidden details: sub-millisecond local queries, tactile mechanical haptics, and clean architecture.'
                   .localized(context),
         ),
 

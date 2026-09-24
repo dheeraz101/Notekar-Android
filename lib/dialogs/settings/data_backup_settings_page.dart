@@ -258,6 +258,17 @@ class DataBackupSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
+              icon: Icons.swap_horiz_rounded,
+              title: 'Migrate from Other Apps'.localized(context),
+              subtitle: 'Import Loop Habit Tracker CSV or HabitKit JSON'
+                  .localized(context),
+              status: 'Migration'.localized(context),
+              color: const Color(0xFF00E5FF),
+              rowKind: 'link',
+              onTap: onImportBackup,
+            ),
+            SettingsRow(
+              p: p,
               icon: Icons.folder_zip_outlined,
               title: 'Local Backups'.localized(context),
               status: 'Manage'.localized(context),

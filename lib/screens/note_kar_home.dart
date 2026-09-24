@@ -42,6 +42,7 @@ import 'package:notekar/utils/backup_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/life_audit_service.dart';
+import 'package:notekar/utils/migration_import_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/streak_guardian_service.dart';
 import 'package:notekar/utils/tag_migration_service.dart';
@@ -3784,10 +3785,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     try {
       content = await _fileChannel.invokeMethod<String>('openTextFile', {
-        'mimeType': 'application/json',
+        'mimeType': '*/*',
       });
     } catch (_) {
-      _showToast('Could not open backup file', warning: true);
+      _showToast('Could not open file', warning: true);
       return;
     }
 
@@ -3803,14 +3804,23 @@ class _NoteKarHomeState extends State<NoteKarHome>
     try {
       final importTask = developer.TimelineTask()
         ..start('notekar.backup_import');
-      final validation = developer.Timeline.timeSync(
+      var validation = developer.Timeline.timeSync(
         'notekar.backup_import.validate',
         () => validateNoteKarBackupContent(content),
       );
       if (!validation.isValid) {
-        importTask.finish();
-        _showToast(validation.error ?? 'Invalid backup file', warning: true);
-        return false;
+        final migration = MigrationImportService.parseMigrationContent(content);
+        if (migration.success && migration.moments.isNotEmpty) {
+          validation = BackupValidationResult.valid(
+            entries: migration.moments,
+            settings: const {},
+            exportedAt: DateTime.now(),
+          );
+        } else {
+          importTask.finish();
+          _showToast(validation.error ?? 'Invalid backup file', warning: true);
+          return false;
+        }
       }
 
       final imported = validation.entries;

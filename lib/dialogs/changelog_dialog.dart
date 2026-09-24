@@ -33,7 +33,7 @@ class ChangelogDialog extends StatefulWidget {
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'Apple HIG Dark Surface Harmony',
+        title: 'Dark Surface Harmony',
         desc:
             'Monotonic Gray surface hierarchy across modal sheets, cards, and controls with visible hairline borders.',
         icon: Icons.palette_rounded,
@@ -77,9 +77,9 @@ class ChangelogDialog extends StatefulWidget {
     ],
     items: [
       '• Harmonized dark surface hierarchy, Swiss horology haptics, and conscious rest quick-claim.',
-      '+ Dark Theme Harmony: Apple Secondary Grouped Background (#1C1C1E) for modal sheets and pinned timeline filter headers',
-      '+ Apple Surface Hierarchy: Monotonic layering from canvas (#000000) to sheets (#1C1C1E), cards (#2C2C2E), controls (#3A3A3C), and borders (#48484A)',
-      '+ Border Visibility: 0.6px Apple hairline separators on SettingsGroupCard, SettingsSearchBox, and timeline cards',
+      '+ Dark Theme Harmony: Secondary Grouped Background (#1C1C1E) for modal sheets and pinned timeline filter headers',
+      '+ Surface Hierarchy: Monotonic layering from canvas (#000000) to sheets (#1C1C1E), cards (#2C2C2E), controls (#3A3A3C), and borders (#48484A)',
+      '+ Border Visibility: 0.6px hairline separators on SettingsGroupCard, SettingsSearchBox, and timeline cards',
       '+ Elevated Control Pills: Luminous fill and subtle ambient shadows for active segments in filters and dialogs',
       '+ Auto-Collapsing Capsule: Smooth 320ms spring physics collapse to resting 32px pill on canvas touch or timeline scroll',
       '+ Horology Detent Haptics: Tactile crown click at 50% swipe threshold between Single and Two-Way tracking modes',

@@ -42,6 +42,7 @@ import 'package:notekar/dialogs/settings/upcoming_features_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
+import 'package:notekar/models/help_guide_data.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -1819,9 +1820,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
-        title: '24-Hour Time',
+        title: 'Time Format',
         subtitle:
-            'Show time in 24-hour format instead of 12-hour AM/PM across timeline and history',
+            'Choose between 12-hour AM/PM or international 24-hour time across the app',
         category: 'Display',
         icon: Icons.schedule_rounded,
         keywords: [
@@ -1831,14 +1832,27 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'clock',
           'time format',
           'hours',
+          'military time',
         ],
-        kind: 'switch',
-        boolValue: use24Hour,
-        onBoolChanged: (bool value) {
-          setState(() => use24Hour = value);
-          widget.onUse24Hour?.call(value);
-        },
-        status: null,
+        kind: 'navigation',
+        status: use24Hour ? '24-Hour' : '12-Hour',
+      ),
+      item(
+        title: 'Clock Typography',
+        subtitle:
+            'Choose between Condensed Digital or Geometric Modern typography for the home clock',
+        category: 'Display',
+        icon: Icons.font_download_rounded,
+        keywords: [
+          'font',
+          'clock typography',
+          'condensed digital',
+          'geometric modern',
+          'bebas',
+          'inter',
+        ],
+        kind: 'navigation',
+        status: clockFont == 'Inter' ? 'Geometric Modern' : 'Condensed Digital',
       ),
       item(
         title: 'Button Labels',
@@ -2135,8 +2149,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
         keywords: [
           'philosophy',
           'manifesto',
-          'steve jobs',
-          'apple',
+          'craftsmanship',
+          'timeless',
           'privacy',
           'offline',
           'craft',
@@ -2701,7 +2715,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'changelog',
           'keynote',
           'innovations',
-          'steve jobs',
           'pinch-to-density',
           'bed of red',
           'cupertino alerts',
@@ -3544,6 +3557,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
       if (title.contains(query) || titleLoc.contains(query)) return true;
       if (subtitle.contains(query) || subtitleLoc.contains(query)) return true;
+      return item.keywords.any((k) => k.contains(query));
+    }).toList();
+  }
+
+  List<HelpGuideItem> get _helpGuideSearchResults {
+    final query = _settingsQuery.trim().toLowerCase();
+    if (query.isEmpty) return const [];
+
+    return allHelpAndGuideCatalog.where((item) {
+      final title = item.title.toLowerCase();
+      final titleLoc = item.title.localized(context).toLowerCase();
+      final content = item.content.toLowerCase();
+      final contentLoc = item.content.localized(context).toLowerCase();
+
+      if (title.contains(query) || titleLoc.contains(query)) return true;
+      if (content.contains(query) || contentLoc.contains(query)) return true;
       return item.keywords.any((k) => k.contains(query));
     }).toList();
   }
@@ -4620,158 +4649,198 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                 ],
                               ] else if (_settingsQuery.trim().isNotEmpty) ...[
-                                SettingsGroup(
-                                  p: p,
-                                  insetDividers: true,
-                                  children: [
-                                    for (final result in _settingsSearchResults)
-                                      if (result.kind == 'switch')
-                                        SettingsSwitchRow(
-                                          p: p,
-                                          icon: result.icon,
-                                          title: result.title,
-                                          subtitle: result.subtitle,
-                                          value: result.boolValue!,
-                                          onChanged: (val) {
-                                            _saveRecentSearch(result.title);
-                                            result.onBoolChanged!(val);
-                                          },
-                                          color:
-                                              result.title == 'Confirm Delete'
-                                              ? p.red
-                                              : (result.title == 'Rm -rf Cache'
-                                                    ? p.orange
-                                                    : p.accent),
-                                        )
-                                      else
-                                        SettingsRow(
-                                          p: p,
-                                          icon: result.icon,
-                                          title: result.title,
-                                          subtitle: result.subtitle,
-                                          status: result.status,
-                                          highlight: _settingsQuery,
-                                          color:
-                                              result.title ==
-                                                      'Reset All Data' ||
-                                                  result.title ==
-                                                      'Factory Reset'
-                                              ? p.red
-                                              : p.accent,
-                                          onTap: () {
-                                            _saveRecentSearch(result.title);
-                                            if (result.title == 'App Version') {
-                                              showGeneralDialog(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                barrierLabel: 'Changelog',
-                                                pageBuilder: (context, _, _) =>
-                                                    ChangelogDialog(
-                                                      p: widget.p,
-                                                    ),
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Release Date') {
-                                              _openCategory('Update Center');
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Developer & Creator') {
-                                              openExternalLinkSafely(
-                                                context,
-                                                p: p,
-                                                url:
-                                                    'https://github.com/dheeraz101',
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Open Source Codebase') {
-                                              openExternalLinkSafely(
-                                                context,
-                                                p: p,
-                                                url:
-                                                    'https://github.com/dheeraz101/Notekar-Android',
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Security & Integrity') {
-                                              showSecurityDetailsSheet(
-                                                context: context,
-                                                p: p,
-                                                reduceMotion: reduceMotion,
-                                                enableTranslucency:
-                                                    enableTranslucency,
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Privacy & Local Storage') {
-                                              showPrivacyDetailsSheet(
-                                                context: context,
-                                                p: p,
-                                                reduceMotion: reduceMotion,
-                                                enableTranslucency:
-                                                    enableTranslucency,
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Network Monitor') {
-                                              _openCategory('Network Monitor');
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Reset All Data') {
-                                              unawaited(_confirmResetAll(p));
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Factory Reset') {
-                                              unawaited(
-                                                _confirmFactoryReset(p),
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Reset Settings Only') {
-                                              unawaited(
-                                                _confirmResetSettings(),
-                                              );
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Recently Deleted') {
-                                              if (widget.onOpenTrash != null) {
-                                                widget.onOpenTrash!();
+                                if (_settingsSearchResults.isNotEmpty)
+                                  SettingsGroup(
+                                    p: p,
+                                    title: _helpGuideSearchResults.isNotEmpty
+                                        ? 'Settings'
+                                        : null,
+                                    insetDividers: true,
+                                    children: [
+                                      for (final result
+                                          in _settingsSearchResults)
+                                        if (result.kind == 'switch')
+                                          SettingsSwitchRow(
+                                            p: p,
+                                            icon: result.icon,
+                                            title: result.title,
+                                            subtitle: result.subtitle,
+                                            value: result.boolValue!,
+                                            onChanged: (val) {
+                                              _saveRecentSearch(result.title);
+                                              result.onBoolChanged!(val);
+                                            },
+                                            color:
+                                                result.title == 'Confirm Delete'
+                                                ? p.red
+                                                : (result.title ==
+                                                          'Rm -rf Cache'
+                                                      ? p.orange
+                                                      : p.accent),
+                                          )
+                                        else
+                                          SettingsRow(
+                                            p: p,
+                                            icon: result.icon,
+                                            title: result.title,
+                                            subtitle: result.subtitle,
+                                            status: result.status,
+                                            highlight: _settingsQuery,
+                                            color:
+                                                result.title ==
+                                                        'Reset All Data' ||
+                                                    result.title ==
+                                                        'Factory Reset'
+                                                ? p.red
+                                                : p.accent,
+                                            onTap: () {
+                                              _saveRecentSearch(result.title);
+                                              if (result.title ==
+                                                  'App Version') {
+                                                showGeneralDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  barrierLabel: 'Changelog',
+                                                  pageBuilder:
+                                                      (context, _, _) =>
+                                                          ChangelogDialog(
+                                                            p: widget.p,
+                                                          ),
+                                                );
+                                                return;
                                               }
-                                              return;
-                                            }
-                                            if (result.title ==
-                                                'Executive Intelligence Hub') {
-                                              _openCategory('Dashboard');
-                                              return;
-                                            }
-                                            _openCategory(result.category);
-                                          },
-                                        ),
-                                    if (_settingsSearchResults.isEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 64),
-                                        child: HIGEmptyState(
-                                          p: p,
-                                          icon: Icons.search_off_rounded,
-                                          title: 'No Results',
-                                          message:
-                                              'No settings match "${_settingsQuery.trim()}". Try different keywords or check your spelling.',
-                                          compact: true,
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                                              if (result.title ==
+                                                  'Release Date') {
+                                                _openCategory('Update Center');
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Developer & Creator') {
+                                                openExternalLinkSafely(
+                                                  context,
+                                                  p: p,
+                                                  url:
+                                                      'https://github.com/dheeraz101',
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Open Source Codebase') {
+                                                openExternalLinkSafely(
+                                                  context,
+                                                  p: p,
+                                                  url:
+                                                      'https://github.com/dheeraz101/Notekar-Android',
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Security & Integrity') {
+                                                showSecurityDetailsSheet(
+                                                  context: context,
+                                                  p: p,
+                                                  reduceMotion: reduceMotion,
+                                                  enableTranslucency:
+                                                      enableTranslucency,
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Privacy & Local Storage') {
+                                                showPrivacyDetailsSheet(
+                                                  context: context,
+                                                  p: p,
+                                                  reduceMotion: reduceMotion,
+                                                  enableTranslucency:
+                                                      enableTranslucency,
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Network Monitor') {
+                                                _openCategory(
+                                                  'Network Monitor',
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Reset All Data') {
+                                                unawaited(_confirmResetAll(p));
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Factory Reset') {
+                                                unawaited(
+                                                  _confirmFactoryReset(p),
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Reset Settings Only') {
+                                                unawaited(
+                                                  _confirmResetSettings(),
+                                                );
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Recently Deleted') {
+                                                if (widget.onOpenTrash !=
+                                                    null) {
+                                                  widget.onOpenTrash!();
+                                                }
+                                                return;
+                                              }
+                                              if (result.title ==
+                                                  'Executive Intelligence Hub') {
+                                                _openCategory('Dashboard');
+                                                return;
+                                              }
+                                              _openCategory(result.category);
+                                            },
+                                          ),
+                                    ],
+                                  ),
+                                if (_helpGuideSearchResults.isNotEmpty) ...[
+                                  if (_settingsSearchResults.isNotEmpty)
+                                    const SizedBox(height: 16),
+                                  SettingsGroup(
+                                    p: p,
+                                    title: 'Help & Knowledge Base',
+                                    showDividers: true,
+                                    children: [
+                                      for (final item
+                                          in _helpGuideSearchResults)
+                                        if (item.isFaq)
+                                          HelpRow(
+                                            p: p,
+                                            question: item.title,
+                                            answer: item.content,
+                                          )
+                                        else
+                                          GuideRow(
+                                            p: p,
+                                            icon:
+                                                item.icon ??
+                                                Icons.help_outline_rounded,
+                                            title: item.title,
+                                            text: item.content,
+                                          ),
+                                    ],
+                                  ),
+                                ],
+                                if (_settingsSearchResults.isEmpty &&
+                                    _helpGuideSearchResults.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 64),
+                                    child: HIGEmptyState(
+                                      p: p,
+                                      icon: Icons.search_off_rounded,
+                                      title: 'No Results',
+                                      message:
+                                          'No settings, guides, or help articles match "${_settingsQuery.trim()}". Try different keywords or check your spelling.',
+                                      compact: true,
+                                    ),
+                                  ),
                               ],
                               const SizedBox(height: spacing48),
                             ]),
@@ -5662,335 +5731,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.touch_app_rounded,
-                                    title: 'Save a Moment',
-                                    text:
-                                        'Tap the home screen once to save the current time.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.compare_arrows_rounded,
-                                    title: 'Two-Way Mode',
-                                    text:
-                                        'First tap saves In. The next tap saves Out and completes the pair.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.radio_button_checked_rounded,
-                                    title: 'Single Mode',
-                                    text:
-                                        'Every tap saves one standalone moment.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.note_add_rounded,
-                                    title: 'Add a Note',
-                                    text:
-                                        'Touch and hold the home screen to write a note before saving.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.category_rounded,
-                                    title: 'Modes & Categories',
-                                    text:
-                                        'Select an active mode like Work or Deep Focus from the home screen pills carousel to automatically tag all subsequent moments and sessions.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.touch_app_rounded,
-                                    title: 'Ergonomic Tap Zone',
-                                    text:
-                                        'The tap logging zone is vertically centered on the clock band with full-width reach, eliminating accidental taps on status bars and navigation gestures.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.widgets_rounded,
-                                    title: 'Android Home Screen Widgets',
-                                    text:
-                                        'Place NoteKar Quick Log, Sobriety Companion, and Life Audit widgets on your launcher for instant logging and live statistics without opening the app.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.auto_stories_rounded,
-                                    title: 'Life Ledger Timeline',
-                                    text:
-                                        'Open History to explore connected session cards pairing Two-Way IN and OUT intervals with duration badges. Filter seamlessly across All, Sessions, Singles, or With Notes.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.stop_circle_rounded,
-                                    title: '1-Tap Live Session End',
-                                    text:
-                                        'Active ongoing sessions in History feature a red "End" button right on the card. Tap it anytime to seal the session at the current moment with zero friction.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.history_rounded,
-                                    title: 'Review History',
-                                    text:
-                                        'Open History to review moments, use Select Date for a calendar day, or filter by Today and This Week.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.search_rounded,
-                                    title: 'Search Notes',
-                                    text:
-                                        'Open Settings, then Logging, Moments, Search Notes to find note text by words, date, or time.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.timer_rounded,
-                                    title: 'Time Between Moments',
-                                    text:
-                                        'Select one moment, then another, to calculate the time between them.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.subject_rounded,
-                                    title: 'Manage Moment Notes',
-                                    text:
-                                        'Touch and hold any history moment to add, read, edit, or delete its note.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.lock_rounded,
-                                    title: 'App Lock & Custom PIN',
-                                    text:
-                                        'Configure App Lock to use either native biometrics (System Lock) or a secure local passcode (In-App PIN). Features rate-limiting lockout protection.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.auto_awesome_motion_rounded,
-                                    title: 'Minimal Moment Options',
-                                    text:
-                                        'Enable in Settings > Logging > Moments to use a fast, icon-only row for editing and deleting.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.auto_awesome_rounded,
-                                    title: 'Adaptive Engine',
-                                    text:
-                                        'Notekar automatically tunes visual effects to your CPU, RAM, and SDK. Check stats in Advanced > Device Health.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.delete_outline_rounded,
-                                    title: 'Restore Deleted Moments',
-                                    text:
-                                        'Open Trash Bin in History or Settings > Moments to view, restore, or permanently remove deleted moments.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.backup_rounded,
-                                    title: 'Back Up Data',
-                                    text:
-                                        'Export a JSON backup before resetting, changing phones, or testing a new build.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.notifications_active_outlined,
-                                    title: 'Logging Reminders',
-                                    text:
-                                        'Configure daily, weekly, monthly, or inactivity-based notifications under Settings > Logging > Reminders. Custom messages let you personalize alerts.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.dashboard_customize_rounded,
-                                    title: 'Executive Intelligence Hub',
-                                    text:
-                                        'Open Settings > Logging > Dashboard to explore your Daily Rhythm bar chart with bottom-aligned bars, 90-day activity intensity grid, circadian time-of-day breakdowns, and instant time-scope filters (Today, Week, Month, All).',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.pinch_rounded,
-                                    title: 'Pinch-to-Density Sensory Zoom',
-                                    text:
-                                        'Pinch with two fingers anywhere on the History timeline or toggle under Settings > Personalization > History to fluidly scale between Compact (information dense) and Comfortable (spacious ivory cards).',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.volume_up_rounded,
-                                    title: 'Acoustic Glass Mechanics & Haptics',
-                                    text:
-                                        'Every interaction carries physical weight: single taps evoke crisp mechanical tocks, switching clock faces produces a precision sliding resistance, and saves chime like polished acoustic crystal.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.swipe_rounded,
-                                    title: 'Swipe-to-Undo Dynamic Island',
-                                    text:
-                                        'Accidentally delete a moment? Swiping to dismiss reveals a solid red bed beneath the card with exact corner geometry, followed by a floating Dynamic Island pill with a tactile Undo button and countdown ring.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.campaign_rounded,
-                                    title:
-                                        'Official Bulletins (Zero Telemetry)',
-                                    text:
-                                        'Critical security alerts, version bulletins, and release insights delivered directly from static GitHub feeds without sending a single byte of user telemetry or tracking.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.widgets_rounded,
-                                    title: 'Home Screen Widget',
-                                    text:
-                                        'Add the NoteKar widget to your launcher. Tap IN, OUT, or TAP to log instantly in the background with real-time widget updates, or tap NOTE to open a native quick-log overlay.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.screenshot_rounded,
-                                    title: 'Hide Content in Recents',
-                                    text:
-                                        'Turn on Hide App Content in Recents under Settings > Privacy & Security to cover app screens and block screenshots when minimizing the app.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.notification_important_rounded,
-                                    title: 'Persistent Control',
-                                    text:
-                                        'Enable in Settings > Logging to show a low-priority, sticky control notification in the system drawer for instant checking IN/OUT from the lock screen.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.pin_outlined,
-                                    title:
-                                        'Sequential Single Numbering (00–99)',
-                                    text:
-                                        'Enable "Use Numbers in Single" under Settings > Logging > Moments to show clean 2-digit sequential counters (00 to 99) on standalone moments. Enable "Reset Daily" to automatically restart from 00 every midnight.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.touch_app_outlined,
-                                    title: 'Count on Save Pulse',
-                                    text:
-                                        'Turn on "Enable Count on Save" in Settings > Logging > Moments to display your updated 2-digit sequential count directly inside the glowing ripple pulse on the home screen when tapping.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.apps_rounded,
-                                    title: '8 Luxury App Icon Editions',
-                                    text:
-                                        'Personalize your home screen with 8 handcrafted launcher styles under Settings > Personalization > App Icons: Aurora (Default), Midnight (Onyx), Sapphire (Ocean), Imperial (Gold), Emerald (Forest), Sunset (Coral), Crimson (Velvet), and Amethyst (Nebula).',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.spa_rounded,
-                                    title: 'Sobriety Tracker & Milestone Cards',
-                                    text:
-                                        'Track your recovery journey with live streak counters, unlock 10 milestone badges with confetti celebrations, and generate high-res shareable PNG cards under Settings > Personalization > Sobriety Tracker.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.calendar_month_rounded,
-                                    title:
-                                        'iOS Calendar & Centered Date Baseline',
-                                    text:
-                                        'Tap the calendar chip in History to pick any past date. Dates with recorded moments feature subtle event dots anchored beneath numerals with zero vertical baseline shift.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.developer_mode_rounded,
-                                    title: 'Developer Options & Telemetry',
-                                    text:
-                                        'Inspect internal diagnostics, device hardware health metrics, real-time network request audits, and GitHub commits cache under Settings > Advanced > Developer Options.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.self_improvement_rounded,
-                                    title:
-                                        'Hourly Time Reflection & Mindfulness',
-                                    text:
-                                        'Enable hourly mindful breathing overlays with soothing chimes in Settings > Time Reflection. Set active daytime schedules to automatically mute alerts during sleep.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.language_rounded,
-                                    title:
-                                        '100% Offline Multilingual Localization',
-                                    text:
-                                        'Switch between English, French, Spanish, Hindi, German, Japanese, and Russian instantly in Settings > Advanced > Language with zero data usage or downloads.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.battery_charging_full_rounded,
-                                    title: 'Battery & Doze Optimization',
-                                    text:
-                                        'NoteKar uses non-waking alarms for routine reminders, staying 100% compliant with Android Doze mode while eliminating unnecessary battery drain.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.vpn_key_rounded,
-                                    title: 'The Architect\'s Cipher (Enigma)',
-                                    text:
-                                        'Encrypted hex stream detected: "23 67 6f 64 6d 6f 64 65". Decipher the hex ASCII sequence into plain text, then inscribe and save it inside any moment\'s note to awaken dormant powers.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: CupertinoIcons.link,
-                                    title: 'Deep Linking & URL Schemes',
-                                    text:
-                                        'Trigger instant logs, Two-Way intervals, prefill notes, or jump to specific screens using custom URL schemes (e.g. notekar://log?type=single&note=Coffee, notekar://in, notekar://out, notekar://open?page=history). Perfect for NFC tags, browser bookmarks, and launchers.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: CupertinoIcons.selection_pin_in_out,
-                                    title:
-                                        'Global Text Selection ("Log in NoteKar")',
-                                    text:
-                                        'Highlight text anywhere across Android in Chrome, WhatsApp, Kindle, Books, or Twitter and choose "Log in NoteKar" from the context menu to capture notes offline with an instant toast.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.article_rounded,
-                                    title: 'Obsidian & Logseq Markdown Journal',
-                                    text:
-                                        'Export pristine, date-grouped Markdown tables formatted with timestamps, session durations, and telemetry statistics under Settings > Integrations & Automation > Export Markdown Journal.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: CupertinoIcons.calendar,
-                                    title: 'Calendar Sessions (.ics) Export',
-                                    text:
-                                        'Export your tracked Two-Way IN/OUT intervals as RFC 5545 calendar events into an .ics file for 1-tap import into Google Calendar, Samsung Calendar, Outlook, or Proton.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: CupertinoIcons.radiowaves_right,
-                                    title: 'Tasker & Automation Broadcasts',
-                                    text:
-                                        'Trigger offline background moment logging via the system broadcast intent app.notekar.notekar.ACTION_LOG_MOMENT with extras type (single, in, out, note) and note.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.auto_delete_outlined,
-                                    title: 'Rm -rf Cache (Update Clean)',
-                                    text:
-                                        'Enable "Rm -rf Cache" in Updates & Notices to automatically purge update APK installer files and cache upon installation, keeping app storage lightweight.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: CupertinoIcons.plus_app,
-                                    title:
-                                        'Plus Notes (Unrestricted Journaling)',
-                                    text:
-                                        'When a quick micro-note isn\'t enough, tap "Plus" in the note editor to write expansive journals, reflections, or meeting logs with an unrestricted character limit.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.schedule_rounded,
-                                    title: '12-Hour vs 24-Hour Time Format',
-                                    text:
-                                        'Toggle 24-Hour Time in Settings > Personalization > Display. In 12-hour mode, the home screen shows clean hours and minutes, while History and Search Notes display explicit AM/PM tags.',
-                                  ),
-                                  GuideRow(
-                                    p: p,
-                                    icon: Icons.tag_rounded,
-                                    title: 'Customizable Hashtags',
-                                    text:
-                                        'Long press any quick tag pill in the note editor to customize or replace it with your own personal tags, allowing tailored one-tap categorization for moments.',
-                                  ),
+                                  for (final g in allGuideItems)
+                                    GuideRow(
+                                      p: p,
+                                      icon:
+                                          g.icon ?? Icons.help_outline_rounded,
+                                      title: g.title,
+                                      text: g.content,
+                                    ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -6009,325 +5757,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 p: p,
                                 showDividers: true,
                                 children: [
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do Modes & Focus Categories work?',
-                                    answer:
-                                        'Tap any category pill on the home screen carousel (e.g. Work, Deep Focus) to tag upcoming moments and sessions. In Settings > Logging > Modes, you can create custom modes, view tracked hours, and explore dedicated category histories.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Why does tapping the very top or bottom of the screen not log?',
-                                    answer:
-                                        'NoteKar features an intentional Ergonomic Safety Zone centered around the clock face (+ buffer). This allows full-width one-handed thumb tapping while preventing accidental logs when pulling down notification shades or performing navigation gestures.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'What Android Home Screen Widgets are supported?',
-                                    answer:
-                                        'NoteKar provides 3 dedicated widgets: Quick Log (1-tap IN/OUT/Moment capture & mode status), Sobriety Companion (clean streak & milestone progress), and Life Audit (daily waking focus ratio). Add them by long-pressing your home screen launcher and selecting Widgets > NoteKar.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How does Pinch-to-Density work in History?',
-                                    answer:
-                                        'Simply pinch in or out with two fingers on the History timeline. The cards scale fluidly between compact information-dense tiles and comfortable expanded views with live tactile feedback.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Where can I read Official Bulletins?',
-                                    answer:
-                                        'Open Settings > Updates & Notices > Official Bulletins to view verified release announcements, curated tips, and security advisories fetched securely with zero tracking.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'What happens when I swipe to delete a moment?',
-                                    answer:
-                                        'Swiping a moment card glides it smoothly off the screen revealing a solid red bed underneath. A floating Dynamic Island undo prompt instantly appears at the top, letting you restore the card with a single tap before it is sent to Trash.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How does the Life Ledger Timeline work in History?',
-                                    answer:
-                                        'History automatically pairs chronological Two-Way IN and OUT moments into connected session cards with elapsed duration calculations and start/finish nodes. Single moments show clean rail nodes with optional 00–99 badges. You can filter by All, Sessions, Singles, or With Notes without any layout overlapping.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I end an ongoing live session?',
-                                    answer:
-                                        'Ongoing sessions in History display a pulsing green LIVE duration pill alongside a red "End" button. Tapping End instantly logs an OUT moment at the current time and closes the session card on the spot.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I filter History by specific calendar dates?',
-                                    answer:
-                                        'Tap the calendar icon [📅] in the History filter bar to open the Apple HIG calendar picker. Days with recorded moments show an event dot anchored beneath the number. Selecting any past date instantly filters your history to that day.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I interpret the Dashboard Daily Rhythm and Activity Grid?',
-                                    answer:
-                                        'The Daily Rhythm bar chart displays your activity volume for each day of the week, anchored cleanly to the bottom baseline. The 90-day Activity Grid uses color intensity gradations to visualize consistency, alongside habit streak counts and time-of-day circadian focus breakdowns.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Can NoteKar communicate with other apps or automators?',
-                                    answer:
-                                        'Yes! NoteKar features a complete suite of system bridges: custom URL schemes (notekar://), Android global text selection ("Log in NoteKar"), Android share target for plain text, local Tasker/MacroDroid broadcast intents, Obsidian Markdown journal sync, and Calendar .ics session exports under Settings > Integrations & Automation.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I export tracked sessions to Google Calendar or Outlook?',
-                                    answer:
-                                        'Open Settings > Integrations & Automation and tap "Export Sessions to Calendar (.ics)". The exported file can be imported directly into Google Calendar, Samsung Calendar, Outlook, or Proton Calendar.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I sync NoteKar with Obsidian or Logseq?',
-                                    answer:
-                                        'Open Settings > Integrations & Automation and tap "Export Markdown Journal (.md)". The generated file contains structured Markdown tables grouped by date, ready to drop into your second-brain vault.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How does Hourly Time Reflection work?',
-                                    answer:
-                                        'Time Reflection prompts you with an hourly mindful breathing pause and chime. It only runs during your configured Active Hours and mutes automatically overnight to protect your sleep.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Is there a secret sovereign or god mode?',
-                                    answer:
-                                        'Legend speaks of an ancient developer cipher: "#" + "g-o-d-m-o-d-e". Inscribe and save "#godmode" as any moment\'s note to awaken exclusive developer themes, the mindful gravity sandbox, and cryptographic pioneer credentials.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Does NoteKar support offline languages?',
-                                    answer:
-                                        'Yes! NoteKar includes 7 built-in language localizations (English, French, Spanish, Hindi, German, Japanese, and Russian) that work 100% offline without requiring any internet connection or file downloads.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'What features are upcoming in NoteKar?',
-                                    answer:
-                                        'Upcoming capabilities on the roadmap include Hands-free Voice Notes with 100% offline multi-language speech transcription (English, Hindi, Spanish, French, German, Japanese, Russian), calendar-based day-swipe visual timeline, and adaptive mode-based color accents.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'Can I restore deleted moments?',
-                                    answer:
-                                        'Yes! Deleted moments are moved to Trash Bin. You can restore individual moments or all moments anytime from History or Settings > Moments.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Can I view updates while offline?',
-                                    answer:
-                                        'Yes! NoteKar automatically caches the latest commits feed when you check for updates online. If you are offline, you will still see the cached feed, though checking for new updates will show a "No internet" notice.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'What is the Network Monitor?',
-                                    answer:
-                                        'NoteKar includes an offline-first Network Monitor that displays a real-time audit log of every internet request made by the app (like update checks, changelogs, and notice checks), including status codes, request sizes, and purpose. No data ever leaves your device.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'Switching track shows no update',
-                                    answer:
-                                        'If you are on a Beta release (which has a higher version code) and switch to the Stable track, Android prevents installing an older version (downgrading). You will see the update option once a newer Stable build is officially released. Alternatively, you can uninstall the Beta version and download the Stable version manually.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'Update check failed',
-                                    answer:
-                                        'First confirm that your phone is connected to the internet. If other websites work, GitHub may be unavailable or limiting requests. Wait a few minutes and try again.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'App Notices are not appearing',
-                                    answer:
-                                        'Confirm App Notices are enabled and Android notification permission is allowed. Battery restrictions or background limits may delay checks. Opening NoteKar while online also triggers a notice check.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'NoteKar is offline',
-                                    answer:
-                                        'Logging, History, notes, settings, and local backups work without internet. Only update checks, external links, and App Notices require a connection.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Backup import found no new moments',
-                                    answer:
-                                        'The backup was read correctly, but its moments already exist on this device. NoteKar skips duplicates instead of adding them again.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'Backup import failed',
-                                    answer:
-                                        'Make sure you selected a NoteKar JSON backup that was not renamed, manually edited, or damaged. Try exporting a fresh backup.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Live Icon Motion will not turn on',
-                                    answer:
-                                        'Turn off Reduced Motion first. If NoteKar reports that the motion sensor is unavailable, the phone does not provide a usable accelerometer stream or your hardware tier is set to Power Saver.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Live Icon Motion looks slow or delayed',
-                                    answer:
-                                        'The movement is intentionally smoothed to prevent jitter. Lower-end phones may also reduce animation performance automatically based on CPU and RAM stats.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How does App Lock protect NoteKar?',
-                                    answer:
-                                        'You can lock NoteKar using either your device\'s native credentials (System Lock) or a custom 4-digit passcode (In-App PIN). If you choose System Lock, removing your device lock screen security will automatically disable App Lock for safety. In-App PIN runs independently and includes rate-limiting lockout protection.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'App Lock appears after the notification panel',
-                                    answer:
-                                        'If App Lock is set to Immediately, opening Recents or pulling down the notification panel counts as leaving NoteKar. This ensures your moments stay hidden.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'The app icon did not change immediately',
-                                    answer:
-                                        'Some Android launchers cache icons. Return to the home screen, wait briefly, or restart the launcher or phone.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'A moment was saved accidentally',
-                                    answer:
-                                        'Use Undo immediately after saving, or remove it from History. You can enable Confirm Delete for extra protection.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'My data disappeared after clearing app storage',
-                                    answer:
-                                        'NoteKar stores data locally. Clearing Android app storage deletes that local data. Restore it using a backup file if one was exported earlier.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Will reminders work when the app is closed?',
-                                    answer:
-                                        'Yes! NoteKar registers reminders directly with Android\'s system AlarmManager. The OS will launch our background notification receiver and show the alert even if the app is closed or force-killed.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Why am I not receiving reminders?',
-                                    answer:
-                                        'Make sure Android notification permissions are allowed for NoteKar. On some devices, OEM power-saving modes or background execution restrictions may block or delay scheduled alarms. Consider disabling battery optimization for NoteKar.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'Is NoteKar safe to use?',
-                                    answer:
-                                        'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Updates & Notices.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I add and use the home screen widget?',
-                                    answer:
-                                        'Touch and hold an empty space on your phone\'s home screen, select Widgets, and drag NoteKar to your screen. You can log immediately using the quick-action buttons. Tapping the top history stack opens the main app.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question: 'Is my Dashboard data uploaded?',
-                                    answer:
-                                        'No. All stats, activity heatmaps, anomalies, and correlation graphs are computed completely offline on your device. We do not track or upload your habits or logs.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I block screenshots and screen previews?',
-                                    answer:
-                                        'Enable "Hide App Content" under Settings > Privacy & Security. Once enabled, screenshots will be blocked inside NoteKar, and the system app switcher card will appear blank.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I log directly from the lock screen?',
-                                    answer:
-                                        'Turn on "Persistent Control" in Settings > Logging. A sticky, low-priority control card will appear in your notification drawer with quick actions to log IN, OUT, or write a quick note instantly.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How does Sequential Single Numbering work?',
-                                    answer:
-                                        'When "Use Numbers in Single" is enabled, single moments are tagged with 00 to 99 sequence badges. If "Reset Daily" is enabled, the count restarts at 00 every midnight while keeping past days intact.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Where are Diagnostics and Network Monitor?',
-                                    answer:
-                                        'Advanced tools and telemetry are organized under Settings > Advanced > Developer Options, including real-time hardware health, diagnostics logs, network audits, and cached commit feeds.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How do I export my Sobriety Milestones?',
-                                    answer:
-                                        'Open Settings > Personalization > Sobriety Tracker, tap on any unlocked milestone badge in the milestones gallery, and tap "Export Milestone Card" to share a high-res image directly.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'What is "Rm -rf Cache" and how does it work?',
-                                    answer:
-                                        'Inspired by the Unix clean command, "Rm -rf Cache" automatically deletes downloaded update packages and temporary build artifacts upon installation or when turned on. It prevents installer files from accumulating in device storage without affecting your private notes or logs.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'What is a Plus Note and how does it differ from a standard note?',
-                                    answer:
-                                        'Standard notes are lightweight micro-captures (up to 500 characters) designed for rapid logging. Plus Notes let you write long-form journals, memos, and multi-paragraph entries without character restrictions. Tap "Plus" on the left side of any note dialog to open the full editor.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'How does the 12/24-hour time setting affect the app?',
-                                    answer:
-                                        'Under Settings > Personalization > Display, you can switch between 12-hour and 24-hour time. In 12-hour mode, the home clock face remains distraction-free without an AM/PM label, while History, Search Notes, and detail dialogs clearly display AM or PM tags.',
-                                  ),
-                                  HelpRow(
-                                    p: p,
-                                    question:
-                                        'Can I customize the hashtag suggestions in the note editor?',
-                                    answer:
-                                        'Yes! In the note dialog, long-press any hashtag chip to edit it. You can define your own frequent tags to quickly categorize moments with a single tap.',
-                                  ),
+                                  for (final h in allHelpFaqItems)
+                                    HelpRow(
+                                      p: p,
+                                      question: h.title,
+                                      answer: h.content,
+                                    ),
                                 ],
                               ),
                               SettingsPageDescription(

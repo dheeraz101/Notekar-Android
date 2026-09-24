@@ -29,11 +29,11 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     badgeColor: Color(0xFFFF9F0A),
     innovations: [
       (
-        title: 'Apple HIG Dark Surface Harmony',
+        title: 'Dark Surface Harmony',
         category: 'DESIGN ARCHITECTURE',
         headline: 'Monotonic Grays. Seamless Hairline Borders.',
         desc:
-            'Harmonized dark theme across all modal sheets, cards, and dialogs. Pinned timeline filters now match modal sheets, and 0.6px Apple hairline separators prevent visual boundary clipping.',
+            'Harmonized dark theme across all modal sheets, cards, and dialogs. Pinned timeline filters now match modal sheets, and 0.6px hairline separators prevent visual boundary clipping.',
         icon: Icons.palette_rounded,
         badgeColor: Color(0xFF0A84FF),
         specs:
@@ -44,7 +44,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         category: 'DYNAMIC FLUIDITY',
         headline: 'Spring Physics. Uninterrupted Canvas.',
         desc:
-            'Engaging the clock canvas or scrolling the timeline automatically collapses the dynamic header capsule back to its resting 32px pill with soft 320ms Apple spring physics.',
+            'Engaging the clock canvas or scrolling the timeline automatically collapses the dynamic header capsule back to its resting 32px pill with soft 320ms spring physics.',
         icon: Icons.animation_rounded,
         badgeColor: Color(0xFFFF9F0A),
         specs: 'Spring Physics (300/28) · Auto-Collapse · Immersive Canvas',
@@ -164,7 +164,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     ],
     highlights: [
       (
-        title: 'Apple HIG Dark Surface Harmony',
+        title: 'Dark Surface Harmony',
         desc:
             'Monotonic Gray surface hierarchy across modal sheets, cards, and controls with visible hairline borders.',
         icon: Icons.palette_rounded,
@@ -208,9 +208,9 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
     ],
     items: [
       '• Harmonized dark surface hierarchy, Swiss horology haptics, and conscious rest quick-claim.',
-      '+ Dark Theme Harmony: Apple Secondary Grouped Background (#1C1C1E) for modal sheets and pinned timeline filter headers',
-      '+ Apple Surface Hierarchy: Monotonic layering from canvas (#000000) to sheets (#1C1C1E), cards (#2C2C2E), controls (#3A3A3C), and borders (#48484A)',
-      '+ Border Visibility: 0.6px Apple hairline separators on SettingsGroupCard, SettingsSearchBox, and timeline cards',
+      '+ Dark Theme Harmony: Secondary Grouped Background (#1C1C1E) for modal sheets and pinned timeline filter headers',
+      '+ Surface Hierarchy: Monotonic layering from canvas (#000000) to sheets (#1C1C1E), cards (#2C2C2E), controls (#3A3A3C), and borders (#48484A)',
+      '+ Border Visibility: 0.6px hairline separators on SettingsGroupCard, SettingsSearchBox, and timeline cards',
       '+ Elevated Control Pills: Luminous fill and subtle ambient shadows for active segments in filters and dialogs',
       '+ Auto-Collapsing Capsule: Smooth 320ms spring physics collapse to resting 32px pill on canvas touch or timeline scroll',
       '+ Horology Detent Haptics: Tactile crown click at 50% swipe threshold between Single and Two-Way tracking modes',
@@ -519,7 +519,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing16),
 
-        // 3. Steve Jobs Quote Card
+        // 3. Craftsmanship Philosophy Card
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
@@ -549,7 +549,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'STEVE JOBS'.localized(context),
+                'TIMELESS CRAFT'.localized(context),
                 style: TextStyle(
                   color: p.text3,
                   fontSize: 10.5,

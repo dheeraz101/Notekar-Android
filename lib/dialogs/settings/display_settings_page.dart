@@ -160,22 +160,124 @@ class DisplaySettingsPage extends StatelessWidget {
                 onHighlightSecondsChanged(value);
               },
             ),
-            SettingsSwitchRow(
-              p: p,
-              title: '24-Hour Time',
-              subtitle:
-                  'Show time in 24-hour format instead of 12-hour AM/PM across timeline and history.'
-                      .localized(context),
-              color: p.accent,
-              value: use24HourFormat,
-              onChanged: (value) => onUse24HourFormatChanged?.call(value),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text: 'Configure the home screen clock and live seconds display.'
+              .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Time Format',
+          showDividers: false,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        if (!use24HourFormat) return;
+                        AppHaptics.select();
+                        onUse24HourFormatChanged?.call(false);
+                      },
+                      child: Container(
+                        height: 76,
+                        decoration: BoxDecoration(
+                          color: !use24HourFormat ? p.surface3 : p.surface2,
+                          borderRadius: BorderRadius.circular(20),
+                          border: !use24HourFormat
+                              ? Border.all(color: p.accent, width: 1.5)
+                              : Border.all(
+                                  color: p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '9:41 AM',
+                              style: TextStyle(
+                                fontFamily: clockFont,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: !use24HourFormat ? p.text : p.text2,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '12-Hour (AM/PM)'.localized(context),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: !use24HourFormat ? p.text : p.text3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        if (use24HourFormat) return;
+                        AppHaptics.select();
+                        onUse24HourFormatChanged?.call(true);
+                      },
+                      child: Container(
+                        height: 76,
+                        decoration: BoxDecoration(
+                          color: use24HourFormat ? p.surface3 : p.surface2,
+                          borderRadius: BorderRadius.circular(20),
+                          border: use24HourFormat
+                              ? Border.all(color: p.accent, width: 1.5)
+                              : Border.all(
+                                  color: p.border.withValues(alpha: 0.5),
+                                  width: 0.8,
+                                ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '21:41',
+                              style: TextStyle(
+                                fontFamily: clockFont,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: use24HourFormat ? p.text : p.text2,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '24-Hour (Standard)'.localized(context),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: use24HourFormat ? p.text : p.text3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         SettingsPageDescription(
           p: p,
-          text: 'Configure the home screen clock and visual feedback.'
-              .localized(context),
+          text:
+              'Display timestamps in standard 12-hour AM/PM or international 24-hour time across the app.'
+                  .localized(context),
         ),
 
         SettingsGroup(
@@ -223,7 +325,7 @@ class DisplaySettingsPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Athletic (Bebas)'.localized(context),
+                              'Condensed Digital'.localized(context),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -272,7 +374,7 @@ class DisplaySettingsPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Apple Lockscreen'.localized(context),
+                              'Geometric Modern'.localized(context),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -292,7 +394,7 @@ class DisplaySettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Choose between athletic condensed Bebas or Apple iOS lockscreen typography for the home clock.'
+              'Choose between condensed display numerals or geometric modern typography for the home clock.'
                   .localized(context),
         ),
 

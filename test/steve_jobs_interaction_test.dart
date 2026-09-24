@@ -441,9 +441,9 @@ void main() {
           findsOneWidget,
         );
 
-        // 2. Steve Jobs Conviction Callout
+        // 2. Timeless Design Creed Callout
         expect(find.text('THE COURAGE TO SAY NO'), findsOneWidget);
-        expect(find.text('— Steve Jobs'), findsOneWidget);
+        expect(find.text('— Timeless Design Creed'), findsOneWidget);
 
         // 3. Five Core Pillars
         expect(find.text('FIVE PILLARS OF CRAFT'), findsOneWidget);
@@ -630,7 +630,7 @@ void main() {
           find.text('"Details matter, it’s worth waiting to get it right."'),
           findsOneWidget,
         );
-        expect(find.text('STEVE JOBS'), findsOneWidget);
+        expect(find.text('TIMELESS CRAFT'), findsOneWidget);
         expect(find.text('View Full Technical Changelog'), findsOneWidget);
       },
     );

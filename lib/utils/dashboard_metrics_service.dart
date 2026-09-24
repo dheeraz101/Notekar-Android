@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -93,6 +95,7 @@ class ActivityGridStats {
   const ActivityGridStats({
     required this.longestStreak,
     required this.currentStreak,
+    this.habitStrength = 0,
     required this.activeDaysCount,
     required this.totalDaysCount,
     required this.dayIntensities,
@@ -100,6 +103,7 @@ class ActivityGridStats {
 
   final int longestStreak;
   final int currentStreak;
+  final int habitStrength; // Exponential half-life decay percentage (0-100%)
   final int activeDaysCount;
   final int totalDaysCount;
   final Map<String, int> dayIntensities;
@@ -653,9 +657,29 @@ class DashboardMetricsService {
       }
     }
 
+    // Exponential Half-life Habit Strength (12-day half-life decay model)
+    double weightedActiveSum = 0.0;
+    double totalWeightSum = 0.0;
+    const double halfLifeDays = 12.0;
+
+    for (int i = 0; i < totalDays; i++) {
+      final d = now.subtract(Duration(days: i));
+      final k = dateKey(d);
+      final weight = math.pow(0.5, i / halfLifeDays).toDouble();
+      totalWeightSum += weight;
+      if ((intensities[k] ?? 0) > 0) {
+        weightedActiveSum += weight;
+      }
+    }
+
+    final int habitStrength = totalWeightSum > 0
+        ? ((weightedActiveSum / totalWeightSum) * 100).round().clamp(0, 100)
+        : 0;
+
     return ActivityGridStats(
       longestStreak: longest,
       currentStreak: current,
+      habitStrength: habitStrength,
       activeDaysCount: activeCount,
       totalDaysCount: totalDays,
       dayIntensities: intensities,

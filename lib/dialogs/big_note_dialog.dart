@@ -227,368 +227,371 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
     final p = widget.p;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      child: Glass(
-        p: p,
-        blur: widget.blur,
-        radius: 24,
-        padding: EdgeInsets.zero,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 620, maxHeight: 780),
-          decoration: BoxDecoration(
-            color: p.surface.withValues(alpha: widget.blur ? 0.85 : 0.98),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: p.border.withValues(alpha: 0.6),
-              width: 1.0,
-            ),
-          ),
-          child: Column(
-            children: [
-              // Apple HIG Navigation Header
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: p.border.withValues(alpha: 0.5),
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    PressableScale(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.pop(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 4,
-                        ),
-                        child: Text(
-                          widget.allowEmpty ? 'Cancel' : 'Dismiss',
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
+    return AnimatedPadding(
+      padding:
+          MediaQuery.viewInsetsOf(context) +
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.decelerate,
+      child: Center(
+        child: Material(
+          type: MaterialType.transparency,
+          child: Glass(
+            p: p,
+            blur: widget.blur,
+            radius: 24,
+            padding: EdgeInsets.zero,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 620, maxHeight: 780),
+              child: Column(
+                children: [
+                  // Navigation Header
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.5,
                         ),
                       ),
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          CupertinoIcons.doc_text,
-                          size: 16,
-                          color: p.accent,
+                        PressableScale(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.pop(context);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 4,
+                            ),
+                            child: Text(
+                              widget.allowEmpty ? 'Cancel' : 'Dismiss',
+                              style: TextStyle(
+                                color: p.text2,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          widget.title,
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.2,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.doc_text,
+                              size: 16,
+                              color: p.accent,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.title,
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        PressableScale(
+                          onTap: _save,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.accent,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              widget.saveLabel,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    PressableScale(
-                      onTap: _save,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: p.accent,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          widget.saveLabel,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                  ),
+
+                  // Metadata bar (Date, Word Count, Character Count)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    color: p.surface2.withValues(alpha: 0.4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          datePretty(DateTime.now().millisecondsSinceEpoch),
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Metadata bar (Date, Word Count, Character Count)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 8,
-                ),
-                color: p.surface2.withValues(alpha: 0.4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      datePretty(DateTime.now().millisecondsSinceEpoch),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _controller,
-                      builder: (context, val, _) {
-                        final charCount = val.text.length;
-                        final wordCount = _wordCount;
-                        return Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: p.surface3,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                '$wordCount words',
-                                style: TextStyle(
-                                  color: p.text2,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                        ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _controller,
+                          builder: (context, val, _) {
+                            final charCount = val.text.length;
+                            final wordCount = _wordCount;
+                            return Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.surface3,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '$wordCount words',
+                                    style: TextStyle(
+                                      color: p.text2,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: p.surface3,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                '$charCount chars',
-                                style: TextStyle(
-                                  color: p.text2,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.surface3,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '$charCount chars',
+                                    style: TextStyle(
+                                      color: p.text2,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-
-              // Expansive Writing Canvas
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
                   ),
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    autofocus: true,
-                    maxLines: null,
-                    expands: true,
-                    textAlignVertical: TextAlignVertical.top,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    textCapitalization: TextCapitalization.sentences,
-                    autocorrect: true,
-                    enableSuggestions: true,
-                    style: TextStyle(
-                      color: p.text,
-                      fontSize: widget.largeText ? 17 : 15.5,
-                      height: 1.45,
-                      letterSpacing: 0.1,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Write in depth without limits...',
-                      hintStyle: TextStyle(
-                        color: p.text3.withValues(alpha: 0.7),
-                        fontSize: 15.5,
+
+                  // Expansive Writing Canvas
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
                       ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        autofocus: true,
+                        maxLines: null,
+                        expands: true,
+                        textAlignVertical: TextAlignVertical.top,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        textCapitalization: TextCapitalization.sentences,
+                        autocorrect: true,
+                        enableSuggestions: true,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: widget.largeText ? 17 : 15.5,
+                          height: 1.45,
+                          letterSpacing: 0.1,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Write in depth without limits...',
+                          hintStyle: TextStyle(
+                            color: p.text3.withValues(alpha: 0.7),
+                            fontSize: 15.5,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // Apple Notes Accessory Toolbar (Tags + Quick Insert Actions)
-              Container(
-                padding: EdgeInsets.fromLTRB(
-                  14,
-                  8,
-                  14,
-                  math.max(8.0, bottomInset > 0 ? 8.0 : 12.0),
-                ),
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  border: Border(
-                    top: BorderSide(
-                      color: p.border.withValues(alpha: 0.5),
-                      width: 0.5,
+                  // Apple Notes Accessory Toolbar (Tags + Quick Insert Actions)
+                  Container(
+                    padding: EdgeInsets.fromLTRB(
+                      14,
+                      8,
+                      14,
+                      math.max(8.0, bottomInset > 0 ? 8.0 : 12.0),
                     ),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Horizontal scrollable tags with Add button
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        children: [
-                          for (final tag in _tags)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: PressableScale(
-                                onTap: () => _insertTag(tag),
-                                onLongPress: () => _confirmDeleteTag(tag),
+                    decoration: BoxDecoration(
+                      color: p.surface2,
+                      border: Border(
+                        top: BorderSide(
+                          color: p.border.withValues(alpha: 0.5),
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Horizontal scrollable tags with Add button
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              for (final tag in _tags)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: PressableScale(
+                                    onTap: () => _insertTag(tag),
+                                    onLongPress: () => _confirmDeleteTag(tag),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: p.surface,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        border: Border.all(
+                                          color: p.border.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        tag,
+                                        style: TextStyle(
+                                          color: p.text,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              // Add tag button
+                              PressableScale(
+                                onTap: _showAddTagDialog,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: p.surface,
+                                    color: p.accent.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(999),
                                     border: Border.all(
-                                      color: p.border.withValues(alpha: 0.7),
+                                      color: p.accent.withValues(alpha: 0.3),
                                     ),
                                   ),
-                                  child: Text(
-                                    tag,
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.add,
+                                        size: 12,
+                                        color: p.accent,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Tag',
+                                        style: TextStyle(
+                                          color: p.accent,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                            ),
-                          // Add tag button
-                          PressableScale(
-                            onTap: _showAddTagDialog,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: p.accent.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: p.accent.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.add,
-                                    size: 12,
-                                    color: p.accent,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Tag',
-                                    style: TextStyle(
-                                      color: p.accent,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                    // Quick Markdown/Format Actions
-                    Row(
-                      children: [
-                        _buildQuickAction(
-                          icon: CupertinoIcons.time,
-                          label: 'Time',
-                          onTap: _insertTimestamp,
-                        ),
-                        const SizedBox(width: 6),
-                        _buildQuickAction(
-                          icon: CupertinoIcons.list_bullet,
-                          label: 'Bullet',
-                          onTap: () => _insertSnippet('\n• '),
-                        ),
-                        const SizedBox(width: 6),
-                        _buildQuickAction(
-                          icon: CupertinoIcons.check_mark_circled,
-                          label: 'Checklist',
-                          onTap: () => _insertSnippet('\n[ ] '),
-                        ),
-                        const Spacer(),
-                        ValueListenableBuilder<TextEditingValue>(
-                          valueListenable: _controller,
-                          builder: (context, val, _) {
-                            if (val.text.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-                            return PressableScale(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                _controller.clear();
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 4,
-                                ),
-                                child: Text(
-                                  'Clear',
-                                  style: TextStyle(
-                                    color: p.text3,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
+                        // Quick Markdown/Format Actions
+                        Row(
+                          children: [
+                            _buildQuickAction(
+                              icon: CupertinoIcons.time,
+                              label: 'Time',
+                              onTap: _insertTimestamp,
+                            ),
+                            const SizedBox(width: 6),
+                            _buildQuickAction(
+                              icon: CupertinoIcons.list_bullet,
+                              label: 'Bullet',
+                              onTap: () => _insertSnippet('\n• '),
+                            ),
+                            const SizedBox(width: 6),
+                            _buildQuickAction(
+                              icon: CupertinoIcons.check_mark_circled,
+                              label: 'Checklist',
+                              onTap: () => _insertSnippet('\n[ ] '),
+                            ),
+                            const Spacer(),
+                            ValueListenableBuilder<TextEditingValue>(
+                              valueListenable: _controller,
+                              builder: (context, val, _) {
+                                if (val.text.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+                                return PressableScale(
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    _controller.clear();
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      'Clear',
+                                      style: TextStyle(
+                                        color: p.text3,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

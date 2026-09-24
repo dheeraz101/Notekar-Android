@@ -233,10 +233,14 @@ class _AppSheetState extends State<AppSheet> {
         child: content,
       );
     }
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(spacing16),
-      child: content,
+    return AnimatedPadding(
+      padding:
+          MediaQuery.viewInsetsOf(context) + const EdgeInsets.all(spacing16),
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.decelerate,
+      child: Center(
+        child: Material(type: MaterialType.transparency, child: content),
+      ),
     );
   }
 }

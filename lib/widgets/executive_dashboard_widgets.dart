@@ -856,7 +856,16 @@ class YearlyActivityGridCard extends StatelessWidget {
                   value: '${stats.currentStreak} days',
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildStreakCard(
+                  icon: Icons.bolt_rounded,
+                  color: p.green,
+                  label: 'Habit Strength'.localized(context),
+                  value: '${stats.habitStrength}%',
+                ),
+              ),
+              const SizedBox(width: 6),
               Expanded(
                 child: _buildStreakCard(
                   icon: Icons.emoji_events_rounded,

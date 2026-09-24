@@ -1902,7 +1902,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'A high-precision chronological record of your moments with intelligent session pairing and Apple HIG elegance.'
+              'A high-precision chronological record of your moments with intelligent session pairing and precision craftsmanship.'
                   .localized(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: p.text2, fontSize: 14.5, height: 1.4),

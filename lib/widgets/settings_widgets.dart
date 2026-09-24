@@ -645,7 +645,10 @@ class ThemeChoice extends StatelessWidget {
         height: 80,
         decoration: BoxDecoration(
           color: active ? p.surface3 : p.surface2,
-          borderRadius: BorderRadius.circular(32), // iOS 26 style
+          borderRadius: BorderRadius.circular(20),
+          border: active
+              ? Border.all(color: p.accent, width: 1.5)
+              : Border.all(color: p.border.withValues(alpha: 0.5), width: 0.8),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
