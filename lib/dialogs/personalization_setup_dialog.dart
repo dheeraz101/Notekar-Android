@@ -81,8 +81,8 @@ class _PersonalizationSetupDialogState
       final picker = ImagePicker();
       final picked = await picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 256,
-        maxHeight: 256,
+        maxWidth: 512,
+        maxHeight: 512,
         imageQuality: 85,
       );
       if (picked != null) {
@@ -91,6 +91,7 @@ class _PersonalizationSetupDialogState
           _customAvatarBytes = bytes;
           _presetIndex = null;
         });
+        await _service.updateAvatar(customAvatarBytes: bytes);
       }
     } catch (_) {}
   }
@@ -176,6 +177,9 @@ class _PersonalizationSetupDialogState
                               child: _customAvatarBytes != null
                                   ? Image.memory(
                                       _customAvatarBytes!,
+                                      key: ValueKey(
+                                        _customAvatarBytes.hashCode,
+                                      ),
                                       fit: BoxFit.cover,
                                       alignment: Alignment.center,
                                     )
@@ -269,12 +273,13 @@ class _PersonalizationSetupDialogState
                       i++
                     ) ...[
                       GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           HapticFeedback.selectionClick();
                           setState(() {
                             _presetIndex = i;
                             _customAvatarBytes = null;
                           });
+                          await _service.updateAvatar(presetIndex: i);
                         },
                         child: Container(
                           width: 34,
@@ -509,28 +514,45 @@ class _PersonalizationSetupDialogState
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: p.accent,
-                      inactiveTrackColor: p.surface3,
-                      thumbColor: p.accent,
-                      overlayColor: p.accent.withValues(alpha: 0.15),
-                      trackHeight: 4,
-                    ),
-                    child: Slider(
-                      value: _mementoMoriYears.toDouble(),
-                      min: math.max(20, (ageYears?.ceil() ?? 20)).toDouble(),
-                      max: UserProfileService.maxMementoMoriYears.toDouble(),
-                      divisions: 80,
-                      onChanged: (val) {
-                        setState(() {
-                          _mementoMoriYears = val.round().clamp(
-                            1,
-                            UserProfileService.maxMementoMoriYears,
-                          );
-                        });
-                      },
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final double minVal = math.min(
+                        math.max(20.0, (ageYears?.ceil() ?? 20).toDouble()),
+                        99.0,
+                      );
+                      const double maxVal = 100.0;
+                      final int divisions = math.max(
+                        1,
+                        (maxVal - minVal).round(),
+                      );
+                      final double sliderVal = _mementoMoriYears
+                          .toDouble()
+                          .clamp(minVal, maxVal);
+
+                      return SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: p.accent,
+                          inactiveTrackColor: p.surface3,
+                          thumbColor: p.accent,
+                          overlayColor: p.accent.withValues(alpha: 0.15),
+                          trackHeight: 4,
+                        ),
+                        child: Slider(
+                          value: sliderVal,
+                          min: minVal,
+                          max: maxVal,
+                          divisions: divisions,
+                          onChanged: (val) {
+                            setState(() {
+                              _mementoMoriYears = val.round().clamp(
+                                1,
+                                UserProfileService.maxMementoMoriYears,
+                              );
+                            });
+                          },
+                        ),
+                      );
+                    },
                   ),
                   if (_dob != null) ...[
                     const SizedBox(height: 8),

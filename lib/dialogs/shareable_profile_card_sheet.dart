@@ -334,7 +334,7 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                                     ),
                                   ),
                                   Text(
-                                    '${(horizon.remainingYears).toStringAsFixed(1)} years to make history',
+                                    '${(horizon.remainingYears).toStringAsFixed(1)} years left',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(

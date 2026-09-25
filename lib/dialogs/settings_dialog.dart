@@ -540,7 +540,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             (m) => '${m[1]},',
           );
           subtitle =
-              'Age ${horizon.ageYears} • ${horizon.targetYears}y Horizon • $weeksStr wks to make history';
+              'Age ${horizon.ageYears} • ${horizon.targetYears}y Horizon • $weeksStr wks left';
         } else {
           subtitle = 'Set up your profile, age & life horizon'.localized(
             context,

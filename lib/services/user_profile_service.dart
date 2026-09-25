@@ -143,6 +143,35 @@ class UserProfileService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Directly updates the user avatar (custom image or preset) and notifies listeners immediately.
+  Future<void> updateAvatar({
+    Uint8List? customAvatarBytes,
+    int? presetIndex,
+    SharedPreferences? prefs,
+  }) async {
+    final p = prefs ?? await SharedPreferences.getInstance();
+    if (customAvatarBytes != null && customAvatarBytes.isNotEmpty) {
+      _avatarBytes = customAvatarBytes;
+      _avatarBase64 = base64Encode(customAvatarBytes);
+      _presetAvatarIndex = null;
+      await p.setString(keyUserAvatarBase64, _avatarBase64!);
+      await p.remove(keyUserPresetAvatar);
+    } else if (presetIndex != null) {
+      _presetAvatarIndex = presetIndex;
+      _avatarBytes = null;
+      _avatarBase64 = null;
+      await p.setInt(keyUserPresetAvatar, presetIndex);
+      await p.remove(keyUserAvatarBase64);
+    } else {
+      _avatarBytes = null;
+      _avatarBase64 = null;
+      _presetAvatarIndex = null;
+      await p.remove(keyUserAvatarBase64);
+      await p.remove(keyUserPresetAvatar);
+    }
+    notifyListeners();
+  }
+
   Future<void> saveProfile({
     required String name,
     DateTime? dob,
@@ -156,7 +185,7 @@ class UserProfileService extends ChangeNotifier {
     _name = name.trim();
     _dob = dob;
 
-    if (customAvatarBytes != null) {
+    if (customAvatarBytes != null && customAvatarBytes.isNotEmpty) {
       _avatarBytes = customAvatarBytes;
       _avatarBase64 = base64Encode(customAvatarBytes);
       _presetAvatarIndex = null;
@@ -216,9 +245,11 @@ class UserProfileService extends ChangeNotifier {
     final ageYears = exactAgeYears.floor();
     final ageMonths = ((exactAgeYears - ageYears) * 12).round();
 
-    final int targetYears = _mementoMoriYears
-        .clamp(math.max(1, ageYears), maxMementoMoriYears)
-        .toInt();
+    final int targetYears = ageYears >= maxMementoMoriYears
+        ? ageYears
+        : _mementoMoriYears
+              .clamp(math.max(1, ageYears), maxMementoMoriYears)
+              .toInt();
     final totalDays = (targetYears * 365.2425).round();
     final remainingDays = math.max(0, totalDays - daysLived);
     final remainingYears = remainingDays / 365.2425;
@@ -349,6 +380,7 @@ class UserProfileService extends ChangeNotifier {
     if (_avatarBytes != null && _avatarBytes!.isNotEmpty) {
       content = Image.memory(
         _avatarBytes!,
+        key: ValueKey(_avatarBytes.hashCode),
         fit: BoxFit.cover,
         alignment: Alignment.center,
         errorBuilder: (context, error, stackTrace) =>

@@ -76,6 +76,16 @@ class _PersonalProfileSettingsPageState
           _customAvatarBytes = bytes;
           _presetIndex = null;
         });
+        await UserProfileService().updateAvatar(customAvatarBytes: bytes);
+        widget.onSaved?.call();
+        if (mounted) {
+          showIosPillToast(
+            context: context,
+            p: p,
+            message: 'Profile photo updated'.localized(context),
+            icon: Icons.check_circle_outline_rounded,
+          );
+        }
       }
     } catch (e, stack) {
       AppLogger().error('Failed to pick profile image', e, stack);
@@ -137,16 +147,11 @@ class _PersonalProfileSettingsPageState
       if (mounted) {
         setState(() => _isSaving = false);
         widget.onSaved?.call();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Personal identity updated.'.localized(context),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            backgroundColor: p.surface2,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
+        showIosPillToast(
+          context: context,
+          p: p,
+          message: 'Personal identity updated'.localized(context),
+          icon: Icons.check_circle_rounded,
         );
       }
     } catch (e, stack) {
@@ -266,6 +271,9 @@ class _PersonalProfileSettingsPageState
                               child: _customAvatarBytes != null
                                   ? Image.memory(
                                       _customAvatarBytes!,
+                                      key: ValueKey(
+                                        _customAvatarBytes.hashCode,
+                                      ),
                                       fit: BoxFit.cover,
                                       alignment: Alignment.center,
                                     )
@@ -363,12 +371,16 @@ class _PersonalProfileSettingsPageState
                       i++
                     ) ...[
                       GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           HapticFeedback.selectionClick();
                           setState(() {
                             _presetIndex = i;
                             _customAvatarBytes = null;
                           });
+                          await UserProfileService().updateAvatar(
+                            presetIndex: i,
+                          );
+                          widget.onSaved?.call();
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -593,28 +605,43 @@ class _PersonalProfileSettingsPageState
               const SizedBox(height: 14),
 
               // Apple Slider
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: p.accent,
-                  inactiveTrackColor: p.surface3,
-                  thumbColor: p.accent,
-                  overlayColor: p.accent.withValues(alpha: 0.15),
-                  trackHeight: 5,
-                ),
-                child: Slider(
-                  value: _mementoMoriYears.toDouble(),
-                  min: math.max(20, (ageYears?.ceil() ?? 20)).toDouble(),
-                  max: UserProfileService.maxMementoMoriYears.toDouble(),
-                  divisions: 80,
-                  onChanged: (val) {
-                    setState(() {
-                      _mementoMoriYears = val.round().clamp(
-                        1,
-                        UserProfileService.maxMementoMoriYears,
-                      );
-                    });
-                  },
-                ),
+              Builder(
+                builder: (context) {
+                  final double minVal = math.min(
+                    math.max(20.0, (ageYears?.ceil() ?? 20).toDouble()),
+                    99.0,
+                  );
+                  const double maxVal = 100.0;
+                  final int divisions = math.max(1, (maxVal - minVal).round());
+                  final double sliderVal = _mementoMoriYears.toDouble().clamp(
+                    minVal,
+                    maxVal,
+                  );
+
+                  return SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: p.accent,
+                      inactiveTrackColor: p.surface3,
+                      thumbColor: p.accent,
+                      overlayColor: p.accent.withValues(alpha: 0.15),
+                      trackHeight: 5,
+                    ),
+                    child: Slider(
+                      value: sliderVal,
+                      min: minVal,
+                      max: maxVal,
+                      divisions: divisions,
+                      onChanged: (val) {
+                        setState(() {
+                          _mementoMoriYears = val.round().clamp(
+                            1,
+                            UserProfileService.maxMementoMoriYears,
+                          );
+                        });
+                      },
+                    ),
+                  );
+                },
               ),
 
               if (_dob != null) ...[
