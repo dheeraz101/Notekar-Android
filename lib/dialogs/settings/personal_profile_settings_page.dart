@@ -8,8 +8,10 @@ import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/shareable_profile_card_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/user_profile_service.dart';
+import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -75,7 +77,17 @@ class _PersonalProfileSettingsPageState
           _presetIndex = null;
         });
       }
-    } catch (_) {}
+    } catch (e, stack) {
+      AppLogger().error('Failed to pick profile image', e, stack);
+      if (mounted) {
+        showIosPillToast(
+          context: context,
+          p: p,
+          message: 'Could not access photo'.localized(context),
+          icon: Icons.photo_camera_outlined,
+        );
+      }
+    }
   }
 
   Future<void> _selectDob() async {
@@ -113,28 +125,41 @@ class _PersonalProfileSettingsPageState
     setState(() => _isSaving = true);
     HapticFeedback.mediumImpact();
 
-    await UserProfileService().saveProfile(
-      name: _nameController.text.trim(),
-      dob: _dob,
-      customAvatarBytes: _customAvatarBytes,
-      presetIndex: _presetIndex,
-      mementoMoriYears: _mementoMoriYears,
-    );
-
-    if (mounted) {
-      setState(() => _isSaving = false);
-      widget.onSaved?.call();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Personal identity updated.'.localized(context),
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          backgroundColor: p.surface2,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
+    try {
+      await UserProfileService().saveProfile(
+        name: _nameController.text.trim(),
+        dob: _dob,
+        customAvatarBytes: _customAvatarBytes,
+        presetIndex: _presetIndex,
+        mementoMoriYears: _mementoMoriYears,
       );
+
+      if (mounted) {
+        setState(() => _isSaving = false);
+        widget.onSaved?.call();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Personal identity updated.'.localized(context),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            backgroundColor: p.surface2,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e, stack) {
+      AppLogger().error('Failed to save profile', e, stack);
+      if (mounted) {
+        setState(() => _isSaving = false);
+        showIosPillToast(
+          context: context,
+          p: p,
+          message: 'Failed to save profile'.localized(context),
+          icon: Icons.error_outline_rounded,
+        );
+      }
     }
   }
 

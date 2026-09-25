@@ -16,6 +16,9 @@ class AppLogger {
     _log('WARN', message, error, stackTrace);
   }
 
+  void warning(String message, [Object? error, StackTrace? stackTrace]) =>
+      warn(message, error, stackTrace);
+
   void error(String message, [Object? error, StackTrace? stackTrace]) {
     _log('ERROR', message, error, stackTrace);
   }

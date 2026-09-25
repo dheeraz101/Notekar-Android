@@ -67,6 +67,9 @@
     - [🌱 7. Sobriety Companion & Milestone Map](#-7-sobriety-companion--milestone-map)
     - [🧘 8. Hourly Time Reflection & Mindfulness](#-8-hourly-time-reflection--mindfulness)
     - [📱 9. Android Home Screen Widget (2x2)](#-9-android-home-screen-widget-2x2)
+    - [👤 10. Personal Identity, 24h Life Clock & 100y Memento Mori](#-10-personal-identity-24h-life-clock--100y-memento-mori)
+    - [📥 11. Third-Party Data Migration (Loop & HabitKit)](#-11-third-party-data-migration-loop--habitkit)
+    - [⚡ 12. Device Health Diagnostics & 3-Tier Adaptive Engine](#-12-device-health-diagnostics--3-tier-adaptive-engine)
 - [🌉 System Bridges & Automation](#-system-bridges--automation)
 - [🛡️ Privacy, Security & Hardware Protection](#️-privacy-security--hardware-protection)
 - [🌐 Multilingual & Global Community](#-multilingual--global-community)
@@ -258,6 +261,35 @@ insights computed 100% on-device:
 
 - Fast, battery-efficient App Widget to log moments and check streak milestones directly from your
   Android launcher without opening the app.
+
+### 👤 10. Personal Identity, 24h Life Clock & 100y Memento Mori
+
+- **Apple ID-Grade Identity Card**: Top-level Settings profile card featuring edge-to-edge circular avatar framing (`BoxFit.cover`), custom display names, bios, and real-time existential age telemetry (e.g. `25y · 75y Mori (75.0%)`).
+- **24-Hour Life Clock**: Maps human mortality onto an intuitive single 24-hour day. If your lifespan is calibrated to a 100-year ceiling, age 25 corresponds to `06:00 AM`—illuminating where you stand in the grand day of your life.
+- **Conscious Waking Horizon**: Dissects total mortal runway into conscious waking hours (subtracting 8 hours/day for baseline sleep), computing lived conscious years versus remaining conscious runway.
+- **1-Hour Daily Leverage Formula**: Demonstrates the compounding value of temporal discipline. Reclaiming just 1 unproductive hour each day yields:
+  $$\text{Reclaimed Runway} = \frac{365 \text{ hours/year} \times \text{Remaining Years}}{16 \text{ waking hours/day} \times 365 \text{ days/year}} \approx +5.4 \text{ Conscious Waking Years}$$
+- **100-Year Ceiling Memento Mori Matrix**: Visceral progress horizon capped strictly at 100 years, providing clear perspective without fatalism.
+- **Dedicated Bottom Date Wheel Selector**: Native iOS Cupertino wheel date picker presented as a reusable bottom sheet for selecting Date of Birth with smooth haptic detents.
+- **Social Intelligence & High-Res Share Cards**: Export your Sovereign ID card and Life Audit summaries as high-resolution PNG cards with local privacy watermarks for personal reflection or community sharing.
+
+### 📥 11. Third-Party Data Migration (Loop & HabitKit)
+
+- **Dedicated Migration Card**: Located in **Settings → Backup & Export → Third-Party Migration** with strict Apple HIG styling and zero subtitle clutter.
+- **Format Auto-Sniffing & Parsing**:
+  - **Loop Habit Tracker (`.csv`)**: Seamlessly imports habit check-in logs, maps habit titles to NoteKar categories, and parses historical timestamps.
+  - **HabitKit (`.json`)**: Recursively ingests habit completions, colors, and records into encrypted Hive storage.
+- **Zero Cloud & Air-Gapped**: All parsing and schema transformation runs purely on-device in memory, maintaining absolute data sovereignty.
+- **Extensible Architecture**: Engineered with a modular adapter pattern for upcoming migration from Obsidian, Logseq, and other time-tracking tools.
+
+### ⚡ 12. Device Health Diagnostics & 3-Tier Adaptive Engine
+
+- **Hardware Capability Profiling**: NoteKar's `AdaptiveEngine` automatically inspects device RAM and processor cores to assign one of three performance tiers:
+  - **High Performance / Pro**: 120 FPS ProMotion spring physics, full multi-pass Gaussian backdrop glass blur, live particle celebrations, and unthrottled background polling.
+  - **Balanced**: 60 FPS standard refresh, efficient single-pass glass blur, and balanced animations for mid-range chipsets.
+  - **Power Saver**: 30–60 FPS capped refresh, solid high-contrast opaque surfaces (blur disabled), reduced motion, and throttled background tasks to preserve battery life and eliminate thermal throttling.
+- **Hardware Diagnostics Telemetry**: Inspect system health, SoC cores, memory footprint (with resilient SELinux heap estimation), platform details, and target render capabilities in **Settings → Device Health**.
+- **18 Minimal Glyph Category Icons**: Customizable monochrome Apple HIG glyphs for active and custom modes, consistently rendered across the home capsule, history sheet, insights, and executive dashboard.
 
 ---
 

@@ -3834,7 +3834,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
           );
         } else {
           importTask.finish();
-          _showToast(validation.error ?? 'Invalid backup file', warning: true);
+          final errorMessage =
+              migration.errorMessage ??
+              validation.error ??
+              'Invalid backup or migration file.';
+          _logger.warning('Backup/migration validation failed: $errorMessage');
+          _showToast(errorMessage, warning: true);
           return false;
         }
       }

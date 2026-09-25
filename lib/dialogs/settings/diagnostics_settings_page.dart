@@ -317,13 +317,13 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             ),
             DiagnosticRow(
               p: widget.p,
-              label: 'Performance Tier',
-              value: engine.tier.name.toUpperCase(),
+              label: 'System Health',
+              value: engine.healthStatus,
             ),
             DiagnosticRow(
               p: widget.p,
               label: 'RAM Capacity',
-              value: engine.ramGb > 0 ? '${engine.ramGb} GB' : 'Dynamic',
+              value: engine.ramGb > 0 ? '${engine.ramGb} GB' : 'Dynamic Heap',
             ),
             DiagnosticRow(
               p: widget.p,
@@ -343,25 +343,68 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                         : engine.supportedAbis.first)
                   : 'arm64-v8a',
             ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: widget.p,
+          text:
+              'Technical hardware telemetry detected by the Adaptive Engine at launch.'
+                  .localized(context),
+        ),
+
+        const SizedBox(height: 16),
+        SettingsGroup(
+          p: widget.p,
+          title: 'Performance Tiers & Capabilities',
+          children: [
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Active Tier',
+              value: '${engine.tierLabel} (${engine.tier.name.toUpperCase()})',
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Target Frame Rate',
+              value: '${engine.targetFps} FPS',
+            ),
             DiagnosticRow(
               p: widget.p,
               label: 'System Blur',
-              value: engine.supportsBlur ? 'Supported' : 'Hardware Limited',
+              value: engine.blurStatusLabel,
             ),
             DiagnosticRow(
               p: widget.p,
               label: 'Live Animations',
-              value: engine.supportsAdvancedAnimations
-                  ? 'High Performance'
-                  : 'Optimized',
+              value: engine.animationsStatusLabel,
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Visual Effects',
+              value: engine.visualEffectsStatusLabel,
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Sensory Haptics',
+              value: engine.hapticsStatusLabel,
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Background Polling',
+              value: engine.backgroundPollingStatusLabel,
             ),
           ],
         ),
         SettingsPageDescription(
           p: widget.p,
-          text: 'Technical stats about your device and the Adaptive Engine.'
-              .localized(context),
+          text:
+              '${engine.tierDefinition}\n\n'
+                      'Tier definitions:\n'
+                      '• Pro (High): Full 120 FPS spring physics, Gaussian glass blur, and particle dynamics.\n'
+                      '• Balanced: 60 FPS standard transitions and battery-efficient glass overlays.\n'
+                      '• Power Saver (Low): Translucency and live physics scaled back to guarantee smooth responsiveness without lag or thermal throttling.'
+                  .localized(context),
         ),
+
         SettingsBetaNote(p: widget.p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],

@@ -39,6 +39,46 @@ class AdaptiveEngine {
 
   bool get supportsAdvancedAnimations => _tier == PerformanceTier.high;
 
+  bool get supportsTranslucency => supportsBlur;
+
+  bool get enableComplexShadows => _tier != PerformanceTier.low;
+
+  bool get enableParticleEffects => _tier == PerformanceTier.high;
+
+  int get targetFps => switch (_tier) {
+    PerformanceTier.high => 120,
+    PerformanceTier.balanced => 60,
+    PerformanceTier.low => 30,
+  };
+
+  String get blurStatusLabel => supportsBlur ? 'Supported' : 'Hardware Limited';
+
+  String get animationsStatusLabel => switch (_tier) {
+    PerformanceTier.high => 'High Performance (120 FPS)',
+    PerformanceTier.balanced => 'Optimized (60 FPS)',
+    PerformanceTier.low => 'Power Saver (Reduced)',
+  };
+
+  String get hapticsStatusLabel => 'Sensory Active';
+
+  String get visualEffectsStatusLabel => switch (_tier) {
+    PerformanceTier.high => 'All Visuals Unlocked',
+    PerformanceTier.balanced => 'Optimized Balance',
+    PerformanceTier.low => 'Core Essentials Only',
+  };
+
+  String get backgroundPollingStatusLabel =>
+      isLowEnd ? 'Throttled (Hourly)' : 'Standard Precision (15m)';
+
+  String get tierDefinition => switch (_tier) {
+    PerformanceTier.high =>
+      'Pro Tier: Full 120 FPS fluid physics, background Gaussian glass, and particle effects unlocked.',
+    PerformanceTier.balanced =>
+      'Balanced Tier: Standard 60 FPS transitions and battery-efficient glass overlays.',
+    PerformanceTier.low =>
+      'Power Saver Tier: Translucency and live physics scaled back to guarantee smooth responsiveness without lag or thermal throttling.',
+  };
+
   bool? get cachedSensorAvailable => _cachedSensorAvailable;
 
   Future<void> initialize({SharedPreferences? prefs}) async {
@@ -67,6 +107,9 @@ class AdaptiveEngine {
       // If RAM is not cached, detect it
       if (_ramGb == 0) {
         _ramGb = await _detectAndroidRam();
+        if (_ramGb == 0) {
+          _ramGb = _processors >= 8 ? 6 : (_processors >= 6 ? 4 : 3);
+        }
         await effectivePrefs.setInt('device_total_ram_gb', _ramGb);
       }
 
