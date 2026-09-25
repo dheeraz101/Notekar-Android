@@ -49,7 +49,7 @@ class NoticeService {
       'channels': ['stable', 'beta'],
       'platforms': ['android'],
       'minVersion': '7.0.0',
-      'maxVersion': '7.5.3',
+      'maxVersion': appVersion,
       'maxShows': 5,
       'cooldownHours': 12,
     },

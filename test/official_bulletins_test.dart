@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/notice_service.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +41,7 @@ void main() {
         expect(notice['body_ja'], isNotEmpty);
         expect(notice['body_ru'], isNotEmpty);
         expect(notice['minVersion'], '7.0.0');
-        expect(notice['maxVersion'], '7.5.3');
+        expect(notice['maxVersion'], appVersion);
         expect(notice['priority'], 'normal');
       },
     );
