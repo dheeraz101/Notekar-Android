@@ -67,12 +67,27 @@ class CaptureSettingsPage extends StatelessWidget {
                 onDefaultModeChanged('two-way');
               },
             ),
+            SettingsRow(
+              p: p,
+              title: 'Last Used'.localized(context),
+              subtitle:
+                  'Resumes whichever mode was active when you last used the app.'
+                      .localized(context),
+              trailing: defaultMode == 'last-used'
+                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  : const SizedBox.shrink(),
+              onTap: () {
+                if (defaultMode == 'last-used') return;
+                onDefaultModeChanged('last-used');
+              },
+            ),
           ],
         ),
         SettingsPageDescription(
           p: p,
-          text: 'Defines the primary logging mode active when the app launches.'
-              .localized(context),
+          text:
+              'Defines the primary logging mode active when the app launches. Select Last Used to remember and restore your previous workflow.'
+                  .localized(context),
         ),
 
         Glass(

@@ -529,7 +529,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               context,
             ),
             value: defaultMode,
-            values: const {'single': 'Single', 'two-way': 'Two-Way'},
+            values: const {
+              'single': 'Single',
+              'two-way': 'Two-Way',
+              'last-used': 'Last Used',
+            },
             onChanged: (value) {
               setState(() => defaultMode = value);
               widget.onDefaultMode(value);

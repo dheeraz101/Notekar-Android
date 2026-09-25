@@ -76,7 +76,7 @@ class LoggingSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.touch_app_rounded,
               title: 'Capture',
-              status: defaultMode == 'single' ? 'Single' : 'Two-Way',
+              status: defaultModeLabel(defaultMode),
               color: p.green,
               onTap: () => onOpenCategory('Capture', parent: 'Logging'),
             ),

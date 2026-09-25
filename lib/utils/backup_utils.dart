@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:isolate';
-import 'package:notekar/models/moment.dart';
+
 import 'package:notekar/models/backup_models.dart';
-import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_logger.dart';
+import 'package:notekar/utils/app_utils.dart';
 
 Future<BackupValidationResult> validateNoteKarBackupContentAsync(
   String content,
@@ -99,7 +100,8 @@ BackupValidationResult validateNoteKarBackupContent(String content) {
 
     final timestamp = timestampValue.toInt();
     final moment = Moment(
-      id: i + 1, // ID will be reassigned during merge
+      id: i + 1,
+      // ID will be reassigned during merge
       timestamp: timestamp,
       type: validatedType,
       date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
@@ -163,8 +165,12 @@ BackupDryRunSummary buildBackupDryRunSummary({
 
 int restorableBackupSettingsCount(Map<String, dynamic> settings) {
   var count = 0;
-  if (['dark', 'light', 'amoled'].contains(settings['theme'])) count++;
-  if (['single', 'two-way'].contains(settings['defaultMode'])) count++;
+  if (['dark', 'light', 'amoled'].contains(settings['theme'])) {
+    count++;
+  }
+  if (['single', 'two-way', 'last-used'].contains(settings['defaultMode'])) {
+    count++;
+  }
   final tapDelay = settings['tapDelay'];
   if (tapDelay is num && delayValues.contains(tapDelay.toInt())) {
     count++;
@@ -172,13 +178,21 @@ int restorableBackupSettingsCount(Map<String, dynamic> settings) {
   if (accentOptions.contains(settings['accentColor'])) {
     count++;
   }
-  if (isAppIconStyle(settings['appIconStyle'] as String?)) count++;
-  if (['off', 'light', 'standard'].contains(settings['hapticStyle'])) count++;
-  if (['comfortable', 'compact'].contains(settings['historyDensity'])) count++;
+  if (isAppIconStyle(settings['appIconStyle'] as String?)) {
+    count++;
+  }
+  if (['off', 'light', 'standard'].contains(settings['hapticStyle'])) {
+    count++;
+  }
+  if (['comfortable', 'compact'].contains(settings['historyDensity'])) {
+    count++;
+  }
   final backupDays = settings['backupReminderDays'];
   if (backupDays is num && [0, 7, 14, 30].contains(backupDays.toInt())) {
     count++;
   }
-  if (settings['homeMenuAnimations'] is bool) count++;
+  if (settings['homeMenuAnimations'] is bool) {
+    count++;
+  }
   return count;
 }

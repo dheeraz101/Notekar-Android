@@ -577,9 +577,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
           prefs.getString('sobriety_milestone_theme') ?? 'science';
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
-      _mode = prefs.getString('m-mode') ?? _defaultMode;
-      _inout = prefs.getString('m-inout') ?? 'in';
       _sessionStart = prefs.getInt('m-ses');
+      if (_sessionStart != null) {
+        _mode = 'two-way';
+      } else if (_defaultMode == 'single') {
+        _mode = 'single';
+      } else if (_defaultMode == 'two-way') {
+        _mode = 'two-way';
+      } else {
+        // 'last-used'
+        _mode = prefs.getString('m-mode') ?? 'two-way';
+      }
+      _inout = prefs.getString('m-inout') ?? 'in';
       _tapDelay = prefs.getInt('m-delay') ?? 0;
       _remoteNotices = prefs.getBool('m-remote-notices') ?? false;
       _reduceMotion = prefs.getBool('m-reduce-motion') ?? false;
@@ -3885,7 +3894,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
           ? importedTheme!
           : _theme;
       final nextDefaultMode =
-          (importedDefaultMode == 'single' || importedDefaultMode == 'two-way')
+          (importedDefaultMode == 'single' ||
+              importedDefaultMode == 'two-way' ||
+              importedDefaultMode == 'last-used')
           ? importedDefaultMode!
           : _defaultMode;
       final nextTapDelay =
@@ -3959,7 +3970,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         await _replaceStoredEntries(merged);
         await _saveSetting('m-theme', nextTheme);
         await _saveSetting('m-default-mode', nextDefaultMode);
-        await _saveSetting('m-mode', nextDefaultMode);
+        await _saveSetting(
+          'm-mode',
+          nextDefaultMode == 'last-used' ? _mode : nextDefaultMode,
+        );
         await _saveSetting('m-delay', nextTapDelay);
         await _saveSetting('m-accent-color', nextAccentColor);
         await _saveSetting('m-app-icon-style', nextAppIconStyle);
@@ -3988,7 +4002,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         _lastDeletedPreview = null;
         _theme = nextTheme;
         _defaultMode = nextDefaultMode;
-        _mode = nextDefaultMode;
+        _mode = nextDefaultMode == 'last-used' ? _mode : nextDefaultMode;
         _tapDelay = nextTapDelay;
         _accentColor = nextAccentColor;
         _appIconStyle = nextAppIconStyle;

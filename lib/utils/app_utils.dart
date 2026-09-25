@@ -299,6 +299,18 @@ String durationLabel(Duration d, {bool extended = false}) {
 
 String delayLabel(int value) => value == 60 ? '1m' : '${value}s';
 
+String defaultModeLabel(String mode) {
+  switch (mode) {
+    case 'single':
+      return 'Single';
+    case 'last-used':
+      return 'Last Used';
+    case 'two-way':
+    default:
+      return 'Two-Way';
+  }
+}
+
 String privacyLockDelayLabel(int value) {
   return switch (value) {
     0 => 'Immediately',

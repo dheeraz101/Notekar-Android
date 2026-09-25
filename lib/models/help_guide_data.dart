@@ -41,6 +41,26 @@ const List<HelpGuideItem> allGuideItems = [
     keywords: ['single', 'moment', 'standalone', 'tap'],
   ),
   HelpGuideItem(
+    icon: Icons.history_toggle_off_rounded,
+    title: 'Startup Mode & Last Used',
+    content:
+        'Choose whether NoteKar launches in Single mode, Two-Way mode, or Last Used. When set to Last Used, the app automatically remembers and restores the exact capture mode you were using before closing.',
+    isFaq: false,
+    keywords: [
+      'startup',
+      'last used',
+      'startup mode',
+      'launch mode',
+      'remember mode',
+      'resume',
+      'restore',
+      'default mode',
+      'single',
+      'two-way',
+      'capture',
+    ],
+  ),
+  HelpGuideItem(
     icon: Icons.note_add_rounded,
     title: 'Add a Note',
     content: 'Touch and hold the home screen to write a note before saving.',
@@ -483,6 +503,21 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'ergonomic',
       'tap zone',
       'accidental tap',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'How does Last Used startup mode work?',
+    content:
+        'When you select Last Used under Settings > Capture > Startup Mode, NoteKar preserves your active logging mode across app closures. If you switch between Single and Two-Way logging, reopening NoteKar will resume immediately in that mode without requiring manual adjustment.',
+    isFaq: true,
+    keywords: [
+      'last used',
+      'startup mode',
+      'launch',
+      'remember',
+      'resume',
+      'mode switch',
+      'preserve mode',
     ],
   ),
   HelpGuideItem(
