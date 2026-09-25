@@ -1,5 +1,62 @@
 [
   {
+    "version": "7.5.4",
+    "buildNumber": "26BR0925",
+    "releaseDate": "2026-09-25",
+    "channel": "beta",
+    "channelTag": "[Beta]",
+    "isBeta": true,
+    "edition": "Personal Identity & Life Horizons",
+    "badgeColor": "#FF9F0A",
+    "isLatest": true,
+    "highlights": [
+      {
+        "title": "Personal Identity & Memento Mori",
+        "description": "Custom avatar personalization, dedicated DOB picker, and Memento Mori Life Horizon metrics.",
+        "icon": "person_rounded"
+      },
+      {
+        "title": "Adaptive 'Last Used' Startup Mode",
+        "description": "Seamlessly remembers and restores whichever logging mode was active during your previous session.",
+        "icon": "history_toggle_off_rounded"
+      },
+      {
+        "title": "Exponential Habit Strength Decay",
+        "description": "12-day half-life habit retention calculation with vacation and rest neutrality in Streak Guardian.",
+        "icon": "trending_up_rounded"
+      },
+      {
+        "title": "Universal Migration Importer",
+        "description": "Offline import engine for Loop Habit Tracker CSV and HabitKit JSON archives.",
+        "icon": "move_to_inbox_rounded"
+      },
+      {
+        "title": "Shareable Life Horizon Card",
+        "description": "High-fidelity social milestone export card with concise typography and local rendering.",
+        "icon": "share_rounded"
+      }
+    ],
+    "fullChangelog": [
+      "+ Personal Identity: Custom profile avatar and user alias with real-time sync across Settings and views",
+      "+ Memento Mori Horizon: Interactive life elapsed percentage, weeks lived, and seasons remaining",
+      "+ Modular Date Picker: System-grade Cupertino bottom sheet for Date of Birth configuration",
+      "+ Last Used Startup: Automatically remembers and restores active logging mode across app closures",
+      "+ Habit Strength Decay: Exponential 12-day half-life calculation reflecting behavioral retention",
+      "+ Rest Day Neutrality: Vacation and sabbath neutrality in Streak Guardian prevents streak penalties",
+      "+ Migration Importer: Dedicated offline import card supporting Loop Habit Tracker and HabitKit formats",
+      "+ Device Telemetry: Hardware diagnostics card showing memory, refresh rate, and thermal envelope",
+      "+ Responsive 2-Card Time Format: Replaced 24-hour switch with responsive 2-card Cupertino selector",
+      "+ Modal Geometry Fix: Eliminated double corner radius visual bug on modal sheets and note dialogs",
+      "+ Instant Avatar Sync: Immediate preview reflection and robust slider assertion guards",
+      "! Session Continuity: Resolved edge-case storage crashes and IPC state synchronization",
+      "* All 215 automated unit and widget test suites passing with zero lints and 100% offline privacy"
+    ],
+    "downloads": {
+      "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.4/NoteKar-v7.5.4-universal-release.apk",
+      "arm64Apk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.4/NoteKar-v7.5.4-arm64-v8a-release.apk"
+    }
+  },
+  {
     "version": "7.5.3",
     "buildNumber": "26BR0923",
     "releaseDate": "2026-09-23",
@@ -8,7 +65,7 @@
     "isBeta": true,
     "edition": "Sensory Horology & Surface Harmony",
     "badgeColor": "#FF9F0A",
-    "isLatest": true,
+    "isLatest": false,
     "highlights": [
       {
         "title": "Apple HIG Dark Surface Harmony",
@@ -115,7 +172,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Universal Themes \u0026 Spatial Modes",
+    "edition": "Universal Themes & Spatial Modes",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -165,7 +222,7 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Official Bulletins \u0026 Life Ledger Calibration",
+    "edition": "Official Bulletins & Life Ledger Calibration",
     "badgeColor": "#0A84FF",
     "isLatest": false,
     "highlights": [
@@ -189,12 +246,12 @@
       "NoteKar has revisioned itself — honoring the truth of human history.",
       "Add native 7-language support (EN, HI, ES, DE, FR, JA, RU) to AppNotice and local-first NoticeService defaults",
       "Introduce full notification hierarchy: Critical, Security (dedicated section), Release Bulletins, and Curated Tips",
-      "Remove status circle dot next to \u0027Notice Engine Active\u0027 for clean visual hierarchy",
+      "Remove status circle dot next to 'Notice Engine Active' for clean visual hierarchy",
       "Replace blocking modal alerts with non-blocking Apple-style iOS pill toast on manual refresh",
-      "Implement silent background auto-sync for stale cache (\u003e 4h) and automatic recovery from corrupted cache",
+      "Implement silent background auto-sync for stale cache (> 4h) and automatic recovery from corrupted cache",
       "Add contextual action routing and localized action button labels (releases, settings, audit, history, web links)",
       "Calibrate existential wastage metrics to recorded history bounds, preventing uncalibrated void hours for new users",
-      "Equalize card dimensions for Waking Days and Earth Days lost under \u0027The Cost of Void\u0027",
+      "Equalize card dimensions for Waking Days and Earth Days lost under 'The Cost of Void'",
       "Resolve text truncation and header collision in Life Audit dashboard card",
       "Integrate Official Bulletins into Settings category navigation stack with seamless back button routing",
       "Add universal back handlers to all secondary modal dialogs and bottom sheets",
@@ -212,12 +269,12 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Life Audit, Spatial Harmony \u0026 Sovereign Signal",
+    "edition": "Life Audit, Spatial Harmony & Sovereign Signal",
     "badgeColor": "#7000FF",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Life Audit \u0026 The Void",
+        "title": "Life Audit & The Void",
         "description": "Daily 24h partition engine confronting unaccounted hours across 6 horizons.",
         "icon": "auto_graph_rounded"
       },
@@ -237,7 +294,7 @@
         "icon": "edit_note_rounded"
       },
       {
-        "title": "Smart Onboarding \u0026 7 Locales",
+        "title": "Smart Onboarding & 7 Locales",
         "description": "Tours integrated into onboarding, unseen cards for updating users, and full 7-language support.",
         "icon": "translate_rounded"
       }
@@ -267,7 +324,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Physical Swipe Geometry \u0026 Sovereign Signal",
+    "edition": "Physical Swipe Geometry & Sovereign Signal",
     "badgeColor": "#0A84FF",
     "isLatest": false,
     "highlights": [
@@ -295,9 +352,9 @@
     "fullChangelog": [
       "Re-engineer swipe-to-delete with SwipeableCardBed matching exact 16pt/12pt card corner radii",
       "Eliminate all background straight-line cutouts and gaps behind sliding session and single moment cards",
-      "Standardize What\u0027s New keynote hero card and innovation cards to flush settings group bounds",
+      "Standardize What's New keynote hero card and innovation cards to flush settings group bounds",
       "Align keynote pill tags, release edition badges, and date metadata to eliminate horizontal overflows",
-      "Couple Official Bulletins visibility with App Notices preference switch in Notifications \u0026 Updates",
+      "Couple Official Bulletins visibility with App Notices preference switch in Notifications & Updates",
       "Add 1-second deliberate activity feedback spinner and socket-level DNS verification to bulletin checks",
       "Refine App Philosophy card in About with elevated typography, removing redundant subtitle copy",
       "Simplify Reset page description to minimal text and subtle warning icon",
@@ -315,7 +372,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Life Ledger Density \u0026 iOS Dialog Architecture",
+    "edition": "Life Ledger Density & iOS Dialog Architecture",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -368,7 +425,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Life Ledger Timeline \u0026 Executive Intelligence Hub",
+    "edition": "Life Ledger Timeline & Executive Intelligence Hub",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -415,7 +472,7 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Sovereign God Mode \u0026 Apple HIG Evolution",
+    "edition": "Sovereign God Mode & Apple HIG Evolution",
     "badgeColor": "#0A84FF",
     "isLatest": false,
     "highlights": [
@@ -430,7 +487,7 @@
         "icon": "notifications_active_rounded"
       },
       {
-        "title": "System Bridges \u0026 Broadcast APIs",
+        "title": "System Bridges & Broadcast APIs",
         "description": "Custom notekar:// URL schemes, Android text selection context menu, and Tasker broadcast automation.",
         "icon": "link_rounded"
       },
@@ -441,7 +498,7 @@
       }
     ],
     "fullChangelog": [
-      "Add sovereign God Mode suite with secret theme palettes, gravity sandbox \u0026 VIP badge",
+      "Add sovereign God Mode suite with secret theme palettes, gravity sandbox & VIP badge",
       "Add Apple HIG Dynamic Island pill toasts with frosted glass translucency",
       "Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation",
       "Add Android text selection context menu (\"Log in NoteKar\") via ProcessTextActivity",
@@ -453,7 +510,7 @@
       "Add full offline historical changelog archive with dynamic GitHub releases sync",
       "Optimize R8 and ProGuard compiler rules with build caching for faster startup",
       "Safeguard database initialization when revoking God Mode to prevent preference desynchronization",
-      "Eliminate nested modal sheets in What\u0027s New, Changelog, and Language Center"
+      "Eliminate nested modal sheets in What's New, Changelog, and Language Center"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.3.0/NoteKar-v7.3.0-universal-release.apk",
@@ -467,18 +524,18 @@
     "channel": "priority",
     "channelTag": "[Priority]",
     "isBeta": false,
-    "edition": "Mindfulness, Integrations \u0026 Battery Evolution",
+    "edition": "Mindfulness, Integrations & Battery Evolution",
     "badgeColor": "#0A84FF",
     "isLatest": false,
     "highlights": [
       {
-        "title": "System Bridges \u0026 URL Schemes",
+        "title": "System Bridges & URL Schemes",
         "description": "Trigger instant logs, Two-Way tracking, or navigate with custom notekar:// links.",
         "icon": "link_rounded"
       },
       {
-        "title": "Android Text Selection \u0026 Share Target",
-        "description": "Highlight text in any app and tap \u0027Log in NoteKar\u0027 to capture notes offline with zero friction.",
+        "title": "Android Text Selection & Share Target",
+        "description": "Highlight text in any app and tap 'Log in NoteKar' to capture notes offline with zero friction.",
         "icon": "select_all_rounded"
       },
       {
@@ -487,19 +544,19 @@
         "icon": "self_improvement_rounded"
       },
       {
-        "title": "Obsidian \u0026 Calendar Live Sync",
+        "title": "Obsidian & Calendar Live Sync",
         "description": "Export structured Markdown journal tables and RFC 5545 .ics calendar session blocks.",
         "icon": "calendar_month_rounded"
       }
     ],
     "fullChangelog": [
       "+ Add notekar:// custom URL scheme support for instant logging, Two-Way tracking, and navigation",
-      "+ Add Android text selection context menu (\u0027Log in NoteKar\u0027) via ProcessTextActivity",
+      "+ Add Android text selection context menu ('Log in NoteKar') via ProcessTextActivity",
       "+ Add Android Share Target (ACTION_SEND text/plain) for instant quote capturing",
       "+ Add local Tasker / MacroDroid broadcast automation API via ACTION_LOG_MOMENT",
       "+ Add MarkdownSyncService for Obsidian and Logseq date-grouped journal sync",
       "+ Add CalendarSyncService for RFC 5545 .ics Two-Way session export to Google/Outlook Calendar",
-      "+ Add dedicated \u0027Integrations \u0026 Automation\u0027 settings page with copyable templates and live test triggers",
+      "+ Add dedicated 'Integrations & Automation' settings page with copyable templates and live test triggers",
       "+ Use iOS Cupertino wheel time picker, rename message row, and simplify editor sheet",
       "+ Add alarm audio chime, active hours schedule, and onboarding flow",
       "* Eliminate RTC_WAKEUP battery drain for routine logging reminders",
@@ -530,7 +587,7 @@
         "icon": "translate_rounded"
       },
       {
-        "title": "Localized Numerals \u0026 Symbols",
+        "title": "Localized Numerals & Symbols",
         "description": "Native numeral systems (Devanagari, etc.) and locale-aware currency and date formatting.",
         "icon": "pin_rounded"
       },
@@ -544,7 +601,7 @@
       "+ Add French, German, Japanese, Russian localization and dynamic pattern translation",
       "+ Add localized numerals and currency symbols across the app",
       "* Preserve Apple HIG typography in English and normalize toolbar buttons",
-      "* Standardize toolbar button icon containers \u0026 fix settings description placement"
+      "* Standardize toolbar button icon containers & fix settings description placement"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.1.0/NoteKar-v7.1.0-universal-release.apk",
@@ -563,7 +620,7 @@
     "isLatest": false,
     "highlights": [
       {
-        "title": "Apple HIG \u0026 iOS Redesign",
+        "title": "Apple HIG & iOS Redesign",
         "description": "Top-floating Dynamic Island capsule pill notifications paired with tactile haptics.",
         "icon": "phone_iphone_rounded"
       },
@@ -573,15 +630,15 @@
         "icon": "palette_rounded"
       },
       {
-        "title": "Sobriety Milestones \u0026 Share Sheet",
+        "title": "Sobriety Milestones & Share Sheet",
         "description": "Export milestone cards directly to native Android share chooser with celebration confetti.",
         "icon": "emoji_events_rounded"
       }
     ],
     "fullChangelog": [
-      "+ Complete Apple HIG \u0026 iOS UI redesign upgrade with Dynamic Island pill toasts",
+      "+ Complete Apple HIG & iOS UI redesign upgrade with Dynamic Island pill toasts",
       "+ Modernized App Icon suite featuring 8 custom branded logo editions",
-      "+ Sobriety milestones card exporter with native Android share sheet \u0026 confetti",
+      "+ Sobriety milestones card exporter with native Android share sheet & confetti",
       "* 2-digit single numbering mode (01, 02...), daily reset, and directional badges",
       "+ Complete local database backup manager with individual Restore and Delete options",
       "+ Grouped Developer Options under Advanced Settings"
@@ -598,7 +655,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Branded Icon Suite \u0026 Upgrade Cards",
+    "edition": "Branded Icon Suite & Upgrade Cards",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -631,7 +688,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Milestone Peak Export \u0026 Confetti Dynamics",
+    "edition": "Milestone Peak Export & Confetti Dynamics",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -664,7 +721,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "2-Digit Single Numbering \u0026 iOS Calendar",
+    "edition": "2-Digit Single Numbering & iOS Calendar",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -697,7 +754,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Dynamic Island Pill Toasts \u0026 Search Notes",
+    "edition": "Dynamic Island Pill Toasts & Search Notes",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -708,10 +765,10 @@
       }
     ],
     "fullChangelog": [
-      "+ Complete Apple HIG \u0026 iOS UI/UX redesign upgrade",
+      "+ Complete Apple HIG & iOS UI/UX redesign upgrade",
       "+ Add iOS dynamic pill toast notification for note copy action",
       "+ Display all notes in full length by default in Search Notes page",
-      "! Isolate search notes navigation, instant trash updates \u0026 milestone share menu"
+      "! Isolate search notes navigation, instant trash updates & milestone share menu"
     ],
     "downloads": {
       "universalApk": "https://github.com/dheeraz101/Notekar-Android/releases/download/v6.0.6/NoteKar-v6.0.6-universal-release.apk"
@@ -724,7 +781,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "HIG Design Tokens \u0026 Directional Arrows",
+    "edition": "HIG Design Tokens & Directional Arrows",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -749,7 +806,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Streak Spring Animation \u0026 HIG Shimmer",
+    "edition": "Streak Spring Animation & HIG Shimmer",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -761,7 +818,7 @@
     ],
     "fullChangelog": [
       "+ Add streak counter spring animation, HIG shimmer loader, and shield activation moment",
-      "+ Implement Apple-level UX/UI audit redesign \u0026 home refactor",
+      "+ Implement Apple-level UX/UI audit redesign & home refactor",
       "! Remove trash bin icon from Recently Deleted card on logging page"
     ],
     "downloads": {
@@ -775,7 +832,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Elastic Bouncing Scroll \u0026 Hairline Dividers",
+    "edition": "Elastic Bouncing Scroll & Hairline Dividers",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -786,8 +843,8 @@
       }
     ],
     "fullChangelog": [
-      "+ Tier 1 \u0026 2 HIG design system \u0026 elastic bouncing scroll upgrades",
-      "+ Apple HIG inset hairline dividers, activity ring \u0026 heavy taptic feedback",
+      "+ Tier 1 & 2 HIG design system & elastic bouncing scroll upgrades",
+      "+ Apple HIG inset hairline dividers, activity ring & heavy taptic feedback",
       "* Circular Checkbox in Network Warning Dialog, System Update Date Formatting"
     ],
     "downloads": {
@@ -814,7 +871,7 @@
     "fullChangelog": [
       "* Align empty state labels with Apple HIG punctuation guidelines",
       "* Apply apple HIG visual squircle badges and punctuation minimalism",
-      "* Industry-standard performance, security, storage \u0026 accessibility audit upgrades",
+      "* Industry-standard performance, security, storage & accessibility audit upgrades",
       "! Eliminate 5ms coachmark tooltip flash on app launch"
     ],
     "downloads": {
@@ -828,7 +885,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Urge Surfing \u0026 Gamification",
+    "edition": "Urge Surfing & Gamification",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -839,7 +896,7 @@
       }
     ],
     "fullChangelog": [
-      "+ 3-phase major update with urge surfing, risk radar, apple hig \u0026 gamification",
+      "+ 3-phase major update with urge surfing, risk radar, apple hig & gamification",
       "* Readme file formatting and repository documentation polish"
     ],
     "downloads": {
@@ -853,7 +910,7 @@
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Milestone Map \u0026 Hardware Encryption",
+    "edition": "Milestone Map & Hardware Encryption",
     "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
@@ -888,7 +945,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Onboarding Coachmarks \u0026 Streak Freeze",
+    "edition": "Onboarding Coachmarks & Streak Freeze",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -915,7 +972,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Sobriety Widget \u0026 Link Safety Sheet",
+    "edition": "Sobriety Widget & Link Safety Sheet",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -967,7 +1024,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Solo Leveling Milestones \u0026 Note on Click",
+    "edition": "Solo Leveling Milestones & Note on Click",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -980,7 +1037,7 @@
     "fullChangelog": [
       "+ Add 21 research-backed milestones and 10 psychological themes",
       "+ Add iOS-style date-time picker for custom sobriety start timestamps",
-      "+ Wire up \u0027Note on Click\u0027 setting to open note composer on single taps",
+      "+ Wire up 'Note on Click' setting to open note composer on single taps",
       "* Align home streak card and integrate onboarding walkthrough"
     ],
     "downloads": {
@@ -994,7 +1051,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "R8 Minification \u0026 Commit Cache",
+    "edition": "R8 Minification & Commit Cache",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1048,7 +1105,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Network Monitor \u0026 Mobile Data Warning",
+    "edition": "Network Monitor & Mobile Data Warning",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1060,7 +1117,7 @@
     ],
     "fullChangelog": [
       "+ Add network monitor welcome card, FAQs, and upgrader walkthrough checks",
-      "+ Implement mobile data update warning \u0026 network monitor page",
+      "+ Implement mobile data update warning & network monitor page",
       "+ Upgrade widget layout and settings search index with version and privacy metadata",
       "* Standardize settings card widths and dynamic translucency"
     ],
@@ -1075,7 +1132,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Hardware Keystore AES-256 \u0026 QS Tile",
+    "edition": "Hardware Keystore AES-256 & QS Tile",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1103,7 +1160,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "2x2 Widget Layout \u0026 Activity Heatmap",
+    "edition": "2x2 Widget Layout & Activity Heatmap",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1130,7 +1187,7 @@
     "channel": "security",
     "channelTag": "[Security]",
     "isBeta": false,
-    "edition": "App Lock with Custom PIN \u0026 Security",
+    "edition": "App Lock with Custom PIN & Security",
     "badgeColor": "#30D158",
     "isLatest": false,
     "highlights": [
@@ -1191,7 +1248,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Custom Markdown Renderer \u0026 Dual Action Buttons",
+    "edition": "Custom Markdown Renderer & Dual Action Buttons",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1218,7 +1275,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Track Switch Downgrades \u0026 Build Choose",
+    "edition": "Track Switch Downgrades & Build Choose",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1269,7 +1326,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Bug Fixes \u0026 Release Pipeline",
+    "edition": "Bug Fixes & Release Pipeline",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1294,7 +1351,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Haptic Engine \u0026 Performance",
+    "edition": "Haptic Engine & Performance",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1319,7 +1376,7 @@
     "channel": "beta",
     "channelTag": "[Beta]",
     "isBeta": true,
-    "edition": "Telemetry \u0026 Storage Isolation",
+    "edition": "Telemetry & Storage Isolation",
     "badgeColor": "#FF9F0A",
     "isLatest": false,
     "highlights": [
@@ -1344,7 +1401,7 @@
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "CSV Exporter \u0026 Custom Delimiters",
+    "edition": "CSV Exporter & Custom Delimiters",
     "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
@@ -1369,7 +1426,7 @@
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Two-Way Logging \u0026 Duration Analytics",
+    "edition": "Two-Way Logging & Duration Analytics",
     "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
@@ -1394,12 +1451,12 @@
     "channel": "stable",
     "channelTag": "[Stable]",
     "isBeta": false,
-    "edition": "Search Notes \u0026 Tagging Engine",
+    "edition": "Search Notes & Tagging Engine",
     "badgeColor": "#AF52DE",
     "isLatest": false,
     "highlights": [
       {
-        "title": "Search \u0026 Notes",
+        "title": "Search & Notes",
         "description": "Attach rich notes to any timestamp and search instantly.",
         "icon": "search_rounded"
       }

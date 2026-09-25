@@ -1,0 +1,12 @@
+Update to 7.5.4 (build 26BR0925):
+- New: Personal Profile & Identity system with real-time avatar sync across Settings
+- New: Memento Mori Life Horizon Card with lifespan metrics and dedicated DOB picker sheet
+- New: Shareable Life Horizon social export card with refined typography and layout
+- New: "Last Used" startup mode with automatic mode memory and settings search indexing
+- New: Exponential habit strength decay model (12-day half-life) and Streak Guardian vacation neutrality
+- New: Universal migration importer for Loop Habit Tracker CSV and HabitKit JSON archives
+- New: Live hardware & device health diagnostics card in settings
+- Fix: Instant avatar preview reflection and state synchronization
+- Fix: Resolved nested double corner radius visual bug on modal sheets and note dialogs
+- Fix: Replaced 24-hour toggle with responsive 2-card selector and hardened contrast borders
+- All 215 automated unit and widget tests passing with 100% offline privacy

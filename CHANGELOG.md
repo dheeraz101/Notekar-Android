@@ -1,11 +1,55 @@
-# Changelog: NoteKar Android
+# Changelog
 
-All notable changes to NoteKar Android will be documented in this file.
-
+All notable changes to the NoteKar Android application are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+
+## [7.5.4] - 2026-09-25 (versionCode 26BR0925) [BR]
+
+> *Personal Identity, Life Horizons & Mindful Continuity.*
+
+### What's New
+
+- **Personal Profile & Identity System**:
+    - Introduced a dedicated Personal Profile system with custom avatar personalization, user alias, and real-time state synchronization across Settings and navigation surfaces.
+    - Added the **Memento Mori Life Horizon Card**: an interactive visualization displaying elapsed lifespan percentage, total weeks lived, seasons remaining, and target mortality horizons.
+    - Dedicated system-grade Cupertino bottom sheet for Date of Birth selection, adhering to modular OS-level picker paradigms.
+    - High-fidelity **Shareable Life Horizon Card**: social milestone card formatted with elegant typography, concise metrics, and privacy-first local graphic rendering.
+- **Adaptive Startup Mode & "Last Used" Memory**:
+    - Added **Last Used** startup mode alongside Single and Two-Way options in Capture Settings.
+    - Seamlessly remembers and restores the exact active logging mode from your previous session across cold launches, with full background IPC session protection.
+    - Integrated startup mode indexing in Settings Search (with dedicated "Remember Last Mode" quick access) and comprehensive documentation in Help & Guides.
+- **Habit Strength Decay & Streak Guardian Rest Neutrality**:
+    - Engineered scientifically grounded exponential habit strength decay with a 12-day half-life model ($H(t) = H_0 \cdot 2^{-t / 12}$), accurately reflecting psychological automaticity retention.
+    - Introduced vacation and sabbath rest day neutrality in Streak Guardian, preventing punitive streak breaks during planned recovery periods.
+- **Universal Migration Engine**:
+    - Added dedicated, standalone **Migrate from Other Apps** card in Backup & Export with Apple HIG copy.
+    - High-speed offline parsers for Loop Habit Tracker CSV exports and HabitKit JSON archives, featuring automatic category mapping, duplicate deduplication, and dry-run validation.
+- **Hardware & Device Health Diagnostics**:
+    - Added live hardware telemetry card displaying real-time memory pressure, display refresh rate (e.g. 60Hz / 120Hz ProMotion), device thermal envelope, and battery health state.
+
+### Improvements
+
+- **Visual Optics & Modal Sheet Geometry**:
+    - Resolved nested double corner radius visual anomalies across modal sheets and the extended note dialog.
+    - Enhanced theme card border contrast with high-visibility hairline strokes across Light, Dark, and AMOLED palettes.
+    - Replaced the 24-hour time format switch with a responsive 2-card Cupertino visual segment selector.
+- **Avatar Precision & Copy Refinements**:
+    - Fixed image clipping in circular avatar frames to eliminate awkward empty corner padding.
+    - Shortened and elevated metrics copy across social share cards and mortality horizons to prevent text ellipsis clipping.
+    - Unified Help & Guides catalog with instant search answer resolution for all newly introduced capabilities.
+
+### Bug Fixes
+
+- **Profile State & UI Assertions**:
+    - Fixed instant avatar preview reactivity, ensuring uploaded avatars reflect immediately across all surfaces without requiring dialog reloads.
+    - Added boundary assertion guards for Memento Mori horizon age sliders to prevent invalid range errors.
+- **Session Continuity & Storage Resilience**:
+    - Resolved edge-case storage crashes and IPC state synchronization during rapid two-way toggle switches.
+    - Hardened backup import parser and dry-run validator to recognize and restore `'last-used'` startup configurations.
+    - All 215 automated unit and widget test suites passing with zero lints and 100% offline privacy.
 
 ## [7.5.3] - 2026-09-23 (versionCode 26BR0923) [BR]
 
