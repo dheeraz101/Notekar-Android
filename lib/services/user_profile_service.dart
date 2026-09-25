@@ -22,6 +22,11 @@ class LifeHorizonData {
     required this.remainingWeeks,
     required this.totalWeeks,
     required this.livedPercentage,
+    this.lifeClockFormatted = '06:00 AM',
+    this.lifeClockTimeOfDay = 'Dawn',
+    this.remainingConsciousYears = 0.0,
+    this.remainingConsciousWeeks = 0,
+    this.oneHourDailyLeverageYears = 0.0,
   });
 
   final bool hasDob;
@@ -34,6 +39,11 @@ class LifeHorizonData {
   final int remainingWeeks;
   final int totalWeeks;
   final double livedPercentage;
+  final String lifeClockFormatted;
+  final String lifeClockTimeOfDay;
+  final double remainingConsciousYears;
+  final int remainingConsciousWeeks;
+  final double oneHourDailyLeverageYears;
 }
 
 /// Breakdown of conscious focus vs claimed rest vs untracked horizon.
@@ -221,6 +231,32 @@ class UserProfileService extends ChangeNotifier {
         ? (daysLived / totalDays).clamp(0.0, 1.0)
         : 0.0;
 
+    final lifeFraction = targetYears > 0
+        ? (exactAgeYears / targetYears).clamp(0.0, 1.0)
+        : 0.0;
+    final totalClockMinutes = (lifeFraction * 24 * 60).round();
+    final clockHours24 = (totalClockMinutes ~/ 60) % 24;
+    final clockMinutes = totalClockMinutes % 60;
+    final isPm = clockHours24 >= 12;
+    final clockHours12 = clockHours24 == 0
+        ? 12
+        : (clockHours24 > 12 ? clockHours24 - 12 : clockHours24);
+    final String lifeClockFormatted =
+        '${clockHours12.toString().padLeft(2, '0')}:${clockMinutes.toString().padLeft(2, '0')} ${isPm ? 'PM' : 'AM'}';
+    final String lifeClockTimeOfDay = clockHours24 < 6
+        ? 'Dawn'
+        : (clockHours24 < 12
+              ? 'Morning'
+              : (clockHours24 < 17
+                    ? 'Afternoon'
+                    : (clockHours24 < 21 ? 'Evening' : 'Night')));
+
+    const consciousAwakeRatio = 14.0 / 24.0;
+    final remainingConsciousYears = remainingYears * consciousAwakeRatio;
+    final remainingConsciousWeeks = (remainingWeeks * consciousAwakeRatio)
+        .round();
+    final oneHourDailyLeverageYears = remainingYears / 14.0;
+
     return LifeHorizonData(
       hasDob: true,
       exactAgeYears: exactAgeYears,
@@ -232,6 +268,11 @@ class UserProfileService extends ChangeNotifier {
       remainingWeeks: remainingWeeks,
       totalWeeks: totalWeeks,
       livedPercentage: livedPercentage,
+      lifeClockFormatted: lifeClockFormatted,
+      lifeClockTimeOfDay: lifeClockTimeOfDay,
+      remainingConsciousYears: remainingConsciousYears,
+      remainingConsciousWeeks: remainingConsciousWeeks,
+      oneHourDailyLeverageYears: oneHourDailyLeverageYears,
     );
   }
 
@@ -308,9 +349,8 @@ class UserProfileService extends ChangeNotifier {
     if (_avatarBytes != null && _avatarBytes!.isNotEmpty) {
       content = Image.memory(
         _avatarBytes!,
-        width: size,
-        height: size,
         fit: BoxFit.cover,
+        alignment: Alignment.center,
         errorBuilder: (context, error, stackTrace) =>
             _buildFallbackMonogram(p, size),
       );
@@ -335,18 +375,31 @@ class UserProfileService extends ChangeNotifier {
       );
     }
 
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: p.accent.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-        border: showBorder
-            ? Border.all(color: p.accent.withValues(alpha: 0.35), width: 1.5)
-            : null,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: p.accent.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+          ),
+          ClipOval(child: SizedBox.expand(child: content)),
+          if (showBorder)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+              ),
+            ),
+        ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: content,
     );
   }
 

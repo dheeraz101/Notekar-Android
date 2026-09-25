@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/user_profile_service.dart';
@@ -56,7 +57,6 @@ class _PersonalizationSetupDialogState
   Uint8List? _customAvatarBytes;
   int? _presetIndex;
   late int _mementoMoriYears;
-  bool _showDatePicker = false;
   bool _isSaving = false;
 
   @override
@@ -159,50 +159,76 @@ class _PersonalizationSetupDialogState
                 children: [
                   GestureDetector(
                     onTap: _pickImage,
-                    child: Container(
+                    child: SizedBox(
                       width: 86,
                       height: 86,
-                      decoration: BoxDecoration(
-                        color: p.accent.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: p.accent.withValues(alpha: 0.4),
-                          width: 2,
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _customAvatarBytes != null
-                          ? Image.memory(_customAvatarBytes!, fit: BoxFit.cover)
-                          : (_presetIndex != null &&
-                                    _presetIndex! >= 0 &&
-                                    _presetIndex! <
-                                        UserProfileService.presetAvatars.length
-                                ? Center(
-                                    child: Text(
-                                      UserProfileService
-                                          .presetAvatars[_presetIndex!],
-                                      style: const TextStyle(fontSize: 42),
-                                    ),
-                                  )
-                                : Center(
-                                    child:
-                                        _nameController.text.trim().isNotEmpty
-                                        ? Text(
-                                            _nameController.text
-                                                .trim()[0]
-                                                .toUpperCase(),
-                                            style: TextStyle(
-                                              color: p.accent,
-                                              fontSize: 36,
-                                              fontWeight: FontWeight.w800,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: p.accent.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          ClipOval(
+                            child: SizedBox.expand(
+                              child: _customAvatarBytes != null
+                                  ? Image.memory(
+                                      _customAvatarBytes!,
+                                      fit: BoxFit.cover,
+                                      alignment: Alignment.center,
+                                    )
+                                  : (_presetIndex != null &&
+                                            _presetIndex! >= 0 &&
+                                            _presetIndex! <
+                                                UserProfileService
+                                                    .presetAvatars
+                                                    .length
+                                        ? Center(
+                                            child: Text(
+                                              UserProfileService
+                                                  .presetAvatars[_presetIndex!],
+                                              style: const TextStyle(
+                                                fontSize: 42,
+                                              ),
                                             ),
                                           )
-                                        : Icon(
-                                            CupertinoIcons.person_fill,
-                                            size: 40,
-                                            color: p.accent,
-                                          ),
-                                  )),
+                                        : Center(
+                                            child:
+                                                _nameController.text
+                                                    .trim()
+                                                    .isNotEmpty
+                                                ? Text(
+                                                    _nameController.text
+                                                        .trim()[0]
+                                                        .toUpperCase(),
+                                                    style: TextStyle(
+                                                      color: p.accent,
+                                                      fontSize: 36,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
+                                                  )
+                                                : Icon(
+                                                    CupertinoIcons.person_fill,
+                                                    size: 40,
+                                                    color: p.accent,
+                                                  ),
+                                          )),
+                            ),
+                          ),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: p.accent.withValues(alpha: 0.45),
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Positioned(
@@ -340,9 +366,33 @@ class _PersonalizationSetupDialogState
             ),
             const SizedBox(height: 6),
             PressableScale(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                setState(() => _showDatePicker = !_showDatePicker);
+              onTap: () async {
+                HapticFeedback.selectionClick();
+                final now = DateTime.now();
+                final initialDate =
+                    _dob ?? DateTime(now.year - 24, now.month, now.day);
+                final picked = await AppDatePickerSheet.show(
+                  context,
+                  p: p,
+                  title: 'Date of Birth',
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: initialDate,
+                  minimumDate: DateTime(1900, 1, 1),
+                  maximumDate: now,
+                );
+                if (picked != null && mounted) {
+                  setState(() {
+                    _dob = picked;
+                    final currentAgeYears =
+                        now.difference(picked).inDays / 365.2425;
+                    if (_mementoMoriYears < currentAgeYears.ceil()) {
+                      _mementoMoriYears = currentAgeYears.ceil().clamp(
+                        1,
+                        UserProfileService.maxMementoMoriYears,
+                      );
+                    }
+                  });
+                }
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -370,47 +420,20 @@ class _PersonalizationSetupDialogState
                         ),
                       ),
                     ),
-                    Icon(
-                      _showDatePicker
-                          ? CupertinoIcons.chevron_up
-                          : CupertinoIcons.chevron_down,
-                      size: 14,
-                      color: p.text3,
-                    ),
+                    Icon(CupertinoIcons.chevron_down, size: 14, color: p.text3),
                   ],
                 ),
               ),
             ),
 
-            if (_showDatePicker) ...[
-              const SizedBox(height: 8),
-              Container(
-                height: 190,
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: p.border.withValues(alpha: 0.5)),
-                ),
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: _dob ?? DateTime(2000, 1, 1),
-                  minimumDate: DateTime(1910, 1, 1),
-                  maximumDate: DateTime.now(),
-                  onDateTimeChanged: (picked) {
-                    setState(() => _dob = picked);
-                  },
-                ),
-              ),
-            ],
+            const SizedBox(height: 18),
 
-            const SizedBox(height: 20),
-
-            // Memento Mori Life Expectancy Card
+            // Memento Mori Life Expectancy Card (Redesigned: Big Numbers, Rich Visuals, No Truncation)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: p.border.withValues(alpha: 0.6)),
               ),
               child: Column(
@@ -419,51 +442,70 @@ class _PersonalizationSetupDialogState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.hourglass,
-                              size: 15,
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.hourglass,
+                            size: 15,
+                            color: p.orange,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'MEMENTO MORI HORIZON',
+                            style: TextStyle(
                               color: p.orange,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
                             ),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                'MEMENTO MORI HORIZON',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: p.text3,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
                       Text(
-                        '$_mementoMoriYears yrs (Max 100)',
+                        'Max 100 Years',
                         style: TextStyle(
-                          color: p.accent,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
+                          color: p.text3,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$_mementoMoriYears',
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Years Horizon',
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
                   Text(
-                    'Set your life expectancy to ground daily minutes in life perspective. Strictly capped at 100 years.'
+                    'Grounded life perspective strictly capped at 100 years.'
                         .localized(context),
                     style: TextStyle(
-                      color: p.text2,
-                      fontSize: 12,
-                      height: 1.35,
+                      color: p.text3,
+                      fontSize: 11.5,
+                      height: 1.3,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -491,43 +533,123 @@ class _PersonalizationSetupDialogState
                     ),
                   ),
                   if (_dob != null) ...[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        value: livedRatio,
-                        minHeight: 6,
-                        backgroundColor: p.surface3,
-                        valueColor: AlwaysStoppedAnimation<Color>(p.orange),
+                      child: Container(
+                        height: 7,
+                        color: p.surface3,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Row(
+                              children: [
+                                Container(
+                                  width: constraints.maxWidth * livedRatio,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [p.accent, p.orange],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Flexible(
-                          child: Text(
-                            'Lived: ${ageYears!.toStringAsFixed(1)} yrs ($weeksLived wks)',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: p.orange,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.surface3.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'LIVED (${(livedRatio * 100).toStringAsFixed(0)}%)',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '$weeksLived wks',
+                                  style: TextStyle(
+                                    color: p.orange,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${ageYears!.toStringAsFixed(1)} years',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            'Remaining: $weeksRemaining wks',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                              color: p.green,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.surface3.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'AHEAD (${((1 - livedRatio) * 100).toStringAsFixed(0)}%)',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '$weeksRemaining wks',
+                                  style: TextStyle(
+                                    color: p.green,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${(math.max(0.0, _mementoMoriYears - ageYears)).toStringAsFixed(1)} years left',
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

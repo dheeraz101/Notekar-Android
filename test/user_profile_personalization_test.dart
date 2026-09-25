@@ -2,12 +2,18 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
+import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
+import 'package:notekar/dialogs/shareable_profile_card_sheet.dart';
+import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/user_profile_service.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/dashboard_metrics_service.dart';
+import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/widgets/executive_dashboard_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -233,6 +239,58 @@ void main() {
       expect(prod.restPercentage, closeTo(0.2, 0.01));
       expect(prod.untrackedPercentage, closeTo(0.6, 0.01));
     });
+
+    test(
+      'Calculates 24-hour life clock, conscious horizon, and 1h daily leverage',
+      () async {
+        final service = UserProfileService();
+        final now = DateTime.now();
+        final birthDate = DateTime(now.year - 25, now.month, now.day);
+        await service.saveProfile(
+          name: 'Marcus',
+          dob: birthDate,
+          mementoMoriYears: 100,
+        );
+        final horizon = service.calculateLifeHorizon();
+
+        expect(horizon.hasDob, isTrue);
+        expect(horizon.exactAgeYears, closeTo(25.0, 0.2));
+        expect(horizon.remainingYears, closeTo(75.0, 0.2));
+        expect(horizon.lifeClockFormatted, contains(':'));
+        expect(horizon.lifeClockTimeOfDay, isNotEmpty);
+        expect(horizon.remainingConsciousYears, closeTo(43.75, 1.5));
+        expect(horizon.oneHourDailyLeverageYears, closeTo(5.35, 0.5));
+      },
+    );
+
+    test(
+      'LifeAuditService computes partial tracked duration and intentionality when history is partial',
+      () {
+        final now = DateTime(2026, 9, 25, 12, 0);
+        final twoDaysAgo = now.subtract(const Duration(days: 1));
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: twoDaysAgo.millisecondsSinceEpoch,
+            type: 'single', // 15 mins focus credit
+            date: dateKey(twoDaysAgo),
+          ),
+        ];
+
+        final summary = LifeAuditService.calculate(
+          entries: entries,
+          timeframe:
+              LifeAuditTimeframe.week, // 7 days required, 2 days available
+          referenceNow: now,
+        );
+
+        expect(summary.hasData, isFalse);
+        expect(summary.availableHistoryDays, 2);
+        expect(summary.totalTrackedDuration.inMinutes, 15);
+        expect(summary.intentionalityRatio, greaterThan(0.0));
+        expect(summary.totalWastedDuration, Duration.zero);
+      },
+    );
   });
 
   group('Category Minimal Glyph Icons Integration', () {
@@ -307,7 +365,160 @@ void main() {
       expect(find.text('Life Horizon'), findsOneWidget);
       expect(find.text('Lived So Far'), findsOneWidget);
       expect(find.text('Horizon Left'), findsOneWidget);
+      expect(find.textContaining('Life Clock:'), findsOneWidget);
+      expect(find.textContaining('Conscious Waking Horizon:'), findsOneWidget);
+      expect(find.textContaining('compounded mastery'), findsOneWidget);
       expect(find.textContaining('Seneca'), findsOneWidget);
+    });
+
+    testWidgets('AppDatePickerSheet renders Done and Cancel buttons', (
+      tester,
+    ) async {
+      DateTime? chosenDate;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () async {
+                  chosenDate = await AppDatePickerSheet.show(
+                    context,
+                    p: p,
+                    title: 'Select Date of Birth',
+                    initialDateTime: DateTime(2000, 1, 1),
+                  );
+                },
+                child: const Text('Open Picker'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Picker'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
+
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+
+      expect(chosenDate, isNotNull);
+    });
+
+    testWidgets(
+      'PersonalProfileSettingsPage renders Apple HIG profile editing',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(tester.view.reset);
+
+        final profile = UserProfileService();
+        await profile.saveProfile(
+          name: 'Dheeraj',
+          dob: DateTime(1998, 5, 20),
+          mementoMoriYears: 85,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: PersonalProfileSettingsPage(p: p),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('YOUR NAME'), findsOneWidget);
+        expect(find.text('DATE OF BIRTH'), findsOneWidget);
+        expect(find.text('MEMENTO MORI HORIZON'), findsOneWidget);
+
+        await tester.drag(
+          find.byType(SingleChildScrollView).first,
+          const Offset(0, -800),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Share Card'), findsOneWidget);
+        expect(find.text('Save Profile'), findsOneWidget);
+      },
+    );
+
+    testWidgets('ShareableProfileCardSheet renders identity share card', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.reset);
+
+      final profile = UserProfileService();
+      await profile.saveProfile(
+        name: 'Marcus Aurelius',
+        dob: DateTime(1995, 4, 26),
+        mementoMoriYears: 80,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => ShareableProfileCardSheet.show(context, p: p),
+                child: const Text('Open Profile Card'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Profile Card'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Marcus Aurelius'), findsOneWidget);
+      expect(find.text('NoteKar ID'), findsOneWidget);
+      expect(find.text('Share Identity Card'), findsNWidgets(2));
+    });
+
+    testWidgets('ShareableStatsSheet renders performance share card', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => ShareableStatsSheet.show(
+                  context,
+                  p: p,
+                  periodLabel: 'Week',
+                  totalTracked: const Duration(hours: 32, minutes: 15),
+                  intentionalityRatio: 78.5,
+                  wastedOrDrift: const Duration(hours: 8),
+                  streakDays: 14,
+                  topCategory: 'Engineering',
+                  topCategoryPct: 62,
+                ),
+                child: const Text('Open Stats Card'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Stats Card'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('CONSCIOUS FOCUS TIME'), findsOneWidget);
+      expect(find.text('WEEK'), findsOneWidget);
+      expect(find.text('32h 15m'), findsOneWidget);
+      expect(find.text('Share Stats on Social'), findsOneWidget);
     });
   });
 }

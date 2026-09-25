@@ -341,19 +341,29 @@ class LifeAuditService {
         );
       }
 
+      int partialTrackedMs = 0;
+      for (final r in partialRecords) {
+        partialTrackedMs += r.trackedDuration.inMilliseconds;
+      }
+      final partialConsciousMs =
+          consciousWindowPerDay.inMilliseconds * daysToBuild;
+      final double partialIntentionality = partialConsciousMs > 0
+          ? ((partialTrackedMs / partialConsciousMs) * 100.0).clamp(0.0, 100.0)
+          : 0.0;
+
       return LifeAuditSummary(
         timeframe: timeframe,
         daysCount: requiredDays,
         sleepHours: sleepHours,
         essentialsHours: essentialsHours,
         consciousHoursPerDay: consciousHours,
-        totalConsciousWindow: Duration.zero,
-        totalTrackedDuration: Duration.zero,
+        totalConsciousWindow: Duration(milliseconds: partialConsciousMs),
+        totalTrackedDuration: Duration(milliseconds: partialTrackedMs),
         totalWastedDuration: Duration.zero,
         totalWakingDaysLost: 0.0,
         totalCelestialDaysLost: 0.0,
-        intentionalityRatio: 0.0,
-        voidRatio: 0.0,
+        intentionalityRatio: partialIntentionality,
+        voidRatio: (100.0 - partialIntentionality).clamp(0.0, 100.0),
         dailyRecords: partialRecords,
         hasData: false,
         availableHistoryDays: availableHistoryDays,

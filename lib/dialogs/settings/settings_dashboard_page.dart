@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -10,6 +12,7 @@ import 'package:notekar/utils/risk_radar_service.dart';
 import 'package:notekar/utils/user_rank_service.dart';
 import 'package:notekar/widgets/executive_dashboard_widgets.dart';
 import 'package:notekar/widgets/history_analytics_card.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -73,6 +76,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           p: p,
           entries: entries,
           timeframe: _timeframe,
+          onOpenLifeAudit: widget.onOpenLifeAudit,
         ),
         _buildLifeAuditCard(context),
         if (entries.isNotEmpty &&
@@ -514,13 +518,52 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                'THE STORY OF YOUR TIME'.localized(context),
-                style: TextStyle(
-                  color: p.accent,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
+              Expanded(
+                child: Text(
+                  'THE STORY OF YOUR TIME'.localized(context),
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+              PressableScale(
+                onTap: () {
+                  NotekarHaptics.selection('standard');
+                  ShareableStatsSheet.show(
+                    context,
+                    p: p,
+                    entries: entries,
+                    dashboardData: data,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.share, size: 11, color: p.accent),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Share Stats'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -764,8 +807,10 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         maxLines: 1,
                         style: TextStyle(
                           color: isSevere ? p.red : p.text,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.8,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),

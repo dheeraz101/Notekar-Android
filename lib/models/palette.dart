@@ -70,6 +70,8 @@ class Palette {
   final Color orange;
   final Color red;
   final Color blue;
+
+  bool get isDark => name != 'light';
 }
 
 Palette paletteFor(

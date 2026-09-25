@@ -190,8 +190,9 @@ class HeroActivityRingCard extends StatelessWidget {
                         data.formattedTotalTracked,
                         style: TextStyle(
                           color: p.text,
-                          fontSize: 14.5,
+                          fontSize: 22,
                           fontWeight: FontWeight.w900,
+                          letterSpacing: -0.6,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
@@ -969,12 +970,14 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
     required this.entries,
     required this.timeframe,
     this.onConfigure,
+    this.onOpenLifeAudit,
   });
 
   final Palette p;
   final List<Moment> entries;
   final DashboardTimeframe timeframe;
   final VoidCallback? onConfigure;
+  final VoidCallback? onOpenLifeAudit;
 
   @override
   Widget build(BuildContext context) {
@@ -1093,6 +1096,43 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
               const SizedBox(height: 16),
 
               if (horizon.hasDob) ...[
+                // 24-Hour Life Clock Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: p.border.withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(CupertinoIcons.clock, size: 13, color: p.accent),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Life Clock: '.localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        '${horizon.lifeClockFormatted} • ${horizon.lifeClockTimeOfDay}',
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
                 // Metric cards row
                 Row(
                   children: [
@@ -1118,6 +1158,41 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 10),
+
+                // Merged Life Horizon: Conscious Horizon Awake
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.bolt_horizontal_circle,
+                        size: 14,
+                        color: p.green,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Conscious Waking Horizon: ~${horizon.remainingConsciousYears.toStringAsFixed(1)} yrs (~${horizon.remainingConsciousWeeks} wks awake)',
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 14),
 
@@ -1256,6 +1331,93 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
+                // 1-Hour Daily Leverage Formula
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: p.accent.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.flame_fill,
+                        size: 14,
+                        color: p.accent,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '1h of daily focus yields ${horizon.oneHourDailyLeverageYears.toStringAsFixed(1)} full years of compounded mastery over your remaining lifespan.',
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (onOpenLifeAudit != null) ...[
+                  const SizedBox(height: 10),
+                  PressableScale(
+                    onTap: () {
+                      NotekarHaptics.selection('standard');
+                      onOpenLifeAudit!();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.timelapse,
+                                size: 14,
+                                color: p.accent,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Inspect Daily Life Audit & Void'.localized(
+                                  context,
+                                ),
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 13,
+                            color: p.text3,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+
                 // Seneca Quote
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1372,13 +1534,18 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              color: p.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                color: p.text,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.6,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
           const SizedBox(height: 2),

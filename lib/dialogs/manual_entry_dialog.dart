@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, TimeOfDay;
+import 'package:flutter/material.dart' show Colors, TimeOfDay;
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -37,133 +38,14 @@ Future<DateTime?> showCupertinoDatePickerSheet(
   DateTime? maximumDate,
   required String title,
 }) {
-  DateTime selected = initialDateTime;
-  return showCupertinoModalPopup<DateTime>(
-    context: context,
-    barrierColor: const Color(0x66000000),
-    builder: (BuildContext sheetContext) {
-      return Material(
-        color: Colors.transparent,
-        child: DefaultTextStyle(
-          style: TextStyle(
-            color: p.text,
-            decoration: TextDecoration.none,
-            fontFamily: '.SF Pro Text',
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: p.surface2,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-              border: Border.all(color: p.border.withValues(alpha: 0.6)),
-            ),
-            child: SafeArea(
-              top: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 8, bottom: 4),
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: p.border,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () => Navigator.pop(sheetContext, null),
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () =>
-                              Navigator.pop(sheetContext, selected),
-                          child: Text(
-                            'Done',
-                            style: TextStyle(
-                              color: p.accent,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 0.5,
-                    color: p.border.withValues(alpha: 0.5),
-                  ),
-                  SizedBox(
-                    height: 220,
-                    child: CupertinoTheme(
-                      data: CupertinoThemeData(
-                        brightness: p.name == 'light'
-                            ? Brightness.light
-                            : Brightness.dark,
-                        primaryColor: p.accent,
-                        textTheme: CupertinoTextThemeData(
-                          textStyle: TextStyle(
-                            color: p.text,
-                            decoration: TextDecoration.none,
-                          ),
-                          dateTimePickerTextStyle: TextStyle(
-                            color: p.text,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                      child: CupertinoDatePicker(
-                        mode: mode,
-                        initialDateTime: initialDateTime,
-                        minimumDate: minimumDate,
-                        maximumDate: maximumDate,
-                        onDateTimeChanged: (val) {
-                          HapticFeedback.selectionClick();
-                          selected = val;
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    },
+  return AppDatePickerSheet.show(
+    context,
+    p: p,
+    title: title,
+    mode: mode,
+    initialDateTime: initialDateTime,
+    minimumDate: minimumDate,
+    maximumDate: maximumDate,
   );
 }
 

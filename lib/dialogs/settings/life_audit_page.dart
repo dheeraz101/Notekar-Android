@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -463,10 +464,11 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 maxLines: 1,
                 style: TextStyle(
                   color: p.text,
-                  fontSize: 32,
+                  fontSize: 34,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
                   height: 1.1,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ),
@@ -518,8 +520,12 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                               '0 days',
                               style: TextStyle(
                                 color: p.text,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.6,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
                               ),
                             ),
                           ),
@@ -560,8 +566,12 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                               '0 days',
                               style: TextStyle(
                                 color: p.text,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.6,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
                               ),
                             ),
                           ),
@@ -693,6 +703,42 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   ),
                 ),
               ),
+              const SizedBox(width: 6),
+              PressableScale(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ShareableStatsSheet.show(
+                    context,
+                    p: p,
+                    entries: widget.entries,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.share, size: 11, color: p.accent),
+                      const SizedBox(width: 3),
+                      Text(
+                        'Share'.localized(context),
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -706,10 +752,11 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               maxLines: 1,
               style: TextStyle(
                 color: isSevere ? p.red : p.text,
-                fontSize: 32,
+                fontSize: 34,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.8,
                 height: 1.1,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -757,8 +804,12 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                             wakingLost,
                             style: TextStyle(
                               color: p.red,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.6,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
                             ),
                           ),
                         ),
@@ -799,8 +850,12 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                             celestialLost,
                             style: TextStyle(
                               color: p.text,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.6,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
                             ),
                           ),
                         ),

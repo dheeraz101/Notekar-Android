@@ -30,6 +30,7 @@ import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/dialogs/settings/logging_settings_page.dart';
 import 'package:notekar/dialogs/settings/modes_categories_settings_page.dart';
 import 'package:notekar/dialogs/settings/moments_settings_page.dart';
+import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/reminders_settings_page.dart';
@@ -534,9 +535,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
         String subtitle;
         if (horizon.hasDob) {
-          subtitle = '  •  ';
+          final weeksStr = horizon.remainingWeeks.toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (m) => '${m[1]},',
+          );
+          subtitle =
+              'Age ${horizon.ageYears} • ${horizon.targetYears}y Horizon • $weeksStr wks to make history';
         } else {
-          subtitle = 'Set up name, photo & Memento Mori'.localized(context);
+          subtitle = 'Set up your profile, age & life horizon'.localized(
+            context,
+          );
         }
 
         return Container(
@@ -544,17 +552,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
           child: PressableScale(
             onTap: () {
               NotekarHaptics.selection('standard');
-              PersonalizationSetupDialog.show(
-                context,
-                p: p,
-                onSaved: () => setState(() {}),
-              );
+              _openCategory('Personal Profile');
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(26),
                 border: Border.all(
                   color: p.border.withValues(alpha: 0.5),
                   width: 0.8,
@@ -5021,6 +5025,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                             ]),
                           ),
                         ],
+                        if (show('Personal Profile'))
+                          SliverToBoxAdapter(
+                            child: PersonalProfileSettingsPage(
+                              p: p,
+                              onSaved: () => setState(() {}),
+                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
+                          ),
                         if (show('Personalization'))
                           SliverToBoxAdapter(
                             child: PersonalizationSettingsPage(

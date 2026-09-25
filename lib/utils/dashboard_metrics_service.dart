@@ -147,6 +147,18 @@ class ExecutiveDashboardData {
       return '${mins}m';
     }
   }
+
+  Duration get untrackedDuration {
+    final days = switch (timeframe) {
+      DashboardTimeframe.today => 1,
+      DashboardTimeframe.week => 7,
+      DashboardTimeframe.month => 30,
+      DashboardTimeframe.all => 90,
+    };
+    final conscious = Duration(hours: days * 10);
+    final diff = conscious - totalTracked;
+    return diff.isNegative ? Duration.zero : diff;
+  }
 }
 
 class DashboardMetricsService {
