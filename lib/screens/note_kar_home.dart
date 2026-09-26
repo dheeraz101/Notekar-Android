@@ -2311,7 +2311,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'streakMilestone': streakMilestone,
         'lastRelapseTime': lastRelapseTime,
         'activeCategory': _activeCategory,
-        'focusRatio': (todayAudit.intentionalityRatio * 100).round(),
+        'focusRatio': todayAudit.intentionalityRatio.round().clamp(0, 100),
         'totalTracked': todayAudit.formattedTotalTracked,
         'totalWasted': todayAudit.formattedTotalWasted,
       });

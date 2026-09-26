@@ -5,6 +5,7 @@ import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/zen_day_gauge.dart';
 
@@ -24,10 +25,12 @@ class HomeTopInsightsPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = _computeHumanLifeNarrative(context);
-    final today = dateKey(DateTime.now());
-    final todayCount = entries.where((e) => e.date == today).length;
-    final progress = (todayCount / 6.0).clamp(0.0, 1.0);
+    final todayAudit = LifeAuditService.calculate(
+      entries: entries,
+      timeframe: LifeAuditTimeframe.today,
+    );
+    final label = _computeHumanLifeNarrative(context, todayAudit);
+    final progress = (todayAudit.intentionalityRatio / 100.0).clamp(0.0, 1.0);
 
     return Center(
       child: PressableScale(
@@ -113,7 +116,10 @@ class HomeTopInsightsPill extends StatelessWidget {
     return (peakSlot, range, pct);
   }
 
-  String _computeHumanLifeNarrative(BuildContext context) {
+  String _computeHumanLifeNarrative(
+    BuildContext context,
+    LifeAuditSummary todayAudit,
+  ) {
     if (entries.isEmpty) {
       return 'Activity Insights • Tap to explore'.localized(context);
     }
@@ -134,13 +140,16 @@ class HomeTopInsightsPill extends StatelessWidget {
     }
 
     final completedSessions = math.min(inCount, outCount);
-    final (slotName, _, _) = _computeTimeSlotBias();
-
     if (completedSessions > 0) {
       final sessionLabel = completedSessions == 1
           ? '1 session today'
           : '$completedSessions sessions today';
-      return '$sessionLabel • Peak in $slotName'.localized(context);
+      if (todayAudit.totalWastedDuration > Duration.zero) {
+        return '$sessionLabel • ${todayAudit.formattedTotalTracked} Conscious • ${todayAudit.formattedTotalWasted} Drift'
+            .localized(context);
+      }
+      return '$sessionLabel • ${todayAudit.formattedTotalTracked} Conscious'
+          .localized(context);
     }
 
     final singles = todayEntries.length;

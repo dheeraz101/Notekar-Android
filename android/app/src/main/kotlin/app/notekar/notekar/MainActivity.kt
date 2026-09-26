@@ -1233,6 +1233,12 @@ class MainActivity : FlutterActivity() {
             val sobrietyEnabled =
                 widgetPrefs.getBoolean(NoteKarWidgetProvider.KEY_SOBRIETY_ENABLED, false)
             val streakDays = widgetPrefs.getString(NoteKarWidgetProvider.KEY_STREAK_DAYS, "") ?: ""
+            val totalTracked =
+                widgetPrefs.getString(NoteKarWidgetProvider.KEY_TOTAL_TRACKED, "0m") ?: "0m"
+            val totalWasted =
+                widgetPrefs.getString(NoteKarWidgetProvider.KEY_TOTAL_WASTED, "0m") ?: "0m"
+            val focusRatio =
+                widgetPrefs.getInt(NoteKarWidgetProvider.KEY_FOCUS_RATIO, 0)
 
             val inIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
                 action = NoteKarWidgetProvider.ACTION_LOG_BG
@@ -1301,11 +1307,22 @@ class MainActivity : FlutterActivity() {
                 SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(lastTimestamp))
             } else ""
 
+            val hasAuditData = totalTracked != "0m" || totalWasted != "0m"
+            val auditSummary = if (hasAuditData) {
+                "Today: $totalTracked Conscious • $totalWasted Mortal Drift"
+            } else {
+                "$todayCount moments today"
+            }
+
             val contentText = when {
-                isCurrentlyIn && formattedTime.isNotEmpty() -> "Active session since $formattedTime • $todayCount moments today"
-                sobrietyEnabled && streakDays.isNotEmpty() -> "Clean streak: $streakDays • $todayCount moments today"
-                todayCount > 0 -> "$todayCount moments today"
-                else -> "Ready to log • Tap actions below to record instantly"
+                isCurrentlyIn && formattedTime.isNotEmpty() ->
+                    "Active since $formattedTime • $auditSummary"
+                sobrietyEnabled && streakDays.isNotEmpty() ->
+                    "Clean: $streakDays • $auditSummary"
+                todayCount > 0 || hasAuditData ->
+                    auditSummary
+                else ->
+                    "Ready to log • Tap actions below to record instantly"
             }
 
             val expandedText = buildString {
@@ -1316,6 +1333,14 @@ class MainActivity : FlutterActivity() {
                     append(if (isCurrentlyIn) "Session started: " else "Last recorded: ").append(
                         formattedTime
                     ).append("\n")
+                }
+                if (hasAuditData) {
+                    append("Conscious: ").append(totalTracked)
+                        .append(" • Mortal Drift: ").append(totalWasted)
+                    if (focusRatio > 0) {
+                        append(" (").append(focusRatio).append("% Intentional)")
+                    }
+                    append("\n")
                 }
                 append("Today's Total: ").append(todayCount).append(" moments")
                 if (sobrietyEnabled && streakDays.isNotEmpty()) {

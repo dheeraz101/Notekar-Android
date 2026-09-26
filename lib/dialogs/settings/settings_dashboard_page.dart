@@ -352,11 +352,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                                 Text(
                                   progress.isCompleted
                                       ? 'Done (${(progress.ratio * 100).toInt()}%)'
-                                      : '${progress.trackedFormatted} / ${progress.targetFormatted}',
+                                      : '${progress.remainingFormatted} to go',
                                   style: TextStyle(
                                     color: progress.isCompleted
                                         ? p.green
-                                        : p.text2,
+                                        : p.orange,
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
                                     fontFeatures: const [

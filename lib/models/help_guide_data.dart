@@ -253,6 +253,39 @@ const List<HelpGuideItem> allGuideItems = [
     keywords: ['end', 'live', 'session', 'stop', 'close'],
   ),
   HelpGuideItem(
+    icon: Icons.hourglass_top_rounded,
+    title: 'Timeline Gap Recovery & Rest',
+    content:
+        'Unaccounted intervals between sessions are highlighted as gentle timeline gaps. Tap "Rest" to instantly convert untracked time into accounted rest and recovery in your Life Audit, or tap "Log" to open a pre-filled manual session.',
+    isFaq: false,
+    keywords: [
+      'gap',
+      'recovery',
+      'rest',
+      'untracked',
+      'void',
+      'guilt-free',
+      'claim rest',
+      'audit',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.screen_lock_portrait_rounded,
+    title: 'Lock Screen & Mortal Drift',
+    content:
+        'Enable the persistent control panel in Settings > Logging to view real-time conscious hours versus mortal drift ("Today: 3h 15m Conscious • 4h 45m Mortal Drift") directly on your lock screen, with one-tap IN/OUT, Quick Note, and Mode toggle.',
+    isFaq: false,
+    keywords: [
+      'lock screen',
+      'persistent',
+      'notification',
+      'mortal drift',
+      'conscious hours',
+      'quick actions',
+      'control panel',
+    ],
+  ),
+  HelpGuideItem(
     icon: Icons.history_rounded,
     title: 'Review History',
     content:

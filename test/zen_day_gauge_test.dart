@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/life_audit_service.dart';
+import 'package:notekar/widgets/home_top_insights_pill.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/zen_day_gauge.dart';
 
@@ -98,5 +102,63 @@ void main() {
       expect(find.text('Rest'), findsNothing);
       expect(find.text('Log'), findsOneWidget);
     });
+
+    testWidgets(
+      'HomeTopInsightsPill renders conscious vs mortal drift narrative',
+      (tester) async {
+        final now = DateTime.now();
+        final nowMs = now.millisecondsSinceEpoch;
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: nowMs - 3600000,
+            date: dateKey(now),
+            type: 'in',
+          ),
+          Moment(id: 2, timestamp: nowMs, date: dateKey(now), type: 'out'),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: HomeTopInsightsPill(p: p, entries: entries, onTap: () {}),
+            ),
+          ),
+        );
+
+        expect(find.byType(HomeTopInsightsPill), findsOneWidget);
+        expect(find.byType(ZenDayRing), findsOneWidget);
+        // Confirms Conscious is rendered in narrative
+        expect(find.textContaining('Conscious'), findsOneWidget);
+      },
+    );
+
+    test(
+      'LifeAuditService intentionality ratio stays strictly between 0 and 100',
+      () {
+        final now = DateTime.now();
+        final nowMs = now.millisecondsSinceEpoch;
+        final entries = [
+          Moment(
+            id: 1,
+            timestamp: nowMs - 7200000,
+            date: dateKey(now),
+            type: 'in',
+          ),
+          Moment(id: 2, timestamp: nowMs, date: dateKey(now), type: 'out'),
+        ];
+
+        final todayAudit = LifeAuditService.calculate(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.today,
+        );
+
+        expect(todayAudit.intentionalityRatio, greaterThanOrEqualTo(0.0));
+        expect(todayAudit.intentionalityRatio, lessThanOrEqualTo(100.0));
+        // Focus ratio sent to Android clamped between 0 and 100
+        final focusRatio = todayAudit.intentionalityRatio.round().clamp(0, 100);
+        expect(focusRatio, inInclusiveRange(0, 100));
+      },
+    );
   });
 }

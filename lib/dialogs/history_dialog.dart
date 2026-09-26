@@ -1213,17 +1213,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                   ),
                                             );
                                           },
-                                          onClaimRest:
-                                              widget.onClaimRest != null
-                                              ? () => _claimRest(
-                                                  DateTime.fromMillisecondsSinceEpoch(
-                                                    gap.startTimestamp,
-                                                  ),
-                                                  DateTime.fromMillisecondsSinceEpoch(
-                                                    gap.endTimestamp,
-                                                  ),
-                                                )
-                                              : null,
+                                          onClaimRest: () => _claimRest(
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              gap.startTimestamp,
+                                            ),
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              gap.endTimestamp,
+                                            ),
+                                          ),
                                         );
                                       }
                                       if (elem.item is TimelineSessionItem) {
