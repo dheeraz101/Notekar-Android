@@ -21,6 +21,7 @@ class TimelineSessionCard extends StatelessWidget {
     this.onLongPressCard,
     this.selected = false,
     this.compact = false,
+    this.rainbowCards = false,
   });
 
   final Palette p;
@@ -32,6 +33,7 @@ class TimelineSessionCard extends StatelessWidget {
   final VoidCallback? onLongPressCard;
   final bool selected;
   final bool compact;
+  final bool rainbowCards;
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -53,6 +55,8 @@ class TimelineSessionCard extends StatelessWidget {
     final durationStr = _formatDuration(session.duration);
     final hasNote = session.note.isNotEmpty;
     final cardRadius = BorderRadius.circular(compact ? 12 : 16);
+    final cat = session.category ?? 'Session';
+    final meta = getCategoryMeta(cat, p);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: compact ? 2.5 : 4),
@@ -77,14 +81,23 @@ class TimelineSessionCard extends StatelessWidget {
                 ? const EdgeInsets.symmetric(horizontal: 11, vertical: 8)
                 : const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: selected ? p.surface3 : p.surface2,
+              color: selected
+                  ? p.surface3
+                  : (rainbowCards
+                        ? Color.alphaBlend(
+                            meta.color.withValues(alpha: 0.12),
+                            p.surface2,
+                          )
+                        : p.surface2),
               borderRadius: cardRadius,
               border: Border.all(
                 color: selected
                     ? p.accent.withValues(alpha: 0.5)
                     : isOngoing
                     ? p.green.withValues(alpha: 0.4)
-                    : p.border.withValues(alpha: 0.6),
+                    : (rainbowCards
+                          ? meta.color.withValues(alpha: 0.35)
+                          : p.border.withValues(alpha: 0.6)),
                 width: isOngoing || selected ? 1.5 : 1.0,
               ),
               boxShadow: [

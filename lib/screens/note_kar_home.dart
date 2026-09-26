@@ -147,7 +147,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _toolbarAppearance = 'standard';
   int _streakShields = 0;
   bool _showLastSavedHint = true;
-  bool _requireLongPressNote = false;
   int _privacyLockDelayMinutes = 0;
   DateTime? _privacyPausedAt;
   DateTime? _privacyAuthGraceUntil;
@@ -597,6 +596,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           prefs.getString('m-haptic-style') ?? (_haptics ? 'standard' : 'off');
       _haptics = _hapticStyle != 'off';
       _acousticFeedback = prefs.getBool('m-acoustic-feedback') ?? true;
+      AppSound.setEnabled(_acousticFeedback);
       _accentColor = prefs.getString('m-accent-color') ?? 'blue';
       final savedAppIconStyle =
           prefs.getString('m-app-icon-style') ?? 'default';
@@ -619,6 +619,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           prefs.getBool('adaptive_mode_color') ??
           false;
       _showSeconds = prefs.getBool('m-show-seconds') ?? true;
+      setGlobalShowSeconds(_showSeconds);
       _highlightSeconds = prefs.getBool('m-highlight-seconds') ?? true;
       _use24HourFormat = prefs.getBool('m-use-24-hour') ?? true;
       setGlobalUse24Hour(_use24HourFormat);
@@ -639,8 +640,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
           prefs.getString('home_clock_complication') ?? 'intentionality';
       _toolbarAppearance = prefs.getString('toolbar_appearance') ?? 'standard';
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
-      _requireLongPressNote =
-          prefs.getBool('m-require-long-press-note') ?? false;
       _privacyLockDelayMinutes = prefs.getInt('m-privacy-lock-delay') ?? 0;
       _updateStatus = prefs.getString('m-update-status') ?? _updateStatus;
       _lastUpdateCheckedAt = prefs.getInt('m-last-update-check');
@@ -1344,14 +1343,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
     if (_isDelayBlocked()) return;
-    if (_mode == 'single') {
+    if (_enableNoteOnClick) {
       unawaited(_openNote(position: details.globalPosition));
     } else {
-      if (_enableNoteOnClick) {
-        unawaited(_openNote(position: details.globalPosition));
-      } else {
-        unawaited(_logEntry(position: details.globalPosition));
-      }
+      unawaited(_logEntry(position: details.globalPosition));
     }
   }
 
@@ -1669,6 +1664,53 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
+  Future<void> _openNoteForLastCapture() async {
+    final id = _lastId;
+    if (id == null) return;
+    final entry = _entries.where((item) => item.id == id).firstOrNull;
+    if (entry == null) return;
+
+    String initialNote = entry.note;
+    Moment? matchingIn;
+    if (_mode == 'two-way' && entry.type == 'out') {
+      matchingIn = _entries
+          .where(
+            (item) => item.type == 'in' && item.timestamp <= entry.timestamp,
+          )
+          .firstOrNull;
+      if (initialNote.isEmpty && matchingIn != null) {
+        initialNote = matchingIn.note;
+      }
+    }
+
+    NotekarHaptics.light(_hapticStyle);
+    final result = await showGeneralDialog<NoteResult>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close note',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => NoteDialog(
+        p: p,
+        initialNote: initialNote,
+        title: initialNote.isNotEmpty ? 'Edit Note' : 'Add Note',
+        blur:
+            _enableTranslucency &&
+            AdaptiveEngine().supportsBlur &&
+            !_reduceMotion,
+        largeText: _largeText,
+      ),
+    );
+
+    if (result != null) {
+      await _updateMomentNote(entry.id, result.note, tags: result.tags);
+      if (matchingIn != null) {
+        await _updateMomentNote(matchingIn.id, result.note, tags: result.tags);
+      }
+      _showToast(initialNote.isNotEmpty ? 'Note updated' : 'Note added');
+    }
+  }
+
   Future<void> _deleteEntry(int id) async {
     final entry = _entries.where((item) => item.id == id).firstOrNull;
     if (entry == null) return;
@@ -1803,7 +1845,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _homeMenuAnimations = false;
       _showHistoryText = true;
       _showLastSavedHint = true;
-      _requireLongPressNote = false;
       _extendedDuration = false;
       _enableTranslucency = true;
       _minimalMomentOptions = false;
@@ -1899,7 +1940,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'm-home-menu-animations',
         'm-show-history-text',
         'm-show-last-saved-hint',
-        'm-require-long-press-note',
         'm-extended-duration',
         'm-translucency',
         'm-minimal-moment-options',
@@ -2036,7 +2076,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _homeMenuAnimations = false;
       _showHistoryText = true;
       _showLastSavedHint = true;
-      _requireLongPressNote = false;
       _extendedDuration = false;
       _enableTranslucency = true;
       _minimalMomentOptions = false;
@@ -2089,7 +2128,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-home-menu-animations', _homeMenuAnimations);
     await _prefs?.setBool('m-show-history-text', _showHistoryText);
     await _prefs?.setBool('m-show-last-saved-hint', _showLastSavedHint);
-    await _prefs?.setBool('m-require-long-press-note', _requireLongPressNote);
     await _prefs?.setBool('m-extended-duration', _extendedDuration);
     await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
     await _prefs?.setBool('m-use-numbers-in-single', _useNumbersInSingle);
@@ -2173,7 +2211,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _homeMenuAnimations = snapshot['homeMenuAnimations'] as bool;
       _showHistoryText = snapshot['showHistoryText'] as bool;
       _showLastSavedHint = snapshot['showLastSavedHint'] as bool;
-      _requireLongPressNote = snapshot['requireLongPressNote'] as bool;
       _extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
       _enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
       _minimalMomentOptions =
@@ -2208,7 +2245,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _prefs?.setBool('m-home-menu-animations', _homeMenuAnimations);
     await _prefs?.setBool('m-show-history-text', _showHistoryText);
     await _prefs?.setBool('m-show-last-saved-hint', _showLastSavedHint);
-    await _prefs?.setBool('m-require-long-press-note', _requireLongPressNote);
     await _prefs?.setBool('m-extended-duration', _extendedDuration);
     await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
     await _prefs?.setBool('m-use-numbers-in-single', _useNumbersInSingle);
@@ -2366,10 +2402,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       ),
     );
     if (result != null) {
-      if (_requireLongPressNote && result.note.trim().isEmpty) {
-        _showToast('Add a note to save', warning: true);
-        return;
-      }
       unawaited(
         _logEntry(
           forcedType: forcedType,
@@ -2444,6 +2476,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
             await _prefs?.remove('m-ses');
             await _saveSetting('m-inout', 'in');
           }
+          unawaited(_updateAndroidWidget());
+        },
+        onRestoreLiveSession: (inMoment) async {
+          setState(() {
+            _inout = 'out';
+            _sessionStart = inMoment.timestamp;
+          });
+          await _saveSetting('m-ses', _sessionStart!);
+          await _saveSetting('m-inout', 'out');
           unawaited(_updateAndroidWidget());
         },
       ),
@@ -2692,6 +2733,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         highContrast: _highContrast,
         compactHistory: _compactHistory,
         confirmDelete: _confirmDelete,
+        soundEffects: _acousticFeedback,
         showSeconds: _showSeconds,
         highlightSeconds: _highlightSeconds,
         use24Hour: _use24HourFormat,
@@ -2706,7 +2748,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
         homeMenuAnimations: _homeMenuAnimations,
         showHistoryText: _showHistoryText,
         showLastSavedHint: _showLastSavedHint,
-        requireLongPressNote: _requireLongPressNote,
         extendedDuration: _extendedDuration,
         enableTranslucency: _enableTranslucency,
         minimalMomentOptions: _minimalMomentOptions,
@@ -2768,6 +2809,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
           });
           _saveSetting('m-haptic-style', value);
           _prefs?.setBool('m-haptics', value != 'off');
+        },
+        onSoundEffects: (value) {
+          setState(() => _acousticFeedback = value);
+          _saveSetting('m-acoustic-feedback', value);
+          AppSound.setEnabled(value);
         },
         onHistoryDensity: (value) {
           setState(() {
@@ -2851,10 +2897,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onShowLastSavedHint: (value) {
           setState(() => _showLastSavedHint = value);
           _prefs?.setBool('m-show-last-saved-hint', value);
-        },
-        onRequireLongPressNote: (value) {
-          setState(() => _requireLongPressNote = value);
-          _prefs?.setBool('m-require-long-press-note', value);
         },
         onMinimalMomentOptions: (value) {
           setState(() => _minimalMomentOptions = value);
@@ -4747,10 +4789,46 @@ class _NoteKarHomeState extends State<NoteKarHome>
               left: 0,
               right: 0,
               bottom: 102 + bottomInset,
-              child: UndoToast(
-                p: palette,
-                onUndo: _undoLast,
-                token: _lastId ?? 0,
+              child: Builder(
+                builder: (context) {
+                  final lastEntry = _lastId != null
+                      ? _entries.where((e) => e.id == _lastId).firstOrNull
+                      : null;
+                  String? message;
+                  String noteLabel = '+ Note';
+                  if (lastEntry != null) {
+                    if (_mode == 'single') {
+                      message = 'Moment saved';
+                      if (lastEntry.note.isNotEmpty) noteLabel = 'Edit Note';
+                    } else {
+                      if (lastEntry.type == 'in') {
+                        message = 'Session started';
+                        if (lastEntry.note.isNotEmpty) noteLabel = 'Edit Note';
+                      } else {
+                        message = 'Session ended';
+                        final matchingIn = _entries
+                            .where(
+                              (e) =>
+                                  e.type == 'in' &&
+                                  e.timestamp <= lastEntry.timestamp,
+                            )
+                            .firstOrNull;
+                        final hasNote =
+                            lastEntry.note.isNotEmpty ||
+                            (matchingIn != null && matchingIn.note.isNotEmpty);
+                        if (hasNote) noteLabel = 'Edit Note';
+                      }
+                    }
+                  }
+                  return UndoToast(
+                    p: palette,
+                    onUndo: _undoLast,
+                    token: _lastId ?? 0,
+                    message: message,
+                    onAddNote: _openNoteForLastCapture,
+                    noteLabel: noteLabel,
+                  );
+                },
               ),
             ),
           if (_toolbarAppearance == 'standard')

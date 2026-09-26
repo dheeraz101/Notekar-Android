@@ -13,20 +13,20 @@ class CaptureSettingsPage extends StatelessWidget {
     required this.p,
     required this.defaultMode,
     required this.tapDelay,
-    required this.requireLongPressNote,
+    required this.enableNoteOnClick,
     required this.onDefaultModeChanged,
     required this.onTapDelayChanged,
-    required this.onRequireLongPressNoteChanged,
+    required this.onEnableNoteOnClickChanged,
   });
 
   final Palette p;
   final String defaultMode;
   final int tapDelay;
-  final bool requireLongPressNote;
+  final bool enableNoteOnClick;
 
   final ValueChanged<String> onDefaultModeChanged;
   final ValueChanged<int> onTapDelayChanged;
-  final ValueChanged<bool> onRequireLongPressNoteChanged;
+  final ValueChanged<bool> onEnableNoteOnClickChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -194,17 +194,19 @@ class CaptureSettingsPage extends StatelessWidget {
           children: [
             SettingsSwitchRow(
               p: p,
-              title: 'Require Note on Hold',
-              color: p.orange,
-              value: requireLongPressNote,
-              onChanged: onRequireLongPressNoteChanged,
+              title: 'Note on Click',
+              subtitle:
+                  'Tap to compose a note before logging. When disabled, tapping logs instantly and holding prompts for a note.',
+              color: p.accent,
+              value: enableNoteOnClick,
+              onChanged: onEnableNoteOnClickChanged,
             ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Forces context entry for any moment captured via the long-press gesture.'
+              'When enabled, tap opens the note composer for both single moments and two-way sessions.'
                   .localized(context),
         ),
         const SizedBox(height: spacing48),

@@ -221,22 +221,48 @@ String monthLabel(DateTime value) {
 }
 
 bool _globalUse24Hour = true;
+bool _globalShowSeconds = true;
 
 void setGlobalUse24Hour(bool value) => _globalUse24Hour = value;
-
 bool get globalUse24Hour => _globalUse24Hour;
 
-String timeOnly(int timestamp, {bool? use24Hour}) {
+void setGlobalShowSeconds(bool value) => _globalShowSeconds = value;
+bool get globalShowSeconds => _globalShowSeconds;
+
+String timeOnly(int timestamp, {bool? use24Hour, bool? showSeconds}) {
   final effective24 = use24Hour ?? _globalUse24Hour;
+  final effectiveSeconds = showSeconds ?? _globalShowSeconds;
   final d = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  final mm = d.minute.toString().padLeft(2, '0');
+  final ss = d.second.toString().padLeft(2, '0');
   if (effective24) {
-    return '${d.hour.toString().padLeft(2, '0')}:'
-        '${d.minute.toString().padLeft(2, '0')}:'
-        '${d.second.toString().padLeft(2, '0')}';
+    final hh = d.hour.toString().padLeft(2, '0');
+    return effectiveSeconds ? '$hh:$mm:$ss' : '$hh:$mm';
   }
   final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
   final period = d.hour >= 12 ? 'PM' : 'AM';
-  return '$hour:${d.minute.toString().padLeft(2, '0')}:${d.second.toString().padLeft(2, '0')} $period';
+  return effectiveSeconds ? '$hour:$mm:$ss $period' : '$hour:$mm $period';
+}
+
+/// Instant addictive auditory feedback engine.
+class AppSound {
+  static bool _enabled = true;
+  static bool get enabled => _enabled;
+  static void setEnabled(bool val) => _enabled = val;
+
+  static void click() {
+    if (!_enabled) return;
+    try {
+      SystemSound.play(SystemSoundType.click);
+    } catch (_) {}
+  }
+
+  static void alert() {
+    if (!_enabled) return;
+    try {
+      SystemSound.play(SystemSoundType.alert);
+    } catch (_) {}
+  }
 }
 
 String formatTimeShort(int timestamp, {bool? use24Hour}) {

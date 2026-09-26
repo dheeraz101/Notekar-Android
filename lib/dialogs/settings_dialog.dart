@@ -34,7 +34,9 @@ import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/reminders_settings_page.dart';
+import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
+import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/dialogs/settings/security_privacy_details_sheets.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
@@ -96,7 +98,6 @@ class SettingsDialog extends StatefulWidget {
     required this.homeMenuAnimations,
     required this.showHistoryText,
     required this.showLastSavedHint,
-    required this.requireLongPressNote,
     required this.extendedDuration,
     required this.minimalMomentOptions,
     required this.enableTranslucency,
@@ -136,7 +137,6 @@ class SettingsDialog extends StatefulWidget {
     required this.onHomeMenuAnimations,
     required this.onShowHistoryText,
     required this.onShowLastSavedHint,
-    required this.onRequireLongPressNote,
     required this.onExtendedDuration,
     required this.onMinimalMomentOptions,
     this.useNumbersInSingle = false,
@@ -175,8 +175,12 @@ class SettingsDialog extends StatefulWidget {
     this.initialCategory,
     this.onTriggerUrlScheme,
     this.onAdaptiveColorChanged,
+    this.soundEffects = true,
+    this.onSoundEffects,
   });
 
+  final bool soundEffects;
+  final ValueChanged<bool>? onSoundEffects;
   final ValueChanged<bool>? onAdaptiveColorChanged;
   final ValueChanged<String>? onTriggerUrlScheme;
   final String currentLocale;
@@ -209,7 +213,6 @@ class SettingsDialog extends StatefulWidget {
   final bool homeMenuAnimations;
   final bool showHistoryText;
   final bool showLastSavedHint;
-  final bool requireLongPressNote;
   final bool extendedDuration;
   final bool minimalMomentOptions;
   final bool useNumbersInSingle;
@@ -257,7 +260,6 @@ class SettingsDialog extends StatefulWidget {
   final Future<bool> Function(bool) onHomeMenuAnimations;
   final ValueChanged<bool> onShowHistoryText;
   final ValueChanged<bool> onShowLastSavedHint;
-  final ValueChanged<bool> onRequireLongPressNote;
   final ValueChanged<bool> onExtendedDuration;
   final ValueChanged<bool> onMinimalMomentOptions;
   final ValueChanged<bool> onTranslucency;
@@ -322,7 +324,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool homeMenuAnimations;
   late bool showHistoryText;
   late bool showLastSavedHint;
-  late bool requireLongPressNote;
   late bool extendedDuration;
   late bool minimalMomentOptions;
   late bool useNumbersInSingle;
@@ -332,6 +333,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late int privacyLockDelayMinutes;
   late String privacyLockType;
   late String currentLocale;
+  late bool soundEffects;
+  bool _rainbowCards = false;
+  TimelineFilterCriteria _searchNotesFilterCriteria =
+      const TimelineFilterCriteria();
+  final List<Moment> _searchNotesSelectedMoments = [];
   List<NetworkLogEntry> _networkLogs = [];
   bool _loadingNetworkLogs = false;
   AppNotice? _criticalNotice;
@@ -1249,7 +1255,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     homeMenuAnimations = widget.homeMenuAnimations;
     showHistoryText = widget.showHistoryText;
     showLastSavedHint = widget.showLastSavedHint;
-    requireLongPressNote = widget.requireLongPressNote;
     extendedDuration = widget.extendedDuration;
     minimalMomentOptions = widget.minimalMomentOptions;
     useNumbersInSingle = widget.useNumbersInSingle;
@@ -1259,6 +1264,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
     privacyLockDelayMinutes = widget.privacyLockDelayMinutes;
     privacyLockType = widget.privacyLockType;
     currentLocale = widget.currentLocale;
+    soundEffects = widget.soundEffects;
+    SharedPreferences.getInstance().then((prefs) {
+      if (mounted) {
+        setState(() {
+          _rainbowCards = prefs.getBool('m-rainbow-cards') ?? false;
+        });
+      }
+    });
 
     if (widget.initialCategory != null) {
       category = widget.initialCategory;
@@ -1498,6 +1511,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ].take(5).toList();
     await prefs.setStringList('recent_note_searches', updated);
     setState(() => _recentNoteSearches = updated);
+  }
+
+  void _toggleSelectSearchNoteMoment(Moment entry, Palette p) {
+    if (_searchNotesSelectedMoments.any((m) => m.id == entry.id)) {
+      setState(() {
+        _searchNotesSelectedMoments.removeWhere((m) => m.id == entry.id);
+      });
+    } else if (_searchNotesSelectedMoments.isEmpty) {
+      setState(() {
+        _searchNotesSelectedMoments.add(entry);
+      });
+    } else {
+      final first = _searchNotesSelectedMoments.first;
+      setState(() {
+        _searchNotesSelectedMoments.clear();
+      });
+      showTimeDifferenceDialog(
+        context,
+        p: p,
+        a: first,
+        b: entry,
+        largeText: largeText,
+        blur: enableTranslucency,
+      );
+    }
   }
 
   void _openCategory(String name, {String? parent}) {
@@ -2535,20 +2573,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: delayLabel(tapDelay),
-      ),
-      item(
-        title: 'Require Note on Hold',
-        subtitle: 'Prompt for a note when long-pressing',
-        category: 'Capture',
-        icon: Icons.edit_note_rounded,
-        keywords: ['note', 'hold', 'long press', 'require', 'context'],
-        kind: 'switch',
-        boolValue: requireLongPressNote,
-        onBoolChanged: (bool value) {
-          setState(() => requireLongPressNote = value);
-          widget.onRequireLongPressNote(value);
-        },
-        status: null,
       ),
       item(
         title: 'Plus Notes',
@@ -5275,6 +5299,13 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   showPersistentNotification,
                               showTrashBin: widget.onOpenTrash != null,
                               trash: _trash,
+                              rainbowCards: _rainbowCards,
+                              onRainbowCardsChanged: (val) async {
+                                setState(() => _rainbowCards = val);
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setBool('m-rainbow-cards', val);
+                              },
                               onShowPersistentNotificationChanged:
                                   (value) async {
                                     if (_prefs != null) {
@@ -5343,7 +5374,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               defaultMode: defaultMode,
                               tapDelay: tapDelay,
-                              requireLongPressNote: requireLongPressNote,
+                              enableNoteOnClick: enableNoteOnClick,
                               onDefaultModeChanged: (value) {
                                 setState(() => defaultMode = value);
                                 widget.onDefaultMode(value);
@@ -5352,9 +5383,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 setState(() => tapDelay = value);
                                 widget.onDelay(value);
                               },
-                              onRequireLongPressNoteChanged: (value) {
-                                setState(() => requireLongPressNote = value);
-                                widget.onRequireLongPressNote(value);
+                              onEnableNoteOnClickChanged: (value) async {
+                                if (_prefs != null) {
+                                  await _prefs!.setBool(
+                                    'enable_note_on_click',
+                                    value,
+                                  );
+                                }
+                                setState(() => enableNoteOnClick = value);
                               },
                             ),
                           ),
@@ -6008,6 +6044,17 @@ ${stackTrace ?? 'No stack trace provided.'}
                               await prefs.remove('recent_note_searches');
                               setState(() => _recentNoteSearches = []);
                             },
+                            filterCriteria: _searchNotesFilterCriteria,
+                            onFilterCriteriaChanged: (crit) => setState(
+                              () => _searchNotesFilterCriteria = crit,
+                            ),
+                            selectedMoments: _searchNotesSelectedMoments,
+                            onToggleSelectMoment: (entry) =>
+                                _toggleSelectSearchNoteMoment(entry, p),
+                            onClearSelection: () => setState(
+                              () => _searchNotesSelectedMoments.clear(),
+                            ),
+                            rainbowCards: _rainbowCards,
                           ),
                         if (show('Guides'))
                           SliverList(
@@ -6580,6 +6627,19 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               subCategory: 'Accessibility',
                               hapticStyle: hapticStyle,
+                              soundEffects: soundEffects,
+                              onSoundEffectsChanged: (value) async {
+                                setState(() => soundEffects = value);
+                                widget.onSoundEffects?.call(value);
+                                AppSound.setEnabled(value);
+                                if (value) AppSound.click();
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setBool(
+                                  'm-acoustic-feedback',
+                                  value,
+                                );
+                              },
                               reduceMotion: reduceMotion,
                               largeText: largeText,
                               highContrast: highContrast,

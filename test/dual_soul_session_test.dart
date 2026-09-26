@@ -198,6 +198,8 @@ void main() {
         );
 
         // Tap the Large Text row
+        await tester.ensureVisible(find.text('Large Text'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Large Text'));
         await tester.pumpAndSettle();
 

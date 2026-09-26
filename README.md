@@ -70,6 +70,7 @@
     - [👤 10. Personal Identity, 24h Life Clock & 100y Memento Mori](#-10-personal-identity-24h-life-clock--100y-memento-mori)
     - [📥 11. Third-Party Data Migration (Loop & HabitKit)](#-11-third-party-data-migration-loop--habitkit)
     - [⚡ 12. Device Health Diagnostics & 3-Tier Adaptive Engine](#-12-device-health-diagnostics--3-tier-adaptive-engine)
+    - [🎯 13. Flagship Goals & Intentional Target Engine](#-13-flagship-goals--intentional-target-engine)
 - [🌉 System Bridges & Automation](#-system-bridges--automation)
 - [🛡️ Privacy, Security & Hardware Protection](#️-privacy-security--hardware-protection)
 - [🌐 Multilingual & Global Community](#-multilingual--global-community)
@@ -290,6 +291,17 @@ insights computed 100% on-device:
   - **Power Saver**: 30–60 FPS capped refresh, solid high-contrast opaque surfaces (blur disabled), reduced motion, and throttled background tasks to preserve battery life and eliminate thermal throttling.
 - **Hardware Diagnostics Telemetry**: Inspect system health, SoC cores, memory footprint (with resilient SELinux heap estimation), platform details, and target render capabilities in **Settings → Device Health**.
 - **18 Minimal Glyph Category Icons**: Customizable monochrome Apple HIG glyphs for active and custom modes, consistently rendered across the home capsule, history sheet, insights, and executive dashboard.
+
+### 🎯 13. Flagship Goals & Intentional Target Engine
+
+- **Apple HIG Target Allocation**: Move from passive tracking to intentional temporal design. Establish precise hourly targets (e.g. 20h deep work, 5h physical fitness) evaluated over flexible temporal horizons:
+  - **Weekly**: Evaluated Monday to Sunday with real-time countdown to weekly reset.
+  - **Monthly**: Calendar month pacing with projected completion rates.
+  - **Yearly & All-Time**: Long-term mastery milestones and open-ended focus goals.
+- **Real-Time Runway & Deficit Tracking**: Instantly displays invested hours versus remaining deficit (e.g., `14h 20m / 20h` with a clean `5h 40m to go` status pill or `Goal Met 🎉`).
+- **Category & Mode Binding**: Bind targets specifically to two-way focus sessions, single reflective moments, or specialized category scopes (e.g. Work, Study, Health).
+- **Dual Sovereign Access**: Accessible seamlessly via the top header flag icon in the **Life Ledger Timeline (`HistoryDialog`)** and from the **Executive Intelligence Hub (`SettingsDashboardPage`)**.
+- **100% Offline Persistence**: Encrypted local storage with zero cloud dependencies and immediate reactive recalculations upon every logged moment.
 
 ---
 

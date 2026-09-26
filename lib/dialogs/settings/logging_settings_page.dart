@@ -17,6 +17,8 @@ class LoggingSettingsPage extends StatelessWidget {
     required this.showPersistentNotification,
     this.showTrashBin = false,
     this.trash = const [],
+    this.rainbowCards = false,
+    this.onRainbowCardsChanged,
     required this.onShowPersistentNotificationChanged,
     required this.onOpenCategory,
   });
@@ -30,6 +32,8 @@ class LoggingSettingsPage extends StatelessWidget {
   final bool showPersistentNotification;
   final bool showTrashBin;
   final List<Moment> trash;
+  final bool rainbowCards;
+  final ValueChanged<bool>? onRainbowCardsChanged;
   final ValueChanged<bool> onShowPersistentNotificationChanged;
   final void Function(String category, {required String parent}) onOpenCategory;
 
@@ -233,6 +237,29 @@ class LoggingSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Enables quick, low-priority control notification in the system drawer for convenience.'
+                  .localized(context),
+        ),
+        const SizedBox(height: 12),
+        SettingsGroup(
+          p: p,
+          title: 'Card Chromatics'.localized(context),
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Rainbow Cards'.localized(context),
+              subtitle:
+                  'Tint cards with category colors across timeline, calendar, and search notes while preserving contrast.'
+                      .localized(context),
+              value: rainbowCards,
+              color: p.accent,
+              onChanged: onRainbowCardsChanged ?? (_) {},
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Subtle chromatic tinting provides effortless visual distinction between categories without visual fatigue.'
                   .localized(context),
         ),
         const SizedBox(height: spacing48),

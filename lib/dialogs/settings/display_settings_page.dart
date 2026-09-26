@@ -143,9 +143,15 @@ class DisplaySettingsPage extends StatelessWidget {
             SettingsSwitchRow(
               p: p,
               title: 'Show Seconds',
+              subtitle:
+                  'Dynamically display seconds across the clock, timeline, calendar, and search notes.'
+                      .localized(context),
               color: p.accent,
               value: showSeconds,
-              onChanged: onShowSecondsChanged,
+              onChanged: (val) {
+                setGlobalShowSeconds(val);
+                onShowSecondsChanged(val);
+              },
             ),
             SettingsSwitchRow(
               p: p,
@@ -164,8 +170,9 @@ class DisplaySettingsPage extends StatelessWidget {
         ),
         SettingsPageDescription(
           p: p,
-          text: 'Configure the home screen clock and live seconds display.'
-              .localized(context),
+          text:
+              'Configure the precision of timestamps app-wide, including clock and moment logs.'
+                  .localized(context),
         ),
 
         SettingsGroup(

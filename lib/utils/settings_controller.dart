@@ -24,7 +24,6 @@ class SettingsController extends ChangeNotifier {
   bool _showLastSavedHint = true;
   String _defaultMode = 'single';
   int _tapDelay = 0;
-  bool _requireLongPressNote = false;
   bool _compactHistory = false;
   bool _confirmDelete = true;
   bool _extendedDuration = false;
@@ -72,8 +71,6 @@ class SettingsController extends ChangeNotifier {
 
   int get tapDelay => _tapDelay;
 
-  bool get requireLongPressNote => _requireLongPressNote;
-
   bool get compactHistory => _compactHistory;
 
   bool get confirmDelete => _confirmDelete;
@@ -108,7 +105,6 @@ class SettingsController extends ChangeNotifier {
     _showLastSavedHint = _prefs.getBool('show_last_saved_hint') ?? true;
     _defaultMode = _prefs.getString('default_mode') ?? 'single';
     _tapDelay = _prefs.getInt('tap_delay') ?? 0;
-    _requireLongPressNote = _prefs.getBool('require_long_press_note') ?? false;
     _compactHistory = _prefs.getBool('compact_history') ?? false;
     _confirmDelete = _prefs.getBool('confirm_delete') ?? true;
     _extendedDuration = _prefs.getBool('extended_duration') ?? false;
@@ -238,13 +234,6 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setRequireLongPressNote(bool value) async {
-    if (_requireLongPressNote == value) return;
-    _requireLongPressNote = value;
-    await _prefs.setBool('require_long_press_note', value);
-    notifyListeners();
-  }
-
   Future<void> setCompactHistory(bool value) async {
     if (_compactHistory == value) return;
     _compactHistory = value;
@@ -332,7 +321,6 @@ class SettingsController extends ChangeNotifier {
     _showLastSavedHint = true;
     _defaultMode = 'single';
     _tapDelay = 0;
-    _requireLongPressNote = false;
     _compactHistory = false;
     _confirmDelete = true;
     _extendedDuration = false;

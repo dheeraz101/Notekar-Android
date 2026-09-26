@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/calendar_dialog.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
+import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -22,6 +23,8 @@ import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/timeline_single_tile.dart';
+import 'package:notekar/dialogs/manual_entry_dialog.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryDialog extends StatefulWidget {
@@ -43,6 +46,7 @@ class HistoryDialog extends StatefulWidget {
     this.onOpenManualEntry,
     this.onClaimRest,
     this.onEndLiveSession,
+    this.onRestoreLiveSession,
     this.blur = false,
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
@@ -69,6 +73,7 @@ class HistoryDialog extends StatefulWidget {
   final Future<void> Function(DateTime start, DateTime end)? onClaimRest;
   final Future<void> Function(int inMomentId, Moment outEntry)?
   onEndLiveSession;
+  final Future<void> Function(Moment inMoment)? onRestoreLiveSession;
   final bool blur;
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
@@ -111,6 +116,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   late bool _compactRows;
   String _viewMode = 'list';
   bool _showGapCards = false;
+  bool _rainbowCards = false;
   TimelineDaySection? _activeInsightsSection;
 
   // Memoized lists & number maps
@@ -134,10 +140,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
     if (mounted) {
       final savedViewMode = prefs.getString('history_view_mode') ?? 'list';
       final savedGaps = prefs.getBool('show_gap_cards') ?? false;
+      final savedRainbow = prefs.getBool('m-rainbow-cards') ?? false;
       setState(() {
         _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
         _viewMode = savedViewMode;
         _showGapCards = savedGaps;
+        _rainbowCards = savedRainbow;
       });
       _rebuildMemoizedLists();
     }
@@ -495,7 +503,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       child: PressableScale(
                         onTap: () {
                           NotekarHaptics.selection('standard');
-                          widget.onOpenManualEntry!();
+                          _handleOpenManualEntry();
                         },
                         child: Container(
                           width: 36,
@@ -518,8 +526,39 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ),
         trailingAction: _activeInsightsSection != null
             ? null
-            : (widget.onOpenSearchNotes != null
-                  ? Tooltip(
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Tooltip(
+                    message: 'Targets & Goals'.localized(context),
+                    child: PressableScale(
+                      onTap: () {
+                        NotekarHaptics.selection('standard');
+                        GoalsSheet.show(
+                          context,
+                          p: widget.p,
+                          moments: _entries,
+                        );
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: widget.p.surface3,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          CupertinoIcons.flag,
+                          color: widget.p.text3,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (widget.onOpenSearchNotes != null) ...[
+                    const SizedBox(width: 8),
+                    Tooltip(
                       message: 'Search Notes'.localized(context),
                       child: PressableScale(
                         onTap: () {
@@ -541,8 +580,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           ),
                         ),
                       ),
-                    )
-                  : null),
+                    ),
+                  ],
+                ],
+              ),
         child: SizedBox(
           width: 410,
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
@@ -552,7 +593,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   section: _activeInsightsSection!,
                   allEntries: _entries,
                   onEditNote: _openDirectNoteEditor,
-                  onOpenManualEntry: widget.onOpenManualEntry,
+                  onOpenManualEntry: _handleOpenManualEntry,
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
                 )
               : _viewMode == 'calendar'
@@ -562,10 +603,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   allEntries: _entries,
                   initialDateKey: _selectedDateKey,
                   onEditNote: _openDirectNoteEditor,
-                  onOpenManualEntry: widget.onOpenManualEntry,
+                  onOpenManualEntry: _handleOpenManualEntry,
                   onOpenInsights: (sec) {
                     setState(() => _activeInsightsSection = sec);
                   },
+                  onDelete: _removeEntry,
+                  rainbowCards: _rainbowCards,
                 )
               : Stack(
                   children: [
@@ -1119,7 +1162,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           startTimestamp: gap.startTimestamp,
                                           endTimestamp: gap.endTimestamp,
                                           onTap: () {
-                                            widget.onOpenManualEntry?.call(
+                                            _handleOpenManualEntry(
                                               prefilledStartTime:
                                                   DateTime.fromMillisecondsSinceEpoch(
                                                     gap.startTimestamp,
@@ -1159,6 +1202,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                             session: session,
                                             selected: isSelected,
                                             compact: _compactRows,
+                                            rainbowCards: _rainbowCards,
                                             onEditNote: () =>
                                                 _openDirectNoteEditor(
                                                   session.noteMoment,
@@ -1214,6 +1258,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                               _singleNumberMap[moment.id],
                                           selected: isSelected,
                                           compact: _compactRows,
+                                          rainbowCards: _rainbowCards,
                                           isFirst: elem.isFirst,
                                           isLast: elem.isLast,
                                           onEditNote: () =>
@@ -1487,6 +1532,123 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
+  Future<void> _handleOpenManualEntry({
+    DateTime? prefilledStartTime,
+    DateTime? prefilledEndTime,
+  }) async {
+    final categories = await CategoryService().getCategories();
+    final activeCat = await CategoryService().getActiveCategory();
+    if (!mounted) return;
+
+    final result = await showModalBottomSheet<ManualEntryResult>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      enableDrag: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      sheetAnimationStyle: const AnimationStyle(
+        duration: Duration(milliseconds: 180),
+        reverseDuration: Duration(milliseconds: 170),
+      ),
+      builder: (ctx) => ManualEntryDialog(
+        p: widget.p,
+        categories: categories,
+        initialCategory: activeCat,
+        prefilledStartTime: prefilledStartTime,
+        prefilledEndTime: prefilledEndTime,
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    final List<Moment> addedMoments = [];
+    final maxId = _entries.isEmpty
+        ? 0
+        : _entries.map((e) => e.id).reduce(math.max);
+
+    if (result.isSession && result.endDateTime != null) {
+      final startMs = result.startDateTime.millisecondsSinceEpoch;
+      var endMs = result.endDateTime!.millisecondsSinceEpoch;
+      if (endMs <= startMs) {
+        endMs = startMs + 60000;
+      }
+      final endDt = DateTime.fromMillisecondsSinceEpoch(endMs);
+
+      final inMoment = Moment(
+        id: math.max(maxId + 1, startMs),
+        timestamp: startMs,
+        type: 'in',
+        date: dateKey(result.startDateTime),
+        note: result.note,
+        tags: result.tags,
+        category: result.category,
+      );
+      final outMoment = Moment(
+        id: math.max(maxId + 2, endMs),
+        timestamp: endMs,
+        type: 'out',
+        date: dateKey(endDt),
+        note: '',
+        tags: const [],
+        category: result.category,
+      );
+
+      addedMoments.addAll([inMoment, outMoment]);
+    } else {
+      final startMs = result.startDateTime.millisecondsSinceEpoch;
+      final moment = Moment(
+        id: math.max(maxId + 1, startMs),
+        timestamp: startMs,
+        type: 'single',
+        date: dateKey(result.startDateTime),
+        note: result.note,
+        tags: result.tags,
+        category: result.category,
+      );
+      addedMoments.add(moment);
+    }
+
+    setState(() {
+      _entries = [...addedMoments, ..._entries]
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _availableDateKeys = _entries.map((item) => item.date).toSet();
+      _rebuildMemoizedLists();
+    });
+
+    for (final m in addedMoments) {
+      await widget.onRestore(m);
+    }
+
+    if (!mounted) return;
+    final noticeText = result.isSession
+        ? 'Session logged manually'.localized(context)
+        : 'Moment logged manually'.localized(context);
+    _showNotice(
+      noticeText,
+      onUndo: () async {
+        _noticeTimer?.cancel();
+        if (!mounted) return;
+        setState(() {
+          final idsToRemove = addedMoments.map((m) => m.id).toSet();
+          _entries = _entries
+              .where((e) => !idsToRemove.contains(e.id))
+              .toList();
+          _availableDateKeys = _entries.map((item) => item.date).toSet();
+          _notice = null;
+          _noticeUndo = null;
+          _rebuildMemoizedLists();
+        });
+        for (final m in addedMoments) {
+          await widget.onDelete(m.id);
+        }
+        if (mounted) {
+          _showNotice('Manual entry reverted'.localized(context));
+        }
+      },
+    );
+  }
+
   Future<void> _endLiveSession(TimelineSessionItem session) async {
     NotekarHaptics.success('standard');
 
@@ -1543,7 +1705,26 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _rebuildMemoizedLists();
     });
-    _showNotice('Session ended'.localized(context));
+    _showNotice(
+      'Session ended'.localized(context),
+      onUndo: () async {
+        _noticeTimer?.cancel();
+        setState(() {
+          _entries = _entries.where((item) => item.id != outEntry.id).toList();
+          _availableDateKeys = _entries.map((item) => item.date).toSet();
+          _notice = null;
+          _noticeUndo = null;
+          _rebuildMemoizedLists();
+        });
+        await widget.onDelete(outEntry.id);
+        if (widget.onRestoreLiveSession != null) {
+          await widget.onRestoreLiveSession!(session.inMoment);
+        }
+        if (mounted) {
+          _showNotice('Session restored'.localized(context));
+        }
+      },
+    );
     if (widget.onEndLiveSession != null) {
       await widget.onEndLiveSession!(session.inMoment.id, outEntry);
     } else {

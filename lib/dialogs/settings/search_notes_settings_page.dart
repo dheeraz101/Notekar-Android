@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
+import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
@@ -28,6 +30,12 @@ class SearchNotesSettingsPage {
     required List<String> recentSearches,
     required ValueChanged<String> onSaveRecentSearch,
     required VoidCallback onClearRecentSearches,
+    TimelineFilterCriteria filterCriteria = const TimelineFilterCriteria(),
+    ValueChanged<TimelineFilterCriteria>? onFilterCriteriaChanged,
+    List<Moment> selectedMoments = const [],
+    ValueChanged<Moment>? onToggleSelectMoment,
+    VoidCallback? onClearSelection,
+    bool rainbowCards = false,
   }) {
     final q = settingsQuery.trim().toLowerCase();
     final hashtagRegex = RegExp(r'#([A-Za-z0-9_]+)');
@@ -66,10 +74,33 @@ class SearchNotesSettingsPage {
                   !e.note.contains('#godmode'),
             )
             .where((e) {
-              if (q.isEmpty) return true;
               final session = sessionLookup[e.id];
               final isTwoWay =
                   e.type == 'in' || e.type == 'out' || session != null;
+
+              // Filter by mode
+              if (filterCriteria.mode == 'single' && isTwoWay) return false;
+              if (filterCriteria.mode == 'two-way' && !isTwoWay) return false;
+
+              // Filter by category
+              if (filterCriteria.category != null &&
+                  filterCriteria.category!.isNotEmpty) {
+                final cat = filterCriteria.category!.toLowerCase();
+                final matchesCat =
+                    (e.category != null && e.category!.toLowerCase() == cat) ||
+                    e.note.toLowerCase().contains('#$cat');
+                if (!matchesCat) return false;
+              }
+
+              // Filter by hashtag
+              if (filterCriteria.hashtag != null &&
+                  filterCriteria.hashtag!.isNotEmpty) {
+                final tag = filterCriteria.hashtag!.toLowerCase();
+                final cleanTag = tag.startsWith('#') ? tag : '#$tag';
+                if (!e.note.toLowerCase().contains(cleanTag)) return false;
+              }
+
+              if (q.isEmpty) return true;
               final modeKeywords = isTwoWay ? '2-way two-way twoway' : 'single';
               final sessionDetails = session != null
                   ? '${timeOnly(session.startTimestamp)} ${session.outMoment != null ? timeOnly(session.outMoment!.timestamp) : 'ongoing'} ${_formatDuration(session.duration)}'
@@ -105,50 +136,79 @@ class SearchNotesSettingsPage {
               focusNode: settingsSearchFocusNode,
               onChanged: onQueryChanged,
               onClear: onClearQuery,
+              isFilterActive: filterCriteria.isActive,
+              onTapFilter: () async {
+                final cats = await CategoryService().getCategories();
+                if (!context.mounted) return;
+                final res = await TimelineFilterSheet.show(
+                  context,
+                  p: p,
+                  initial: filterCriteria,
+                  categories: cats,
+                  hashtags: allTags,
+                  largeText: false,
+                  blur: enableTranslucency,
+                );
+                if (res != null) {
+                  onFilterCriteriaChanged?.call(res);
+                }
+              },
             ),
           ),
         ),
       ),
 
-      // Hashtags horizontal filter pills (only appears if any hashtag is present in notes)
-      if (allTags.isNotEmpty)
+      // Selection banner for 2-moment time difference comparison
+      if (selectedMoments.isNotEmpty)
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: p.accent.withValues(alpha: 0.35),
+                  width: 1,
+                ),
+              ),
               child: Row(
                 children: [
-                  _SearchTagPill(
-                    p: p,
-                    label: 'All Notes',
-                    selected:
-                        q.isEmpty || !allTags.any((t) => t.toLowerCase() == q),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      onClearQuery();
-                    },
-                  ),
-                  for (final tag in allTags)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: _SearchTagPill(
-                        p: p,
-                        label: tag,
-                        selected: q == tag.toLowerCase(),
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          if (q == tag.toLowerCase()) {
-                            onClearQuery();
-                          } else {
-                            settingsSearchController.text = tag;
-                            onQueryChanged(tag);
-                            onSaveRecentSearch(tag);
-                          }
-                        },
+                  Icon(Icons.compare_arrows_rounded, color: p.accent, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '1 moment selected. Tap another to compare time.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
+                  ),
+                  PressableScale(
+                    onTap: onClearSelection,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface2,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Cancel'.localized(context),
+                        style: TextStyle(
+                          color: p.text2,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -308,10 +368,37 @@ class SearchNotesSettingsPage {
                           )
                         : Duration.zero);
 
+              final isSelected = selectedMoments.any((m) => m.id == entry.id);
+              final meta = getCategoryMeta(
+                entry.category ?? (isTwoWay ? 'two-way' : 'single'),
+                p,
+              );
+              final Color? catColor = entry.category != null
+                  ? meta.color
+                  : null;
+              final Color cardBg = (rainbowCards && catColor != null)
+                  ? Color.alphaBlend(
+                      catColor.withValues(alpha: 0.12),
+                      p.surface2,
+                    )
+                  : p.surface2;
+              final Color cardBorder = isSelected
+                  ? p.accent
+                  : (rainbowCards && catColor != null)
+                  ? Color.alphaBlend(
+                      catColor.withValues(alpha: 0.35),
+                      p.border.withValues(alpha: 0.6),
+                    )
+                  : p.border.withValues(alpha: 0.6);
+
               return Padding(
                 padding: EdgeInsets.only(bottom: compactHistory ? 10 : 14),
                 child: PressableScale(
                   onTap: () {
+                    if (selectedMoments.isNotEmpty) {
+                      onToggleSelectMoment?.call(entry);
+                      return;
+                    }
                     if (q.isNotEmpty) onSaveRecentSearch(q);
                     HapticFeedback.mediumImpact();
                     Clipboard.setData(ClipboardData(text: entry.note));
@@ -322,15 +409,19 @@ class SearchNotesSettingsPage {
                       icon: Icons.copy_rounded,
                     );
                   },
+                  onLongPress: () {
+                    HapticFeedback.heavyImpact();
+                    onToggleSelectMoment?.call(entry);
+                  },
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(spacing16),
                     decoration: BoxDecoration(
-                      color: p.surface2,
+                      color: cardBg,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: p.border.withValues(alpha: 0.6),
-                        width: 0.8,
+                        color: cardBorder,
+                        width: isSelected ? 1.5 : 0.8,
                       ),
                       boxShadow: p.name == 'amoled'
                           ? null
@@ -440,15 +531,36 @@ class SearchNotesSettingsPage {
                                 ],
                               ],
                             ),
-                            // Date
-                            Text(
-                              datePretty(startTs ?? entry.timestamp),
-                              style: TextStyle(
-                                color: p.text3,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
+                            // Date & Compare Action
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                PressableScale(
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    onToggleSelectMoment?.call(entry);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: Icon(
+                                      isSelected
+                                          ? Icons.check_circle_rounded
+                                          : Icons.compare_arrows_rounded,
+                                      size: 16,
+                                      color: isSelected ? p.accent : p.text3,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  datePretty(startTs ?? entry.timestamp),
+                                  style: TextStyle(
+                                    color: p.text3,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -610,56 +722,5 @@ class SearchNotesSettingsPage {
     } else {
       return '${mins}m';
     }
-  }
-}
-
-class _SearchTagPill extends StatelessWidget {
-  const _SearchTagPill({
-    required this.p,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final Palette p;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return PressableScale(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? p.accent : p.surface2,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected ? p.accent : p.border.withValues(alpha: 0.6),
-            width: 0.8,
-          ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: p.accent.withValues(alpha: 0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected
-                ? (p.name == 'light' ? Colors.white : Colors.black)
-                : p.text2,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
   }
 }

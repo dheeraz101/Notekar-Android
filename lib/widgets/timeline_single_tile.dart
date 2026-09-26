@@ -23,6 +23,7 @@ class TimelineSingleTile extends StatelessWidget {
     this.isFirst = false,
     this.isLast = false,
     this.compact = false,
+    this.rainbowCards = false,
   });
 
   final Palette p;
@@ -36,6 +37,7 @@ class TimelineSingleTile extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
   final bool compact;
+  final bool rainbowCards;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +46,8 @@ class TimelineSingleTile extends StatelessWidget {
         moment.note.contains('#godmode');
     final hasNote = moment.note.trim().isNotEmpty;
     final color = momentColor(p, moment.type);
+    final cat = moment.category ?? 'Moment';
+    final meta = getCategoryMeta(cat, p);
 
     final tileRadius = BorderRadius.circular(compact ? 9 : 12);
 
@@ -145,12 +149,21 @@ class TimelineSingleTile extends StatelessWidget {
                       vertical: compact ? 5 : 8,
                     ),
                     decoration: BoxDecoration(
-                      color: selected ? p.surface3 : p.surface2,
+                      color: selected
+                          ? p.surface3
+                          : (rainbowCards
+                                ? Color.alphaBlend(
+                                    meta.color.withValues(alpha: 0.12),
+                                    p.surface2,
+                                  )
+                                : p.surface2),
                       borderRadius: BorderRadius.circular(compact ? 9 : 12),
                       border: Border.all(
                         color: selected
                             ? p.accent.withValues(alpha: 0.4)
-                            : p.border.withValues(alpha: 0.55),
+                            : (rainbowCards
+                                  ? meta.color.withValues(alpha: 0.35)
+                                  : p.border.withValues(alpha: 0.55)),
                       ),
                     ),
                     child: Row(

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -95,6 +96,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           _buildRiskRadarCard(context),
           const SizedBox(height: 6),
         ],
+        _buildGoalsCard(context),
         HeroActivityRingCard(p: p, data: dashboardData),
         IntelligentTimeSlotBiasCard(p: p, data: dashboardData.timeSlotBias),
         DailyRhythmBarChart(p: p, data: dashboardData.dailyRhythm),
@@ -103,6 +105,71 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
+    );
+  }
+
+  Widget _buildGoalsCard(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: PressableScale(
+        onTap: () {
+          NotekarHaptics.selection('standard');
+          GoalsSheet.show(context, p: p, moments: entries);
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: p.surface2,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: p.border.withValues(alpha: 0.6)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  CupertinoIcons.flag_fill,
+                  size: 20,
+                  color: p.accent,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Targets & Intentional Goals'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Track weekly/monthly targets and deficits'.localized(
+                        context,
+                      ),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(CupertinoIcons.chevron_right, size: 16, color: p.text3),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

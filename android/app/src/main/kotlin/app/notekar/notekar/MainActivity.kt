@@ -1233,7 +1233,7 @@ class MainActivity : FlutterActivity() {
             val contentText = when {
                 isCurrentlyIn && formattedTime.isNotEmpty() -> "Active session since $formattedTime • $todayCount moments today"
                 sobrietyEnabled && streakDays.isNotEmpty() -> "Clean streak: $streakDays • $todayCount moments today"
-                todayCount > 0 -> "$todayCount moments logged today • Ready for next capture"
+                todayCount > 0 -> "$todayCount moments today"
                 else -> "Ready to log • Tap actions below to record instantly"
             }
 
@@ -1260,6 +1260,7 @@ class MainActivity : FlutterActivity() {
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentIntent(mainPending)
                 .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
             if (isCurrentlyIn && lastTimestamp > 0L) {

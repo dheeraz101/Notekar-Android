@@ -20,7 +20,9 @@ class AdvancedSettingsPage extends StatelessWidget {
     required this.largeText,
     required this.highContrast,
     required this.healthStatus,
+    this.soundEffects = true,
     required this.onHapticStyleChanged,
+    this.onSoundEffectsChanged,
     required this.onReduceMotionChanged,
     required this.onLargeTextChanged,
     required this.onHighContrastChanged,
@@ -40,8 +42,10 @@ class AdvancedSettingsPage extends StatelessWidget {
   final bool largeText;
   final bool highContrast;
   final String healthStatus;
+  final bool soundEffects;
 
   final ValueChanged<String> onHapticStyleChanged;
+  final ValueChanged<bool>? onSoundEffectsChanged;
   final ValueChanged<bool> onReduceMotionChanged;
   final ValueChanged<bool> onLargeTextChanged;
   final ValueChanged<bool> onHighContrastChanged;
@@ -263,6 +267,28 @@ class AdvancedSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Configure the intensity of vibration feedback during taps and saves.'
+                  .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Sound Effects',
+              subtitle:
+                  'Play instant tactile auditory feedback on clicks, taps, and swipe actions.'
+                      .localized(context),
+              color: p.accent,
+              value: soundEffects,
+              onChanged: onSoundEffectsChanged ?? (_) {},
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Tactile auditory clicks provide immediate physical reassurance upon every capture.'
                   .localized(context),
         ),
 

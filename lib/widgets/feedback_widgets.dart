@@ -75,11 +75,17 @@ class UndoToast extends StatefulWidget {
     required this.p,
     required this.onUndo,
     required this.token,
+    this.message,
+    this.onAddNote,
+    this.noteLabel,
   });
 
   final Palette p;
   final VoidCallback onUndo;
   final int token;
+  final String? message;
+  final VoidCallback? onAddNote;
+  final String? noteLabel;
 
   @override
   State<UndoToast> createState() => _UndoToastState();
@@ -150,7 +156,7 @@ class _UndoToastState extends State<UndoToast>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Moment saved'.localized(context),
+                      (widget.message ?? 'Moment saved').localized(context),
                       style: TextStyle(color: widget.p.text),
                     ),
                     const SizedBox(width: 10),
@@ -164,6 +170,38 @@ class _UndoToastState extends State<UndoToast>
                         ),
                       ),
                     ),
+                    if (widget.onAddNote != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Container(
+                          width: 1,
+                          height: 14,
+                          color: widget.p.border.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: widget.onAddNote,
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.note_add_outlined,
+                              size: 14,
+                              color: widget.p.accent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              (widget.noteLabel ?? '+ Note').localized(context),
+                              style: TextStyle(
+                                color: widget.p.accent,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
