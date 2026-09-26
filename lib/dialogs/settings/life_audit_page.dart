@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/life_audit_service.dart';
@@ -75,7 +77,11 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         _buildBrutalRealityCard(summary),
         const SizedBox(height: 16),
 
-        // 4. Day-by-Day Historical Ledger
+        // 4. Life Horizon Impact & Lifespan Erosion Bridge
+        _buildLifeHorizonBridge(summary),
+        const SizedBox(height: 16),
+
+        // 5. Day-by-Day Historical Ledger
         _buildDayByDayLedger(summary),
         const SizedBox(height: 16),
 
@@ -674,36 +680,15 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  'The Cost of the Void'.localized(context).toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: isSevere ? p.red : p.orange,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
-                  ),
+              Text(
+                'The Cost of the Void'.localized(context).toUpperCase(),
+                style: TextStyle(
+                  color: isSevere ? p.red : p.orange,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: (isSevere ? p.red : p.orange).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  headlineVerdict.localized(context),
-                  style: TextStyle(
-                    color: isSevere ? p.red : p.orange,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
               PressableScale(
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -715,8 +700,8 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
+                    horizontal: 10,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: p.accent.withValues(alpha: 0.12),
@@ -725,8 +710,8 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(CupertinoIcons.share, size: 11, color: p.accent),
-                      const SizedBox(width: 3),
+                      Icon(CupertinoIcons.share, size: 12, color: p.accent),
+                      const SizedBox(width: 4),
                       Text(
                         'Share'.localized(context),
                         style: TextStyle(
@@ -740,6 +725,22 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: (isSevere ? p.red : p.orange).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              headlineVerdict.localized(context),
+              style: TextStyle(
+                color: isSevere ? p.red : p.orange,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           const SizedBox(height: 14),
 
@@ -1155,6 +1156,199 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLifeHorizonBridge(LifeAuditSummary summary) {
+    final profile = UserProfileService();
+    final horizon = profile.calculateLifeHorizon();
+    final hasDob = horizon.hasDob;
+    final remainingYears = horizon.remainingYears;
+    final ratio = summary.intentionalityRatio;
+
+    // Projected conscious life vs void life based on audit ratio
+    final consciousYears = remainingYears * (ratio / 100);
+    final voidYears = remainingYears - consciousYears;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: p.border.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(CupertinoIcons.compass, size: 16, color: p.accent),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LIFE HORIZON EROSION'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    Text(
+                      'Memento Mori Lifespan Audit'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!hasDob)
+                PressableScale(
+                  onTap: () {
+                    PersonalizationSetupDialog.show(context, p: p);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Calibrate'.localized(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (hasDob) ...[
+            Text(
+              'At your current intentionality rate of ${ratio.toStringAsFixed(0)}%, out of ~${remainingYears.toStringAsFixed(0)} estimated remaining years:'
+                  .localized(context),
+              style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: p.surface3,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Conscious Life'.localized(context),
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${consciousYears.toStringAsFixed(1)} Years',
+                          style: TextStyle(
+                            color: p.green,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: p.surface3,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Lost to Void'.localized(context),
+                          style: TextStyle(
+                            color: p.text3,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${voidYears.toStringAsFixed(1)} Years',
+                          style: TextStyle(
+                            color: p.red,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                height: 8,
+                child: Row(
+                  children: [
+                    if (consciousYears > 0)
+                      Expanded(
+                        flex: (consciousYears * 10).round().clamp(1, 1000),
+                        child: Container(color: p.green),
+                      ),
+                    if (voidYears > 0)
+                      Expanded(
+                        flex: (voidYears * 10).round().clamp(1, 1000),
+                        child: Container(color: p.red),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            Text(
+              'Set your birthdate to unlock your personalized Memento Mori horizon projection and see your exact conscious years remaining vs lost to the void.'
+                  .localized(context),
+              style: TextStyle(color: p.text2, fontSize: 12.5, height: 1.4),
+            ),
+          ],
         ],
       ),
     );

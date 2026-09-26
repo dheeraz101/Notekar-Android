@@ -82,7 +82,6 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   Future<void> _showAddTagDialog() async {
-    AppSound.click();
     final textController = TextEditingController();
     final created = await showCupertinoDialog<String>(
       context: context,
@@ -166,7 +165,6 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   Future<void> _openBigNote() async {
-    AppSound.click();
     final result = await showDialog<NoteResult>(
       context: context,
       builder: (ctx) => BigNoteDialog(
@@ -200,7 +198,6 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   void _insertTag(String tag) {
-    AppSound.click();
     final text = _controller.text;
     final spacer = text.isEmpty || text.endsWith(' ') ? '' : ' ';
     final newText = '$text$spacer$tag ';
@@ -218,8 +215,14 @@ class _NoteDialogState extends State<NoteDialog> {
     final screenHeight = media.size.height;
 
     // Expandable height bounds
-    final expandedMaxHeight = (screenHeight * 0.45).clamp(240.0, 380.0);
-    final compactMaxHeight = 110.0;
+    final keyboardSafeSpace =
+        screenHeight -
+        (keyboardHeight > 0 ? (keyboardHeight + 40) : (bottomPadding + 60));
+    final expandedMaxHeight = (screenHeight * 0.75).clamp(
+      320.0,
+      keyboardSafeSpace > 320.0 ? keyboardSafeSpace : 320.0,
+    );
+    final compactMaxHeight = 120.0;
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -229,33 +232,38 @@ class _NoteDialogState extends State<NoteDialog> {
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOutQuad,
           padding: EdgeInsets.only(
-            bottom: keyboardHeight > 0 ? keyboardHeight : (bottomPadding + 10),
-            left: 10,
-            right: 10,
+            bottom: keyboardHeight > 0 ? keyboardHeight : 0,
           ),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 620),
+            width: double.infinity,
             decoration: BoxDecoration(
               color: widget.p.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: widget.p.border.withValues(alpha: 0.65),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
+              border: Border(
+                top: BorderSide(
+                  color: widget.p.border.withValues(alpha: 0.65),
+                  width: 1,
+                ),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.32),
-                  blurRadius: 28,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
                 ),
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
               child: SafeArea(
                 top: false,
-                bottom: false,
+                bottom: keyboardHeight == 0,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,7 +357,6 @@ class _NoteDialogState extends State<NoteDialog> {
                           // Expand / Collapse Height Toggle
                           PressableScale(
                             onTap: () {
-                              AppSound.click();
                               setState(() => _isExpanded = !_isExpanded);
                             },
                             child: Container(
@@ -372,7 +379,6 @@ class _NoteDialogState extends State<NoteDialog> {
                           // Close / Cancel Button
                           PressableScale(
                             onTap: () {
-                              AppSound.click();
                               Navigator.pop(context);
                             },
                             child: Container(
@@ -480,7 +486,6 @@ class _NoteDialogState extends State<NoteDialog> {
                                 padding: const EdgeInsets.only(right: 6),
                                 child: PressableScale(
                                   onTap: () {
-                                    AppSound.click();
                                     setState(
                                       () => _showSobrietyTray =
                                           !_showSobrietyTray,
@@ -644,7 +649,6 @@ class _NoteDialogState extends State<NoteDialog> {
                                           mood,
                                           _selectedMood == mood.toLowerCase(),
                                           () {
-                                            AppSound.click();
                                             setState(() {
                                               _selectedMood =
                                                   _selectedMood ==
@@ -739,30 +743,21 @@ class _NoteDialogState extends State<NoteDialog> {
                           ),
                           const SizedBox(width: 8),
 
-                          // Circular WhatsApp-style Send/Save Button
+                          // Circular WhatsApp-style Send/Save Button (Minimal, non-glowing)
                           PressableScale(
                             onTap: _saveNote,
                             child: Container(
-                              width: 46,
-                              height: 46,
+                              width: 44,
+                              height: 44,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: widget.p.accent,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: widget.p.accent.withValues(
-                                      alpha: 0.4,
-                                    ),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
                               ),
                               child: const Center(
                                 child: Icon(
                                   Icons.arrow_upward_rounded,
                                   color: Colors.white,
-                                  size: 24,
+                                  size: 22,
                                 ),
                               ),
                             ),
@@ -826,7 +821,6 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   void _saveNote() {
-    AppSound.click();
     var note = _controller.text.trim();
 
     if (_sobrietyMode) {
@@ -940,7 +934,6 @@ class _IosStyleSwitchState extends State<_IosStyleSwitch>
         _stretchController.reverse();
       },
       onTap: () {
-        AppSound.click();
         widget.onChanged(!value);
       },
       child: AnimatedContainer(

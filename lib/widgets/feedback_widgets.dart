@@ -173,7 +173,6 @@ class _UndoToastState extends State<UndoToast>
                         const SizedBox(width: 10),
                         PressableScale(
                           onTap: () {
-                            AppSound.click();
                             widget.onUndo();
                           },
                           child: Text(
@@ -198,7 +197,6 @@ class _UndoToastState extends State<UndoToast>
             const SizedBox(width: 8),
             PressableScale(
               onTap: () {
-                AppSound.click();
                 widget.onAddNote?.call();
               },
               child: Glass(

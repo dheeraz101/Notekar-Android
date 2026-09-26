@@ -2,9 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/daily_wisdom_service.dart';
 import 'package:notekar/utils/dashboard_metrics_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -26,6 +29,7 @@ class SettingsDashboardPage extends StatefulWidget {
     required this.onLogNow,
     required this.onLearnMoreBeta,
     this.onOpenLifeAudit,
+    this.onOpenGoals,
   });
 
   final Palette p;
@@ -34,6 +38,7 @@ class SettingsDashboardPage extends StatefulWidget {
   final VoidCallback onLogNow;
   final VoidCallback onLearnMoreBeta;
   final VoidCallback? onOpenLifeAudit;
+  final VoidCallback? onOpenGoals;
 
   @override
   State<SettingsDashboardPage> createState() => _SettingsDashboardPageState();
@@ -109,67 +114,281 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
   }
 
   Widget _buildGoalsCard(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: PressableScale(
-        onTap: () {
+    return FutureBuilder<List<Goal>>(
+      future: GoalsService.instance.getGoals(),
+      builder: (context, snapshot) {
+        final allGoals = snapshot.data ?? [];
+        final activeGoals = allGoals.where((g) => !g.isArchived).toList();
+
+        void openGoals() {
           NotekarHaptics.selection('standard');
-          GoalsSheet.show(context, p: p, moments: entries);
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: p.border.withValues(alpha: 0.6)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
+          if (widget.onOpenGoals != null) {
+            widget.onOpenGoals!();
+          } else {
+            GoalsSheet.show(context, p: p, moments: entries);
+          }
+        }
+
+        if (activeGoals.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: PressableScale(
+              onTap: openGoals,
+              child: Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: p.border.withValues(alpha: 0.6)),
                 ),
-                child: Icon(
-                  CupertinoIcons.flag_fill,
-                  size: 20,
-                  color: p.accent,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      'Targets & Intentional Goals'.localized(context),
-                      style: TextStyle(
-                        color: p.text,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: p.accent.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        CupertinoIcons.flag_fill,
+                        size: 20,
+                        color: p.accent,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Track weekly/monthly targets and deficits'.localized(
-                        context,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Targets & Intentional Goals'.localized(context),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Set weekly/monthly targets and track deficits'
+                                .localized(context),
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    ),
+                    Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 16,
+                      color: p.text3,
                     ),
                   ],
                 ),
               ),
-              Icon(CupertinoIcons.chevron_right, size: 16, color: p.text3),
-            ],
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: p.surface2,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: p.accent.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        CupertinoIcons.flag_fill,
+                        size: 18,
+                        color: p.accent,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Active Targets & Goals'.localized(context),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            '${activeGoals.length} ${activeGoals.length == 1 ? "target active" : "targets active"} • ${activeGoals.where((g) => GoalsService.instance.calculateProgress(g, entries).isCompleted).length} completed'
+                                .localized(context),
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PressableScale(
+                      onTap: openGoals,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.surface3,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: p.border.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Manage'.localized(context),
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 10,
+                              color: p.accent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                // Goal Items (up to 3)
+                for (final goal in activeGoals.take(3)) ...[
+                  Builder(
+                    builder: (ctx) {
+                      final progress = GoalsService.instance.calculateProgress(
+                        goal,
+                        entries,
+                      );
+                      final meta = getCategoryMeta(
+                        goal.category ?? 'Target',
+                        p,
+                      );
+                      final accentCol = goal.category != null
+                          ? meta.color
+                          : p.accent;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      goal.category != null
+                                          ? meta.icon
+                                          : CupertinoIcons.flag_fill,
+                                      size: 13,
+                                      color: accentCol,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      goal.title,
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 1.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: p.surface3,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        goal.timeframe.label.localized(context),
+                                        style: TextStyle(
+                                          color: p.text3,
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  progress.isCompleted
+                                      ? 'Done (${(progress.ratio * 100).toInt()}%)'
+                                      : '${progress.trackedFormatted} / ${progress.targetFormatted}',
+                                  style: TextStyle(
+                                    color: progress.isCompleted
+                                        ? p.green
+                                        : p.text2,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: progress.ratio,
+                                minHeight: 6,
+                                backgroundColor: p.surface3,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  progress.isCompleted ? p.green : accentCol,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

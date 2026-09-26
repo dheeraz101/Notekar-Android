@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
-import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -24,6 +23,7 @@ import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
+import 'package:notekar/dialogs/settings/goals_settings_page.dart';
 import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/integrations_settings_page.dart';
@@ -1712,7 +1712,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         title: 'Targets & Goals',
         subtitle:
             'Allocate and track intentional hour targets across weeks, months, or tags',
-        category: 'Dashboard',
+        category: 'Targets & Goals',
         icon: Icons.track_changes_rounded,
         keywords: [
           'goals',
@@ -1724,7 +1724,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           'timeframe',
           'quota',
         ],
-        kind: 'action',
+        kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
       ),
@@ -5007,10 +5007,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                     }
                                                     if (result.title ==
                                                         'Targets & Goals') {
-                                                      GoalsSheet.show(
-                                                        context,
-                                                        p: p,
-                                                        moments: entries,
+                                                      _openCategory(
+                                                        'Targets & Goals',
                                                       );
                                                       return;
                                                     }
@@ -5445,7 +5443,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 'Life Audit',
                                 parent: 'Dashboard',
                               ),
+                              onOpenGoals: () => _openCategory(
+                                'Targets & Goals',
+                                parent: 'Dashboard',
+                              ),
                             ),
+                          ),
+                        if (show('Targets & Goals') || show('Goals'))
+                          SliverToBoxAdapter(
+                            child: GoalsSettingsPage(p: p, moments: entries),
                           ),
                         if (show('Life Audit'))
                           SliverToBoxAdapter(

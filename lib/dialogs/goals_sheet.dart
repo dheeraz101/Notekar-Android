@@ -7,7 +7,6 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
-import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -26,7 +25,6 @@ class GoalsSheet extends StatelessWidget {
     required Palette p,
     required List<Moment> moments,
   }) {
-    AppSound.click();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -56,12 +54,16 @@ class GoalsContentView extends StatefulWidget {
     required this.moments,
     this.onAddGoal,
     this.onEditGoal,
+    this.shrinkWrap = false,
+    this.physics,
   });
 
   final Palette p;
   final List<Moment> moments;
   final VoidCallback? onAddGoal;
   final ValueChanged<Goal>? onEditGoal;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
 
   @override
   State<GoalsContentView> createState() => GoalsContentViewState();
@@ -88,7 +90,6 @@ class GoalsContentViewState extends State<GoalsContentView> {
   }
 
   void _openCreateOrEditGoalDialog([Goal? existing]) {
-    AppSound.click();
     if (widget.onEditGoal != null && existing != null) {
       widget.onEditGoal!(existing);
       return;
@@ -122,7 +123,6 @@ class GoalsContentViewState extends State<GoalsContentView> {
   }
 
   void _confirmDeleteGoal(Goal goal) {
-    AppSound.click();
     showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
@@ -160,9 +160,42 @@ class GoalsContentViewState extends State<GoalsContentView> {
     }
 
     return ListView.builder(
+      shrinkWrap: widget.shrinkWrap,
+      physics: widget.physics,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: _goals.length,
+      itemCount: _goals.length + 1,
       itemBuilder: (ctx, idx) {
+        if (idx == _goals.length) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 16),
+            child: Center(
+              child: OutlinedButton.icon(
+                onPressed: () => _openCreateOrEditGoalDialog(),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: widget.p.accent,
+                  side: BorderSide(
+                    color: widget.p.accent.withValues(alpha: 0.4),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                ),
+                icon: const Icon(CupertinoIcons.add, size: 15),
+                label: Text(
+                  'Add New Target'.localized(context),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
         final goal = _goals[idx];
         final progress = GoalsService.instance.calculateProgress(
           goal,
@@ -463,7 +496,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   }
 
   void _save() {
-    AppSound.click();
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
@@ -534,7 +566,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 children: [
                   PressableScale(
                     onTap: () {
-                      AppSound.click();
                       if (_targetHours > 1) {
                         setState(() => _targetHours--);
                       }
@@ -556,7 +587,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                   const SizedBox(width: 8),
                   PressableScale(
                     onTap: () {
-                      AppSound.click();
                       setState(() => _targetHours++);
                     },
                     child: Container(
@@ -588,7 +618,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 selected: selected,
                 onSelected: (val) {
                   if (val) {
-                    AppSound.click();
                     setState(() => _targetHours = hrs);
                   }
                 },
@@ -617,7 +646,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 selected: selected,
                 onSelected: (val) {
                   if (val) {
-                    AppSound.click();
                     setState(() => _timeframe = tf);
                   }
                 },
@@ -644,7 +672,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 label: Text('All Categories'.localized(context)),
                 selected: _category == null,
                 onSelected: (val) {
-                  AppSound.click();
                   if (val) setState(() => _category = null);
                 },
               ),
@@ -654,7 +681,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                   label: Text(cat),
                   selected: selected,
                   onSelected: (val) {
-                    AppSound.click();
                     setState(() => _category = val ? cat : null);
                   },
                 );
@@ -669,7 +695,6 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
               Expanded(
                 child: PressableScale(
                   onTap: () {
-                    AppSound.click();
                     widget.onCancel?.call();
                   },
                   child: Container(

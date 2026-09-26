@@ -39,6 +39,7 @@ class MainActivity : FlutterActivity() {
     private var pendingNotificationResult: MethodChannel.Result? = null
     private var soundPool: SoundPool? = null
     private var clickSoundId: Int = 0
+    private var shhhSoundId: Int = 0
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         try {
@@ -564,6 +565,22 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "playShhhSound", "playSwipeSound" -> {
+                    try {
+                        if (soundPool == null || shhhSoundId == 0) {
+                            initSoundPool()
+                        }
+                        if (soundPool != null && shhhSoundId != 0) {
+                            soundPool?.play(shhhSoundId, 0.9f, 0.9f, 1, 0, 1.0f)
+                            result.success(true)
+                        } else {
+                            result.success(false)
+                        }
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         }
@@ -583,6 +600,10 @@ class MainActivity : FlutterActivity() {
             val soundResId = resources.getIdentifier("sound_click", "raw", packageName)
             if (soundResId != 0) {
                 clickSoundId = sp.load(this, soundResId, 1)
+            }
+            val shhhResId = resources.getIdentifier("sound_shhh", "raw", packageName)
+            if (shhhResId != 0) {
+                shhhSoundId = sp.load(this, shhhResId, 1)
             }
             soundPool = sp
         } catch (e: Exception) {

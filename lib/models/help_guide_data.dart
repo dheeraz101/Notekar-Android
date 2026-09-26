@@ -62,16 +62,20 @@ const List<HelpGuideItem> allGuideItems = [
   ),
   HelpGuideItem(
     icon: Icons.note_add_rounded,
-    title: 'Add a Note',
+    title: 'Add a Note & Bottom Composer',
     content:
-        'Touch and hold the home screen, tap the + Note button on the bottom capsule, or enable "Note on Click" in Settings > Capture to write a note before saving.',
+        'Touch and hold the home screen, tap the + floating pill, or write from notifications to open the full-width bottom composer. Features smooth multi-line Enter line breaks, quick #tag selection, expandable viewport height, and minimal distraction-free styling.',
     isFaq: false,
     keywords: [
       'note',
-      'long press',
-      'touch and hold',
+      'composer',
       'write',
-      'capsule',
+      'enter key',
+      'line break',
+      'multiline',
+      'tags',
+      'pill',
+      'long press',
       'note on click',
     ],
   ),
@@ -79,7 +83,7 @@ const List<HelpGuideItem> allGuideItems = [
     icon: Icons.track_changes_rounded,
     title: 'Goals & Intentional Targets',
     content:
-        'Set intentional hourly targets (e.g. 20 hours per week or month) scoped to specific categories or all modes. Track progress bars, completion rings, and deficit countdowns ("X hours to go") directly from History or Settings.',
+        'Set intentional hourly targets (e.g. 20 hours per week or month) scoped to specific categories or all modes. Track progress bars, completion indicators, and deficit countdowns ("X hours to go") directly from the History 3-dots menu, Executive Dashboard, or Settings > Targets & Goals.',
     isFaq: false,
     keywords: [
       'goal',
@@ -93,6 +97,40 @@ const List<HelpGuideItem> allGuideItems = [
       'weekly goal',
       'monthly goal',
       'timeframe',
+      'executive dashboard',
+    ],
+  ),
+  HelpGuideItem(
+    icon: CupertinoIcons.ellipsis_vertical_circle,
+    title: 'History 3-Dots Action Menu',
+    content:
+        'Tap the 3-dots menu in the top right of the History sheet to access secondary power tools without visual clutter: Delete All, Add Manual Entry, Filters, and Targets & Goals are consolidated into a clean, dedicated card.',
+    isFaq: false,
+    keywords: [
+      'history menu',
+      '3 dots',
+      'three dots',
+      'manual entry',
+      'delete all',
+      'history actions',
+      'targets',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.timelapse_rounded,
+    title: 'Life Audit & Life Horizon Bridge',
+    content:
+        'Connect daily intentionality directly to your mortal window: the Life Audit calculates your awake intentional ratio and projects your conscious living years versus void years over your 100-year horizon, with 1-tap birthdate calibration.',
+    isFaq: false,
+    keywords: [
+      'life audit',
+      'life horizon',
+      'memento mori',
+      'void',
+      'intentionality',
+      'longevity',
+      'conscious years',
+      'drift',
     ],
   ),
   HelpGuideItem(
@@ -130,13 +168,16 @@ const List<HelpGuideItem> allGuideItems = [
     icon: Icons.volume_up_rounded,
     title: 'Sound Effects (Acoustic Feedback)',
     content:
-        'Experience crisp, instant audio feedback on taps, session start/end, and swipe actions. Toggle this feature on or off under Settings > Accessibility.',
+        'Experience crisp, instant tactile click feedback on home screen session/moment taps and a soft "shhh" whoosh acoustic effect when swiping moments to delete. Scoped strictly to core actions to prevent auditory fatigue. Toggle on or off under Settings > Accessibility.',
     isFaq: false,
     keywords: [
       'sound',
       'sound effects',
       'acoustic',
       'click',
+      'shhh',
+      'swipe sound',
+      'whoosh',
       'audio',
       'feedback',
     ],
@@ -633,9 +674,17 @@ const List<HelpGuideItem> allHelpFaqItems = [
   HelpGuideItem(
     title: 'What happens when I swipe to delete a moment?',
     content:
-        'Swiping a moment card glides it smoothly off the screen revealing a solid red bed underneath. A floating Dynamic Island undo prompt instantly appears at the top, letting you restore the card with a single tap before it is sent to Trash.',
+        'Swiping a moment card glides it smoothly off the screen with a satisfying soft "shhh" acoustic whoosh, revealing a solid red bed underneath. A floating Dynamic Island undo prompt instantly appears at the top, letting you restore the card with a single tap before it is sent to Trash.',
     isFaq: true,
-    keywords: ['swipe', 'delete', 'undo', 'dynamic island', 'trash'],
+    keywords: [
+      'swipe',
+      'delete',
+      'undo',
+      'dynamic island',
+      'trash',
+      'shhh',
+      'sound',
+    ],
   ),
   HelpGuideItem(
     title: 'How does the Life Ledger Timeline work in History?',

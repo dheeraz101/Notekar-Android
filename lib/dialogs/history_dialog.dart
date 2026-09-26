@@ -424,7 +424,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 message: 'Back'.localized(context),
                 child: PressableScale(
                   onTap: () {
-                    AppSound.click();
                     if (_inSheetView == 'create_goal') {
                       setState(() => _inSheetView = 'goals');
                     } else if (_inSheetView != null) {
@@ -459,7 +458,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         : 'List view',
                     child: PressableScale(
                       onTap: () {
-                        AppSound.click();
                         final nextMode = _viewMode == 'list'
                             ? 'calendar'
                             : 'list';
@@ -498,7 +496,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       message: 'Search Notes'.localized(context),
                       child: PressableScale(
                         onTap: () {
-                          AppSound.click();
                           widget.onOpenSearchNotes!();
                         },
                         child: Container(
@@ -525,7 +522,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 message: 'New Goal'.localized(context),
                 child: PressableScale(
                   onTap: () {
-                    AppSound.click();
                     setState(() {
                       _editingGoal = null;
                       _inSheetView = 'create_goal';
@@ -553,7 +549,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 message: 'More Options'.localized(context),
                 child: PressableScale(
                   onTap: () {
-                    AppSound.click();
                     _showThreeDotsMenu();
                   },
                   child: Container(
@@ -1581,7 +1576,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
     DateTime? prefilledStartTime,
     DateTime? prefilledEndTime,
   }) async {
-    AppSound.click();
     setState(() => _inSheetView = 'manual');
   }
 
@@ -1676,7 +1670,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   void _showThreeDotsMenu() {
-    AppSound.click();
     showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
@@ -1693,7 +1686,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.pop(ctx);
-                AppSound.click();
                 setState(() => _inSheetView = 'manual');
               },
               child: Row(
@@ -1719,7 +1711,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(ctx);
-              AppSound.click();
               setState(() => _inSheetView = 'goals');
             },
             child: Row(
@@ -1741,7 +1732,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(ctx);
-              AppSound.click();
               _openFilterSheet();
             },
             child: Row(
@@ -1769,7 +1759,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
               isDestructiveAction: true,
               onPressed: () {
                 Navigator.pop(ctx);
-                AppSound.click();
                 _confirmDeleteAll();
               },
               child: Row(
@@ -1805,7 +1794,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   void _openFilterSheet() {
-    AppSound.click();
     showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
@@ -1834,7 +1822,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.pop(ctx);
-                AppSound.click();
                 if (f == 'date') {
                   _openDateFilter();
                 } else {

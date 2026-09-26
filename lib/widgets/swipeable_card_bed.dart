@@ -147,6 +147,7 @@ class SwipeableCardBedState extends State<SwipeableCardBed>
     if (shouldTrigger) {
       if ((_dx < 0 || fastLeftFling) && widget.onDelete != null) {
         AppHaptics.heavy();
+        AppSound.swipeDelete();
         widget.onDelete?.call();
       } else if ((_dx > 0 || fastRightFling) && widget.onEdit != null) {
         AppHaptics.light();

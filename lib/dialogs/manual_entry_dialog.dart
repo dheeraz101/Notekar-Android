@@ -398,7 +398,6 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     );
 
     HapticFeedback.mediumImpact();
-    AppSound.click();
     widget.onSubmit(result);
   }
 
@@ -780,7 +779,6 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               Expanded(
                 child: PressableScale(
                   onTap: () {
-                    AppSound.click();
                     if (widget.onCancel != null) {
                       widget.onCancel!();
                     } else {

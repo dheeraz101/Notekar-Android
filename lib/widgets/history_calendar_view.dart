@@ -75,7 +75,6 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   }
 
   void _handleCardTap(Moment moment) {
-    AppSound.click();
     if (_selectedMoments.any((m) => m.id == moment.id)) {
       setState(() => _selectedMoments.removeWhere((m) => m.id == moment.id));
     } else {
@@ -92,7 +91,6 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   }
 
   void _showMomentContextMenu(Moment moment) {
-    AppSound.click();
     HapticFeedback.mediumImpact();
     final hasNote = moment.note.trim().isNotEmpty;
 
@@ -184,7 +182,6 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   }
 
   void _confirmDeleteMoment(Moment moment) {
-    AppSound.click();
     showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(

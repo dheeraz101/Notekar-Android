@@ -270,6 +270,13 @@ class AppSound {
       SystemSound.play(SystemSoundType.alert);
     } catch (_) {}
   }
+
+  static void swipeDelete() {
+    if (!_enabled) return;
+    try {
+      _channel.invokeMethod('playShhhSound').catchError((_) {});
+    } catch (_) {}
+  }
 }
 
 String formatTimeShort(int timestamp, {bool? use24Hour}) {

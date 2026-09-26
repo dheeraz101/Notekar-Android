@@ -85,7 +85,6 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   }
 
   Future<void> _showAddTagDialog() async {
-    AppSound.click();
     final textController = TextEditingController();
     final created = await showCupertinoDialog<String>(
       context: context,
@@ -138,7 +137,6 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   }
 
   Future<void> _confirmDeleteTag(String tag) async {
-    AppSound.click();
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
