@@ -246,8 +246,8 @@ void main() {
         );
         expect(textField.autocorrect, isTrue);
         expect(textField.enableSuggestions, isTrue);
-        expect(textField.minLines, 4);
-        expect(textField.maxLines, 6);
+        expect(textField.minLines, 2);
+        expect(textField.maxLines, 4);
       },
     );
 

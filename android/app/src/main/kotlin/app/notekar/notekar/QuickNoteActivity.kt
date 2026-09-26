@@ -96,8 +96,14 @@ class QuickNoteActivity : Activity() {
             hint = "What's on your mind?"
             setHintTextColor(Color.parseColor("#60FFFFFF"))
             setTextColor(Color.WHITE)
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            setSingleLine(true)
+            inputType = InputType.TYPE_CLASS_TEXT or
+                    InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or
+                    InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            isSingleLine = false
+            minLines = 3
+            maxLines = 6
+            gravity = Gravity.TOP or Gravity.START
+            imeOptions = android.view.inputmethod.EditorInfo.IME_FLAG_NO_ENTER_ACTION
             textSize = 14f
 
             // Styled input box background

@@ -12,7 +12,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.media.SoundPool
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -35,6 +37,8 @@ class MainActivity : FlutterActivity() {
     private var pendingLaunchAction: String? = null
     private var pendingLaunchPayload: Map<String, Any?>? = null
     private var pendingNotificationResult: MethodChannel.Result? = null
+    private var soundPool: SoundPool? = null
+    private var clickSoundId: Int = 0
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         try {
@@ -59,6 +63,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        initSoundPool()
         pendingLaunchPayload = payloadFromIntent(intent)
         pendingLaunchAction =
             actionFromIntent(intent) ?: pendingLaunchPayload?.get("action") as? String
@@ -543,9 +548,54 @@ class MainActivity : FlutterActivity() {
                     result.success(null)
                 }
 
+                "playAcousticSound" -> {
+                    try {
+                        if (soundPool == null || clickSoundId == 0) {
+                            initSoundPool()
+                        }
+                        if (soundPool != null && clickSoundId != 0) {
+                            soundPool?.play(clickSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+                            result.success(true)
+                        } else {
+                            result.success(false)
+                        }
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         }
+    }
+
+    private fun initSoundPool() {
+        if (soundPool != null) return
+        try {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            val sp = SoundPool.Builder()
+                .setMaxStreams(6)
+                .setAudioAttributes(audioAttributes)
+                .build()
+            val soundResId = resources.getIdentifier("sound_click", "raw", packageName)
+            if (soundResId != 0) {
+                clickSoundId = sp.load(this, soundResId, 1)
+            }
+            soundPool = sp
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to initialize SoundPool", e)
+        }
+    }
+
+    override fun onDestroy() {
+        try {
+            soundPool?.release()
+            soundPool = null
+        } catch (_: Exception) {}
+        super.onDestroy()
     }
 
     override fun onRequestPermissionsResult(

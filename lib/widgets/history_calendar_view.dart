@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
-import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -76,56 +75,40 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   }
 
   void _handleCardTap(Moment moment) {
-    if (_selectedMoments.isNotEmpty) {
-      HapticFeedback.selectionClick();
-      if (_selectedMoments.any((m) => m.id == moment.id)) {
-        setState(() => _selectedMoments.removeWhere((m) => m.id == moment.id));
-      } else {
-        _selectedMoments.add(moment);
-        if (_selectedMoments.length >= 2) {
-          final a = _selectedMoments[0];
-          final b = _selectedMoments[1];
-          setState(() => _selectedMoments.clear());
-          showTimeDifferenceDialog(context, p: widget.p, a: a, b: b);
-        } else {
-          setState(() {});
-        }
-      }
-      return;
-    }
-    // Default single tap on card: preview note if exists, else show context menu
-    if (moment.note.isNotEmpty) {
-      NotePreviewSheet.show(
-        context,
-        p: widget.p,
-        note: moment.note,
-        title:
-            '${datePretty(moment.timestamp)} • ${timeOnly(moment.timestamp)}',
-        category: moment.category,
-        onEdit: widget.onEditNote != null
-            ? () => widget.onEditNote!(moment)
-            : null,
-      );
+    AppSound.click();
+    if (_selectedMoments.any((m) => m.id == moment.id)) {
+      setState(() => _selectedMoments.removeWhere((m) => m.id == moment.id));
     } else {
-      _showMomentContextMenu(moment);
+      _selectedMoments.add(moment);
+      if (_selectedMoments.length >= 2) {
+        final a = _selectedMoments[0];
+        final b = _selectedMoments[1];
+        setState(() => _selectedMoments.clear());
+        showTimeDifferenceDialog(context, p: widget.p, a: a, b: b);
+      } else {
+        setState(() {});
+      }
     }
   }
 
   void _showMomentContextMenu(Moment moment) {
+    AppSound.click();
     HapticFeedback.mediumImpact();
+    final hasNote = moment.note.trim().isNotEmpty;
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text(
-          moment.note.isNotEmpty
-              ? (moment.note.length > 30
-                    ? '${moment.note.substring(0, 30)}...'
+          hasNote
+              ? (moment.note.length > 36
+                    ? '${moment.note.substring(0, 36)}...'
                     : moment.note)
               : '${moment.category ?? 'Moment'} • ${timeOnly(moment.timestamp)}',
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: widget.p.text2,
+            color: widget.p.text,
           ),
         ),
         message: Text(
@@ -142,47 +125,25 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(CupertinoIcons.pencil, size: 18, color: widget.p.accent),
+                  Icon(
+                    hasNote
+                        ? CupertinoIcons.pencil
+                        : CupertinoIcons.plus_bubble,
+                    size: 19,
+                    color: widget.p.accent,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    'Edit Note'.localized(context),
+                    (hasNote ? 'Edit Note' : 'Add Note').localized(context),
                     style: TextStyle(
                       color: widget.p.accent,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() {
-                if (!_selectedMoments.any((m) => m.id == moment.id)) {
-                  _selectedMoments.add(moment);
-                }
-              });
-              HapticFeedback.selectionClick();
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.arrow_right_arrow_left,
-                  size: 18,
-                  color: widget.p.text,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Compare Time'.localized(context),
-                  style: TextStyle(
-                    color: widget.p.text,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
           if (widget.onDelete != null)
             CupertinoActionSheetAction(
               isDestructiveAction: true,
@@ -195,11 +156,17 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 children: [
                   const Icon(
                     CupertinoIcons.trash,
-                    size: 18,
+                    size: 19,
                     color: CupertinoColors.destructiveRed,
                   ),
                   const SizedBox(width: 8),
-                  Text('Delete Moment'.localized(context)),
+                  Text(
+                    'Delete Moment'.localized(context),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -207,28 +174,32 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
           onPressed: () => Navigator.pop(ctx),
-          child: Text('Cancel'.localized(context)),
+          child: Text(
+            'Cancel'.localized(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
   }
 
   void _confirmDeleteMoment(Moment moment) {
-    showDialog<void>(
+    AppSound.click();
+    showCupertinoDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => CupertinoAlertDialog(
         title: Text('Delete Moment?'.localized(context)),
         content: Text(
           'Are you sure you want to delete this moment? This cannot be undone.'
               .localized(context),
         ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel'.localized(context)),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: widget.p.red),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () {
               Navigator.pop(ctx);
               widget.onDelete?.call(moment);

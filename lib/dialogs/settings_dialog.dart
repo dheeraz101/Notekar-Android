@@ -9,9 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
+import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
+import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
@@ -34,9 +36,7 @@ import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
 import 'package:notekar/dialogs/settings/personalization_settings_page.dart';
 import 'package:notekar/dialogs/settings/privacy_security_settings_page.dart';
 import 'package:notekar/dialogs/settings/reminders_settings_page.dart';
-import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/settings/search_notes_settings_page.dart';
-import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/dialogs/settings/security_privacy_details_sheets.dart';
 import 'package:notekar/dialogs/settings/settings_dashboard_page.dart';
 import 'package:notekar/dialogs/settings/sobriety_companion_settings_page.dart';
@@ -45,6 +45,7 @@ import 'package:notekar/dialogs/settings/trash_bin_settings_page.dart';
 import 'package:notekar/dialogs/settings/upcoming_features_settings_page.dart';
 import 'package:notekar/dialogs/settings/update_center_page.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
+import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/help_guide_data.dart';
 import 'package:notekar/models/moment.dart';
@@ -1708,6 +1709,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
         onBoolChanged: null,
       ),
       item(
+        title: 'Targets & Goals',
+        subtitle:
+            'Allocate and track intentional hour targets across weeks, months, or tags',
+        category: 'Dashboard',
+        icon: Icons.track_changes_rounded,
+        keywords: [
+          'goals',
+          'targets',
+          'hours',
+          'progress',
+          'deficit',
+          'intentionality',
+          'timeframe',
+          'quota',
+        ],
+        kind: 'action',
+        boolValue: null,
+        onBoolChanged: null,
+      ),
+      item(
         title: 'Mode Glyph Icons',
         subtitle: 'Select minimal glyph icons for active and custom modes',
         category: 'Modes & Categories',
@@ -2575,6 +2596,33 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: delayLabel(tapDelay),
       ),
       item(
+        title: 'Note on Click',
+        subtitle:
+            'Tap to compose a note before logging. When disabled, tapping logs instantly and holding prompts for a note.',
+        category: 'Capture',
+        icon: Icons.edit_note_rounded,
+        keywords: [
+          'note',
+          'click',
+          'tap',
+          'compose',
+          'capture',
+          'prompt',
+          'single',
+          'two-way',
+          'write note',
+        ],
+        kind: 'switch',
+        boolValue: enableNoteOnClick,
+        onBoolChanged: (bool value) async {
+          if (_prefs != null) {
+            await _prefs!.setBool('enable_note_on_click', value);
+          }
+          setState(() => enableNoteOnClick = value);
+        },
+        status: null,
+      ),
+      item(
         title: 'Plus Notes',
         subtitle: 'Unrestricted long-form journaling and meeting logs',
         category: 'Moments',
@@ -2685,31 +2733,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
         status: null,
       ),
       item(
-        title: 'Note on Click',
-        subtitle:
-            'Tap a moment to view or edit its note, and long-press to select for duration.',
-        category: 'Moments',
-        icon: Icons.edit_note_rounded,
-        keywords: [
-          'note',
-          'click',
-          'tap',
-          'history',
-          'edit',
-          'select',
-          'long-press',
-        ],
-        kind: 'switch',
-        boolValue: enableNoteOnClick,
-        onBoolChanged: (bool value) async {
-          if (_prefs != null) {
-            await _prefs!.setBool('enable_note_on_click', value);
-          }
-          setState(() => enableNoteOnClick = value);
-        },
-        status: null,
-      ),
-      item(
         title: 'Extended Duration',
         subtitle: 'Show days, months, and years in time between moments',
         category: 'Moments',
@@ -2730,6 +2753,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
           widget.onExtendedDuration(value);
         },
         status: null,
+      ),
+      item(
+        title: 'Time Difference Comparison',
+        subtitle:
+            'Compare time elapsed between any two moments in history calendar or search',
+        category: 'Moments',
+        icon: Icons.compare_arrows_rounded,
+        keywords: [
+          'time difference',
+          'compare',
+          'delta',
+          'elapsed',
+          'between moments',
+          'difference',
+          'duration',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
       ),
       item(
         title: 'Minimal Moment Options',
@@ -2843,6 +2885,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: '${_trash.length} items',
+      ),
+      item(
+        title: 'Rainbow Cards',
+        subtitle:
+            'Subtle category chromatic tinting across timeline, calendar, and search cards',
+        category: 'Logging',
+        icon: Icons.palette_outlined,
+        keywords: [
+          'rainbow',
+          'rainbow cards',
+          'chromatic',
+          'tint',
+          'category color',
+          'cards',
+          'palette',
+        ],
+        kind: 'switch',
+        boolValue: _rainbowCards,
+        onBoolChanged: (bool value) async {
+          setState(() => _rainbowCards = value);
+          if (_prefs != null) {
+            await _prefs!.setBool('m-rainbow-cards', value);
+          }
+        },
+        status: null,
       ),
       item(
         title: 'Updates & Notices',
@@ -3245,6 +3312,33 @@ class _SettingsDialogState extends State<SettingsDialog> {
         boolValue: null,
         onBoolChanged: null,
         status: hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
+      ),
+      item(
+        title: 'Sound Effects',
+        subtitle: 'Subtle acoustic click feedback on logging and interactions',
+        category: 'Accessibility',
+        icon: Icons.volume_up_rounded,
+        keywords: [
+          'sound',
+          'sound effects',
+          'acoustic',
+          'audio',
+          'click',
+          'feedback',
+          'audio feedback',
+          'click sound',
+        ],
+        kind: 'switch',
+        boolValue: soundEffects,
+        onBoolChanged: (bool value) async {
+          setState(() => soundEffects = value);
+          widget.onSoundEffects?.call(value);
+          AppSound.setEnabled(value);
+          if (value) AppSound.click();
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('m-acoustic-feedback', value);
+        },
+        status: null,
       ),
       item(
         title: 'Diagnostics',
@@ -4911,6 +5005,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                                                       );
                                                       return;
                                                     }
+                                                    if (result.title ==
+                                                        'Targets & Goals') {
+                                                      GoalsSheet.show(
+                                                        context,
+                                                        p: p,
+                                                        moments: entries,
+                                                      );
+                                                      return;
+                                                    }
                                                     _openCategory(
                                                       result.category,
                                                     );
@@ -5859,7 +5962,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                               trash: _trash,
                               compactHistory: compactHistory,
                               confirmDelete: confirmDelete,
-                              enableNoteOnClick: enableNoteOnClick,
                               extendedDuration: extendedDuration,
                               minimalMomentOptions: minimalMomentOptions,
                               useNumbersInSingle: useNumbersInSingle,
@@ -5879,15 +5981,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onConfirmDeleteChanged: (value) {
                                 setState(() => confirmDelete = value);
                                 widget.onConfirmDelete(value);
-                              },
-                              onEnableNoteOnClickChanged: (value) async {
-                                if (_prefs != null) {
-                                  await _prefs!.setBool(
-                                    'enable_note_on_click',
-                                    value,
-                                  );
-                                }
-                                setState(() => enableNoteOnClick = value);
                               },
                               onExtendedDurationChanged: (value) {
                                 setState(() => extendedDuration = value);

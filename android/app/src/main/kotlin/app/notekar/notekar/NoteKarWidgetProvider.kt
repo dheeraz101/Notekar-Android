@@ -181,6 +181,27 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 .putString(KEY_HISTORY, updatedHistory)
                 .apply()
 
+            // Write to pending queue inside Flutter's default SharedPreferences file FIRST (synchronous commit)
+            val bgPrefs =
+                context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)
+            val logString = "$now|$type|$note"
+
+            val bgEditor = bgPrefs.edit()
+                .putString("flutter.log_$currentPendingCount", logString)
+                .putInt("flutter.pending_count", currentPendingCount + 1)
+
+            if (mode == "two-way") {
+                if (type == "in") {
+                    bgEditor.putString("flutter.m-inout", "out")
+                    bgEditor.putLong("flutter.m-ses", now)
+                } else if (type == "out") {
+                    bgEditor.putString("flutter.m-inout", "in")
+                    bgEditor.remove("flutter.m-ses")
+                }
+            }
+            bgEditor.commit()
+
             // Update all widgets visually and instantly
             updateAllWidgets(context)
 
@@ -189,17 +210,6 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             // Notify running foreground activity
             MainActivity.notifyBackgroundLogRecorded()
-
-            // Write to pending queue inside Flutter's default SharedPreferences file
-            val bgPrefs =
-                context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)
-            val logString = "$now|$type|$note"
-
-            bgPrefs.edit()
-                .putString("flutter.log_$currentPendingCount", logString)
-                .putInt("flutter.pending_count", currentPendingCount + 1)
-                .apply()
 
             // Toast feedback
             val label = when (type) {

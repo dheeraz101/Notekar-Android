@@ -427,17 +427,20 @@ class _NoteKarHomeState extends State<NoteKarHome>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       if (_prefs != null) {
-        unawaited(_syncBackgroundLogs(_prefs!));
-        final savedMode = _prefs!.getString('m-mode');
-        final savedInOut = _prefs!.getString('m-inout');
-        final savedSes = _prefs!.getInt('m-ses');
-        if (mounted) {
-          setState(() {
-            if (savedMode != null) _mode = savedMode;
-            if (savedInOut != null) _inout = savedInOut;
-            _sessionStart = savedSes;
-          });
-        }
+        unawaited(() async {
+          await _prefs!.reload();
+          await _syncBackgroundLogs(_prefs!);
+          final savedMode = _prefs!.getString('m-mode');
+          final savedInOut = _prefs!.getString('m-inout');
+          final savedSes = _prefs!.getInt('m-ses');
+          if (mounted) {
+            setState(() {
+              if (savedMode != null) _mode = savedMode;
+              if (savedInOut != null) _inout = savedInOut;
+              _sessionStart = savedSes;
+            });
+          }
+        }());
       }
 
       if (_startupComplete) {
@@ -1172,7 +1175,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       });
       NotekarHaptics.save(_hapticStyle, type);
       if (_acousticFeedback) {
-        SystemSound.play(SystemSoundType.click);
+        AppSound.click();
       }
 
       _pendingTap = {
@@ -1257,7 +1260,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     NotekarHaptics.save(_hapticStyle, type);
     if (_acousticFeedback) {
-      SystemSound.play(SystemSoundType.click);
+      AppSound.click();
     }
 
     try {
@@ -2318,6 +2321,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<void> _syncBackgroundLogs(SharedPreferences prefs) async {
+    await prefs.reload();
     final pendingCount = prefs.getInt('pending_count') ?? 0;
     if (pendingCount <= 0) return;
 
@@ -2351,6 +2355,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
     // Save all new entries to repository
     for (final entry in newEntries) {
       await _repository.saveMoment(entry);
+      if (_mode == 'two-way') {
+        if (entry.type == 'in') {
+          _inout = 'out';
+          _sessionStart = entry.timestamp;
+          await prefs.setString('m-inout', 'out');
+          await prefs.setInt('m-ses', entry.timestamp);
+        } else if (entry.type == 'out') {
+          _inout = 'in';
+          _sessionStart = null;
+          await prefs.setString('m-inout', 'in');
+          await prefs.remove('m-ses');
+        }
+      }
     }
 
     // Clear SharedPreferences queue keys
@@ -2361,10 +2378,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     // Reload the full list from Hive to refresh states
     final updatedEntries = _repository.getAllMoments();
-    setState(() {
-      _entries = updatedEntries;
-      _nextId = nextId;
-    });
+    if (mounted) {
+      setState(() {
+        _entries = updatedEntries;
+        _nextId = nextId;
+      });
+    }
 
     // Update native widget UI
     unawaited(_updateAndroidWidget());

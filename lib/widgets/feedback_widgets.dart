@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 
 class Ripple extends StatefulWidget {
   const Ripple({super.key, required this.origin, required this.color});
@@ -122,92 +123,103 @@ class _UndoToastState extends State<UndoToast>
 
   @override
   Widget build(BuildContext context) {
+    final isEditNote = widget.noteLabel == "Edit Note";
+
     return Center(
-      child: Glass(
-        p: widget.p,
-        radius: 999,
-        padding: EdgeInsets.zero,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (_, _) {
-                    return FractionallySizedBox(
-                      alignment: Alignment.centerLeft,
-                      widthFactor: (1 - _controller.value).clamp(0.0, 1.0),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: widget.p.accent.withValues(alpha: 0.10),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 9,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      (widget.message ?? 'Moment saved').localized(context),
-                      style: TextStyle(color: widget.p.text),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 1. Standalone Undo Pill with countdown progress bar
+          Glass(
+            p: widget.p,
+            radius: 999,
+            padding: EdgeInsets.zero,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: AnimatedBuilder(
+                      animation: _controller,
+                      builder: (_, _) {
+                        return FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: (1 - _controller.value).clamp(0.0, 1.0),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: widget.p.accent.withValues(alpha: 0.10),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: widget.onUndo,
-                      child: Text(
-                        'Undo'.localized(context),
-                        style: TextStyle(
-                          color: widget.p.accent,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
                     ),
-                    if (widget.onAddNote != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Container(
-                          width: 1,
-                          height: 14,
-                          color: widget.p.border.withValues(alpha: 0.6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          (widget.message ?? "Moment saved").localized(context),
+                          style: TextStyle(
+                            color: widget.p.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: widget.onAddNote,
-                        behavior: HitTestBehavior.opaque,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.note_add_outlined,
-                              size: 14,
+                        const SizedBox(width: 10),
+                        PressableScale(
+                          onTap: () {
+                            AppSound.click();
+                            widget.onUndo();
+                          },
+                          child: Text(
+                            "Undo".localized(context),
+                            style: TextStyle(
                               color: widget.p.accent,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              (widget.noteLabel ?? '+ Note').localized(context),
-                              style: TextStyle(
-                                color: widget.p.accent,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 2. Separate floating pill with only the + icon beside the undo pill
+          if (widget.onAddNote != null) ...[
+            const SizedBox(width: 8),
+            PressableScale(
+              onTap: () {
+                AppSound.click();
+                widget.onAddNote?.call();
+              },
+              child: Glass(
+                p: widget.p,
+                radius: 999,
+                padding: EdgeInsets.zero,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(shape: BoxShape.circle),
+                  child: Icon(
+                    isEditNote ? CupertinoIcons.pencil : CupertinoIcons.add,
+                    size: 18,
+                    color: widget.p.accent,
+                  ),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          ],
+        ],
       ),
     );
   }

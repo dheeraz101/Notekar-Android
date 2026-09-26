@@ -51,7 +51,7 @@ Future<DateTime?> showCupertinoDatePickerSheet(
 
 /// Apple HIG Manual Entry Sheet allowing users to retroactively log
 /// single moments or full start/end sessions up to 30 days in the past.
-class ManualEntryDialog extends StatefulWidget {
+class ManualEntryDialog extends StatelessWidget {
   const ManualEntryDialog({
     super.key,
     required this.p,
@@ -68,10 +68,48 @@ class ManualEntryDialog extends StatefulWidget {
   final DateTime? prefilledEndTime;
 
   @override
-  State<ManualEntryDialog> createState() => _ManualEntryDialogState();
+  Widget build(BuildContext context) {
+    return AppSheet(
+      p: p,
+      title: 'Manual Entry',
+      child: ManualEntryContent(
+        p: p,
+        categories: categories,
+        initialCategory: initialCategory,
+        prefilledStartTime: prefilledStartTime,
+        prefilledEndTime: prefilledEndTime,
+        onSubmit: (res) => Navigator.pop(context, res),
+        onCancel: () => Navigator.pop(context),
+      ),
+    );
+  }
 }
 
-class _ManualEntryDialogState extends State<ManualEntryDialog> {
+class ManualEntryContent extends StatefulWidget {
+  const ManualEntryContent({
+    super.key,
+    required this.p,
+    required this.categories,
+    this.initialCategory,
+    this.prefilledStartTime,
+    this.prefilledEndTime,
+    required this.onSubmit,
+    this.onCancel,
+  });
+
+  final Palette p;
+  final List<String> categories;
+  final String? initialCategory;
+  final DateTime? prefilledStartTime;
+  final DateTime? prefilledEndTime;
+  final ValueChanged<ManualEntryResult> onSubmit;
+  final VoidCallback? onCancel;
+
+  @override
+  State<ManualEntryContent> createState() => _ManualEntryContentState();
+}
+
+class _ManualEntryContentState extends State<ManualEntryContent> {
   late bool _isSession;
   late DateTime _selectedDate;
   late TimeOfDay _startTime;
@@ -360,7 +398,8 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
     );
 
     HapticFeedback.mediumImpact();
-    Navigator.pop(context, result);
+    AppSound.click();
+    widget.onSubmit(result);
   }
 
   @override
@@ -376,9 +415,7 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
         ? 'Today (${datePretty(_selectedDate.millisecondsSinceEpoch)})'
         : datePretty(_selectedDate.millisecondsSinceEpoch);
 
-    return AppSheet(
-      p: p,
-      title: 'Manual Entry',
+    return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -742,7 +779,14 @@ class _ManualEntryDialogState extends State<ManualEntryDialog> {
             children: [
               Expanded(
                 child: PressableScale(
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    AppSound.click();
+                    if (widget.onCancel != null) {
+                      widget.onCancel!();
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     decoration: BoxDecoration(

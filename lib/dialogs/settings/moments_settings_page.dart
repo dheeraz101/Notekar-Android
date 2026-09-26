@@ -14,7 +14,6 @@ class MomentsSettingsPage extends StatelessWidget {
     required this.trash,
     this.compactHistory = false,
     required this.confirmDelete,
-    required this.enableNoteOnClick,
     required this.extendedDuration,
     required this.minimalMomentOptions,
     required this.notesCount,
@@ -24,7 +23,6 @@ class MomentsSettingsPage extends StatelessWidget {
     this.onCompactHistoryChanged,
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
-    required this.onEnableNoteOnClickChanged,
     required this.onExtendedDurationChanged,
     required this.onMinimalMomentOptionsChanged,
     required this.onUseNumbersInSingleChanged,
@@ -38,7 +36,6 @@ class MomentsSettingsPage extends StatelessWidget {
   final List<Moment> trash;
   final bool compactHistory;
   final bool confirmDelete;
-  final bool enableNoteOnClick;
   final bool extendedDuration;
   final bool minimalMomentOptions;
   final int notesCount;
@@ -49,7 +46,6 @@ class MomentsSettingsPage extends StatelessWidget {
   final ValueChanged<bool>? onCompactHistoryChanged;
   final ValueChanged<String> onHistoryDensityChanged;
   final ValueChanged<bool> onConfirmDeleteChanged;
-  final ValueChanged<bool> onEnableNoteOnClickChanged;
   final ValueChanged<bool> onExtendedDurationChanged;
   final ValueChanged<bool> onMinimalMomentOptionsChanged;
   final ValueChanged<bool> onUseNumbersInSingleChanged;
@@ -73,15 +69,6 @@ class MomentsSettingsPage extends StatelessWidget {
               color: p.red,
               value: confirmDelete,
               onChanged: onConfirmDeleteChanged,
-            ),
-            SettingsSwitchRow(
-              p: p,
-              title: 'Note on Click',
-              subtitle:
-                  'Tap a moment to view or edit its note, and long-press to select for duration.',
-              color: p.accent,
-              value: enableNoteOnClick,
-              onChanged: onEnableNoteOnClickChanged,
             ),
           ],
         ),

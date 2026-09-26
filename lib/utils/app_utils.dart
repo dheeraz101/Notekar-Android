@@ -249,12 +249,19 @@ class AppSound {
   static bool _enabled = true;
   static bool get enabled => _enabled;
   static void setEnabled(bool val) => _enabled = val;
+  static const MethodChannel _channel = MethodChannel('notekar/files');
 
   static void click() {
     if (!_enabled) return;
     try {
-      SystemSound.play(SystemSoundType.click);
-    } catch (_) {}
+      _channel.invokeMethod('playAcousticSound').catchError((_) {
+        SystemSound.play(SystemSoundType.click);
+      });
+    } catch (_) {
+      try {
+        SystemSound.play(SystemSoundType.click);
+      } catch (_) {}
+    }
   }
 
   static void alert() {

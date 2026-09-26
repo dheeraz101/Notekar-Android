@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
@@ -85,41 +85,38 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   }
 
   Future<void> _showAddTagDialog() async {
-    HapticFeedback.lightImpact();
+    AppSound.click();
     final textController = TextEditingController();
-    final created = await showDialog<String>(
+    final created = await showCupertinoDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: widget.p.surface2,
-        title: Text(
-          'New Hashtag',
-          style: TextStyle(
-            color: widget.p.text,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: TextField(
-          controller: textController,
-          autofocus: true,
-          style: TextStyle(color: widget.p.text),
-          decoration: InputDecoration(
-            hintText: 'tag (e.g. #journal, #gym)',
-            hintStyle: TextStyle(color: widget.p.text3),
-            prefixText: textController.text.startsWith('#') ? null : '#',
-            prefixStyle: TextStyle(
-              color: widget.p.accent,
-              fontWeight: FontWeight.bold,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('New Hashtag'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12.0),
+          child: CupertinoTextField(
+            controller: textController,
+            autofocus: true,
+            placeholder: 'tag (e.g. journal, gym)',
+            style: TextStyle(color: widget.p.text),
+            prefix: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                '#',
+                style: TextStyle(
+                  color: widget.p.accent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: widget.p.text2)),
+            child: const Text('Cancel'),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: widget.p.accent),
+          CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () {
               final raw = textController.text.trim();
               if (raw.isEmpty) return;
@@ -141,30 +138,21 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
   }
 
   Future<void> _confirmDeleteTag(String tag) async {
-    HapticFeedback.mediumImpact();
-    final confirmed = await showDialog<bool>(
+    AppSound.click();
+    final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: widget.p.surface2,
-        title: Text(
-          'Remove $tag?',
-          style: TextStyle(
-            color: widget.p.text,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text('Remove $tag?'),
+        content: const Text(
           'Do you want to remove this tag from your quick list?',
-          style: TextStyle(color: widget.p.text2, fontSize: 13),
         ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: widget.p.text2)),
+            child: const Text('Cancel'),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: widget.p.red),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Remove'),
           ),

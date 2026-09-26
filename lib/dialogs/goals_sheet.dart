@@ -1,12 +1,13 @@
 import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -14,7 +15,7 @@ import 'package:notekar/widgets/pressable_scale.dart';
 /// Flagship Apple HIG Goals & Targets Sheet.
 /// Allows setting intentional target allocations across week, month, year, or all-time,
 /// tracking invested duration vs remaining deficit ("X hours to go").
-class GoalsSheet extends StatefulWidget {
+class GoalsSheet extends StatelessWidget {
   const GoalsSheet({super.key, required this.p, required this.moments});
 
   final Palette p;
@@ -25,7 +26,7 @@ class GoalsSheet extends StatefulWidget {
     required Palette p,
     required List<Moment> moments,
   }) {
-    HapticFeedback.lightImpact();
+    AppSound.click();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -35,20 +36,48 @@ class GoalsSheet extends StatefulWidget {
   }
 
   @override
-  State<GoalsSheet> createState() => _GoalsSheetState();
+  Widget build(BuildContext context) {
+    return AppSheet(
+      p: p,
+      title: 'Targets & Goals'.localized(context),
+      child: SizedBox(
+        width: 420,
+        height: 520,
+        child: GoalsContentView(p: p, moments: moments),
+      ),
+    );
+  }
 }
 
-class _GoalsSheetState extends State<GoalsSheet> {
+class GoalsContentView extends StatefulWidget {
+  const GoalsContentView({
+    super.key,
+    required this.p,
+    required this.moments,
+    this.onAddGoal,
+    this.onEditGoal,
+  });
+
+  final Palette p;
+  final List<Moment> moments;
+  final VoidCallback? onAddGoal;
+  final ValueChanged<Goal>? onEditGoal;
+
+  @override
+  State<GoalsContentView> createState() => GoalsContentViewState();
+}
+
+class GoalsContentViewState extends State<GoalsContentView> {
   List<Goal> _goals = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadGoals();
+    loadGoals();
   }
 
-  Future<void> _loadGoals() async {
+  Future<void> loadGoals() async {
     final list = await GoalsService.instance.getGoals();
     if (mounted) {
       setState(() {
@@ -59,40 +88,59 @@ class _GoalsSheetState extends State<GoalsSheet> {
   }
 
   void _openCreateOrEditGoalDialog([Goal? existing]) {
-    HapticFeedback.lightImpact();
-    showDialog<void>(
+    AppSound.click();
+    if (widget.onEditGoal != null && existing != null) {
+      widget.onEditGoal!(existing);
+      return;
+    }
+    if (widget.onAddGoal != null && existing == null) {
+      widget.onAddGoal!();
+      return;
+    }
+
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (ctx) => _CreateOrEditGoalDialog(
+      builder: (ctx) => AppSheet(
         p: widget.p,
-        goal: existing,
-        onSave: (saved) async {
-          await GoalsService.instance.saveGoal(saved);
-          await _loadGoals();
-        },
+        title: (existing == null ? 'New Target Goal' : 'Edit Target Goal')
+            .localized(context),
+        child: SizedBox(
+          width: 420,
+          child: CreateOrEditGoalView(
+            p: widget.p,
+            goal: existing,
+            onSave: (saved) async {
+              Navigator.pop(ctx);
+              await GoalsService.instance.saveGoal(saved);
+              await loadGoals();
+            },
+            onCancel: () => Navigator.pop(ctx),
+          ),
+        ),
       ),
     );
   }
 
   void _confirmDeleteGoal(Goal goal) {
-    HapticFeedback.selectionClick();
-    showDialog<void>(
+    AppSound.click();
+    showCupertinoDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => CupertinoAlertDialog(
         title: Text('Delete Goal?'.localized(context)),
         content: Text(
           'Are you sure you want to delete "${goal.title}"?'.localized(context),
         ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel'.localized(context)),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: widget.p.red),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(ctx);
               await GoalsService.instance.deleteGoal(goal.id);
-              await _loadGoals();
+              await loadGoals();
             },
             child: Text('Delete'.localized(context)),
           ),
@@ -103,44 +151,25 @@ class _GoalsSheetState extends State<GoalsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return AppSheet(
-      p: widget.p,
-      title: 'Targets & Goals'.localized(context),
-      trailingAction: PressableScale(
-        onTap: () => _openCreateOrEditGoalDialog(),
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: widget.p.accent.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(CupertinoIcons.add, size: 19, color: widget.p.accent),
-        ),
-      ),
-      child: SizedBox(
-        width: 420,
-        height: 520,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator.adaptive())
-            : _goals.isEmpty
-            ? _buildEmptyState()
-            : ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                itemCount: _goals.length,
-                itemBuilder: (ctx, idx) {
-                  final goal = _goals[idx];
-                  final progress = GoalsService.instance.calculateProgress(
-                    goal,
-                    widget.moments,
-                  );
-                  return _buildGoalCard(goal, progress);
-                },
-              ),
-      ),
+    if (_isLoading) {
+      return const Center(child: CupertinoActivityIndicator());
+    }
+
+    if (_goals.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: _goals.length,
+      itemBuilder: (ctx, idx) {
+        final goal = _goals[idx];
+        final progress = GoalsService.instance.calculateProgress(
+          goal,
+          widget.moments,
+        );
+        return _buildGoalCard(goal, progress);
+      },
     );
   }
 
@@ -379,23 +408,25 @@ class _GoalsSheetState extends State<GoalsSheet> {
   }
 }
 
-class _CreateOrEditGoalDialog extends StatefulWidget {
-  const _CreateOrEditGoalDialog({
+class CreateOrEditGoalView extends StatefulWidget {
+  const CreateOrEditGoalView({
+    super.key,
     required this.p,
     this.goal,
     required this.onSave,
+    this.onCancel,
   });
 
   final Palette p;
   final Goal? goal;
   final ValueChanged<Goal> onSave;
+  final VoidCallback? onCancel;
 
   @override
-  State<_CreateOrEditGoalDialog> createState() =>
-      _CreateOrEditGoalDialogState();
+  State<CreateOrEditGoalView> createState() => _CreateOrEditGoalViewState();
 }
 
-class _CreateOrEditGoalDialogState extends State<_CreateOrEditGoalDialog> {
+class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   late final TextEditingController _titleController;
   late int _targetHours;
   late GoalTimeframe _timeframe;
@@ -432,6 +463,7 @@ class _CreateOrEditGoalDialogState extends State<_CreateOrEditGoalDialog> {
   }
 
   void _save() {
+    AppSound.click();
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
@@ -450,124 +482,244 @@ class _CreateOrEditGoalDialogState extends State<_CreateOrEditGoalDialog> {
     );
 
     widget.onSave(saved);
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        widget.goal == null
-            ? 'New Target Goal'.localized(context)
-            : 'Edit Target Goal'.localized(context),
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _titleController,
-              autofocus: widget.goal == null,
-              decoration: InputDecoration(
-                labelText: 'Goal Title'.localized(context),
-                hintText: 'e.g. Deep Work, Reading, Fitness',
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _titleController,
+            autofocus: widget.goal == null,
+            style: TextStyle(color: widget.p.text),
+            decoration: InputDecoration(
+              labelText: 'Goal Title'.localized(context),
+              hintText: 'e.g. Deep Work, Reading, Fitness',
+              hintStyle: TextStyle(color: widget.p.text3),
+              filled: true,
+              fillColor: widget.p.surface3,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: widget.p.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: widget.p.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: widget.p.accent),
               ),
             ),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
 
-            // Target Hours
-            Text(
-              'Target Hours: $_targetHours hrs'.localized(context),
-              style: TextStyle(
-                color: widget.p.text,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
-                final selected = _targetHours == hrs;
-                return ChoiceChip(
-                  label: Text('${hrs}h'),
-                  selected: selected,
-                  onSelected: (val) {
-                    if (val) setState(() => _targetHours = hrs);
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-
-            // Timeframe Segmented Control
-            Text(
-              'Timeframe'.localized(context),
-              style: TextStyle(
-                color: widget.p.text,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              children: GoalTimeframe.values.map((tf) {
-                final selected = _timeframe == tf;
-                return ChoiceChip(
-                  label: Text(tf.label.localized(context)),
-                  selected: selected,
-                  onSelected: (val) {
-                    if (val) setState(() => _timeframe = tf);
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-
-            // Category Filter
-            Text(
-              'Category Scope'.localized(context),
-              style: TextStyle(
-                color: widget.p.text,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              children: [
-                ChoiceChip(
-                  label: Text('All Categories'.localized(context)),
-                  selected: _category == null,
-                  onSelected: (val) {
-                    if (val) setState(() => _category = null);
-                  },
+          // Target Hours Stepper & Chips
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Target: $_targetHours hrs'.localized(context),
+                style: TextStyle(
+                  color: widget.p.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                 ),
-                ..._availableCategories.map((cat) {
-                  final selected = _category == cat;
-                  return ChoiceChip(
-                    label: Text(cat),
-                    selected: selected,
-                    onSelected: (val) {
-                      setState(() => _category = val ? cat : null);
+              ),
+              Row(
+                children: [
+                  PressableScale(
+                    onTap: () {
+                      AppSound.click();
+                      if (_targetHours > 1) {
+                        setState(() => _targetHours--);
+                      }
                     },
-                  );
-                }),
-              ],
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: widget.p.surface3,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        CupertinoIcons.minus,
+                        size: 14,
+                        color: widget.p.text,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PressableScale(
+                    onTap: () {
+                      AppSound.click();
+                      setState(() => _targetHours++);
+                    },
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: widget.p.surface3,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        CupertinoIcons.plus,
+                        size: 14,
+                        color: widget.p.text,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
+              final selected = _targetHours == hrs;
+              return ChoiceChip(
+                label: Text('${hrs}h'),
+                selected: selected,
+                onSelected: (val) {
+                  if (val) {
+                    AppSound.click();
+                    setState(() => _targetHours = hrs);
+                  }
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          // Timeframe Segmented Control
+          Text(
+            'Timeframe'.localized(context),
+            style: TextStyle(
+              color: widget.p.text,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: GoalTimeframe.values.map((tf) {
+              final selected = _timeframe == tf;
+              return ChoiceChip(
+                label: Text(tf.label.localized(context)),
+                selected: selected,
+                onSelected: (val) {
+                  if (val) {
+                    AppSound.click();
+                    setState(() => _timeframe = tf);
+                  }
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          // Category Scope
+          Text(
+            'Category Scope'.localized(context),
+            style: TextStyle(
+              color: widget.p.text,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              ChoiceChip(
+                label: Text('All Categories'.localized(context)),
+                selected: _category == null,
+                onSelected: (val) {
+                  AppSound.click();
+                  if (val) setState(() => _category = null);
+                },
+              ),
+              ..._availableCategories.map((cat) {
+                final selected = _category == cat;
+                return ChoiceChip(
+                  label: Text(cat),
+                  selected: selected,
+                  onSelected: (val) {
+                    AppSound.click();
+                    setState(() => _category = val ? cat : null);
+                  },
+                );
+              }),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: PressableScale(
+                  onTap: () {
+                    AppSound.click();
+                    widget.onCancel?.call();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: widget.p.border.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Cancel'.localized(context),
+                      style: TextStyle(
+                        color: widget.p.text2,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: PressableScale(
+                  onTap: _save,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: widget.p.accent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Save Goal'.localized(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'.localized(context)),
-        ),
-        FilledButton(onPressed: _save, child: Text('Save'.localized(context))),
-      ],
     );
   }
 }

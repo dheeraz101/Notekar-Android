@@ -1,19 +1,23 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/calendar_dialog.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
+import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
@@ -23,8 +27,6 @@ import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/timeline_single_tile.dart';
-import 'package:notekar/dialogs/manual_entry_dialog.dart';
-import 'package:notekar/utils/category_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryDialog extends StatefulWidget {
@@ -118,6 +120,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
   bool _showGapCards = false;
   bool _rainbowCards = false;
   TimelineDaySection? _activeInsightsSection;
+  String? _inSheetView; // null, 'manual', 'goals', 'create_goal'
+  Goal? _editingGoal;
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -382,30 +386,52 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final hasOlderRows = _hasOlderRows;
 
     return PopScope(
-      canPop: _activeInsightsSection == null,
+      canPop: _activeInsightsSection == null && _inSheetView == null,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _activeInsightsSection != null) {
-          setState(() => _activeInsightsSection = null);
+        if (!didPop) {
+          if (_inSheetView == 'create_goal') {
+            setState(() => _inSheetView = 'goals');
+          } else if (_inSheetView != null) {
+            setState(() => _inSheetView = null);
+          } else if (_activeInsightsSection != null) {
+            setState(() => _activeInsightsSection = null);
+          }
         }
       },
       child: AppSheet(
         p: widget.p,
-        title: _activeInsightsSection != null
+        title: _inSheetView == 'manual'
+            ? 'Manual Entry'.localized(context)
+            : _inSheetView == 'goals'
+            ? 'Targets & Goals'.localized(context)
+            : _inSheetView == 'create_goal'
+            ? (_editingGoal == null ? 'New Target Goal' : 'Edit Target Goal')
+                  .localized(context)
+            : _activeInsightsSection != null
             ? _activeInsightsSection!.displayTitle
             : 'History'.localized(context),
         docked: true,
         blur: widget.blur,
         largeText: widget.largeText,
         controller: _scrollController,
-        showLargeTitle: true,
+        showLargeTitle:
+            _inSheetView == null &&
+            _activeInsightsSection == null &&
+            _viewMode == 'list',
         removeBottomPadding: true,
-        leadingAction: _activeInsightsSection != null
+        leadingAction: (_inSheetView != null || _activeInsightsSection != null)
             ? Tooltip(
-                message: 'Back to History'.localized(context),
+                message: 'Back'.localized(context),
                 child: PressableScale(
                   onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _activeInsightsSection = null);
+                    AppSound.click();
+                    if (_inSheetView == 'create_goal') {
+                      setState(() => _inSheetView = 'goals');
+                    } else if (_inSheetView != null) {
+                      setState(() => _inSheetView = null);
+                    } else if (_activeInsightsSection != null) {
+                      setState(() => _activeInsightsSection = null);
+                    }
                   },
                   child: Container(
                     width: 36,
@@ -426,36 +452,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (widget.onClearAll != null && _entries.isNotEmpty) ...[
-                    PressableScale(
-                      onTap: () {
-                        AppHaptics.heavy();
-                        _confirmDeleteAll();
-                      },
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: widget.p.surface3,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          CupertinoIcons.trash,
-                          color: widget.p.text3,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  // View Mode Toggle: minimal single icon button (List <-> Timeline)
+                  // Timeline Theme Switch
                   Tooltip(
                     message: _viewMode == 'list'
                         ? 'Timeline view'
                         : 'List view',
                     child: PressableScale(
                       onTap: () {
-                        NotekarHaptics.selection('standard');
+                        AppSound.click();
                         final nextMode = _viewMode == 'list'
                             ? 'calendar'
                             : 'list';
@@ -476,14 +480,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         ),
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 200),
-                          transitionBuilder: (child, animation) =>
-                              ScaleTransition(
-                                scale: animation,
-                                child: FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                ),
-                              ),
                           child: Icon(
                             _viewMode == 'list'
                                 ? CupertinoIcons.calendar
@@ -496,73 +492,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       ),
                     ),
                   ),
-                  if (widget.onOpenManualEntry != null) ...[
-                    const SizedBox(width: 8),
-                    Tooltip(
-                      message: 'Manual Entry'.localized(context),
-                      child: PressableScale(
-                        onTap: () {
-                          NotekarHaptics.selection('standard');
-                          _handleOpenManualEntry();
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: widget.p.surface3,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            CupertinoIcons.add,
-                            color: widget.p.accent,
-                            size: 19,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-        trailingAction: _activeInsightsSection != null
-            ? null
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Tooltip(
-                    message: 'Targets & Goals'.localized(context),
-                    child: PressableScale(
-                      onTap: () {
-                        NotekarHaptics.selection('standard');
-                        GoalsSheet.show(
-                          context,
-                          p: widget.p,
-                          moments: _entries,
-                        );
-                      },
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: widget.p.surface3,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          CupertinoIcons.flag,
-                          color: widget.p.text3,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
                   if (widget.onOpenSearchNotes != null) ...[
                     const SizedBox(width: 8),
                     Tooltip(
                       message: 'Search Notes'.localized(context),
                       child: PressableScale(
                         onTap: () {
-                          NotekarHaptics.selection('standard');
+                          AppSound.click();
                           widget.onOpenSearchNotes!();
                         },
                         child: Container(
@@ -575,7 +511,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           ),
                           child: Icon(
                             CupertinoIcons.search,
-                            color: widget.p.text3,
+                            color: widget.p.text,
                             size: 18,
                           ),
                         ),
@@ -584,10 +520,113 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   ],
                 ],
               ),
+        trailingAction: _inSheetView == 'goals'
+            ? Tooltip(
+                message: 'New Goal'.localized(context),
+                child: PressableScale(
+                  onTap: () {
+                    AppSound.click();
+                    setState(() {
+                      _editingGoal = null;
+                      _inSheetView = 'create_goal';
+                    });
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.accent.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.add,
+                      color: widget.p.accent,
+                      size: 19,
+                    ),
+                  ),
+                ),
+              )
+            : (_inSheetView != null || _activeInsightsSection != null)
+            ? null
+            : Tooltip(
+                message: 'More Options'.localized(context),
+                child: PressableScale(
+                  onTap: () {
+                    AppSound.click();
+                    _showThreeDotsMenu();
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.ellipsis_circle,
+                      color: widget.p.text,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
         child: SizedBox(
           width: 410,
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
-          child: _activeInsightsSection != null
+          child: _inSheetView == 'manual'
+              ? FutureBuilder<List<String>>(
+                  future: CategoryService().getCategories(),
+                  builder: (context, catSnapshot) {
+                    final cats = catSnapshot.data ?? const ['General'];
+                    return ManualEntryContent(
+                      p: widget.p,
+                      categories: cats,
+                      initialCategory: 'All',
+                      onSubmit: _handleManualEntrySubmit,
+                      onCancel: () {
+                        setState(() => _inSheetView = null);
+                      },
+                    );
+                  },
+                )
+              : _inSheetView == 'goals'
+              ? GoalsContentView(
+                  p: widget.p,
+                  moments: _entries,
+                  onAddGoal: () {
+                    setState(() {
+                      _editingGoal = null;
+                      _inSheetView = 'create_goal';
+                    });
+                  },
+                  onEditGoal: (g) {
+                    setState(() {
+                      _editingGoal = g;
+                      _inSheetView = 'create_goal';
+                    });
+                  },
+                )
+              : _inSheetView == 'create_goal'
+              ? CreateOrEditGoalView(
+                  p: widget.p,
+                  goal: _editingGoal,
+                  onSave: (saved) async {
+                    await GoalsService.instance.saveGoal(saved);
+                    setState(() {
+                      _editingGoal = null;
+                      _inSheetView = 'goals';
+                    });
+                  },
+                  onCancel: () {
+                    setState(() {
+                      _editingGoal = null;
+                      _inSheetView = 'goals';
+                    });
+                  },
+                )
+              : _activeInsightsSection != null
               ? DayDetailContent(
                   p: widget.p,
                   section: _activeInsightsSection!,
@@ -1033,30 +1072,32 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                             width: 8,
                                                           ),
                                                           Container(
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  horizontal: 6,
-                                                                  vertical: 2,
+                                                            width: 20,
+                                                            height: 20,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                                  color: widget
+                                                                      .p
+                                                                      .surface3
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.5,
+                                                                      ),
+                                                                  shape: BoxShape
+                                                                      .circle,
                                                                 ),
-                                                            decoration: BoxDecoration(
-                                                              color: widget
-                                                                  .p
-                                                                  .surface3
-                                                                  .withValues(
-                                                                    alpha: 0.5,
-                                                                  ),
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    999,
-                                                                  ),
-                                                            ),
                                                             child: Text(
                                                               '${sec.totalLogs}',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
                                                               style: TextStyle(
                                                                 color: widget
                                                                     .p
                                                                     .text2,
-                                                                fontSize: 11,
+                                                                fontSize: 10,
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w700,
@@ -1075,6 +1116,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                             .inMinutes >
                                                         0)
                                                       Container(
+                                                        margin:
+                                                            const EdgeInsets.only(
+                                                              left: 8,
+                                                            ),
                                                         padding:
                                                             const EdgeInsets.symmetric(
                                                               horizontal: 8,
@@ -1536,31 +1581,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
     DateTime? prefilledStartTime,
     DateTime? prefilledEndTime,
   }) async {
-    final categories = await CategoryService().getCategories();
-    final activeCat = await CategoryService().getActiveCategory();
-    if (!mounted) return;
+    AppSound.click();
+    setState(() => _inSheetView = 'manual');
+  }
 
-    final result = await showModalBottomSheet<ManualEntryResult>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      enableDrag: true,
-      isScrollControlled: true,
-      useSafeArea: true,
-      sheetAnimationStyle: const AnimationStyle(
-        duration: Duration(milliseconds: 180),
-        reverseDuration: Duration(milliseconds: 170),
-      ),
-      builder: (ctx) => ManualEntryDialog(
-        p: widget.p,
-        categories: categories,
-        initialCategory: activeCat,
-        prefilledStartTime: prefilledStartTime,
-        prefilledEndTime: prefilledEndTime,
-      ),
-    );
-
-    if (result == null || !mounted) return;
+  Future<void> _handleManualEntrySubmit(ManualEntryResult result) async {
+    setState(() => _inSheetView = null);
 
     final List<Moment> addedMoments = [];
     final maxId = _entries.isEmpty
@@ -1646,6 +1672,226 @@ class _HistoryDialogState extends State<HistoryDialog> {
           _showNotice('Manual entry reverted'.localized(context));
         }
       },
+    );
+  }
+
+  void _showThreeDotsMenu() {
+    AppSound.click();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(
+          'Timeline Options'.localized(context),
+          style: TextStyle(
+            color: widget.p.text,
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          ),
+        ),
+        actions: [
+          if (widget.onOpenManualEntry != null)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                AppSound.click();
+                setState(() => _inSheetView = 'manual');
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.plus_circle,
+                    size: 20,
+                    color: widget.p.accent,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Add Manual Moment'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.accent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              AppSound.click();
+              setState(() => _inSheetView = 'goals');
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.flag, size: 20, color: widget.p.text),
+                const SizedBox(width: 10),
+                Text(
+                  'Targets & Goals'.localized(context),
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              AppSound.click();
+              _openFilterSheet();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.slider_horizontal_3,
+                  size: 20,
+                  color: widget.p.text,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Filter Timeline'.localized(context),
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (widget.onClearAll != null && _entries.isNotEmpty)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(ctx);
+                AppSound.click();
+                _confirmDeleteAll();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    CupertinoIcons.trash,
+                    size: 20,
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Delete All Moments'.localized(context),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(
+            'Cancel'.localized(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openFilterSheet() {
+    AppSound.click();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(
+          'Filter Timeline'.localized(context),
+          style: TextStyle(
+            color: widget.p.text,
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          ),
+        ),
+        message: Text(
+          'Select moments to display'.localized(context),
+          style: TextStyle(color: widget.p.text3, fontSize: 12),
+        ),
+        actions: [
+          for (final f in [
+            'all',
+            'today',
+            'week',
+            'sessions',
+            'single',
+            'notes',
+            'date',
+          ])
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                AppSound.click();
+                if (f == 'date') {
+                  _openDateFilter();
+                } else {
+                  setState(() {
+                    _filter = f;
+                    _selectedDateKey = null;
+                    _visibleCount = _pageSize;
+                    _rebuildMemoizedLists();
+                  });
+                  if (_scrollController.hasClients) {
+                    _scrollController.jumpTo(0.0);
+                  }
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_filter == f) ...[
+                    Icon(
+                      CupertinoIcons.check_mark,
+                      size: 16,
+                      color: widget.p.accent,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    switch (f) {
+                      'all' => 'All Moments'.localized(context),
+                      'today' => 'Today'.localized(context),
+                      'week' => 'This Week'.localized(context),
+                      'sessions' => 'Sessions (In/Out)'.localized(context),
+                      'single' => 'Single Logs'.localized(context),
+                      'notes' => 'With Notes'.localized(context),
+                      'date' => 'Pick Specific Date...'.localized(context),
+                      _ => f,
+                    },
+                    style: TextStyle(
+                      color: _filter == f ? widget.p.accent : widget.p.text,
+                      fontWeight: _filter == f
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(
+            'Cancel'.localized(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
     );
   }
 

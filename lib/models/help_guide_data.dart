@@ -63,9 +63,98 @@ const List<HelpGuideItem> allGuideItems = [
   HelpGuideItem(
     icon: Icons.note_add_rounded,
     title: 'Add a Note',
-    content: 'Touch and hold the home screen to write a note before saving.',
+    content:
+        'Touch and hold the home screen, tap the + Note button on the bottom capsule, or enable "Note on Click" in Settings > Capture to write a note before saving.',
     isFaq: false,
-    keywords: ['note', 'long press', 'touch and hold', 'write'],
+    keywords: [
+      'note',
+      'long press',
+      'touch and hold',
+      'write',
+      'capsule',
+      'note on click',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.track_changes_rounded,
+    title: 'Goals & Intentional Targets',
+    content:
+        'Set intentional hourly targets (e.g. 20 hours per week or month) scoped to specific categories or all modes. Track progress bars, completion rings, and deficit countdowns ("X hours to go") directly from History or Settings.',
+    isFaq: false,
+    keywords: [
+      'goal',
+      'goals',
+      'target',
+      'targets',
+      'quota',
+      'hours',
+      'deficit',
+      'progress',
+      'weekly goal',
+      'monthly goal',
+      'timeframe',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.compare_arrows_rounded,
+    title: 'Compare Time Between Moments',
+    content:
+        'Select any two moments in the History Calendar or Search Notes to inspect the exact elapsed time between them with an Apple HIG breakdown and category badges.',
+    isFaq: false,
+    keywords: [
+      'time difference',
+      'compare',
+      'delta',
+      'duration',
+      'elapsed',
+      'between moments',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.palette_outlined,
+    title: 'Rainbow Cards (Category Chromatics)',
+    content:
+        'Enable Rainbow Cards in Settings > Logging to apply a subtle, elegant tint of each moment\'s category color to timeline cards, calendar entries, and search results while preserving WCAG AAA contrast.',
+    isFaq: false,
+    keywords: [
+      'rainbow',
+      'rainbow cards',
+      'chromatics',
+      'tint',
+      'colors',
+      'category color',
+      'palette',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.volume_up_rounded,
+    title: 'Sound Effects (Acoustic Feedback)',
+    content:
+        'Experience crisp, instant audio feedback on taps, session start/end, and swipe actions. Toggle this feature on or off under Settings > Accessibility.',
+    isFaq: false,
+    keywords: [
+      'sound',
+      'sound effects',
+      'acoustic',
+      'click',
+      'audio',
+      'feedback',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.tune_rounded,
+    title: 'Timeline & Search Filters',
+    content:
+        'Tap the filter icon in Search Notes or the History Calendar to open the unified Apple HIG filter modal. Filter by mode (Single/Two-Way), colored category dots, or hashtags with Reset and Apply actions.',
+    isFaq: false,
+    keywords: [
+      'filter',
+      'timeline filter',
+      'search filter',
+      'tags',
+      'categories',
+      'mode filter',
+    ],
   ),
   HelpGuideItem(
     icon: Icons.category_rounded,

@@ -679,9 +679,9 @@ void main() {
 
         expect(find.byType(NoteDialog), findsOneWidget);
 
-        // Enter note text and tap Add Note
+        // Enter note text and tap WhatsApp-style send button
         await tester.enterText(find.byType(TextField), 'Deep focus session');
-        await tester.tap(find.byType(FilledButton));
+        await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 200));
         await tester.pump(const Duration(milliseconds: 300));
