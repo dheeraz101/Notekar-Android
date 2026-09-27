@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
@@ -13,23 +14,32 @@ import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Flagship Apple HIG Goals & Targets Sheet.
 /// Allows setting intentional target allocations across week, month, year, or all-time,
-/// tracking invested duration vs remaining deficit ("X hours to go").
+/// tracking invested duration vs remaining deficit ("X hours to go"),
+/// with daily pacing breakdown and 1-tap direct session start.
 class GoalsSheet extends StatelessWidget {
-  const GoalsSheet({super.key, required this.p, required this.moments});
+  const GoalsSheet({
+    super.key,
+    required this.p,
+    required this.moments,
+    this.onStartSession,
+  });
 
   final Palette p;
   final List<Moment> moments;
+  final ValueChanged<Goal>? onStartSession;
 
-  static Future<void> show(
+  static Future<dynamic> show(
     BuildContext context, {
     required Palette p,
     required List<Moment> moments,
+    ValueChanged<Goal>? onStartSession,
   }) {
-    return showModalBottomSheet<void>(
+    return showModalBottomSheet<dynamic>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => GoalsSheet(p: p, moments: moments),
+      builder: (_) =>
+          GoalsSheet(p: p, moments: moments, onStartSession: onStartSession),
     );
   }
 
@@ -40,8 +50,12 @@ class GoalsSheet extends StatelessWidget {
       title: 'Targets & Goals'.localized(context),
       child: SizedBox(
         width: 420,
-        height: 520,
-        child: GoalsContentView(p: p, moments: moments),
+        height: 540,
+        child: GoalsContentView(
+          p: p,
+          moments: moments,
+          onStartSession: onStartSession,
+        ),
       ),
     );
   }
@@ -54,6 +68,7 @@ class GoalsContentView extends StatefulWidget {
     required this.moments,
     this.onAddGoal,
     this.onEditGoal,
+    this.onStartSession,
     this.shrinkWrap = false,
     this.physics,
   });
@@ -62,6 +77,7 @@ class GoalsContentView extends StatefulWidget {
   final List<Moment> moments;
   final VoidCallback? onAddGoal;
   final ValueChanged<Goal>? onEditGoal;
+  final ValueChanged<Goal>? onStartSession;
   final bool shrinkWrap;
   final ScrollPhysics? physics;
 
@@ -123,6 +139,7 @@ class GoalsContentViewState extends State<GoalsContentView> {
   }
 
   void _confirmDeleteGoal(Goal goal) {
+    HapticFeedback.lightImpact();
     showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
@@ -167,29 +184,43 @@ class GoalsContentViewState extends State<GoalsContentView> {
       itemBuilder: (ctx, idx) {
         if (idx == _goals.length) {
           return Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 16),
+            padding: const EdgeInsets.only(top: 6, bottom: 20),
             child: Center(
-              child: OutlinedButton.icon(
-                onPressed: () => _openCreateOrEditGoalDialog(),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: widget.p.accent,
-                  side: BorderSide(
-                    color: widget.p.accent.withValues(alpha: 0.4),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              child: PressableScale(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _openCreateOrEditGoalDialog();
+                },
+                child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
+                    horizontal: 18,
                     vertical: 10,
                   ),
-                ),
-                icon: const Icon(CupertinoIcons.add, size: 15),
-                label: Text(
-                  'Add New Target'.localized(context),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                  decoration: BoxDecoration(
+                    color: widget.p.surface3,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: widget.p.border.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.add,
+                        size: 15,
+                        color: widget.p.accent,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Add New Target'.localized(context),
+                        style: TextStyle(
+                          color: widget.p.accent,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -236,10 +267,33 @@ class GoalsContentViewState extends State<GoalsContentView> {
             ),
           ),
           const SizedBox(height: 18),
-          FilledButton.tonalIcon(
-            onPressed: () => _openCreateOrEditGoalDialog(),
-            icon: const Icon(CupertinoIcons.add, size: 16),
-            label: Text('Create First Goal'.localized(context)),
+          PressableScale(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _openCreateOrEditGoalDialog();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              decoration: BoxDecoration(
+                color: widget.p.accent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(CupertinoIcons.add, size: 16, color: Colors.white),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Create First Goal'.localized(context),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -256,28 +310,29 @@ class GoalsContentViewState extends State<GoalsContentView> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: widget.p.surface2,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: progress.isCompleted
-                ? widget.p.green.withValues(alpha: 0.5)
-                : widget.p.border.withValues(alpha: 0.6),
+                ? widget.p.green.withValues(alpha: 0.45)
+                : widget.p.border.withValues(alpha: 0.5),
             width: progress.isCompleted ? 1.4 : 1.0,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row: Tags & Actions
+            // Header Row: Apple Tags & Context Actions
             Row(
               children: [
+                // Category Tag
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 3,
+                    vertical: 3.5,
                   ),
                   decoration: BoxDecoration(
-                    color: accentCol.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
+                    color: accentCol.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -303,14 +358,15 @@ class GoalsContentViewState extends State<GoalsContentView> {
                   ),
                 ),
                 const SizedBox(width: 6),
+                // Timeframe Tag
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 7,
-                    vertical: 3,
+                    vertical: 3.5,
                   ),
                   decoration: BoxDecoration(
                     color: widget.p.surface3,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     goal.timeframe.label.localized(context),
@@ -322,34 +378,61 @@ class GoalsContentViewState extends State<GoalsContentView> {
                   ),
                 ),
                 const Spacer(),
-                GestureDetector(
+                // Apple HIG Edit Button
+                PressableScale(
                   onTap: () => _openCreateOrEditGoalDialog(goal),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      CupertinoIcons.pencil,
-                      size: 16,
-                      color: widget.p.text3,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.slider_horizontal_3,
+                          size: 13,
+                          color: widget.p.text2,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Edit'.localized(context),
+                          style: TextStyle(
+                            color: widget.p.text2,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 6),
-                GestureDetector(
+                // Apple HIG Delete Button
+                PressableScale(
                   onTap: () => _confirmDeleteGoal(goal),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Icon(
                       CupertinoIcons.trash,
-                      size: 16,
+                      size: 13,
                       color: widget.p.red.withValues(alpha: 0.8),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // Title & Percentage
+            // Title & Percentage Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -358,62 +441,95 @@ class GoalsContentViewState extends State<GoalsContentView> {
                     goal.title,
                     style: TextStyle(
                       color: widget.p.text,
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
                     ),
                   ),
                 ),
-                Text(
-                  '${(progress.ratio * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    color: progress.isCompleted
-                        ? widget.p.green
-                        : widget.p.text,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (progress.isCompleted ? widget.p.green : accentCol)
+                        .withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${(progress.ratio * 100).toInt()}%',
+                    style: TextStyle(
+                      color: progress.isCompleted ? widget.p.green : accentCol,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
 
-            // Progress Bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: progress.ratio,
-                minHeight: 7,
-                backgroundColor: widget.p.surface3,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  progress.isCompleted ? widget.p.green : accentCol,
+            // Apple Continuous Gauge Track
+            Stack(
+              children: [
+                Container(
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: widget.p.surface3,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
-              ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Container(
+                      height: 7,
+                      width: constraints.maxWidth * progress.ratio,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: progress.isCompleted
+                              ? [widget.p.green, widget.p.green]
+                              : [accentCol, accentCol.withValues(alpha: 0.85)],
+                        ),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Metrics row: Tracked vs Deficit
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${progress.trackedFormatted} / ${progress.targetFormatted}',
-                  style: TextStyle(
-                    color: widget.p.text2,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(CupertinoIcons.clock, size: 12, color: widget.p.text3),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${progress.trackedFormatted} of ${progress.targetFormatted}',
+                      style: TextStyle(
+                        color: widget.p.text2,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2.5,
+                    horizontal: 7,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: progress.isCompleted
-                        ? widget.p.green.withValues(alpha: 0.15)
-                        : widget.p.orange.withValues(alpha: 0.15),
+                        ? widget.p.green.withValues(alpha: 0.14)
+                        : widget.p.orange.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -434,6 +550,89 @@ class GoalsContentViewState extends State<GoalsContentView> {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+
+            // Daily Pacing Breakdown Pill
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: widget.p.surface3.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    progress.isCompleted
+                        ? CupertinoIcons.checkmark_seal_fill
+                        : CupertinoIcons.flame_fill,
+                    size: 13,
+                    color: progress.isCompleted
+                        ? widget.p.green
+                        : widget.p.orange,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      progress.pacingDescription.localized(context),
+                      style: TextStyle(
+                        color: widget.p.text,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 1-Tap [Start Session] Action Button
+            PressableScale(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                if (widget.onStartSession != null) {
+                  widget.onStartSession!(goal);
+                } else {
+                  Navigator.of(context).pop({
+                    'action': 'start_goal_session',
+                    'category': goal.category,
+                    'mode': goal.mode,
+                  });
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                decoration: BoxDecoration(
+                  color: accentCol.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accentCol.withValues(alpha: 0.3)),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.play_arrow_solid,
+                      size: 12,
+                      color: accentCol,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Start ${goal.category ?? 'Session'}'.localized(context),
+                      style: TextStyle(
+                        color: accentCol,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -441,6 +640,7 @@ class GoalsContentViewState extends State<GoalsContentView> {
   }
 }
 
+/// Apple HIG Grouped Inset Form for Creating or Editing Goals.
 class CreateOrEditGoalView extends StatefulWidget {
   const CreateOrEditGoalView({
     super.key,
@@ -464,7 +664,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   late int _targetHours;
   late GoalTimeframe _timeframe;
   String? _category;
-  String? _mode;
+  String _mode = 'all';
 
   List<String> _availableCategories = [];
 
@@ -475,7 +675,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     _targetHours = (widget.goal?.targetMinutes ?? 1200) ~/ 60;
     _timeframe = widget.goal?.timeframe ?? GoalTimeframe.week;
     _category = widget.goal?.category;
-    _mode = widget.goal?.mode;
+    _mode = widget.goal?.mode ?? 'all';
 
     _loadCategories();
   }
@@ -505,7 +705,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       id: id,
       title: title,
       category: _category,
-      mode: _mode,
+      mode: _mode == 'all' ? null : _mode,
       targetMinutes: math.max(1, _targetHours) * 60,
       timeframe: _timeframe,
       createdAt:
@@ -513,6 +713,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       isArchived: widget.goal?.isArchived ?? false,
     );
 
+    HapticFeedback.mediumImpact();
     widget.onSave(saved);
   }
 
@@ -524,177 +725,469 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _titleController,
-            autofocus: widget.goal == null,
-            style: TextStyle(color: widget.p.text),
-            decoration: InputDecoration(
-              labelText: 'Goal Title'.localized(context),
-              hintText: 'e.g. Deep Work, Reading, Fitness',
-              hintStyle: TextStyle(color: widget.p.text3),
-              filled: true,
-              fillColor: widget.p.surface3,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: widget.p.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: widget.p.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: widget.p.accent),
-              ),
+          // 1. Title Input (Apple HIG Inset Grouped)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: widget.p.surface3,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Goal Title'.localized(context).toUpperCase(),
+                  style: TextStyle(
+                    color: widget.p.text3,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                CupertinoTextField(
+                  controller: _titleController,
+                  autofocus: widget.goal == null,
+                  padding: EdgeInsets.zero,
+                  decoration: null,
+                  cursorColor: widget.p.accent,
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  placeholder: 'e.g. Deep Work, Fitness, Reading',
+                  placeholderStyle: TextStyle(
+                    color: widget.p.text3.withValues(alpha: 0.6),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
 
-          // Target Hours Stepper & Chips
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // 2. Target Hours Stepper & Apple Presets
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: widget.p.surface3,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: widget.p.border.withValues(alpha: 0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$_targetHours hrs'.localized(context),
+                          style: TextStyle(
+                            color: widget.p.text,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        Text(
+                          'Target Allocation'.localized(context),
+                          style: TextStyle(
+                            color: widget.p.text3,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Apple Stepper
+                    Container(
+                      decoration: BoxDecoration(
+                        color: widget.p.surface2,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: widget.p.border.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PressableScale(
+                            onTap: () {
+                              if (_targetHours > 1) {
+                                HapticFeedback.lightImpact();
+                                setState(() => _targetHours--);
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              child: Icon(
+                                CupertinoIcons.minus,
+                                size: 14,
+                                color: _targetHours > 1
+                                    ? widget.p.text
+                                    : widget.p.text3.withValues(alpha: 0.3),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 16,
+                            color: widget.p.border.withValues(alpha: 0.6),
+                          ),
+                          PressableScale(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              setState(() => _targetHours++);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              child: Icon(
+                                CupertinoIcons.plus,
+                                size: 14,
+                                color: widget.p.text,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Apple preset pills
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
+                      final selected = _targetHours == hrs;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: PressableScale(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _targetHours = hrs);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 140),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? widget.p.accent
+                                  : widget.p.surface2,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: selected
+                                    ? widget.p.accent
+                                    : widget.p.border.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Text(
+                              '${hrs}h',
+                              style: TextStyle(
+                                color: selected ? Colors.white : widget.p.text,
+                                fontSize: 12,
+                                fontWeight: selected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 3. Timeframe (Apple HIG Sliding Segmented Control)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Target: $_targetHours hrs'.localized(context),
+                'TIMEFRAME'.localized(context),
                 style: TextStyle(
-                  color: widget.p.text,
-                  fontSize: 14,
+                  color: widget.p.text3,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
                 ),
               ),
-              Row(
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.all(3),
+                child: CupertinoSlidingSegmentedControl<GoalTimeframe>(
+                  backgroundColor: Colors.transparent,
+                  thumbColor: widget.p.surface2,
+                  groupValue: _timeframe,
+                  children: {
+                    for (final tf in GoalTimeframe.values)
+                      tf: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        child: Text(
+                          tf.label.localized(context),
+                          style: TextStyle(
+                            color: _timeframe == tf
+                                ? widget.p.text
+                                : widget.p.text2,
+                            fontSize: 12,
+                            fontWeight: _timeframe == tf
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  },
+                  onValueChanged: (val) {
+                    if (val != null) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _timeframe = val);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 4. Category Scope (Apple HIG Pills)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'CATEGORY SCOPE'.localized(context),
+                style: TextStyle(
+                  color: widget.p.text3,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
                 children: [
                   PressableScale(
                     onTap: () {
-                      if (_targetHours > 1) {
-                        setState(() => _targetHours--);
-                      }
+                      HapticFeedback.selectionClick();
+                      setState(() => _category = null);
                     },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: widget.p.surface3,
-                        shape: BoxShape.circle,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 140),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
                       ),
-                      child: Icon(
-                        CupertinoIcons.minus,
-                        size: 14,
-                        color: widget.p.text,
+                      decoration: BoxDecoration(
+                        color: _category == null
+                            ? widget.p.accent
+                            : widget.p.surface3,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _category == null
+                              ? widget.p.accent
+                              : widget.p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.circle_grid_hex,
+                            size: 13,
+                            color: _category == null
+                                ? Colors.white
+                                : widget.p.text2,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'All Categories'.localized(context),
+                            style: TextStyle(
+                              color: _category == null
+                                  ? Colors.white
+                                  : widget.p.text,
+                              fontSize: 12,
+                              fontWeight: _category == null
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  PressableScale(
-                    onTap: () {
-                      setState(() => _targetHours++);
-                    },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: widget.p.surface3,
-                        shape: BoxShape.circle,
+                  ..._availableCategories.map((cat) {
+                    final isSelected = _category == cat;
+                    final meta = getCategoryMeta(cat, widget.p);
+                    return PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _category = isSelected ? null : cat);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 140),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected ? meta.color : widget.p.surface3,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected
+                                ? meta.color
+                                : widget.p.border.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              meta.icon,
+                              size: 12,
+                              color: isSelected ? Colors.white : meta.color,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              cat,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : widget.p.text,
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Icon(
-                        CupertinoIcons.plus,
-                        size: 14,
-                        color: widget.p.text,
-                      ),
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [2, 5, 10, 15, 20, 30, 40].map((hrs) {
-              final selected = _targetHours == hrs;
-              return ChoiceChip(
-                label: Text('${hrs}h'),
-                selected: selected,
-                onSelected: (val) {
-                  if (val) {
-                    setState(() => _targetHours = hrs);
-                  }
-                },
-              );
-            }).toList(),
-          ),
           const SizedBox(height: 16),
 
-          // Timeframe Segmented Control
-          Text(
-            'Timeframe'.localized(context),
-            style: TextStyle(
-              color: widget.p.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: GoalTimeframe.values.map((tf) {
-              final selected = _timeframe == tf;
-              return ChoiceChip(
-                label: Text(tf.label.localized(context)),
-                selected: selected,
-                onSelected: (val) {
-                  if (val) {
-                    setState(() => _timeframe = tf);
-                  }
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-
-          // Category Scope
-          Text(
-            'Category Scope'.localized(context),
-            style: TextStyle(
-              color: widget.p.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
+          // 5. Recording Mode (Apple HIG Sliding Segmented Control)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ChoiceChip(
-                label: Text('All Categories'.localized(context)),
-                selected: _category == null,
-                onSelected: (val) {
-                  if (val) setState(() => _category = null);
-                },
+              Text(
+                'RECORDING MODE'.localized(context),
+                style: TextStyle(
+                  color: widget.p.text3,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
               ),
-              ..._availableCategories.map((cat) {
-                final selected = _category == cat;
-                return ChoiceChip(
-                  label: Text(cat),
-                  selected: selected,
-                  onSelected: (val) {
-                    setState(() => _category = val ? cat : null);
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.all(3),
+                child: CupertinoSlidingSegmentedControl<String>(
+                  backgroundColor: Colors.transparent,
+                  thumbColor: widget.p.surface2,
+                  groupValue: _mode,
+                  children: {
+                    'all': Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 7),
+                      child: Text(
+                        'All Modes'.localized(context),
+                        style: TextStyle(
+                          color: _mode == 'all'
+                              ? widget.p.text
+                              : widget.p.text2,
+                          fontSize: 12,
+                          fontWeight: _mode == 'all'
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    'two-way': Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 7),
+                      child: Text(
+                        'Sessions'.localized(context),
+                        style: TextStyle(
+                          color: _mode == 'two-way'
+                              ? widget.p.text
+                              : widget.p.text2,
+                          fontSize: 12,
+                          fontWeight: _mode == 'two-way'
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    'single': Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 7),
+                      child: Text(
+                        'Moments'.localized(context),
+                        style: TextStyle(
+                          color: _mode == 'single'
+                              ? widget.p.text
+                              : widget.p.text2,
+                          fontSize: 12,
+                          fontWeight: _mode == 'single'
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   },
-                );
-              }),
+                  onValueChanged: (val) {
+                    if (val != null) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _mode = val);
+                    }
+                  },
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
 
-          // Action Buttons
+          // 6. Action Buttons
           Row(
             children: [
               Expanded(
                 child: PressableScale(
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     widget.onCancel?.call();
                   },
                   child: Container(

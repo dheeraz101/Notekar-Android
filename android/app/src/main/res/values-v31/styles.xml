@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31+) LaunchTheme using WindowSplashScreen API -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">@color/bg_dark</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_squircle</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/bg_dark</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@color/bg_dark</item>
+    </style>
+</resources>

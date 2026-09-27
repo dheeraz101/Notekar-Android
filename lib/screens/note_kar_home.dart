@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart'
@@ -61,6 +62,7 @@ import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
 import 'package:notekar/widgets/top_fade_blur.dart';
+import 'package:notekar/widgets/zen_doodle_splash.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -134,6 +136,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _countOnSave = false;
   String? _lastSingleCount;
   bool _startupComplete = false;
+  bool _splashDismissed = ZenDoodleSplash.hasShownThisSession;
   bool _hasTappedBefore = false;
   Map<String, dynamic>? _pendingTap;
   bool _enableNoteOnClick = false;
@@ -2517,6 +2520,28 @@ class _NoteKarHomeState extends State<NoteKarHome>
         prefilledStartTime: result['start'] as DateTime?,
         prefilledEndTime: result['end'] as DateTime?,
       );
+    } else if (result is Map &&
+        result['action'] == 'start_goal_session' &&
+        mounted) {
+      final targetCat = result['category'] as String?;
+      final targetMode = result['mode'] as String?;
+      if (targetCat != null) {
+        await _setActiveCategory(targetCat);
+      }
+      if (targetMode == 'single' || targetMode == 'two-way') {
+        _setMode(targetMode!);
+      }
+      if (_mode == 'two-way' && _inout != 'out') {
+        _handleTap(
+          TapUpDetails(
+            kind: PointerDeviceKind.touch,
+            globalPosition: Offset.zero,
+          ),
+        );
+        _showToast('Started ${targetCat ?? 'Goal'} session');
+      } else {
+        _showToast('Active mode set to ${targetCat ?? 'Goal'}');
+      }
     }
     if (mounted) setState(() {});
   }
@@ -4958,6 +4983,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
               onUnlockFailed: _handleUnlockFailed,
               enableTranslucency: _enableTranslucency,
               reduceMotion: _reduceMotion,
+            ),
+          if (!_splashDismissed)
+            Positioned.fill(
+              child: ZenDoodleSplash(
+                p: palette,
+                onComplete: () {
+                  if (mounted) {
+                    setState(() => _splashDismissed = true);
+                  }
+                },
+              ),
             ),
         ],
       ),

@@ -58,22 +58,6 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
 
   static const int _daysRange = 60; // 60 days lookback
 
-  List<String> _extractAvailableHashtags() {
-    final tags = <String>{};
-    final reg = RegExp(r'#(\w+)');
-    for (final m in widget.allEntries) {
-      if (m.note.isNotEmpty) {
-        for (final match in reg.allMatches(m.note)) {
-          final t = match.group(1);
-          if (t != null && t.isNotEmpty) {
-            tags.add(t);
-          }
-        }
-      }
-    }
-    return tags.toList()..sort();
-  }
-
   void _handleCardTap(Moment moment) {
     if (_selectedMoments.any((m) => m.id == moment.id)) {
       setState(() => _selectedMoments.removeWhere((m) => m.id == moment.id));
@@ -407,176 +391,108 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
           ),
         ),
 
-        // 2. Day Header Bar (Tap for Day Reflection Sheet) & Filter
+        // 2. Day Header Bar (Tap for Day Reflection Sheet)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: PressableScale(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    if (currentSection != null) {
-                      if (widget.onOpenInsights != null) {
-                        widget.onOpenInsights!(currentSection);
-                      } else {
-                        showModalBottomSheet<void>(
-                          context: context,
-                          backgroundColor: Colors.transparent,
-                          isScrollControlled: true,
-                          builder: (_) => DayDetailSheet(
-                            p: widget.p,
-                            section: currentSection,
-                            allEntries: widget.allEntries,
-                            onEditNote: widget.onEditNote,
-                            onOpenManualEntry: widget.onOpenManualEntry,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
+          child: PressableScale(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              if (currentSection != null) {
+                if (widget.onOpenInsights != null) {
+                  widget.onOpenInsights!(currentSection);
+                } else {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    isScrollControlled: true,
+                    builder: (_) => DayDetailSheet(
+                      p: widget.p,
+                      section: currentSection,
+                      allEntries: widget.allEntries,
+                      onEditNote: widget.onEditNote,
+                      onOpenManualEntry: widget.onOpenManualEntry,
                     ),
-                    decoration: BoxDecoration(
-                      color: widget.p.surface2,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: widget.p.border.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    child: Row(
+                  );
+                }
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: widget.p.surface2,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: widget.p.border.withValues(alpha: 0.6),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    CupertinoIcons.calendar,
+                    size: 18,
+                    color: widget.p.accent,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          CupertinoIcons.calendar,
-                          size: 18,
-                          color: widget.p.accent,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                currentSection?.displayTitle ??
-                                    _formatDayLabel(selectedDate),
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                currentSection != null
-                                    ? '${currentSection.totalLogs} logs • ${_formatDuration(currentSection.totalTrackedDuration)} tracked'
-                                    : 'No activity logged',
-                                style: TextStyle(
-                                  color: widget.p.text3,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                        Text(
+                          currentSection?.displayTitle ??
+                              _formatDayLabel(selectedDate),
+                          style: TextStyle(
+                            color: widget.p.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        if (currentSection != null) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.p.accent.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Insights',
-                                  style: TextStyle(
-                                    color: widget.p.accent,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(width: 3),
-                                Icon(
-                                  CupertinoIcons.chevron_right,
-                                  size: 12,
-                                  color: widget.p.accent,
-                                ),
-                              ],
-                            ),
+                        Text(
+                          currentSection != null
+                              ? '${currentSection.totalLogs} logs • ${_formatDuration(currentSection.totalTrackedDuration)} tracked'
+                              : 'No activity logged',
+                          style: TextStyle(
+                            color: widget.p.text3,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
+                        ),
                       ],
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              PressableScale(
-                onTap: () async {
-                  HapticFeedback.lightImpact();
-                  final categories = await CategoryService().getCategories();
-                  if (!context.mounted) return;
-                  final result = await TimelineFilterSheet.show(
-                    context,
-                    p: widget.p,
-                    initial: _filterCriteria,
-                    categories: categories,
-                    hashtags: _extractAvailableHashtags(),
-                  );
-                  if (result != null) {
-                    setState(() => _filterCriteria = result);
-                  }
-                },
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: _filterCriteria.isActive
-                        ? widget.p.accent.withValues(alpha: 0.16)
-                        : widget.p.surface2,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _filterCriteria.isActive
-                          ? widget.p.accent
-                          : widget.p.border.withValues(alpha: 0.6),
-                      width: _filterCriteria.isActive ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Icon(
-                        Icons.tune_rounded,
-                        size: 20,
-                        color: _filterCriteria.isActive
-                            ? widget.p.accent
-                            : widget.p.text,
+                  if (currentSection != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      if (_filterCriteria.isActive)
-                        Positioned(
-                          top: 9,
-                          right: 9,
-                          child: Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
+                      decoration: BoxDecoration(
+                        color: widget.p.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Insights',
+                            style: TextStyle(
                               color: widget.p.accent,
-                              shape: BoxShape.circle,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                ),
+                          const SizedBox(width: 3),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 12,
+                            color: widget.p.accent,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
+            ),
           ),
         ),
 

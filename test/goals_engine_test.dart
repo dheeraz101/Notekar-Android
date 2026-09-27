@@ -151,5 +151,71 @@ void main() {
       expect(progress.ratio, 1.0);
       expect(progress.isCompleted, isTrue);
     });
+
+    test(
+      'GoalTimeframe.none only evaluates moments from creation day onwards',
+      () {
+        final service = GoalsService.instance;
+        final now = DateTime.now();
+        final todayStart = DateTime(now.year, now.month, now.day);
+        final yesterday = todayStart.subtract(const Duration(days: 1));
+
+        final goal = Goal(
+          id: 'all_time_goal',
+          title: 'Future Mastery',
+          targetMinutes: 120, // 2h
+          timeframe: GoalTimeframe.none,
+          createdAt: todayStart.millisecondsSinceEpoch + 1000,
+        );
+
+        final moments = [
+          // Moment logged yesterday before goal was created (must NOT be counted)
+          Moment(
+            id: 1,
+            timestamp: yesterday.millisecondsSinceEpoch + 3600000,
+            type: 'single',
+            category: 'Work',
+            date: 'yesterday',
+          ),
+          // Moment logged today after creation day start (must be counted)
+          Moment(
+            id: 2,
+            timestamp: todayStart.millisecondsSinceEpoch + 7200000,
+            type: 'single',
+            category: 'Work',
+            date: 'today',
+          ),
+        ];
+
+        final progress = service.calculateProgress(goal, moments);
+        // Only the single moment from today (15m) should count
+        expect(progress.trackedMinutes, 15);
+        expect(progress.remainingMinutes, 105);
+        expect(progress.isCompleted, isFalse);
+      },
+    );
+
+    test('GoalProgress daily pacing calculations', () {
+      final goal = Goal(
+        id: 'pacing_goal',
+        title: 'Weekly Sprint',
+        targetMinutes: 700,
+        timeframe: GoalTimeframe.week,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      final progress = GoalProgress(
+        goal: goal,
+        trackedMinutes: 0,
+        sessionCount: 0,
+        singleCount: 0,
+      );
+
+      expect(progress.daysRemainingInTimeframe, greaterThan(0));
+      expect(progress.daysRemainingInTimeframe, lessThanOrEqualTo(7));
+      expect(progress.dailyPaceMinutes, greaterThan(0));
+      expect(progress.dailyPaceFormatted, isNotEmpty);
+      expect(progress.pacingDescription, contains('left this week'));
+    });
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Supported target evaluation timeframes for Apple HIG Goals Engine.
@@ -122,6 +124,54 @@ class GoalProgress {
   String get trackedFormatted => _formatMinutes(trackedMinutes);
   String get targetFormatted => _formatMinutes(targetMinutes);
   String get remainingFormatted => _formatMinutes(remainingMinutes);
+
+  /// Days remaining in the evaluation timeframe (inclusive of today).
+  int get daysRemainingInTimeframe {
+    final now = DateTime.now();
+    switch (goal.timeframe) {
+      case GoalTimeframe.week:
+        return math.max(1, 7 - now.weekday + 1);
+      case GoalTimeframe.month:
+        final lastDay = DateTime(now.year, now.month + 1, 0).day;
+        return math.max(1, lastDay - now.day + 1);
+      case GoalTimeframe.year:
+        final isLeap =
+            (now.year % 4 == 0 && now.year % 100 != 0) || (now.year % 400 == 0);
+        final totalDays = isLeap ? 366 : 365;
+        final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays + 1;
+        return math.max(1, totalDays - dayOfYear + 1);
+      case GoalTimeframe.none:
+        return 30; // standard 30-day pace horizon for open-ended targets
+    }
+  }
+
+  /// Minutes per day required to reach the target before the timeframe ends.
+  int get dailyPaceMinutes {
+    if (isCompleted || remainingMinutes <= 0) return 0;
+    final days = daysRemainingInTimeframe;
+    return (remainingMinutes / days).ceil();
+  }
+
+  /// Human formatted daily pacing required.
+  String get dailyPaceFormatted => _formatMinutes(dailyPaceMinutes);
+
+  /// Narrative pacing description.
+  String get pacingDescription {
+    if (isCompleted) {
+      return 'Target achieved! 🎉';
+    }
+    final days = daysRemainingInTimeframe;
+    switch (goal.timeframe) {
+      case GoalTimeframe.week:
+        return 'Need $dailyPaceFormatted/day ($days ${days == 1 ? 'day' : 'days'} left this week)';
+      case GoalTimeframe.month:
+        return 'Need $dailyPaceFormatted/day ($days ${days == 1 ? 'day' : 'days'} left this month)';
+      case GoalTimeframe.year:
+        return 'Need $dailyPaceFormatted/day ($days ${days == 1 ? 'day' : 'days'} left this year)';
+      case GoalTimeframe.none:
+        return 'Need $dailyPaceFormatted/day (at 30-day pace)';
+    }
+  }
 
   static String _formatMinutes(int totalMins) {
     if (totalMins <= 0) return '0m';

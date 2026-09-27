@@ -602,6 +602,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       _inSheetView = 'create_goal';
                     });
                   },
+                  onStartSession: (g) {
+                    Navigator.pop(context, {
+                      'action': 'start_goal_session',
+                      'category': g.category,
+                      'mode': g.mode,
+                    });
+                  },
                 )
               : _inSheetView == 'create_goal'
               ? CreateOrEditGoalView(

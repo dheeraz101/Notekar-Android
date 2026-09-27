@@ -516,41 +516,204 @@ class _PersonalizationSetupDialogState
                   const SizedBox(height: 12),
                   Builder(
                     builder: (context) {
-                      final double minVal = math.min(
-                        math.max(20.0, (ageYears?.ceil() ?? 20).toDouble()),
-                        99.0,
+                      final int minVal = math.min(
+                        math.max(20, ageYears?.ceil() ?? 20),
+                        99,
                       );
-                      const double maxVal = 100.0;
-                      final int divisions = math.max(
-                        1,
-                        (maxVal - minVal).round(),
-                      );
-                      final double sliderVal = _mementoMoriYears
-                          .toDouble()
-                          .clamp(minVal, maxVal);
+                      const int maxVal = 100;
+                      final milestones = [75, 80, 85, 90, 100];
 
-                      return SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: p.accent,
-                          inactiveTrackColor: p.surface3,
-                          thumbColor: p.accent,
-                          overlayColor: p.accent.withValues(alpha: 0.15),
-                          trackHeight: 4,
-                        ),
-                        child: Slider(
-                          value: sliderVal,
-                          min: minVal,
-                          max: maxVal,
-                          divisions: divisions,
-                          onChanged: (val) {
-                            setState(() {
-                              _mementoMoriYears = val.round().clamp(
-                                1,
-                                UserProfileService.maxMementoMoriYears,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Tactile Stepper & Value Display
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.surface3,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: p.border.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '$_mementoMoriYears ${'Years'.localized(context)}',
+                                      style: TextStyle(
+                                        color: p.text,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.4,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      'Target Lifespan Horizon'.localized(
+                                        context,
+                                      ),
+                                      style: TextStyle(
+                                        color: p.text3,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Spacer(),
+                                // Cupertino Stepper [-] [+]
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: p.surface2,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: p.border.withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      PressableScale(
+                                        onTap: _mementoMoriYears > minVal
+                                            ? () {
+                                                HapticFeedback.lightImpact();
+                                                setState(() {
+                                                  _mementoMoriYears = math.max(
+                                                    minVal,
+                                                    _mementoMoriYears - 1,
+                                                  );
+                                                });
+                                              }
+                                            : null,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
+                                          child: Icon(
+                                            CupertinoIcons.minus,
+                                            size: 15,
+                                            color: _mementoMoriYears > minVal
+                                                ? p.text
+                                                : p.text3.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 1,
+                                        height: 18,
+                                        color: p.border.withValues(alpha: 0.6),
+                                      ),
+                                      PressableScale(
+                                        onTap: _mementoMoriYears < maxVal
+                                            ? () {
+                                                HapticFeedback.lightImpact();
+                                                setState(() {
+                                                  _mementoMoriYears = math.min(
+                                                    maxVal,
+                                                    _mementoMoriYears + 1,
+                                                  );
+                                                });
+                                              }
+                                            : null,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
+                                          child: Icon(
+                                            CupertinoIcons.plus,
+                                            size: 15,
+                                            color: _mementoMoriYears < maxVal
+                                                ? p.text
+                                                : p.text3.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Landmark Milestone Pills
+                          Row(
+                            children: milestones.map((yr) {
+                              final isSelected = _mementoMoriYears == yr;
+                              final isApplicable = yr >= minVal;
+                              return Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2.5,
+                                  ),
+                                  child: PressableScale(
+                                    onTap: isApplicable
+                                        ? () {
+                                            HapticFeedback.selectionClick();
+                                            setState(
+                                              () => _mementoMoriYears = yr,
+                                            );
+                                          }
+                                        : null,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 150,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? p.accent
+                                            : isApplicable
+                                            ? p.surface3
+                                            : p.surface3.withValues(alpha: 0.4),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? p.accent
+                                              : p.border.withValues(alpha: 0.4),
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        '${yr}y',
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : isApplicable
+                                              ? p.text
+                                              : p.text3.withValues(alpha: 0.4),
+                                          fontSize: 12.5,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
+                                          fontFeatures: const [
+                                            FontFeature.tabularFigures(),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               );
-                            });
-                          },
-                        ),
+                            }).toList(),
+                          ),
+                        ],
                       );
                     },
                   ),

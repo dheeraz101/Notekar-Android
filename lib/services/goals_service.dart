@@ -84,7 +84,8 @@ class GoalsService {
         startWindow = DateTime(now.year, 1, 1);
         endWindow = DateTime(now.year + 1, 1, 1);
       case GoalTimeframe.none:
-        startWindow = DateTime.fromMillisecondsSinceEpoch(0);
+        final createdDt = DateTime.fromMillisecondsSinceEpoch(goal.createdAt);
+        startWindow = DateTime(createdDt.year, createdDt.month, createdDt.day);
         endWindow = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
     }
 
