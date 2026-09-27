@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -23,6 +22,7 @@ class LifeAuditPage extends StatefulWidget {
     required this.essentialsHours,
     required this.onSleepHoursChanged,
     required this.onEssentialsHoursChanged,
+    this.onOpenPersonalProfile,
     this.onLearnMoreBeta,
   });
 
@@ -32,6 +32,7 @@ class LifeAuditPage extends StatefulWidget {
   final double essentialsHours;
   final ValueChanged<double> onSleepHoursChanged;
   final ValueChanged<double> onEssentialsHoursChanged;
+  final VoidCallback? onOpenPersonalProfile;
   final VoidCallback? onLearnMoreBeta;
 
   @override
@@ -1221,7 +1222,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               if (!hasDob)
                 PressableScale(
                   onTap: () {
-                    PersonalizationSetupDialog.show(context, p: p);
+                    widget.onOpenPersonalProfile?.call();
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

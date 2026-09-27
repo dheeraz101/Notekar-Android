@@ -81,7 +81,7 @@ void main() {
           mode: 'two-way',
           targetMinutes: 120, // 2 hours
           timeframe: GoalTimeframe.none, // all-time
-          createdAt: nowMs - 1000000,
+          createdAt: nowMs - 86400000,
         );
 
         // Create a 1-hour session matching category 'Code'
@@ -124,7 +124,7 @@ void main() {
         category: 'Study',
         targetMinutes: 30,
         timeframe: GoalTimeframe.none,
-        createdAt: nowMs - 1000000,
+        createdAt: nowMs - 86400000,
       );
 
       // Create a 30-minute session matching 'Study'

@@ -10,7 +10,6 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
-import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
@@ -2571,6 +2570,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                               entries: entries,
                               sleepHours: _timeAuditSleepHours,
                               essentialsHours: _timeAuditEssentialsHours,
+                              onOpenPersonalProfile: () =>
+                                  _openCategory('Personal Profile'),
                               onSleepHoursChanged: (val) async {
                                 setState(() => _timeAuditSleepHours = val);
                                 await _prefs?.setDouble(

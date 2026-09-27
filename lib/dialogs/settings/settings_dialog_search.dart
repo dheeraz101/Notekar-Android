@@ -2487,11 +2487,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                               onTap: () {
                                 _saveRecentSearch(result.title);
                                 if (result.title == 'Personal Profile') {
-                                  PersonalizationSetupDialog.show(
-                                    context,
-                                    p: p,
-                                    onSaved: () => update(() {}),
-                                  );
+                                  _openCategory('Personal Profile');
                                   return;
                                 }
                                 if (result.title == 'App Version') {
@@ -2655,11 +2651,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                         onTap: () {
                           _saveRecentSearch(result.title);
                           if (result.title == 'Personal Profile') {
-                            PersonalizationSetupDialog.show(
-                              context,
-                              p: p,
-                              onSaved: () => update(() {}),
-                            );
+                            _openCategory('Personal Profile');
                             return;
                           }
                           if (result.title == 'App Version') {

@@ -22,13 +22,11 @@ import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
-import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/privacy_overlay.dart';
 import 'package:notekar/dialogs/recently_deleted_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings_dialog.dart';
 import 'package:notekar/dialogs/smart_trim_sheet.dart';
-import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
 import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
@@ -57,7 +55,6 @@ import 'package:notekar/widgets/clock_face.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/dynamic_header_capsule.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
-import 'package:notekar/widgets/home_clock_complication.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_minimal_toolbar_capsule.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
@@ -157,7 +154,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _sobrietyMilestoneTheme = 'science';
   bool _showHistoryText = true;
   bool _headerExpanded = false;
-  String _complicationStyle = 'intentionality';
   String _toolbarAppearance = 'standard';
   int _streakShields = 0;
   bool _showLastSavedHint = true;
@@ -653,8 +649,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _resetSingleDaily = prefs.getBool('m-reset-single-daily') ?? false;
       _countOnSave = prefs.getBool('m-count-on-save') ?? false;
       _showHistoryText = prefs.getBool('m-show-history-text') ?? true;
-      _complicationStyle =
-          prefs.getString('home_clock_complication') ?? 'intentionality';
       _toolbarAppearance = prefs.getString('toolbar_appearance') ?? 'standard';
       _showLastSavedHint = prefs.getBool('m-show-last-saved-hint') ?? true;
       _privacyLockDelayMinutes = prefs.getInt('m-privacy-lock-delay') ?? 0;
@@ -716,9 +710,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
         if (mounted) {
           await _showWelcomeIfNeeded(prefs);
         }
-      }
-      if (mounted) {
-        unawaited(_showPersonalizationSetupIfNeeded());
       }
 
       // Initialize MomentRepository and load database entries
@@ -949,16 +940,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (prefs == null) return;
     if (value is String) await prefs.setString(key, value);
     if (value is int) await prefs.setInt(key, value);
-  }
-
-  Future<void> _showPersonalizationSetupIfNeeded() async {
-    if (!mounted) return;
-    final profile = UserProfileService();
-    if (!profile.isOnboardingCompleted) {
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      if (!mounted) return;
-      await PersonalizationSetupDialog.show(context, p: p, isFirstTime: true);
-    }
   }
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
@@ -1378,31 +1359,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     } else {
       unawaited(_logEntry(position: details.globalPosition));
     }
-  }
-
-  void _cycleComplication() {
-    const styles = ['intentionality', 'streak', 'circadian', 'void'];
-    final idx = styles.indexOf(_complicationStyle);
-    final next = styles[(idx + 1) % styles.length];
-    setState(() => _complicationStyle = next);
-    _prefs?.setString('home_clock_complication', next);
-    final label = switch (next) {
-      'streak' => 'Streak Complication',
-      'circadian' => 'Circadian Complication',
-      'void' => 'Pure Void (Complication Hidden)',
-      _ => 'Intentionality Complication',
-    };
-    _showToast(label, withHaptic: false);
-  }
-
-  Future<void> _openSundayDispatch() async {
-    HapticFeedback.lightImpact();
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => SundayDispatchSheet(p: p, entries: _entries),
-    );
   }
 
   Widget _buildMinimalToolbarCapsule(Palette palette, double bottomInset) {
@@ -3632,32 +3588,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     ],
                   ),
                 ),
-              ),
-            ),
-          ),
-          // Apple Watch-Grade Complication beneath the clock
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom:
-                MediaQuery.paddingOf(context).bottom +
-                (_toolbarAppearance == 'hidden' ? 36 : 82),
-            child: Center(
-              child: HomeClockComplication(
-                p: palette,
-                style: _complicationStyle,
-                entries: _entries,
-                streak: StreakGuardianService.calculateStreak(
-                  _entries.map((e) => e.date).toSet(),
-                ),
-                isLiveSession:
-                    _mode == 'two-way' &&
-                    (_sessionStart != null || _inout == 'out'),
-                liveSessionColor: _activeCategory != 'All'
-                    ? getCategoryMeta(_activeCategory, palette).color
-                    : palette.accent,
-                onTap: _cycleComplication,
-                onLongPress: _openSundayDispatch,
               ),
             ),
           ),

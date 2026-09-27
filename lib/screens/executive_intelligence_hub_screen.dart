@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
+import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/dashboard_metrics_service.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/digital_wellbeing_card.dart';
 import 'package:notekar/widgets/executive_dashboard_widgets.dart';
@@ -167,6 +170,30 @@ class _ExecutiveIntelligenceHubScreenState
                             p: p,
                             entries: _moments,
                             timeframe: _selectedTimeframe,
+                            onConfigure: () {
+                              Navigator.of(context).push(
+                                CupertinoPageRoute<void>(
+                                  builder: (_) => Scaffold(
+                                    backgroundColor: p.bg,
+                                    appBar: CupertinoNavigationBar(
+                                      backgroundColor: p.surface.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      middle: Text(
+                                        'Personal Profile'.localized(context),
+                                        style: TextStyle(color: p.text),
+                                      ),
+                                    ),
+                                    body: SingleChildScrollView(
+                                      child: PersonalProfileSettingsPage(
+                                        p: p,
+                                        onSaved: () => setState(() {}),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -232,6 +259,33 @@ class _ExecutiveIntelligenceHubScreenState
               ],
             ),
           ),
+          Tooltip(
+            message: 'Weekly Dispatch'.localized(context),
+            child: PressableScale(
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  builder: (_) => SundayDispatchSheet(p: p, entries: _moments),
+                );
+              },
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: p.surface2,
+                  border: Border.all(
+                    color: p.border.withValues(alpha: 0.3),
+                    width: 0.8,
+                  ),
+                ),
+                child: Icon(CupertinoIcons.news, size: 17, color: p.text2),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           PressableScale(
             onTap: _loadMoments,
             child: Container(

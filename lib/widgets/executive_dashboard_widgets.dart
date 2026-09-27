@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/user_profile_service.dart';
@@ -1056,8 +1055,8 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                       NotekarHaptics.selection('standard');
                       if (onConfigure != null) {
                         onConfigure!();
-                      } else {
-                        PersonalizationSetupDialog.show(context, p: p);
+                      } else if (onOpenLifeAudit != null) {
+                        onOpenLifeAudit!();
                       }
                     },
                     child: Container(
@@ -1476,7 +1475,11 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                           ),
                           onPressed: () {
                             NotekarHaptics.selection('standard');
-                            PersonalizationSetupDialog.show(context, p: p);
+                            if (onConfigure != null) {
+                              onConfigure!();
+                            } else if (onOpenLifeAudit != null) {
+                              onOpenLifeAudit!();
+                            }
                           },
                           child: Text(
                             'Set Up Birth Date & Horizon'.localized(context),
