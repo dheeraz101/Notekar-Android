@@ -273,22 +273,33 @@ class LifeAuditService {
             sectionTrackedMs += it.duration.inMilliseconds;
           }
         } else if (it is TimelineSingleItem) {
-          // Calibrated focus credit for deliberate single moments (15 minutes default)
-          sectionTrackedMs += const Duration(minutes: 15).inMilliseconds;
+          // Point-in-time check-ins do not fabricate duration in conscious audit
         }
       }
       // If today and activeSessionStart is provided without an ongoing TimelineSessionItem
       if (section.dateKey == dateKey(now) &&
           !hasOngoingSession &&
           activeSessionStart != null) {
+        final todayMidnightMs = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).millisecondsSinceEpoch;
+        final effectiveSessionStartForToday = math.max(
+          todayMidnightMs,
+          activeSessionStart,
+        );
         final elapsed = math.max(
           0,
-          now.millisecondsSinceEpoch - activeSessionStart,
+          now.millisecondsSinceEpoch - effectiveSessionStartForToday,
         );
         sectionTrackedMs += elapsed;
       }
       trackedByDateKey[section.dateKey] = Duration(
-        milliseconds: sectionTrackedMs,
+        milliseconds: math.min(
+          sectionTrackedMs,
+          const Duration(hours: 24).inMilliseconds,
+        ),
       );
     }
 

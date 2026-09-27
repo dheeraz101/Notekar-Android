@@ -271,8 +271,16 @@ void main() {
         final entries = [
           Moment(
             id: 1,
+            timestamp: twoDaysAgo
+                .subtract(const Duration(minutes: 30))
+                .millisecondsSinceEpoch,
+            type: 'in',
+            date: dateKey(twoDaysAgo),
+          ),
+          Moment(
+            id: 2,
             timestamp: twoDaysAgo.millisecondsSinceEpoch,
-            type: 'single', // 15 mins focus credit
+            type: 'out',
             date: dateKey(twoDaysAgo),
           ),
         ];
@@ -286,7 +294,7 @@ void main() {
 
         expect(summary.hasData, isFalse);
         expect(summary.availableHistoryDays, 2);
-        expect(summary.totalTrackedDuration.inMinutes, 15);
+        expect(summary.totalTrackedDuration.inMinutes, 30);
         expect(summary.intentionalityRatio, greaterThan(0.0));
         expect(summary.totalWastedDuration, Duration.zero);
       },

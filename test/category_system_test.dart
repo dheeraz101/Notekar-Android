@@ -148,18 +148,14 @@ void main() {
         dateKey: '2026-09-12',
         date: now,
         displayTitle: 'TODAY',
-        totalTrackedDuration: const Duration(hours: 2, minutes: 15),
+        totalTrackedDuration: const Duration(hours: 2),
         totalLogs: 3,
         items: [session, single],
       );
 
       expect(daySection.categoryBreakdown['Work'], const Duration(hours: 2));
-      expect(
-        daySection.categoryBreakdown['Study'],
-        const Duration(minutes: 15),
-      );
+      expect(daySection.categoryBreakdown['Study'], isNull);
       expect(daySection.categorySummaryText, contains('Work 2h'));
-      expect(daySection.categorySummaryText, contains('Study 15m'));
     });
   });
 

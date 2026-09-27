@@ -285,6 +285,7 @@ class NoteKarAppState extends State<NoteKarApp> {
         },
       ),
       splashFactory: NoSplash.splashFactory,
+      extensions: [p],
     );
   }
 

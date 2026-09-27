@@ -46,13 +46,12 @@ class CalendarSyncService {
         );
         activeIn = null;
       } else if (m.type == 'single' || m.type == 'note') {
-        // Individual discrete moment (default 15m duration)
+        // Individual discrete moment (instantaneous point in time)
         final startDt = DateTime.fromMillisecondsSinceEpoch(m.timestamp);
-        final endDt = startDt.add(const Duration(minutes: 15));
         sessions.add(
           _SessionInterval(
             start: startDt,
-            end: endDt,
+            end: startDt,
             startNote: m.note,
             endNote: '',
             id: '${m.id}_single',
@@ -60,6 +59,15 @@ class CalendarSyncService {
           ),
         );
       }
+    }
+
+    String escapeIcs(String text) {
+      return text
+          .replaceAll(r'\', r'\\')
+          .replaceAll(';', r'\;')
+          .replaceAll(',', r'\,')
+          .replaceAll('\r\n', r'\n')
+          .replaceAll('\n', r'\n');
     }
 
     // Write each VEVENT
@@ -71,16 +79,18 @@ class CalendarSyncService {
       final uid = 'notekar_session_${s.id}@notekar.app';
 
       final title = s.isSingle
-          ? (s.startNote.isNotEmpty ? '⚡ ${s.startNote}' : '⚡ NoteKar Moment')
+          ? (s.startNote.isNotEmpty
+                ? escapeIcs('⚡ ${s.startNote}')
+                : '⚡ NoteKar Moment')
           : (s.startNote.isNotEmpty
-                ? '⏳ ${s.startNote}'
+                ? escapeIcs('⏳ ${s.startNote}')
                 : '⏳ NoteKar Focus Session');
 
       final description = StringBuffer();
       if (s.isSingle) {
-        description.write('Logged single moment in NoteKar.\\n');
+        description.write(escapeIcs('Logged single moment in NoteKar.'));
         if (s.startNote.isNotEmpty) {
-          description.write('Note: ${s.startNote}\\n');
+          description.write('\\nNote: ${escapeIcs(s.startNote)}');
         }
       } else {
         final durationMins = s.end.difference(s.start).inMinutes;
@@ -90,12 +100,14 @@ class CalendarSyncService {
             ? '${durationHours}h ${remMins}m'
             : '${remMins}m';
 
-        description.write('Two-Way Tracked Interval: $durationLabel\\n');
+        description.write(
+          escapeIcs('Two-Way Tracked Interval: $durationLabel'),
+        );
         if (s.startNote.isNotEmpty) {
-          description.write('IN Note: ${s.startNote}\\n');
+          description.write('\\nIN Note: ${escapeIcs(s.startNote)}');
         }
         if (s.endNote.isNotEmpty) {
-          description.write('OUT Note: ${s.endNote}\\n');
+          description.write('\\nOUT Note: ${escapeIcs(s.endNote)}');
         }
       }
 

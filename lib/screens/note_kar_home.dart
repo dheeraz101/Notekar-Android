@@ -10,10 +10,10 @@ import 'package:flutter/cupertino.dart'
     show
         CupertinoAlertDialog,
         CupertinoDialogAction,
-        CupertinoIcons,
         CupertinoTextField,
         CupertinoTheme,
-        CupertinoThemeData;
+        CupertinoThemeData,
+        showCupertinoDialog;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -33,9 +33,11 @@ import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
+import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -57,15 +59,21 @@ import 'package:notekar/widgets/dynamic_header_capsule.dart';
 import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/home_clock_complication.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
+import 'package:notekar/widgets/home_minimal_toolbar_capsule.dart';
+import 'package:notekar/widgets/home_momentum_card.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
+import 'package:notekar/widgets/home_sobriety_streak_card.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
-import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
 import 'package:notekar/widgets/top_fade_blur.dart';
 import 'package:notekar/widgets/zen_doodle_splash.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+part 'home/home_backup_lifecycle.dart';
+
+part 'home/home_reset_lifecycle.dart';
 
 class NoteKarHome extends StatefulWidget {
   const NoteKarHome({super.key, this.preloadedPrefs});
@@ -78,6 +86,10 @@ class NoteKarHome extends StatefulWidget {
 
 class _NoteKarHomeState extends State<NoteKarHome>
     with TickerProviderStateMixin, WidgetsBindingObserver {
+  void update(VoidCallback fn) {
+    if (mounted) setState(fn);
+  }
+
   static const _welcomeSeenKey = 'notekar.welcomeSeen';
   static const _lastSeenVersionKey = 'notekar.lastSeenVersion';
   static const _fileChannel = MethodChannel('notekar/files');
@@ -741,6 +753,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
       unawaited(_updateStreakShields());
       unawaited(_evaluateStreakGuardian(entries));
 
+      final wasCorrupted =
+          prefs.getBool(MomentRepository.keyCorruptedFlag) ?? false;
+      final recoveredFromSnapshot =
+          prefs.getBool(MomentRepository.keyRecoveredFromSnapshot) ?? false;
+      if (wasCorrupted) {
+        unawaited(prefs.remove(MomentRepository.keyCorruptedFlag));
+        unawaited(prefs.remove(MomentRepository.keyRecoveredFromSnapshot));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _showCorruptionNotificationDialog(recoveredFromSnapshot);
+        });
+      }
+
       // Run quick actions and notifications check
       _initQuickActions();
       await _syncBackgroundLogs(prefs);
@@ -1382,76 +1407,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Widget _buildMinimalToolbarCapsule(Palette palette, double bottomInset) {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: palette.surface2.withValues(
-          alpha: _enableTranslucency && AdaptiveEngine().supportsBlur
-              ? 0.75
-              : 0.95,
-        ),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: palette.border.withValues(alpha: 0.35),
-          width: 0.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          PressableScale(
-            onTap: _toggleMode,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                _mode == 'single'
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.all_inclusive_rounded,
-                size: 16,
-                color: palette.accent,
-              ),
-            ),
-          ),
-          Container(
-            width: 0.5,
-            height: 16,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            color: palette.border.withValues(alpha: 0.4),
-          ),
-          PressableScale(
-            onTap: _openHistory,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(CupertinoIcons.clock, size: 16, color: palette.text),
-            ),
-          ),
-          Container(
-            width: 0.5,
-            height: 16,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            color: palette.border.withValues(alpha: 0.4),
-          ),
-          PressableScale(
-            onTap: _openSettings,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(
-                CupertinoIcons.gear_alt,
-                size: 16,
-                color: palette.text2,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return HomeMinimalToolbarCapsule(
+      palette: palette,
+      mode: _mode,
+      enableTranslucency: _enableTranslucency,
+      onToggleMode: _toggleMode,
+      onOpenHistory: _openHistory,
+      onOpenSettings: _openSettings,
     );
   }
 
@@ -1781,488 +1743,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _saveEntry(updatedMoment);
   }
 
-  Future<void> _resetAll() async {
-    setState(() {
-      _entries = [];
-      _lastId = null;
-      _lastDeletedPreview = null;
-      _inout = 'in';
-      _sessionStart = null;
-      _sobrietyCustomStart = null;
-      _streakShields = 1;
-    });
-
-    await _prefs?.remove('m-inout');
-    await _prefs?.remove('m-ses');
-    await _prefs?.remove('sobriety_custom_start_ms');
-    await _prefs?.setInt('streak_shields', 1);
-    await _prefs?.setInt('last_shield_granted_threshold', 0);
-    await _prefs?.remove('recent_note_searches');
-    await _prefs?.remove('notekar.categories_v1');
-    await _prefs?.remove('m-last-backup-at');
-    await _repository.clearAll();
-    await _repository.clearTrash();
-    _trashNotifier.value = [];
-    setState(() => _nextId = _repository.getNextId());
-    unawaited(_updateAndroidWidget());
-  }
-
-  Future<void> _factoryReset() async {
-    final prefs = _prefs;
-    setState(() {
-      _factoryResetVisible = true;
-      _factoryResetComplete = false;
-      _factoryResetProgress = 0.0;
-      _factoryResetText = 'Preparing Factory Reset...';
-      _factoryResetSubText = 'Initializing secure wipe sequence...';
-      _factoryResetIcon = Icons.settings_suggest_rounded;
-      _factoryResetWelcomePrefs = prefs;
-      _entries = [];
-      _lastId = null;
-      _lastDeletedPreview = null;
-      _lastTapPosition = null;
-      _theme = 'dark';
-      _defaultMode = 'two-way';
-      _mode = 'two-way';
-      _inout = 'in';
-      _sessionStart = null;
-      _tapDelay = 0;
-      _accentColor = 'blue';
-      _appIconStyle = 'default';
-      _hapticStyle = 'standard';
-      _historyDensity = 'comfortable';
-      _privacyLock = false;
-      _privacyUnlocked = false;
-      _backupReminderDays = 0;
-      _lastBackupAt = null;
-      _remoteNotices = false;
-      _reduceMotion = false;
-      _haptics = true;
-      _largeText = false;
-      _highContrast = false;
-      _compactHistory = false;
-      _confirmDelete = false;
-      _showSeconds = true;
-      _highlightSeconds = true;
-      _use24HourFormat = true;
-      _buttonLabels = true;
-      _largeControls = false;
-      _homeMenuPill = true;
-      _homeMenuAnimations = false;
-      _showHistoryText = true;
-      _showLastSavedHint = true;
-      _extendedDuration = false;
-      _enableTranslucency = true;
-      _minimalMomentOptions = false;
-      _useNumbersInSingle = false;
-      _resetSingleDaily = false;
-      _countOnSave = false;
-      _privacyLockDelayMinutes = 0;
-      _updateStatus = 'v$appVersion - Check for available updates';
-      _lastUpdateCheckedAt = null;
-      _nextId = 1;
-      _enableSobrietyMode = false;
-      _sobrietyResetType = 'any';
-      _sobrietyCustomStart = null;
-      _sobrietyMilestoneTheme = 'science';
-      _streakShields = 0;
-    });
-    _applySystemUiStyle();
-
-    // Stage 1: Prep (1s)
-    await Future<void>.delayed(const Duration(milliseconds: 1000));
-    if (!mounted) return;
-    setState(() {
-      _factoryResetProgress = 0.20;
-      _factoryResetText = 'Deleting Database Records...';
-      _factoryResetSubText =
-          'Securely clearing moments, notes, and trash data...';
-      _factoryResetIcon = Icons.delete_sweep_rounded;
-    });
-
-    // Stage 2: Clear DB (1.2s)
-    await _repository.clearAll();
-    await _repository.clearTrash();
-    _trashNotifier.value = [];
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
-    if (!mounted) return;
-    setState(() {
-      _factoryResetProgress = 0.55;
-      _factoryResetText = 'Purging Shared Preferences...';
-      _factoryResetSubText =
-          'Resetting personalization settings and secure keys...';
-      _factoryResetIcon = Icons.lock_reset_rounded;
-    });
-
-    // Stage 3: Wipe Prefs (1.2s)
-    if (prefs != null) {
-      for (final key in [
-        'notekar.nextId',
-        _welcomeSeenKey,
-        _lastSeenVersionKey,
-        'enable_sobriety_mode',
-        'sobriety_reset_type',
-        'sobriety_custom_start_ms',
-        'sobriety_milestone_theme',
-        'streak_shields',
-        'last_shield_granted_threshold',
-        'notekar.sobrietyWalkthroughSeen_v6',
-        'notekar.singleNumberingWalkthroughSeen_v7',
-        'notekar.appIconsWalkthroughSeen_v8',
-        'notekar.securityWalkthroughSeen_v5',
-        'notekar.networkWalkthroughSeen_v5',
-        'notekar.remindersWalkthroughSeen',
-        'notekar.autoStartCardDismissed',
-        'm-locale',
-        'm-theme',
-        'm-default-mode',
-        'm-mode',
-        'm-inout',
-        'm-ses',
-        'm-delay',
-        'm-accent-color',
-        'm-app-icon-style',
-        'm-haptic-style',
-        'm-history-density',
-        'm-privacy-lock',
-        'm-privacy-lock-type',
-        'm-backup-reminder-days',
-        'm-last-backup-at',
-        'm-last-backup-reminder-day',
-        'm-remote-notices',
-        'm-reduce-motion',
-        'm-haptics',
-        'm-reduced-haptics',
-        'm-acoustic-feedback',
-        'm-large-text',
-        'm-high-contrast',
-        'm-compact-history',
-        'm-confirm-delete',
-        'm-show-seconds',
-        'm-highlight-seconds',
-        'm-button-labels',
-        'm-large-controls',
-        'm-home-menu-pill',
-        'm-home-menu-animations',
-        'm-show-history-text',
-        'm-show-last-saved-hint',
-        'm-extended-duration',
-        'm-translucency',
-        'm-minimal-moment-options',
-        'm-use-numbers-in-single',
-        'm-reset-single-daily',
-        'm-count-on-save',
-        'm-privacy-lock-delay',
-        'm-update-status',
-        'm-last-update-check',
-        'reminder_daily_enabled',
-        'reminder_daily_hour',
-        'reminder_daily_minute',
-        'reminder_daily_body',
-        'reminder_inactivity_enabled',
-        'reminder_inactivity_interval_mins',
-        'reminder_weekly_enabled',
-        'reminder_weekly_days',
-        'reminder_weekly_hour',
-        'reminder_weekly_minute',
-        'reminder_weekly_body',
-        'reminder_monthly_enabled',
-        'reminder_monthly_day',
-        'reminder_monthly_hour',
-        'reminder_monthly_minute',
-        'reminder_monthly_body',
-        'reminder_reflection_enabled',
-        'reminder_reflection_interval_mins',
-        'reminder_reflection_sound',
-        'reminder_reflection_body',
-        'reminder_reflection_start_hour',
-        'reminder_reflection_start_minute',
-        'reminder_reflection_end_hour',
-        'reminder_reflection_end_minute',
-        'enable_note_on_click',
-        'obfuscate_in_recents',
-        'show_persistent_notification',
-        'recent_settings_searches',
-        'recent_note_searches',
-        'time_audit_sleep_hours',
-        'time_audit_essentials_hours',
-        'notekar.batteryOptimizationCardDismissed',
-        'notekar.categories_v1',
-        'god_mode_unlocked',
-        'use_12h_format',
-        'm-use-12h',
-        'notekar.commits_cache',
-        'notekar.commits_cache_time',
-      ]) {
-        await prefs.remove(key);
-      }
-    }
-    await _setAppIconStyle('default', showToast: false);
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
-    if (!mounted) return;
-    setState(() {
-      _factoryResetProgress = 0.85;
-      _factoryResetText = 'Cancelling Scheduled Alarms...';
-      _factoryResetSubText = 'De-registering background broadcast receivers...';
-      _factoryResetIcon = Icons.alarm_off_rounded;
-    });
-
-    // Stage 4: Wiping background alarms & notices (1.0s)
-    try {
-      await _fileChannel.invokeMethod<void>('configureRemoteNotices', {
-        'enabled': false,
-        'feedUrl': notificationFeed,
-      });
-    } catch (_) {}
-    await Future<void>.delayed(const Duration(milliseconds: 1000));
-    if (!mounted) return;
-    setState(() {
-      _factoryResetProgress = 0.96;
-      _factoryResetText = 'Finalizing System Recovery...';
-      _factoryResetSubText =
-          'Wipe completed. Setting up system for a clean launch...';
-      _factoryResetIcon = Icons.published_with_changes_rounded;
-    });
-
-    // Stage 5: Done (0.6s)
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
-    setState(() {
-      _factoryResetProgress = 1.0;
-      _factoryResetComplete = true;
-      _factoryResetText = 'Restore complete';
-      _factoryResetSubText = 'Click Start to begin new setup';
-      _factoryResetIcon = Icons.check_circle_rounded;
-    });
-    unawaited(_updateAndroidWidget());
-  }
-
-  Future<void> _finishFactoryResetOverlay() async {
-    final prefs = _factoryResetWelcomePrefs;
-    if (mounted) {
-      NoteKarApp.of(context)?.setLocale('system');
-    }
-    if (mounted && prefs != null) {
-      unawaited(_showWelcomeIfNeeded(prefs));
-    }
-    // Delay setting overlay visibility to false by 50ms so navigation transaction has started
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    if (mounted) {
-      setState(() {
-        _locale = 'system';
-        _factoryResetVisible = false;
-      });
-    }
-  }
-
-  Future<void> _resetSettingsOnly() async {
-    setState(() {
-      _theme = 'dark';
-      _defaultMode = 'two-way';
-      _tapDelay = 0;
-      _accentColor = 'blue';
-      _appIconStyle = 'default';
-      _hapticStyle = 'standard';
-      _historyDensity = 'comfortable';
-      _privacyLock = false;
-      _backupReminderDays = 0;
-      _remoteNotices = false;
-      _reduceMotion = false;
-      _haptics = true;
-      _acousticFeedback = true;
-      _largeText = false;
-      _highContrast = false;
-      _compactHistory = false;
-      _confirmDelete = false;
-      _showSeconds = true;
-      _highlightSeconds = true;
-      _buttonLabels = true;
-      _largeControls = false;
-      _homeMenuPill = true;
-      _homeMenuAnimations = false;
-      _showHistoryText = true;
-      _showLastSavedHint = true;
-      _extendedDuration = false;
-      _enableTranslucency = true;
-      _minimalMomentOptions = false;
-      _useNumbersInSingle = false;
-      _resetSingleDaily = false;
-      _countOnSave = false;
-      _privacyLockDelayMinutes = 0;
-      _locale = 'system';
-      _enableSobrietyMode = false;
-      _sobrietyResetType = 'any';
-      _sobrietyCustomStart = null;
-      _sobrietyMilestoneTheme = 'science';
-      _streakShields = 0;
-    });
-    await _prefs?.setBool('enable_sobriety_mode', _enableSobrietyMode);
-    await _prefs?.setString('sobriety_reset_type', _sobrietyResetType);
-    await _prefs?.remove('sobriety_custom_start_ms');
-    await _prefs?.setString(
-      'sobriety_milestone_theme',
-      _sobrietyMilestoneTheme,
-    );
-    await _prefs?.setInt('streak_shields', 0);
-    await _prefs?.setInt('last_shield_granted_threshold', 0);
-    await _prefs?.remove('notekar.sobrietyWalkthroughSeen_v6');
-    await _prefs?.remove('notekar.singleNumberingWalkthroughSeen_v7');
-    await _prefs?.remove('notekar.appIconsWalkthroughSeen_v8');
-    await _prefs?.setString('m-theme', _theme);
-    await _prefs?.setString('m-default-mode', _defaultMode);
-    await _prefs?.setInt('m-delay', _tapDelay);
-    await _prefs?.setString('m-accent-color', _accentColor);
-    await _prefs?.setString('m-app-icon-style', _appIconStyle);
-    await _prefs?.setString('m-haptic-style', _hapticStyle);
-    await _prefs?.setString('m-history-density', _historyDensity);
-    await _prefs?.setBool('m-privacy-lock', _privacyLock);
-    await _prefs?.setInt('m-backup-reminder-days', _backupReminderDays);
-    await _prefs?.setBool('m-remote-notices', _remoteNotices);
-    await _prefs?.setBool('m-reduce-motion', _reduceMotion);
-    await _prefs?.setBool('m-haptics', _haptics);
-    await _prefs?.remove('m-reduced-haptics');
-    await _prefs?.setBool('m-large-text', _largeText);
-    await _prefs?.setBool('m-high-contrast', _highContrast);
-    await _prefs?.setBool('m-compact-history', _compactHistory);
-    await _prefs?.setBool('m-confirm-delete', _confirmDelete);
-    await _prefs?.setBool('m-show-seconds', _showSeconds);
-    await _prefs?.setBool('m-highlight-seconds', _highlightSeconds);
-    await _prefs?.setBool('m-use-24-hour', _use24HourFormat);
-    await _prefs?.setBool('m-button-labels', _buttonLabels);
-    await _prefs?.setBool('m-large-controls', _largeControls);
-    await _prefs?.setBool('m-home-menu-pill', _homeMenuPill);
-    await _prefs?.setBool('m-home-menu-animations', _homeMenuAnimations);
-    await _prefs?.setBool('m-show-history-text', _showHistoryText);
-    await _prefs?.setBool('m-show-last-saved-hint', _showLastSavedHint);
-    await _prefs?.setBool('m-extended-duration', _extendedDuration);
-    await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
-    await _prefs?.setBool('m-use-numbers-in-single', _useNumbersInSingle);
-    await _prefs?.setBool('m-reset-single-daily', _resetSingleDaily);
-    await _prefs?.setBool('m-count-on-save', _countOnSave);
-    await _prefs?.setBool('m-translucency', _enableTranslucency);
-    await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
-    await _prefs?.setString('m-locale', _locale);
-    await _prefs?.remove('reminder_daily_enabled');
-    await _prefs?.remove('reminder_daily_hour');
-    await _prefs?.remove('reminder_daily_minute');
-    await _prefs?.remove('reminder_daily_body');
-    await _prefs?.remove('reminder_inactivity_enabled');
-    await _prefs?.remove('reminder_inactivity_interval_mins');
-    await _prefs?.remove('reminder_weekly_enabled');
-    await _prefs?.remove('reminder_weekly_days');
-    await _prefs?.remove('reminder_weekly_hour');
-    await _prefs?.remove('reminder_weekly_minute');
-    await _prefs?.remove('reminder_weekly_body');
-    await _prefs?.remove('reminder_monthly_enabled');
-    await _prefs?.remove('reminder_monthly_day');
-    await _prefs?.remove('reminder_monthly_hour');
-    await _prefs?.remove('reminder_monthly_minute');
-    await _prefs?.remove('reminder_monthly_body');
-    await _prefs?.remove('reminder_reflection_enabled');
-    await _prefs?.remove('reminder_reflection_interval_mins');
-    await _prefs?.remove('reminder_reflection_sound');
-    await _prefs?.remove('reminder_reflection_body');
-    await _prefs?.remove('reminder_reflection_start_hour');
-    await _prefs?.remove('reminder_reflection_start_minute');
-    await _prefs?.remove('reminder_reflection_end_hour');
-    await _prefs?.remove('reminder_reflection_end_minute');
-    await _prefs?.remove('time_audit_sleep_hours');
-    await _prefs?.remove('time_audit_essentials_hours');
-    await _prefs?.remove('notekar.autoStartCardDismissed');
-    await _prefs?.remove('notekar.batteryOptimizationCardDismissed');
-    await _prefs?.remove('notekar.categories_v1');
-    await _prefs?.remove('recent_settings_searches');
-    await _prefs?.remove('recent_note_searches');
-    await _prefs?.remove('enable_note_on_click');
-    await _prefs?.remove('obfuscate_in_recents');
-    await _prefs?.remove('show_persistent_notification');
-    await _prefs?.remove('use_12h_format');
-    await _prefs?.remove('m-use-12h');
-    await _setAppIconStyle('default', showToast: false);
-    if (mounted) {
-      NoteKarApp.of(context)?.setLocale(_locale);
-    }
-    try {
-      await _fileChannel.invokeMethod<void>('configureRemoteNotices', {
-        'enabled': false,
-        'feedUrl': notificationFeed,
-      });
-    } catch (_) {}
-    _applySystemUiStyle();
-  }
-
-  Future<void> _restoreSettings(Map<String, Object> snapshot) async {
-    setState(() {
-      _theme = snapshot['theme'] as String;
-      _defaultMode = snapshot['defaultMode'] as String;
-      _tapDelay = snapshot['tapDelay'] as int;
-      _accentColor = snapshot['accentColor'] as String;
-      _appIconStyle = snapshot['appIconStyle'] as String;
-      _hapticStyle = snapshot['hapticStyle'] as String;
-      _historyDensity = snapshot['historyDensity'] as String;
-      _privacyLock = snapshot['privacyLock'] as bool;
-      _backupReminderDays = snapshot['backupReminderDays'] as int;
-      _remoteNotices = snapshot['remoteNotices'] as bool;
-      _reduceMotion = snapshot['reduceMotion'] as bool;
-      _haptics = _hapticStyle != 'off';
-      _largeText = snapshot['largeText'] as bool;
-      _highContrast = snapshot['highContrast'] as bool;
-      _compactHistory = snapshot['compactHistory'] as bool;
-      _confirmDelete = snapshot['confirmDelete'] as bool;
-      _showSeconds = snapshot['showSeconds'] as bool;
-      _highlightSeconds = snapshot['highlightSeconds'] as bool;
-      _buttonLabels = snapshot['buttonLabels'] as bool;
-      _largeControls = snapshot['largeControls'] as bool;
-      _homeMenuPill = snapshot['homeMenuPill'] as bool;
-      _homeMenuAnimations = snapshot['homeMenuAnimations'] as bool;
-      _showHistoryText = snapshot['showHistoryText'] as bool;
-      _showLastSavedHint = snapshot['showLastSavedHint'] as bool;
-      _extendedDuration = snapshot['extendedDuration'] as bool? ?? false;
-      _enableTranslucency = snapshot['enableTranslucency'] as bool? ?? true;
-      _minimalMomentOptions =
-          snapshot['minimalMomentOptions'] as bool? ?? false;
-      _useNumbersInSingle = snapshot['useNumbersInSingle'] as bool? ?? false;
-      _resetSingleDaily = snapshot['resetSingleDaily'] as bool? ?? false;
-      _countOnSave = snapshot['countOnSave'] as bool? ?? false;
-      _privacyLockDelayMinutes = snapshot['privacyLockDelayMinutes'] as int;
-    });
-    await _prefs?.setString('m-theme', _theme);
-    await _prefs?.setString('m-default-mode', _defaultMode);
-    await _prefs?.setInt('m-delay', _tapDelay);
-    await _prefs?.setString('m-accent-color', _accentColor);
-    await _prefs?.setString('m-app-icon-style', _appIconStyle);
-    await _prefs?.setString('m-haptic-style', _hapticStyle);
-    await _prefs?.setString('m-history-density', _historyDensity);
-    await _prefs?.setBool('m-privacy-lock', _privacyLock);
-    await _prefs?.setInt('m-backup-reminder-days', _backupReminderDays);
-    await _prefs?.setBool('m-remote-notices', _remoteNotices);
-    await _prefs?.setBool('m-reduce-motion', _reduceMotion);
-    await _prefs?.setBool('m-haptics', _haptics);
-    await _prefs?.remove('m-reduced-haptics');
-    await _prefs?.setBool('m-large-text', _largeText);
-    await _prefs?.setBool('m-high-contrast', _highContrast);
-    await _prefs?.setBool('m-compact-history', _compactHistory);
-    await _prefs?.setBool('m-confirm-delete', _confirmDelete);
-    await _prefs?.setBool('m-show-seconds', _showSeconds);
-    await _prefs?.setBool('m-highlight-seconds', _highlightSeconds);
-    await _prefs?.setBool('m-button-labels', _buttonLabels);
-    await _prefs?.setBool('m-large-controls', _largeControls);
-    await _prefs?.setBool('m-home-menu-pill', _homeMenuPill);
-    await _prefs?.setBool('m-home-menu-animations', _homeMenuAnimations);
-    await _prefs?.setBool('m-show-history-text', _showHistoryText);
-    await _prefs?.setBool('m-show-last-saved-hint', _showLastSavedHint);
-    await _prefs?.setBool('m-extended-duration', _extendedDuration);
-    await _prefs?.setBool('m-minimal-moment-options', _minimalMomentOptions);
-    await _prefs?.setBool('m-use-numbers-in-single', _useNumbersInSingle);
-    await _prefs?.setBool('m-reset-single-daily', _resetSingleDaily);
-    await _prefs?.setBool('m-count-on-save', _countOnSave);
-    await _prefs?.setBool('m-translucency', _enableTranslucency);
-    await _prefs?.setInt('m-privacy-lock-delay', _privacyLockDelayMinutes);
-    _applySystemUiStyle();
-    _showToast('Settings restored');
-    unawaited(_updateAndroidWidget());
-  }
-
   Future<void> _updateAndroidWidget() async {
     final now = DateTime.now();
     final today = dateKey(now);
@@ -2439,6 +1919,60 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (_headerExpanded) {
       setState(() => _headerExpanded = false);
     }
+  }
+
+  Duration _computeTodayTrackedDuration() {
+    final now = DateTime.now();
+    final todayKey = dateKey(now);
+    final todayMoments = _entries.where((m) => m.date == todayKey).toList();
+    final sections = buildTimelineDaySections(todayMoments);
+    var dur = sections.isNotEmpty
+        ? sections.first.totalTrackedDuration
+        : Duration.zero;
+    if (_mode == 'two-way' && _sessionStart != null) {
+      final elapsed = now.millisecondsSinceEpoch - _sessionStart!;
+      if (elapsed > 0) dur += Duration(milliseconds: elapsed);
+    }
+    return dur;
+  }
+
+  int _computeTodayMomentsCount() {
+    final todayKey = dateKey(DateTime.now());
+    return _entries.where((m) => m.date == todayKey).length;
+  }
+
+  Future<void> _openIntelligenceHub() async {
+    _collapseHeaderIfExpanded();
+    if (!_startupComplete) {
+      _showToast('Loading database...', warning: true);
+      return;
+    }
+    await Navigator.of(context).push(ExecutiveIntelligenceHubScreen.route());
+    _load();
+  }
+
+  void _showCorruptionNotificationDialog(bool recoveredFromSnapshot) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (BuildContext ctx) => CupertinoAlertDialog(
+        title: const Text('Database Safety Notice'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            recoveredFromSnapshot
+                ? 'A database storage anomaly was safely isolated. NoteKar automatically restored your moments from the rolling snapshot!'
+                : 'A database anomaly was safely isolated. The corrupted files were preserved in corrupted_backups/ on disk to prevent data loss.',
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _openHistory() async {
@@ -3491,103 +3025,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     });
   }
 
-  Future<bool> _exportFile({
-    required String fileName,
-    required String content,
-    required String mimeType,
-  }) async {
-    try {
-      await _fileChannel.invokeMethod<String>('saveTextFile', {
-        'fileName': fileName,
-        'content': content,
-        'mimeType': mimeType,
-      });
-
-      if (mounted) _showToast('Export saved to Downloads');
-      return true;
-    } catch (_) {
-      if (mounted) _showToast('Export failed. Try again.', warning: true);
-      return false;
-    }
-  }
-
-  Future<Directory> _getLocalBackupDir() async {
-    const channel = MethodChannel('notekar/files');
-    final dataDir = await channel.invokeMethod<String>('appDataDir');
-    final path = dataDir ?? Directory.systemTemp.path;
-    final dir = Directory('$path/local_backups');
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    return dir;
-  }
-
-  Future<void> _saveLocalBackup(String content) async {
-    try {
-      final dir = await _getLocalBackupDir();
-      final dateStr = exportDateStamp();
-      final targetPath = '${dir.path}/notekar-backup-$dateStr.json';
-      final tempFile = File('$targetPath.tmp');
-
-      // 1. Atomic write to temporary file first
-      await tempFile.writeAsString(content, flush: true);
-      await tempFile.rename(targetPath);
-
-      // 2. Automated retention pruning (keep latest 15 local backups)
-      final List<FileSystemEntity> entities = await dir.list().toList();
-      final List<File> backupFiles = entities
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.json'))
-          .toList();
-
-      if (backupFiles.length > 15) {
-        backupFiles.sort((a, b) {
-          final aTime = a.lastModifiedSync();
-          final bTime = b.lastModifiedSync();
-          return bTime.compareTo(aTime);
-        });
-
-        for (int i = 15; i < backupFiles.length; i++) {
-          try {
-            await backupFiles[i].delete();
-          } catch (_) {}
-        }
-      }
-    } catch (e) {
-      developer.log('Error saving local backup: $e');
-    }
-  }
-
-  Future<void> _createQuickLocalBackup() async {
-    try {
-      final content = _backupExport();
-      await _saveLocalBackup(content);
-      _showToast('Quick local backup created');
-      final now = DateTime.now().millisecondsSinceEpoch;
-      setState(() => _lastBackupAt = now);
-      await _prefs?.setInt('m-last-backup-at', now);
-    } catch (_) {
-      _showToast('Failed to create local backup', warning: true);
-    }
-  }
-
-  Future<void> _exportBackupFile() async {
-    final content = _backupExport();
-    await _saveLocalBackup(content);
-
-    final ok = await _exportFile(
-      fileName: 'notekar-backup-${exportDateStamp()}.json',
-      content: content,
-      mimeType: 'application/json',
-    );
-
-    if (!ok) return;
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    setState(() => _lastBackupAt = now);
-    await _prefs?.setInt('m-last-backup-at', now);
-  }
-
   Future<void> _checkSystemLockAvailability() async {
     final available = await _canUsePrivacyLock();
     if (mounted) {
@@ -3891,269 +3328,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
-  Future<void> _importBackupFile() async {
-    String? content;
-
-    try {
-      content = await _fileChannel.invokeMethod<String>('openTextFile', {
-        'mimeType': '*/*',
-      });
-    } catch (_) {
-      _showToast('Could not open file', warning: true);
-      return;
-    }
-
-    if (content == null || content.trim().isEmpty) {
-      _showToast('Import cancelled', warning: true);
-      return;
-    }
-
-    await _restoreBackupFromString(content);
-  }
-
-  Future<bool> _restoreBackupFromString(String content) async {
-    try {
-      final importTask = developer.TimelineTask()
-        ..start('notekar.backup_import');
-      var validation = developer.Timeline.timeSync(
-        'notekar.backup_import.validate',
-        () => validateNoteKarBackupContent(content),
-      );
-      if (!validation.isValid) {
-        final migration = MigrationImportService.parseMigrationContent(content);
-        if (migration.success && migration.moments.isNotEmpty) {
-          validation = BackupValidationResult.valid(
-            entries: migration.moments,
-            settings: const {},
-            exportedAt: DateTime.now(),
-          );
-        } else {
-          importTask.finish();
-          final errorMessage =
-              migration.errorMessage ??
-              validation.error ??
-              'Invalid backup or migration file.';
-          _logger.warning('Backup/migration validation failed: $errorMessage');
-          _showToast(errorMessage, warning: true);
-          return false;
-        }
-      }
-
-      final imported = validation.entries;
-      final dryRun = buildBackupDryRunSummary(
-        validation: validation,
-        existingEntries: _entries,
-      );
-      if (imported.isEmpty) {
-        importTask.finish();
-        if (_entries.isNotEmpty) {
-          _showToast('Backup has no new moments', warning: true);
-        } else {
-          _showToast('This backup contains no moments', warning: true);
-        }
-        return false;
-      }
-
-      final confirmed = await _confirmBackupImport(dryRun);
-      if (confirmed != true) {
-        importTask.finish();
-        _showToast('Import cancelled');
-        return false;
-      }
-
-      final settings = validation.settings;
-
-      final importedTheme = settings['theme'] as String?;
-      final importedDefaultMode = settings['defaultMode'] as String?;
-      final importedAccentColor = settings['accentColor'] as String?;
-      final importedAppIconStyle = settings['appIconStyle'] as String?;
-      final importedHapticStyle = settings['hapticStyle'] as String?;
-      final importedHistoryDensity = settings['historyDensity'] as String?;
-      final importedBackupReminderDays = settings['backupReminderDays'];
-      final importedHomeMenuAnimations = settings['homeMenuAnimations'];
-      final importedTapDelay = settings['tapDelay'];
-
-      final nextTheme =
-          (importedTheme == 'dark' ||
-              importedTheme == 'light' ||
-              importedTheme == 'amoled')
-          ? importedTheme!
-          : _theme;
-      final nextDefaultMode =
-          (importedDefaultMode == 'single' ||
-              importedDefaultMode == 'two-way' ||
-              importedDefaultMode == 'last-used')
-          ? importedDefaultMode!
-          : _defaultMode;
-      final nextTapDelay =
-          importedTapDelay is num &&
-              delayValues.contains(importedTapDelay.toInt())
-          ? importedTapDelay.toInt()
-          : _tapDelay;
-      final nextAccentColor = accentOptions.contains(importedAccentColor)
-          ? importedAccentColor!
-          : _accentColor;
-      final nextAppIconStyle = isAppIconStyle(importedAppIconStyle)
-          ? importedAppIconStyle!
-          : _appIconStyle;
-      final nextHapticStyle =
-          ['off', 'light', 'standard'].contains(importedHapticStyle)
-          ? importedHapticStyle!
-          : _hapticStyle;
-      final nextHistoryDensity =
-          ['comfortable', 'compact'].contains(importedHistoryDensity)
-          ? importedHistoryDensity == 'compact'
-                ? 'compact'
-                : 'comfortable'
-          : _historyDensity;
-      final nextBackupReminderDays =
-          importedBackupReminderDays is num &&
-              [0, 7, 14, 30].contains(importedBackupReminderDays.toInt())
-          ? importedBackupReminderDays.toInt()
-          : _backupReminderDays;
-      final nextHomeMenuAnimations = importedHomeMenuAnimations is bool
-          ? importedHomeMenuAnimations
-          : _homeMenuAnimations;
-
-      var nextId = math.max(
-        _nextId,
-        _entries.isEmpty
-            ? 1
-            : _entries.map((entry) => entry.id).reduce(math.max) + 1,
-      );
-
-      final existingKeys = _entries
-          .map((entry) => '${entry.timestamp}|${entry.type}|${entry.note}')
-          .toSet();
-
-      final merged = List<Moment>.from(_entries);
-      var addedCount = 0;
-
-      for (final entry in imported) {
-        final key = '${entry.timestamp}|${entry.type}|${entry.note}';
-        if (existingKeys.contains(key)) continue;
-
-        existingKeys.add(key);
-        merged.add(
-          Moment(
-            id: nextId++,
-            timestamp: entry.timestamp,
-            type: entry.type,
-            date: entry.date,
-            note: entry.note,
-          ),
-        );
-        addedCount++;
-      }
-
-      merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-      final oldNextId = _nextId;
-      _nextId = nextId;
-      final persistTask = developer.TimelineTask()
-        ..start('notekar.backup_import.persist');
-      try {
-        await _replaceStoredEntries(merged);
-        await _saveSetting('m-theme', nextTheme);
-        await _saveSetting('m-default-mode', nextDefaultMode);
-        await _saveSetting(
-          'm-mode',
-          nextDefaultMode == 'last-used' ? _mode : nextDefaultMode,
-        );
-        await _saveSetting('m-delay', nextTapDelay);
-        await _saveSetting('m-accent-color', nextAccentColor);
-        await _saveSetting('m-app-icon-style', nextAppIconStyle);
-        await _saveSetting('m-haptic-style', nextHapticStyle);
-        await _saveSetting('m-history-density', nextHistoryDensity);
-        await _prefs?.setInt('m-backup-reminder-days', nextBackupReminderDays);
-        await _prefs?.setBool('m-home-menu-animations', nextHomeMenuAnimations);
-        await _prefs?.remove('m-inout');
-        await _prefs?.remove('m-ses');
-      } catch (_) {
-        _nextId = oldNextId;
-        importTask.finish();
-        _showToast(
-          'Import stopped safely. Your current data was not changed.',
-          warning: true,
-        );
-        return false;
-      } finally {
-        persistTask.finish();
-      }
-
-      setState(() {
-        _entries = merged;
-        _nextId = nextId;
-        _lastId = null;
-        _lastDeletedPreview = null;
-        _theme = nextTheme;
-        _defaultMode = nextDefaultMode;
-        _mode = nextDefaultMode == 'last-used' ? _mode : nextDefaultMode;
-        _tapDelay = nextTapDelay;
-        _accentColor = nextAccentColor;
-        _appIconStyle = nextAppIconStyle;
-        _hapticStyle = nextHapticStyle;
-        _haptics = _hapticStyle != 'off';
-        _historyDensity = nextHistoryDensity;
-        _compactHistory = _historyDensity == 'compact';
-        _backupReminderDays = nextBackupReminderDays;
-        _homeMenuAnimations = nextHomeMenuAnimations;
-        _inout = 'in';
-        _sessionStart = null;
-      });
-
-      if (_homeMenuAnimations) {
-        final motionAvailable = await _canUseMotionSensor();
-
-        if (motionAvailable) {
-          _startMotionIfNeeded();
-        } else {
-          if (mounted) setState(() => _homeMenuAnimations = false);
-
-          _motion.value = Offset.zero;
-
-          await _prefs?.setBool('m-home-menu-animations', false);
-          _showToast('Motion sensor unavailable', warning: true);
-        }
-      }
-
-      _showToast(
-        addedCount == 0
-            ? 'Backup has no new moments'
-            : 'Imported $addedCount new moments',
-        warning: addedCount == 0,
-      );
-      importTask.finish();
-      unawaited(_updateAndroidWidget());
-      return true;
-    } catch (_) {
-      _showToast(
-        'Import failed. The backup file looks damaged.',
-        warning: true,
-      );
-      return false;
-    }
-  }
-
-  Future<bool?> _confirmBackupImport(BackupDryRunSummary summary) {
-    return showGeneralDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close backup preview',
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (_, _, _) => BackupImportPreviewDialog(
-        p: p,
-        summary: summary,
-        largeText: _largeText,
-        blur:
-            _enableTranslucency &&
-            AdaptiveEngine().supportsBlur &&
-            !_reduceMotion,
-      ),
-    );
-  }
-
   DateTime? _getLatestRelapseTime() {
     if (_entries.isEmpty) return null;
     if (_sobrietyResetType == 'relapse') {
@@ -4264,202 +3438,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Widget _buildSobrietyStreakCard(Palette palette) {
-    final duration = _getSobrietyDuration();
-    final milestoneResult = getMilestoneProgress(duration);
-    final theme = _sobrietyMilestoneTheme;
-
-    // Pill label: first 24h → "Oh Clean", then milestone name
-    final String bigLabel;
-    if (duration.inHours < 24) {
-      bigLabel = 'Oh Clean';
-    } else {
-      bigLabel = milestoneResult.current != null
-          ? getMilestoneName(milestoneResult.current!, theme)
-          : 'Oh Clean';
-    }
-
-    final String milestoneDaysLeftText;
-    if (milestoneResult.next != null) {
-      final hoursLeft = (milestoneResult.next!.days * 24) - duration.inHours;
-      milestoneDaysLeftText = hoursLeft >= 24
-          ? 'Next in ${(hoursLeft / 24).ceil()}d'
-          : 'Next in ${hoursLeft}h';
-    } else {
-      milestoneDaysLeftText = 'Mastery achieved';
-    }
-
-    final String smallLabel;
-    final String shieldText = _streakShields > 0
-        ? ' • $_streakShields active'
-        : '';
-    if (duration.inDays == 0) {
-      final hours = duration.inHours;
-      smallLabel =
-          '$hours ${hours == 1 ? 'hr' : 'hrs'} clean$shieldText • $milestoneDaysLeftText';
-    } else {
-      final days = duration.inDays;
-      smallLabel =
-          '$days ${days == 1 ? 'day' : 'days'} clean$shieldText • $milestoneDaysLeftText';
-    }
-    final double progress = milestoneResult.progress;
-
-    final Color progressColor;
-    if (milestoneResult.current == null) {
-      progressColor = palette.orange;
-    } else {
-      final days = milestoneResult.current!.days;
-      if (days < 7) {
-        progressColor = palette.green;
-      } else if (days < 30) {
-        progressColor = palette.accent;
-      } else if (days < 90) {
-        progressColor = const Color(0xFFC77DFF);
-      } else {
-        progressColor = const Color(0xFFFFB703);
-      }
-    }
-
-    final String flameText = duration.inDays > 0
-        ? ' 🔥 ${duration.inDays}d'
-        : '';
-    final String displayLabel = '$bigLabel$flameText';
-
-    return PressableScale(
-      onTap: () {
-        if (milestoneResult.current != null) {
-          showMilestoneUnlockDialog(
-            context: context,
-            p: palette,
-            milestone: milestoneResult.current!,
-            themeId: theme,
-            streakDays: duration.inDays,
-            streakShields: _streakShields,
-          );
-        } else {
-          _openSettings(initialCategory: 'Sobriety Companion');
-        }
+    return HomeSobrietyStreakCard(
+      duration: _getSobrietyDuration(),
+      milestoneTheme: _sobrietyMilestoneTheme,
+      streakShields: _streakShields,
+      onTapMilestone: (milestone, streakDays) {
+        showMilestoneUnlockDialog(
+          context: context,
+          p: palette,
+          milestone: milestone,
+          themeId: _sobrietyMilestoneTheme,
+          streakDays: streakDays,
+          streakShields: _streakShields,
+        );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(999),
-        child: Stack(
-          children: [
-            // Background track
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: palette.surface2,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: palette.border, width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: progressColor.withValues(alpha: 0.08),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-            ),
-            // Progress fill
-            FractionallySizedBox(
-              widthFactor: progress.clamp(0.05, 1.0),
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: progressColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-            // Text content
-            SizedBox(
-              height: 60,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (smallLabel.isNotEmpty)
-                            Text(
-                              smallLabel,
-                              style: TextStyle(
-                                color: palette.text2,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 450),
-                            transitionBuilder: (child, animation) {
-                              return ScaleTransition(
-                                scale: Tween<double>(begin: 0.80, end: 1.0)
-                                    .animate(
-                                      CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.elasticOut,
-                                      ),
-                                    ),
-                                child: FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: Text(
-                              displayLabel,
-                              key: ValueKey(
-                                'streak-${duration.inDays}-$displayLabel',
-                              ),
-                              style: TextStyle(
-                                color: palette.text,
-                                fontSize: smallLabel.isEmpty ? 20 : 17,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.3,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _openUrgeSurfing,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: palette.accent.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.air_rounded,
-                          color: palette.accent,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: palette.text3,
-                      size: 18,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      onTapSettings: () => _openSettings(initialCategory: 'Sobriety Companion'),
+      onOpenUrgeSurfing: _openUrgeSurfing,
     );
   }
 
@@ -4532,93 +3526,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
       ),
     );
-  }
-
-  String _csvExport({DateTime? since}) {
-    final exportedAt = DateTime.now().toIso8601String();
-    final d = _csvDelimiter;
-    final buffer = StringBuffer(
-      'app${d}version${d}exported_at${d}id${d}timestamp${d}iso${d}date${d}time${d}type${d}note\n',
-    );
-    final rows =
-        _entries
-            .where(
-              (entry) =>
-                  since == null ||
-                  DateTime.fromMillisecondsSinceEpoch(
-                    entry.timestamp,
-                  ).isAfter(since),
-            )
-            .toList()
-          ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    for (final e in rows) {
-      final iso = DateTime.fromMillisecondsSinceEpoch(
-        e.timestamp,
-      ).toIso8601String();
-      final escapedNote = e.note.replaceAll('"', '""');
-      buffer.writeln(
-        '"NoteKar"$d"$appVersion"$d"$exportedAt"$d${e.id}$d${e.timestamp}$d'
-        '"$iso"$d"${e.date}"$d"${timeOnly(e.timestamp)}"$d"${e.type}"$d'
-        '"$escapedNote"',
-      );
-    }
-    return buffer.toString();
-  }
-
-  String _jsonExport() {
-    final rows = [..._entries]
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    return const JsonEncoder.withIndent('  ').convert({
-      'app': 'NoteKar',
-      'version': appVersion,
-      'exportedAt': DateTime.now().toIso8601String(),
-      'entries': rows
-          .map(
-            (e) => {
-              ...e.toJson(),
-              'iso': DateTime.fromMillisecondsSinceEpoch(
-                e.timestamp,
-              ).toIso8601String(),
-            },
-          )
-          .toList(),
-    });
-  }
-
-  String _backupExport() {
-    final rows = [..._entries]
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    return const JsonEncoder.withIndent('  ').convert({
-      'app': 'NoteKar',
-      'kind': 'backup',
-      'version': appVersion,
-      'build': kAppBuildNumber,
-      'exportedAt': DateTime.now().toIso8601String(),
-      'settings': {
-        'theme': _theme,
-        'defaultMode': _defaultMode,
-        'tapDelay': _tapDelay,
-        'accentColor': _accentColor,
-        'appIconStyle': _appIconStyle,
-        'hapticStyle': _hapticStyle,
-        'historyDensity': _historyDensity,
-        'backupReminderDays': _backupReminderDays,
-        'homeMenuPill': _homeMenuPill,
-        'homeMenuAnimations': _homeMenuAnimations,
-        'showHistoryText': _showHistoryText,
-        'privacyLockDelayMinutes': _privacyLockDelayMinutes,
-      },
-      'entries': rows
-          .map(
-            (e) => {
-              ...e.toJson(),
-              'iso': DateTime.fromMillisecondsSinceEpoch(
-                e.timestamp,
-              ).toIso8601String(),
-            },
-          )
-          .toList(),
-    });
   }
 
   @override
@@ -4825,6 +3732,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       AdaptiveEngine().supportsBlur &&
                       !_reduceMotion,
                 ),
+                if (!_headerExpanded && _entries.isNotEmpty) ...[
+                  HomeMomentumCard(
+                    trackedDuration: _computeTodayTrackedDuration(),
+                    momentsCount: _computeTodayMomentsCount(),
+                    currentStreak: StreakGuardianService.calculateStreak(
+                      _entries.map((e) => e.date).toSet(),
+                    ),
+                    bankedGraceDays:
+                        _prefs?.getInt('notekar.streak_grace_banked') ?? 1,
+                    activeCategory: _activeCategory,
+                    isSessionOngoing:
+                        _mode == 'two-way' &&
+                        (_sessionStart != null || _inout == 'out'),
+                    onTap: _openIntelligenceHub,
+                  ),
+                ],
               ],
             ),
           ),

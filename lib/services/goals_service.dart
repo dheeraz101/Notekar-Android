@@ -92,32 +92,54 @@ class GoalsService {
     final startMs = startWindow.millisecondsSinceEpoch;
     final endMs = endWindow.millisecondsSinceEpoch;
 
-    // Filter moments within timeframe
-    final timeFiltered = moments.where((m) {
-      return m.timestamp >= startMs && m.timestamp < endMs;
-    }).toList()..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    final chronoSorted = List<Moment>.from(moments)
+      ..sort((a, b) {
+        final cmp = a.timestamp.compareTo(b.timestamp);
+        if (cmp != 0) return cmp;
+        if (a.type == 'in' && b.type != 'in') return -1;
+        if (b.type == 'in' && a.type != 'in') return 1;
+        return a.id.compareTo(b.id);
+      });
 
     int trackedMs = 0;
     int sessionCount = 0;
     int singleCount = 0;
 
-    // Evaluate sessions (in/out pairs)
     Moment? currentIn;
-    for (final m in timeFiltered) {
+    for (final m in chronoSorted) {
       if (m.type == 'in') {
-        currentIn = m;
-      } else if (m.type == 'out' && currentIn != null) {
-        if (_matchesCriteria(currentIn, goal, isSession: true)) {
-          final sessionDur = math.max(0, m.timestamp - currentIn.timestamp);
-          trackedMs += sessionDur;
-          sessionCount++;
+        if (currentIn != null &&
+            _matchesCriteria(currentIn, goal, isSession: true)) {
+          // Account for unclosed previous session interrupted by new IN
+          final sStart = currentIn.timestamp;
+          final sEnd = m.timestamp;
+          final overlapStart = math.max(startMs, sStart);
+          final overlapEnd = math.min(endMs, sEnd);
+          if (overlapEnd > overlapStart) {
+            trackedMs += (overlapEnd - overlapStart);
+            sessionCount++;
+          }
         }
-        currentIn = null;
+        currentIn = m;
+      } else if (m.type == 'out') {
+        if (currentIn != null) {
+          if (_matchesCriteria(currentIn, goal, isSession: true)) {
+            final sStart = currentIn.timestamp;
+            final sEnd = m.timestamp;
+            final overlapStart = math.max(startMs, sStart);
+            final overlapEnd = math.min(endMs, sEnd);
+            if (overlapEnd > overlapStart) {
+              trackedMs += (overlapEnd - overlapStart);
+              sessionCount++;
+            }
+          }
+          currentIn = null;
+        }
       } else if (m.type == 'single') {
-        if (_matchesCriteria(m, goal, isSession: false)) {
-          // Default intentional single moment contribution: 15 minutes
-          trackedMs += 15 * 60 * 1000;
-          singleCount++;
+        if (m.timestamp >= startMs && m.timestamp < endMs) {
+          if (_matchesCriteria(m, goal, isSession: false)) {
+            singleCount++;
+          }
         }
       }
     }
@@ -125,12 +147,14 @@ class GoalsService {
     // Account for ongoing live session if active
     if (currentIn != null &&
         _matchesCriteria(currentIn, goal, isSession: true)) {
-      final ongoingDur = math.max(
-        0,
-        now.millisecondsSinceEpoch - currentIn.timestamp,
-      );
-      trackedMs += ongoingDur;
-      sessionCount++;
+      final sStart = currentIn.timestamp;
+      final sEnd = now.millisecondsSinceEpoch;
+      final overlapStart = math.max(startMs, sStart);
+      final overlapEnd = math.min(endMs, sEnd);
+      if (overlapEnd > overlapStart) {
+        trackedMs += (overlapEnd - overlapStart);
+        sessionCount++;
+      }
     }
 
     final trackedMinutes = (trackedMs / (1000 * 60)).round();

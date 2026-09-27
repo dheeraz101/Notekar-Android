@@ -83,14 +83,18 @@ class RiskRadarService {
     ];
     final peakDayName = dayNames[maxDay];
 
+    String formatHour12(int h) {
+      final hour = h % 24;
+      if (hour == 0) return '12 AM';
+      if (hour < 12) return '$hour AM';
+      if (hour == 12) return '12 PM';
+      return '${hour - 12} PM';
+    }
+
     final startHour = maxHour;
     final endHour = (maxHour + 3) % 24;
-    final formatStart = startHour == 0
-        ? '12 AM'
-        : (startHour > 12 ? '${startHour - 12} PM' : '$startHour AM');
-    final formatEnd = endHour == 0
-        ? '12 AM'
-        : (endHour > 12 ? '${endHour - 12} PM' : '$endHour AM');
+    final formatStart = formatHour12(startHour);
+    final formatEnd = formatHour12(endHour);
     final peakHourRange = '$formatStart – $formatEnd';
 
     // Compute Risk Score

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:notekar/models/moment.dart';
@@ -111,6 +113,105 @@ class MomentRepository {
     }
   }
 
+  static const String _autoSnapshotKey = 'notekar.auto_rolling_snapshot';
+  static const String _lastSnapshotTimeKey = 'notekar.last_auto_snapshot_ms';
+  static const String keyCorruptedFlag = 'notekar.database_corrupted_flag';
+  static const String keyRecoveredFromSnapshot =
+      'notekar.database_recovered_from_snapshot';
+
+  Future<void> _emergencyBackupCorruptedBox(String boxName) async {
+    try {
+      String? dataDirPath;
+      try {
+        const channel = MethodChannel('notekar/files');
+        dataDirPath = await channel.invokeMethod<String>('appDataDir');
+      } catch (_) {}
+      dataDirPath ??= Directory.systemTemp.path;
+
+      final dir = Directory(dataDirPath);
+      if (!dir.existsSync()) return;
+
+      final backupDir = Directory(
+        '${dir.path}${Platform.pathSeparator}corrupted_backups',
+      );
+      if (!backupDir.existsSync()) {
+        backupDir.createSync(recursive: true);
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final files = dir.listSync();
+      for (final f in files) {
+        if (f is File && f.path.contains(boxName)) {
+          final fileName = f.uri.pathSegments.last;
+          final dest = File(
+            '${backupDir.path}${Platform.pathSeparator}${timestamp}_$fileName',
+          );
+          f.copySync(dest.path);
+          _logger.warn('Emergency copy of corrupted box created: ${dest.path}');
+        }
+      }
+    } catch (e, stack) {
+      _logger.error(
+        'Failed to create emergency backup of corrupted box $boxName',
+        e,
+        stack,
+      );
+    }
+  }
+
+  Future<void> _attemptSnapshotRestore(Box<dynamic> box) async {
+    try {
+      final snapshotRaw = _prefs.getString(_autoSnapshotKey);
+      if (snapshotRaw == null || snapshotRaw.isEmpty) return;
+      final decoded = jsonDecode(snapshotRaw);
+      if (decoded is List && decoded.isNotEmpty) {
+        final Map<int, dynamic> entries = {};
+        int maxId = 0;
+        for (final item in decoded) {
+          if (item is Map) {
+            final m = Moment.fromJson(Map<String, dynamic>.from(item));
+            entries[m.id] = m.toJson();
+            if (m.id > maxId) maxId = m.id;
+          }
+        }
+        if (entries.isNotEmpty) {
+          await box.putAll(entries);
+          await _prefs.setInt(_nextIdKey, maxId + 1);
+          await _prefs.setBool(keyRecoveredFromSnapshot, true);
+          _logger.info(
+            'Successfully restored ${entries.length} moments from rolling snapshot after corruption',
+          );
+        }
+      }
+    } catch (e, stack) {
+      _logger.error(
+        'Failed restoring from snapshot after corruption',
+        e,
+        stack,
+      );
+    }
+  }
+
+  Future<void> triggerAutoSnapshotIfNeeded({bool force = false}) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final lastMs = _prefs.getInt(_lastSnapshotTimeKey) ?? 0;
+      if (!force && now - lastMs < const Duration(hours: 6).inMilliseconds) {
+        return;
+      }
+
+      final moments = getAllMoments();
+      if (moments.isEmpty) return;
+
+      final jsonList = moments.map((m) => m.toJson()).toList();
+      await _prefs.setString(_autoSnapshotKey, jsonEncode(jsonList));
+      await _prefs.setInt(_lastSnapshotTimeKey, now);
+      _logger.info('Auto-snapshot updated with ${moments.length} moments');
+    } catch (e, stack) {
+      _logger.error('Failed generating auto-snapshot', e, stack);
+    }
+  }
+
   Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
     if (_isInitialized) return;
     _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
@@ -118,7 +219,7 @@ class MomentRepository {
     final encryptionKey = await _getOrGenerateEncryptionKey();
     final cipher = encryptionKey != null ? HiveAesCipher(encryptionKey) : null;
 
-    // Database Corruption Recovery Wrapper
+    // Database Corruption Recovery Wrapper with Emergency Pre-wipe Backups
     try {
       _box = await Hive.openBox<dynamic>(
         _entryBoxName,
@@ -126,9 +227,15 @@ class MomentRepository {
       );
     } catch (e, stack) {
       _logger.error(
-        'Failed to open entry box due to corruption. Recreating...',
+        'Failed to open entry box due to corruption. Creating emergency backup & recreating...',
         e,
         stack,
+      );
+      await _emergencyBackupCorruptedBox(_entryBoxName);
+      await _prefs.setBool(keyCorruptedFlag, true);
+      await _prefs.setString(
+        'notekar.last_corrupted_time',
+        DateTime.now().toIso8601String(),
       );
       try {
         await Hive.deleteBoxFromDisk(_entryBoxName);
@@ -136,6 +243,8 @@ class MomentRepository {
           _entryBoxName,
           encryptionCipher: cipher,
         );
+        // Attempt automatic restore from rolling snapshot if available
+        await _attemptSnapshotRestore(_box);
       } catch (innerE, innerStack) {
         _logger.error(
           'Failed to recreate corrupted entry box.',
@@ -153,10 +262,11 @@ class MomentRepository {
       );
     } catch (e, stack) {
       _logger.error(
-        'Failed to open trash box due to corruption. Recreating...',
+        'Failed to open trash box due to corruption. Creating emergency backup & recreating...',
         e,
         stack,
       );
+      await _emergencyBackupCorruptedBox(_trashBoxName);
       try {
         await Hive.deleteBoxFromDisk(_trashBoxName);
         _trashBox = await Hive.openBox<dynamic>(
@@ -192,6 +302,7 @@ class MomentRepository {
       Future(() {
         getAllMoments();
         getTrashMoments();
+        triggerAutoSnapshotIfNeeded();
       }),
     );
 

@@ -153,7 +153,7 @@ class ExecutiveDashboardData {
       DashboardTimeframe.today => 1,
       DashboardTimeframe.week => 7,
       DashboardTimeframe.month => 30,
-      DashboardTimeframe.all => 90,
+      DashboardTimeframe.all => math.max(30, gridStats.totalDaysCount),
     };
     final conscious = Duration(hours: days * 10);
     final diff = conscious - totalTracked;
@@ -413,7 +413,8 @@ class DashboardMetricsService {
       _ => '10 PM – 6 AM',
     };
 
-    final headline = 'You are $peakPct% more active during $peak ($peakRange)';
+    final headline =
+        'Peak Focus: $peak ($peakRange) accounts for $peakPct% of tracked activity';
 
     final slots = [
       TimeSlotStat(
@@ -528,9 +529,8 @@ class DashboardMetricsService {
         } else if (it is TimelineSingleItem) {
           final cat = _extractCategory(it.moment.note);
           catCounts[cat] = (catCounts[cat] ?? 0) + 1;
-          // Approximate 15m for standalone singles if no duration
-          catMs[cat] =
-              (catMs[cat] ?? 0) + const Duration(minutes: 15).inMilliseconds;
+          // Standalone singles are instantaneous moments (0 tracked duration)
+          catMs[cat] = catMs[cat] ?? 0;
         }
       }
     }
@@ -540,8 +540,15 @@ class DashboardMetricsService {
     }
 
     final totalMs = catMs.values.fold<int>(0, (a, b) => a + b);
+    final totalCount = catCounts.values.fold<int>(0, (a, b) => a + b);
     final sortedKeys = catMs.keys.toList()
-      ..sort((a, b) => (catMs[b] ?? 0).compareTo(catMs[a] ?? 0));
+      ..sort((a, b) {
+        if (totalMs > 0) {
+          final cmp = (catMs[b] ?? 0).compareTo(catMs[a] ?? 0);
+          if (cmp != 0) return cmp;
+        }
+        return (catCounts[b] ?? 0).compareTo(catCounts[a] ?? 0);
+      });
 
     final colors = [
       p.accent,
@@ -556,14 +563,17 @@ class DashboardMetricsService {
     for (int i = 0; i < sortedKeys.length; i++) {
       final cat = sortedKeys[i];
       final ms = catMs[cat] ?? 0;
-      final pct = totalMs > 0 ? ((ms / totalMs) * 100).round() : 0;
+      final cnt = catCounts[cat] ?? 0;
+      final pct = totalMs > 0
+          ? ((ms / totalMs) * 100).round()
+          : (totalCount > 0 ? ((cnt / totalCount) * 100).round() : 0);
       result.add(
         FocusCategoryStat(
           name: cat,
           color: colors[i % colors.length],
           duration: Duration(milliseconds: ms),
           percentage: pct,
-          count: catCounts[cat] ?? 0,
+          count: cnt,
         ),
       );
     }

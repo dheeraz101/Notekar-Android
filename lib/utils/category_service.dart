@@ -386,7 +386,7 @@ class CategoryService {
       final categoryLabel = cat ?? 'General';
       final itemMs = switch (item) {
         TimelineSessionItem s => s.duration.inMilliseconds,
-        TimelineSingleItem _ => const Duration(minutes: 15).inMilliseconds,
+        TimelineSingleItem _ => 0,
         TimelineGapItem _ => 0,
       };
 

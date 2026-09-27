@@ -127,19 +127,19 @@ void main() {
         createdAt: nowMs - 1000000,
       );
 
-      // Create two single moments matching 'Study' (each = 15m)
+      // Create a 30-minute session matching 'Study'
       final moments = [
         Moment(
           id: 10,
-          timestamp: nowMs - 3000,
-          type: 'single',
+          timestamp: nowMs - 30 * 60 * 1000,
+          type: 'in',
           category: 'Study',
           date: '2026-09-25',
         ),
         Moment(
           id: 11,
-          timestamp: nowMs - 1000,
-          type: 'single',
+          timestamp: nowMs,
+          type: 'out',
           category: 'Study',
           date: '2026-09-25',
         ),
@@ -169,28 +169,42 @@ void main() {
         );
 
         final moments = [
-          // Moment logged yesterday before goal was created (must NOT be counted)
+          // Session logged yesterday before goal was created (must NOT be counted)
           Moment(
             id: 1,
             timestamp: yesterday.millisecondsSinceEpoch + 3600000,
-            type: 'single',
+            type: 'in',
             category: 'Work',
             date: 'yesterday',
           ),
-          // Moment logged today after creation day start (must be counted)
           Moment(
             id: 2,
+            timestamp: yesterday.millisecondsSinceEpoch + 5400000, // 30m
+            type: 'out',
+            category: 'Work',
+            date: 'yesterday',
+          ),
+          // Session logged today after creation day start (must be counted)
+          Moment(
+            id: 3,
             timestamp: todayStart.millisecondsSinceEpoch + 7200000,
-            type: 'single',
+            type: 'in',
+            category: 'Work',
+            date: 'today',
+          ),
+          Moment(
+            id: 4,
+            timestamp: todayStart.millisecondsSinceEpoch + 9000000, // 30m
+            type: 'out',
             category: 'Work',
             date: 'today',
           ),
         ];
 
         final progress = service.calculateProgress(goal, moments);
-        // Only the single moment from today (15m) should count
-        expect(progress.trackedMinutes, 15);
-        expect(progress.remainingMinutes, 105);
+        // Only the session from today (30m) should count
+        expect(progress.trackedMinutes, 30);
+        expect(progress.remainingMinutes, 90);
         expect(progress.isCompleted, isFalse);
       },
     );

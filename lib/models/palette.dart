@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Palette {
-  Palette({
+class Palette extends ThemeExtension<Palette> {
+  const Palette({
     required this.name,
     required this.bg,
     required this.surface,
@@ -19,6 +19,7 @@ class Palette {
     required this.blue,
   });
 
+  @override
   Palette copyWith({
     String? name,
     Color? bg,
@@ -55,6 +56,28 @@ class Palette {
     );
   }
 
+  @override
+  Palette lerp(ThemeExtension<Palette>? other, double t) {
+    if (other is! Palette) return this;
+    return Palette(
+      name: t < 0.5 ? name : other.name,
+      bg: Color.lerp(bg, other.bg, t) ?? bg,
+      surface: Color.lerp(surface, other.surface, t) ?? surface,
+      surface2: Color.lerp(surface2, other.surface2, t) ?? surface2,
+      surface3: Color.lerp(surface3, other.surface3, t) ?? surface3,
+      border: Color.lerp(border, other.border, t) ?? border,
+      text: Color.lerp(text, other.text, t) ?? text,
+      text2: Color.lerp(text2, other.text2, t) ?? text2,
+      text3: Color.lerp(text3, other.text3, t) ?? text3,
+      clock: Color.lerp(clock, other.clock, t) ?? clock,
+      accent: Color.lerp(accent, other.accent, t) ?? accent,
+      green: Color.lerp(green, other.green, t) ?? green,
+      orange: Color.lerp(orange, other.orange, t) ?? orange,
+      red: Color.lerp(red, other.red, t) ?? red,
+      blue: Color.lerp(blue, other.blue, t) ?? blue,
+    );
+  }
+
   final String name;
   final Color bg;
   final Color surface;
@@ -71,7 +94,12 @@ class Palette {
   final Color red;
   final Color blue;
 
-  bool get isDark => name != 'light';
+  bool get isDark => name != 'light' && name != 'eink';
+}
+
+extension PaletteContextExtension on BuildContext {
+  Palette get palette =>
+      Theme.of(this).extension<Palette>() ?? paletteFor('dark');
 }
 
 Palette paletteFor(

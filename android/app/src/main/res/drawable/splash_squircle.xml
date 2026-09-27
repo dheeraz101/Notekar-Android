@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Elegant Apple-style Squircle Background with subtle border -->
+    <!-- Rounded rect from (14, 14) to (94, 94) with 22dp radius -->
+    <path
+        android:pathData="M 36,14 L 72,14 A 22,22 0 0 1 94,36 L 94,72 A 22,22 0 0 1 72,94 L 36,94 A 22,22 0 0 1 14,72 L 14,36 A 22,22 0 0 1 36,14 Z"
+        android:fillColor="#121318"
+        android:strokeColor="#242633"
+        android:strokeWidth="1.5" />
+
+    <!-- Centered NoteKar Glyph scaled 1.25x -->
+    <group
+        android:translateX="29"
+        android:translateY="29"
+        android:scaleX="1.25"
+        android:scaleY="1.25">
+        <path
+            android:pathData="M17.5 8L23 10.5Q20.5 12 24 13.5L24.5 19L25 14Q31.4 11.7 29 19.5L28 23.5L29 30Q23 32.3 25 25.5L24 25.5Q26.6 32.8 20.5 31L19 29.5L19 12L16 12.5L16 31L12 31L12 11.5L14.5 9L17.5 8Z"
+            android:fillColor="#FFFFFFFF" />
+    </group>
+</vector>

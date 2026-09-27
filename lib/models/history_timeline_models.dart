@@ -153,7 +153,7 @@ class TimelineDaySection {
       final cat = it.category ?? 'General';
       final itemMs = switch (it) {
         TimelineSessionItem s => s.duration.inMilliseconds,
-        TimelineSingleItem _ => const Duration(minutes: 15).inMilliseconds,
+        TimelineSingleItem _ => 0,
         TimelineGapItem _ => 0,
       };
       if (itemMs > 0) {

@@ -224,36 +224,38 @@ void main() {
       },
     );
 
-    test('Single moments receive calibrated intentional focus credit', () {
-      // 4 single moments today = 4 * 15m = 60m (1h)
-      final entries = List.generate(
-        4,
-        (i) => Moment(
-          id: i + 1,
-          timestamp: referenceNow
-              .subtract(Duration(hours: 4 - i))
-              .millisecondsSinceEpoch,
-          type: 'single',
-          date: '2026-09-08',
-          note: 'Focus checkpoint $i',
-        ),
-      );
+    test(
+      'Single moments are recorded as discrete check-ins without artificial duration',
+      () {
+        final entries = List.generate(
+          4,
+          (i) => Moment(
+            id: i + 1,
+            timestamp: referenceNow
+                .subtract(Duration(hours: 4 - i))
+                .millisecondsSinceEpoch,
+            type: 'single',
+            date: '2026-09-08',
+            note: 'Focus checkpoint $i',
+          ),
+        );
 
-      final summary = LifeAuditService.calculate(
-        entries: entries,
-        timeframe: LifeAuditTimeframe.today,
-        sleepHours: 10.0,
-        essentialsHours: 4.0,
-        referenceNow: referenceNow,
-      );
+        final summary = LifeAuditService.calculate(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.today,
+          sleepHours: 10.0,
+          essentialsHours: 4.0,
+          referenceNow: referenceNow,
+        );
 
-      expect(summary.totalTrackedDuration.inMinutes, 60);
-      expect(
-        summary.totalWastedDuration.inMinutes,
-        540,
-      ); // 10h - 1h = 9h (540m)
-      expect(summary.intentionalityRatio, 10.0); // 1h / 10h = 10%
-    });
+        expect(summary.totalTrackedDuration.inMinutes, 0);
+        expect(
+          summary.totalWastedDuration.inMinutes,
+          600,
+        ); // 10h conscious window
+        expect(summary.intentionalityRatio, 0.0);
+      },
+    );
 
     test(
       'Ongoing live session without out moment is credited in real time',

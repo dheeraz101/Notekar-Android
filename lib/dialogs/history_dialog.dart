@@ -15,6 +15,7 @@ import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
@@ -486,6 +487,31 @@ class _HistoryDialogState extends State<HistoryDialog> {
                             size: 19,
                             color: widget.p.text,
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: 'Executive Intelligence Hub'.localized(context),
+                    child: PressableScale(
+                      onTap: () {
+                        Navigator.of(
+                          context,
+                        ).push(ExecutiveIntelligenceHubScreen.route());
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          CupertinoIcons.chart_pie,
+                          color: widget.p.accent,
+                          size: 19,
                         ),
                       ),
                     ),

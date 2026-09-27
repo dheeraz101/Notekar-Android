@@ -168,11 +168,16 @@ class StreakGuardianService {
       }
     }
 
-    // Bank new grace days for every 14 days of streak (max 2 banked)
+    // Bank new grace days for every 14 days of current unbroken streak (max 2 banked)
     final earnedGraceTotal = (streak / 14).floor();
     if (earnedGraceTotal > lastEarnedThreshold) {
-      banked = math.min(2, banked + (earnedGraceTotal - lastEarnedThreshold));
+      final newlyEarned = earnedGraceTotal - lastEarnedThreshold;
+      banked = math.min(2, banked + newlyEarned);
       await prefs.setInt(_keyBankedGrace, banked);
+      await prefs.setInt(_keyHighestEarnedMilestone, earnedGraceTotal);
+    } else if (earnedGraceTotal < lastEarnedThreshold) {
+      // Streak broken or reset: synchronize milestone tracking with the current streak
+      // so subsequent 14-day milestones on the new streak will appropriately award grace days.
       await prefs.setInt(_keyHighestEarnedMilestone, earnedGraceTotal);
     }
 

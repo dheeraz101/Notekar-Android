@@ -140,9 +140,16 @@ class QuickNoteActivity : Activity() {
             } else {
                 val jsonString = flutterPrefs.getString("flutter.custom_note_tags", null)
                 if (jsonString != null && jsonString.startsWith("[")) {
-                    val cleaned = jsonString.removeSurrounding("[", "]").replace("\"", "")
-                    if (cleaned.isNotEmpty()) {
-                        customTags.addAll(cleaned.split(",").map { it.trim() })
+                    try {
+                        val jsonArray = org.json.JSONArray(jsonString)
+                        for (i in 0 until jsonArray.length()) {
+                            val tag = jsonArray.optString(i)?.trim()
+                            if (!tag.isNullOrEmpty()) {
+                                customTags.add(tag)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             }
