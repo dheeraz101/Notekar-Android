@@ -8,7 +8,6 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
-import 'package:notekar/widgets/home_momentum_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/zen_day_gauge.dart';
 
@@ -416,7 +415,6 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
             activeCategory: widget.activeCategory,
             onSelectCategory: (cat) {
               widget.onSelectCategory(cat);
-              // Do not close immediately, let them see active change
             },
             onAddCategory: widget.onAddCategory,
             onManageCategories: widget.onManageCategories,
@@ -425,81 +423,188 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
 
           const SizedBox(height: 10),
 
-          // Today's Momentum Card inside expanded sheet
-          HomeMomentumCard(
-            trackedDuration: displayDuration,
-            momentsCount: momentsCount,
-            currentStreak: widget.currentStreak,
-            bankedGraceDays: widget.bankedGraceDays,
-            activeCategory: widget.activeCategory,
-            isSessionOngoing: widget.isSessionOngoing,
-            margin: EdgeInsets.zero,
+          // Unified Minimal Momentum & Conscious Card
+          PressableScale(
             onTap: () {
               _toggleExpanded();
               widget.onOpenIntelligenceHub?.call();
             },
-          ),
-
-          const SizedBox(height: 10),
-
-          // Circadian Progress Bar
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Today: ${_formatDuration(displayDuration)} tracked',
-                          style: TextStyle(
-                            color: p.text2,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '$intPercent% Conscious',
-                          style: TextStyle(
-                            color: p.accent,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        value: ratio,
-                        minHeight: 4,
-                        backgroundColor: p.surface3,
-                        valueColor: AlwaysStoppedAnimation<Color>(p.accent),
-                      ),
-                    ),
-                  ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: p.surface3.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: widget.isSessionOngoing
+                      ? p.green.withValues(alpha: 0.5)
+                      : p.border.withValues(alpha: 0.4),
+                  width: widget.isSessionOngoing ? 1.2 : 0.8,
                 ),
               ),
-            ],
-          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Row 1: Duration, Active Category & Live status, Conscious % & Streak
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left: Live Duration & Category Tag
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.isSessionOngoing)
+                              Container(
+                                width: 7,
+                                height: 7,
+                                margin: const EdgeInsets.only(right: 6),
+                                decoration: BoxDecoration(
+                                  color: p.green,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: p.green.withValues(alpha: 0.6),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            Text(
+                              _formatDuration(displayDuration),
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              ' tracked',
+                              style: TextStyle(
+                                color: p.text2,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (widget.activeCategory != 'All' &&
+                                widget.activeCategory.isNotEmpty) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: meta.color.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  widget.activeCategory,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: meta.color,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      // Right: Conscious %, Streak & Chevron
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.currentStreak > 0) ...[
+                            Text(
+                              '🔥${widget.currentStreak}d',
+                              style: TextStyle(
+                                color: p.orange,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            if (widget.bankedGraceDays > 0) ...[
+                              const SizedBox(width: 3),
+                              Text(
+                                '🛡️${widget.bankedGraceDays}',
+                                style: TextStyle(
+                                  color: p.accent,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(width: 6),
+                          ],
+                          ZenDayRing(p: p, progress: ratio, size: 11),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$intPercent% Conscious',
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 10,
+                            color: p.text3.withValues(alpha: 0.6),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
 
-          const SizedBox(height: 8),
+                  // Row 2: Circadian Intentionality Progress Track
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: ratio,
+                      minHeight: 4,
+                      backgroundColor: p.surface2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        widget.isSessionOngoing ? p.green : p.accent,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 7),
 
-          // Day Rhythm Quick Micro-Blocks
-          Row(
-            children: [
-              _buildMicroRhythm('Morning', morningMs, p.orange),
-              const SizedBox(width: 4),
-              _buildMicroRhythm('Afternoon', afternoonMs, p.accent),
-              const SizedBox(width: 4),
-              _buildMicroRhythm('Evening', eveningMs, const Color(0xFFAF52DE)),
-              const SizedBox(width: 4),
-              _buildMicroRhythm('Night', nightMs, const Color(0xFF30B0C7)),
-            ],
+                  // Row 3: Day Rhythm Quick Micro-Blocks
+                  Row(
+                    children: [
+                      _buildMicroRhythm('Morning', morningMs, p.orange),
+                      const SizedBox(width: 4),
+                      _buildMicroRhythm('Afternoon', afternoonMs, p.accent),
+                      const SizedBox(width: 4),
+                      _buildMicroRhythm(
+                        'Evening',
+                        eveningMs,
+                        const Color(0xFFAF52DE),
+                      ),
+                      const SizedBox(width: 4),
+                      _buildMicroRhythm(
+                        'Night',
+                        nightMs,
+                        const Color(0xFF30B0C7),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

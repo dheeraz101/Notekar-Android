@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/models/goal.dart';
+import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
+import 'package:notekar/widgets/timeline_session_card.dart';
 import 'package:notekar/widgets/zen_doodle_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -147,9 +149,9 @@ void main() {
 
         // Check Apple grouped headers
         expect(find.text('GOAL TITLE'), findsOneWidget);
+        expect(find.text('Target Allocation'), findsOneWidget);
         expect(find.text('TIMEFRAME'), findsOneWidget);
         expect(find.text('CATEGORY SCOPE'), findsOneWidget);
-        expect(find.text('RECORDING MODE'), findsOneWidget);
 
         // Enter title
         await tester.enterText(
@@ -163,6 +165,100 @@ void main() {
 
         expect(savedResult, isNotNull);
         expect(savedResult!.title, 'Writing Memoir');
+      },
+    );
+
+    testWidgets(
+      'CreateOrEditGoalView selecting Custom Date timeframe exposes DEADLINE DATE selector',
+      (tester) async {
+        Goal? savedResult;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: CreateOrEditGoalView(
+                  p: p,
+                  onSave: (g) {
+                    savedResult = g;
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Switch to Custom Date
+        await tester.tap(find.text('Custom Date'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Target Deadline'), findsOneWidget);
+
+        await tester.enterText(
+          find.byType(CupertinoTextField),
+          'Thesis Completion',
+        );
+
+        await tester.tap(find.text('Save Goal'));
+        await tester.pumpAndSettle();
+
+        expect(savedResult, isNotNull);
+        expect(savedResult!.timeframe, GoalTimeframe.custom);
+        expect(savedResult!.targetDate, isNotNull);
+      },
+    );
+
+    testWidgets(
+      'TimelineSessionCard renders goal attribution badge when matching category goal exists',
+      (tester) async {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final testGoal = Goal(
+          id: 'focus_goal',
+          title: 'Master Flutter',
+          category: 'Focus',
+          targetMinutes: 120,
+          timeframe: GoalTimeframe.week,
+          createdAt: now,
+        );
+
+        final session = TimelineSessionItem(
+          inMoment: Moment(
+            id: 101,
+            timestamp: now - (30 * 60 * 1000), // 30 mins ago
+            type: 'in',
+            category: 'Focus',
+            date: '2026-09-27',
+          ),
+          outMoment: Moment(
+            id: 102,
+            timestamp: now,
+            type: 'out',
+            category: 'Focus',
+            date: '2026-09-27',
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: session,
+                goals: [testGoal],
+                onEditNote: () {},
+                onDeleteSession: () {},
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Verify that the goal attribution pill is visible with the goal title
+        expect(find.textContaining('Master Flutter'), findsOneWidget);
+        expect(find.textContaining('30m'), findsWidgets);
       },
     );
   });

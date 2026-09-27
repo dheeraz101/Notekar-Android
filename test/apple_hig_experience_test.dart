@@ -11,7 +11,6 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/widgets/dynamic_header_capsule.dart';
 import 'package:notekar/widgets/home_clock_complication.dart';
-import 'package:notekar/widgets/home_momentum_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -276,22 +275,21 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Resting capsule: HomeMomentumCard is not visible
-        expect(find.byType(HomeMomentumCard), findsNothing);
+        // Resting capsule: expanded unified rhythm content is not visible
+        expect(find.text('MODES & RHYTHM'), findsNothing);
 
         // Tap capsule to expand
         await tester.tap(find.byType(DynamicHeaderCapsule));
         await tester.pumpAndSettle();
 
-        // Expanded card now reveals HomeMomentumCard with Today's Momentum, streak, grace shield
-        expect(find.byType(HomeMomentumCard), findsOneWidget);
-        expect(find.text("TODAY'S MOMENTUM"), findsOneWidget);
-        expect(find.text('🔥 7'), findsOneWidget);
-        expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
-        expect(find.text('Insights'), findsOneWidget);
+        // Expanded card now reveals Unified Rhythm card with streak, grace shield, conscious %
+        expect(find.text('MODES & RHYTHM'), findsOneWidget);
+        expect(find.text('🔥7d'), findsOneWidget);
+        expect(find.text('🛡️2'), findsOneWidget);
+        expect(find.textContaining('Conscious'), findsOneWidget);
 
-        // Tapping HomeMomentumCard triggers onOpenIntelligenceHub
-        await tester.tap(find.byType(HomeMomentumCard));
+        // Tapping unified rhythm card triggers onOpenIntelligenceHub
+        await tester.tap(find.textContaining('Conscious'));
         await tester.pumpAndSettle();
 
         expect(openedHub, isTrue);

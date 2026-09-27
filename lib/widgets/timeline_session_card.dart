@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -22,6 +23,7 @@ class TimelineSessionCard extends StatelessWidget {
     this.selected = false,
     this.compact = false,
     this.rainbowCards = false,
+    this.goals,
   });
 
   final Palette p;
@@ -34,6 +36,29 @@ class TimelineSessionCard extends StatelessWidget {
   final bool selected;
   final bool compact;
   final bool rainbowCards;
+  final List<Goal>? goals;
+
+  Goal? _findMatchingGoal() {
+    if (goals == null || goals!.isEmpty) return null;
+    final cat = session.category;
+    if (cat != null && cat.trim().isNotEmpty) {
+      return goals!
+          .where(
+            (g) =>
+                !g.isArchived &&
+                g.category != null &&
+                g.category!.toLowerCase() == cat.toLowerCase(),
+          )
+          .firstOrNull;
+    }
+    return goals!
+        .where(
+          (g) =>
+              !g.isArchived &&
+              (g.category == null || g.category!.trim().isEmpty),
+        )
+        .firstOrNull;
+  }
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -52,6 +77,7 @@ class TimelineSessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOngoing = session.isOngoing;
+    final matchingGoal = _findMatchingGoal();
     final durationStr = _formatDuration(session.duration);
     final hasNote = session.note.isNotEmpty;
     final cardRadius = BorderRadius.circular(compact ? 12 : 16);
@@ -343,13 +369,27 @@ class TimelineSessionCard extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (session.category != null &&
-                              session.category!.trim().isNotEmpty) ...[
-                            _SessionCategoryBadge(
-                              p: p,
-                              category: session.category!,
-                              compact: compact,
-                            ),
+                          if ((session.category != null &&
+                                  session.category!.trim().isNotEmpty) ||
+                              matchingGoal != null) ...[
+                            if (session.category != null &&
+                                session.category!.trim().isNotEmpty)
+                              _SessionCategoryBadge(
+                                p: p,
+                                category: session.category!,
+                                compact: compact,
+                              ),
+                            if (matchingGoal != null) ...[
+                              if (session.category != null &&
+                                  session.category!.trim().isNotEmpty)
+                                SizedBox(width: compact ? 4 : 5),
+                              _SessionGoalBadge(
+                                p: p,
+                                goalTitle: matchingGoal.title,
+                                durationStr: durationStr,
+                                compact: compact,
+                              ),
+                            ],
                             SizedBox(width: compact ? 5 : 7),
                           ] else ...[
                             Padding(
@@ -426,6 +466,7 @@ class _SessionCategoryBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final meta = getCategoryMeta(category, p);
     return Container(
+      constraints: BoxConstraints(maxWidth: compact ? 90 : 120),
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 5 : 7,
         vertical: compact ? 1.5 : 2.5,
@@ -443,12 +484,66 @@ class _SessionCategoryBadge extends StatelessWidget {
         children: [
           Icon(meta.icon, size: compact ? 9 : 11, color: meta.color),
           const SizedBox(width: 3.5),
-          Text(
-            category,
-            style: TextStyle(
-              color: meta.color,
-              fontSize: compact ? 9.5 : 10.5,
-              fontWeight: FontWeight.w700,
+          Flexible(
+            child: Text(
+              category,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: meta.color,
+                fontSize: compact ? 9.5 : 10.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionGoalBadge extends StatelessWidget {
+  const _SessionGoalBadge({
+    required this.p,
+    required this.goalTitle,
+    required this.durationStr,
+    required this.compact,
+  });
+
+  final Palette p;
+  final String goalTitle;
+  final String durationStr;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(maxWidth: compact ? 110 : 140),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 5 : 6.5,
+        vertical: compact ? 1.5 : 2.5,
+      ),
+      decoration: BoxDecoration(
+        color: p.accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: p.accent.withValues(alpha: 0.35), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.flag_rounded, size: compact ? 9.5 : 11, color: p.accent),
+          const SizedBox(width: 3.5),
+          Flexible(
+            child: Text(
+              '$goalTitle • $durationStr',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: p.accent,
+                fontSize: compact ? 9.5 : 10.5,
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],

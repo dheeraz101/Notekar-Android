@@ -2,10 +2,4 @@
 <!-- NoteKar Launch Splash Background -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/bg_dark" />
-
-    <item
-        android:width="96dp"
-        android:height="96dp"
-        android:gravity="center"
-        android:drawable="@drawable/splash_squircle" />
 </layer-list>

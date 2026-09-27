@@ -83,6 +83,25 @@ class GoalsService {
       case GoalTimeframe.year:
         startWindow = DateTime(now.year, 1, 1);
         endWindow = DateTime(now.year + 1, 1, 1);
+      case GoalTimeframe.custom:
+        final createdDt = DateTime.fromMillisecondsSinceEpoch(goal.createdAt);
+        startWindow = DateTime(createdDt.year, createdDt.month, createdDt.day);
+        if (goal.targetDate != null) {
+          final targetDt = DateTime.fromMillisecondsSinceEpoch(
+            goal.targetDate!,
+          );
+          endWindow = DateTime(
+            targetDt.year,
+            targetDt.month,
+            targetDt.day,
+            23,
+            59,
+            59,
+            999,
+          );
+        } else {
+          endWindow = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
+        }
       case GoalTimeframe.none:
         final createdDt = DateTime.fromMillisecondsSinceEpoch(goal.createdAt);
         startWindow = DateTime(createdDt.year, createdDt.month, createdDt.day);

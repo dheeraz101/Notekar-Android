@@ -7,12 +7,14 @@ enum GoalTimeframe {
   week,
   month,
   year,
+  custom,
   none;
 
   String get label => switch (this) {
     GoalTimeframe.week => 'Weekly',
     GoalTimeframe.month => 'Monthly',
     GoalTimeframe.year => 'Yearly',
+    GoalTimeframe.custom => 'Custom Date',
     GoalTimeframe.none => 'All Time',
   };
 
@@ -21,6 +23,7 @@ enum GoalTimeframe {
       'week' => GoalTimeframe.week,
       'month' => GoalTimeframe.month,
       'year' => GoalTimeframe.year,
+      'custom' => GoalTimeframe.custom,
       _ => GoalTimeframe.none,
     };
   }
@@ -35,6 +38,7 @@ class Goal {
     this.mode,
     required this.targetMinutes,
     this.timeframe = GoalTimeframe.week,
+    this.targetDate,
     required this.createdAt,
     this.isArchived = false,
   });
@@ -42,9 +46,10 @@ class Goal {
   final String id;
   final String title;
   final String? category; // null = all categories
-  final String? mode; // 'single', 'two-way', or null = all modes
+  final String? mode; // 'two-way' or null = sessions
   final int targetMinutes;
   final GoalTimeframe timeframe;
+  final int? targetDate; // epoch ms for custom target deadline
   final int createdAt; // epoch ms
   final bool isArchived;
 
@@ -57,6 +62,7 @@ class Goal {
     String? mode,
     int? targetMinutes,
     GoalTimeframe? timeframe,
+    int? targetDate,
     int? createdAt,
     bool? isArchived,
   }) {
@@ -67,6 +73,7 @@ class Goal {
       mode: mode ?? this.mode,
       targetMinutes: targetMinutes ?? this.targetMinutes,
       timeframe: timeframe ?? this.timeframe,
+      targetDate: targetDate ?? this.targetDate,
       createdAt: createdAt ?? this.createdAt,
       isArchived: isArchived ?? this.isArchived,
     );
@@ -79,6 +86,7 @@ class Goal {
     'mode': mode,
     'targetMinutes': targetMinutes,
     'timeframe': timeframe.name,
+    'targetDate': targetDate,
     'createdAt': createdAt,
     'isArchived': isArchived,
   };
@@ -91,6 +99,7 @@ class Goal {
       mode: json['mode'] as String?,
       targetMinutes: (json['targetMinutes'] as num?)?.toInt() ?? 600,
       timeframe: GoalTimeframe.fromString(json['timeframe'] as String?),
+      targetDate: (json['targetDate'] as num?)?.toInt(),
       createdAt:
           (json['createdAt'] as num?)?.toInt() ??
           DateTime.now().millisecondsSinceEpoch,
@@ -140,6 +149,17 @@ class GoalProgress {
         final totalDays = isLeap ? 366 : 365;
         final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays + 1;
         return math.max(1, totalDays - dayOfYear + 1);
+      case GoalTimeframe.custom:
+        if (goal.targetDate != null) {
+          final target = DateTime.fromMillisecondsSinceEpoch(goal.targetDate!);
+          final diff = DateTime(
+            target.year,
+            target.month,
+            target.day,
+          ).difference(DateTime(now.year, now.month, now.day)).inDays;
+          return math.max(1, diff + 1);
+        }
+        return 30;
       case GoalTimeframe.none:
         return 30; // standard 30-day pace horizon for open-ended targets
     }
@@ -168,6 +188,8 @@ class GoalProgress {
         return 'Need $dailyPaceFormatted/day ($days ${days == 1 ? 'day' : 'days'} left this month)';
       case GoalTimeframe.year:
         return 'Need $dailyPaceFormatted/day ($days ${days == 1 ? 'day' : 'days'} left this year)';
+      case GoalTimeframe.custom:
+        return 'Need $dailyPaceFormatted/day ($days ${days == 1 ? 'day' : 'days'} left)';
       case GoalTimeframe.none:
         return 'Need $dailyPaceFormatted/day (at 30-day pace)';
     }
