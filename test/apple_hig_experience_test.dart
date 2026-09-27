@@ -11,6 +11,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/widgets/dynamic_header_capsule.dart';
 import 'package:notekar/widgets/home_clock_complication.dart';
+import 'package:notekar/widgets/home_momentum_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -232,6 +233,70 @@ void main() {
       expect(expandedState, isFalse);
       expect(find.byIcon(CupertinoIcons.chevron_down), findsOneWidget);
     });
+
+    testWidgets(
+      'Reveals Today Momentum card inside expanded capsule and routes to Intelligence Hub',
+      (tester) async {
+        final now = DateTime.now();
+        final todayDate = dateKey(now);
+        final List<Moment> entries = [
+          Moment(
+            id: 1,
+            type: 'out',
+            timestamp: now
+                .subtract(const Duration(minutes: 45))
+                .millisecondsSinceEpoch,
+            note: 'Design Polish',
+            date: todayDate,
+            category: 'Design',
+          ),
+        ];
+
+        bool openedHub = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: DynamicHeaderCapsule(
+                  p: testPalette,
+                  entries: entries,
+                  categories: const ['Design', 'Engineering'],
+                  activeCategory: 'All',
+                  onSelectCategory: (_) {},
+                  onAddCategory: () {},
+                  currentStreak: 7,
+                  bankedGraceDays: 2,
+                  isSessionOngoing: false,
+                  onOpenIntelligenceHub: () => openedHub = true,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Resting capsule: HomeMomentumCard is not visible
+        expect(find.byType(HomeMomentumCard), findsNothing);
+
+        // Tap capsule to expand
+        await tester.tap(find.byType(DynamicHeaderCapsule));
+        await tester.pumpAndSettle();
+
+        // Expanded card now reveals HomeMomentumCard with Today's Momentum, streak, grace shield
+        expect(find.byType(HomeMomentumCard), findsOneWidget);
+        expect(find.text("TODAY'S MOMENTUM"), findsOneWidget);
+        expect(find.text('🔥 7'), findsOneWidget);
+        expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
+        expect(find.text('Insights'), findsOneWidget);
+
+        // Tapping HomeMomentumCard triggers onOpenIntelligenceHub
+        await tester.tap(find.byType(HomeMomentumCard));
+        await tester.pumpAndSettle();
+
+        expect(openedHub, isTrue);
+      },
+    );
   });
 
   group('HomeClockComplication Widget', () {

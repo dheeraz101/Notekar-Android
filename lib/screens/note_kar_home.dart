@@ -60,7 +60,6 @@ import 'package:notekar/widgets/feedback_widgets.dart';
 import 'package:notekar/widgets/home_clock_complication.dart';
 import 'package:notekar/widgets/home_coachmark_tooltip.dart';
 import 'package:notekar/widgets/home_minimal_toolbar_capsule.dart';
-import 'package:notekar/widgets/home_momentum_card.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
 import 'package:notekar/widgets/home_sobriety_streak_card.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
@@ -3731,23 +3730,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       _enableTranslucency &&
                       AdaptiveEngine().supportsBlur &&
                       !_reduceMotion,
-                ),
-                if (!_headerExpanded && _entries.isNotEmpty) ...[
-                  HomeMomentumCard(
-                    trackedDuration: _computeTodayTrackedDuration(),
-                    momentsCount: _computeTodayMomentsCount(),
-                    currentStreak: StreakGuardianService.calculateStreak(
-                      _entries.map((e) => e.date).toSet(),
-                    ),
-                    bankedGraceDays:
-                        _prefs?.getInt('notekar.streak_grace_banked') ?? 1,
-                    activeCategory: _activeCategory,
-                    isSessionOngoing:
-                        _mode == 'two-way' &&
-                        (_sessionStart != null || _inout == 'out'),
-                    onTap: _openIntelligenceHub,
+                  trackedDuration: _computeTodayTrackedDuration(),
+                  momentsCount: _computeTodayMomentsCount(),
+                  currentStreak: StreakGuardianService.calculateStreak(
+                    _entries.map((e) => e.date).toSet(),
                   ),
-                ],
+                  bankedGraceDays:
+                      _prefs?.getInt('notekar.streak_grace_banked') ?? 1,
+                  isSessionOngoing:
+                      _mode == 'two-way' &&
+                      (_sessionStart != null || _inout == 'out'),
+                  onOpenIntelligenceHub: _openIntelligenceHub,
+                ),
               ],
             ),
           ),

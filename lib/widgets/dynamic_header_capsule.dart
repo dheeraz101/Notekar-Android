@@ -8,6 +8,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
+import 'package:notekar/widgets/home_momentum_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/zen_day_gauge.dart';
 
@@ -16,8 +17,8 @@ import 'package:notekar/widgets/zen_day_gauge.dart';
 /// In resting state, it renders as a whisper-thin 32px pill:
 /// `[ 🟢 3h 12m Deep Focus • 78% Intentional ]`.
 ///
-/// Tapping smoothly expands it to reveal mode selection,
-/// circadian day rhythm, and manage actions.
+/// Tapping smoothly expands it into a card containing today's
+/// momentum metrics, streak shields, category modes, and circadian rhythm.
 class DynamicHeaderCapsule extends StatefulWidget {
   /// Apple Dynamic Island spring curve (stiffness: 300, damping: 28)
   static const Curve appleSpringCurve = Cubic(0.2, 0.9, 0.3, 1.0);
@@ -37,6 +38,12 @@ class DynamicHeaderCapsule extends StatefulWidget {
     this.onExpansionChanged,
     this.mode = 'two-way',
     this.onModeChanged,
+    this.trackedDuration,
+    this.momentsCount,
+    this.currentStreak = 0,
+    this.bankedGraceDays = 0,
+    this.isSessionOngoing = false,
+    this.onOpenIntelligenceHub,
   });
 
   final Palette p;
@@ -52,6 +59,12 @@ class DynamicHeaderCapsule extends StatefulWidget {
   final ValueChanged<bool>? onExpansionChanged;
   final String mode;
   final ValueChanged<String>? onModeChanged;
+  final Duration? trackedDuration;
+  final int? momentsCount;
+  final int currentStreak;
+  final int bankedGraceDays;
+  final bool isSessionOngoing;
+  final VoidCallback? onOpenIntelligenceHub;
 
   @override
   State<DynamicHeaderCapsule> createState() => _DynamicHeaderCapsuleState();
@@ -102,7 +115,9 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
     final sections = buildTimelineDaySections(todayMoments);
     final todaySection = sections.isNotEmpty ? sections.first : null;
     final totalTodayDuration =
-        todaySection?.totalTrackedDuration ?? Duration.zero;
+        widget.trackedDuration ??
+        (todaySection?.totalTrackedDuration ?? Duration.zero);
+    final totalMomentsCount = widget.momentsCount ?? todayMoments.length;
 
     // Filtered duration for active category
     Duration activeCatDuration = totalTodayDuration;
@@ -176,10 +191,15 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
               ? _buildExpandedCard(
                   context,
                   meta,
-                  totalTodayDuration,
+                  isAll ? totalTodayDuration : activeCatDuration,
                   intPercent,
                   intentionalityRatio,
                   todaySection,
+                  isAll
+                      ? totalMomentsCount
+                      : todayMoments
+                            .where((m) => m.category == widget.activeCategory)
+                            .length,
                 )
               : const SizedBox.shrink(),
         ),
@@ -272,10 +292,11 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
   Widget _buildExpandedCard(
     BuildContext context,
     CategoryMeta meta,
-    Duration totalToday,
+    Duration displayDuration,
     int intPercent,
     double ratio,
     TimelineDaySection? section,
+    int momentsCount,
   ) {
     final p = widget.p;
 
@@ -402,7 +423,24 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
             onLongPressCategory: widget.onLongPressCategory,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
+
+          // Today's Momentum Card inside expanded sheet
+          HomeMomentumCard(
+            trackedDuration: displayDuration,
+            momentsCount: momentsCount,
+            currentStreak: widget.currentStreak,
+            bankedGraceDays: widget.bankedGraceDays,
+            activeCategory: widget.activeCategory,
+            isSessionOngoing: widget.isSessionOngoing,
+            margin: EdgeInsets.zero,
+            onTap: () {
+              _toggleExpanded();
+              widget.onOpenIntelligenceHub?.call();
+            },
+          ),
+
+          const SizedBox(height: 10),
 
           // Circadian Progress Bar
           Row(
@@ -415,7 +453,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Today: ${_formatDuration(totalToday)} tracked',
+                          'Today: ${_formatDuration(displayDuration)} tracked',
                           style: TextStyle(
                             color: p.text2,
                             fontSize: 11,

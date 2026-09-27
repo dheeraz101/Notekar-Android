@@ -17,6 +17,8 @@ class HomeMomentumCard extends StatelessWidget {
     required this.activeCategory,
     required this.onTap,
     this.isSessionOngoing = false,
+    this.margin = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+    this.padding = const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
   });
 
   final Duration trackedDuration;
@@ -26,6 +28,8 @@ class HomeMomentumCard extends StatelessWidget {
   final String activeCategory;
   final VoidCallback onTap;
   final bool isSessionOngoing;
+  final EdgeInsetsGeometry margin;
+  final EdgeInsets padding;
 
   String _formatDuration(Duration d) {
     final totalMinutes = d.inMinutes;
@@ -45,7 +49,7 @@ class HomeMomentumCard extends StatelessWidget {
     return PressableScale(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+        margin: margin,
         decoration: BoxDecoration(
           borderRadius: NkTokens.radii.card,
           border: Border.all(
@@ -59,7 +63,7 @@ class HomeMomentumCard extends StatelessWidget {
         child: Glass(
           p: p,
           borderRadius: NkTokens.radii.card,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: padding,
           child: Row(
             children: [
               // Left: Progress Icon
@@ -90,16 +94,20 @@ class HomeMomentumCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          isSessionOngoing
-                              ? 'RECORDING SESSION'
-                              : 'TODAY\'S MOMENTUM',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: isSessionOngoing ? p.green : p.text3,
+                        Flexible(
+                          child: Text(
+                            isSessionOngoing
+                                ? 'RECORDING SESSION'
+                                : 'TODAY\'S MOMENTUM',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.7,
+                              color: isSessionOngoing ? p.green : p.text3,
+                            ),
                           ),
                         ),
                         if (activeCategory != 'All' &&
@@ -108,13 +116,17 @@ class HomeMomentumCard extends StatelessWidget {
                             ' • ',
                             style: TextStyle(color: p.text3, fontSize: 10),
                           ),
-                          Text(
-                            activeCategory.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              color: p.accent,
+                          Flexible(
+                            child: Text(
+                              activeCategory.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: p.accent,
+                              ),
                             ),
                           ),
                         ],
@@ -127,7 +139,7 @@ class HomeMomentumCard extends StatelessWidget {
                           formattedTime,
                           style: TextStyle(
                             fontFamily: 'Inter',
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.3,
                             color: p.text,
@@ -137,18 +149,22 @@ class HomeMomentumCard extends StatelessWidget {
                           ' tracked',
                           style: TextStyle(
                             fontFamily: 'Inter',
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w500,
                             color: p.text2,
                           ),
                         ),
                         if (momentsCount > 0) ...[
-                          Text(
-                            ' • $momentsCount ${momentsCount == 1 ? 'log' : 'logs'}',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 12.5,
-                              color: p.text3,
+                          Flexible(
+                            child: Text(
+                              ' • $momentsCount ${momentsCount == 1 ? 'log' : 'logs'}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 12,
+                                color: p.text3,
+                              ),
                             ),
                           ),
                         ],
