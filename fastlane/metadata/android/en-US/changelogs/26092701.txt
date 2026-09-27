@@ -1,0 +1,8 @@
+Update to 7.5.5 (build 26BR0927):
+- New: Dynamic Momentum Capsule — Today's Momentum now opens cleanly inside the top pill, keeping the home canvas pure
+- New: Android Digital Wellbeing & Smart Buckets — Intentionality Reality Delta dashboard comparing focus to total screen time
+- New: WhatsApp-style doodle splash screen with authentic NoteKar badge & Apple HIG Goals Engine with pacing indicators
+- New: Data Safety Shield — auto-snapshots before box repair & repaired streak grace shields
+- Security: Broadcast receivers hardened with signature permissions
+- Fix: Removed fabricated durations; fixed 12 PM noon risk radar display
+- All 234 automated tests passing with 100% offline privacy

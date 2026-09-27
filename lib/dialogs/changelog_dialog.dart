@@ -27,68 +27,67 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.4',
-    date: 'September 25, 2026',
-    edition: 'Personal Identity & Life Horizons',
+    version: '7.5.5',
+    date: 'September 27, 2026',
+    edition: 'Dynamic Momentum & Digital Wellbeing',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'Personal Identity & Horizons',
+        title: 'Dynamic Momentum Capsule',
         desc:
-            'Dedicated profile avatar, Memento Mori lifespan metrics, and dedicated Cupertino date picker sheet.',
-        icon: Icons.person_rounded,
-        tag: 'Identity',
-      ),
-      (
-        title: 'Adaptive "Last Used" Startup',
-        desc:
-            'Automatically remembers and restores your previous logging mode across cold launches.',
-        icon: Icons.history_toggle_off_rounded,
+            'Today\'s Momentum card opens seamlessly inside the top pill, keeping the home canvas pure and distraction-free.',
+        icon: Icons.speed_rounded,
         tag: 'Capture',
       ),
       (
-        title: 'Exponential Habit Decay',
+        title: 'Android Digital Wellbeing',
         desc:
-            'Scientifically modeled 12-day habit strength half-life with vacation neutrality in Streak Guardian.',
-        icon: Icons.trending_up_rounded,
+            'Opt-in Smart Buckets and Intentionality Reality Delta dashboard comparing focus to total screen time.',
+        icon: Icons.pie_chart_outline_rounded,
+        tag: 'Wellbeing',
+      ),
+      (
+        title: 'Data Safety & Recovery',
+        desc:
+            'Automated corrupted-box snapshots prevent data loss; streak grace shields restore cleanly upon new streaks.',
+        icon: Icons.shield_rounded,
+        tag: 'Safety',
+      ),
+      (
+        title: 'Apple HIG Goals Engine',
+        desc:
+            'Pacing metrics, WhatsApp-style doodle splash, and 1-tap session launching.',
+        icon: Icons.track_changes_rounded,
+        tag: 'Goals',
+      ),
+      (
+        title: 'Platform Security Hardening',
+        desc:
+            'Secured broadcast receivers with signature permissions against external intent spoofing.',
+        icon: Icons.security_rounded,
+        tag: 'Security',
+      ),
+      (
+        title: 'Authentic Analytics Engine',
+        desc:
+            'Purged fabricated durations, accurate cross-boundary sessions, and corrected 12 PM noon risk radar display.',
+        icon: Icons.insights_rounded,
         tag: 'Analytics',
-      ),
-      (
-        title: 'Universal Migration Importer',
-        desc:
-            'Dedicated offline import engine for Loop Habit Tracker CSV and HabitKit JSON archives.',
-        icon: Icons.move_to_inbox_rounded,
-        tag: 'Migration',
-      ),
-      (
-        title: 'Shareable Horizon Card',
-        desc:
-            'High-fidelity social life milestone export card with concise typography and local image generation.',
-        icon: Icons.share_rounded,
-        tag: 'Sharing',
-      ),
-      (
-        title: 'Hardware Diagnostics Card',
-        desc:
-            'Live device telemetry tracking memory pressure, display refresh rate, and thermal status.',
-        icon: Icons.memory_rounded,
-        tag: 'Diagnostics',
       ),
     ],
     items: [
-      '• Personal identity profile, Memento Mori life horizon, adaptive startup mode, and habit decay.',
-      '+ Personal Identity: Custom profile avatar and user alias with real-time sync across Settings and views',
-      '+ Memento Mori Horizon: Interactive life elapsed percentage, weeks lived, and seasons remaining',
-      '+ Modular Date Picker: System-grade Cupertino bottom sheet for Date of Birth configuration',
-      '+ Last Used Startup: Automatically remembers and restores active logging mode across app closures',
-      '+ Habit Strength Decay: Exponential 12-day half-life calculation reflecting behavioral retention',
-      '+ Rest Day Neutrality: Vacation and sabbath neutrality in Streak Guardian prevents streak penalties',
-      '+ Migration Importer: Dedicated offline import card supporting Loop Habit Tracker and HabitKit formats',
-      '+ Device Telemetry: Hardware diagnostics card showing memory, refresh rate, and thermal envelope',
-      '+ Responsive 2-Card Time Format: Replaced 24-hour switch with responsive 2-card Cupertino selector',
-      '+ Modal Geometry Fix: Eliminated double corner radius visual bug on modal sheets and note dialogs',
-      '+ Instant Avatar Sync: Immediate preview reflection and robust slider assertion guards',
-      '* All 215 automated unit and widget test suites passing with zero lints and 100% offline privacy',
+      '• Dynamic momentum capsule, Android Digital Wellbeing, Apple HIG goals, and core data resilience.',
+      '+ Dynamic Momentum Capsule: Today\'s Momentum embedded inside DynamicHeaderCapsule with live progress',
+      '+ Android Digital Wellbeing: Smart Buckets and Intentionality Reality Delta dashboard',
+      '+ Apple HIG Goals Engine: Pacing metrics, Cupertino segmented controls, and 1-tap session launch',
+      '+ Squircle Splash & Zen Doodle: Liquid splash transition with fluid doodle animation',
+      '+ Corrupted-Box Snapshots: Automatic database backup before repair to eliminate silent data loss',
+      '+ Streak Guardian Repair: Fixed permanent shield lockout on relapse, restoring streak forgiveness',
+      '+ Platform Security: Exported broadcast receivers protected with signature-level permissions',
+      '+ God-Class Deconstruction: Split 12,000+ lines into modular lifecycle delegates and NkTokens',
+      '+ Authentic Analytics: Purged fabricated 15m single tap durations for true session integrity',
+      '+ Noon Risk Radar Fix: Corrected "12 AM" display for 12:00 PM noon time blocks',
+      '* All 234 automated unit and widget test suites passing with zero lints and 100% offline privacy',
     ],
   );
 

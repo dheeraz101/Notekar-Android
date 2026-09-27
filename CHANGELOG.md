@@ -6,6 +6,45 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.5] - 2026-09-27 (versionCode 26BR0927) [BR]
+
+> *Dynamic Momentum, Digital Wellbeing & Data Resilience.*
+
+### What's New
+
+- **Dynamic Momentum Capsule**:
+    - Re-architected home screen canvas hierarchy by moving Today's Momentum into the top `DynamicHeaderCapsule`, preserving pure, distraction-free minimalism.
+    - Smooth Apple spring expansion reveals live tracked duration, conscious moment count, streak flame, banked grace shields, session recording status, and 1-tap navigation into the Executive Intelligence Hub.
+- **Android Digital Wellbeing & Intentionality Reality Delta**:
+    - Native offline integration with Android `UsageStatsManager` (`PACKAGE_USAGE_STATS`) using a 100% private, zero-telemetry architecture.
+    - Automatic Smart Buckets classification (Productivity, Social, Entertainment, System) using native `ApplicationInfo.category`.
+    - Opt-in **Intentionality Reality Delta** dashboard inside Executive Intelligence Hub contrasting intentional focus hours against raw device screen time.
+- **Flagship Apple HIG Goals Engine & Sensory Polish**:
+    - Rebuilt goals system featuring pacing indicators, Cupertino segmented controls, and 1-tap session launching.
+    - WhatsApp-style dark mode doodle wallpaper splash screen with authentic NoteKar center badge and instant dismiss.
+    - Acoustic swipe-to-delete sound effect, refined bottom note composer, and independent goals navigation.
+    - Implemented 4 strategic retention pillars for lock screen awareness, ambient pulse, and deficit targets.
+- **Automated Corrupted-Box Data Safety Net**:
+    - Hive database corruption now creates emergency timestamped local file snapshots before recovery, eliminating silent data loss.
+    - Restored Streak Guardian grace-day logic: relapses no longer permanently lock out earned shields; grace days reset cleanly for new streaks.
+
+### Improvements
+
+- **Architectural God-Class Deconstruction**:
+    - Modularized monolithic `settings_dialog.dart` and `note_kar_home.dart` into isolated lifecycle delegates (`home_reset_lifecycle.dart`, `home_backup_lifecycle.dart`, `home_sobriety_streak_card.dart`, `home_minimal_toolbar_capsule.dart`).
+    - Introduced `NkTokens` design tokens establishing systematic visual hierarchy, typography, radii, and elevation shadows.
+- **Platform Security & Broadcast Protection**:
+    - Secured exported Android broadcast receivers with signature-level permissions (`android:protectionLevel="signature"`), preventing unauthorized intent spoofing.
+
+### Bug Fixes
+
+- **Analytics Duration & Midnight Boundaries**:
+    - Purged fabricated 15-minute durations assigned to single taps; true cross-boundary sessions and gap intervals are faithfully recorded.
+    - Fixed 12:00 PM noon time formatting bug in risk radar (previously displayed as "12 AM").
+- **Release Verification & Pre-Push Hook**:
+    - Bound bulletin `maxVersion` to `appVersion` and installed automated pre-push test hook.
+    - All 234 automated unit and widget test suites passing with zero lints and 100% offline privacy.
+
 ## [7.5.4] - 2026-09-25 (versionCode 26BR0925) [BR]
 
 > *Personal Identity, Life Horizons & Mindful Continuity.*

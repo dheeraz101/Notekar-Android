@@ -2,7 +2,7 @@ name: notekar
 description: "Native Android rewrite of the NoteKar timestamp logger."
 publish_to: 'none'
 
-version: 7.5.4+26092501
+version: 7.5.5+26092701
 environment:
   sdk: ^3.12.0
 
@@ -36,6 +36,7 @@ flutter:
   assets:
     - icon-maskable-512.png
     - app_icons/
+    - assets/images/
 
   fonts:
     - family: Inter
