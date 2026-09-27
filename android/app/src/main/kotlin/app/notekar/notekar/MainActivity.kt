@@ -581,6 +581,30 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "hasUsagePermission" -> {
+                    result.success(DigitalWellbeingManager.hasUsagePermission(applicationContext))
+                }
+
+                "openUsageAccessSettings" -> {
+                    DigitalWellbeingManager.openUsageAccessSettings(this)
+                    result.success(true)
+                }
+
+                "getDailyUsageStats" -> {
+                    val startMs = call.argument<Number>("startTimeMs")?.toLong()
+                    val endMs = call.argument<Number>("endTimeMs")?.toLong()
+                    try {
+                        val stats = DigitalWellbeingManager.getDailyUsageStats(
+                            applicationContext,
+                            startMs,
+                            endMs
+                        )
+                        result.success(stats)
+                    } catch (e: Exception) {
+                        result.error("USAGE_STATS_ERROR", e.message, null)
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         }
