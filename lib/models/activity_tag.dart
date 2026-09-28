@@ -21,11 +21,49 @@ class ActivityTag {
   final int colorValue;
   final bool isCustom;
 
-  IconData get icon => IconData(
-    iconCodePoint,
-    fontFamily: iconFontFamily,
-    fontPackage: iconFontPackage,
-  );
+  IconData get icon => iconForCodePoint(iconCodePoint);
+
+  /// Map of compile-time constant CupertinoIcons to prevent dynamic IconData tree-shaking failures
+  static IconData iconForCodePoint(int codePoint) {
+    return _iconLookup[codePoint] ?? CupertinoIcons.tag_fill;
+  }
+
+  static final Map<int, IconData> _iconLookup = {
+    CupertinoIcons.tag_fill.codePoint: CupertinoIcons.tag_fill,
+    CupertinoIcons.compass_fill.codePoint: CupertinoIcons.compass_fill,
+    CupertinoIcons.flame_fill.codePoint: CupertinoIcons.flame_fill,
+    CupertinoIcons.book_fill.codePoint: CupertinoIcons.book_fill,
+    CupertinoIcons.device_laptop.codePoint: CupertinoIcons.device_laptop,
+    CupertinoIcons.drop_fill.codePoint: CupertinoIcons.drop_fill,
+    CupertinoIcons.sparkles.codePoint: CupertinoIcons.sparkles,
+    CupertinoIcons.doc_text_fill.codePoint: CupertinoIcons.doc_text_fill,
+    CupertinoIcons.heart_circle_fill.codePoint:
+        CupertinoIcons.heart_circle_fill,
+    CupertinoIcons.car_fill.codePoint: CupertinoIcons.car_fill,
+    CupertinoIcons.flame.codePoint: CupertinoIcons.flame,
+    CupertinoIcons.trash.codePoint: CupertinoIcons.trash,
+    CupertinoIcons.gamecontroller_fill.codePoint:
+        CupertinoIcons.gamecontroller_fill,
+    CupertinoIcons.person_2_fill.codePoint: CupertinoIcons.person_2_fill,
+    CupertinoIcons.suit_club_fill.codePoint: CupertinoIcons.suit_club_fill,
+    CupertinoIcons.moon_fill.codePoint: CupertinoIcons.moon_fill,
+    0xf56b: CupertinoIcons.tag_fill,
+    0xf657: CupertinoIcons.compass_fill,
+    0xf54f: CupertinoIcons.flame_fill,
+    0xf524: CupertinoIcons.book_fill,
+    0xf598: CupertinoIcons.device_laptop,
+    0xf772: CupertinoIcons.drop_fill,
+    0xf6e5: CupertinoIcons.sparkles,
+    0xf70e: CupertinoIcons.doc_text_fill,
+    0xf6e9: CupertinoIcons.heart_circle_fill,
+    0xf555: CupertinoIcons.car_fill,
+    0xf626: CupertinoIcons.flame,
+    0xf708: CupertinoIcons.trash,
+    0xf666: CupertinoIcons.gamecontroller_fill,
+    0xf6fb: CupertinoIcons.person_2_fill,
+    0xf64f: CupertinoIcons.suit_club_fill,
+    0xf72a: CupertinoIcons.moon_fill,
+  };
 
   Color get color => Color(colorValue);
 

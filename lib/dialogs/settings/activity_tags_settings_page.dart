@@ -31,29 +31,23 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
   List<ActivityTag> _tags = [];
   bool _loading = true;
 
-  static const List<int> _availableGlyphs = [
-    0xf56b, // tag
-    0xf657, // figure.walk
-    0xf54f, // dumbbell
-    0xf524, // book
-    0xf598, // desktopcomputer / flame
-    0xf772, // drop / bath
-    0xf6e5, // person / washroom
-    0xf70e, // eyeglasses
-    0xf6e9, // sparkler / meditation
-    0xf555, // car / commute
-    0xf626, // flame / cook
-    0xf708, // broom / chores
-    0xf666, // gamecontroller
-    0xf6fb, // person.2 / family
-    0xf64f, // cup / dining
-    0xf72a, // bed / sleep
-    0xf544, // moon
-    0xf534, // heart
-    0xf566, // star
-    0xf634, // lightbulb
-    0xf741, // cart
-    0xf5a5, // music
+  static final List<int> _availableGlyphs = [
+    CupertinoIcons.tag_fill.codePoint,
+    CupertinoIcons.compass_fill.codePoint,
+    CupertinoIcons.flame_fill.codePoint,
+    CupertinoIcons.book_fill.codePoint,
+    CupertinoIcons.device_laptop.codePoint,
+    CupertinoIcons.drop_fill.codePoint,
+    CupertinoIcons.sparkles.codePoint,
+    CupertinoIcons.doc_text_fill.codePoint,
+    CupertinoIcons.heart_circle_fill.codePoint,
+    CupertinoIcons.car_fill.codePoint,
+    CupertinoIcons.flame.codePoint,
+    CupertinoIcons.trash.codePoint,
+    CupertinoIcons.gamecontroller_fill.codePoint,
+    CupertinoIcons.person_2_fill.codePoint,
+    CupertinoIcons.suit_club_fill.codePoint,
+    CupertinoIcons.moon_fill.codePoint,
   ];
 
   @override
@@ -152,11 +146,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                             ),
                           ),
                           child: Icon(
-                            IconData(
-                              glyph,
-                              fontFamily: 'CupertinoIcons',
-                              fontPackage: 'cupertino_icons',
-                            ),
+                            ActivityTag.iconForCodePoint(glyph),
                             size: 16,
                             color: isSelected
                                 ? widget.p.accent

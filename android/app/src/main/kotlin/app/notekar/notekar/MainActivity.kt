@@ -1413,7 +1413,8 @@ class MainActivity : FlutterActivity() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val notifLogBehavior = fp.getString("flutter.notif_log_action", "popup") ?: "popup"
+            val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val notifLogBehavior = flutterPrefs.getString("flutter.notif_log_action", "popup") ?: "popup"
             val singleLogActionPending = if (notifLogBehavior == "popup") {
                 val intent = Intent(context, QuickNoteActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
