@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 
 /// Read-only note preview bottom sheet with full text viewing, copying, and edit action.
@@ -55,6 +56,11 @@ class NotePreviewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cleanNote = note.trim();
+    final tags = NoteTagExtractor.extractHashtags(cleanNote);
+    final cleanBody = NoteTagExtractor.cleanBodyText(cleanNote);
+    final displayText = cleanBody.isNotEmpty
+        ? cleanBody
+        : (cleanNote.isEmpty ? 'No text in note.' : cleanNote);
 
     return AppSheet(
       p: p,
@@ -63,7 +69,7 @@ class NotePreviewSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (category != null || dateStr != null) ...[
+          if (category != null || dateStr != null || tags.isNotEmpty) ...[
             Row(
               children: [
                 if (category != null && category!.trim().isNotEmpty) ...[
@@ -102,6 +108,49 @@ class NotePreviewSheet extends StatelessWidget {
                   ),
               ],
             ),
+            if (tags.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: tags.map((t) {
+                  final actTag = TagService.instance.findActivityTag(t);
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.surface3,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: p.border.withValues(alpha: 0.6),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          actTag?.icon ?? CupertinoIcons.tag_fill,
+                          size: 11,
+                          color: p.accent,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          actTag?.label ?? TagService.stripHash(t),
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
             const SizedBox(height: spacing12),
           ],
 
@@ -122,7 +171,7 @@ class NotePreviewSheet extends StatelessWidget {
                   children: [
                     WidgetSpan(
                       child: IosEmojiText(
-                        cleanNote.isEmpty ? 'No text in note.' : cleanNote,
+                        displayText,
                         style: TextStyle(
                           color: p.text,
                           fontSize: 15,

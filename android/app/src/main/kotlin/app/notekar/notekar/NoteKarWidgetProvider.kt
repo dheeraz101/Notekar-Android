@@ -142,6 +142,24 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             )
         }
 
+        fun launchQuickSessionActivityIntent(
+            context: Context,
+            requestCode: Int,
+            logType: String
+        ): PendingIntent {
+            val intent = Intent(context, QuickNoteActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra(QuickNoteActivity.EXTRA_IS_SESSION, true)
+                putExtra(QuickNoteActivity.EXTRA_LOG_TYPE, logType)
+            }
+            return PendingIntent.getActivity(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
         fun performBackgroundLog(context: Context, type: String, note: String = "") {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val todayCount = prefs.getInt(KEY_TODAY_COUNT, 0)
@@ -337,7 +355,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             views.setOnClickPendingIntent(
                 R.id.widget_in,
-                launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+                if (mode == "two-way") launchQuickSessionActivityIntent(context, appWidgetId + 20, "in")
+                else launchBackgroundLogIntent(context, appWidgetId + 20, "in")
             )
 
             views.setOnClickPendingIntent(

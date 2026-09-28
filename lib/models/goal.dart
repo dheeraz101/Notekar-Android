@@ -94,7 +94,7 @@ class Goal {
   factory Goal.fromJson(Map<String, dynamic> json) {
     return Goal(
       id: json['id'] as String? ?? UniqueKey().toString(),
-      title: json['title'] as String? ?? 'Target Goal',
+      title: _clampTitle(json['title'] as String? ?? 'Target'),
       category: json['category'] as String?,
       mode: json['mode'] as String?,
       targetMinutes: (json['targetMinutes'] as num?)?.toInt() ?? 600,
@@ -105,6 +105,12 @@ class Goal {
           DateTime.now().millisecondsSinceEpoch,
       isArchived: json['isArchived'] as bool? ?? false,
     );
+  }
+
+  static String _clampTitle(String raw) {
+    final t = raw.trim();
+    if (t.length <= 9) return t;
+    return t.substring(0, 9);
   }
 }
 

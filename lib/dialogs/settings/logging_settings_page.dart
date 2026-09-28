@@ -15,6 +15,8 @@ class LoggingSettingsPage extends StatelessWidget {
     required this.remindersStatus,
     required this.enableSobrietyMode,
     required this.showPersistentNotification,
+    this.notifLogAction = 'popup',
+    this.onNotifLogActionChanged,
     this.showTrashBin = false,
     this.trash = const [],
     this.rainbowCards = false,
@@ -30,6 +32,8 @@ class LoggingSettingsPage extends StatelessWidget {
   final String remindersStatus;
   final bool enableSobrietyMode;
   final bool showPersistentNotification;
+  final String notifLogAction;
+  final ValueChanged<bool>? onNotifLogActionChanged;
   final bool showTrashBin;
   final List<Moment> trash;
   final bool rainbowCards;
@@ -99,6 +103,14 @@ class LoggingSettingsPage extends StatelessWidget {
               status: 'Focus Modes',
               color: p.accent,
               onTap: () => onOpenCategory('Modes', parent: 'Logging'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.tag_rounded,
+              title: 'Activity Tags'.localized(context),
+              status: '15 Tags',
+              color: p.accent,
+              onTap: () => onOpenCategory('Activity Tags', parent: 'Logging'),
             ),
             SettingsRow(
               p: p,
@@ -230,6 +242,16 @@ class LoggingSettingsPage extends StatelessWidget {
               value: showPersistentNotification,
               color: p.accent,
               onChanged: onShowPersistentNotificationChanged,
+            ),
+            SettingsSwitchRow(
+              p: p,
+              title: 'Log ⚡ Quick Note Popup',
+              subtitle:
+                  'Open popup to pick quick activity tags and add notes when tapping Log ⚡ in notification drawer.'
+                      .localized(context),
+              value: notifLogAction != 'silent',
+              color: p.accent,
+              onChanged: onNotifLogActionChanged ?? (_) {},
             ),
           ],
         ),

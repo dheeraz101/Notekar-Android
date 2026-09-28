@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -9,10 +10,22 @@ import 'package:notekar/widgets/settings_widgets.dart';
 
 /// Standalone Settings page for managing Targets & Goals.
 class GoalsSettingsPage extends StatelessWidget {
-  const GoalsSettingsPage({super.key, required this.p, required this.moments});
+  const GoalsSettingsPage({
+    super.key,
+    required this.p,
+    required this.moments,
+    this.activeCategory,
+    this.isSessionRunning = false,
+    this.onStartSession,
+    this.onStopSession,
+  });
 
   final Palette p;
   final List<Moment> moments;
+  final String? activeCategory;
+  final bool isSessionRunning;
+  final ValueChanged<Goal>? onStartSession;
+  final VoidCallback? onStopSession;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +43,10 @@ class GoalsSettingsPage extends StatelessWidget {
         GoalsContentView(
           p: p,
           moments: moments,
+          activeCategory: activeCategory,
+          isSessionRunning: isSessionRunning,
+          onStartSession: onStartSession,
+          onStopSession: onStopSession,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
         ),

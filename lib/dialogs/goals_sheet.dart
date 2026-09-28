@@ -40,40 +40,73 @@ class GoalsSheet extends StatelessWidget {
     super.key,
     required this.p,
     required this.moments,
+    this.activeCategory,
+    this.isSessionRunning = false,
     this.onStartSession,
+    this.onStopSession,
   });
 
   final Palette p;
   final List<Moment> moments;
+  final String? activeCategory;
+  final bool isSessionRunning;
   final ValueChanged<Goal>? onStartSession;
+  final VoidCallback? onStopSession;
 
   static Future<dynamic> show(
     BuildContext context, {
     required Palette p,
     required List<Moment> moments,
+    String? activeCategory,
+    bool isSessionRunning = false,
     ValueChanged<Goal>? onStartSession,
+    VoidCallback? onStopSession,
   }) {
     return showModalBottomSheet<dynamic>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) =>
-          GoalsSheet(p: p, moments: moments, onStartSession: onStartSession),
+      builder: (_) => GoalsSheet(
+        p: p,
+        moments: moments,
+        activeCategory: activeCategory,
+        isSessionRunning: isSessionRunning,
+        onStartSession: onStartSession,
+        onStopSession: onStopSession,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final contentKey = GlobalKey<GoalsContentViewState>();
     return AppSheet(
       p: p,
       title: 'Targets & Goals'.localized(context),
+      trailingAction: PressableScale(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          contentKey.currentState?.openCreateOrEditGoalDialog();
+        },
+        child: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(color: p.surface3, shape: BoxShape.circle),
+          child: Icon(CupertinoIcons.add, size: 18, color: p.accent),
+        ),
+      ),
       child: SizedBox(
         width: double.infinity,
         height: 580,
         child: GoalsContentView(
+          key: contentKey,
           p: p,
           moments: moments,
+          activeCategory: activeCategory,
+          isSessionRunning: isSessionRunning,
           onStartSession: onStartSession,
+          onStopSession: onStopSession,
         ),
       ),
     );
@@ -85,18 +118,24 @@ class GoalsContentView extends StatefulWidget {
     super.key,
     required this.p,
     required this.moments,
+    this.activeCategory,
+    this.isSessionRunning = false,
     this.onAddGoal,
     this.onEditGoal,
     this.onStartSession,
+    this.onStopSession,
     this.shrinkWrap = false,
     this.physics,
   });
 
   final Palette p;
   final List<Moment> moments;
+  final String? activeCategory;
+  final bool isSessionRunning;
   final VoidCallback? onAddGoal;
   final ValueChanged<Goal>? onEditGoal;
   final ValueChanged<Goal>? onStartSession;
+  final VoidCallback? onStopSession;
   final bool shrinkWrap;
   final ScrollPhysics? physics;
 
@@ -104,14 +143,40 @@ class GoalsContentView extends StatefulWidget {
   State<GoalsContentView> createState() => GoalsContentViewState();
 }
 
-class GoalsContentViewState extends State<GoalsContentView> {
+class GoalsContentViewState extends State<GoalsContentView>
+    with SingleTickerProviderStateMixin {
   List<Goal> _goals = [];
   bool _isLoading = true;
+  late final AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    if (widget.isSessionRunning) {
+      _pulseController.repeat(reverse: true);
+    }
     loadGoals();
+  }
+
+  @override
+  void didUpdateWidget(covariant GoalsContentView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isSessionRunning && !_pulseController.isAnimating) {
+      _pulseController.repeat(reverse: true);
+    } else if (!widget.isSessionRunning && _pulseController.isAnimating) {
+      _pulseController.stop();
+      _pulseController.value = 0.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
   }
 
   Future<void> loadGoals() async {
@@ -124,7 +189,7 @@ class GoalsContentViewState extends State<GoalsContentView> {
     }
   }
 
-  void _openCreateOrEditGoalDialog([Goal? existing]) {
+  void openCreateOrEditGoalDialog([Goal? existing]) {
     if (widget.onEditGoal != null && existing != null) {
       widget.onEditGoal!(existing);
       return;
@@ -141,7 +206,7 @@ class GoalsContentViewState extends State<GoalsContentView> {
         title: (existing == null ? 'New Target Goal' : 'Edit Target Goal')
             .localized(context),
         child: SizedBox(
-          width: 420,
+          width: 580,
           child: CreateOrEditGoalView(
             p: widget.p,
             goal: existing,
@@ -199,53 +264,8 @@ class GoalsContentViewState extends State<GoalsContentView> {
       shrinkWrap: widget.shrinkWrap,
       physics: widget.physics,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: _goals.length + 1,
+      itemCount: _goals.length,
       itemBuilder: (ctx, idx) {
-        if (idx == _goals.length) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 6, bottom: 20),
-            child: Center(
-              child: PressableScale(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  _openCreateOrEditGoalDialog();
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.p.surface3,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: widget.p.border.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        CupertinoIcons.add,
-                        size: 15,
-                        color: widget.p.accent,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Add New Target'.localized(context),
-                        style: TextStyle(
-                          color: widget.p.accent,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
         final goal = _goals[idx];
         final progress = GoalsService.instance.calculateProgress(
           goal,
@@ -289,7 +309,7 @@ class GoalsContentViewState extends State<GoalsContentView> {
           PressableScale(
             onTap: () {
               HapticFeedback.lightImpact();
-              _openCreateOrEditGoalDialog();
+              openCreateOrEditGoalDialog();
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -322,444 +342,456 @@ class GoalsContentViewState extends State<GoalsContentView> {
   Widget _buildGoalCard(Goal goal, GoalProgress progress) {
     final meta = getCategoryMeta(goal.category ?? 'Target', widget.p);
     final accentCol = goal.category != null ? meta.color : widget.p.accent;
+    final isActiveGoal =
+        widget.isSessionRunning &&
+        (goal.category == widget.activeCategory ||
+            (goal.category == null && widget.activeCategory == 'All'));
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color.alphaBlend(
-            accentCol.withValues(alpha: 0.04),
-            widget.p.surface2,
-          ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: progress.isCompleted
-                ? widget.p.green.withValues(alpha: 0.5)
-                : accentCol.withValues(alpha: 0.35),
-            width: progress.isCompleted ? 1.4 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Left Category Accent Indicator Strip
-                Container(
-                  width: 5,
-                  decoration: BoxDecoration(
-                    color: progress.isCompleted ? widget.p.green : accentCol,
+    Widget cardBody = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row: Category Badge, Timeframe / Due Date, and Prominent Action Buttons
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accentCol.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      goal.category != null
+                          ? meta.icon
+                          : CupertinoIcons.flag_fill,
+                      size: 12,
+                      color: accentCol,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      goal.category ?? 'All Categories',
+                      style: TextStyle(
+                        color: accentCol,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  goal.timeframe == GoalTimeframe.custom &&
+                          goal.targetDate != null
+                      ? 'Due ${_formatDateShort(DateTime.fromMillisecondsSinceEpoch(goal.targetDate!))}'
+                      : goal.timeframe.label.localized(context),
+                  style: TextStyle(
+                    color: widget.p.text2,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                // Main Card Content
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header Row: Category Badge, Timeframe / Due Date, and Actions
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: accentCol.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    goal.category != null
-                                        ? meta.icon
-                                        : CupertinoIcons.flag_fill,
-                                    size: 11,
-                                    color: accentCol,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    goal.category ?? 'All Categories',
-                                    style: TextStyle(
-                                      color: accentCol,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 3.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: widget.p.surface3,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                goal.timeframe == GoalTimeframe.custom &&
-                                        goal.targetDate != null
-                                    ? 'Due ${_formatDateShort(DateTime.fromMillisecondsSinceEpoch(goal.targetDate!))}'
-                                    : goal.timeframe.label.localized(context),
-                                style: TextStyle(
-                                  color: widget.p.text2,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const Spacer(),
-                            // Edit Action Button (enlarged touch target)
-                            PressableScale(
-                              onTap: () => _openCreateOrEditGoalDialog(goal),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: widget.p.surface3,
-                                  borderRadius: BorderRadius.circular(9),
-                                  border: Border.all(
-                                    color: widget.p.border.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.slider_horizontal_3,
-                                      size: 14,
-                                      color: widget.p.text2,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Edit'.localized(context),
-                                      style: TextStyle(
-                                        color: widget.p.text2,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Delete Action Button (prominent 34x34 button with red tint)
-                            PressableScale(
-                              onTap: () => _confirmDeleteGoal(goal),
-                              child: Container(
-                                width: 34,
-                                height: 34,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: widget.p.red.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(9),
-                                  border: Border.all(
-                                    color: widget.p.red.withValues(alpha: 0.35),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Icon(
-                                  CupertinoIcons.trash,
-                                  size: 16,
-                                  color: widget.p.red,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Title & Completion Percentage
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                goal.title,
-                                style: TextStyle(
-                                  color: widget.p.text,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 9,
-                                vertical: 3.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    (progress.isCompleted
-                                            ? widget.p.green
-                                            : accentCol)
-                                        .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${(progress.ratio * 100).toInt()}%',
-                                style: TextStyle(
-                                  color: progress.isCompleted
-                                      ? widget.p.green
-                                      : accentCol,
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w900,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Continuous Gauge Track
-                        Stack(
-                          children: [
-                            Container(
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: widget.p.surface3,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
-                            FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: progress.ratio.clamp(0.0, 1.0),
-                              child: Container(
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: progress.isCompleted
-                                        ? [widget.p.green, widget.p.green]
-                                        : [
-                                            accentCol,
-                                            accentCol.withValues(alpha: 0.85),
-                                          ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Tracked vs Target metrics row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  CupertinoIcons.clock,
-                                  size: 13,
-                                  color: widget.p.text3,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  '${progress.trackedFormatted} of ${progress.targetFormatted}',
-                                  style: TextStyle(
-                                    color: widget.p.text2,
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w600,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: progress.isCompleted
-                                    ? widget.p.green.withValues(alpha: 0.14)
-                                    : widget.p.orange.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                progress.isCompleted
-                                    ? 'Goal Met 🎉'.localized(context)
-                                    : '${progress.remainingFormatted} to go'
-                                          .localized(context),
-                                style: TextStyle(
-                                  color: progress.isCompleted
-                                      ? widget.p.green
-                                      : widget.p.orange,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Detailed Daily Investment Callout Block
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                (progress.isCompleted
-                                        ? widget.p.green
-                                        : widget.p.orange)
-                                    .withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color:
-                                  (progress.isCompleted
-                                          ? widget.p.green
-                                          : widget.p.orange)
-                                      .withValues(alpha: 0.28),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    progress.isCompleted
-                                        ? CupertinoIcons.checkmark_seal_fill
-                                        : CupertinoIcons.flame_fill,
-                                    size: 14,
-                                    color: progress.isCompleted
-                                        ? widget.p.green
-                                        : widget.p.orange,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    progress.isCompleted
-                                        ? 'Target Achieved!'.localized(context)
-                                        : '${progress.dailyPaceFormatted} / day needed'
-                                              .localized(context),
-                                    style: TextStyle(
-                                      color: progress.isCompleted
-                                          ? widget.p.green
-                                          : widget.p.orange,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w800,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    '${progress.daysRemainingInTimeframe}d left',
-                                    style: TextStyle(
-                                      color: widget.p.text2,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (!progress.isCompleted) ...[
-                                const SizedBox(height: 3),
-                                Text(
-                                  'Invest ${progress.dailyPaceFormatted} daily over the next ${progress.daysRemainingInTimeframe} days to achieve your target on schedule.',
-                                  style: TextStyle(
-                                    color: widget.p.text2,
-                                    fontSize: 11,
-                                    height: 1.25,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // 1-Tap [Start Session] Action Button
-                        PressableScale(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            if (widget.onStartSession != null) {
-                              widget.onStartSession!(goal);
-                            } else {
-                              Navigator.of(context).pop({
-                                'action': 'start_goal_session',
-                                'category': goal.category,
-                                'mode': goal.mode ?? 'two-way',
-                              });
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: accentCol.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: accentCol.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  CupertinoIcons.play_arrow_solid,
-                                  size: 13,
-                                  color: accentCol,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Start ${goal.category ?? 'Session'}'
-                                      .localized(context),
-                                  style: TextStyle(
-                                    color: accentCol,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+              ),
+              const Spacer(),
+              // Icon-only Edit Action Button (38x38)
+              Tooltip(
+                message: 'Edit Goal'.localized(context),
+                child: PressableScale(
+                  onTap: () => openCreateOrEditGoalDialog(goal),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.surface3,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: widget.p.border.withValues(alpha: 0.5),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.pencil,
+                      size: 16,
+                      color: widget.p.text2,
                     ),
                   ),
                 ),
+              ),
+              const SizedBox(width: 8),
+              // Icon-only Delete Action Button (38x38 with red tint)
+              Tooltip(
+                message: 'Delete Goal'.localized(context),
+                child: PressableScale(
+                  onTap: () => _confirmDeleteGoal(goal),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.red.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: widget.p.red.withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.trash,
+                      size: 16,
+                      color: widget.p.red,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Title & Completion Percentage
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  goal.title,
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: (progress.isCompleted ? widget.p.green : accentCol)
+                      .withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${(progress.ratio * 100).toInt()}%',
+                  style: TextStyle(
+                    color: progress.isCompleted ? widget.p.green : accentCol,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Continuous Gauge Track
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress.ratio.clamp(0.0, 1.0),
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: progress.isCompleted
+                          ? [widget.p.green, widget.p.green]
+                          : [accentCol, accentCol.withValues(alpha: 0.85)],
+                    ),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Tracked vs Target metrics row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(CupertinoIcons.clock, size: 13, color: widget.p.text3),
+                  const SizedBox(width: 5),
+                  Text(
+                    '${progress.trackedFormatted} of ${progress.targetFormatted}',
+                    style: TextStyle(
+                      color: widget.p.text2,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 2.5,
+                ),
+                decoration: BoxDecoration(
+                  color: progress.isCompleted
+                      ? widget.p.green.withValues(alpha: 0.14)
+                      : widget.p.orange.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  progress.isCompleted
+                      ? 'Goal Met 🎉'.localized(context)
+                      : '${progress.remainingFormatted} to go'.localized(
+                          context,
+                        ),
+                  style: TextStyle(
+                    color: progress.isCompleted
+                        ? widget.p.green
+                        : widget.p.orange,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Detailed Daily Investment Callout Block
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: (progress.isCompleted ? widget.p.green : widget.p.orange)
+                  .withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: (progress.isCompleted ? widget.p.green : widget.p.orange)
+                    .withValues(alpha: 0.28),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      progress.isCompleted
+                          ? CupertinoIcons.checkmark_seal_fill
+                          : CupertinoIcons.flame_fill,
+                      size: 14,
+                      color: progress.isCompleted
+                          ? widget.p.green
+                          : widget.p.orange,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      progress.isCompleted
+                          ? 'Target Achieved!'.localized(context)
+                          : '${progress.dailyPaceFormatted} / day needed'
+                                .localized(context),
+                      style: TextStyle(
+                        color: progress.isCompleted
+                            ? widget.p.green
+                            : widget.p.orange,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${progress.daysRemainingInTimeframe}d left',
+                      style: TextStyle(
+                        color: widget.p.text2,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                if (!progress.isCompleted) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    'Invest ${progress.dailyPaceFormatted} daily over the next ${progress.daysRemainingInTimeframe} days to achieve your target on schedule.',
+                    style: TextStyle(
+                      color: widget.p.text2,
+                      fontSize: 11,
+                      height: 1.25,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 12),
+
+          // Action Button: [Stop Session] if active, or [Start Session]
+          if (isActiveGoal)
+            PressableScale(
+              onTap: () {
+                HapticFeedback.heavyImpact();
+                if (widget.onStopSession != null) {
+                  widget.onStopSession!();
+                } else {
+                  Navigator.of(context).pop({'action': 'stop_goal_session'});
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: widget.p.red.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: widget.p.red.withValues(alpha: 0.4),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.stop_fill,
+                      size: 13,
+                      color: widget.p.red,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Stop Session (${goal.category ?? 'Active'})'.localized(
+                        context,
+                      ),
+                      style: TextStyle(
+                        color: widget.p.red,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            PressableScale(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                if (widget.onStartSession != null) {
+                  widget.onStartSession!(goal);
+                } else {
+                  Navigator.of(context).pop({
+                    'action': 'start_goal_session',
+                    'category': goal.category,
+                    'mode': goal.mode ?? 'two-way',
+                  });
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: accentCol.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accentCol.withValues(alpha: 0.3)),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.play_arrow_solid,
+                      size: 13,
+                      color: accentCol,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Start ${goal.category ?? 'Session'}'.localized(context),
+                      style: TextStyle(
+                        color: accentCol,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: isActiveGoal
+          ? AnimatedBuilder(
+              animation: _pulseController,
+              builder: (ctx, child) {
+                final pulse = _pulseController.value;
+                final glowColor = accentCol.withValues(
+                  alpha: 0.4 + 0.4 * pulse,
+                );
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Color.alphaBlend(
+                      accentCol.withValues(alpha: 0.06),
+                      widget.p.surface2,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: glowColor, width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: accentCol.withValues(alpha: 0.15 * pulse),
+                        blurRadius: 12 * pulse + 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: child,
+                );
+              },
+              child: cardBody,
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: Color.alphaBlend(
+                  accentCol.withValues(alpha: 0.04),
+                  widget.p.surface2,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: progress.isCompleted
+                      ? widget.p.green.withValues(alpha: 0.5)
+                      : accentCol.withValues(alpha: 0.35),
+                  width: progress.isCompleted ? 1.4 : 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: cardBody,
+            ),
     );
   }
 }
@@ -873,6 +905,8 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 const SizedBox(height: 6),
                 CupertinoTextField(
                   controller: _titleController,
+                  maxLength: 9,
+                  inputFormatters: [LengthLimitingTextInputFormatter(9)],
                   autofocus: widget.goal == null,
                   padding: EdgeInsets.zero,
                   decoration: null,
@@ -882,11 +916,19 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
-                  placeholder: 'e.g. Deep Work, Fitness, Reading',
+                  placeholder: 'e.g. Deep Work, Gym, Study',
                   placeholderStyle: TextStyle(
                     color: widget.p.text3.withValues(alpha: 0.6),
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Max 9 characters for widget and pill fit'.localized(context),
+                  style: TextStyle(
+                    color: widget.p.text3.withValues(alpha: 0.8),
+                    fontSize: 10.5,
                   ),
                 ),
               ],

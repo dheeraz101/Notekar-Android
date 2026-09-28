@@ -1413,18 +1413,46 @@ class MainActivity : FlutterActivity() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            val notifLogBehavior = fp.getString("flutter.notif_log_action", "popup") ?: "popup"
+            val singleLogActionPending = if (notifLogBehavior == "popup") {
+                val intent = Intent(context, QuickNoteActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra(QuickNoteActivity.EXTRA_LOG_TYPE, "single")
+                }
+                PendingIntent.getActivity(
+                    context,
+                    1007,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                singleLogPending
+            }
+
+            val sessionInIntent = Intent(context, QuickNoteActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(QuickNoteActivity.EXTRA_IS_SESSION, true)
+                putExtra(QuickNoteActivity.EXTRA_LOG_TYPE, "in")
+            }
+            val sessionInPending = PendingIntent.getActivity(
+                context,
+                1001,
+                sessionInIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             if (isTwoWay) {
                 if (isCurrentlyIn) {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
                     builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 } else {
-                    builder.addAction(R.drawable.ic_stat_notekar, "Log IN", inPending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "Log IN", sessionInPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
                     builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 }
             } else {
-                builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogPending)
+                builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogActionPending)
                 builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
                 builder.addAction(R.drawable.ic_stat_notekar, "⇄ Two-Way", togglePending)
             }

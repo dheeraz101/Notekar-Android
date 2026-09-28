@@ -274,7 +274,7 @@
 
         <activity
             android:name=".QuickNoteActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:theme="@style/Theme.NoteKar.TranslucentDialog"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:taskAffinity="app.notekar.notekar.quicknote"

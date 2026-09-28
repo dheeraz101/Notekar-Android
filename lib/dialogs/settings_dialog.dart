@@ -12,6 +12,7 @@ import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
+import 'package:notekar/dialogs/settings/activity_tags_settings_page.dart';
 import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_lock_settings_page.dart';
@@ -179,8 +180,12 @@ class SettingsDialog extends StatefulWidget {
     this.onAdaptiveColorChanged,
     this.soundEffects = true,
     this.onSoundEffects,
+    this.activeCategory,
+    this.isSessionRunning = false,
   });
 
+  final String? activeCategory;
+  final bool isSessionRunning;
   final bool soundEffects;
   final ValueChanged<bool>? onSoundEffects;
   final ValueChanged<bool>? onAdaptiveColorChanged;
@@ -384,6 +389,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   bool _autoDeleteUpdateCache = false;
   bool obfuscateInRecents = false;
   bool showPersistentNotification = false;
+  String notifLogAction = 'popup';
   bool enableNoteOnClick = false;
   bool enableSobrietyMode = false;
   String sobrietyResetType = 'any';
@@ -641,6 +647,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
       showPersistentNotification =
           _prefs?.getBool('show_persistent_notification') ?? false;
+      notifLogAction = _prefs?.getString('notif_log_action') ?? 'popup';
       enableNoteOnClick = _prefs?.getBool('enable_note_on_click') ?? false;
       enableSobrietyMode = _prefs?.getBool('enable_sobriety_mode') ?? false;
       sobrietyResetType = _prefs?.getString('sobriety_reset_type') ?? 'any';
@@ -2161,6 +2168,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   SettingsRow(
                                     p: p,
+                                    icon: CupertinoIcons.tag,
+                                    title: 'Activity Tags',
+                                    status: 'Quick Tags',
+                                    color: p.accent,
+                                    onTap: () => _openCategory('Activity Tags'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
                                     icon: CupertinoIcons.shield,
                                     title: 'Privacy & Security',
                                     status: privacyLock ? 'On' : 'Off',
@@ -2508,6 +2523,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                               enableSobrietyMode: enableSobrietyMode,
                               showPersistentNotification:
                                   showPersistentNotification,
+                              notifLogAction: notifLogAction,
+                              onNotifLogActionChanged: (val) async {
+                                final mode = val ? 'popup' : 'silent';
+                                setState(() => notifLogAction = mode);
+                                await _prefs?.setString(
+                                  'notif_log_action',
+                                  mode,
+                                );
+                              },
                               showTrashBin: widget.onOpenTrash != null,
                               trash: _trash,
                               rainbowCards: _rainbowCards,
@@ -2561,7 +2585,12 @@ ${stackTrace ?? 'No stack trace provided.'}
                           ),
                         if (show('Targets & Goals') || show('Goals'))
                           SliverToBoxAdapter(
-                            child: GoalsSettingsPage(p: p, moments: entries),
+                            child: GoalsSettingsPage(
+                              p: p,
+                              moments: entries,
+                              activeCategory: widget.activeCategory,
+                              isSessionRunning: widget.isSessionRunning,
+                            ),
                           ),
                         if (show('Life Audit'))
                           SliverToBoxAdapter(
@@ -3213,6 +3242,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onAdaptiveColorChanged:
                                   widget.onAdaptiveColorChanged,
                               onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                            ),
+                          ),
+                        if (show('Activity Tags') ||
+                            show('Tags') ||
+                            show('Quick Tags'))
+                          SliverToBoxAdapter(
+                            child: ActivityTagsSettingsPage(
+                              p: p,
+                              onTagsChanged: () => setState(() {}),
                             ),
                           ),
                         if (category != null && category!.startsWith('Mode: '))

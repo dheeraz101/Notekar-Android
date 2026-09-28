@@ -1,40 +1,71 @@
+import 'dart:convert';
+import 'package:notekar/models/activity_tag.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Centralized tag management service.
-/// Single source of truth for custom tags, recent tags, and tag utilities.
+/// Single source of truth for 15 Activity Quick Tags with glyph icons,
+/// custom user tags, recent usages, and tag utilities.
 class TagService {
   TagService._();
 
   static final TagService instance = TagService._();
 
+  static const _activityTagsKey = 'notekar_activity_tags_v2';
   static const _customTagsKey = 'custom_note_tags';
   static const _recentTagsKey = 'notekar.recent_tags';
   static const _maxRecentTags = 10;
   static const _maxTagLength = 20;
 
-  static const defaultTags = [
-    '#work',
-    '#study',
-    '#play',
-    '#health',
-    '#focus',
-    '#routine',
-  ];
-
-  List<String> _customTags = List.from(defaultTags);
+  List<ActivityTag> _activityTags = List.from(ActivityTag.default15Tags);
   List<String> _recentTags = [];
   bool _loaded = false;
 
-  /// Load custom and recent tags from SharedPreferences.
-  /// Safe to call multiple times — only loads once.
+  /// Load activity tags and recent tags from SharedPreferences.
   Future<void> load() async {
     if (_loaded) return;
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList(_customTagsKey);
-    if (saved != null && saved.isNotEmpty) {
-      _customTags = saved;
+
+    final rawJson = prefs.getString(_activityTagsKey);
+    if (rawJson != null && rawJson.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawJson) as List<dynamic>;
+        _activityTags = decoded
+            .map((item) => ActivityTag.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } catch (_) {
+        _activityTags = List.from(ActivityTag.default15Tags);
+      }
+    } else {
+      final legacy = prefs.getStringList(_customTagsKey);
+      if (legacy != null && legacy.isNotEmpty) {
+        _activityTags = [];
+        for (final t in legacy) {
+          final clean = t.replaceFirst('#', '').trim();
+          if (clean.isNotEmpty) {
+            _activityTags.add(
+              ActivityTag(
+                id: 'legacy_${clean.toLowerCase()}',
+                label: t,
+                iconCodePoint: 0xf56b,
+                isCustom: true,
+              ),
+            );
+          }
+        }
+        for (final def in ActivityTag.default15Tags) {
+          if (!_activityTags.any(
+            (t) => t.label.toLowerCase() == def.label.toLowerCase(),
+          )) {
+            _activityTags.add(def);
+          }
+        }
+      } else {
+        _activityTags = List.from(ActivityTag.default15Tags);
+      }
+      await _saveActivityTags();
     }
+
     final recent = prefs.getStringList(_recentTagsKey);
     if (recent != null) {
       _recentTags = recent;
@@ -42,35 +73,97 @@ class TagService {
     _loaded = true;
   }
 
-  /// Force reload from disk (e.g. after background sync).
+  /// Reset internal state for test environments.
+  void resetForTesting() {
+    _loaded = false;
+    _activityTags = List.from(ActivityTag.default15Tags);
+    _recentTags = [];
+  }
+
+  /// Force reload from disk.
   Future<void> reload() async {
     _loaded = false;
     await load();
   }
 
-  /// Get the user's custom tag palette.
-  List<String> get customTags => List.unmodifiable(_customTags);
+  /// Get the configured Activity Quick Tags.
+  List<ActivityTag> get activityTags => List.unmodifiable(_activityTags);
 
-  /// Get recently used tags (most recent first), excluding any already in customTags.
+  /// Get legacy list of string hashtags (e.g. '#walking', '#gym').
+  List<String> get customTags => _activityTags.map((t) => t.hashtag).toList();
+
+  /// Get recently used tags (most recent first).
   List<String> get recentTags {
-    final customSet = _customTags.toSet();
+    final customSet = customTags.toSet();
     return _recentTags.where((t) => !customSet.contains(t)).toList();
   }
 
-  /// Add a new custom tag to the palette.
-  /// Returns true if the tag was added (not a duplicate).
-  Future<bool> addCustomTag(String rawTag) async {
-    final tag = normalize(rawTag);
-    if (tag.isEmpty || _customTags.contains(tag)) return false;
-    _customTags = [..._customTags, tag];
-    await _saveCustomTags();
+  /// Add a new Activity Quick Tag.
+  Future<bool> addActivityTag(ActivityTag tag) async {
+    if (_activityTags.any(
+      (t) => t.id == tag.id || t.label.toLowerCase() == tag.label.toLowerCase(),
+    )) {
+      return false;
+    }
+    _activityTags = [..._activityTags, tag];
+    await _saveActivityTags();
     return true;
   }
 
-  /// Remove a custom tag from the palette.
+  /// Update an existing Activity Quick Tag.
+  Future<bool> updateActivityTag(ActivityTag updated) async {
+    final idx = _activityTags.indexWhere((t) => t.id == updated.id);
+    if (idx < 0) return false;
+    _activityTags[idx] = updated;
+    await _saveActivityTags();
+    return true;
+  }
+
+  /// Remove an Activity Quick Tag by ID.
+  Future<void> removeActivityTag(String id) async {
+    _activityTags = _activityTags.where((t) => t.id != id).toList();
+    await _saveActivityTags();
+  }
+
+  /// Reorder tags in palette.
+  Future<void> reorderActivityTags(int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = _activityTags.removeAt(oldIndex);
+    _activityTags.insert(newIndex, item);
+    await _saveActivityTags();
+  }
+
+  /// Reset to standard 15 research-backed activity tags.
+  Future<void> resetToDefaultTags() async {
+    _activityTags = List.from(ActivityTag.default15Tags);
+    await _saveActivityTags();
+  }
+
+  /// Backward-compatible method to add a raw string tag.
+  Future<bool> addCustomTag(String rawTag) async {
+    final clean = normalize(rawTag);
+    if (clean.isEmpty) return false;
+    final label = stripHash(clean);
+    return addActivityTag(
+      ActivityTag(
+        id: 'tag_${DateTime.now().millisecondsSinceEpoch}',
+        label: label[0].toUpperCase() + label.substring(1),
+        iconCodePoint: 0xf56b, // default glyph
+        isCustom: true,
+      ),
+    );
+  }
+
+  /// Backward-compatible method to remove a tag by string.
   Future<void> removeCustomTag(String tag) async {
-    _customTags = _customTags.where((t) => t != tag).toList();
-    await _saveCustomTags();
+    final clean = normalize(tag);
+    final target = _activityTags.firstWhere(
+      (t) => t.hashtag.toLowerCase() == clean.toLowerCase(),
+      orElse: () => _activityTags.first,
+    );
+    await removeActivityTag(target.id);
   }
 
   /// Record a tag as recently used.
@@ -93,7 +186,6 @@ class TagService {
   }
 
   /// Normalize a tag string: lowercase, trim, remove leading #, clamp length.
-  /// Returns the tag WITH the # prefix for display consistency.
   String normalize(String raw) {
     var tag = raw.trim();
     if (tag.startsWith('#')) tag = tag.substring(1);
@@ -109,9 +201,8 @@ class TagService {
   }
 
   /// Get all unique tags ever used across all entries.
-  /// Merges custom tags + recent tags + inline hashtags from all moments.
   List<String> getAllKnownTags(List<Moment> entries) {
-    final all = <String>{..._customTags, ..._recentTags};
+    final all = <String>{...customTags, ..._recentTags};
     for (final entry in entries) {
       for (final tag in entry.effectiveTags) {
         all.add('#$tag');
@@ -121,7 +212,6 @@ class TagService {
   }
 
   /// Suggest tags matching a prefix (for autocomplete).
-  /// Returns tags starting with the prefix, ordered by: recent → custom → all.
   List<String> suggestTags(String prefix, List<Moment> entries) {
     final normalizedPrefix = prefix.toLowerCase().replaceAll('#', '');
     if (normalizedPrefix.isEmpty) return [];
@@ -133,8 +223,51 @@ class TagService {
         .toList();
   }
 
-  Future<void> _saveCustomTags() async {
+  /// Find an ActivityTag by hashtag or label.
+  ActivityTag? findActivityTag(String tagOrHashtag) {
+    final clean = TagService.stripHash(tagOrHashtag).toLowerCase();
+    for (final tag in _activityTags) {
+      if (tag.label.toLowerCase() == clean ||
+          tag.hashtag.toLowerCase() == '#$clean') {
+        return tag;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _saveActivityTags() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_customTagsKey, _customTags);
+    final encoded = jsonEncode(_activityTags.map((t) => t.toJson()).toList());
+    await prefs.setString(_activityTagsKey, encoded);
+
+    // Sync legacy string list for widget/quick note parsing
+    final stringList = _activityTags.map((t) => t.label).toList();
+    await prefs.setStringList(_customTagsKey, stringList);
+  }
+}
+
+/// Helper for extracting and stripping hashtags from note body text in view modes.
+class NoteTagExtractor {
+  static final RegExp _hashtagRegex = RegExp(
+    r'(?:^|\s)#[a-zA-Z0-9_\u0900-\u097F]+',
+  );
+
+  /// Extracts list of unique hashtags from note text (e.g. ['#walking', '#deepwork']).
+  static List<String> extractHashtags(String note) {
+    if (note.isEmpty) return const [];
+    return _hashtagRegex
+        .allMatches(note)
+        .map((m) => m.group(0)!.trim())
+        .toSet()
+        .toList();
+  }
+
+  /// Removes hashtags from note text for clean Apple HIG timeline presentation.
+  static String cleanBodyText(String note) {
+    if (note.isEmpty) return '';
+    return note
+        .replaceAll(_hashtagRegex, '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
   }
 }

@@ -522,23 +522,51 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (widget.currentStreak > 0) ...[
-                            Text(
-                              '🔥${widget.currentStreak}d',
-                              style: TextStyle(
-                                color: p.orange,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.flame_fill,
+                                  size: 11,
+                                  color: p.orange,
+                                ),
+                                const SizedBox(width: 2.5),
+                                Text(
+                                  '${widget.currentStreak}d',
+                                  style: TextStyle(
+                                    color: p.orange,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                             if (widget.bankedGraceDays > 0) ...[
-                              const SizedBox(width: 3),
-                              Text(
-                                '🛡️${widget.bankedGraceDays}',
-                                style: TextStyle(
-                                  color: p.accent,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              const SizedBox(width: 5),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.shield_fill,
+                                    size: 10,
+                                    color: p.accent,
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    '${widget.bankedGraceDays}',
+                                    style: TextStyle(
+                                      color: p.accent,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                             const SizedBox(width: 6),

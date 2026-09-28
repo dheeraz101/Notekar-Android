@@ -15,7 +15,7 @@ void main() {
     test('Goal model serialization roundtrip', () {
       final goal = Goal(
         id: 'test_goal_1',
-        title: 'Deep Focus',
+        title: 'Deep Work',
         category: 'Work',
         mode: 'two-way',
         targetMinutes: 600,
@@ -27,7 +27,7 @@ void main() {
       final revived = Goal.fromJson(json);
 
       expect(revived.id, 'test_goal_1');
-      expect(revived.title, 'Deep Focus');
+      expect(revived.title, 'Deep Work');
       expect(revived.category, 'Work');
       expect(revived.mode, 'two-way');
       expect(revived.targetMinutes, 600);
@@ -36,10 +36,9 @@ void main() {
       expect(revived.isArchived, false);
     });
 
-    test('GoalsService seeds default goals if empty', () async {
+    test('GoalsService starts empty without dummy seed goals', () async {
       final goals = await GoalsService.instance.getGoals();
-      expect(goals.isNotEmpty, isTrue);
-      expect(goals.any((g) => g.title.contains('Deep Work')), isTrue);
+      expect(goals.isEmpty, isTrue);
     });
 
     test('GoalsService save, archive, and delete lifecycle', () async {

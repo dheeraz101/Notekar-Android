@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -15,6 +16,7 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'custom_note_tags': ['#focus', '#writing', '#journal'],
       });
+      TagService.instance.resetForTesting();
     });
 
     testWidgets(
@@ -32,7 +34,7 @@ void main() {
         expect(find.text('#focus'), findsOneWidget);
         expect(find.text('#writing'), findsOneWidget);
         expect(find.text('#journal'), findsOneWidget);
-        expect(find.text('Tag'), findsOneWidget);
+        expect(find.text('Tag', skipOffstage: false), findsOneWidget);
         expect(find.text('Plus'), findsOneWidget);
       },
     );

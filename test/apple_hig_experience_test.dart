@@ -284,8 +284,10 @@ void main() {
 
         // Expanded card now reveals Unified Rhythm card with streak, grace shield, conscious %
         expect(find.text('MODES & RHYTHM'), findsOneWidget);
-        expect(find.text('🔥7d'), findsOneWidget);
-        expect(find.text('🛡️2'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.flame_fill), findsOneWidget);
+        expect(find.text('7d'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.shield_fill), findsOneWidget);
+        expect(find.text('2'), findsOneWidget);
         expect(find.textContaining('Conscious'), findsOneWidget);
 
         // Tapping unified rhythm card triggers onOpenIntelligenceHub

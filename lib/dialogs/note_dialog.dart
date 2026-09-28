@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
+import 'package:notekar/models/activity_tag.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -51,7 +52,7 @@ class _NoteDialogState extends State<NoteDialog> {
   int _availableShields = 0;
   bool _shieldActivated = false;
 
-  List<String> _tags = const [];
+  List<ActivityTag> _activityTags = const [];
 
   @override
   void initState() {
@@ -78,7 +79,7 @@ class _NoteDialogState extends State<NoteDialog> {
   Future<void> _loadTags() async {
     final tagService = TagService.instance;
     await tagService.load();
-    if (mounted) setState(() => _tags = tagService.customTags);
+    if (mounted) setState(() => _activityTags = tagService.activityTags);
   }
 
   Future<void> _showAddTagDialog() async {
@@ -86,24 +87,14 @@ class _NoteDialogState extends State<NoteDialog> {
     final created = await showCupertinoDialog<String>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('New Hashtag'),
+        title: const Text('New Tag'),
         content: Padding(
           padding: const EdgeInsets.only(top: 12.0),
           child: CupertinoTextField(
             controller: textController,
             autofocus: true,
-            placeholder: 'tag (e.g. work, gym)',
+            placeholder: 'tag (e.g. Walking, Gym)',
             style: TextStyle(color: widget.p.text),
-            prefix: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                '#',
-                style: TextStyle(
-                  color: widget.p.accent,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           ),
         ),
         actions: [
@@ -116,8 +107,7 @@ class _NoteDialogState extends State<NoteDialog> {
             onPressed: () {
               final raw = textController.text.trim();
               if (raw.isEmpty) return;
-              final clean = raw.startsWith('#') ? raw : '#$raw';
-              Navigator.pop(ctx, clean);
+              Navigator.pop(ctx, raw);
             },
             child: const Text('Add'),
           ),
@@ -128,17 +118,17 @@ class _NoteDialogState extends State<NoteDialog> {
     if (created != null && created.isNotEmpty) {
       final added = await TagService.instance.addCustomTag(created);
       if (added && mounted) {
-        setState(() => _tags = TagService.instance.customTags);
+        setState(() => _activityTags = TagService.instance.activityTags);
       }
     }
   }
 
-  Future<void> _confirmDeleteTag(String tag) async {
+  Future<void> _confirmDeleteTag(ActivityTag tag) async {
     HapticFeedback.mediumImpact();
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Remove $tag?'),
+        title: Text('Remove ${tag.label}?'),
         content: const Text(
           'Do you want to remove this tag from your quick list?',
         ),
@@ -157,9 +147,9 @@ class _NoteDialogState extends State<NoteDialog> {
     );
 
     if (confirmed == true) {
-      await TagService.instance.removeCustomTag(tag);
+      await TagService.instance.removeActivityTag(tag.id);
       if (mounted) {
-        setState(() => _tags = TagService.instance.customTags);
+        setState(() => _activityTags = TagService.instance.activityTags);
       }
     }
   }
@@ -406,39 +396,6 @@ class _NoteDialogState extends State<NoteDialog> {
                           scrollDirection: Axis.horizontal,
                           physics: const BouncingScrollPhysics(),
                           children: [
-                            for (final tag in _tags)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 6),
-                                child: PressableScale(
-                                  onTap: () => _insertTag(tag),
-                                  onLongPress: () => _confirmDeleteTag(tag),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: widget.p.surface2,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: widget.p.border.withValues(
-                                          alpha: 0.6,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        tag,
-                                        style: TextStyle(
-                                          color: widget.p.text2,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
                               child: PressableScale(
@@ -481,6 +438,48 @@ class _NoteDialogState extends State<NoteDialog> {
                                 ),
                               ),
                             ),
+                            for (final tag in _activityTags)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: PressableScale(
+                                  onTap: () => _insertTag(tag.hashtag),
+                                  onLongPress: () => _confirmDeleteTag(tag),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 9,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: widget.p.surface2,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: widget.p.border.withValues(
+                                          alpha: 0.6,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          tag.icon,
+                                          size: 12,
+                                          color: widget.p.accent,
+                                        ),
+                                        const SizedBox(width: 4.5),
+                                        Text(
+                                          tag.label,
+                                          style: TextStyle(
+                                            color: widget.p.text2,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             if (_sobrietyMode)
                               Padding(
                                 padding: const EdgeInsets.only(right: 6),

@@ -12,24 +12,25 @@ class GoalsService {
 
   static const String _storageKey = 'notekar_goals_list_v1';
 
-  /// Retrieves all configured goals, seeding high-utility defaults if empty.
+  /// Retrieves all configured user goals. Does not seed dummy defaults.
   Future<List<Goal>> getGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_storageKey);
     if (raw == null || raw.isEmpty) {
-      final defaultGoals = _createDefaultGoals();
-      await _persistGoals(defaultGoals);
-      return defaultGoals;
+      return [];
     }
 
     try {
       final decoded = jsonDecode(raw) as List<dynamic>;
       final list = decoded
           .map((item) => Goal.fromJson(item as Map<String, dynamic>))
+          .where(
+            (g) => g.id != 'goal_deep_work_weekly' && g.id != 'goal_health',
+          )
           .toList();
       return list;
     } catch (_) {
-      return _createDefaultGoals();
+      return [];
     }
   }
 
@@ -203,30 +204,6 @@ class GoalsService {
     }
 
     return true;
-  }
-
-  List<Goal> _createDefaultGoals() {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    return [
-      Goal(
-        id: 'goal_deep_work',
-        title: 'Deep Work Focus',
-        category: null,
-        mode: 'two-way',
-        targetMinutes: 1200, // 20 hours
-        timeframe: GoalTimeframe.week,
-        createdAt: now,
-      ),
-      Goal(
-        id: 'goal_health',
-        title: 'Physical Health & Fitness',
-        category: 'Health',
-        mode: null,
-        targetMinutes: 300, // 5 hours
-        timeframe: GoalTimeframe.week,
-        createdAt: now,
-      ),
-    ];
   }
 
   Future<void> _persistGoals(List<Goal> list) async {

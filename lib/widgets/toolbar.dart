@@ -3,12 +3,13 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
-class Toolbar extends StatelessWidget {
+class Toolbar extends StatefulWidget {
   const Toolbar({
     super.key,
     required this.p,
@@ -26,6 +27,11 @@ class Toolbar extends StatelessWidget {
     required this.showHistoryText,
     this.lastTimestamp,
     this.blur = false,
+    this.isSessionActive = false,
+    this.activeGoalTitle,
+    this.onNextGoal,
+    this.onPrevGoal,
+    this.enableGoalSwitcher = true,
   });
 
   final Palette p;
@@ -43,13 +49,105 @@ class Toolbar extends StatelessWidget {
   final bool showHistoryText;
   final String? lastTimestamp;
   final bool blur;
+  final bool isSessionActive;
+  final String? activeGoalTitle;
+  final VoidCallback? onNextGoal;
+  final VoidCallback? onPrevGoal;
+  final bool enableGoalSwitcher;
+
+  @override
+  State<Toolbar> createState() => _ToolbarState();
+}
+
+class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
+  late final AnimationController _bounceController;
+  late final Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _bounceAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 0.0,
+          end: -8.0,
+        ).chain(CurveTween(curve: Curves.easeOutQuad)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -8.0,
+          end: 6.0,
+        ).chain(CurveTween(curve: Curves.easeInOutQuad)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 6.0,
+          end: -3.0,
+        ).chain(CurveTween(curve: Curves.easeInOutQuad)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -3.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeInQuad)),
+        weight: 25,
+      ),
+    ]).animate(_bounceController);
+
+    if (widget.isSessionActive &&
+        widget.activeGoalTitle != null &&
+        widget.enableGoalSwitcher) {
+      _bounceController.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant Toolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.isSessionActive &&
+        widget.isSessionActive &&
+        widget.activeGoalTitle != null &&
+        widget.enableGoalSwitcher) {
+      _bounceController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    super.dispose();
+  }
+
+  static String _clampTitle(String raw) {
+    final t = raw.trim();
+    if (t.length <= 9) return t;
+    return t.substring(0, 9);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final historyLabel = lastTimestamp ?? 'History';
-    if (showLabels) {
+    final p = widget.p;
+    final isGoalActive =
+        widget.isSessionActive &&
+        widget.enableGoalSwitcher &&
+        widget.activeGoalTitle != null &&
+        widget.activeGoalTitle!.trim().isNotEmpty;
+    final clampedGoal = isGoalActive
+        ? _clampTitle(widget.activeGoalTitle!)
+        : null;
+    final historyLabel = clampedGoal ?? (widget.lastTimestamp ?? 'History');
+    final showGoalPill = isGoalActive || widget.showHistoryText;
+
+    if (widget.showLabels) {
       final labeledRow = Padding(
-        padding: EdgeInsets.all(showBackgroundPill ? spacing8 : 0),
+        padding: EdgeInsets.all(widget.showBackgroundPill ? spacing8 : 0),
         child: SizedBox(
           width: math.min(MediaQuery.sizeOf(context).width - spacing48, 318),
           child: Row(
@@ -57,19 +155,41 @@ class Toolbar extends StatelessWidget {
               Expanded(
                 child: TextToolButton(
                   p: p,
-                  label: mode == 'single' ? 'Single' : 'Two-Way',
-                  blur: blur,
-                  onTap: onMode,
+                  label: widget.mode == 'single' ? 'Single' : 'Two-Way',
+                  blur: widget.blur,
+                  onTap: widget.onMode,
                 ),
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: TextToolButton(
-                  p: p,
-                  label: showHistoryText ? historyLabel : '',
-                  icon: showHistoryText ? null : CupertinoIcons.clock,
-                  blur: blur,
-                  onTap: onHistory,
+                child: GestureDetector(
+                  onHorizontalDragEnd: isGoalActive
+                      ? (details) {
+                          if (details.primaryVelocity != null) {
+                            if (details.primaryVelocity! < -100) {
+                              HapticFeedback.selectionClick();
+                              widget.onNextGoal?.call();
+                            } else if (details.primaryVelocity! > 100) {
+                              HapticFeedback.selectionClick();
+                              widget.onPrevGoal?.call();
+                            }
+                          }
+                        }
+                      : null,
+                  child: AnimatedBuilder(
+                    animation: _bounceAnimation,
+                    builder: (context, child) => Transform.translate(
+                      offset: Offset(_bounceAnimation.value, 0),
+                      child: child,
+                    ),
+                    child: TextToolButton(
+                      p: p,
+                      label: historyLabel,
+                      icon: showGoalPill ? null : CupertinoIcons.clock,
+                      blur: widget.blur,
+                      onTap: widget.onHistory,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
@@ -77,28 +197,28 @@ class Toolbar extends StatelessWidget {
                 child: TextToolButton(
                   p: p,
                   label: 'Settings',
-                  blur: blur,
-                  onTap: onSettings,
+                  blur: widget.blur,
+                  onTap: widget.onSettings,
                 ),
               ),
             ],
           ),
         ),
       );
-      final content = showBackgroundPill
-          ? (blur
+      final content = widget.showBackgroundPill
+          ? (widget.blur
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
                       child: DecoratedBox(
-                        decoration: _bottomNavDecoration(p, blur),
+                        decoration: _bottomNavDecoration(p, widget.blur),
                         child: labeledRow,
                       ),
                     ),
                   )
                 : DecoratedBox(
-                    decoration: _bottomNavDecoration(p, blur),
+                    decoration: _bottomNavDecoration(p, widget.blur),
                     child: labeledRow,
                   ))
           : labeledRow;
@@ -111,91 +231,140 @@ class Toolbar extends StatelessWidget {
       );
     }
     final iconRow = Padding(
-      padding: EdgeInsets.all(showBackgroundPill ? spacing8 : 0),
+      padding: EdgeInsets.all(widget.showBackgroundPill ? spacing8 : 0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           ModeToolButton(
             p: p,
-            mode: mode,
-            large: largeControls,
-            blur: blur,
-            motionNotifier: animateIcons ? motionNotifier : null,
-            motionX: animateIcons ? motionX : 0,
-            motionY: animateIcons ? motionY : 0,
-            onTap: onMode,
+            mode: widget.mode,
+            large: widget.largeControls,
+            blur: widget.blur,
+            motionNotifier: widget.animateIcons ? widget.motionNotifier : null,
+            motionX: widget.animateIcons ? widget.motionX : 0,
+            motionY: widget.animateIcons ? widget.motionY : 0,
+            onTap: widget.onMode,
           ),
           const SizedBox(width: spacing8),
-          PressableScale(
-            onTap: onHistory,
-            child: Glass(
-              p: p,
-              blur: blur,
-              radius: 999,
-              padding: EdgeInsets.only(
-                left: showHistoryText ? (largeControls ? 10 : 8) : 0,
-                right: showHistoryText ? spacing16 : 0,
+          GestureDetector(
+            onHorizontalDragEnd: isGoalActive
+                ? (details) {
+                    if (details.primaryVelocity != null) {
+                      if (details.primaryVelocity! < -100) {
+                        HapticFeedback.selectionClick();
+                        widget.onNextGoal?.call();
+                      } else if (details.primaryVelocity! > 100) {
+                        HapticFeedback.selectionClick();
+                        widget.onPrevGoal?.call();
+                      }
+                    }
+                  }
+                : null,
+            child: AnimatedBuilder(
+              animation: _bounceAnimation,
+              builder: (context, child) => Transform.translate(
+                offset: Offset(_bounceAnimation.value, 0),
+                child: child,
               ),
-              child: SizedBox(
-                width: showHistoryText ? null : (largeControls ? 56 : 48),
-                height: largeControls ? 56 : 48,
-                child: showHistoryText
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: largeControls ? 36 : 32,
-                            height: largeControls ? 36 : 32,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: p.surface3,
-                              shape: BoxShape.circle,
+              child: PressableScale(
+                onTap: widget.onHistory,
+                child: Glass(
+                  p: p,
+                  blur: widget.blur,
+                  radius: 999,
+                  padding: EdgeInsets.only(
+                    left: showGoalPill ? (widget.largeControls ? 10 : 8) : 0,
+                    right: showGoalPill ? spacing16 : 0,
+                  ),
+                  child: SizedBox(
+                    width: showGoalPill
+                        ? null
+                        : (widget.largeControls ? 56 : 48),
+                    height: widget.largeControls ? 56 : 48,
+                    child: showGoalPill
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: widget.largeControls ? 36 : 32,
+                                height: widget.largeControls ? 36 : 32,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: isGoalActive
+                                      ? p.accent.withValues(alpha: 0.16)
+                                      : p.surface3,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: isGoalActive
+                                    ? Icon(
+                                        CupertinoIcons.flag_fill,
+                                        color: p.accent,
+                                        size: widget.largeControls ? 18 : 16,
+                                      )
+                                    : AnimatedHomeIcon(
+                                        icon: CupertinoIcons.clock,
+                                        color: p.text,
+                                        size: widget.largeControls ? 20 : 18,
+                                        motionNotifier: widget.animateIcons
+                                            ? widget.motionNotifier
+                                            : null,
+                                        motionX: widget.animateIcons
+                                            ? widget.motionX
+                                            : 0,
+                                        motionY: widget.animateIcons
+                                            ? widget.motionY
+                                            : 0,
+                                      ),
+                              ),
+                              const SizedBox(width: spacing8),
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                transitionBuilder: (child, animation) =>
+                                    FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    ),
+                                child: Text(
+                                  historyLabel,
+                                  key: ValueKey<String>(historyLabel),
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                          )
+                        : Center(
+                            child: Container(
+                              width: widget.largeControls ? 36 : 32,
+                              height: widget.largeControls ? 36 : 32,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: p.surface3,
+                                shape: BoxShape.circle,
+                              ),
+                              child: AnimatedHomeIcon(
+                                icon: CupertinoIcons.clock,
+                                color: p.text,
+                                size: widget.largeControls ? 20 : 18,
+                                motionNotifier: widget.animateIcons
+                                    ? widget.motionNotifier
+                                    : null,
+                                motionX: widget.animateIcons
+                                    ? widget.motionX
+                                    : 0,
+                                motionY: widget.animateIcons
+                                    ? widget.motionY
+                                    : 0,
+                              ),
                             ),
-                            child: AnimatedHomeIcon(
-                              icon: CupertinoIcons.clock,
-                              color: p.text,
-                              size: largeControls ? 20 : 18,
-                              motionNotifier: animateIcons
-                                  ? motionNotifier
-                                  : null,
-                              motionX: animateIcons ? motionX : 0,
-                              motionY: animateIcons ? motionY : 0,
-                            ),
                           ),
-                          const SizedBox(width: spacing8),
-                          Text(
-                            historyLabel,
-                            style: TextStyle(
-                              color: p.text,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      )
-                    : Center(
-                        child: Container(
-                          width: largeControls ? 36 : 32,
-                          height: largeControls ? 36 : 32,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: p.surface3,
-                            shape: BoxShape.circle,
-                          ),
-                          child: AnimatedHomeIcon(
-                            icon: CupertinoIcons.clock,
-                            color: p.text,
-                            size: largeControls ? 20 : 18,
-                            motionNotifier: animateIcons
-                                ? motionNotifier
-                                : null,
-                            motionX: animateIcons ? motionX : 0,
-                            motionY: animateIcons ? motionY : 0,
-                          ),
-                        ),
-                      ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -204,32 +373,32 @@ class Toolbar extends StatelessWidget {
             p: p,
             icon: CupertinoIcons.settings,
             color: p.text,
-            label: showLabels ? 'Settings' : null,
-            size: largeControls ? 56 : 48,
-            blur: blur,
-            motionNotifier: animateIcons ? motionNotifier : null,
-            motionX: animateIcons ? motionX : 0,
-            motionY: animateIcons ? motionY : 0,
-            onTap: onSettings,
+            label: widget.showLabels ? 'Settings' : null,
+            size: widget.largeControls ? 56 : 48,
+            blur: widget.blur,
+            motionNotifier: widget.animateIcons ? widget.motionNotifier : null,
+            motionX: widget.animateIcons ? widget.motionX : 0,
+            motionY: widget.animateIcons ? widget.motionY : 0,
+            onTap: widget.onSettings,
           ),
         ],
       ),
     );
 
-    final content = showBackgroundPill
-        ? (blur
+    final content = widget.showBackgroundPill
+        ? (widget.blur
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
                     child: DecoratedBox(
-                      decoration: _bottomNavDecoration(p, blur),
+                      decoration: _bottomNavDecoration(p, widget.blur),
                       child: iconRow,
                     ),
                   ),
                 )
               : DecoratedBox(
-                  decoration: _bottomNavDecoration(p, blur),
+                  decoration: _bottomNavDecoration(p, widget.blur),
                   child: iconRow,
                 ))
         : iconRow;

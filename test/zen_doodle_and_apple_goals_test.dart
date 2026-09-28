@@ -62,7 +62,7 @@ void main() {
         final now = DateTime.now().millisecondsSinceEpoch;
         final testGoal = Goal(
           id: 'coding_goal',
-          title: 'Deep Coding',
+          title: 'Coding',
           category: 'Code',
           mode: 'two-way',
           targetMinutes: 600,
@@ -109,7 +109,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Check title and category pill
-        expect(find.text('Deep Coding'), findsOneWidget);
+        expect(find.text('Coding'), findsOneWidget);
         expect(find.text('Code'), findsOneWidget);
 
         // Check 1-tap start button
@@ -153,18 +153,15 @@ void main() {
         expect(find.text('TIMEFRAME'), findsOneWidget);
         expect(find.text('CATEGORY SCOPE'), findsOneWidget);
 
-        // Enter title
-        await tester.enterText(
-          find.byType(CupertinoTextField),
-          'Writing Memoir',
-        );
+        // Enter title (<= 9 chars)
+        await tester.enterText(find.byType(CupertinoTextField), 'Memoir');
 
         // Tap Save
         await tester.tap(find.text('Save Goal'));
         await tester.pumpAndSettle();
 
         expect(savedResult, isNotNull);
-        expect(savedResult!.title, 'Writing Memoir');
+        expect(savedResult!.title, 'Memoir');
       },
     );
 

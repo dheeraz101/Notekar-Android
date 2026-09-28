@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/goal.dart';
@@ -6,6 +7,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/swipeable_card_bed.dart';
@@ -406,15 +408,95 @@ class TimelineSessionCard extends StatelessWidget {
                           ],
                           Expanded(
                             child: hasNote
-                                ? IosEmojiText(
-                                    session.note,
-                                    maxLines: compact ? 1 : 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: p.text,
-                                      fontSize: compact ? 11.5 : 12.5,
-                                      height: 1.3,
-                                    ),
+                                ? Builder(
+                                    builder: (ctx) {
+                                      final tags =
+                                          NoteTagExtractor.extractHashtags(
+                                            session.note,
+                                          );
+                                      final clean =
+                                          NoteTagExtractor.cleanBodyText(
+                                            session.note,
+                                          );
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (clean.isNotEmpty)
+                                            IosEmojiText(
+                                              clean,
+                                              maxLines: compact ? 1 : 3,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: p.text,
+                                                fontSize: compact ? 11.5 : 12.5,
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                          if (tags.isNotEmpty) ...[
+                                            if (clean.isNotEmpty)
+                                              const SizedBox(height: 3.5),
+                                            Wrap(
+                                              spacing: 4,
+                                              runSpacing: 4,
+                                              children: tags.map((t) {
+                                                final actTag = TagService
+                                                    .instance
+                                                    .findActivityTag(t);
+                                                return Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: p.surface3,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          6,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: p.border
+                                                          .withValues(
+                                                            alpha: 0.5,
+                                                          ),
+                                                      width: 0.7,
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        actTag?.icon ??
+                                                            CupertinoIcons
+                                                                .tag_fill,
+                                                        size: 9.5,
+                                                        color: p.accent,
+                                                      ),
+                                                      const SizedBox(width: 3),
+                                                      Text(
+                                                        actTag?.label ??
+                                                            TagService.stripHash(
+                                                              t,
+                                                            ),
+                                                        style: TextStyle(
+                                                          color: p.text2,
+                                                          fontSize: 10,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ],
+                                        ],
+                                      );
+                                    },
                                   )
                                 : Text(
                                     'Tap to add session note...'.localized(

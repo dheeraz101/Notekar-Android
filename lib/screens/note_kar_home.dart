@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui' show PointerDeviceKind;
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart'
     show
         CupertinoAlertDialog,
         CupertinoDialogAction,
+        CupertinoIcons,
         CupertinoTextField,
         CupertinoTheme,
         CupertinoThemeData,
@@ -31,12 +31,14 @@ import 'package:notekar/dialogs/time_reflection_sheet.dart';
 import 'package:notekar/dialogs/urge_surfing_dialog.dart';
 import 'package:notekar/main.dart';
 import 'package:notekar/models/backup_models.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
-import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
+import 'package:notekar/services/digital_wellbeing_service.dart';
+import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -60,6 +62,7 @@ import 'package:notekar/widgets/home_minimal_toolbar_capsule.dart';
 import 'package:notekar/widgets/home_pin_setup_overlay.dart';
 import 'package:notekar/widgets/home_sobriety_streak_card.dart';
 import 'package:notekar/widgets/milestone_celebration_dialog.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/toolbar.dart';
 import 'package:notekar/widgets/top_fade_blur.dart';
 import 'package:notekar/widgets/zen_doodle_splash.dart';
@@ -197,6 +200,46 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int _savedPulseToken = 0;
   double _horizontalSwipeDelta = 0.0;
   bool _horologyDetentFired = false;
+
+  List<Goal> _cachedGoals = [];
+
+  String? get _activeGoalTitle {
+    if (_cachedGoals.isEmpty) return null;
+    final match =
+        _cachedGoals.where((g) => g.category == _activeCategory).firstOrNull ??
+        _cachedGoals.where((g) => g.title == _activeCategory).firstOrNull;
+    if (match != null) {
+      return match.title.length > 9 ? match.title.substring(0, 9) : match.title;
+    }
+    final first = _cachedGoals.first;
+    return first.title.length > 9 ? first.title.substring(0, 9) : first.title;
+  }
+
+  void _onNextGoal() {
+    if (_cachedGoals.isEmpty) return;
+    final currentIndex = _cachedGoals.indexWhere(
+      (g) => g.category == _activeCategory || g.title == _activeCategory,
+    );
+    final nextIndex = currentIndex < 0
+        ? 0
+        : (currentIndex + 1) % _cachedGoals.length;
+    final nextGoal = _cachedGoals[nextIndex];
+    unawaited(_setActiveCategory(nextGoal.category ?? nextGoal.title));
+    _showToast(nextGoal.title, withHaptic: false);
+  }
+
+  void _onPrevGoal() {
+    if (_cachedGoals.isEmpty) return;
+    final currentIndex = _cachedGoals.indexWhere(
+      (g) => g.category == _activeCategory || g.title == _activeCategory,
+    );
+    final prevIndex = currentIndex < 0
+        ? _cachedGoals.length - 1
+        : (currentIndex - 1 + _cachedGoals.length) % _cachedGoals.length;
+    final prevGoal = _cachedGoals[prevIndex];
+    unawaited(_setActiveCategory(prevGoal.category ?? prevGoal.title));
+    _showToast(prevGoal.title, withHaptic: false);
+  }
 
   StreamSubscription<AccelerometerEvent>? _motionSub;
   final ValueNotifier<Offset> _motion = ValueNotifier(Offset.zero);
@@ -436,6 +479,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      unawaited(DigitalWellbeingService.instance.checkPermission());
       if (_prefs != null) {
         unawaited(() async {
           await _prefs!.reload();
@@ -734,9 +778,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         unawaited(prefs.setBool('notekar.has_tapped_before', true));
       }
 
+      final goals = await GoalsService.instance.getGoals();
+
       setState(() {
         _entries = entries;
         _trashNotifier.value = trash;
+        _cachedGoals = goals;
         _nextId = nextId;
         _startupComplete = true; // DB operations ready
       });
@@ -1321,6 +1368,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
           if (mounted) setState(() => _streakShields = newShields);
         }
       }
+
+      if (_mode == 'two-way' && type == 'out') {
+        Future.delayed(const Duration(milliseconds: 320), () {
+          if (mounted) {
+            _openNoteForLastCapture();
+          }
+        });
+      }
     } catch (e, stack) {
       _logger.error('Failed to log entry', e, stack);
       // Rollback
@@ -1827,6 +1882,118 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
+  Future<void> _startGoalSession({
+    required String? category,
+    String mode = 'two-way',
+  }) async {
+    if (category != null && category.isNotEmpty) {
+      await _setActiveCategory(category);
+    }
+    if (_mode != mode) {
+      setState(() => _mode = mode);
+      await _saveSetting('m-mode', mode);
+    }
+    if (_mode == 'two-way') {
+      if (_inout == 'out') {
+        _showToast('Switched to ${category ?? 'Goal'} session');
+      } else {
+        await _logEntry(forcedType: 'in');
+        _showToast('Started ${category ?? 'Goal'} session');
+      }
+    } else {
+      await _logEntry(forcedType: 'single');
+      _showToast('Moment logged for ${category ?? 'Goal'}');
+    }
+    _cachedGoals = await GoalsService.instance.getGoals();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _stopGoalSession() async {
+    if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out')) {
+      await _logEntry(forcedType: 'out');
+    }
+  }
+
+  Future<String?> _showModeSelectorSheet() async {
+    return showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      isScrollControlled: true,
+      builder: (ctx) => AppSheet(
+        p: p,
+        title: 'Select Mode'.localized(ctx),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(ctx).height * 0.6,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final cat in _categories) ...[
+                    PressableScale(
+                      onTap: () => Navigator.pop(ctx, cat),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cat == _activeCategory
+                              ? p.accent.withValues(alpha: 0.12)
+                              : p.surface3,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: cat == _activeCategory
+                                ? p.accent.withValues(alpha: 0.4)
+                                : p.border.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: getCategoryMeta(cat, p).color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                cat,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            if (cat == _activeCategory)
+                              Icon(
+                                CupertinoIcons.checkmark,
+                                size: 16,
+                                color: p.accent,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openNote({
     Offset? position,
     String? initialText,
@@ -1839,6 +2006,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
       return;
     }
     if (_isDelayBlocked()) return;
+
+    if (_mode == 'two-way' && _inout != 'out' && forcedType == null) {
+      final selectedCat = await _showModeSelectorSheet();
+      if (selectedCat == null) return;
+      await _setActiveCategory(selectedCat);
+      forcedType = 'in';
+    }
+
+    if (!mounted) return;
     NotekarHaptics.light(_hapticStyle);
     final result = await showGeneralDialog<NoteResult>(
       context: context,
@@ -1902,8 +2078,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _showToast('Loading database...', warning: true);
       return;
     }
-    await Navigator.of(context).push(ExecutiveIntelligenceHubScreen.route());
-    _load();
+    await _openSettings(initialCategory: 'Dashboard');
   }
 
   void _showCorruptionNotificationDialog(bool recoveredFromSnapshot) {
@@ -1955,6 +2130,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         minimalMomentOptions: _minimalMomentOptions,
         useNumbersInSingle: _useNumbersInSingle,
         resetSingleDaily: _resetSingleDaily,
+        activeCategory: _activeCategory,
+        isSessionRunning: _mode == 'two-way' && _sessionStart != null,
+        onStopSession: () {
+          Navigator.pop(sheetContext, {'action': 'stop_goal_session'});
+        },
         blur:
             _enableTranslucency &&
             AdaptiveEngine().supportsBlur &&
@@ -2013,25 +2193,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
         result['action'] == 'start_goal_session' &&
         mounted) {
       final targetCat = result['category'] as String?;
-      final targetMode = result['mode'] as String?;
-      if (targetCat != null) {
-        await _setActiveCategory(targetCat);
-      }
-      if (targetMode == 'single' || targetMode == 'two-way') {
-        _setMode(targetMode!);
-      }
-      if (_mode == 'two-way' && _inout != 'out') {
-        _handleTap(
-          TapUpDetails(
-            kind: PointerDeviceKind.touch,
-            globalPosition: Offset.zero,
-          ),
-        );
-        _showToast('Started ${targetCat ?? 'Goal'} session');
-      } else {
-        _showToast('Active mode set to ${targetCat ?? 'Goal'}');
-      }
+      final targetMode = result['mode'] as String? ?? 'two-way';
+      await _startGoalSession(category: targetCat, mode: targetMode);
+    } else if (result is Map &&
+        result['action'] == 'stop_goal_session' &&
+        mounted) {
+      await _stopGoalSession();
     }
+    _cachedGoals = await GoalsService.instance.getGoals();
     if (mounted) setState(() {});
   }
 
@@ -2236,7 +2405,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ? 'Last deleted: ${timeOnly(trash.first.timestamp)}${trash.first.note.isNotEmpty ? ' - ${trash.first.note}' : ''}'
         : 'No moments deleted';
 
-    final result = await showModalBottomSheet<String>(
+    final result = await showModalBottomSheet<dynamic>(
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.42),
@@ -2250,6 +2419,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       builder: (_) => SettingsDialog(
         p: p,
         initialCategory: initialCategory,
+        activeCategory: _activeCategory,
+        isSessionRunning: _mode == 'two-way' && _sessionStart != null,
         theme: _theme,
         defaultMode: _defaultMode,
         tapDelay: _tapDelay,
@@ -2556,7 +2727,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
       Future.delayed(const Duration(milliseconds: 200), () {
         _logEntry();
       });
+    } else if (result is Map &&
+        result['action'] == 'start_goal_session' &&
+        mounted) {
+      final targetCat = result['category'] as String?;
+      final targetMode = result['mode'] as String? ?? 'two-way';
+      await _startGoalSession(category: targetCat, mode: targetMode);
+    } else if (result is Map &&
+        result['action'] == 'stop_goal_session' &&
+        mounted) {
+      await _stopGoalSession();
     }
+    _cachedGoals = await GoalsService.instance.getGoals();
+    if (mounted) setState(() {});
   }
 
   Future<void> _openWhatsNew() async {
@@ -3749,6 +3932,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       _enableTranslucency &&
                       AdaptiveEngine().supportsBlur &&
                       !_reduceMotion,
+                  isSessionActive: _mode == 'two-way' && _sessionStart != null,
+                  activeGoalTitle: _activeGoalTitle,
+                  onNextGoal: _cachedGoals.isNotEmpty ? _onNextGoal : null,
+                  onPrevGoal: _cachedGoals.isNotEmpty ? _onPrevGoal : null,
+                  enableGoalSwitcher: true,
                 ),
               ),
             )

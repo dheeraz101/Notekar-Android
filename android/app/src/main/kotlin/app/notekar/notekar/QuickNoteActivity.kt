@@ -3,6 +3,7 @@ package app.notekar.notekar
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
@@ -13,16 +14,20 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
+import org.json.JSONArray
+import org.json.JSONObject
 
 class QuickNoteActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Set full screen layout translucent
-        window.setBackgroundDrawableResource(android.R.color.transparent)
-        window.setDimAmount(0.45f) // Dim the background for premium feel
+        // Set full transparent window & decor to eliminate rectangular box borders on older Android
+        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.decorView.setBackgroundColor(Color.TRANSPARENT)
+        window.setDimAmount(0.45f)
 
         val density = resources.displayMetrics.density
 
@@ -42,7 +47,7 @@ class QuickNoteActivity : Activity() {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             val lp = FrameLayout.LayoutParams(
-                (300 * density).toInt(),
+                (320 * density).toInt(),
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 gravity = Gravity.CENTER
@@ -63,50 +68,255 @@ class QuickNoteActivity : Activity() {
 
         val isSession = intent.getBooleanExtra(EXTRA_IS_SESSION, false)
         val explicitLogType = intent.getStringExtra(EXTRA_LOG_TYPE)
+        val widgetPrefs = getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+        val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+
+        val nextAction = widgetPrefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
+        val resolvedType = explicitLogType ?: if (isSession) nextAction else "single"
+        val isStartingSession = isSession && resolvedType == "in"
+        val isEndingSession = isSession && resolvedType == "out"
+
+        var selectedCategory = widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, "Work") ?: "Work"
+        if (selectedCategory == "All") selectedCategory = "Work"
+        var selectedGoalTitle: String? = null
 
         // Title
         val title = TextView(this).apply {
-            text = if (isSession) {
-                val prefs =
-                    getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
-                val nextAction =
-                    prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
-                val resolvedType = explicitLogType ?: nextAction
-                if (resolvedType == "out") "Log OUT Note" else "Log IN Note"
-            } else {
-                "Quick Note"
+            text = when {
+                isStartingSession -> "Start Session"
+                isEndingSession -> "Log OUT Note"
+                else -> "⚡ Quick Log"
             }
             setTextColor(Color.WHITE)
             textSize = 17f
-            typeface =
-                android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
             val lp = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                bottomMargin = (16 * density).toInt()
+                bottomMargin = (14 * density).toInt()
             }
             layoutParams = lp
         }
         card.addView(title)
 
+        // 1. If starting session: Show Mode / Category Selector Strip
+        if (isStartingSession) {
+            val categories = mutableListOf<String>()
+            val customCatsJson = flutterPrefs.getString("flutter.custom_categories", null)
+            if (customCatsJson != null && customCatsJson.startsWith("[")) {
+                try {
+                    val arr = JSONArray(customCatsJson)
+                    for (i in 0 until arr.length()) {
+                        val c = arr.optString(i)?.trim()
+                        if (!c.isNullOrEmpty() && c != "All") categories.add(c)
+                    }
+                } catch (_: Exception) {}
+            }
+            if (categories.isEmpty()) {
+                categories.addAll(listOf("Work", "Study", "Gym", "Reading", "Personal", "Health", "Routine"))
+            }
+
+            val catLabel = TextView(this).apply {
+                text = "SELECT MODE"
+                setTextColor(Color.parseColor("#80FFFFFF"))
+                textSize = 11f
+                typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                val lp = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = (6 * density).toInt()
+                }
+                layoutParams = lp
+            }
+            card.addView(catLabel)
+
+            val catScroll = HorizontalScrollView(this).apply {
+                overScrollMode = View.OVER_SCROLL_NEVER
+                isHorizontalScrollBarEnabled = false
+                val lp = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = (12 * density).toInt()
+                }
+                layoutParams = lp
+            }
+
+            val catRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+            }
+
+            val catViews = mutableListOf<TextView>()
+            for (cat in categories) {
+                val isSelected = cat.equals(selectedCategory, ignoreCase = true)
+                val catChip = TextView(this).apply {
+                    text = cat
+                    textSize = 12f
+                    gravity = Gravity.CENTER
+                    val hPad = (11 * density).toInt()
+                    val vPad = (6 * density).toInt()
+                    setPadding(hPad, vPad, hPad, vPad)
+
+                    val chipLp = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        marginEnd = (6 * density).toInt()
+                    }
+                    layoutParams = chipLp
+
+                    fun applyCatStyle(active: Boolean) {
+                        setTextColor(if (active) Color.WHITE else Color.parseColor("#B3FFFFFF"))
+                        background = GradientDrawable().apply {
+                            setColor(if (active) Color.parseColor("#FF0A84FF") else Color.parseColor("#1FFFFFFF"))
+                            cornerRadius = 14 * density
+                            if (!active) {
+                                setStroke((1 * density).toInt(), Color.parseColor("#26FFFFFF"))
+                            }
+                        }
+                    }
+
+                    applyCatStyle(isSelected)
+
+                    setOnClickListener {
+                        selectedCategory = cat
+                        for (v in catViews) {
+                            (v.tag as? ((Boolean) -> Unit))?.invoke(v.text == cat)
+                        }
+                    }
+                    tag = { active: Boolean -> applyCatStyle(active) }
+                }
+                catViews.add(catChip)
+                catRow.addView(catChip)
+            }
+            catScroll.addView(catRow)
+            card.addView(catScroll)
+
+            // Goals / Target Selector Strip (if user configured any goals)
+            val goalsList = mutableListOf<String>()
+            val rawGoals = flutterPrefs.getString("flutter.notekar_goals_list_v1", null)
+            if (rawGoals != null && rawGoals.startsWith("[")) {
+                try {
+                    val arr = JSONArray(rawGoals)
+                    for (i in 0 until arr.length()) {
+                        val g = arr.optJSONObject(i)
+                        if (g != null && !g.optBoolean("isArchived", false)) {
+                            val gTitle = g.optString("title", "").trim()
+                            if (gTitle.isNotEmpty()) {
+                                goalsList.add(gTitle.take(9))
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+
+            if (goalsList.isNotEmpty()) {
+                val goalLabel = TextView(this).apply {
+                    text = "LINK TARGET / GOAL (OPTIONAL)"
+                    setTextColor(Color.parseColor("#80FFFFFF"))
+                    textSize = 11f
+                    typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                    val lp = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        bottomMargin = (6 * density).toInt()
+                    }
+                    layoutParams = lp
+                }
+                card.addView(goalLabel)
+
+                val goalScroll = HorizontalScrollView(this).apply {
+                    overScrollMode = View.OVER_SCROLL_NEVER
+                    isHorizontalScrollBarEnabled = false
+                    val lp = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        bottomMargin = (12 * density).toInt()
+                    }
+                    layoutParams = lp
+                }
+
+                val goalRow = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                }
+
+                val goalViews = mutableListOf<TextView>()
+                for (goal in goalsList) {
+                    val goalChip = TextView(this).apply {
+                        text = "🎯 $goal"
+                        textSize = 11.5f
+                        gravity = Gravity.CENTER
+                        val hPad = (10 * density).toInt()
+                        val vPad = (5 * density).toInt()
+                        setPadding(hPad, vPad, hPad, vPad)
+
+                        val chipLp = LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            marginEnd = (6 * density).toInt()
+                        }
+                        layoutParams = chipLp
+
+                        fun applyGoalStyle(active: Boolean) {
+                            setTextColor(if (active) Color.WHITE else Color.parseColor("#B3FFFFFF"))
+                            background = GradientDrawable().apply {
+                                setColor(if (active) Color.parseColor("#FF30D158") else Color.parseColor("#1FFFFFFF"))
+                                cornerRadius = 14 * density
+                                if (!active) {
+                                    setStroke((1 * density).toInt(), Color.parseColor("#26FFFFFF"))
+                                }
+                            }
+                        }
+
+                        applyGoalStyle(false)
+
+                        setOnClickListener {
+                            if (selectedGoalTitle == goal) {
+                                selectedGoalTitle = null
+                                applyGoalStyle(false)
+                            } else {
+                                selectedGoalTitle = goal
+                                for (v in goalViews) {
+                                    val isCurrent = (v.text.toString() == "🎯 $goal")
+                                    (v.tag as? ((Boolean) -> Unit))?.invoke(isCurrent)
+                                }
+                            }
+                        }
+                        tag = { active: Boolean -> applyGoalStyle(active) }
+                    }
+                    goalViews.add(goalChip)
+                    goalRow.addView(goalChip)
+                }
+                goalScroll.addView(goalRow)
+                card.addView(goalScroll)
+            }
+        }
+
         // EditText
         val input = EditText(this).apply {
-            hint = "What's on your mind?"
+            hint = when {
+                isStartingSession -> "Session focus or notes (optional)"
+                isEndingSession -> "What did you accomplish?"
+                else -> "What's on your mind?"
+            }
             setHintTextColor(Color.parseColor("#60FFFFFF"))
             setTextColor(Color.WHITE)
             inputType = InputType.TYPE_CLASS_TEXT or
                     InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or
                     InputType.TYPE_TEXT_FLAG_MULTI_LINE
             isSingleLine = false
-            minLines = 3
-            maxLines = 6
+            minLines = if (isStartingSession) 2 else 3
+            maxLines = 5
             gravity = Gravity.TOP or Gravity.START
             imeOptions = android.view.inputmethod.EditorInfo.IME_FLAG_NO_ENTER_ACTION
             textSize = 14f
 
-            // Styled input box background
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#15FFFFFF"))
                 cornerRadius = 12 * density
@@ -127,29 +337,21 @@ class QuickNoteActivity : Activity() {
         }
         card.addView(input)
 
-        // Quick Tag Chips
+        // Quick Tag Chips (15 Researched Daily Activities)
         try {
-            val flutterPrefs =
-                getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
             val customTags = mutableListOf<String>()
-
-            // Flutter StringList is stored in JSON or prefix set
             val stringSet = flutterPrefs.getStringSet("flutter.custom_note_tags", null)
             if (stringSet != null && stringSet.isNotEmpty()) {
                 customTags.addAll(stringSet)
             } else {
                 val jsonString = flutterPrefs.getString("flutter.custom_note_tags", null)
                 if (jsonString != null && jsonString.startsWith("[")) {
-                    try {
-                        val jsonArray = org.json.JSONArray(jsonString)
-                        for (i in 0 until jsonArray.length()) {
-                            val tag = jsonArray.optString(i)?.trim()
-                            if (!tag.isNullOrEmpty()) {
-                                customTags.add(tag)
-                            }
+                    val jsonArray = JSONArray(jsonString)
+                    for (i in 0 until jsonArray.length()) {
+                        val tag = jsonArray.optString(i)?.trim()
+                        if (!tag.isNullOrEmpty()) {
+                            customTags.add(tag)
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
             }
@@ -157,17 +359,26 @@ class QuickNoteActivity : Activity() {
             if (customTags.isEmpty()) {
                 customTags.addAll(
                     listOf(
-                        "#work",
-                        "#study",
-                        "#play",
-                        "#health",
-                        "#focus",
-                        "#routine"
+                        "Walking",
+                        "Gym",
+                        "Studying",
+                        "Deep Work",
+                        "Bathing",
+                        "Washroom",
+                        "Reading",
+                        "Meditation",
+                        "Commute",
+                        "Cooking",
+                        "Chores",
+                        "Gaming",
+                        "Family",
+                        "Dining",
+                        "Sleep"
                     )
                 )
             }
 
-            val tagScroll = android.widget.HorizontalScrollView(this).apply {
+            val tagScroll = HorizontalScrollView(this).apply {
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isHorizontalScrollBarEnabled = false
                 val lp = LinearLayout.LayoutParams(
@@ -181,10 +392,6 @@ class QuickNoteActivity : Activity() {
 
             val tagRow = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
             }
 
             for (tag in customTags) {
@@ -232,8 +439,7 @@ class QuickNoteActivity : Activity() {
             }
             tagScroll.addView(tagRow)
             card.addView(tagScroll)
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
 
         // Buttons Layout
         val buttonsContainer = LinearLayout(this).apply {
@@ -246,14 +452,12 @@ class QuickNoteActivity : Activity() {
 
         // Cancel / Skip Button
         val btnCancel = TextView(this).apply {
-            text = if (isSession) "Skip" else "Cancel"
+            text = if (isEndingSession) "Skip" else "Cancel"
             setTextColor(Color.parseColor("#B3FFFFFF"))
             textSize = 14f
             gravity = Gravity.CENTER
-            typeface =
-                android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
 
-            // Hover background
             background = StateListDrawable().apply {
                 addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
                     setColor(Color.parseColor("#1AFFFFFF"))
@@ -266,16 +470,10 @@ class QuickNoteActivity : Activity() {
             }
             layoutParams = lp
             setOnClickListener {
-                if (isSession) {
-                    val prefs =
-                        getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
-                    val nextAction =
-                        prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
-                    val logType = explicitLogType ?: nextAction
-
+                if (isEndingSession) {
                     NoteKarWidgetProvider.performBackgroundLog(
                         this@QuickNoteActivity,
-                        logType,
+                        "out",
                         ""
                     )
                 }
@@ -284,42 +482,51 @@ class QuickNoteActivity : Activity() {
         }
         buttonsContainer.addView(btnCancel)
 
-        // Save Button
+        // Save / Action Button
         val btnSave = TextView(this).apply {
-            text = "Add"
+            text = when {
+                isStartingSession -> "Start Session"
+                isEndingSession -> "Complete"
+                else -> "Log ⚡"
+            }
             setTextColor(Color.WHITE)
             textSize = 14f
             gravity = Gravity.CENTER
-            typeface =
-                android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+
+            val accentColor = if (isStartingSession) "#FF30D158" else "#FF0A84FF"
 
             background = StateListDrawable().apply {
                 addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
-                    setColor(Color.parseColor("#FF0062CC"))
+                    setColor(Color.parseColor(if (isStartingSession) "#FF24A143" else "#FF0062CC"))
                     cornerRadius = 20 * density
                 })
                 addState(intArrayOf(), GradientDrawable().apply {
-                    setColor(Color.parseColor("#FF0A84FF")) // iOS Accent Blue
+                    setColor(Color.parseColor(accentColor))
                     cornerRadius = 20 * density
                 })
             }
 
-            val lp = LinearLayout.LayoutParams(0, (40 * density).toInt(), 1f).apply {
+            val lp = LinearLayout.LayoutParams(0, (40 * density).toInt(), 1.2f).apply {
                 marginStart = (6 * density).toInt()
             }
             layoutParams = lp
             setOnClickListener {
-                val note = input.text.toString().trim()
-                val prefs =
-                    getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
-                val nextAction =
-                    prefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
-                val logType = explicitLogType ?: if (isSession) nextAction else "single"
+                var noteText = input.text.toString().trim()
+                if (selectedGoalTitle != null && selectedGoalTitle!!.isNotEmpty()) {
+                    noteText = if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
+                }
+
+                if (isStartingSession) {
+                    widgetPrefs.edit()
+                        .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
+                        .apply()
+                }
 
                 NoteKarWidgetProvider.performBackgroundLog(
                     this@QuickNoteActivity,
-                    logType,
-                    note
+                    resolvedType,
+                    noteText
                 )
                 finish()
             }

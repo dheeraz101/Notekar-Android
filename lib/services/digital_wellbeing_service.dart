@@ -153,6 +153,7 @@ class DigitalWellbeingService {
       DigitalWellbeingService._internal();
 
   factory DigitalWellbeingService() => _instance;
+  static DigitalWellbeingService get instance => _instance;
 
   static const MethodChannel _channel = MethodChannel('notekar/files');
 

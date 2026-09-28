@@ -49,6 +49,9 @@ class HistoryDialog extends StatefulWidget {
     this.onClaimRest,
     this.onEndLiveSession,
     this.onRestoreLiveSession,
+    this.activeCategory,
+    this.isSessionRunning = false,
+    this.onStopSession,
     this.blur = false,
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
@@ -76,6 +79,9 @@ class HistoryDialog extends StatefulWidget {
   final Future<void> Function(int inMomentId, Moment outEntry)?
   onEndLiveSession;
   final Future<void> Function(Moment inMoment)? onRestoreLiveSession;
+  final String? activeCategory;
+  final bool isSessionRunning;
+  final VoidCallback? onStopSession;
   final bool blur;
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
@@ -599,6 +605,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ? GoalsContentView(
                   p: widget.p,
                   moments: _entries,
+                  activeCategory: widget.activeCategory,
+                  isSessionRunning: widget.isSessionRunning,
+                  onStopSession:
+                      widget.onStopSession ??
+                      () {
+                        Navigator.pop(context, {'action': 'stop_goal_session'});
+                      },
                   onAddGoal: () {
                     setState(() {
                       _editingGoal = null;
@@ -615,7 +628,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     Navigator.pop(context, {
                       'action': 'start_goal_session',
                       'category': g.category,
-                      'mode': g.mode,
+                      'mode': g.mode ?? 'two-way',
                     });
                   },
                 )
