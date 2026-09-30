@@ -10,7 +10,7 @@ We provide security updates for the following release channels:
 
 | Version Channel | Supported |
 | :--- | :--- |
-| Latest Release (v4.x) | :white_check_mark: |
+| Latest Release (v7.x) | :white_check_mark: |
 | Development / Beta Branches | :white_check_mark: |
 | Older Legacy Releases | :x: |
 

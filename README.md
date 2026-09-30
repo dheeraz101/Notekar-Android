@@ -12,6 +12,7 @@
 
 [![Version](https://img.shields.io/badge/version-7.5.5-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Build](https://img.shields.io/badge/build-26BR0927-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Release Cadence](https://img.shields.io/badge/cadence-weekly%20%2F%20bi--monthly-8A2BE2.svg?style=flat-square&logo=clock)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -23,7 +24,7 @@
 
 <p align="center">
   <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.4-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.5-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
   </a>
   &nbsp;&nbsp;
   <a href="https://notekarapp.vercel.app/">
@@ -39,6 +40,10 @@
 
 ---
 
+> [!NOTE]
+> 📢 **Release & Maintenance Cadence**  
+> Due to developer schedule and commitments, updates and new builds are released **weekly or once to twice a month**. Bug fixes, security patches, and performance optimizations are continuously batched and rolled out on this cadence. Thank you for your support and patience!
+
 > [!IMPORTANT]
 > 🧭 **"NoteKar has revisioned itself."**
 >
@@ -46,10 +51,7 @@
 > finite human conscious hours, confronting the cost of the unaccounted void, and perfecting sensory
 > chronometer craft. Every second is accounted for; the void is revealed.
 >
-> 📦 **Download Official APKs
-**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases) •
-> 🌐 **Companion Web App
-**: [notekarapp.vercel.app](https://notekarapp.vercel.app/) • [Web Source Repo](https://github.com/dheeraz101/Notekar)
+> 📦 **Download Official APKs**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases) • 🌐 **Companion Web App**: [notekarapp.vercel.app](https://notekarapp.vercel.app/) • [Web Source Repo](https://github.com/dheeraz101/Notekar)
 
 ---
 
@@ -78,6 +80,7 @@
 - [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
 - [💻 Building & Running Locally](#-building--running-locally)
 - [🔑 Release Signing & Keystore Setup](#-release-signing--keystore-setup)
+- [🤝 Contributing & Community](#-contributing--community)
 - [🚀 Product Roadmap & Upcoming Innovations](#-product-roadmap--upcoming-innovations)
 - [☕ Support & Community](#-support--community)
 - [📄 License & Attribution](#-license--attribution)
@@ -125,9 +128,9 @@ fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
 
 ## 🌟 Core Features & Existential Engine
 
-### ⏳ 1. Life Audit & The Cost of the Void (Existential Accounting Engine)
+### ⏳ 1. Life Audit & The Cost of the Void
 
-NoteKar's most transformative innovation: **confronting the finite nature of human conscious time**.
+*Existential Accounting Engine* — NoteKar's most transformative innovation: **confronting the finite nature of human conscious time**.
 If you are not logging your hours, time does not pause—it vanishes into the unaccounted void.
 NoteKar makes this friction visible with mathematical clarity:
 
@@ -172,9 +175,7 @@ NoteKar makes this friction visible with mathematical clarity:
 
 - **One-Tap Glass Capture**: Tap anywhere on the main screen to immediately capture exact timestamps
   with custom tactile haptic pulses.
-- **Seamless Two-Way Session Continuity**: Switch dynamically between **Single** mode and **Two-Way
-  ** mode mid-flight without resetting the live stopwatch, losing elapsed intervals, or dropping
-  draft notes.
+- **Seamless Two-Way Session Continuity**: Switch dynamically between **Single** mode and **Two-Way** mode mid-flight without resetting the live stopwatch, losing elapsed intervals, or dropping draft notes.
 - **Dual Operating Modes**:
     - **Single Mode**: Rapid one-shot timestamp counter (`00` to `99`) with automatic rollover,
       optional daily reset, and "Count on Save" badges.
@@ -210,15 +211,14 @@ raw log records into an elegant, unified chronicle of your day:
 - **Unified Apple HIG Dialog Architecture**: All multi-choice confirmation prompts, external
   navigation security alerts, and network warnings standardized to native `CupertinoAlertDialog`
   with zero button truncation.
-- **Frictionless Filter Pills**: Seamlessly toggle between **All**, **Sessions**, **Singles**, and *
-  *With Notes** with instant responsive transitions and zero layout clipping.
+- **Frictionless Filter Pills**: Seamlessly toggle between **All**, **Sessions**, **Singles**, and **With Notes** with instant responsive transitions and zero layout clipping.
 - **iOS-Style Calendar Picker**: A fluid monthly calendar sheet featuring solid iOS System Red
   selection circles, past-date selection, and anchored event dots positioned with locked geometric
   centering (zero vertical baseline shift).
 - **Trash Bin Safety**: Local soft-delete vault to restore or permanently purge removed records
   anytime.
 
-### 📊 6. Executive Intelligence Hub (Redesigned Dashboard)
+### 📊 6. Executive Intelligence Hub (Dashboard)
 
 The **Executive Intelligence Hub** delivers deep behavioral analytics, habit rhythms, and circadian
 insights computed 100% on-device:
@@ -363,8 +363,7 @@ telemetry:
 
 ### 🗓️ 5. Calendar Session Exporter (RFC 5545 `.ics`)
 
-Convert tracked Two-Way intervals into standard `.ics` calendar files with 1-tap import into *
-*Google Calendar, Outlook, Samsung Calendar, and Proton Calendar**.
+Convert tracked Two-Way intervals into standard `.ics` calendar files with 1-tap import into **Google Calendar, Outlook, Samsung Calendar, and Proton Calendar**.
 
 ### 🤖 6. Tasker, MacroDroid & Termux Broadcast API
 
@@ -493,29 +492,25 @@ cd "Notekar - Flutter"
 # 2. Install Flutter packages
 flutter pub get
 
-# 3. Run the test suite
+# 3. Verify static analysis and formatting
+flutter analyze
+dart format --output=none --set-exit-if-changed .
+
+# 4. Run the test suite
 flutter test
 
-# 4. Launch on your connected device
+# 5. Launch on your connected device
 flutter run
 ```
 
----
+### 🪝 Automated Pre-Commit Checks (Lefthook)
 
-## 🔮 Upcoming Features (Roadmap)
+This repository includes configured [Lefthook](https://github.com/evilmartians/lefthook) hooks to automatically format and analyze code before committing:
 
-- **🎙️ Voice Notes & Spoken Reflections**:
-    - Record hands-free ambient or verbal notes attached to any moment or session.
-    - **100% Offline Multilingual Transcription**: Speech recognition processed on-device without
-      cloud dependencies, respecting NoteKar's strict zero-telemetry sovereign ethos.
-    - Multi-language support covering English, Hindi, Spanish, French, German, Japanese, and
-      Russian.
-- **📅 Visual Day-Swipe Timeline**:
-    - Full-screen chronological day calendar swipe view complementing the classic list ledger.
-- **🧩 Adaptive Color Accents**:
-    - Mode-specific accent overrides automatically tinting clock and highlights based on active
-      focus
-      category.
+```bash
+# Install Git pre-commit hooks
+lefthook install
+```
 
 ---
 
@@ -547,60 +542,66 @@ To generate a signed release APK or App Bundle (`.aab`):
 
 ---
 
+## 🤝 Contributing & Community
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. 🐛 **Report Bugs & Suggest Features**: Open an issue on our [GitHub Issues](https://github.com/dheeraz101/Notekar-Android/issues) tracker.
+2. 🌐 **Localization & Translations**: Help us bring NoteKar to 50+ languages! Follow our [3-Step Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md).
+3. 🛠️ **Code Contributions**: Review [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming, testing, and PR conventions.
+4. 📜 **Code of Conduct**: Please read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
+5. 🛡️ **Security Inquiries**: Disclose security findings responsibly via [SECURITY.md](SECURITY.md).
+
+---
+
 ## 🚀 Product Roadmap & Upcoming Innovations
 
-NoteKar's architectural evolution balances Apple HIG sensory minimalism, uncompromising offline
-sovereignty, and conscious temporal intelligence. The following innovations are actively in
-development:
+NoteKar's architectural evolution balances Apple HIG sensory minimalism, uncompromising offline sovereignty, and conscious temporal intelligence. The following innovations are actively planned and in development:
 
 ### 🎙️ 1. Multi-Language Hands-Free Voice Notes & Edge Whisper STT
 
-- **Sovereign On-Device Speech-to-Text**: Transcribe spontaneous thoughts directly into moments
-  without cloud round-trips using quantized offline Whisper models.
+- **Sovereign On-Device Speech-to-Text**: Transcribe spontaneous thoughts directly into moments without cloud round-trips using quantized offline Whisper models.
 - **7-Language Native Support**: English, Hindi, Spanish, French, German, Japanese, and Russian.
-- **Autonomous Auto-Stop & Silence Detection**: Intelligent voice-activity detection (VAD) finishes
-  and categorizes notes hands-free.
+- **Autonomous Auto-Stop & Silence Detection**: Intelligent voice-activity detection (VAD) finishes and categorizes notes hands-free.
 
 ### 🧠 2. AI Temporal Insights & Circadian Narrative Engine
 
-- **Local Micro-LLM / On-Device Embeddings**: High-fidelity contextual understanding running
-  completely on silicon (zero telemetry, zero server egress).
-- **Circadian Velocity & Horizon Forecasting**: Actionable circadian rhythm analysis detecting deep
-  focus peaks and drift hours.
-- **Contextual Retrospectives**: Daily, weekly, and monthly reflective narratives woven from your
-  conscious logbook.
+- **Local Micro-LLM / On-Device Embeddings**: High-fidelity contextual understanding running completely on silicon (zero telemetry, zero server egress).
+- **Circadian Velocity & Horizon Forecasting**: Actionable circadian rhythm analysis detecting deep focus peaks and drift hours.
+- **Contextual Retrospectives**: Daily, weekly, and monthly reflective narratives woven from your conscious logbook.
 
 ### 🔔 3. Dynamic Live Activities & Interactive Lockscreen
 
-- **Apple HIG-Grade Live Island**: Real-time persistent elapsed ticker with mode-tinted ring and
-  quick pause/resume controls.
+- **Apple HIG-Grade Live Island**: Real-time persistent elapsed ticker with mode-tinted ring and quick pause/resume controls.
 - **Lockscreen Quick Capture**: Directly log thoughts or switch modes without unlocking the device.
 - **Dynamic Color Harmony**: Lockscreen widget gracefully inherits the current active mode palette.
 
 ### 🧩 4. Micro-Chrono Interactive Widgets (2x2 & 4x2)
 
 - **Compact Chronometer Capsule**: High-precision stopwatch readout directly on your home screen.
-- **1-Tap Quick Capture**: Log timestamps and quick tags directly from the Android home screen
-  launcher.
-- **Circadian Progress Ring**: Visual 24-hour conscious timeline disc showing focus vs. void in real
-  time.
+- **1-Tap Quick Capture**: Log timestamps and quick tags directly from the Android home screen launcher.
+- **Circadian Progress Ring**: Visual 24-hour conscious timeline disc showing focus vs. void in real time.
 
-### 📡 5. Sovereign Peer-to-Peer Local LAN Sync
+### 📅 5. Visual Day-Swipe Timeline
 
-- **AirDrop-Style Offline Mesh**: Encrypted local WiFi / Wi-Fi Direct synchronization across phones,
-  tablets, and desktop workstations.
+- **Full-Screen Day-Swipe Navigation**: Chronological swipe-able day calendar view complementing the classic list ledger.
+- **Day-by-Day Temporal Density**: Quick visual overview of session distribution, notes, and conscious intervals across consecutive days.
+
+### 🎨 6. Adaptive Color Accents
+
+- **Mode-Specific Accents**: Dynamic accent overrides automatically tinting clock numerals and highlights based on active focus category.
+
+### 📡 7. Sovereign Peer-to-Peer Local LAN Sync
+
+- **AirDrop-Style Offline Mesh**: Encrypted local WiFi / Wi-Fi Direct synchronization across phones, tablets, and desktop workstations.
 - **Zero Third-Party Servers**: No centralized accounts, no cloud relays, no subscription fees.
-- **Conflict-Free Replicated Data Types (CRDTs)**: Mathematically proven deterministic merge
-  guarantees across devices without data loss.
+- **Conflict-Free Replicated Data Types (CRDTs)**: Mathematically proven deterministic merge guarantees across devices without data loss.
 
-### 🏷️ 6. Chrono-Tag Association Matrix & Visual Graph
+### 🏷️ 8. Chrono-Tag Association Matrix & Visual Graph
 
-- **Interactive Force-Directed Node Graph**: Explore temporal connections between tags, modes, and
-  life categories.
-- **Co-Occurrence Matrix**: Uncover hidden habit patterns (e.g., how "Late Night" correlates with "
-  Deep Focus" or "Wasted Void").
-- **Multi-Dimensional Horizon Filtering**: Filter and inspect tag clusters across 7-day, 30-day, and
-  90-day timeframes.
+- **Interactive Force-Directed Node Graph**: Explore temporal connections between tags, modes, and life categories.
+- **Co-Occurrence Matrix**: Uncover hidden habit patterns (e.g., how "Late Night" correlates with "Deep Focus" or "Wasted Void").
+- **Multi-Dimensional Horizon Filtering**: Filter and inspect tag clusters across 7-day, 30-day, and 90-day timeframes.
 
 ---
 
@@ -629,9 +630,7 @@ journey:
 ## 📄 License & Attribution
 
 - **License**: Distributed under the **[MIT License](LICENSE)**.
-- **Initiative**: Proudly created under the *
-  *[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)
-  ** initiative.
+- **Initiative**: Proudly created under the **[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)** initiative.
 - **Developer**: [Dheeraz](https://github.com/dheeraz101)
 - **Made with ❤️ in India.**
 
