@@ -1,4 +1,4 @@
-## NoteKar v7.5.6 — Sovereign Goals, Activity Tags & Sensory Precision
+## NoteKar v7.5.6: Sovereign Goals, Activity Tags & Sensory Precision
 
 Signed production/beta release built automatically from the `dev` branch.
 

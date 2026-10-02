@@ -298,7 +298,7 @@
                            }
                        ],
         "fullChangelog":  [
-                              "Elegance inside and out — universal themes, dedicated modes, and tactile home widgets.",
+                              "Elegance inside and out - universal themes, dedicated modes, and tactile home widgets.",
                               "Add full Light, Dark, and AMOLED theme support across all popups, Cupertino sheets, pickers, and pills",
                               "Add dedicated settings pages for logging modes with native back routing and 15-character naming limit",
                               "Relocate destructive mode deletion with Apple-style confirmation to individual mode pages",
@@ -343,7 +343,7 @@
                            }
                        ],
         "fullChangelog":  [
-                              "NoteKar has revisioned itself — honoring the truth of human history.",
+                              "NoteKar has revisioned itself - honoring the truth of human history.",
                               "Add native 7-language support (EN, HI, ES, DE, FR, JA, RU) to AppNotice and local-first NoticeService defaults",
                               "Introduce full notification hierarchy: Critical, Security (dedicated section), Release Bulletins, and Curated Tips",
                               "Remove status circle dot next to \u0027Notice Engine Active\u0027 for clean visual hierarchy",
@@ -478,7 +478,7 @@
         "highlights":  [
                            {
                                "title":  "Compact History Timeline",
-                               "description":  "Ultra-dense timeline layout presenting 2x–3x more moments with scaled rail markers and micro duration badges.",
+                               "description":  "Ultra-dense timeline layout presenting 2x-3x more moments with scaled rail markers and micro duration badges.",
                                "icon":  "view_agenda_rounded"
                            },
                            {
@@ -555,7 +555,7 @@
                               "Add 1-tap inline live session end button in History to terminate tracking immediately",
                               "Add Executive Intelligence Hub with grounded Daily Rhythm chart and 90-day intensity grid",
                               "Add standalone interactive onboarding tour pages for History and Dashboard",
-                              "Add 2-digit sequential single moment numbering (00–99) with daily midnight reset",
+                              "Add 2-digit sequential single moment numbering (00-99) with daily midnight reset",
                               "Geometrically lock calendar day cell baselines so dates with activity dots never jitter",
                               "Reposition Dashboard hero card pace and trend badges to eliminate horizontal clipping",
                               "Fix calendar icon chip in History to immediately open MomentCalendarDialog on first tap"

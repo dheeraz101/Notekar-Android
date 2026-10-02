@@ -192,7 +192,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [7.5.2] - 2026-09-16 (versionCode 26BR0916) [BR]
 
-> *Elegance in every touch — Plus notes, resilient launcher widgets, and distraction-free
+> *Elegance in every touch: Plus notes, resilient launcher widgets, and distraction-free
 timekeeping.*
 
 ### What's New
@@ -481,7 +481,7 @@ timekeeping.*
     - **1-Tap Inline Live Session Termination**: Active sessions now display a pulsing green `LIVE`
       duration pill alongside an immediate red `End` button to conclude tracking directly inside
       history with zero friction.
-    - Sequential `00`–`99` Devanagari and Arabic numbering badges for single moments with optional
+    - Sequential `00`-`99` Devanagari and Arabic numbering badges for single moments with optional
       daily reset.
 - **Executive Intelligence Hub (Redesigned Dashboard)**:
     - **Grounded Daily Rhythm Chart**: Hourly activity bar charts anchored to a solid bottom
@@ -689,7 +689,7 @@ timekeeping.*
 
 ### What's New
 
-- **2-Digit Single Moment Numbering (`00`–`99`)**: Sequential number badge for single moments with
+- **2-Digit Single Moment Numbering (`00`-`99`)**: Sequential number badge for single moments with
   automatic rollover back to `00`.
 - **Daily Reset for Single Moments**: Optional setting to automatically reset sequence counting back
   to `00` each new calendar day while preserving full history.

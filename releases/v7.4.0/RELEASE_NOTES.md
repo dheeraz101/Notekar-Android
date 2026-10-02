@@ -1,4 +1,4 @@
-## 🚨 Priority Release — NoteKar v7.4.0 (`26PR0908`)
+## 🚨 Priority Release - NoteKar v7.4.0 (`26PR0908`)
 
 > *"NoteKar has revisioned itself."* Moving beyond a minimalist clicker, NoteKar elevates into an
 > existential compass: accounting for finite human conscious hours, confronting the cost of the

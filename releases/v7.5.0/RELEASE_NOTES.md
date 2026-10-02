@@ -1,4 +1,4 @@
-## 🚨 Priority Release — NoteKar v7.5.0 (`26PR0908a`)
+## 🚨 Priority Release - NoteKar v7.5.0 (`26PR0908a`)
 
 > *"NoteKar has revisioned itself."* A sovereign tool does not merely log time; it honors the truth
 > of human history. This Priority Update hardens our zero-tracking notice architecture across 7

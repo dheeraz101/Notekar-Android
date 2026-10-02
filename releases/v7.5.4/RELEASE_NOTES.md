@@ -2,7 +2,7 @@
 
 > *Personal Identity, Life Horizons & Mindful Continuity*
 
-Signed release — built automatically from the branch.
+Signed release - built automatically from the branch.
 
 ### What's New
 

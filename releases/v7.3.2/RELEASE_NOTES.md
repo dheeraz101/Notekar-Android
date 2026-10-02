@@ -5,7 +5,7 @@ Signed release - built automatically from the branch.
 ### What's New
 
 - **Redesigned Compact History Mode (Life Ledger High-Density View)**:
-    - Ultra-dense timeline layout presenting 2x–3x more moments with scaled rail markers and micro
+    - Ultra-dense timeline layout presenting 2x-3x more moments with scaled rail markers and micro
       duration badges.
     - Automatic suppression of empty note placeholder boxes in compact mode to maximize vertical
       density.

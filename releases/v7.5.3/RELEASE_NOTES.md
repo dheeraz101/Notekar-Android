@@ -1,6 +1,6 @@
 ## Notekar v7.5.3
 
-Signed release — built automatically from the branch.
+Signed release - built automatically from the branch.
 
 ### What's New
 

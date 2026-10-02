@@ -55,8 +55,20 @@
 
 ---
 
+## 📦 Availability
+
+| Platform | Channel | Link |
+|:---------|:--------|:-----|
+| **Android** | Stable APK | [GitHub Releases](https://github.com/dheeraz101/Notekar-Android/releases/latest) |
+| **Android** | Source Code | [This Repository](https://github.com/dheeraz101/Notekar-Android) |
+| **Web PWA** | Live App | [notekarapp.vercel.app](https://notekarapp.vercel.app/) |
+| **Web PWA** | Source Code | [Notekar Web Repo](https://github.com/dheeraz101/Notekar) |
+
+---
+
 ## 🧭 Table of Contents
 
+- [📦 Availability](#-availability)
 - [✨ Why NoteKar?](#-why-notekar)
 - [📸 Visual UI Gallery](#-visual-ui-gallery)
 - [🌟 Core Features & Existential Engine](#-core-features--existential-engine)
@@ -76,6 +88,7 @@
 - [🌉 System Bridges & Automation](#-system-bridges--automation)
 - [🛡️ Privacy, Security & Hardware Protection](#️-privacy-security--hardware-protection)
 - [🌐 Multilingual & Global Community](#-multilingual--global-community)
+- [💡 The Story Behind the Name ("NoteKar")](#-the-story-behind-the-name-notekar)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
 - [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
 - [💻 Building & Running Locally](#-building--running-locally)
@@ -83,7 +96,10 @@
 - [🤝 Contributing & Community](#-contributing--community)
 - [🚀 Product Roadmap & Upcoming Innovations](#-product-roadmap--upcoming-innovations)
 - [☕ Support & Community](#-support--community)
+- [❓ Frequently Asked Questions](#-frequently-asked-questions)
+- [⚖️ Legal Disclaimer & Trademark Notice](#️-legal-disclaimer--trademark-notice)
 - [📄 License & Attribution](#-license--attribution)
+- [⭐ Star History](#-star-history)
 
 ---
 
@@ -130,8 +146,8 @@ fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
 
 ### ⏳ 1. Life Audit & The Cost of the Void
 
-*Existential Accounting Engine* — NoteKar's most transformative innovation: **confronting the finite nature of human conscious time**.
-If you are not logging your hours, time does not pause—it vanishes into the unaccounted void.
+*Existential Accounting Engine*: NoteKar's most transformative innovation: **confronting the finite nature of human conscious time**.
+If you are not logging your hours, time does not pause, it vanishes into the unaccounted void.
 NoteKar makes this friction visible with mathematical clarity:
 
 - **Daily 24-Hour Partition Architecture**:
@@ -155,8 +171,8 @@ NoteKar makes this friction visible with mathematical clarity:
     - **Earth (24h) Days Lost**: Equivalent full planetary rotations consumed by unrecorded time.
     - **Intentionality Ratio**: Visual percentage gauge of conscious time actively captured and
       justified.
-- **Interactive Partition Sliders**: Real-time tactile adjustment for baseline sleep (e.g., 8–10h)
-  and food/travel logistics (e.g., 2–4h) with haptic resistance.
+- **Interactive Partition Sliders**: Real-time tactile adjustment for baseline sleep (e.g., 8-10h)
+  and food/travel logistics (e.g., 2-4h) with haptic resistance.
 - **Historical Ledger & Seneca Colophon**: Day-by-day audit chronicle paired with Seneca’s Stoic
   reality reminder (*"Time is the only thing where it is a virtue to be greedy"*).
 - **Executive Dashboard Integration**: Dedicated Life Audit card with auto-scaling dynamic horizon
@@ -200,12 +216,12 @@ raw log records into an elegant, unified chronicle of your day:
 - **1-Tap Live Session End**: Ongoing sessions display a pulsing green `LIVE <duration>` badge
   alongside a dedicated red **End** button (`stop_circle_rounded`). Tap **End** right on the card to
   seal the active session in real time with an instant `OUT` moment.
-- **Sequential Single Numbering (`00`–`99`)**: Standalone moments feature high-contrast circular
+- **Sequential Single Numbering (`00`-`99`)**: Standalone moments feature high-contrast circular
   rail badges displaying sequential 2-digit counters, with optional midnight daily resets.
 - **Physical Bed of Red Swipe-to-Delete**: Swipe gestures reveal a solid red backing bed matching
   the card's exact corner radius (16pt sessions, 12pt singles), eliminating gap cutouts, paired with
   a 5-second Dynamic Island countdown undo pill.
-- **Redesigned Compact History Mode**: Ultra-dense timeline layout presenting 2x–3x more moments
+- **Redesigned Compact History Mode**: Ultra-dense timeline layout presenting 2x-3x more moments
   with scaled rail markers, micro duration badges, and automatic suppression of empty note
   placeholder boxes.
 - **Unified Apple HIG Dialog Architecture**: All multi-choice confirmation prompts, external
@@ -231,7 +247,7 @@ insights computed 100% on-device:
 - **90-Day High-Density Activity Grid**: GitHub-style color intensity heatmap tracking logging
   consistency across the last 90 days with dedicated streak counters and clear subtitles.
 - **Circadian Time-of-Day Bias**: Real-time breakdown of activity distribution across **Morning (
-  06–12)**, **Afternoon (12–18)**, **Evening (18–22)**, and **Night (22–06)** windows.
+  06-12)**, **Afternoon (12-18)**, **Evening (18-22)**, and **Night (22-06)** windows.
 - **Executive Focus Metrics**: Track total session focus hours, average session lengths, and peak
   productivity intervals with local in-memory aggregation.
 
@@ -251,7 +267,7 @@ insights computed 100% on-device:
 
 - **Standalone Lockscreen Breathing Alarms**: Full-screen breathing prompts that display directly
   over the lockscreen without unlocking your device or exposing private logs.
-- **Active Hours & Sleep Protection**: Configure daily active windows (e.g. 09:00 AM – 10:00 PM)
+- **Active Hours & Sleep Protection**: Configure daily active windows (e.g. 09:00 AM - 10:00 PM)
   with overnight rollover protection.
 - **Apple HIG Cupertino Wheel Time Picker**: Smooth wheel selector for scheduling reflection
   reminders and check-in intervals.
@@ -266,7 +282,7 @@ insights computed 100% on-device:
 ### 👤 10. Personal Identity, 24h Life Clock & 100y Memento Mori
 
 - **Apple ID-Grade Identity Card**: Top-level Settings profile card featuring edge-to-edge circular avatar framing (`BoxFit.cover`), custom display names, bios, and real-time existential age telemetry (e.g. `25y · 75y Mori (75.0%)`).
-- **24-Hour Life Clock**: Maps human mortality onto an intuitive single 24-hour day. If your lifespan is calibrated to a 100-year ceiling, age 25 corresponds to `06:00 AM`—illuminating where you stand in the grand day of your life.
+- **24-Hour Life Clock**: Maps human mortality onto an intuitive single 24-hour day. If your lifespan is calibrated to a 100-year ceiling, age 25 corresponds to `06:00 AM`, illuminating where you stand in the grand day of your life.
 - **Conscious Waking Horizon**: Dissects total mortal runway into conscious waking hours (subtracting 8 hours/day for baseline sleep), computing lived conscious years versus remaining conscious runway.
 - **1-Hour Daily Leverage Formula**: Demonstrates the compounding value of temporal discipline. Reclaiming just 1 unproductive hour each day yields:
   $$\text{Reclaimed Runway} = \frac{365 \text{ hours/year} \times \text{Remaining Years}}{16 \text{ waking hours/day} \times 365 \text{ days/year}} \approx +5.4 \text{ Conscious Waking Years}$$
@@ -288,7 +304,7 @@ insights computed 100% on-device:
 - **Hardware Capability Profiling**: NoteKar's `AdaptiveEngine` automatically inspects device RAM and processor cores to assign one of three performance tiers:
   - **High Performance / Pro**: 120 FPS ProMotion spring physics, full multi-pass Gaussian backdrop glass blur, live particle celebrations, and unthrottled background polling.
   - **Balanced**: 60 FPS standard refresh, efficient single-pass glass blur, and balanced animations for mid-range chipsets.
-  - **Power Saver**: 30–60 FPS capped refresh, solid high-contrast opaque surfaces (blur disabled), reduced motion, and throttled background tasks to preserve battery life and eliminate thermal throttling.
+  - **Power Saver**: 30-60 FPS capped refresh, solid high-contrast opaque surfaces (blur disabled), reduced motion, and throttled background tasks to preserve battery life and eliminate thermal throttling.
 - **Hardware Diagnostics Telemetry**: Inspect system health, SoC cores, memory footprint (with resilient SELinux heap estimation), platform details, and target render capabilities in **Settings → Device Health**.
 - **18 Minimal Glyph Category Icons**: Customizable monochrome Apple HIG glyphs for active and custom modes, consistently rendered across the home capsule, history sheet, insights, and executive dashboard.
 
@@ -422,6 +438,16 @@ Korean, Turkish, Dutch, Polish, Swedish, Indonesian, Vietnamese, Thai, Ukrainian
 Marathi, Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and more!
 
 👉 **[Read our 3-Step Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)**
+
+---
+
+## 💡 The Story Behind the Name ("NoteKar")
+
+The name is Hindi wordplay: **Note** (नोट, a record) + **Kar** (कर, "to do"). Literally: *"Make a note."*
+
+It's a call to action disguised as a name: every tap is an act of noting your existence in time.
+
+NoteKar started as **YABP** (Yet Another Boring Project), a boilerplate experiment that evolved into a sovereign time-accounting instrument. The "Kar" suffix also nods to the Marathi/Hindi word for "doer": *NoteKar is the one who notes.*
 
 ---
 
@@ -620,10 +646,75 @@ journey:
   </a>
 </p>
 
-- 🛡️ **[Privacy Policy](https://dheeraz101.github.io/Notekar/privacy.html)**
-- 📜 **[Terms of Service](https://dheeraz101.github.io/Notekar/terms.html)**
+- 🛡️ **[Privacy Policy](https://notekarapp.vercel.app/privacy.html)**
+- 📜 **[Terms of Service](https://notekarapp.vercel.app/terms.html)**
 - 🐛 **[Report Issues & Feature Ideas](https://github.com/dheeraz101/Notekar-Android/issues)**
 - 📖 **[Version Changelog (CHANGELOG.md)](CHANGELOG.md)**
+
+---
+
+## ❓ Frequently Asked Questions
+
+<details>
+<summary><b>Is NoteKar really 100% offline?</b></summary>
+
+Yes. NoteKar has zero network dependencies for core functionality. Your timestamps, notes, and activity data never leave your device: not to our servers (we don't have any), not to Google, not anywhere. The only network call is an optional update check against the public GitHub releases feed. The app works identically in airplane mode.
+</details>
+
+<details>
+<summary><b>Why timestamps? Why not a regular notes app?</b></summary>
+
+NoteKar isn't a notes app: it's a **time instrument**. Think of it as a personal flight recorder for your day. One tap captures the exact moment. Over time, these moments reveal patterns in how you spend your existence. The Life Audit and Executive Intelligence features turn raw timestamps into actionable insights about your conscious hours.
+</details>
+
+<details>
+<summary><b>Can I export my data?</b></summary>
+
+Yes. NoteKar supports **CSV** and **JSON** export. Your data, your format, your choice. Go to Settings → Export to download everything.
+</details>
+
+<details>
+<summary><b>Does NoteKar track me or show ads?</b></summary>
+
+No analytics. No ads. No telemetry. No crash reporters. NoteKar contains **zero tracking code**. No Firebase, no Google Analytics, no Sentry: nothing. Verify this yourself: the complete source code is right here in this repository.
+</details>
+
+<details>
+<summary><b>What's the companion web app?</b></summary>
+
+The [companion web app](https://notekarapp.vercel.app/) is a PWA that mirrors the core timestamp logging experience in your browser. It stores data in IndexedDB, still offline-first, still zero-cloud. Perfect for quick logging when your phone isn't nearby.
+</details>
+
+<details>
+<summary><b>What does the "Edition" name mean in releases?</b></summary>
+
+Each release carries an edition name (e.g., *"Sovereign Goals, Activity Tags & Sensory Precision"*) that reflects the theme of new features introduced. It's our way of marking each milestone with intention rather than just a version number.
+</details>
+
+<details>
+<summary><b>Is NoteKar available on the Play Store?</b></summary>
+
+NoteKar is distributed as a direct APK download from [GitHub Releases](https://github.com/dheeraz101/Notekar-Android/releases). This keeps the app free from Play Store restrictions and ensures you always get the latest version directly from the source. NoteKar is also F-Droid compliant.
+</details>
+
+<details>
+<summary><b>How is my data secured?</b></summary>
+
+NoteKar uses **hardware-backed AES-256 encryption** via Android Keystore. Your timestamps and notes are encrypted at rest on your device. Combined with the zero-network architecture, your data has no exposure surface.
+</details>
+
+---
+
+## ⚖️ Legal Disclaimer & Trademark Notice
+
+> [!IMPORTANT]
+> **Independent Open-Source Instrument**: NoteKar is an independent sovereign utility created under the **[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)** initiative. NoteKar is not affiliated with, authorized, maintained, sponsored, or endorsed by Google LLC, Apple Inc., or any of their affiliates or subsidiaries.
+> 
+> "Android", "Google Play", and "Google Drive" are registered trademarks of Google LLC. "Apple", "iOS", and "iPhone" are registered trademarks of Apple Inc. All other trademarks belong to their respective owners.
+> 
+> **Design Philosophy & Attribution**: NoteKar's spatial chronometer typography, dynamic tactile feedback, fluid transitions, and glassmorphic bottom sheets are inspired by the design principles of Apple Human Interface Guidelines (HIG) and iOS modern interfaces. NoteKar is a strictly independent craft built natively with Flutter, Dart, and Kotlin. It does not use, include, copy, or redistribute proprietary Apple or Google code, assets, or services.
+> 
+> **Data Sovereignty Guarantee**: All timestamp captures, conscious hour partitions, sobriety milestones, and existential reflections remain strictly offline on your physical hardware, protected with AES-256 Android Keystore encryption. NoteKar operates zero cloud relays, zero analytics telemetry, and zero third-party tracking SDKs.
 
 ---
 
@@ -633,4 +724,16 @@ journey:
 - **Initiative**: Proudly created under the **[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)** initiative.
 - **Developer**: [Dheeraz](https://github.com/dheeraz101)
 - **Made with ❤️ in India.**
+
+---
+
+## ⭐ Star History
+
+<a href="https://www.star-history.com/?repos=dheeraz101/Notekar-Android&type=Date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dheeraz101/Notekar-Android&type=Date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dheeraz101/Notekar-Android&type=Date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dheeraz101/Notekar-Android&type=Date&legend=top-left" />
+ </picture>
+</a>
 

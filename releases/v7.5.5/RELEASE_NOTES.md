@@ -2,7 +2,7 @@
 
 > *Dynamic Momentum, Digital Wellbeing & Data Resilience*
 
-Signed release — built automatically from the branch.
+Signed release - built automatically from the branch.
 
 ### What's New
 
