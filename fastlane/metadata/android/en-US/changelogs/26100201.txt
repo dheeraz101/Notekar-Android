@@ -1,0 +1,7 @@
+Update to 7.5.6 (build 26BR1002):
+• Apple HIG Goals: Full-width cards, custom deadlines, daily pacing & session attribution.
+• Activity Quick-Tags: 15 daily activity tags, #tag pills & dedicated settings page.
+• Motivation Quick-Log: Interactive tag popup dialog from notifications.
+• Distraction-Free Canvas: Unified header rhythm card; eliminated redundant complications & startup popups.
+• Visual Widget Previews: Photorealistic launcher widget picker assets.
+• Performance: AOT icon tree-shaking & platform stability fixes.

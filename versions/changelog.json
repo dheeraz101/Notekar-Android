@@ -1,18 +1,58 @@
 [
     {
+        "version":  "7.5.6",
+        "buildNumber":  "26BR1002",
+        "releaseDate":  "2026-10-02",
+        "channel":  "beta",
+        "channelTag":  "[Beta]",
+        "isBeta":  true,
+        "edition":  "Sovereign Goals, Activity Tags & Sensory Precision",
+        "badgeColor":  "#FF9F0A",
+        "isLatest":  true,
+        "highlights":  [
+                           {
+                               "title":  "Apple HIG Goals & Pacing Engine",
+                               "description":  "Full-width goal cards, custom deadlines, pacing indicators, and Life Ledger session attribution.",
+                               "icon":  "track_changes_rounded"
+                           },
+                           {
+                               "title":  "Activity Quick-Tags & Note Pills",
+                               "description":  "15 research-backed daily activity tags with Cupertino glyphs and automatic timeline #tag pills.",
+                               "icon":  "tag_rounded"
+                           },
+                           {
+                               "title":  "Motivation Quick-Logging Popup",
+                               "description":  "Interactive notification quick-log dialog and photorealistic home screen widget previews.",
+                               "icon":  "bolt_rounded"
+                           }
+                       ],
+        "fullChangelog":  [
+                              "Apple HIG goals redesign with custom deadlines, pacing indicators, and session attribution",
+                              "15 daily activity quick-tags with dedicated settings page and automatic hashtag rendering",
+                              "Interactive notification quick-log dialog in QuickNoteActivity with activity tag chips",
+                              "Unified header rhythm card in DynamicHeaderCapsule; removed bottom clock complication and startup popups",
+                              "Upgraded launcher widget previews with photorealistic antialiased Bebas Neue assets",
+                              "Fixed MainActivity Kotlin compilation for notification logging and enabled AOT icon tree-shaking"
+                          ],
+        "downloads":  {
+                          "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.6/NoteKar-v7.5.6-universal-release.apk",
+                          "arm64Apk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.6/NoteKar-v7.5.6-arm64-v8a-release.apk"
+                      }
+    },
+    {
         "version":  "7.5.5",
         "buildNumber":  "26BR0927",
         "releaseDate":  "2026-09-27",
         "channel":  "beta",
         "channelTag":  "[Beta]",
         "isBeta":  true,
-        "edition":  "Dynamic Momentum & Digital Wellbeing",
+        "edition":  "Dynamic Momentum \u0026 Digital Wellbeing",
         "badgeColor":  "#FF9F0A",
-        "isLatest":  true,
+        "isLatest":  false,
         "highlights":  [
                            {
                                "title":  "Dynamic Momentum Capsule",
-                               "description":  "Today's Momentum card now opens seamlessly inside the top pill, keeping the home canvas pure.",
+                               "description":  "Today\u0027s Momentum card now opens seamlessly inside the top pill, keeping the home canvas pure.",
                                "icon":  "speed_rounded"
                            },
                            {
@@ -21,7 +61,7 @@
                                "icon":  "pie_chart_outline_rounded"
                            },
                            {
-                               "title":  "Data Safety & Shield Recovery",
+                               "title":  "Data Safety \u0026 Shield Recovery",
                                "description":  "Automated corrupted-box snapshots prevent data loss; streak grace shields restored.",
                                "icon":  "shield_rounded"
                            },
@@ -42,7 +82,7 @@
                            }
                        ],
         "fullChangelog":  [
-                              "+ Dynamic Momentum Capsule: Today's Momentum card embedded inside DynamicHeaderCapsule with live metrics",
+                              "+ Dynamic Momentum Capsule: Today\u0027s Momentum card embedded inside DynamicHeaderCapsule with live metrics",
                               "+ Android Digital Wellbeing: Opt-in Smart Buckets and Intentionality Reality Delta dashboard",
                               "+ Apple HIG Goals Engine: Pacing metrics, Cupertino segmented controls, and 1-tap session launch",
                               "+ WhatsApp Doodle Splash: Static dark OLED doodle wallpaper with official NoteKar squircle emblem",
@@ -51,7 +91,7 @@
                               "+ Platform Security: Exported broadcast receivers protected with signature-level permissions",
                               "+ God-Class Deconstruction: Split 12,000+ lines into modular lifecycle delegates and NkTokens",
                               "! Analytics Duration Fix: Removed fabricated 15-minute single tap durations for authentic tracking",
-                              "! Noon Risk Radar Fix: Corrected '12 AM' display for 12:00 PM noon time blocks",
+                              "! Noon Risk Radar Fix: Corrected \u002712 AM\u0027 display for 12:00 PM noon time blocks",
                               "* 100% offline privacy standard with all 234 automated tests passing"
                           ],
         "downloads":  {

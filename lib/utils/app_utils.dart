@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
-const appVersion = '7.5.5';
+const appVersion = '7.5.6';
 const kAppVersion = appVersion;
-const kAppBuildNumber = '26BR0927';
-const appBuildDate = '2026-09-27';
+const kAppBuildNumber = '26BR1002';
+const appBuildDate = '2026-10-02';
 
 String formatInstalledDate(String buildDateStr) {
   try {

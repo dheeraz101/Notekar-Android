@@ -23,8 +23,8 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.5',
-    date: 'September 27, 2026',
+    version: '7.5.6',
+    date: 'October 02, 2026',
     edition: 'Dynamic Momentum & Digital Wellbeing',
     badgeColor: Color(0xFFFF9F0A),
     innovations: [

@@ -10,8 +10,8 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-7.5.5-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
-[![Build](https://img.shields.io/badge/build-26BR0927-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Version](https://img.shields.io/badge/version-7.5.6-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Build](https://img.shields.io/badge/build-26BR1002-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Release Cadence](https://img.shields.io/badge/cadence-weekly%20%2F%20bi--monthly-8A2BE2.svg?style=flat-square&logo=clock)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.5-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.6-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
   </a>
   &nbsp;&nbsp;
   <a href="https://notekarapp.vercel.app/">
