@@ -3317,7 +3317,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   _openCategory(category, parent: parent),
                             ),
                           ),
-                        if (show('Sobriety Companion'))
+                        if (show('Sobriety Companion') || show('Sobriety'))
                           SliverToBoxAdapter(
                             child: SobrietyCompanionSettingsPage(
                               p: p,

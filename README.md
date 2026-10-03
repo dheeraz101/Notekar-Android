@@ -574,7 +574,7 @@ Contributions are what make the open-source community such an amazing place to l
 
 1. 🐛 **Report Bugs & Suggest Features**: Open an issue on our [GitHub Issues](https://github.com/dheeraz101/Notekar-Android/issues) tracker.
 2. 🌐 **Localization & Translations**: Help us bring NoteKar to 50+ languages! Follow our [3-Step Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md).
-3. 🛠️ **Code Contributions**: Review [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming, testing, and PR conventions.
+3. 🛠️ **Code Contributions & Design System**: Review [CONTRIBUTING.md](CONTRIBUTING.md) and our canonical [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for architecture, design tokens, and Apple HIG guidelines.
 4. 📜 **Code of Conduct**: Please read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
 5. 🛡️ **Security Inquiries**: Disclose security findings responsibly via [SECURITY.md](SECURITY.md).
 

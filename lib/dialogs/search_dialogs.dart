@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
-import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -81,9 +81,22 @@ class NoteSearchContent extends StatefulWidget {
 }
 
 class _NoteSearchRow {
-  const _NoteSearchRow({required this.entry, required this.searchText});
+  const _NoteSearchRow({
+    required this.entry,
+    required this.noteLower,
+    required this.catLower,
+    required this.dateLower,
+    required this.timeLower,
+    required this.typeLower,
+    required this.searchText,
+  });
 
   final Moment entry;
+  final String noteLower;
+  final String catLower;
+  final String dateLower;
+  final String timeLower;
+  final String typeLower;
   final String searchText;
 }
 
@@ -125,37 +138,93 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   }
 
   List<Moment> get _matches {
-    final q = _query.trim().toLowerCase();
-    return _searchRows
-        .where((r) {
-          final isTwoWay = r.entry.type == 'in' || r.entry.type == 'out';
-          if (_filterCriteria.mode == 'single' && isTwoWay) return false;
-          if (_filterCriteria.mode == 'two-way' && !isTwoWay) return false;
-
-          if (_filterCriteria.category != null &&
-              _filterCriteria.category!.isNotEmpty) {
-            final cat = _filterCriteria.category!.toLowerCase();
-            final matchesCat =
-                (r.entry.category != null &&
-                    r.entry.category!.toLowerCase() == cat) ||
-                r.entry.note.toLowerCase().contains('#$cat');
-            if (!matchesCat) return false;
-          }
-
-          if (_filterCriteria.hashtag != null &&
-              _filterCriteria.hashtag!.isNotEmpty) {
-            final tag = _filterCriteria.hashtag!.toLowerCase();
-            final cleanTag = tag.startsWith('#') ? tag : '#$tag';
-            if (!r.entry.note.toLowerCase().contains(cleanTag)) return false;
-          }
-
-          if (q.isNotEmpty && !r.searchText.contains(q)) {
-            return false;
-          }
-          return true;
-        })
-        .map((r) => r.entry)
+    final rawQuery = _query.trim().toLowerCase();
+    final tokens = rawQuery
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
         .toList();
+
+    final filtered = _searchRows.where((r) {
+      final isTwoWay = r.entry.type == 'in' || r.entry.type == 'out';
+      if (_filterCriteria.mode == 'single' && isTwoWay) return false;
+      if (_filterCriteria.mode == 'two-way' && !isTwoWay) return false;
+
+      if (_filterCriteria.category != null &&
+          _filterCriteria.category!.isNotEmpty) {
+        final cat = _filterCriteria.category!.toLowerCase();
+        final matchesCat =
+            (r.entry.category != null &&
+                r.entry.category!.toLowerCase() == cat) ||
+            r.entry.note.toLowerCase().contains('#$cat');
+        if (!matchesCat) return false;
+      }
+
+      if (_filterCriteria.hashtag != null &&
+          _filterCriteria.hashtag!.isNotEmpty) {
+        final tag = _filterCriteria.hashtag!.toLowerCase();
+        final cleanTag = tag.startsWith('#') ? tag : '#$tag';
+        if (!r.entry.note.toLowerCase().contains(cleanTag)) return false;
+      }
+
+      return true;
+    });
+
+    if (tokens.isEmpty) {
+      return filtered.map((r) => r.entry).toList();
+    }
+
+    final scored = <({Moment entry, int score})>[];
+
+    for (final r in filtered) {
+      bool matchesAll = true;
+      int score = 0;
+
+      if (r.noteLower == rawQuery) {
+        score += 1000;
+      } else if (r.noteLower.startsWith(rawQuery)) {
+        score += 500;
+      } else if (r.noteLower.contains(rawQuery)) {
+        score += 250;
+      }
+
+      for (final token in tokens) {
+        bool tokenMatched = false;
+        if (r.noteLower.contains(token)) {
+          tokenMatched = true;
+          score += 150;
+          if (r.noteLower.startsWith(token)) score += 50;
+        }
+        if (r.catLower.contains(token)) {
+          tokenMatched = true;
+          score += 80;
+        }
+        if (r.typeLower.contains(token)) {
+          tokenMatched = true;
+          score += 40;
+        }
+        if (r.dateLower.contains(token) || r.timeLower.contains(token)) {
+          tokenMatched = true;
+          score += 20;
+        }
+
+        if (!tokenMatched) {
+          matchesAll = false;
+          break;
+        }
+      }
+
+      if (matchesAll && score > 0) {
+        scored.add((entry: r.entry, score: score));
+      }
+    }
+
+    scored.sort((a, b) {
+      final cmp = b.score.compareTo(a.score);
+      if (cmp != 0) return cmp;
+      return b.entry.timestamp.compareTo(a.entry.timestamp);
+    });
+
+    return scored.map((e) => e.entry).toList();
   }
 
   List<_NoteSearchRow> _buildSearchRows(List<Moment> entries) {
@@ -166,15 +235,28 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
               !entry.note.contains('God Mode Unlocked') &&
               !entry.note.contains('#godmode'),
         )
-        .map(
-          (entry) => _NoteSearchRow(
+        .map((entry) {
+          final noteLower = entry.note.toLowerCase();
+          final catLower = (entry.category ?? '').toLowerCase();
+          final dateLower = datePretty(entry.timestamp).toLowerCase();
+          final timeLower = timeOnly(entry.timestamp).toLowerCase();
+          final typeLower = entry.type.toLowerCase();
+          final tagsLower = entry.effectiveTags
+              .map((t) => '#$t')
+              .join(' ')
+              .toLowerCase();
+
+          return _NoteSearchRow(
             entry: entry,
+            noteLower: noteLower,
+            catLower: catLower,
+            dateLower: dateLower,
+            timeLower: timeLower,
+            typeLower: typeLower,
             searchText:
-                '${entry.note} ${entry.effectiveTags.map((t) => '#$t').join(' ')} ${datePretty(entry.timestamp)} '
-                        '${timeOnly(entry.timestamp)} ${entry.type} ${entry.category ?? ''}'
-                    .toLowerCase(),
-          ),
-        )
+                '$noteLower $tagsLower $dateLower $timeLower $typeLower $catLower',
+          );
+        })
         .toList();
   }
 

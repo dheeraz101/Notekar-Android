@@ -636,7 +636,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       item(
         title: 'Sobriety Tracker',
         subtitle: 'Track recovery streak, milestone badges, and export cards',
-        category: 'Sobriety',
+        category: 'Sobriety Companion',
         icon: Icons.spa_rounded,
         keywords: [
           'sobriety',
@@ -1459,7 +1459,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Backup & Export',
         subtitle:
             'CSV, JSON, download, restore, import, file, reminder, health',
-        category: 'Logging',
+        category: 'Data & Backup',
         icon: Icons.import_export_rounded,
         keywords: [
           'csv',
@@ -1478,9 +1478,51 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         status: '${entries.length} Logs',
       ),
       item(
+        title: 'Local Backups',
+        subtitle:
+            'Snapshot instant local backups and restore history point-in-time',
+        category: 'Local Backups',
+        icon: Icons.history_edu_rounded,
+        keywords: [
+          'local backup',
+          'backups',
+          'snapshot',
+          'restore backup',
+          'quick backup',
+          'point in time',
+          'archive',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Local',
+      ),
+      item(
+        title: 'Search Notes',
+        subtitle:
+            'Search and filter saved moments, tags, and reflection history',
+        category: 'Search Notes',
+        icon: Icons.manage_search_rounded,
+        keywords: [
+          'search',
+          'notes',
+          'moments',
+          'find',
+          'filter',
+          'query',
+          'history',
+          'entries',
+          'locate',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: '${entries.length} Moments',
+      ),
+      item(
         title: 'Migrate from Other Apps',
         subtitle: 'Import Loop Habit Tracker CSV or HabitKit JSON',
-        category: 'Backup & Export',
+        category: 'Data & Backup',
         icon: Icons.swap_horiz_rounded,
         keywords: [
           'migrate',
@@ -1501,7 +1543,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       item(
         title: 'Backup Status',
         subtitle: 'Android backup, health, encryption, and Drive plans',
-        category: 'Logging',
+        category: 'Data & Backup',
         icon: Icons.cloud_done_rounded,
         keywords: [
           'android backup',
@@ -2315,37 +2357,345 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     })
   >
   get _settingsSearchResults {
-    final query = _settingsQuery.trim().toLowerCase();
-    if (query.isEmpty) return [];
+    final rawQuery = _settingsQuery.trim().toLowerCase();
+    if (rawQuery.isEmpty) return const [];
+
+    final tokens = rawQuery
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+    if (tokens.isEmpty) return const [];
 
     final all = _allSettingsOptions();
+    final scoredItems =
+        <
+          ({
+            ({
+              String title,
+              String subtitle,
+              String category,
+              IconData icon,
+              List<String> keywords,
+              String kind,
+              bool? boolValue,
+              ValueChanged<bool>? onBoolChanged,
+              String? status,
+            })
+            item,
+            int score,
+          })
+        >[];
 
-    return all.where((item) {
+    for (final item in all) {
       final title = item.title.toLowerCase();
       final titleLoc = item.title.localized(context).toLowerCase();
       final subtitle = item.subtitle.toLowerCase();
       final subtitleLoc = item.subtitle.localized(context).toLowerCase();
+      final category = item.category.toLowerCase();
+      final categoryLoc = item.category.localized(context).toLowerCase();
 
-      if (title.contains(query) || titleLoc.contains(query)) return true;
-      if (subtitle.contains(query) || subtitleLoc.contains(query)) return true;
-      return item.keywords.any((k) => k.contains(query));
-    }).toList();
+      bool matchesAllTokens = true;
+      int score = 0;
+
+      // Exact matches get massive bonus
+      if (title == rawQuery || titleLoc == rawQuery) {
+        score += 1000;
+      } else if (title.startsWith(rawQuery) || titleLoc.startsWith(rawQuery)) {
+        score += 500;
+      } else if (title.contains(rawQuery) || titleLoc.contains(rawQuery)) {
+        score += 250;
+      }
+
+      if (category == rawQuery || categoryLoc == rawQuery) {
+        score += 200;
+      }
+
+      for (final token in tokens) {
+        bool tokenMatched = false;
+
+        // Title match
+        if (title.contains(token) || titleLoc.contains(token)) {
+          tokenMatched = true;
+          score += 120;
+          if (title.startsWith(token) || titleLoc.startsWith(token)) {
+            score += 40;
+          }
+        }
+
+        // Category match
+        if (category.contains(token) || categoryLoc.contains(token)) {
+          tokenMatched = true;
+          score += 80;
+        }
+
+        // Keyword matches
+        for (final k in item.keywords) {
+          final kw = k.toLowerCase();
+          if (kw == token) {
+            tokenMatched = true;
+            score += 60;
+          } else if (kw.startsWith(token)) {
+            tokenMatched = true;
+            score += 40;
+          } else if (kw.contains(token)) {
+            tokenMatched = true;
+            score += 25;
+          }
+        }
+
+        // Subtitle match
+        if (subtitle.contains(token) || subtitleLoc.contains(token)) {
+          tokenMatched = true;
+          score += 20;
+        }
+
+        if (!tokenMatched) {
+          matchesAllTokens = false;
+          break;
+        }
+      }
+
+      if (matchesAllTokens && score > 0) {
+        scoredItems.add((item: item, score: score));
+      }
+    }
+
+    scoredItems.sort((a, b) => b.score.compareTo(a.score));
+    return scoredItems.map((e) => e.item).toList();
   }
 
   List<HelpGuideItem> get _helpGuideSearchResults {
-    final query = _settingsQuery.trim().toLowerCase();
-    if (query.isEmpty) return const [];
+    final rawQuery = _settingsQuery.trim().toLowerCase();
+    if (rawQuery.isEmpty) return const [];
 
-    return allHelpAndGuideCatalog.where((item) {
+    final tokens = rawQuery
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+    if (tokens.isEmpty) return const [];
+
+    final scoredItems = <({HelpGuideItem item, int score})>[];
+
+    for (final item in allHelpAndGuideCatalog) {
       final title = item.title.toLowerCase();
       final titleLoc = item.title.localized(context).toLowerCase();
       final content = item.content.toLowerCase();
       final contentLoc = item.content.localized(context).toLowerCase();
 
-      if (title.contains(query) || titleLoc.contains(query)) return true;
-      if (content.contains(query) || contentLoc.contains(query)) return true;
-      return item.keywords.any((k) => k.contains(query));
-    }).toList();
+      bool matchesAllTokens = true;
+      int score = 0;
+
+      if (title == rawQuery || titleLoc == rawQuery) {
+        score += 800;
+      } else if (title.startsWith(rawQuery) || titleLoc.startsWith(rawQuery)) {
+        score += 400;
+      } else if (title.contains(rawQuery) || titleLoc.contains(rawQuery)) {
+        score += 200;
+      }
+
+      for (final token in tokens) {
+        bool tokenMatched = false;
+
+        if (title.contains(token) || titleLoc.contains(token)) {
+          tokenMatched = true;
+          score += 100;
+          if (title.startsWith(token) || titleLoc.startsWith(token)) {
+            score += 30;
+          }
+        }
+
+        for (final k in item.keywords) {
+          final kw = k.toLowerCase();
+          if (kw == token) {
+            tokenMatched = true;
+            score += 50;
+          } else if (kw.contains(token)) {
+            tokenMatched = true;
+            score += 25;
+          }
+        }
+
+        if (content.contains(token) || contentLoc.contains(token)) {
+          tokenMatched = true;
+          score += 20;
+        }
+
+        if (!tokenMatched) {
+          matchesAllTokens = false;
+          break;
+        }
+      }
+
+      if (matchesAllTokens && score > 0) {
+        scoredItems.add((item: item, score: score));
+      }
+    }
+
+    scoredItems.sort((a, b) => b.score.compareTo(a.score));
+    return scoredItems.map((e) => e.item).toList();
+  }
+
+  void _navigateToSetting(
+    ({
+      String title,
+      String subtitle,
+      String category,
+      IconData icon,
+      List<String> keywords,
+      String kind,
+      bool? boolValue,
+      ValueChanged<bool>? onBoolChanged,
+      String? status,
+    })
+    result,
+    Palette p,
+  ) {
+    _saveRecentSearch(result.title);
+
+    // Dialogs & Sheets
+    if (result.title == 'App Version') {
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: 'Changelog',
+        pageBuilder: (context, _, _) => ChangelogDialog(p: widget.p),
+      );
+      return;
+    }
+    if (result.title == 'Developer & Creator') {
+      openExternalLinkSafely(
+        context,
+        p: p,
+        url: 'https://github.com/dheeraz101',
+      );
+      return;
+    }
+    if (result.title == 'Open Source Codebase') {
+      openExternalLinkSafely(
+        context,
+        p: p,
+        url: 'https://github.com/dheeraz101/Notekar-Android',
+      );
+      return;
+    }
+    if (result.title == 'Security & Integrity') {
+      showSecurityDetailsSheet(
+        context: context,
+        p: p,
+        reduceMotion: reduceMotion,
+        enableTranslucency: enableTranslucency,
+      );
+      return;
+    }
+    if (result.title == 'Privacy & Local Storage') {
+      showPrivacyDetailsSheet(
+        context: context,
+        p: p,
+        reduceMotion: reduceMotion,
+        enableTranslucency: enableTranslucency,
+      );
+      return;
+    }
+    if (result.title == 'Reset All Data') {
+      unawaited(_confirmResetAll(p));
+      return;
+    }
+    if (result.title == 'Factory Reset') {
+      unawaited(_confirmFactoryReset(p));
+      return;
+    }
+    if (result.title == 'Reset Settings Only') {
+      unawaited(_confirmResetSettings());
+      return;
+    }
+    if (result.title == 'Recently Deleted' || result.title == 'Trash Bin') {
+      if (widget.onOpenTrash != null) {
+        widget.onOpenTrash!();
+      } else {
+        _openCategory('Trash Bin', parent: 'Logging');
+      }
+      return;
+    }
+
+    // Subpage routing with proper parents to avoid blank/unmatched views
+    if (result.title == 'Personal Profile') {
+      _openCategory('Personal Profile');
+      return;
+    }
+    if (result.title == 'Release Date') {
+      _openCategory('Update Center');
+      return;
+    }
+    if (result.title == 'App Philosophy') {
+      _openCategory('App Philosophy', parent: 'About');
+      return;
+    }
+    if (result.title == 'Upcoming Features') {
+      _openCategory('Upcoming Features', parent: 'About');
+      return;
+    }
+    if (result.title == 'Official Bulletins') {
+      _openCategory('Official Bulletins', parent: 'Updates & Notices');
+      return;
+    }
+    if (result.title == 'Commits') {
+      _openCategory('Commits', parent: 'Developer Options');
+      return;
+    }
+    if (result.title == 'Diagnostics') {
+      _openCategory('Diagnostics', parent: 'Developer Options');
+      return;
+    }
+    if (result.title == 'Device Health') {
+      _openCategory('Device Health', parent: 'Developer Options');
+      return;
+    }
+    if (result.title == 'Network Monitor') {
+      _openCategory('Network Monitor', parent: 'Developer Options');
+      return;
+    }
+    if (result.title == 'Local Backups') {
+      _openCategory('Local Backups', parent: 'Data & Backup');
+      return;
+    }
+    if (result.title == 'Configure Lock') {
+      _openCategory('Configure Lock', parent: 'Privacy & Security');
+      return;
+    }
+    if (result.title == 'When to Lock') {
+      _openCategory('App Lock', parent: 'Privacy & Security');
+      return;
+    }
+    if (result.title == 'Sobriety Tracker' ||
+        result.category == 'Sobriety' ||
+        result.category == 'Sobriety Companion') {
+      _openCategory('Sobriety Companion');
+      return;
+    }
+    if (result.title == 'Search Notes' || result.category == 'Search Notes') {
+      _openCategory('Search Notes');
+      return;
+    }
+    if (result.title == 'Executive Intelligence Hub') {
+      _openCategory('Dashboard');
+      return;
+    }
+    if (result.title == 'Targets & Goals') {
+      _openCategory('Targets & Goals', parent: 'Dashboard');
+      return;
+    }
+    if (result.title == 'Life Audit') {
+      _openCategory('Life Audit', parent: 'Dashboard');
+      return;
+    }
+    if (result.title == 'Backup & Export' ||
+        result.title == 'Backup Status' ||
+        result.title == 'Migrate from Other Apps') {
+      _openCategory('Data & Backup');
+      return;
+    }
+
+    _openCategory(result.category);
   }
 
   List<Widget> _buildSearchSlivers(Palette p) {
@@ -2478,116 +2828,15 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                               icon: result.icon,
                               title: result.title,
                               subtitle: result.subtitle,
-                              status: result.status,
+                              status:
+                                  result.status ??
+                                  result.category.localized(context),
                               color:
                                   (result.title == 'Reset All Data' ||
                                       result.title == 'Factory Reset')
                                   ? p.red
                                   : p.accent,
-                              onTap: () {
-                                _saveRecentSearch(result.title);
-                                if (result.title == 'Personal Profile') {
-                                  _openCategory('Personal Profile');
-                                  return;
-                                }
-                                if (result.title == 'App Version') {
-                                  showGeneralDialog(
-                                    context: context,
-                                    barrierDismissible: true,
-                                    barrierLabel: 'Changelog',
-                                    pageBuilder: (context, _, _) =>
-                                        ChangelogDialog(p: widget.p),
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Release Date') {
-                                  _openCategory('Update Center');
-                                  return;
-                                }
-                                if (result.title == 'Developer & Creator') {
-                                  openExternalLinkSafely(
-                                    context,
-                                    p: p,
-                                    url: 'https://github.com/dheeraz101',
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Open Source Codebase') {
-                                  openExternalLinkSafely(
-                                    context,
-                                    p: p,
-                                    url:
-                                        'https://github.com/dheeraz101/Notekar-Android',
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Security & Integrity') {
-                                  showSecurityDetailsSheet(
-                                    context: context,
-                                    p: p,
-                                    reduceMotion: reduceMotion,
-                                    enableTranslucency: enableTranslucency,
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Privacy & Local Storage') {
-                                  showPrivacyDetailsSheet(
-                                    context: context,
-                                    p: p,
-                                    reduceMotion: reduceMotion,
-                                    enableTranslucency: enableTranslucency,
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'App Philosophy') {
-                                  _openCategory(
-                                    'App Philosophy',
-                                    parent: 'About',
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Upcoming Features') {
-                                  _openCategory(
-                                    'Upcoming Features',
-                                    parent: 'About',
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Network Monitor') {
-                                  _openCategory('Network Monitor');
-                                  return;
-                                }
-                                if (result.title == 'Reset All Data') {
-                                  unawaited(_confirmResetAll(p));
-                                  return;
-                                }
-                                if (result.title == 'Factory Reset') {
-                                  unawaited(_confirmFactoryReset(p));
-                                  return;
-                                }
-                                if (result.title == 'Reset Settings Only') {
-                                  unawaited(_confirmResetSettings());
-                                  return;
-                                }
-                                if (result.title == 'Recently Deleted') {
-                                  if (widget.onOpenTrash != null) {
-                                    widget.onOpenTrash!();
-                                  }
-                                  return;
-                                }
-                                if (result.title == 'Official Bulletins') {
-                                  _openCategory(
-                                    'Official Bulletins',
-                                    parent: 'Updates & Notices',
-                                  );
-                                  return;
-                                }
-                                if (result.title == 'Targets & Goals') {
-                                  _openCategory('Targets & Goals');
-                                  return;
-                                }
-                                _openCategory(result.category);
-                              },
+                              onTap: () => _navigateToSetting(result, p),
                             ),
                           ];
                         }
@@ -2641,96 +2890,15 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                         icon: result.icon,
                         title: result.title,
                         subtitle: result.subtitle,
-                        status: result.status,
+                        status:
+                            result.status ?? result.category.localized(context),
                         highlight: _settingsQuery,
                         color:
                             result.title == 'Reset All Data' ||
                                 result.title == 'Factory Reset'
                             ? p.red
                             : p.accent,
-                        onTap: () {
-                          _saveRecentSearch(result.title);
-                          if (result.title == 'Personal Profile') {
-                            _openCategory('Personal Profile');
-                            return;
-                          }
-                          if (result.title == 'App Version') {
-                            showGeneralDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              barrierLabel: 'Changelog',
-                              pageBuilder: (context, _, _) =>
-                                  ChangelogDialog(p: widget.p),
-                            );
-                            return;
-                          }
-                          if (result.title == 'Release Date') {
-                            _openCategory('Update Center');
-                            return;
-                          }
-                          if (result.title == 'Developer & Creator') {
-                            openExternalLinkSafely(
-                              context,
-                              p: p,
-                              url: 'https://github.com/dheeraz101',
-                            );
-                            return;
-                          }
-                          if (result.title == 'Open Source Codebase') {
-                            openExternalLinkSafely(
-                              context,
-                              p: p,
-                              url:
-                                  'https://github.com/dheeraz101/Notekar-Android',
-                            );
-                            return;
-                          }
-                          if (result.title == 'Security & Integrity') {
-                            showSecurityDetailsSheet(
-                              context: context,
-                              p: p,
-                              reduceMotion: reduceMotion,
-                              enableTranslucency: enableTranslucency,
-                            );
-                            return;
-                          }
-                          if (result.title == 'Privacy & Local Storage') {
-                            showPrivacyDetailsSheet(
-                              context: context,
-                              p: p,
-                              reduceMotion: reduceMotion,
-                              enableTranslucency: enableTranslucency,
-                            );
-                            return;
-                          }
-                          if (result.title == 'Network Monitor') {
-                            _openCategory('Network Monitor');
-                            return;
-                          }
-                          if (result.title == 'Reset All Data') {
-                            unawaited(_confirmResetAll(p));
-                            return;
-                          }
-                          if (result.title == 'Factory Reset') {
-                            unawaited(_confirmFactoryReset(p));
-                            return;
-                          }
-                          if (result.title == 'Reset Settings Only') {
-                            unawaited(_confirmResetSettings());
-                            return;
-                          }
-                          if (result.title == 'Recently Deleted') {
-                            if (widget.onOpenTrash != null) {
-                              widget.onOpenTrash!();
-                            }
-                            return;
-                          }
-                          if (result.title == 'Executive Intelligence Hub') {
-                            _openCategory('Dashboard');
-                            return;
-                          }
-                          _openCategory(result.category);
-                        },
+                        onTap: () => _navigateToSetting(result, p),
                       ),
                 ],
               ),

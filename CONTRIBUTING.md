@@ -33,12 +33,16 @@ Please review and follow our **[Code of Conduct](CODE_OF_CONDUCT.md)** in all re
 
 ## 🚀 How to Contribute
 
-### 1. Code Analysis & Formatting
-Before committing changes, ensure your code passes static analysis and formatting:
+### 1. Code Analysis, Formatting & Design System
+Before committing changes, ensure your code passes static analysis, formatting, and test verification:
 ```bash
 flutter analyze
-flutter format .
+dart format .
+flutter test
 ```
+
+> [!IMPORTANT]
+> **Adhere to the NoteKar Design System**: Review **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** before contributing UI components. All new interfaces must use standardized design tokens (`NkCard`, `NkListTile`, `NkButton`, `NkTokens`) and follow Apple Human Interface Guidelines adapted authentically for Android.
 
 ### 2. Translating the App
 Want to add or improve a language translation? Check out our dedicated **[Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)** for a 3-step walkthrough on working with `.arb` localization files.
