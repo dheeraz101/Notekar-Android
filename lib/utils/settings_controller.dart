@@ -90,7 +90,7 @@ class SettingsController extends ChangeNotifier {
   bool get godModeUnlocked => _godModeUnlocked;
 
   void _loadFromPrefs() {
-    _theme = _prefs.getString('theme') ?? 'dark';
+    _theme = _prefs.getString('m-theme') ?? _prefs.getString('theme') ?? 'dark';
     _locale = _prefs.getString('locale') ?? 'system';
     _accentColor = _prefs.getString('accent_color') ?? 'blue';
     _appIconStyle = _prefs.getString('app_icon_style') ?? 'default';
@@ -133,6 +133,7 @@ class SettingsController extends ChangeNotifier {
     if (_theme == value) return;
     _theme = value;
     await _prefs.setString('theme', value);
+    await _prefs.setString('m-theme', value);
     notifyListeners();
   }
 
@@ -333,6 +334,8 @@ class SettingsController extends ChangeNotifier {
     _showGapCards = false;
 
     await _prefs.clear();
+    await _prefs.setString('theme', 'dark');
+    await _prefs.setString('m-theme', 'dark');
     notifyListeners();
   }
 }

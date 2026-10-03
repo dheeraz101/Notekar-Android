@@ -351,6 +351,7 @@ class HIGEmptyState extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: p.accent,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,

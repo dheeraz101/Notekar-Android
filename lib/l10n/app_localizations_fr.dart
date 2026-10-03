@@ -10,10 +10,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get haveSuggestionsOrFoundABug =>
-      '* Haben Sie Vorschläge oder einen Fehler gefunden? ';
+      '* avez-vous des suggestions ou avez-vous trouvé un bug ?';
 
   @override
-  String get n0Slash68Clean => '0 / 68 sauber';
+  String get n0Slash68Clean => '0 / 68 sain';
 
   @override
   String get n1HourHasPassed => '1 heure s\'est écoulée';
@@ -25,7 +25,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get n100percentOfflineDatabase => 'Base de données 100% hors ligne';
 
   @override
-  String get n100percentOfflineIntegrity => '100% Offline-Integrität';
+  String get n100percentOfflineIntegrity => 'Intégrité 100 % hors ligne';
 
   @override
   String get n100percentOfflineFirstZeroTrackersZeroDataCollection =>
@@ -33,10 +33,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get n16WeekHabitActivityGrid =>
-      '16-Wochen-Gewohnheitsaktivitätsraster';
+      'Grille d\'activités habituelles sur 16 semaines';
 
   @override
-  String get n54321Grounding => '5-4-3-2-1 Erdungstechnik';
+  String get n54321Grounding => '5-4-3-2-1 mise à la terre';
 
   @override
   String get n8LuxuryAppIconEditions => '8 luxury app icon editions';
@@ -53,11 +53,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get aPrivacyFirstOfflineCleanStreakTrackerAndRelapseDiaryBuiltToEmpowerYourRecoveryJourney =>
-      'Ein datenschutzorientiertes Offline-Serientracking und Tagebuch zur Unterstützung Ihrer Genesung.';
+      'un suivi des séquences nettes hors ligne et un journal des rechutes axé sur la confidentialité, conçu pour faciliter votre parcours de guérison.';
 
   @override
   String get aQuietOfflineFirstWayToMarkMomentsTheSecondTheyHappen =>
-      'Eine ruhige, lokale Möglichkeit, Momente im Augenblick festzuhalten.';
+      'une façon silencieuse et hors ligne de marquer les moments dès qu\'ils se produisent.';
 
   @override
   String
@@ -65,26 +65,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un moyen discret et hors ligne pour marquer vos moments, suivre votre temps et inspecter vos journaux selon vos conditions.';
 
   @override
-  String get about => 'Über';
+  String get about => 'À propos';
 
   @override
   String
   get absolutelyNotekarIsOpenSourceAndOfflineFirstToGuaranteeMaximumTrustAndSafetyEveryCompiledReleaseIsAutomaticallyUploadedAndVerifiedCleanBy60plusAntiMalwareEnginesViaVirustotalYouCanInspectTheLiveScanReportUnderPrivacyAndSecurity =>
-      'Absolut. NoteKar ist Open Source und offline-first. Jede Version wird von 60+ Sicherheits-Engines über VirusTotal verifiziert.';
+      'absolument. notekar est open source et hors ligne. pour garantir une confiance et une sécurité maximales, chaque version compilée est automatiquement téléchargée et vérifiée par plus de 60 moteurs anti-malware via virustotal. vous pouvez consulter le rapport d\'analyse en direct sous Confidentialité et sécurité.';
 
   @override
-  String get accentColorCategory => 'Akzentfarbe';
+  String get accentColorCategory => 'Couleur d\'accent';
 
   @override
-  String get accentcolorcategory => 'Akzentfarbe';
+  String get accentcolorcategory => 'Couleur d\'accent';
 
   @override
-  String get accept => 'Akzeptieren';
+  String get accept => 'Accepter';
 
   @override
   String
   get accessSplitPerAbiOptimizedBinariesAndGooglePlayAppbundlesDirectlyFromTheReleasePage =>
-      'Laden Sie ABI-optimierte Binärdateien direkt von der Release-Seite herunter.';
+      'accédez aux binaires optimisés split-per-abi et aux appbundles Google Play directement à partir de la page de version.';
 
   @override
   String get accessibilityCategory => 'Accessibilité';
@@ -100,19 +100,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get active => 'Actif';
 
   @override
-  String get activeIssueTracking => 'Aktives Issue-Tracking';
+  String get activeIssueTracking => 'Suivi actif des problèmes';
 
   @override
-  String get activeLauncherIcon => 'Aktives App-Symbol';
+  String get activeLauncherIcon => 'Icône d\'application active';
 
   @override
   String get activeProtection => 'Protection active';
 
   @override
-  String get activity => 'Aktivität';
+  String get activity => 'Activité';
 
   @override
-  String get adaptiveEngine => 'Adaptive Engine';
+  String get adaptiveEngine => 'Moteur adaptatif';
 
   @override
   String get adaptiveEngineAndPerformanceStatus =>
@@ -122,42 +122,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adaptiveEngineOverview => 'Aperçu du moteur adaptatif';
 
   @override
-  String get addANote => 'Notiz hinzufügen';
+  String get addANote => 'ajouter une remarque';
 
   @override
-  String get addANoteToSave => 'Notiz zum Speichern hinzufügen';
+  String get addANoteToSave => 'ajouter une note à enregistrer';
 
   @override
   String get addNote => 'Ajouter une note';
 
   @override
   String get addsACleanStreakCardToYourHomeScreenAndAdaptsHomeScreenWidgets =>
-      'Fügt Ihrem Startbildschirm eine übersichtliche Serienkarte hinzu und passt Widgets an.';
+      'ajoute une carte de séquence propre à votre écran d\'accueil et adapte les widgets de l\'écran d\'accueil.';
 
   @override
   String get addsASubtleGlassLikeContainerBehindTheHomeToolbar =>
-      'Fügt einen dezenten Glas-Container hinter der Symbolleiste ein.';
+      'ajoute un subtil récipient en forme de verre derrière la barre d\'outils d\'accueil.';
 
   @override
-  String get afternoon => 'Nachmittag';
+  String get afternoon => 'après-midi';
 
   @override
   String
   get aggressiveBatteryCleanersOnLowEndDevicesCanKillNotekarInTheBackgroundDisableBatteryOptimizationToGuaranteeRemindersFire100percentOfTheTime =>
-      'Deaktivieren Sie die Akku-Optimierung, um sicherzustellen, dass Erinnerungen immer zuverlässig ausgelöst werden.';
+      'les nettoyeurs de batterie agressifs sur les appareils bas de gamme peuvent tuer Notekar en arrière-plan. désactivez l\'optimisation de la batterie pour garantir que les rappels se déclenchent 100 % du temps.';
 
   @override
-  String get alarmsPermissionRequired => 'Alarm-Berechtigung erforderlich';
+  String get alarmsPermissionRequired => 'autorisation d\'alarme requise';
 
   @override
   String
   get all21MilestonesFrom1DayTo10YearsRootedInNeuroscienceAddictionRecoveryResearchAndBehaviouralPsychologyNamesShownInYourCurrentTheme =>
-      'Alle 21 Meilensteine von 1 Tag bis 10 Jahren, fundiert in Neurowissenschaft und Verhaltenspsychologie.';
+      'les 21 étapes allant de 1 jour à 10 ans, ancrées dans les neurosciences, la recherche sur le traitement des addictions et la psychologie comportementale. noms affichés dans votre thème actuel.';
 
   @override
   String
   get allBuildsNowUndergoAutomatedCodeqlScansAndVirustotalChecksToEnsureVerificationAndSafety =>
-      'Alle Builds durchlaufen automatisierte CodeQL- und VirusTotal-Prüfungen zur Gewährleistung der Sicherheit.';
+      'toutes les versions sont désormais soumises à des analyses codeql automatisées et à des contrôles antivirus totaux pour garantir la vérification et la sécurité.';
 
   @override
   String
@@ -167,7 +167,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get allSettingsWillBeRestoredToTheirInitialFactoryDefaultsYourSavedMomentsAndNotesWillRemainUntouched =>
-      'Alle Einstellungen werden auf die Werkseinstellungen zurückgesetzt. Ihre gespeicherten Momente und Notizen bleiben erhalten.';
+      'tous les paramètres seront restaurés à leurs valeurs par défaut initiales. vos moments et notes enregistrés resteront intacts.';
 
   @override
   String get allTime => 'Tout le temps';
@@ -176,51 +176,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allowAppInstallation => 'allow app installation';
 
   @override
-  String get allowAutoStartSettings => 'Autostart-Einstellungen erlauben';
+  String get allowAutoStartSettings =>
+      'autoriser les paramètres de démarrage automatique';
 
   @override
-  String get allowNotifications => 'Benachrichtigungen zulassen';
+  String get allowNotifications => 'autoriser les notifications';
 
   @override
   String get allowsNotekarToSendLoggingRemindersAndUpdateNotifications =>
-      'Erlaubt NoteKar, Protokoll-Erinnerungen und Update-Benachrichtigungen zu senden.';
+      'permet à notekar d\'envoyer des rappels de journalisation et des notifications de mise à jour.';
 
   @override
-  String get amethyst => 'Amethyst';
+  String get amethyst => 'améthyste';
 
   @override
   String get amethystNebula => 'amethyst nebula';
 
   @override
-  String get amoled => 'AMOLED';
+  String get amoled => 'amolé';
 
   @override
-  String get ancient => 'Antike';
+  String get ancient => 'ancien';
 
   @override
-  String get androidBackup => 'Android-Sicherung';
+  String get androidBackup => 'sauvegarde Android';
 
   @override
-  String get angry => 'Wütend';
+  String get angry => 'en colère';
 
   @override
-  String get animalKingdom => 'Tierreich';
+  String get animalKingdom => 'règne animal';
 
   @override
-  String get anxious => 'Ängstlich / Besorgt';
+  String get anxious => 'anxieux';
 
   @override
-  String get appIcon => 'App-Icon';
+  String get appIcon => 'Icône de l\'application';
 
   @override
   String get appIconCouldNotBeChanged =>
-      'App-Symbol konnte nicht geändert werden';
+      'l\'icône de l\'application n\'a pas pu être modifiée';
 
   @override
-  String get appIconsCategory => 'App-Symbole';
+  String get appIconsCategory => 'Icônes de l\'application';
 
   @override
-  String get appLanguage => 'App-Sprache';
+  String get appLanguage => 'langue de l\'application';
 
   @override
   String get appLock => 'app lock';
@@ -233,59 +234,62 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appLockAppearsAfterTheNotificationPanel =>
-      'App-Sperre erscheint nach dem Benachrichtigungsfeld';
+      'le verrouillage de l\'application apparaît après le panneau de notification';
 
   @override
   String get appLockNeedsADeviceScreenLock =>
-      'App-Sperre erfordert eine Bildschirmsperre';
+      'le verrouillage de l\'application nécessite un verrouillage de l\'écran de l\'appareil';
 
   @override
-  String get appLockTiming => 'App-Sperrzeit';
+  String get appLockTiming => 'timing de verrouillage de l\'application';
 
   @override
-  String get appLockWillNotTurnOn => 'App-Sperre lässt sich nicht aktivieren';
+  String get appLockWillNotTurnOn =>
+      'le verrouillage de l\'application ne s\'active pas';
 
   @override
-  String get appNotices => 'App-Hinweise';
+  String get appNotices => 'avis d\'application';
 
   @override
   String get appNoticesAreNotAppearing =>
-      'App-Benachrichtigungen erscheinen nicht';
+      'les avis d\'application n\'apparaissent pas';
 
   @override
-  String get appPreferencesAndTheme => 'App-Einstellungen & Theme';
+  String get appPreferencesAndTheme => 'préférences et thème de l\'application';
 
   @override
-  String get appSwitcherObfuscation => 'Verschleierung im App-Umschalter';
+  String get appSwitcherObfuscation =>
+      'obscurcissement du sélecteur d\'applications';
 
   @override
-  String get appTheme => 'App-Farbschema';
+  String get appTheme => 'thème de l\'application';
 
   @override
-  String get appUsage => 'App-Nutzung';
+  String get appUsage => 'utilisation de l\'application';
 
   @override
-  String get appVersion => 'App-Version';
+  String get appVersion => 'version de l\'application';
 
   @override
-  String get appearance => 'Erscheinungsbild';
+  String get appearance => 'Apparence';
 
   @override
-  String get appiconscategory => 'App-Symbole';
+  String get appiconscategory => 'applicationsicônescatégorie';
 
   @override
-  String get applicationBuildIdentifier => 'Anwendungs-Build-Kennung';
+  String get applicationBuildIdentifier =>
+      'identifiant de build d\'application';
 
   @override
   String get applyACustomAccentColorAcrossAllFluidInterfaceElements =>
-      'Wendet eine benutzerdefinierte Akzentfarbe auf alle fließenden UI-Elemente an.';
+      'appliquez une couleur d’accent personnalisée sur tous les éléments de l’interface fluide.';
 
   @override
-  String get applyingAppIcon => 'App-Symbol wird angewendet';
+  String get applyingAppIcon => 'application de l\'icône de l\'application';
 
   @override
   String get armyEliteEveryCleanDayIsABattleFoughtAndWon =>
-      'Armee-Elite. Jeder saubere Tag ist eine gewonnene Schlacht.';
+      'l\'élite de l\'armée. chaque jour propre est une bataille menée et gagnée.';
 
   @override
   String
@@ -293,17 +297,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'as a small, offline-first timestamp logger for real work: quick taps, focused notes, and exports developers can inspect.';
 
   @override
-  String get at => 'um';
+  String get at => 'à';
 
   @override
   String get attachContextWithoutSlowingTheAppDown =>
       'attach context without slowing the app down.';
 
   @override
-  String get attackOnTitan => 'Attack on Titan';
+  String get attackOnTitan => 'attaque sur titan';
 
   @override
-  String get aurora => 'Aurora';
+  String get aurora => 'aurore';
 
   @override
   String get auroraBorealis => 'Aurore boréale';
@@ -313,7 +317,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Démarrage automatique et activité en arrière-plan';
 
   @override
-  String get automatedSecurityScans => 'Automatisierte Sicherheits-Scans';
+  String get automatedSecurityScans => 'analyses de sécurité automatisées';
 
   @override
   String get automatic => 'Automatique';
@@ -322,10 +326,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get availableLanguages => 'Langues disponibles';
 
   @override
-  String get back => 'Zurück';
+  String get back => 'Retour';
 
   @override
-  String get backUpData => 'Daten sichern';
+  String get backUpData => 'sauvegarder les données';
 
   @override
   String get backupExportCategory => 'Sauvegarde et exportation';
@@ -337,21 +341,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get backupFilenamePreview => 'Aperçu du nom de fichier de sauvegarde';
 
   @override
-  String get backupHasNoNewMoments => 'Sicherung enthält keine neuen Momente';
+  String get backupHasNoNewMoments =>
+      'la sauvegarde n\'a pas de nouveaux moments';
 
   @override
-  String get backupImportFailed => 'Sicherungsimport fehlgeschlagen';
+  String get backupImportFailed => 'échec de l\'importation de sauvegarde';
 
   @override
   String get backupImportFoundNoNewMoments =>
-      'Sicherungsimport ergab keine neuen Momente';
+      'l\'importation de sauvegarde n\'a trouvé aucun nouveau moment';
 
   @override
   String get backupReminderExportAFreshBackupSoon =>
-      'Sicherungs-Erinnerung: Bald neue Sicherung exportieren';
+      'rappel de sauvegarde : exportez bientôt une nouvelle sauvegarde';
 
   @override
-  String get backupStatus => 'Sicherungsstatus';
+  String get backupStatus => 'état de sauvegarde';
 
   @override
   String get backupexportcategory => 'Sauvegarde et exportation';
@@ -361,50 +366,50 @@ class AppLocalizationsFr extends AppLocalizations {
       'État de la batterie et des performances';
 
   @override
-  String get batteryOptimizationActive => 'Akku-Optimierung aktiv';
+  String get batteryOptimizationActive => 'optimisation de la batterie active';
 
   @override
-  String get ben10 => 'Ben 10';
+  String get ben10 => 'ben 10';
 
   @override
   String get beta => 'Bêta';
 
   @override
-  String get betaFeature => 'Beta-Funktion';
+  String get betaFeature => 'fonctionnalité bêta';
 
   @override
-  String get betaTrack => 'Beta-Kanal';
+  String get betaTrack => 'piste bêta';
 
   @override
   String get biometricLock => 'Verrouillage biométrique';
 
   @override
-  String get biometricsNotAvailable => 'Biometrie nicht verfügbar';
+  String get biometricsNotAvailable => 'biométrie non disponible';
 
   @override
   String get biometricsOrSystemCredentials =>
       'Biométrie ou identifiants système';
 
   @override
-  String get bleach => 'Bleach';
+  String get bleach => 'eau de Javel';
 
   @override
   String get blurAndTranslucency => 'Flou et translucidité';
 
   @override
-  String get bored => 'Gelangweilt';
+  String get bored => 'ennuyé';
 
   @override
-  String get boredom => 'Langeweile';
+  String get boredom => 'ennui';
 
   @override
-  String get boxBreathing => 'Box-Atmung';
+  String get boxBreathing => 'respiration en boîte';
 
   @override
-  String get buildCacheCleared => 'Build-Cache geleert';
+  String get buildCacheCleared => 'cache de build vidé';
 
   @override
-  String get buildCacheSize => 'Build-Cache-Größe';
+  String get buildCacheSize => 'construire la taille du cache';
 
   @override
   String get buildDate => 'Date de compilation';
@@ -416,14 +421,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get builtBy => 'Développé par';
 
   @override
-  String get bushidoCodeMasterOfTheSelf => 'Bushido-Kodex. Meister des Selbst.';
+  String get bushidoCodeMasterOfTheSelf => 'code bushido. maître de soi.';
 
   @override
   String get buyMeACoffee => 'Offrez-moi un café';
 
   @override
   String get canIRestoreDeletedMoments =>
-      'Kann ich gelöschte Momente wiederherstellen?';
+      'puis-je restaurer des moments supprimés ?';
 
   @override
   String get cancel => 'Annuler';
@@ -446,7 +451,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get changeYourSecureInAppPasscode =>
-      'Ändern Sie Ihren sicheren In-App-Passcode.';
+      'changez votre mot de passe sécurisé dans l\'application.';
 
   @override
   String get changelogTitle => 'Journal des modifications';
@@ -455,20 +460,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get changelogtitle => 'Journal des modifications';
 
   @override
-  String get checkAgain => 'Erneut prüfen';
+  String get checkAgain => 'revérifier';
 
   @override
-  String get checkForUpdates => 'Nach Updates suchen';
+  String get checkForUpdates => 'vérifier les mises à jour';
 
   @override
-  String get checkingForUpdates => 'Suche nach Updates...';
+  String get checkingForUpdates => 'vérifier les mises à jour...';
 
   @override
   String get checksGithubReleasesOnlyWhenNeededZeroTelemetry =>
       'Vérifie les versions GitHub uniquement lorsque nécessaire. Zéro télémétrie.';
 
   @override
-  String get chessMastery => 'Schach-Meisterschaft';
+  String get chessMastery => 'maîtrise des échecs';
 
   @override
   String
@@ -483,31 +488,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chooseLanguage => 'Choisir la langue';
 
   @override
-  String get chooseMilestoneTheme => 'Meilenstein-Design wählen';
+  String get chooseMilestoneTheme => 'choisir le thème des jalons';
 
   @override
   String
   get chooseTheNarrativeStyleForYourMilestoneNamesEachThemeIsPsychologicallyCuratedToMatchADifferentSelfImageAndMotivationStyle =>
-      'Wählen Sie den narrativen Stil für Ihre Meilensteine. Jedes Thema ist psychologisch kuratiert.';
+      'choisissez le style narratif pour les noms de vos jalons. chaque thème est psychologiquement organisé pour correspondre à une image de soi et un style de motivation différents.';
 
   @override
   String get chooseYourPreferredInterfaceLanguage =>
-      'Wählen Sie Ihre bevorzugte Oberflächensprache';
+      'choisissez votre langue d\'interface préférée';
 
   @override
-  String get civilianToTheOneAboveAll => 'Zivilist bis zum Einen über Allen.';
+  String get civilianToTheOneAboveAll => 'civil à celui avant tout.';
 
   @override
-  String get clan => 'Klan';
+  String get clan => 'clan';
 
   @override
-  String get clear => 'Löschen';
+  String get clear => 'Effacer';
 
   @override
   String get clearAllMoments => 'Effacer tous les moments';
 
   @override
-  String get clearCache => 'Cache leeren';
+  String get clearCache => 'vider le cache';
 
   @override
   String get clearSearch => 'Effacer la recherche';
@@ -526,10 +531,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get codeGeass => 'Code Geass';
 
   @override
-  String get colorAccent => 'Akzentfarbe';
+  String get colorAccent => 'accent de couleur';
 
   @override
-  String get commits => 'Commits';
+  String get commits => 'commet';
 
   @override
   String get compactHistory => 'Historique compact';
@@ -537,7 +542,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get compactHistoryCannotBeEnabledWhileSingleMomentNumberingIsActiveDisableSingleNumbersToUseCompactRows =>
-      'Der kompakte Verlauf kann nicht aktiviert werden, solange die Einzelzählung aktiv ist. Deaktivieren Sie die Einzelziffern, um kompakte Zeilen zu verwenden.';
+      'L\'historique compact ne peut pas être activé lorsque la numérotation à un seul moment est active. désactivez les nombres uniques pour utiliser des lignes compactes.';
 
   @override
   String get compactHistoryMode => 'Mode historique compact';
@@ -547,22 +552,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get configureADedicated4DigitPasscode =>
-      'Richten Sie einen 4-stelligen Passcode ein.';
+      'configurer un mot de passe dédié à 4 chiffres.';
 
   @override
-  String get configureSettings => 'Einstellungen anpassen';
+  String get configureSettings => 'configurer les paramètres';
 
   @override
   String get confirm => 'Confirmer';
 
   @override
-  String get confirmDelete => 'Löschen bestätigen';
+  String get confirmDelete => 'confirmer la suppression';
 
   @override
-  String get confirmPasscode => 'Code bestätigen';
+  String get confirmPasscode => 'confirmer le mot de passe';
 
   @override
-  String get actionContinue => 'Weiter';
+  String get actionContinue => 'continuer';
 
   @override
   String get continueMindfully => 'Continuer en pleine conscience';
@@ -577,39 +582,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cooldownPeriod => 'Période de temps de recharge';
 
   @override
-  String get copy => 'Kopieren';
+  String get copy => 'Copier';
 
   @override
-  String get copyMoment => 'Moment kopieren';
+  String get copyMoment => 'moment de copie';
 
   @override
   String get correlationIntelligence => 'Intelligence de corrélation';
 
   @override
   String get cosmicExplorationEveryCleanDayIsLightYearsGained =>
-      'Kosmische Erkundung. Jeder saubere Tag bringt Lichtjahre ein.';
+      'exploration cosmique. chaque jour propre représente des années-lumière gagnées.';
 
   @override
   String get couldNotOpenBackupFile =>
-      'Sicherungsdatei konnte nicht geöffnet werden';
+      'impossible d\'ouvrir le fichier de sauvegarde';
 
   @override
   String get countOnSave => 'count on save';
 
   @override
-  String get createQuickLocalBackup => 'Schnelle lokale Sicherung erstellen';
+  String get createQuickLocalBackup => 'créer une sauvegarde locale rapide';
 
   @override
-  String get crimson => 'Karminrot';
+  String get crimson => 'cramoisi';
 
   @override
-  String get currentMessage => 'Aktuelle Nachricht';
+  String get currentMessage => 'message actuel';
 
   @override
-  String get cursedSpiritToSatoruGojo => 'Fluchgeist bis Satoru Gojo.';
+  String get cursedSpiritToSatoruGojo => 'esprit maudit à satoru gojo.';
 
   @override
-  String get customStartDate => 'Benutzerdefiniertes Startdatum';
+  String get customStartDate => 'date de début personnalisée';
 
   @override
   String get dailyLoggingReminder => 'daily logging reminder';
@@ -618,10 +623,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dailyNeuroscienceInsight => 'Aperçu quotidien en neurosciences';
 
   @override
-  String get dailyReminder => 'Tägliche Erinnerung';
+  String get dailyReminder => 'rappel quotidien';
 
   @override
-  String get dailyReminderMessage => 'Tägliche Erinnerungsnachricht';
+  String get dailyReminderMessage => 'message de rappel quotidien';
 
   @override
   String get dailyReminders => 'Rappels quotidiens';
@@ -630,19 +635,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dark => 'Sombre';
 
   @override
-  String get darkMode => 'Dunkelmodus';
+  String get darkMode => 'mode sombre';
 
   @override
-  String get data => 'Daten';
+  String get data => 'Données';
 
   @override
   String get dataAndBackup => 'Données et sauvegarde';
 
   @override
-  String get dataConsumed => 'Verbrauchte Daten';
+  String get dataConsumed => 'données consommées';
 
   @override
-  String get dataHealth => 'Daten-Zustand';
+  String get dataHealth => 'santé des données';
 
   @override
   String get databaseExport => 'Exportation de la base de données';
@@ -651,61 +656,61 @@ class AppLocalizationsFr extends AppLocalizations {
   String get databaseIntegrity => 'Intégrité de la base de données';
 
   @override
-  String get dayOfMonth => 'Tag des Monats';
+  String get dayOfMonth => 'jour du mois';
 
   @override
-  String get daysOfWeek => 'Wochentage';
+  String get daysOfWeek => 'jours de la semaine';
 
   @override
-  String get deathNote => 'Death Note';
+  String get deathNote => 'menace de mort';
 
   @override
   String get delete => 'Supprimer';
 
   @override
-  String get deleteAllMoments => 'Alle Momente löschen?';
+  String get deleteAllMoments => 'supprimer tous les moments ?';
 
   @override
-  String get deleteBackup => 'Sicherung löschen?';
+  String get deleteBackup => 'supprimer la sauvegarde ?';
 
   @override
-  String get deleteCache => 'Cache löschen';
+  String get deleteCache => 'supprimer le cache';
 
   @override
-  String get deleteMoment => 'Moment löschen';
+  String get deleteMoment => 'supprimer un moment';
 
   @override
-  String get deletePermanently => 'Dauerhaft löschen';
+  String get deletePermanently => 'supprimer définitivement';
 
   @override
-  String get deletePermanently2 => 'Endgültig löschen?';
+  String get deletePermanently2 => 'supprimer définitivement ?';
 
   @override
-  String get deletedInMoment => 'IN-Moment gelöscht';
+  String get deletedInMoment => 'supprimé en un instant';
 
   @override
-  String get deletedOutMoment => 'OUT-Moment gelöscht';
+  String get deletedOutMoment => 'moment supprimé';
 
   @override
-  String get deletedSingleMoment => 'SINGLE-Moment gelöscht';
+  String get deletedSingleMoment => 'moment unique supprimé';
 
   @override
-  String get deletingCache => 'Cache wird gelöscht...';
+  String get deletingCache => 'suppression du cache...';
 
   @override
-  String get demonSlayer => 'Demon Slayer';
+  String get demonSlayer => 'tueur de démons';
 
   @override
-  String get dev => 'Entwicklung';
+  String get dev => 'développeur';
 
   @override
   String get developerDiagnostics => 'Diagnostics développeur';
 
   @override
-  String get developerKey => 'Entwickler-Schlüssel';
+  String get developerKey => 'clé de développeur';
 
   @override
-  String get developerOptions => 'Entwickleroptionen';
+  String get developerOptions => 'options de développement';
 
   @override
   String get deviceHealth => 'device health';
@@ -715,13 +720,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diagnosticsAndInternalEngineSettingsForDevelopers =>
-      'Diagnose und interne Engine-Einstellungen für Entwickler.';
+      'diagnostics et paramètres internes du moteur pour les développeurs.';
 
   @override
   String get diagnosticscategory => 'Diagnostics';
 
   @override
-  String get disableBatteryOptimization => 'Akku-Optimierung deaktivieren';
+  String get disableBatteryOptimization =>
+      'désactiver l\'optimisation de la batterie';
 
   @override
   String get disableCompactHistory => 'Désactiver l\'historique compact ?';
@@ -731,7 +737,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Désactiver le comptage à l\'enregistrement ?';
 
   @override
-  String get disableReduceMotionFirst => '最初に「視覚効果を減らす」を無効にしてください';
+  String get disableReduceMotionFirst =>
+      'désactiver d\'abord la réduction du mouvement';
 
   @override
   String get disableUseNumbersInSingle => 'Désactiver la numérotation unique ?';
@@ -758,39 +765,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get done => 'Terminé';
 
   @override
-  String get download => 'Herunterladen';
+  String get download => 'télécharger';
 
   @override
-  String get downloadAndInstall => 'Herunterladen & Installieren';
+  String get downloadAndInstall => 'télécharger et installer';
 
   @override
-  String get downloadFailed => 'Download fehlgeschlagen';
+  String get downloadFailed => 'échec du téléchargement';
 
   @override
-  String get downloadFromGithub => 'Von GitHub herunterladen';
+  String get downloadFromGithub => 'télécharger depuis github';
 
   @override
-  String get downloadSize => 'Download-Größe:';
+  String get downloadSize => 'taille du téléchargement :';
 
   @override
-  String get downloadingUpdate => 'Update wird heruntergeladen...';
+  String get downloadingUpdate => 'téléchargement de la mise à jour...';
 
   @override
-  String get dragonBall => 'Dragon Ball';
+  String get dragonBall => 'boule de dragon';
 
   @override
   String get eRankSungJinwooToShadowMonarch =>
-      'E-Rang Sung Jinwoo bis zum Schattenmonarchen.';
+      'e-rank a chanté Jinwoo au monarque fantôme.';
 
   @override
   String get eastBlueCobyToThePirateKingGolDRoger =>
-      'East Blue Corby bis zum Piratenkönig Gol D. Roger.';
+      'East Blue Coby au roi pirate Gold D. Roger.';
 
   @override
-  String get edit => 'Bearbeiten';
+  String get edit => 'Modifier';
 
   @override
-  String get editMessage => 'Nachricht bearbeiten';
+  String get editMessage => 'modifier le message';
 
   @override
   String get editNote => 'Modifier la note';
@@ -799,28 +806,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get emailSupport => 'Assistance par e-mail';
 
   @override
-  String get emerald => 'Smaragd';
+  String get emerald => 'émeraude';
 
   @override
   String get emeraldForest => 'emerald forest';
 
   @override
-  String get empty => 'Leer';
+  String get empty => 'vide';
 
   @override
-  String get emptyTrash => 'Papierkorb leeren';
+  String get emptyTrash => 'poubelle vide';
 
   @override
-  String get emptyTrash2 => 'Papierkorb leeren?';
+  String get emptyTrash2 => 'poubelle vide ?';
 
   @override
-  String get enableCountOnSave => 'Zähler beim Speichern anzeigen';
+  String get enableCountOnSave => 'activer le compte sur la sauvegarde';
 
   @override
-  String get enableShowSecondsFirst => 'Zuerst Sekunden anzeigen aktivieren';
+  String get enableShowSecondsFirst =>
+      'activer d\'abord l\'affichage des secondes';
 
   @override
-  String get enableSobrietyMode => 'Nüchternheitsmodus aktivieren';
+  String get enableSobrietyMode => 'activer le mode sobriété';
 
   @override
   String get enableTimeReflection => 'Activer la réflexion temporelle';
@@ -829,25 +837,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enabled => 'Activé';
 
   @override
-  String get encryptedBackup => 'Verschlüsselte Sicherung';
+  String get encryptedBackup => 'sauvegarde cryptée';
 
   @override
-  String get endpointUrl => 'Endpunkt-URL';
+  String get endpointUrl => 'URL du point de terminaison';
 
   @override
   String get english => 'Anglais';
 
   @override
-  String get enterPasscode => 'Code eingeben';
+  String get enterPasscode => 'entrez le code d\'accès';
 
   @override
-  String get enterReminderMessage => 'Erinnerungstext eingeben...';
+  String get enterReminderMessage => 'entrez un message de rappel...';
 
   @override
   String get essentialFeatures => 'Fonctionnalités essentielles';
 
   @override
-  String get evening => 'Abend';
+  String get evening => 'soirée';
 
   @override
   String get every1Hour => 'Toutes les 1 heure';
@@ -856,7 +864,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get every1HourRecommended => 'Toutes les 1 heure (Recommandé)';
 
   @override
-  String get every14Days => 'Alle 14 Tage';
+  String get every14Days => 'tous les 14 jours';
 
   @override
   String get every15Minutes => 'Toutes les 15 minutes';
@@ -865,7 +873,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get every2Hours => 'Toutes les 2 heures';
 
   @override
-  String get every30Days => 'Alle 30 Tage';
+  String get every30Days => 'tous les 30 jours';
 
   @override
   String get every30Minutes => 'Toutes les 30 minutes';
@@ -874,58 +882,61 @@ class AppLocalizationsFr extends AppLocalizations {
   String get every45Minutes => 'Toutes les 45 minutes';
 
   @override
-  String get every7Days => 'Alle 7 Tage';
+  String get every7Days => 'tous les 7 jours';
 
   @override
   String get everyTapRecordsAStandaloneMoment =>
       'Chaque appui enregistre un moment autonome.';
 
   @override
-  String get exportBackup => 'Sicherung exportieren';
+  String get exportBackup => 'exporter la sauvegarde';
 
   @override
-  String get exportCsv => 'CSV exportieren';
+  String get exportCsv => 'exporter au format CSV';
 
   @override
-  String get exportFailedTryAgain => 'Export fehlgeschlagen. Erneut versuchen.';
+  String get exportFailedTryAgain =>
+      'l\'exportation a échoué. essayer à nouveau.';
 
   @override
-  String get exportJson => 'JSON exportieren';
+  String get exportJson => 'exporter json';
 
   @override
-  String get exportLast7Days => 'Letzte 7 Tage exportieren';
+  String get exportLast7Days => 'exporter les 7 derniers jours';
 
   @override
-  String get exportMilestoneCard => 'Meilenstein-Karte exportieren';
+  String get exportMilestoneCard => 'carte de jalon d\'exportation';
 
   @override
-  String get exportSavedToDownloads => 'Export in Downloads gespeichert';
+  String get exportSavedToDownloads =>
+      'exportation enregistrée dans les téléchargements';
 
   @override
   String get exportImportAndManageYourDataBackups =>
-      'Exportieren, importieren und verwalten Sie Ihre Datensicherungen.';
+      'exportez, importez et gérez vos sauvegardes de données.';
 
   @override
-  String get extendedDuration => 'Erweiterte Dauer';
+  String get extendedDuration => 'durée prolongée';
 
   @override
-  String get externalNavigation => 'Externe Weiterleitung';
+  String get externalNavigation => 'navigation externe';
 
   @override
   String get factoryReset => 'factory reset';
 
   @override
-  String get failedToCreateLocalBackup => 'Fehler beim Erstellen der Sicherung';
+  String get failedToCreateLocalBackup =>
+      'échec de création de sauvegarde locale';
 
   @override
   String get failedToReadLocalBackupFile =>
-      'Lokale Sicherungsdatei konnte nicht gelesen werden';
+      'échec de lecture du fichier de sauvegarde local';
 
   @override
-  String get faq => 'Häufige Fragen';
+  String get faq => 'FAQ';
 
   @override
-  String get fatigue => 'Ermüdung';
+  String get fatigue => 'fatigue';
 
   @override
   String get feedback => 'Commentaires';
@@ -940,52 +951,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get frequencyInterval => 'Intervalle de fréquence';
 
   @override
-  String get fri => 'Fr';
+  String get fri => 'Ven';
 
   @override
-  String get friday => 'Freitag';
+  String get friday => 'Vendredi';
 
   @override
-  String get friends => 'Freunde';
+  String get friends => 'amis';
 
   @override
-  String get from => 'Von';
+  String get from => 'depuis';
 
   @override
-  String get full => 'Vollständig';
+  String get full => 'complet';
 
   @override
-  String get fullOnlinePolicy => 'Vollständige Online-Richtlinie';
+  String get fullOnlinePolicy => 'politique complète en ligne';
 
   @override
-  String get fullOnlineTerms => 'Vollständige Online-Bedingungen';
+  String get fullOnlineTerms => 'conditions complètes en ligne';
 
   @override
-  String get fullTitleAndPurpose => 'Vollständiger Titel & Zweck';
+  String get fullTitleAndPurpose => 'titre complet et objectif';
 
   @override
-  String get fullmetalAlchemist => 'Fullmetal Alchemist';
+  String get fullmetalAlchemist => 'alchimiste fullmetal';
 
   @override
   String get german => 'Allemand';
 
   @override
-  String get getStarted => 'Loslegen';
+  String get getStarted => 'commencer';
 
   @override
   String get gintama => 'Gintama';
 
   @override
-  String get github => 'GitHub';
+  String get github => 'github';
 
   @override
-  String get giveFeedback => 'Feedback geben';
+  String get giveFeedback => 'donner votre avis';
 
   @override
-  String get googleDriveBackup => 'Google Drive Sicherung';
+  String get googleDriveBackup => 'sauvegarde Google Drive';
 
   @override
-  String get gotIt => 'Verstanden';
+  String get gotIt => 'j\'ai compris';
 
   @override
   String get grantPermission => 'Accorder la permission';
@@ -995,39 +1006,39 @@ class AppLocalizationsFr extends AppLocalizations {
       'Gloire grecque et romaine. Élevez-vous de mortel à olympien.';
 
   @override
-  String get greyMatterToAlienX => 'Graue Eminenz bis Alien X.';
+  String get greyMatterToAlienX => 'matière grise à alien x.';
 
   @override
-  String get guides => 'Anleitungen';
+  String get guides => 'guides';
 
   @override
-  String get happy => 'Glücklich';
+  String get happy => 'heureux';
 
   @override
   String get hardwareSecurity => 'Sécurité matérielle';
 
   @override
-  String get hardwareBackedEncryption => 'Hardware-gestützte Verschlüsselung';
+  String get hardwareBackedEncryption => 'chiffrement matériel';
 
   @override
   String get harryPotter => 'Harry Potter';
 
   @override
   String get haveSuggestionsOrFoundABug2 =>
-      'Haben Sie Vorschläge oder einen Fehler gefunden?';
+      'avez-vous des suggestions ou avez-vous trouvé un bug ?';
 
   @override
-  String get help => 'Hilfe';
+  String get help => 'aide';
 
   @override
-  String get helpAndUserGuides => 'Hilfe & Benutzerhandbuch';
+  String get helpAndUserGuides => 'aide et guides d\'utilisation';
 
   @override
   String get hideAppContentInRecents =>
       'Masquer le contenu dans les applications récentes';
 
   @override
-  String get hindi => 'Hindi';
+  String get hindi => 'hindi';
 
   @override
   String get historyTitle => 'Historique';
@@ -1036,47 +1047,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String get holdForNotes => 'Maintenir pour les notes';
 
   @override
-  String get hour => 'Stunde';
+  String get hour => 'heure';
 
   @override
   String get hourlyMindfulness => 'Pleine conscience horaire';
 
   @override
-  String get hours => 'Stunden';
+  String get hours => 'heures';
 
   @override
   String get howToUseItEffectively => 'Comment l\'utiliser efficacement';
 
   @override
   String get htmlEditorToTuringAwardWinner =>
-      'HTML-Editor bis zum Turing-Preisträger.';
+      'éditeur HTML pour le lauréat du prix Turing.';
 
   @override
-  String get hunterXHunter => 'Hunter x Hunter';
+  String get hunterXHunter => 'chasseur x chasseur';
 
   @override
-  String get imperial => 'Kaiserlich';
+  String get imperial => 'impérial';
 
   @override
   String get imperialGold => 'Or impérial';
 
   @override
-  String get importBackup => 'Sicherung importieren';
+  String get importBackup => 'importer une sauvegarde';
 
   @override
-  String get importCancelled => 'Import abgebrochen';
+  String get importCancelled => 'importation annulée';
 
   @override
   String get importantNotice => 'Avis important';
 
   @override
-  String get inAppOtaUpdates => 'In-App OTA-Updates';
+  String get inAppOtaUpdates => 'mises à jour ota dans l\'application';
 
   @override
-  String get inAppPin => 'In-App-PIN';
+  String get inAppPin => 'code PIN dans l\'application';
 
   @override
-  String get inAppPinSetSuccessfully => 'In-App-PIN erfolgreich festgelegt.';
+  String get inAppPinSetSuccessfully =>
+      'Le code PIN dans l\'application a été défini avec succès.';
 
   @override
   String get inAppUpdateSetup => 'Configuration des mises à jour intégrées';
@@ -1088,67 +1100,67 @@ class AppLocalizationsFr extends AppLocalizations {
   String get inactivityAlerts => 'inactivity alerts';
 
   @override
-  String get inactivityReminder => 'Inaktivitäts-Erinnerung';
+  String get inactivityReminder => 'rappel d\'inactivité';
 
   @override
-  String get incorrectPasscode => 'Falscher Code';
+  String get incorrectPasscode => 'mot de passe incorrect';
 
   @override
-  String get installNow => 'Jetzt installieren';
+  String get installNow => 'installer maintenant';
 
   @override
   String get installationFailedToStart =>
-      'Installation konnte nicht gestartet werden';
+      'l\'installation n\'a pas pu démarrer';
 
   @override
   String get integrityCheckFailedChecksumMismatch =>
-      'Integritätsprüfung fehlgeschlagen: Prüfsummenfehler';
+      'échec du contrôle d\'intégrité : incompatibilité de la somme de contrôle';
 
   @override
   String get intelligentRiskRadar => 'Radar intelligent des risques';
 
   @override
-  String get invalidBackupFile => 'Ungültige Sicherungsdatei';
+  String get invalidBackupFile => 'fichier de sauvegarde invalide';
 
   @override
-  String get isNotekarPrivate => 'Ist NoteKar privat?';
+  String get isNotekarPrivate => 'Notekar est-il privé ?';
 
   @override
-  String get isNotekarSafeToUse => 'Ist NoteKar sicher zu verwenden?';
+  String get isNotekarSafeToUse => 'Notekar est-il sûr à utiliser ?';
 
   @override
-  String get item => 'Element';
+  String get item => 'article';
 
   @override
-  String get items => 'Elemente';
+  String get items => 'articles';
 
   @override
   String get japanese => 'Japonais';
 
   @override
-  String get jujutsuKaisen => 'Jujutsu Kaisen';
+  String get jujutsuKaisen => 'jujutsu kaisen';
 
   @override
-  String get july2026 => 'Juli 2026';
+  String get july2026 => 'juillet 2026';
 
   @override
-  String get kingdom => 'Königreich';
+  String get kingdom => 'royaume';
 
   @override
   String get konohamaruToTheSageOfSixPaths =>
-      'Konohamaru bis zum Weisen der Sechs Pfade.';
+      'Konohamaru au sage des six voies.';
 
   @override
   String get language => 'Langue';
 
   @override
-  String get lastScan => 'Letzter Scan';
+  String get lastScan => 'dernière analyse';
 
   @override
   String get lateNight => 'Fin de soirée';
 
   @override
-  String get lateNight2 => 'Späte Nacht';
+  String get lateNight2 => 'tard dans la nuit';
 
   @override
   String get learnMore => 'En savoir plus';
@@ -1160,44 +1172,44 @@ class AppLocalizationsFr extends AppLocalizations {
   String get less => 'Moins';
 
   @override
-  String get licenses => 'Lizenzen';
+  String get licenses => 'licences';
 
   @override
   String get light => 'Clair';
 
   @override
-  String get limitedConnectivity => 'Begrenzte Verbindung';
+  String get limitedConnectivity => 'connectivité limitée';
 
   @override
-  String get linkCopied => 'Link kopiert';
+  String get linkCopied => 'lien copié';
 
   @override
   String
   get liveActivityTrackingDashboardFeaturingRealTimeMetricAnalysisHabitTrackingGridsActivityTrendsAndCorrelationIntelligenceCalculatedFromYourMoments =>
-      'Live-Aktivitäts-Dashboard mit Echtzeit-Metriken, Gewohnheitsrastern, Trends und Korrelations-Intelligenz aus Ihren Momenten.';
+      'Tableau de bord de suivi des activités en direct comprenant une analyse des mesures en temps réel, des grilles de suivi des habitudes, des tendances d\'activité et des informations de corrélation calculées à partir de vos moments.';
 
   @override
   String get liveIconMotionLooksSlowOrDelayed =>
-      'Live-Icon-Bewegung wirkt verzögert';
+      'le mouvement de l\'icône en direct semble lent ou retardé';
 
   @override
   String get liveIconMotionWillNotTurnOn =>
-      'Live-Icon-Bewegung lässt sich nicht aktivieren';
+      'le mouvement de l\'icône en direct ne s\'allumera pas';
 
   @override
   String get loadOlderMoments => 'Charger les moments plus anciens';
 
   @override
-  String get loadingDatabase => 'Datenbank wird geladen...';
+  String get loadingDatabase => 'chargement de la base de données...';
 
   @override
-  String get localBackups => 'Lokale Sicherungen';
+  String get localBackups => 'sauvegardes locales';
 
   @override
-  String get localStorage => 'Lokaler Speicher';
+  String get localStorage => 'stockage local';
 
   @override
-  String get location => 'Ort';
+  String get location => 'emplacement';
 
   @override
   String get logAMomentInstantlyFromTheMainScreen =>
@@ -1216,16 +1228,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loggingReminder => 'logging reminder';
 
   @override
-  String get loggingReminders => 'Protokoll-Erinnerungen';
+  String get loggingReminders => 'journalisation des rappels';
 
   @override
-  String get logs => 'Protokolle';
+  String get logs => 'journaux';
 
   @override
-  String get loneliness => 'Einsamkeit';
+  String get loneliness => 'solitude';
 
   @override
-  String get lonely => 'Einsam';
+  String get lonely => 'solitaire';
 
   @override
   String
@@ -1234,74 +1246,73 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get magikarpToTheCreatorGodArceus =>
-      'Karpador bis zum Schöpfergott Arceus.';
+      'Magikarpe au dieu créateur Arceus.';
 
   @override
-  String get manage => 'Verwalten';
+  String get manage => 'gérer';
 
   @override
-  String get manageMomentNotes => 'Moment-Notizen verwalten';
+  String get manageMomentNotes => 'gérer les notes du moment';
 
   @override
   String get manageSecurityPasscodeLockAndAppPrivacy =>
-      'Sicherheit, Codesperre und App-Datenschutz verwalten.';
+      'gérer la sécurité, le verrouillage par mot de passe et la confidentialité des applications.';
 
   @override
-  String get marvelUniverse => 'Marvel-Universum';
+  String get marvelUniverse => 'univers merveilleux';
 
   @override
-  String get matsudaToTheShinigamiKing =>
-      'Matsuda bis zum König der Todesgötter.';
+  String get matsudaToTheShinigamiKing => 'Matsuda au roi shinigami.';
 
   @override
   String get medievalRoyaltyRiseFromSerfToSovereign =>
-      'Mittelalterlicher Adel. Vom Knecht zum Herrscher.';
+      'royauté médiévale. passer de serf à souverain.';
 
   @override
-  String get message => 'Nachricht';
+  String get message => 'message';
 
   @override
-  String get midnight => 'Mitternacht';
+  String get midnight => 'minuit';
 
   @override
   String get midnightObsidian => 'Obsidienne de minuit';
 
   @override
-  String get milestoneAchieved => 'Meilenstein erreicht';
+  String get milestoneAchieved => 'jalon atteint';
 
   @override
   String get milestoneBadges => 'milestone badges';
 
   @override
-  String get milestonePeak => 'Meilenstein-Höhepunkt';
+  String get milestonePeak => 'point culminant';
 
   @override
-  String get milestoneTheme => 'Meilenstein-Design';
+  String get milestoneTheme => 'thème d\'étape';
 
   @override
-  String get milestoneUnlocked => 'Meilenstein freigeschaltet!';
+  String get milestoneUnlocked => 'jalon débloqué !';
 
   @override
-  String get milestones => 'Meilensteine';
+  String get milestones => 'Jalons';
 
   @override
-  String get minetaToAllMightPrime => 'Mineta bis All Might in Bestform.';
+  String get minetaToAllMightPrime => 'mineta à tous pourrait primer.';
 
   @override
-  String get minimalMomentOptions => 'Minimale Moment-Optionen';
+  String get minimalMomentOptions => 'options de moment minimal';
 
   @override
-  String get mit => 'MIT';
+  String get mit => 'avec';
 
   @override
   String get moistureFarmerToTheChosenOne =>
-      'Feuchtigkeitsfarmer bis zum Auserwählten.';
+      'agriculteur d\'humidité à l\'élu.';
 
   @override
-  String get momentOptions => 'Moment-Optionen';
+  String get momentOptions => 'options de moment';
 
   @override
-  String get momentSaved => 'Moment gespeichert';
+  String get momentSaved => 'instant sauvé';
 
   @override
   String get momentsCategory => 'Moments';
@@ -1310,47 +1321,47 @@ class AppLocalizationsFr extends AppLocalizations {
   String get momentscategory => 'Moments';
 
   @override
-  String get mon => 'Mo';
+  String get mon => 'Lun';
 
   @override
   String get monasticJourneySilenceStillnessAndVows =>
-      'Mönchische Reise. Stille, Ruhe und Gelübde.';
+      'voyage monastique. le silence, la tranquillité et les vœux.';
 
   @override
-  String get monday => 'Montag';
+  String get monday => 'Lundi';
 
   @override
-  String get monk => 'Mönch';
+  String get monk => 'moine';
 
   @override
   String get monthlyReminder => 'Rappel mensuel';
 
   @override
-  String get monthlyReminderMessage => 'Monatliche Erinnerungsnachricht';
+  String get monthlyReminderMessage => 'message de rappel mensuel';
 
   @override
   String get more => 'Plus';
 
   @override
-  String get morning => 'Morgen';
+  String get morning => 'matin';
 
   @override
-  String get motionSensorUnavailable => 'Bewegungssensor nicht verfügbar';
+  String get motionSensorUnavailable => 'capteur de mouvement indisponible';
 
   @override
-  String get muggleToMerlin => 'Muggel bis Merlin.';
+  String get muggleToMerlin => 'moldu à Merlin.';
 
   @override
-  String get murataToYoriichiTsugikuni => 'Murata bis Yoriichi Tsugikuni.';
+  String get murataToYoriichiTsugikuni => 'Murata à Yoriichi Tsugikuni.';
 
   @override
-  String get myHeroAcademia => 'My Hero Academia';
+  String get myHeroAcademia => 'mon université de héros';
 
   @override
   String get naruto => 'Naruto';
 
   @override
-  String get navy => 'Marine';
+  String get navy => 'marine';
 
   @override
   String get networkAndDataTransparency => 'Transparence réseau et données';
@@ -1359,48 +1370,49 @@ class AppLocalizationsFr extends AppLocalizations {
   String get networkMonitor => 'Moniteur réseau';
 
   @override
-  String get networkWarning => 'Netzwerkwarnung';
+  String get networkWarning => 'avertissement réseau';
 
   @override
-  String get neuroscienceAndGrowth => 'Neurowissenschaft & Wachstum';
+  String get neuroscienceAndGrowth => 'neurosciences et croissance';
 
   @override
-  String get next => 'Weiter';
+  String get next => 'Suivant';
 
   @override
-  String get night => 'Nacht';
+  String get night => 'nuit';
 
   @override
   String get noInternetConnectionShowingCachedPreview =>
-      'Keine Internetverbindung. Gecachte Vorschau wird angezeigt.';
+      'pas de connexion internet. affichant l\'aperçu en cache.';
 
   @override
-  String get noLocalBackupsFound => 'Keine lokalen Sicherungen gefunden';
+  String get noLocalBackupsFound => 'aucune sauvegarde locale trouvée';
 
   @override
-  String get noMatchingNotes => 'Keine passenden Notizen';
+  String get noMatchingNotes => 'aucune note correspondante';
 
   @override
   String get noMessageSetWillShowDefaultReminder =>
       'Aucun message défini (le rappel par défaut sera affiché)';
 
   @override
-  String get noMoments => 'Keine Momente';
+  String get noMoments => 'pas de moments';
 
   @override
-  String get noMomentsLoggedYet => 'Noch keine Momente protokolliert';
+  String get noMomentsLoggedYet => 'aucun moment enregistré pour l\'instant';
 
   @override
-  String get noNote => 'Keine Notiz';
+  String get noNote => 'aucune remarque';
 
   @override
-  String get noNotesFound => 'Keine Notizen gefunden';
+  String get noNotesFound => 'aucune note trouvée';
 
   @override
-  String get noRelapsesRecordedYet => 'Noch keine Rückfälle erfasst!';
+  String get noRelapsesRecordedYet =>
+      'aucune rechute enregistrée pour l\'instant !';
 
   @override
-  String get noRepositoryActivity => 'Keine Repository-Aktivität';
+  String get noRepositoryActivity => 'aucune activité du référentiel';
 
   @override
   String get noResults => 'Aucun résultat';
@@ -1409,49 +1421,49 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noResultsFound => 'Aucun résultat trouvé';
 
   @override
-  String get noSearchResultsFound => 'Keine Suchergebnisse gefunden';
+  String get noSearchResultsFound => 'aucun résultat de recherche trouvé';
 
   @override
-  String get noTracking => 'Kein Tracking';
+  String get noTracking => 'pas de suivi';
 
   @override
-  String get none => 'Keine';
+  String get none => 'Aucun';
 
   @override
   String get notSetUsingLastLogOrRelapseTag =>
-      'Nicht festgelegt: Letzter Eintrag oder Rückfall-Tag wird verwendet';
+      'non défini : utilisation du dernier journal ou de la balise de rechute';
 
   @override
-  String get noteCopiedToClipboard => 'Notiz in Zwischenablage kopiert';
+  String get noteCopiedToClipboard => 'note copiée dans le presse-papiers';
 
   @override
-  String get noteOnClick => 'Notiz beim Tippen';
+  String get noteOnClick => 'note au clic';
 
   @override
-  String get appTitle => 'NoteKar';
+  String get appTitle => 'notekar';
 
   @override
   String
   get notekarBuildsUndergoAutomatedCodeqlScannerCompilationAndLocalVirustotalScansBinariesAreSignedWithOurOfficialCertificateToEnsureAbsoluteIntegrity =>
-      'NoteKar-Builds durchlaufen automatisierte CodeQL- und lokale VirusTotal-Scans.';
+      'Les versions de notekar sont soumises à une compilation automatisée du scanner codeql et à des analyses antivirus totales locales. les binaires sont signés avec notre certificat officiel pour garantir une intégrité absolue.';
 
   @override
-  String get notekarIsOffline => 'NoteKar ist offline';
+  String get notekarIsOffline => 'notekar est déconnecté';
 
   @override
   String
   get notekarStoresMomentsPrivatelyOnThisDeviceBackupsAreFilesYouControl =>
-      'NoteKar speichert Momente privat auf diesem Gerät. Sicherungen kontrollieren Sie selbst.';
+      'notekar stocke les moments en privé sur cet appareil. les sauvegardes sont des fichiers que vous contrôlez.';
 
   @override
   String get notes => 'Notes';
 
   @override
   String get notificationPermissionNeeded =>
-      'Benachrichtigungsberechtigung erforderlich';
+      'autorisation de notification nécessaire';
 
   @override
-  String get numberedSingleMoments => 'Nummerierte Einzelmomente';
+  String get numberedSingleMoments => 'moments uniques numérotés';
 
   @override
   String get obsidianOnyx => 'Onyx obsidienne';
@@ -1460,46 +1472,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get off => 'Désactivé';
 
   @override
-  String get officialRepositoryMoved => 'Offizielles Repository umgezogen';
+  String get officialRepositoryMoved => 'dépôt officiel déplacé';
 
   @override
   String get offlineAnalysisOfYourLoggedRelapseMomentsNoDataLeavesYourDevice =>
-      'Offline-Analyse Ihrer protokollierten Momente. Keine Daten verlassen Ihr Gerät.';
+      'analyse hors ligne de vos moments de rechute enregistrés. aucune donnée ne quitte votre appareil.';
 
   @override
-  String get offlinePrivacyLog => 'Offline-Datenschutzprotokoll';
+  String get offlinePrivacyLog => 'journal de confidentialité hors ligne';
 
   @override
-  String get offlineFirst => 'Offline-First';
+  String get offlineFirst => 'hors ligne d\'abord';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'd\'accord';
 
   @override
-  String get okay => 'OK';
+  String get okay => 'd\'accord';
 
   @override
   String get actionOn => 'Activé';
 
   @override
-  String get onePiece => 'One Piece';
+  String get onePiece => 'une pièce';
 
   @override
   String
   get onlyMomentsTaggedHashrelapseResetTheStreakTurnOffToResetOnAnyNewLog =>
-      'Nur Momente mit dem Tag #relapse setzen die Serie zurück. Deaktivieren, um bei jedem neuen Eintrag zurückzusetzen.';
+      'seuls les moments marqués #relapse ont réinitialisé la séquence. éteignez-le pour réinitialiser tout nouveau journal.';
 
   @override
   String get open => 'Ouvrir';
 
   @override
-  String get openLink => 'Link öffnen';
+  String get openLink => 'ouvrir le lien';
 
   @override
   String get openSettings => 'Ouvrir les paramètres';
 
   @override
-  String get openSource => 'Open Source';
+  String get openSource => 'source ouverte';
 
   @override
   String
@@ -1507,19 +1519,19 @@ class AppLocalizationsFr extends AppLocalizations {
       'Nos téléphones nous accompagnent à chaque heure de la journée. Dans la course quotidienne, les heures disparaissent souvent dans le multitâche et le défilement infini.';
 
   @override
-  String get packageVerifiedAndReady => 'Paket verifiziert & bereit';
+  String get packageVerifiedAndReady => 'colis vérifié et prêt';
 
   @override
-  String get passcodesDoNotMatch => 'Codes stimmen nicht überein';
+  String get passcodesDoNotMatch => 'les codes d\'accès ne correspondent pas';
 
   @override
-  String get peakRiskWindow => 'Höchstes Risikofenster';
+  String get peakRiskWindow => 'fenêtre de risque maximal';
 
   @override
   String get permission => 'permission.';
 
   @override
-  String get personalization => 'Personalisierung';
+  String get personalization => 'Personnalisation';
 
   @override
   String get personalizeAndConfigureNotekarToFitYourSpecificWorkflow =>
@@ -1529,17 +1541,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get personalizedAppIcons => 'personalized app icons';
 
   @override
-  String get phoenix => 'Phönix';
+  String get phoenix => 'phénix';
 
   @override
-  String get planned => 'Geplant';
+  String get planned => 'prévu';
 
   @override
   String get pleaseWaitWhileAndroidRefreshesNotekar =>
-      'Bitte warten, während Android NoteKar aktualisiert.';
+      'veuillez patienter pendant qu\'Android actualise Notekar.';
 
   @override
-  String get pokemon => 'Pokémon';
+  String get pokemon => 'pokémon';
 
   @override
   String get previewFullScreenAlert => 'Aperçu de l\'alerte plein écran';
@@ -1549,7 +1561,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get priestWillibaldToThorsTheTrollOfJom =>
-      'Priester Willibald bis Thors der Troll von Jom.';
+      'Le prêtre Willibald à Thors le troll de Jom.';
 
   @override
   String get priorityBuild => 'Version prioritaire';
@@ -1558,87 +1570,89 @@ class AppLocalizationsFr extends AppLocalizations {
   String get priorityRelease => 'Version prioritaire';
 
   @override
-  String get privacyAndOfflineModel => 'Datenschutz & Offline-Modell';
+  String get privacyAndOfflineModel =>
+      'modèle de confidentialité et hors ligne';
 
   @override
   String get privacySecurityCategory => 'Confidentialité et sécurité';
 
   @override
-  String get privacyPolicy => 'Datenschutzrichtlinie';
+  String get privacyPolicy => 'politique de confidentialité';
 
   @override
   String
   get privacyFirstStreakTrackingAndRelapseDiaryAllDataStaysOnYourDeviceExistingLogsAreNeverAltered =>
-      'Datenschutzorientiertes Serientracking und Tagebuch. Alle Daten bleiben auf Ihrem Gerät.';
+      'suivi des séquences et journal des rechutes axés sur la confidentialité. toutes les données restent sur votre appareil. les journaux existants ne sont jamais modifiés.';
 
   @override
   String get privacysecuritycategory => 'Confidentialité et sécurité';
 
   @override
   String get pureTitanToTheFounderYmirFritz =>
-      'Reiner Titan bis zur Ur-Gründerin Ymir Fritz.';
+      'pur titan au fondateur ymir fritz.';
 
   @override
   String get pushAlertsAndNotices => 'Alertes push et notifications';
 
   @override
-  String get quickLocalBackupCreated => 'Lokale Sicherung erstellt';
+  String get quickLocalBackupCreated => 'sauvegarde locale rapide créée';
 
   @override
-  String get ratio => 'Verhältnis';
+  String get ratio => 'rapport';
 
   @override
   String get realTimeMetrics => 'Métriques en temps réel';
 
   @override
-  String get realTimeTrafficAudit => 'Echtzeit-Datenverkehr-Audit';
+  String get realTimeTrafficAudit => 'audit du trafic en temps réel';
 
   @override
   String get rebirthThroughFireTheOldIsAshYouAreTheFlame =>
-      'Wiedergeburt durch Feuer. Das Alte ist Asche; du bist die Flamme.';
+      'renaissance par le feu. le vieux est en cendre ; tu es la flamme.';
 
   @override
-  String get recent => 'Kürzlich';
+  String get recent => 'Récent';
 
   @override
-  String get recentMessages => 'Letzte Nachrichten';
+  String get recentMessages => 'messages récents';
 
   @override
-  String get recentlyDeleted => 'KÜRZLICH GELÖSCHT';
+  String get recentlyDeleted => 'récemment supprimé';
 
   @override
-  String get recommendedForStandardUsers => 'Empfohlen für Standardbenutzer.';
+  String get recommendedForStandardUsers =>
+      'recommandé pour les utilisateurs standards.';
 
   @override
-  String get refreshActivity => 'Aktivität aktualisieren';
+  String get refreshActivity => 'activité d\'actualisation';
 
   @override
-  String get remindIfInactiveFor => 'Erinnern bei Inaktivität seit';
+  String get remindIfInactiveFor => 'rappeler si inactif pendant';
 
   @override
   String get reminderInterval => 'Intervalle de rappel';
 
   @override
-  String get reminderMessage => 'Erinnerungsnachricht';
+  String get reminderMessage => 'message de rappel';
 
   @override
-  String get reminders => 'Erinnerungen';
+  String get reminders => 'Rappels';
 
   @override
-  String get remindersAndNotifications => 'Erinnerungen & Benachrichtigungen';
+  String get remindersAndNotifications => 'rappels et notifications';
 
   @override
-  String get reportABug => 'Fehler melden';
+  String get reportABug => 'signaler un bug';
 
   @override
   String get repositoryLinkCopiedToClipboard =>
-      'Repository-Link in Zwischenablage kopiert';
+      'lien du référentiel copié dans le presse-papiers';
 
   @override
   String get repositoryMoved => 'Dépôt déplacé';
 
   @override
-  String get requestAFeature => 'Funktion vorschlagen';
+  String get requestAFeature => 'demander une fonctionnalité';
 
   @override
   String get requiredForNotekarToInstallDownloadedApkUpdatesAutomatically =>
@@ -1646,13 +1660,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get requiredToShowTheLoggingAlerts =>
-      'Erforderlich für Protokollierungs-Benachrichtigungen.';
+      'requis pour afficher les alertes de journalisation.';
 
   @override
   String get resetCategory => 'Réinitialiser';
 
   @override
-  String get resetAllData => 'Alle Daten zurücksetzen';
+  String get resetAllData => 'réinitialiser toutes les données';
 
   @override
   String get resetDaily => 'Réinitialiser quotidiennement';
@@ -1664,51 +1678,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resetNumberingDaily => 'Réinitialiser la numérotation chaque jour';
 
   @override
-  String get resetOnRelapseTagOnly => 'Nur bei Rückfall-Tag zurücksetzen';
+  String get resetOnRelapseTagOnly =>
+      'réinitialiser uniquement en cas de rechute';
 
   @override
-  String get resetPinLock => 'PIN-Sperre zurücksetzen';
+  String get resetPinLock => 'réinitialiser le verrouillage des broches';
 
   @override
   String get resetSettings => 'Réinitialiser les paramètres';
 
   @override
-  String get resetSettingsOnly => 'Nur Einstellungen zurücksetzen';
+  String get resetSettingsOnly => 'réinitialiser les paramètres uniquement';
 
   @override
   String get resetcategory => 'Réinitialisation';
 
   @override
   String get restartsCountAt00EveryMidnightWhileKeepingPastHistoryIntact =>
-      'Startet die Zählung jeden Tag um Mitternacht bei 00 neu, während vergangene Einträge erhalten bleiben.';
+      'les redémarrages comptent à 00 tous les minuit tout en gardant l\'historique intact.';
 
   @override
-  String get restore => 'Wiederherstellen';
+  String get restore => 'Restaurer';
 
   @override
-  String get restoreAll => 'Alle wiederherstellen';
+  String get restoreAll => 'restaurer tout';
 
   @override
-  String get restoreAllMoments => 'Alle Momente wiederherstellen?';
+  String get restoreAllMoments => 'restaurer tous les moments ?';
 
   @override
-  String get restoreDeletedMoments => 'Gelöschte Momente wiederherstellen';
+  String get restoreDeletedMoments => 'restaurer les moments supprimés';
 
   @override
   String get restoreOrPermanentlyRemoveDeletedMoments =>
       'Restaurer ou supprimer définitivement les moments effacés';
 
   @override
-  String get retryDownload => 'Download wiederholen';
+  String get retryDownload => 'réessayez de télécharger';
 
   @override
   String get reviewAndExport => 'Consulter et exporter';
 
   @override
-  String get reviewBackup => 'Sicherung überprüfen';
+  String get reviewBackup => 'revoir la sauvegarde';
 
   @override
-  String get reviewHistory => 'Verlauf überprüfen';
+  String get reviewHistory => 'examiner l\'historique';
 
   @override
   String get royalOcean => 'Océan royal';
@@ -1720,10 +1735,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get russian => 'Russe';
 
   @override
-  String get sMateVictimToMagnusCarlsen => 'Vom Anfänger zum Großmeister.';
+  String get sMateVictimToMagnusCarlsen =>
+      'C\'est la compagne victime de Magnus Carlsen.';
 
   @override
-  String get sNew => 'Neuigkeiten';
+  String get sNew => 'c\'est nouveau';
 
   @override
   String get sNewInNotekar => 'Nouveautés de NoteKar';
@@ -1732,32 +1748,32 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sNew2 => 'Nouveautés :';
 
   @override
-  String get sad => 'Traurig';
+  String get sad => 'triste';
 
   @override
-  String get samurai => 'Samurai';
+  String get samurai => 'samouraï';
 
   @override
-  String get sapphire => 'Saphir';
+  String get sapphire => 'saphir';
 
   @override
-  String get sat => 'Sa';
+  String get sat => 'Sam';
 
   @override
-  String get saturday => 'Samstag';
+  String get saturday => 'Samedi';
 
   @override
   String get save => 'Enregistrer';
 
   @override
-  String get saveAMoment => 'Moment speichern';
+  String get saveAMoment => 'garde un instant';
 
   @override
-  String get science => 'Wissenschaft';
+  String get science => 'science';
 
   @override
   String get seafaringOdysseyChartNewWatersAndNeverLookBack =>
-      'Seefahrt-Odyssee. Erkunden Sie neue Gewässer und blicken Sie nicht zurück.';
+      'odyssée maritime. tracer de nouvelles eaux et ne jamais regarder en arrière.';
 
   @override
   String get searchNotes => 'Rechercher des notes';
@@ -1769,14 +1785,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchSettings2 => 'Rechercher dans les paramètres...';
 
   @override
-  String get securePasscodeProtection => 'Sicherer Passcode-Schutz';
+  String get securePasscodeProtection =>
+      'protection sécurisée par mot de passe';
 
   @override
   String get securityAndCryptographicUpgrade =>
       'Mise à niveau de sécurité et cryptographie';
 
   @override
-  String get securityAndIntegrity => 'Sicherheit & Integrität';
+  String get securityAndIntegrity => 'sécurité et intégrité';
 
   @override
   String get selectAThemeThatBestSuitsYourEnvironment =>
@@ -1786,13 +1803,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get selectDate => 'Sélectionner une date';
 
   @override
-  String get selectDateAndTime => 'Datum und Uhrzeit auswählen';
+  String get selectDateAndTime => 'sélectionner la date et l\'heure';
 
   @override
-  String get selectForDuration => 'Für Dauer auswählen';
+  String get selectForDuration => 'sélectionner pour la durée';
 
   @override
-  String get selectTime => 'Uhrzeit auswählen';
+  String get selectTime => 'sélectionner l\'heure';
 
   @override
   String
@@ -1801,89 +1818,89 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectYourPreferredLanguageForTheApplication =>
-      'Wählen Sie Ihre bevorzugte Sprache für die Anwendung.';
+      'sélectionnez votre langue préférée pour l\'application.';
 
   @override
   String
   get sequentialSingleNumbering0099RequiresStandardRowSpacingToDisplay2DigitBadgesTurnOffCompactHistoryToEnableNumbersInSingleMode =>
-      'Die fortlaufende Einzelnummerierung (00–99) erfordert Standard-Zeilenabstand zur Anzeige der 2-stelligen Abzeichen. Deaktivieren Sie den kompakten Verlauf, um Ziffern zu aktivieren.';
+      'la numérotation séquentielle unique (00 à 99) nécessite un espacement de rangée standard pour afficher les badges à 2 chiffres. désactivez l\'historique compact pour activer les nombres en mode unique.';
 
   @override
   String get sessionsAreRecordedAsInAndOutPairs =>
-      'Sitzungen werden als IN- und OUT-Paare aufgezeichnet.';
+      'les séances sont enregistrées par paires entrantes et sortantes.';
 
   @override
-  String get actionSet => 'Festgelegt';
+  String get actionSet => 'ensemble';
 
   @override
   String get setOneFocusForNextHour =>
       'Fixez une priorité pour l\'heure suivante';
 
   @override
-  String get setPasscode => 'Code festlegen';
+  String get setPasscode => 'définir le mot de passe';
 
   @override
-  String get setSobrietyStartDate => 'Nüchternheitsstartdatum festlegen';
+  String get setSobrietyStartDate => 'fixer la date de début de sobriété';
 
   @override
-  String get setUnrestricted => 'Uneingeschränkt festlegen';
+  String get setUnrestricted => 'définir sans restriction';
 
   @override
   String get settingsTitle => 'Paramètres';
 
   @override
-  String get settingsRestored => 'Einstellungen wiederhergestellt';
+  String get settingsRestored => 'paramètres restaurés';
 
   @override
-  String get sha256Hashes => 'SHA-256-Hashes';
+  String get sha256Hashes => 'hachages sha-256';
 
   @override
-  String get share => 'Teilen';
+  String get share => 'Partager';
 
   @override
-  String get shareCard => 'Karte teilen';
+  String get shareCard => 'partager la carte';
 
   @override
-  String get shareMilestonePeak => 'Meilenstein-Höhepunkt teilen';
+  String get shareMilestonePeak => 'partager le point culminant';
 
   @override
-  String get shinpachiToUtsuro => 'Shinpachi bis Utsuro.';
+  String get shinpachiToUtsuro => 'shinpachi à utsuro.';
 
   @override
   String get shirleyToEmperorLelouchViBritannia =>
-      'Shirley bis Kaiser Lelouch vi Britannia.';
+      'Shirley à l\'empereur Lelouch VI Britannia.';
 
   @override
-  String get showMore => 'Mehr anzeigen';
+  String get showMore => 'afficher plus';
 
   @override
   String get showSeconds => 'Afficher les secondes';
 
   @override
   String get shows0099CountersInsteadOfStaticIconsInHistory =>
-      'Zeigt 00–99 Zähler anstelle von statischen Symbolen im Verlauf an.';
+      'affiche 00 à 99 compteurs au lieu d\'icônes statiques dans l\'historique.';
 
   @override
   String get showsSequentialNumbers0001OnTheTapPulseAnimation =>
-      'Zeigt fortlaufende Nummern (00, 01...) auf der Tap-Puls-Animation an.';
+      'affiche des nombres séquentiels (00, 01...) sur l\'animation d\'impulsion de prise.';
 
   @override
-  String get signature => 'Signatur';
+  String get signature => 'signature';
 
   @override
   String get single => 'Unique';
 
   @override
-  String get singleMode => 'Einzel-Modus';
+  String get singleMode => 'mode unique';
 
   @override
   String get singleMomentNumbering => 'Numérotation des moments uniques';
 
   @override
-  String get skip => 'Überspringen';
+  String get skip => 'sauter';
 
   @override
-  String get smallerOptimizedApks => 'Kleinere, optimierte APKs';
+  String get smallerOptimizedApks => 'apks plus petits et optimisés';
 
   @override
   String get smartBandwidthSaver => 'Économiseur intelligent de bande passante';
@@ -1896,23 +1913,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sobrietyTrackerAndMilestoneCards =>
-      'Abstinenz-Tracker & Meilensteinkarten';
+      'cartes de suivi de la sobriété et d\'étapes';
 
   @override
-  String get sobrietyTriggerAnalysis => 'Nüchternheits-Auslöser-Analyse';
+  String get sobrietyTriggerAnalysis => 'analyse des déclencheurs de sobriété';
 
   @override
   String get socialMedia => 'Réseaux sociaux';
 
   @override
-  String get socialMedia2 => 'Soziale Medien';
+  String get socialMedia2 => 'réseaux sociaux';
 
   @override
   String get softwareCreditsAndOpenSourceLegalNotices =>
       'Crédits logiciels et avis légaux open source';
 
   @override
-  String get softwareLicenses => 'Softwarelizenzen';
+  String get softwareLicenses => 'licences de logiciels';
 
   @override
   String get softwareUpdate => 'Mise à jour logicielle';
@@ -1922,13 +1939,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mise à jour logicielle, avis, journal des modifications';
 
   @override
-  String get soloLeveling => 'Solo Leveling';
+  String get soloLeveling => 'mise à niveau en solo';
 
   @override
   String get soundAndChimeAlert => 'Alerte sonore et carillon';
 
   @override
-  String get space => 'Weltraum';
+  String get space => 'espace';
 
   @override
   String get spanish => 'Espagnol';
@@ -1940,54 +1957,54 @@ class AppLocalizationsFr extends AppLocalizations {
   String get stableBuild => 'Version stable';
 
   @override
-  String get starWars => 'Star Wars';
+  String get starWars => 'guerres des étoiles';
 
   @override
-  String get startLogging => 'Protokollieren starten';
+  String get startLogging => 'commencer à enregistrer';
 
   @override
   String get startupMode => 'Mode de démarrage';
 
   @override
-  String get status => 'Status';
+  String get status => 'Statut';
 
   @override
   String get storageErrorMomentNotSaved =>
-      'Speicherfehler: Moment nicht gespeichert';
+      'erreur de stockage : moment non enregistré';
 
   @override
-  String get streakMode => 'Serien-Modus';
+  String get streakMode => 'mode séquence';
 
   @override
-  String get streakResetLogic => 'Serien-Rücksetzlogik';
+  String get streakResetLogic => 'logique de réinitialisation des séquences';
 
   @override
   String get streakShieldDeployedCleanStreakProtected =>
-      'Serienschild aktiviert! Serie geschützt.';
+      'bouclier anti-strie déployé ! strie propre protégée.';
 
   @override
-  String get stress => 'Stress';
+  String get stress => 'stresser';
 
   @override
-  String get stressed => 'Gestresst';
+  String get stressed => 'stressé';
 
   @override
   String
   get submitBugReportsFeatureRequestsAndFollowCodeChangesDirectlyInTheNewRepositoryIssueTracker =>
-      'Reichen Sie Fehlerberichte und Feature-Wünsche direkt im neuen Issue-Tracker ein.';
+      'soumettez des rapports de bogues, des demandes de fonctionnalités et suivez les modifications de code directement dans le nouveau système de suivi des problèmes du référentiel.';
 
   @override
   String get suggestANewIdeaOrImprovement =>
-      'Schlagen Sie eine neue Idee oder Verbesserung vor.';
+      'suggérer une nouvelle idée ou une amélioration.';
 
   @override
-  String get sun => 'So';
+  String get sun => 'Dim';
 
   @override
-  String get sunday => 'Sonntag';
+  String get sunday => 'Dimanche';
 
   @override
-  String get sunset => 'Sonnenuntergang';
+  String get sunset => 'coucher de soleil';
 
   @override
   String get supportAndCommunity => 'Support et communauté';
@@ -1997,10 +2014,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Survie du plus apte. Du tardigrade au dragon mythique.';
 
   @override
-  String get switchingToBetaBuild => 'Wechsel zur Beta-Version...';
+  String get switchingToBetaBuild => 'passer à la version bêta...';
 
   @override
-  String get switchingToStableBuild => 'Wechsel zur stabilen Version...';
+  String get switchingToStableBuild => 'passer à une version stable...';
 
   @override
   String get system => 'Système';
@@ -2009,10 +2026,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get systemDefault => 'Par défaut du système';
 
   @override
-  String get systemLock => 'Systemsperre';
+  String get systemLock => 'verrouillage du système';
 
   @override
-  String get systemLockEnabled => 'Systemsperre aktiviert';
+  String get systemLockEnabled => 'verrouillage du système activé';
 
   @override
   String get tShowThisWarningAgain => 'Ne plus afficher cet avertissement';
@@ -2022,7 +2039,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Quelque chose ne fonctionne pas comme prévu.';
 
   @override
-  String get table => 'Tabelle';
+  String get table => 'tableau';
 
   @override
   String get takeAMindfulBreath => 'Prenez une respiration consciente';
@@ -2042,7 +2059,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Appuyez sur une icône ci-dessous pour changer de style. Vous pouvez la modifier à tout moment dans les Paramètres.';
 
   @override
-  String get tapDelay => 'Tipp-Verzögerung';
+  String get tapDelay => 'retard de prise';
 
   @override
   String get tapToRecordAMomentHoldToAddANote =>
@@ -2052,7 +2069,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tapToSave => 'Appuyer pour enregistrer';
 
   @override
-  String get techCareer => 'Technik-Karriere';
+  String get techCareer => 'carrière technologique';
 
   @override
   String get technicalStatsAboutYourDeviceAndTheAdaptiveEngine =>
@@ -2060,10 +2077,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get teddyBearKonToYhwachTheAlmighty =>
-      'Plüschbär Kon bis Yhwach der Allmächtige.';
+      'ours en peluche kon à yhwach le tout-puissant.';
 
   @override
-  String get termsOfUse => 'Nutzungsbedingungen';
+  String get termsOfUse => 'Conditions d\'utilisation';
 
   @override
   String get testAlertIn3sLockYourPhoneToTestFullScreenAlarm =>
@@ -2084,13 +2101,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get theme => 'Thème';
 
   @override
-  String get themeDescription => 'Themenbeschreibung';
+  String get themeDescription => 'Description du thème';
 
   @override
-  String get themeMode => 'Design-Modus';
+  String get themeMode => 'Mode de thème';
 
   @override
-  String get themeStyle => 'Design-Stil';
+  String get themeStyle => 'Style de thème';
 
   @override
   String
@@ -2104,7 +2121,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get theseSettingsRefineTheInterfaceAestheticAndDoNotModifyYourSavedData =>
-      'Diese Einstellungen verfeinern die Benutzeroberfläche und ändern keine gespeicherten Daten.';
+      'ces paramètres affinent l\'esthétique de l\'interface et ne modifient pas vos données enregistrées.';
 
   @override
   String get theseToolsAreIntendedForSystemMaintenanceAndTroubleshooting =>
@@ -2112,12 +2129,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get thisBackupContainsNoMoments =>
-      'Diese Sicherung enthält keine Momente';
+      'cette sauvegarde ne contient aucun moment';
 
   @override
   String
   get thisFeatureIsCurrentlyInActiveDevelopmentWhileFullyFunctionalAndSecureYouMayNoticeMinorAdjustmentsToTheLayoutOrPerformanceAsWeRefineTheExperienceAllCalculationsDataAndSecurityPoliciesRemainEntirelyLocalToYourDevice =>
-      'Diese Funktion befindet sich in aktiver Entwicklung. Sie ist voll funktionsfähig und sicher. Alle Berechnungen und Daten bleiben lokal auf Ihrem Gerät.';
+      'cette fonctionnalité est actuellement en développement actif. bien que entièrement fonctionnel et sécurisé, vous remarquerez peut-être des ajustements mineurs à la mise en page ou aux performances à mesure que nous affinons l\'expérience. tous les calculs, données et politiques de sécurité restent entièrement locaux sur votre appareil.';
 
   @override
   String
@@ -2129,8 +2146,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce fichier de sauvegarde locale sera définitivement effacé.';
 
   @override
-  String get thisMomentWillBeErasedForever =>
-      'Dieser Moment wird unwiderruflich gelöscht.';
+  String get thisMomentWillBeErasedForever => 'ce moment sera effacé à jamais.';
 
   @override
   String get thisWeek => 'Cette semaine';
@@ -2138,27 +2154,27 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get thisWillPermanentlyDeleteAllMomentsInTheTrashThisActionCannotBeUndone =>
-      'Dadurch werden alle Momente im Papierkorb endgültig gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden.';
+      'cela supprimera définitivement tous les moments dans la corbeille. cette action ne peut pas être annulée.';
 
   @override
   String get thisWillPermanentlyDeleteAllMomentsThisActionCannotBeUndone =>
-      'Dadurch werden alle Momente unwiderruflich gelöscht.';
+      'cela supprimera définitivement tous les moments. cette action ne peut pas être annulée.';
 
   @override
   String get thisWillReturnAllItemsCurrentlyInTheTrashToYourHistory =>
-      'Dadurch werden alle Elemente aus dem Papierkorb wiederhergestellt.';
+      'cela renverra tous les éléments actuellement dans la corbeille dans votre historique.';
 
   @override
-  String get thu => 'Do';
+  String get thu => 'Jeu';
 
   @override
-  String get thursday => 'Donnerstag';
+  String get thursday => 'Jeudi';
 
   @override
-  String get time => 'Uhrzeit';
+  String get time => 'Heure';
 
   @override
-  String get timeBetweenMoments => 'Zeit zwischen Momenten';
+  String get timeBetweenMoments => 'temps entre les instants';
 
   @override
   String get timeReflection => 'Réflexion temporelle';
@@ -2186,7 +2202,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get timeToLogAMoment => 'time to log a moment!';
 
   @override
-  String get tired => 'Müde';
+  String get tired => 'Fatigué';
 
   @override
   String get toCaptureAnInsightGratitudeOrAchievementDirectlyIntoNotekar =>
@@ -2200,28 +2216,28 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get toTriggerRemindersPreciselyWhenTheAppIsClosedNotekarRequiresTheAlarmsAndRemindersPermission =>
-      'Um Erinnerungen präzise auszulösen, benötigt NoteKar die Berechtigung „Alarme & Erinnerungen“.';
+      'pour déclencher des rappels précisément lorsque l\'application est fermée, notekar nécessite l\'autorisation « alarmes et rappels ».';
 
   @override
   String get today => 'Aujourd\'hui';
 
   @override
-  String get tonpaToAdultGon => 'Tonpa bis zum erwachsenen Gon.';
+  String get tonpaToAdultGon => 'tonpa à gon adulte.';
 
   @override
   String get tools => 'Outils';
 
   @override
-  String get topMood => 'Häufigste Stimmung';
+  String get topMood => 'Humeur principale';
 
   @override
-  String get topTrigger => 'Häufigster Auslöser';
+  String get topTrigger => 'Déclencheur principal';
 
   @override
-  String get totalRelapses => 'Rückfälle insgesamt';
+  String get totalRelapses => 'Total des rechutes';
 
   @override
-  String get totalRequests => 'Gesamtanfragen';
+  String get totalRequests => 'demandes totales';
 
   @override
   String get trackStartsAndStops => 'Suivre les débuts et fins';
@@ -2229,63 +2245,63 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get transformYourHistoryWithSequential2DigitCounters0099DailyMidnightResetsAndAnIosStyleCalendar =>
-      'Verwandeln Sie Ihren Verlauf mit 2-stelligen Zählern (00–99), täglichen Mitternachtsrücksetzungen und einem Kalender im iOS-Stil.';
+      'transformez votre historique avec des compteurs séquentiels à 2 chiffres (00 à 99), des réinitialisations quotidiennes à minuit et un calendrier de style iOS.';
 
   @override
   String get trashBin => 'Corbeille';
 
   @override
-  String get trashIsEmpty => 'Papierkorb ist leer';
+  String get trashIsEmpty => 'La corbeille est vide';
 
   @override
-  String get triggerAnalysis => 'Auslöser-Analyse';
+  String get triggerAnalysis => 'Analyse des déclencheurs';
 
   @override
-  String get triggerDiary => 'Auslöser-Tagebuch';
+  String get triggerDiary => 'Journal des déclencheurs';
 
   @override
   String get triggersRemindersOnSpecificDaysOfTheWeek =>
       'Déclenche des rappels certains jours spécifiques de la semaine.';
 
   @override
-  String get tryAgainInSeconds => 'In wenigen Sekunden erneut versuchen';
+  String get tryAgainInSeconds => 'réessayez dans quelques secondes';
 
   @override
-  String get tryAnotherKeyword => 'Anderes Suchwort versuchen';
+  String get tryAnotherKeyword => 'essayez un autre mot-clé';
 
   @override
-  String get tue => 'Di';
+  String get tue => 'Mar';
 
   @override
-  String get tuesday => 'Dienstag';
+  String get tuesday => 'Mardi';
 
   @override
-  String get turnOffAndEnable => 'Deaktivieren & Aktivieren';
+  String get turnOffAndEnable => 'éteindre et activer';
 
   @override
   String get turnOffReducedMotionFirst =>
-      'Zuerst Bewegungsreduktion deaktivieren';
+      'désactivez d\'abord le mouvement réduit';
 
   @override
-  String get turnOffSingleNumbers => 'Einzelne Ziffern deaktivieren?';
+  String get turnOffSingleNumbers => 'désactiver les numéros uniques ?';
 
   @override
-  String get tutorials => 'Tutorials';
+  String get tutorials => 'tutoriels';
 
   @override
   String get twoWay => 'Deux sens';
 
   @override
-  String get twoWayMode => 'Zwei-Wege-Modus';
+  String get twoWayMode => 'mode bidirectionnel';
 
   @override
-  String get typeToSearchYourNotes => 'Tippen, um Notizen zu durchsuchen...';
+  String get typeToSearchYourNotes => 'tapez pour rechercher vos notes...';
 
   @override
-  String get undetected => 'Nicht erkannt (Sauber)';
+  String get undetected => 'non détecté';
 
   @override
-  String get undo => 'Rückgängig';
+  String get undo => 'Annuler';
 
   @override
   String get upcoming => 'À venir';
@@ -2294,10 +2310,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get upcomingLanguages => 'Langues à venir';
 
   @override
-  String get updateAvailable => 'Update verfügbar';
+  String get updateAvailable => 'Mise à jour disponible';
 
   @override
-  String get updateCheckFailed => 'Update-Prüfung fehlgeschlagen';
+  String get updateCheckFailed => 'Échec de la recherche de mise à jour';
 
   @override
   String get updateTrack => 'Canal de mise à jour';
@@ -2310,7 +2326,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get useFingerprintFaceOrSystemPin =>
-      'Verwenden Sie Fingerabdruck, Gesicht oder System-PIN.';
+      'utilisez l’empreinte digitale, le visage ou le code PIN du système.';
 
   @override
   String get useNumbersInSingle => 'Numérotation en mode unique';
@@ -2324,69 +2340,69 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get verifiedCleanOfMaliciousActivity =>
-      'Nachweislich frei von schädlicher Software';
+      'vérifié sans activité malveillante';
 
   @override
   String get verifiedSafe => 'Vérifié et sûr';
 
   @override
   String get verifyingIntegrityChecksum =>
-      'Integritätsprüfsumme wird überprüft...';
+      'vérification de la somme de contrôle d\'intégrité...';
 
   @override
   String get version => 'Version';
 
   @override
-  String get view => 'Anzeigen';
+  String get view => 'Afficher';
 
   @override
-  String get viewAllMilestones => 'Alle Meilensteine anzeigen';
+  String get viewAllMilestones => 'voir tous les jalons';
 
   @override
-  String get viewFullLicenses => 'Vollständige Lizenzen anzeigen';
+  String get viewFullLicenses => 'voir les licences complètes';
 
   @override
-  String get viewNote => 'Notiz anzeigen';
+  String get viewNote => 'voir la remarque';
 
   @override
   String
   get viewYourRelapsePatternInsightsTopMoodsAndPeakVulnerabilityWindows =>
-      'Sehen Sie Einblicke in Rückfallmuster, Top-Stimmungen und Phasen höchster Anfälligkeit.';
+      'affichez vos informations sur les schémas de rechute, vos principales humeurs et vos fenêtres de vulnérabilité maximale.';
 
   @override
-  String get vinlandSaga => 'Vinland Saga';
+  String get vinlandSaga => 'la saga du Vinland';
 
   @override
-  String get virustotalSafetyScan => 'VirusTotal-Sicherheitsüberprüfung';
+  String get virustotalSafetyScan => 'analyse de sécurité totale des virus';
 
   @override
   String get virustotalScan => 'Analyse VirusTotal';
 
   @override
-  String get vtReport => 'VirusTotal-Bericht';
+  String get vtReport => 'rapport de VT';
 
   @override
-  String get warrior => 'Krieger';
+  String get warrior => 'Guerrier';
 
   @override
   String
   get weHaveOfficiallyMigratedOurCodebaseToANewHomeAllFutureReleasesUpdatesAndIssuesWillBeManagedHere =>
-      'Wir haben unsere Codebasis offiziell verlegt. Alle zukünftigen Releases werden hier verwaltet:';
+      'nous avons officiellement migré notre base de code vers une nouvelle maison. toutes les futures versions, mises à jour et problèmes seront gérés ici :';
 
   @override
-  String get wed => 'Mi';
+  String get wed => 'Mer';
 
   @override
-  String get wednesday => 'Mittwoch';
+  String get wednesday => 'Mercredi';
 
   @override
   String get weeklyReminder => 'Rappel hebdomadaire';
 
   @override
-  String get weeklyReminderMessage => 'Wöchentliche Erinnerungsnachricht';
+  String get weeklyReminderMessage => 'message de rappel hebdomadaire';
 
   @override
-  String get welcome => 'Willkommen';
+  String get welcome => 'Bienvenue';
 
   @override
   String get welcomeToNotekar => 'Bienvenue sur NoteKar';
@@ -2394,7 +2410,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get wereYouAlreadyCleanBeforeInstallingSetYourActualStartDateHereThisOverridesAutomaticDetectionFromYourLogs =>
-      'Waren Sie vor der Installation bereits abstinent? Legen Sie hier Ihr tatsächliches Startdatum fest.';
+      'étais-tu déjà propre avant l\'installation ? définissez ici votre date de début réelle. cela remplace la détection automatique de vos journaux.';
 
   @override
   String get whatsnewtitle => 'Nouveautés';
@@ -2407,7 +2423,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String
   get whenLoggingAMomentWithSobrietyModeOnYouCanTagMoodBoredAnxiousLonelyAndTriggerSocialMediaLateNightTheseAreStoredAsHashtagsInTheNoteForFullBackwardsCompatibility =>
-      'Beim Protokollieren mit aktiviertem Nüchternheitsmodus können Sie Stimmung und Auslöser markieren.';
+      'lorsque vous enregistrez un moment avec le mode sobriété activé, vous pouvez marquer l\'humeur (ennuyé, anxieux, solitaire...) et le déclencheur (réseaux sociaux, tard dans la nuit...). ceux-ci sont stockés sous forme de hashtags dans la note pour une compatibilité ascendante totale.';
 
   @override
   String
@@ -2418,7 +2434,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get whyTimeReflection => 'Pourquoi la réflexion temporelle ?';
 
   @override
-  String get wipe => 'Löschen';
+  String get wipe => 'Effacer';
 
   @override
   String
@@ -2432,33 +2448,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get woodenShovelToCreativeModeGod =>
-      'Holzschaufel bis zum Gott des Kreativmodus.';
+      'pelle en bois au dieu du mode créatif.';
 
   @override
-  String get yamchaToTheOmniKingZeno => 'Yamchu bis zum Allkönig Zeno.';
+  String get yamchaToTheOmniKingZeno => 'yamcha à l\'omni-roi zeno.';
 
   @override
-  String get yokiToTheUltimateTruth => 'Yoki bis zur ultimativen Wahrheit.';
+  String get yokiToTheUltimateTruth => 'yoki à la vérité ultime.';
 
   @override
-  String get youAreUpToDate => 'Sie sind auf dem neuesten Stand';
+  String get youAreUpToDate => 'Vous êtes à jour';
 
   @override
   String get yourCleanStreakIsActiveAndRunning =>
-      'Ihre Serie ist aktiv und läuft.';
+      'votre séquence sans faute est active et en cours d’exécution.';
 
   @override
   String
   get yourDataIs100percentPrivateAndStaysOfflineOnThisDeviceEnablingThisDoesNotAlterAnyExistingLogs =>
-      'Ihre Daten sind zu 100 % privat und bleiben offline auf diesem Gerät.';
+      'vos données sont 100 % privées et restent hors ligne sur cet appareil. l’activer ne modifie aucun journal existant.';
 
   @override
   String
   get yourHomeScreenWillShowALiveStreakCardWithMilestoneBadgesTheHomeWidgetWillAdaptToShowResetAndDiaryButtons =>
-      'Ihr Startbildschirm zeigt eine Live-Serienkarte mit Meilensteinabzeichen.';
+      'votre écran d\'accueil affichera une carte de séquence en direct avec des badges d\'étape. le widget d\'accueil s\'adaptera pour afficher les boutons de réinitialisation et de journal.';
 
   @override
-  String get yourPrivacyMatters => 'Ihre Privatsphäre ist wichtig';
+  String get yourPrivacyMatters => 'Votre vie privée compte';
 
   @override
   String get zeroTelemetryAndOfflineIntegrity =>

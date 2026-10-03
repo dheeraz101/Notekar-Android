@@ -57,14 +57,14 @@ class SettingsGroup extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(32), // iOS 26 High-Radius style
+            borderRadius: BorderRadius.circular(16), // Unified 16pt card radius
             border: Border.all(
               color: p.border.withValues(
                 alpha: p.name == 'amoled'
                     ? 0.5
                     : (p.name == 'light' ? 0.35 : 0.45),
               ),
-              width: 0.6,
+              width: 0.8,
             ),
           ),
           child: Builder(
@@ -306,8 +306,8 @@ class SegmentedSetting extends StatelessWidget {
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     return Glass(
       p: p,
-      radius: 32,
-      // iOS 26 style
+      radius: 16,
+      // Unified 16pt card style
       blur: blur,
       padding: const EdgeInsets.all(16),
       child: Column(

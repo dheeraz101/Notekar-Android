@@ -28,7 +28,7 @@ class ExecutiveIntelligenceHubScreen extends StatefulWidget {
   static Route<void> route({
     DashboardTimeframe initialTimeframe = DashboardTimeframe.week,
   }) {
-    return CupertinoPageRoute<void>(
+    return MaterialPageRoute<void>(
       builder: (_) =>
           ExecutiveIntelligenceHubScreen(initialTimeframe: initialTimeframe),
     );

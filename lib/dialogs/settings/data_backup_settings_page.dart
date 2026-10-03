@@ -8,6 +8,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/design_system/design_system.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class DataBackupSettingsPage extends StatelessWidget {
@@ -502,31 +503,16 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
         const SizedBox(height: spacing12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: spacing16),
-          child: SizedBox(
-            height: 46,
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: p.accent,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: () async {
-                widget.onCreateQuickBackup();
-                await Future<void>.delayed(const Duration(milliseconds: 300));
-                await _loadBackups();
-              },
-              icon: const Icon(Icons.add_to_photos_outlined, size: 18),
-              label: Text(
-                'Create Quick Local Backup'.localized(context),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ),
+          child: NkButton.primary(
+            p: p,
+            fullWidth: true,
+            icon: Icons.add_to_photos_outlined,
+            label: 'Create Quick Local Backup'.localized(context),
+            onPressed: () async {
+              widget.onCreateQuickBackup();
+              await Future<void>.delayed(const Duration(milliseconds: 300));
+              await _loadBackups();
+            },
           ),
         ),
         const SizedBox(height: spacing16),
@@ -538,14 +524,13 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
             ),
           )
         else if (_backupFiles.isEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(spacing32),
-              child: Text(
-                'No Local Backups Found'.localized(context),
-                style: TextStyle(color: p.text3, fontSize: 13),
-              ),
-            ),
+          NkEmptyState(
+            p: p,
+            icon: Icons.folder_zip_outlined,
+            title: 'No Local Backups Found'.localized(context),
+            subtitle:
+                'Tap the button above to create an immediate local snapshot.'
+                    .localized(context),
           )
         else
           SettingsGroup(

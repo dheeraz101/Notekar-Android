@@ -470,40 +470,48 @@ class _HistoryDialogState extends State<HistoryDialog> {
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Timeline Theme Switch
-                  Tooltip(
-                    message: _viewMode == 'list'
-                        ? 'Timeline view'
-                        : 'List view',
-                    child: PressableScale(
-                      onTap: () {
-                        final nextMode = _viewMode == 'list'
-                            ? 'calendar'
-                            : 'list';
-                        setState(() => _viewMode = nextMode);
-                        unawaited(
-                          SharedPreferences.getInstance().then(
-                            (prefs) =>
-                                prefs.setString('history_view_mode', nextMode),
+                  // Timeline / Calendar Switch
+                  Semantics(
+                    button: true,
+                    label: _viewMode == 'list'
+                        ? 'Switch to Calendar'
+                        : 'Switch to Timeline',
+                    child: Tooltip(
+                      message: _viewMode == 'list'
+                          ? 'Timeline view'
+                          : 'List view',
+                      child: PressableScale(
+                        onTap: () {
+                          final nextMode = _viewMode == 'list'
+                              ? 'calendar'
+                              : 'list';
+                          setState(() => _viewMode = nextMode);
+                          unawaited(
+                            SharedPreferences.getInstance().then(
+                              (prefs) => prefs.setString(
+                                'history_view_mode',
+                                nextMode,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: widget.p.surface3,
+                            shape: BoxShape.circle,
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: widget.p.surface3,
-                          shape: BoxShape.circle,
-                        ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: Icon(
-                            _viewMode == 'list'
-                                ? CupertinoIcons.calendar
-                                : CupertinoIcons.list_bullet,
-                            key: ValueKey(_viewMode),
-                            size: 19,
-                            color: widget.p.text,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(
+                              _viewMode == 'list'
+                                  ? CupertinoIcons.calendar
+                                  : CupertinoIcons.list_bullet,
+                              key: ValueKey(_viewMode),
+                              size: 19,
+                              color: widget.p.text,
+                            ),
                           ),
                         ),
                       ),
@@ -511,24 +519,28 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   ),
                   if (widget.onOpenSearchNotes != null) ...[
                     const SizedBox(width: 8),
-                    Tooltip(
-                      message: 'Search Notes'.localized(context),
-                      child: PressableScale(
-                        onTap: () {
-                          widget.onOpenSearchNotes!();
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: widget.p.surface3,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            CupertinoIcons.search,
-                            color: widget.p.text,
-                            size: 18,
+                    Semantics(
+                      button: true,
+                      label: 'Search Notes'.localized(context),
+                      child: Tooltip(
+                        message: 'Search Notes'.localized(context),
+                        child: PressableScale(
+                          onTap: () {
+                            widget.onOpenSearchNotes!();
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: widget.p.surface3,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              CupertinoIcons.search,
+                              color: widget.p.text,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),

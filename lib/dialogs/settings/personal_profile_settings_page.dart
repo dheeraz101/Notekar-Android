@@ -12,6 +12,7 @@ import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
+import 'package:notekar/widgets/design_system/design_system.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -416,13 +417,10 @@ class _PersonalProfileSettingsPageState
         const SizedBox(height: 20),
 
         // 2. Identity Inputs (Apple HIG Card)
-        Container(
+        NkCard.container(
+          p: p,
+          margin: EdgeInsets.zero,
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: p.border.withValues(alpha: 0.5)),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -530,13 +528,10 @@ class _PersonalProfileSettingsPageState
         const SizedBox(height: 16),
 
         // 3. Redesigned Memento Mori Horizon Card (Point 3: No truncation, Big Numbers, Rich Visuals)
-        Container(
+        NkCard.container(
+          p: p,
+          margin: EdgeInsets.zero,
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: p.surface2,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: p.border.withValues(alpha: 0.5)),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -786,7 +781,7 @@ class _PersonalProfileSettingsPageState
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: NkTokens.radii.card,
               border: Border.all(color: p.accent.withValues(alpha: 0.35)),
             ),
             child: Column(
@@ -925,66 +920,22 @@ class _PersonalProfileSettingsPageState
         Row(
           children: [
             Expanded(
-              child: PressableScale(
-                onTap: _save,
-                child: Container(
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: p.accent,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: p.accent.withValues(alpha: 0.3),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: _isSaving
-                      ? const CupertinoActivityIndicator(color: Colors.white)
-                      : Text(
-                          'Save Profile'.localized(context),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                ),
+              child: NkButton.primary(
+                p: p,
+                label: 'Save Profile'.localized(context),
+                isLoading: _isSaving,
+                onPressed: _save,
               ),
             ),
             const SizedBox(width: 12),
-            PressableScale(
-              onTap: () {
+            NkButton.secondary(
+              p: p,
+              label: 'Share Card'.localized(context),
+              icon: CupertinoIcons.share,
+              onPressed: () {
                 HapticFeedback.selectionClick();
                 ShareableProfileCardSheet.show(context, p: p);
               },
-              child: Container(
-                height: 52,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: p.border.withValues(alpha: 0.6)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(CupertinoIcons.share, size: 18, color: p.accent),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Share Card'.localized(context),
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),

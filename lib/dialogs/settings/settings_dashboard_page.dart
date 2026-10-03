@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
@@ -14,6 +15,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/life_audit_service.dart';
 import 'package:notekar/utils/risk_radar_service.dart';
 import 'package:notekar/utils/user_rank_service.dart';
+import 'package:notekar/widgets/design_system/design_system.dart';
 import 'package:notekar/widgets/executive_dashboard_widgets.dart';
 import 'package:notekar/widgets/history_analytics_card.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -70,6 +72,27 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           text:
               'Executive activity intelligence hub featuring time-slot rhythm, focus tag distribution, connected session durations, and 90-day consistency matrix.'
                   .localized(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            spacing16,
+            0,
+            spacing16,
+            spacing12,
+          ),
+          child: NkButton.secondary(
+            p: p,
+            label: 'Open Full Intelligence Hub'.localized(context),
+            icon: Icons.open_in_full_rounded,
+            fullWidth: true,
+            onPressed: () {
+              Navigator.of(context).push(
+                ExecutiveIntelligenceHubScreen.route(
+                  initialTimeframe: _timeframe,
+                ),
+              );
+            },
+          ),
         ),
         TimeframeSegmentedControl(
           p: p,

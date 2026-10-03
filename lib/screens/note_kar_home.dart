@@ -36,6 +36,7 @@ import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/screens/welcome_screen.dart';
 import 'package:notekar/services/digital_wellbeing_service.dart';
 import 'package:notekar/services/goals_service.dart';
@@ -1161,63 +1162,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await prefs.setBool('notekar.historyRedesignTourSeen_v11', true);
       await prefs.setBool('notekar.dashboardRedesignTourSeen_v11', true);
     } else {
-      // 2. Upgraded Users: Check for newly introduced feature cards they haven't seen yet
-      final unseenPages = <String>[];
-      if (prefs.getBool('notekar.lifeAuditIntroSeen_v11') != true) {
-        unseenPages.add('life-audit');
-      }
-      if (prefs.getBool('notekar.historyRedesignTourSeen_v11') != true) {
-        unseenPages.add('history-redesign');
-      }
-      if (prefs.getBool('notekar.dashboardRedesignTourSeen_v11') != true) {
-        unseenPages.add('dashboard-redesign');
-      }
-
-      if (unseenPages.isNotEmpty) {
-        if (!mounted) return;
-        await Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => WelcomeScreen(
-              p: p,
-              theme: _theme,
-              defaultMode: _defaultMode,
-              currentLocale: _locale,
-              appIconStyle: _appIconStyle,
-              useNumbersInSingle: _useNumbersInSingle,
-              resetSingleDaily: _resetSingleDaily,
-              countOnSave: _countOnSave,
-              enableSobrietyMode: _enableSobrietyMode,
-              sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
-              compactHistory: _compactHistory,
-              onLocaleChanged: (value) {
-                NoteKarApp.of(context)?.setLocale(value);
-                setState(() => _locale = value);
-              },
-              onTheme: (value) {
-                NoteKarApp.of(context)?.setTheme(value);
-                setState(() => _theme = value);
-                _saveSetting('m-theme', value);
-                _applySystemUiStyle();
-              },
-              onDefaultMode: (value) {
-                setState(() => _defaultMode = value);
-                _saveSetting('m-default-mode', value);
-              },
-              pages: unseenPages,
-            ),
-          ),
-        );
-        for (final page in unseenPages) {
-          if (page == 'life-audit') {
-            await prefs.setBool('notekar.lifeAuditIntroSeen_v11', true);
-          } else if (page == 'history-redesign') {
-            await prefs.setBool('notekar.historyRedesignTourSeen_v11', true);
-          } else if (page == 'dashboard-redesign') {
-            await prefs.setBool('notekar.dashboardRedesignTourSeen_v11', true);
-          }
-        }
-      }
-
+      // 2. Upgraded Users: Keep their workflow uninterrupted; silently record feature tour version flags
+      await prefs.setBool('notekar.lifeAuditIntroSeen_v11', true);
+      await prefs.setBool('notekar.historyRedesignTourSeen_v11', true);
+      await prefs.setBool('notekar.dashboardRedesignTourSeen_v11', true);
       await prefs.setString(_lastSeenVersionKey, appVersion);
       await prefs.setBool('notekar.appIconsWalkthroughSeen_v9', true);
       await prefs.setBool('notekar.securityWalkthroughSeen_v5', true);
@@ -2255,7 +2203,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _showToast('Loading database...', warning: true);
       return;
     }
-    await _openSettings(initialCategory: 'Dashboard');
+    await Navigator.of(context).push(ExecutiveIntelligenceHubScreen.route());
   }
 
   void _showCorruptionNotificationDialog(bool recoveredFromSnapshot) {
@@ -3913,7 +3861,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
             left: 0,
             right: 0,
             child: Semantics(
-              label: 'Log a new moment',
+              label: _mode == 'single'
+                  ? 'Log a new moment'
+                  : (_inout == 'in' ? 'Start session' : 'End session'),
+              hint:
+                  'Double tap to record, long press to add note, swipe horizontally to switch mode',
               button: true,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -4093,11 +4045,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (_enableSobrietyMode) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: spacing16),
-                    child: _buildSobrietyStreakCard(palette),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    child: !_headerExpanded
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: spacing16,
+                            ),
+                            child: _buildSobrietyStreakCard(palette),
+                          )
+                        : const SizedBox.shrink(),
                   ),
-                  const SizedBox(height: spacing8),
+                  if (!_headerExpanded) const SizedBox(height: spacing8),
                 ],
                 DynamicHeaderCapsule(
                   p: palette,

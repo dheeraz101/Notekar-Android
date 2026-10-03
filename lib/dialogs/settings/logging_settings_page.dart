@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -48,42 +49,13 @@ class LoggingSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         SettingsGroup(
           p: p,
-          insetDividers: true,
-          children: [
-            SettingsRow(
-              p: p,
-              icon: Icons.dashboard_customize_outlined,
-              title: 'Dashboard',
-              status: '$entriesCount ${'Logs'.localized(context)}',
-              color: p.accent,
-              onTap: () => onOpenCategory('Dashboard', parent: 'Logging'),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.timelapse_rounded,
-              title: 'Life Audit',
-              status: 'Time Wastage',
-              color: p.red,
-              onTap: () => onOpenCategory('Life Audit', parent: 'Logging'),
-            ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Executive activity intelligence, time wastage auditing, 24-hour baseline accounting, and mortality insights.'
-                  .localized(context),
-        ),
-        const SizedBox(height: 12),
-        SettingsGroup(
-          p: p,
-          title: 'Logging Controls',
+          title: 'Capture & Session Controls'.localized(context),
           insetDividers: true,
           children: [
             SettingsRow(
               p: p,
               icon: Icons.touch_app_rounded,
-              title: 'Capture',
+              title: 'Capture'.localized(context),
               status: defaultModeLabel(defaultMode),
               color: p.green,
               onTap: () => onOpenCategory('Capture', parent: 'Logging'),
@@ -100,7 +72,7 @@ class LoggingSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.category_rounded,
               title: 'Modes'.localized(context),
-              status: 'Focus Modes',
+              status: 'Focus Modes'.localized(context),
               color: p.accent,
               onTap: () => onOpenCategory('Modes', parent: 'Logging'),
             ),
@@ -108,96 +80,31 @@ class LoggingSettingsPage extends StatelessWidget {
               p: p,
               icon: Icons.tag_rounded,
               title: 'Activity Tags'.localized(context),
-              status: '15 Tags',
+              status: 'Quick Tags'.localized(context),
               color: p.accent,
               onTap: () => onOpenCategory('Activity Tags', parent: 'Logging'),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.notifications_active_outlined,
-              title: 'Reminders',
-              status: remindersStatus,
-              color: p.accent,
-              onTap: () => onOpenCategory('Reminders', parent: 'Logging'),
-            ),
-            SettingsRow(
-              p: p,
-              icon: Icons.import_export_rounded,
-              title: 'Backup & Export'.localized(context),
-              status: 'Data'.localized(context),
-              color: p.green,
-              onTap: () => onOpenCategory('Backup & Export', parent: 'Logging'),
             ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'These settings define how moments are recorded and prepared for export.'
+              'Configure capture defaults, sequential counters, custom focus modes, and activity tags.'
                   .localized(context),
         ),
-        if (showTrashBin) ...[
+        if (showTrashBin && trash.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'RECENTLY DELETED'.localized(context),
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-          ),
-          Column(
+          SettingsGroup(
+            p: p,
             children: [
-              Container(
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  color: p.surface2,
-                  borderRadius: BorderRadius.circular(32),
-                ),
-                child: Column(
-                  children: [
-                    SettingsRow(
-                      p: p,
-                      title: 'Trash Bin'.localized(context),
-                      status:
-                          '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
-                      color: p.orange,
-                      onTap: () =>
-                          onOpenCategory('Trash Bin', parent: 'Logging'),
-                    ),
-                    Divider(height: 0.5, color: p.border),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: p.surface3.withValues(alpha: 0.35),
-                      ),
-                      child: Text(
-                        trash.isEmpty
-                            ? 'Restore or permanently remove deleted moments'
-                                  .localized(context)
-                            : '${trash.first.date} • ${trash.first.note.isEmpty ? 'No note'.localized(context) : trash.first.note}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: p.text3,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              SettingsRow(
+                p: p,
+                icon: CupertinoIcons.trash,
+                title: 'Trash Bin'.localized(context),
+                status:
+                    '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
+                color: p.orange,
+                onTap: () => onOpenCategory('Trash Bin', parent: 'Logging'),
               ),
             ],
           ),
