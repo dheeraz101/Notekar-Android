@@ -18,7 +18,6 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.json.JSONArray
-import org.json.JSONObject
 
 class QuickNoteActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,29 +66,35 @@ class QuickNoteActivity : Activity() {
         }
 
         val isSession = intent.getBooleanExtra(EXTRA_IS_SESSION, false)
+        val showModes = intent.getBooleanExtra(EXTRA_SHOW_MODES, false)
         val explicitLogType = intent.getStringExtra(EXTRA_LOG_TYPE)
-        val widgetPrefs = getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+        val widgetPrefs =
+            getSharedPreferences(NoteKarWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
         val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
 
+        val mode = widgetPrefs.getString(NoteKarWidgetProvider.KEY_MODE, "two-way") ?: "two-way"
         val nextAction = widgetPrefs.getString(NoteKarWidgetProvider.KEY_NEXT_ACTION, "in") ?: "in"
         val resolvedType = explicitLogType ?: if (isSession) nextAction else "single"
         val isStartingSession = isSession && resolvedType == "in"
         val isEndingSession = isSession && resolvedType == "out"
 
-        var selectedCategory = widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, "Work") ?: "Work"
+        var selectedCategory =
+            widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, "Work") ?: "Work"
         if (selectedCategory == "All") selectedCategory = "Work"
         var selectedGoalTitle: String? = null
 
         // Title
         val title = TextView(this).apply {
             text = when {
+                showModes -> "Select Mode & Action"
                 isStartingSession -> "Start Session"
                 isEndingSession -> "Log OUT Note"
                 else -> "⚡ Quick Log"
             }
             setTextColor(Color.WHITE)
             textSize = 17f
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            typeface =
+                android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
             val lp = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -101,8 +106,8 @@ class QuickNoteActivity : Activity() {
         }
         card.addView(title)
 
-        // 1. If starting session: Show Mode / Category Selector Strip
-        if (isStartingSession) {
+        // 1. Show Mode / Category Selector Strip
+        if (isStartingSession || showModes || !isEndingSession) {
             val categories = mutableListOf<String>()
             val customCatsJson = flutterPrefs.getString("flutter.custom_categories", null)
             if (customCatsJson != null && customCatsJson.startsWith("[")) {
@@ -112,17 +117,29 @@ class QuickNoteActivity : Activity() {
                         val c = arr.optString(i)?.trim()
                         if (!c.isNullOrEmpty() && c != "All") categories.add(c)
                     }
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
             }
             if (categories.isEmpty()) {
-                categories.addAll(listOf("Work", "Study", "Gym", "Reading", "Personal", "Health", "Routine"))
+                categories.addAll(
+                    listOf(
+                        "Work",
+                        "Study",
+                        "Gym",
+                        "Reading",
+                        "Personal",
+                        "Health",
+                        "Routine"
+                    )
+                )
             }
 
             val catLabel = TextView(this).apply {
                 text = "SELECT MODE"
                 setTextColor(Color.parseColor("#80FFFFFF"))
                 textSize = 11f
-                typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                typeface =
+                    android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
                 val lp = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -171,7 +188,11 @@ class QuickNoteActivity : Activity() {
                     fun applyCatStyle(active: Boolean) {
                         setTextColor(if (active) Color.WHITE else Color.parseColor("#B3FFFFFF"))
                         background = GradientDrawable().apply {
-                            setColor(if (active) Color.parseColor("#FF0A84FF") else Color.parseColor("#1FFFFFFF"))
+                            setColor(
+                                if (active) Color.parseColor("#FF0A84FF") else Color.parseColor(
+                                    "#1FFFFFFF"
+                                )
+                            )
                             cornerRadius = 14 * density
                             if (!active) {
                                 setStroke((1 * density).toInt(), Color.parseColor("#26FFFFFF"))
@@ -186,6 +207,11 @@ class QuickNoteActivity : Activity() {
                         for (v in catViews) {
                             (v.tag as? ((Boolean) -> Unit))?.invoke(v.text == cat)
                         }
+                        widgetPrefs.edit().putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, cat)
+                            .apply()
+                        flutterPrefs.edit().putString("flutter.active_category", cat).apply()
+                        NoteKarWidgetProvider.updateAllWidgets(this@QuickNoteActivity)
+                        MainActivity.updatePersistentControlPanel(this@QuickNoteActivity)
                     }
                     tag = { active: Boolean -> applyCatStyle(active) }
                 }
@@ -210,7 +236,8 @@ class QuickNoteActivity : Activity() {
                             }
                         }
                     }
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
             }
 
             if (goalsList.isNotEmpty()) {
@@ -218,7 +245,10 @@ class QuickNoteActivity : Activity() {
                     text = "LINK TARGET / GOAL (OPTIONAL)"
                     setTextColor(Color.parseColor("#80FFFFFF"))
                     textSize = 11f
-                    typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                    typeface = android.graphics.Typeface.create(
+                        "sans-serif",
+                        android.graphics.Typeface.BOLD
+                    )
                     val lp = LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -266,7 +296,11 @@ class QuickNoteActivity : Activity() {
                         fun applyGoalStyle(active: Boolean) {
                             setTextColor(if (active) Color.WHITE else Color.parseColor("#B3FFFFFF"))
                             background = GradientDrawable().apply {
-                                setColor(if (active) Color.parseColor("#FF30D158") else Color.parseColor("#1FFFFFFF"))
+                                setColor(
+                                    if (active) Color.parseColor("#FF30D158") else Color.parseColor(
+                                        "#1FFFFFFF"
+                                    )
+                                )
                                 cornerRadius = 14 * density
                                 if (!active) {
                                     setStroke((1 * density).toInt(), Color.parseColor("#26FFFFFF"))
@@ -439,7 +473,8 @@ class QuickNoteActivity : Activity() {
             }
             tagScroll.addView(tagRow)
             card.addView(tagScroll)
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
 
         // Buttons Layout
         val buttonsContainer = LinearLayout(this).apply {
@@ -456,7 +491,8 @@ class QuickNoteActivity : Activity() {
             setTextColor(Color.parseColor("#B3FFFFFF"))
             textSize = 14f
             gravity = Gravity.CENTER
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            typeface =
+                android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
 
             background = StateListDrawable().apply {
                 addState(intArrayOf(android.R.attr.state_pressed), GradientDrawable().apply {
@@ -492,7 +528,8 @@ class QuickNoteActivity : Activity() {
             setTextColor(Color.WHITE)
             textSize = 14f
             gravity = Gravity.CENTER
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            typeface =
+                android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
 
             val accentColor = if (isStartingSession) "#FF30D158" else "#FF0A84FF"
 
@@ -514,7 +551,8 @@ class QuickNoteActivity : Activity() {
             setOnClickListener {
                 var noteText = input.text.toString().trim()
                 if (selectedGoalTitle != null && selectedGoalTitle!!.isNotEmpty()) {
-                    noteText = if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
+                    noteText =
+                        if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
                 }
 
                 if (isStartingSession) {
@@ -531,7 +569,79 @@ class QuickNoteActivity : Activity() {
                 finish()
             }
         }
-        buttonsContainer.addView(btnSave)
+        if (showModes) {
+            val btnLogNote = TextView(this).apply {
+                text = "Log Note"
+                setTextColor(Color.WHITE)
+                textSize = 13.5f
+                gravity = Gravity.CENTER
+                typeface =
+                    android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                background = GradientDrawable().apply {
+                    setColor(Color.parseColor("#FF0A84FF"))
+                    cornerRadius = 20 * density
+                }
+                val lp = LinearLayout.LayoutParams(0, (40 * density).toInt(), 1f).apply {
+                    marginStart = (4 * density).toInt()
+                    marginEnd = (4 * density).toInt()
+                }
+                layoutParams = lp
+                setOnClickListener {
+                    var noteText = input.text.toString().trim()
+                    if (selectedGoalTitle != null && selectedGoalTitle!!.isNotEmpty()) {
+                        noteText =
+                            if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
+                    }
+                    widgetPrefs.edit()
+                        .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
+                        .apply()
+                    NoteKarWidgetProvider.performBackgroundLog(
+                        this@QuickNoteActivity,
+                        "note",
+                        noteText
+                    )
+                    finish()
+                }
+            }
+            buttonsContainer.addView(btnLogNote)
+
+            val btnStart = TextView(this).apply {
+                text = if (mode == "two-way") "Start Session" else "⚡ Log"
+                setTextColor(Color.WHITE)
+                textSize = 13.5f
+                gravity = Gravity.CENTER
+                typeface =
+                    android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                background = GradientDrawable().apply {
+                    setColor(Color.parseColor("#FF30D158"))
+                    cornerRadius = 20 * density
+                }
+                val lp = LinearLayout.LayoutParams(0, (40 * density).toInt(), 1.15f).apply {
+                    marginStart = (4 * density).toInt()
+                }
+                layoutParams = lp
+                setOnClickListener {
+                    var noteText = input.text.toString().trim()
+                    if (selectedGoalTitle != null && selectedGoalTitle!!.isNotEmpty()) {
+                        noteText =
+                            if (noteText.isEmpty()) "[${selectedGoalTitle}]" else "[${selectedGoalTitle}] $noteText"
+                    }
+                    widgetPrefs.edit()
+                        .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, selectedCategory)
+                        .apply()
+                    val targetType = if (mode == "two-way") "in" else "single"
+                    NoteKarWidgetProvider.performBackgroundLog(
+                        this@QuickNoteActivity,
+                        targetType,
+                        noteText
+                    )
+                    finish()
+                }
+            }
+            buttonsContainer.addView(btnStart)
+        } else {
+            buttonsContainer.addView(btnSave)
+        }
 
         card.addView(buttonsContainer)
         root.addView(card)
@@ -556,5 +666,6 @@ class QuickNoteActivity : Activity() {
     companion object {
         const val EXTRA_LOG_TYPE = "log_type"
         const val EXTRA_IS_SESSION = "is_session"
+        const val EXTRA_SHOW_MODES = "show_modes"
     }
 }

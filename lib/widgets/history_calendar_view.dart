@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
+import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -497,49 +498,35 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
         ),
 
         if (_selectedMoments.isNotEmpty)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: widget.p.accent.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: widget.p.accent.withValues(alpha: 0.4)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.info_circle_fill,
-                  size: 16,
-                  color: widget.p.accent,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Center(
+              child: PressableScale(
+                onTap: () => setState(() => _selectedMoments.clear()),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.p.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: widget.p.accent.withValues(alpha: 0.20),
+                    ),
+                  ),
                   child: Text(
-                    '1 moment selected. Tap another to compare time.'.localized(
-                      context,
-                    ),
+                    'Selected ${_selectedMoments.length} of 2 for duration'
+                        .localized(context),
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: widget.p.text,
+                      color: widget.p.accent,
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => setState(() => _selectedMoments.clear()),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Text(
-                      'Cancel'.localized(context),
-                      style: TextStyle(
-                        color: widget.p.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
@@ -790,24 +777,42 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                     ),
                     if (it.note.isNotEmpty) ...[
                       const SizedBox(height: 6),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: widget.p.surface3.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IosEmojiText(
-                          it.note,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: widget.p.text,
-                            fontSize: 12,
-                            height: 1.3,
+                      PressableScale(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          NotePreviewSheet.show(
+                            context,
+                            p: widget.p,
+                            note: it.note,
+                            title:
+                                it.category ??
+                                'Session Note'.localized(context),
+                            category: it.category,
+                            dateStr: datePretty(it.startTimestamp),
+                            onEdit: widget.onEditNote != null
+                                ? () => widget.onEditNote!(it.noteMoment)
+                                : null,
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.p.surface3.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IosEmojiText(
+                            it.note,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: widget.p.text,
+                              fontSize: 12,
+                              height: 1.3,
+                            ),
                           ),
                         ),
                       ),
@@ -877,13 +882,31 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           ),
                           if (it.note.isNotEmpty) ...[
                             const SizedBox(height: 2),
-                            IosEmojiText(
-                              it.note,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: widget.p.text2,
-                                fontSize: 11.5,
+                            PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                NotePreviewSheet.show(
+                                  context,
+                                  p: widget.p,
+                                  note: it.note,
+                                  title:
+                                      it.category ??
+                                      'Moment Note'.localized(context),
+                                  category: it.category,
+                                  dateStr: datePretty(it.primaryTimestamp),
+                                  onEdit: widget.onEditNote != null
+                                      ? () => widget.onEditNote!(it.moment)
+                                      : null,
+                                );
+                              },
+                              child: IosEmojiText(
+                                it.note,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.p.text2,
+                                  fontSize: 11.5,
+                                ),
                               ),
                             ),
                           ],

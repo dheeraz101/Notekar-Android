@@ -3,7 +3,9 @@ import 'package:flutter/material.dart' show Colors, TimeOfDay;
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/tag_service.dart';
@@ -18,6 +20,7 @@ class ManualEntryResult {
     required this.note,
     required this.tags,
     this.category,
+    this.linkedGoal,
   });
 
   final bool isSession;
@@ -26,6 +29,7 @@ class ManualEntryResult {
   final String note;
   final List<String> tags;
   final String? category;
+  final Goal? linkedGoal;
 }
 
 /// Reusable Apple HIG Cupertino Date & Time picker bottom sheet.
@@ -50,13 +54,15 @@ Future<DateTime?> showCupertinoDatePickerSheet(
 }
 
 /// Apple HIG Manual Entry Sheet allowing users to retroactively log
-/// single moments or full start/end sessions up to 30 days in the past.
+/// single moments or full start/end sessions up to 30 days in the past,
+/// with direct integration to Targets & Goals.
 class ManualEntryDialog extends StatelessWidget {
   const ManualEntryDialog({
     super.key,
     required this.p,
     required this.categories,
     this.initialCategory,
+    this.initialGoal,
     this.prefilledStartTime,
     this.prefilledEndTime,
   });
@@ -64,6 +70,7 @@ class ManualEntryDialog extends StatelessWidget {
   final Palette p;
   final List<String> categories;
   final String? initialCategory;
+  final Goal? initialGoal;
   final DateTime? prefilledStartTime;
   final DateTime? prefilledEndTime;
 
@@ -76,6 +83,7 @@ class ManualEntryDialog extends StatelessWidget {
         p: p,
         categories: categories,
         initialCategory: initialCategory,
+        initialGoal: initialGoal,
         prefilledStartTime: prefilledStartTime,
         prefilledEndTime: prefilledEndTime,
         onSubmit: (res) => Navigator.pop(context, res),
@@ -91,6 +99,7 @@ class ManualEntryContent extends StatefulWidget {
     required this.p,
     required this.categories,
     this.initialCategory,
+    this.initialGoal,
     this.prefilledStartTime,
     this.prefilledEndTime,
     required this.onSubmit,
@@ -100,6 +109,7 @@ class ManualEntryContent extends StatefulWidget {
   final Palette p;
   final List<String> categories;
   final String? initialCategory;
+  final Goal? initialGoal;
   final DateTime? prefilledStartTime;
   final DateTime? prefilledEndTime;
   final ValueChanged<ManualEntryResult> onSubmit;
@@ -116,6 +126,8 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   late TimeOfDay _endTime;
   late String _activeCategory;
   late List<String> _categories;
+  List<Goal> _goals = [];
+  Goal? _selectedGoal;
 
   final TextEditingController _noteController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -137,8 +149,26 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     _endTime = TimeOfDay(hour: end.hour, minute: end.minute);
 
     _categories = List<String>.from(widget.categories);
-    _activeCategory = widget.initialCategory ?? 'All';
+    _selectedGoal = widget.initialGoal;
+
+    if (_selectedGoal != null) {
+      if (_selectedGoal!.category != null &&
+          _selectedGoal!.category!.isNotEmpty) {
+        _activeCategory = _selectedGoal!.category!;
+      } else {
+        _activeCategory = widget.initialCategory ?? 'All';
+      }
+      if (_selectedGoal!.mode == 'two-way') {
+        _isSession = true;
+      } else if (_selectedGoal!.mode == 'single') {
+        _isSession = false;
+      }
+    } else {
+      _activeCategory = widget.initialCategory ?? 'All';
+    }
+
     _loadTags();
+    _loadGoals();
   }
 
   Future<void> _showAddCategoryDialog() async {
@@ -278,6 +308,15 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     }
   }
 
+  Future<void> _loadGoals() async {
+    final list = await GoalsService.instance.getGoals();
+    if (mounted) {
+      setState(() {
+        _goals = list.where((g) => !g.isArchived).toList();
+      });
+    }
+  }
+
   @override
   void dispose() {
     _noteController.dispose();
@@ -394,7 +433,10 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       endDateTime: endDt,
       note: rawNote,
       tags: extractedTags,
-      category: _activeCategory != 'All' ? _activeCategory : null,
+      category: _activeCategory != 'All'
+          ? _activeCategory
+          : (_selectedGoal?.category),
+      linkedGoal: _selectedGoal,
     );
 
     HapticFeedback.mediumImpact();
@@ -655,6 +697,145 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
           ),
 
           const SizedBox(height: spacing16),
+
+          // Target & Goal Selector (Optional)
+          if (_goals.isNotEmpty) ...[
+            Text(
+              'TARGET & GOAL (OPTIONAL)',
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: spacing8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  PressableScale(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _selectedGoal = null;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _selectedGoal == null ? p.accent : p.surface2,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: _selectedGoal == null
+                              ? p.accent
+                              : p.border.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      child: Text(
+                        'None',
+                        style: TextStyle(
+                          color: _selectedGoal == null ? Colors.white : p.text2,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  for (final g in _goals) ...[
+                    PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedGoal = g;
+                          if (g.category != null && g.category!.isNotEmpty) {
+                            if (!_categories.contains(g.category!)) {
+                              _categories.add(g.category!);
+                            }
+                            _activeCategory = g.category!;
+                          }
+                          if (g.mode == 'two-way') {
+                            _isSession = true;
+                          } else if (g.mode == 'single') {
+                            _isSession = false;
+                          }
+                          final catTag = g.category != null
+                              ? '#${g.category!.toLowerCase()}'
+                              : '';
+                          if (catTag.isNotEmpty &&
+                              !_noteController.text.toLowerCase().contains(
+                                catTag,
+                              )) {
+                            final text = _noteController.text;
+                            final spacer = text.isEmpty || text.endsWith(' ')
+                                ? ''
+                                : ' ';
+                            _noteController.text = '$text$spacer$catTag ';
+                            _noteController
+                                .selection = TextSelection.fromPosition(
+                              TextPosition(offset: _noteController.text.length),
+                            );
+                          }
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _selectedGoal?.id == g.id
+                              ? p.accent.withValues(alpha: 0.18)
+                              : p.surface2,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: _selectedGoal?.id == g.id
+                                ? p.accent
+                                : p.border.withValues(alpha: 0.6),
+                            width: _selectedGoal?.id == g.id ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.flag_fill,
+                              size: 11,
+                              color: _selectedGoal?.id == g.id
+                                  ? p.accent
+                                  : p.text3,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              g.title,
+                              style: TextStyle(
+                                color: _selectedGoal?.id == g.id
+                                    ? p.accent
+                                    : p.text,
+                                fontSize: 12,
+                                fontWeight: _selectedGoal?.id == g.id
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: spacing16),
+          ],
 
           // Category Mode Selector
           Text(

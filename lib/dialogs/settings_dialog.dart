@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/changelog_dialog.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
+import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/official_bulletins_sheet.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
@@ -60,10 +61,12 @@ import 'package:notekar/utils/markdown_sync_service.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/network_logger.dart';
 import 'package:notekar/utils/notice_service.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
+import 'package:notekar/widgets/hig_widgets.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -182,8 +185,12 @@ class SettingsDialog extends StatefulWidget {
     this.onSoundEffects,
     this.activeCategory,
     this.isSessionRunning = false,
+    this.floatingTimerEnabled = false,
+    this.onFloatingTimerChanged,
   });
 
+  final bool floatingTimerEnabled;
+  final ValueChanged<bool>? onFloatingTimerChanged;
   final String? activeCategory;
   final bool isSessionRunning;
   final bool soundEffects;
@@ -305,6 +312,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   final List<String> _categoryStack = [];
   int _prevStackLength = 0;
   final _activeController = ScrollController();
+
   void update(VoidCallback fn) => setState(fn);
 
   late String theme;
@@ -1548,6 +1556,58 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  Future<void> _editNoteInSearch(Moment moment) async {
+    HapticFeedback.lightImpact();
+    final p = paletteFor(
+      theme,
+      highContrast: highContrast,
+      accentName: accentColor,
+    );
+    final result = await showGeneralDialog<NoteResult>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close note editor',
+      transitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, _, _) => NoteDialog(
+        p: p,
+        initialNote: moment.note,
+        title: 'Edit Note'.localized(context),
+        saveLabel: 'Save'.localized(context),
+        allowEmpty: false,
+      ),
+    );
+    if (result == null || !mounted) return;
+
+    final repo = MomentRepository();
+    await repo.ensureInitialized();
+    final updatedTags = result.tags.isNotEmpty
+        ? result.tags
+        : NoteTagExtractor.extractHashtags(
+            result.note,
+          ).map((t) => t.replaceFirst('#', '').toLowerCase()).toList();
+    final updatedMoment = moment.copyWith(
+      note: result.note.trim(),
+      tags: updatedTags,
+    );
+    await repo.saveMoment(updatedMoment);
+
+    final current = List<Moment>.from(widget.entriesNotifier.value);
+    final idx = current.indexWhere((m) => m.id == moment.id);
+    if (idx >= 0) {
+      current[idx] = updatedMoment;
+      widget.entriesNotifier.value = current;
+    }
+    if (mounted) {
+      showIosPillToast(
+        context: context,
+        p: p,
+        message: 'Note updated'.localized(context),
+        icon: Icons.check_circle_rounded,
+      );
+    }
+  }
+
   void _openCategory(String name, {String? parent}) {
     if (name == 'Network Monitor') {
       _loadNetworkLogs();
@@ -2143,136 +2203,240 @@ ${stackTrace ?? 'No stack trace provided.'}
                               if (_criticalNotice != null)
                                 _buildCriticalAdvisoryBanner(p),
                               _buildAppleIdProfileCard(p),
-                              SettingsGroup(
+
+                              // Domain 2: Workflow & Capture
+                              HigSectionHeader(
                                 p: p,
-                                insetDividers: true,
+                                title: 'Workflow & Capture',
+                              ),
+                              HigGroupedCard(
+                                p: p,
                                 children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.paintbrush,
-                                    title: 'Appearance',
-                                    status:
-                                        theme[0].toUpperCase() +
-                                        theme.substring(1),
-                                    color: p.accent,
-                                    onTap: () =>
-                                        _openCategory('Personalization'),
-                                  ),
-                                  SettingsRow(
+                                  HigRow(
                                     p: p,
                                     icon: CupertinoIcons.bolt,
-                                    title: 'Logging',
+                                    iconColor: p.green,
+                                    title: 'Logging & Sessions',
                                     status: defaultModeLabel(defaultMode),
-                                    color: p.green,
                                     onTap: () => _openCategory('Logging'),
                                   ),
-                                  SettingsRow(
+                                  HigRow(
                                     p: p,
                                     icon: CupertinoIcons.tag,
+                                    iconColor: p.accent,
                                     title: 'Activity Tags',
                                     status: 'Quick Tags',
-                                    color: p.accent,
                                     onTap: () => _openCategory('Activity Tags'),
                                   ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.shield,
-                                    title: 'Privacy & Security',
-                                    status: privacyLock ? 'On' : 'Off',
-                                    color: p.green,
-                                    onTap: () =>
-                                        _openCategory('Privacy & Security'),
-                                  ),
-                                  // SettingsRow(
-                                  //   p: p,
-                                  //   icon: CupertinoIcons.folder,
-                                  //   title: 'Data & Backup'.localized(context),
-                                  //   status:
-                                  //       '${entries.length} ${'Logs'.localized(context)}',
-                                  //   color: p.green,
-                                  //   onTap: () => _openCategory('Data & Backup'),
-                                  // ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.arrow_2_circlepath,
-                                    title: 'Updates & Notices',
-                                    status: _betaTrack ? 'Beta' : 'Stable',
-                                    color: p.accent,
-                                    onTap: () =>
-                                        _openCategory('Updates & Notices'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.book,
-                                    title: 'About',
-                                    status: 'Docs',
-                                    color: p.accent,
-                                    onTap: () => _openCategory('About'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.slider_horizontal_3,
-                                    title: 'Advanced',
-                                    status: 'Tools',
-                                    color: p.orange,
-                                    onTap: () => _openCategory('Advanced'),
-                                  ),
-                                  if (_isGodModeUnlocked)
-                                    SettingsRow(
+                                  if (widget.onFloatingTimerChanged != null)
+                                    HigSwitchRow(
                                       p: p,
-                                      icon: Icons.auto_awesome_rounded,
-                                      title: 'God Mode',
-                                      status: 'Unlocked',
-                                      color: const Color(0xFFFFD700),
-                                      onTap: () => _openCategory('God Mode'),
+                                      icon: CupertinoIcons.timer,
+                                      iconColor: p.orange,
+                                      title: 'Floating Timer Pill',
+                                      subtitle:
+                                          'Draggable on-screen live timer during active session',
+                                      value: widget.floatingTimerEnabled,
+                                      onChanged: widget.onFloatingTimerChanged!,
+                                    ),
+                                  if (widget.onSoundEffects != null)
+                                    HigSwitchRow(
+                                      p: p,
+                                      icon: CupertinoIcons.speaker_2,
+                                      iconColor: p.accent,
+                                      title: 'Acoustic Feedback',
+                                      subtitle:
+                                          'Subtle sound feedback on capture and detents',
+                                      value: widget.soundEffects,
+                                      onChanged: widget.onSoundEffects!,
                                     ),
                                 ],
                               ),
-                              SettingsPageDescription(
+
+                              // Domain 3: Appearance & Display
+                              HigSectionHeader(
                                 p: p,
-                                text:
-                                    'Personalize and configure NoteKar to fit your specific workflow.',
+                                title: 'Appearance & Display',
                               ),
-                              const SizedBox(height: spacing16),
-                              SettingsGroup(
+                              HigGroupedCard(
                                 p: p,
-                                insetDividers: true,
-                                title: 'Support & Community',
                                 children: [
-                                  SettingsRow(
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.paintbrush,
+                                    iconColor: p.accent,
+                                    title: 'Theme & Accent',
+                                    status:
+                                        '${theme[0].toUpperCase()}${theme.substring(1)}',
+                                    onTap: () =>
+                                        _openCategory('Personalization'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.app_badge,
+                                    iconColor: const Color(0xFFAF52DE),
+                                    title: 'App Icons',
+                                    status:
+                                        '${widget.appIconStyle[0].toUpperCase()}${widget.appIconStyle.substring(1)}',
+                                    onTap: () => _openCategory('App Icons'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.clock,
+                                    iconColor: p.blue,
+                                    title: 'Clock Face & Typography',
+                                    status: widget.clockFont,
+                                    onTap: () => _openCategory('Display'),
+                                  ),
+                                ],
+                              ),
+
+                              // Domain 4: Privacy, Security & Data
+                              HigSectionHeader(
+                                p: p,
+                                title: 'Privacy, Security & Data',
+                              ),
+                              HigGroupedCard(
+                                p: p,
+                                children: [
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.shield,
+                                    iconColor: p.green,
+                                    title: 'Privacy & App Lock',
+                                    status: privacyLock ? 'On' : 'Off',
+                                    onTap: () =>
+                                        _openCategory('Privacy & Security'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.folder,
+                                    iconColor: p.accent,
+                                    title: 'Data & Backups',
+                                    status: '${entries.length} Logs',
+                                    onTap: () => _openCategory('Data & Backup'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.trash,
+                                    iconColor: p.red,
+                                    title: 'Trash Bin',
+                                    onTap: () => _openCategory('Trash Bin'),
+                                  ),
+                                ],
+                              ),
+
+                              // Domain 5: Intelligence & Habits
+                              HigSectionHeader(
+                                p: p,
+                                title: 'Intelligence & Habits',
+                              ),
+                              HigGroupedCard(
+                                p: p,
+                                children: [
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.bell,
+                                    iconColor: p.orange,
+                                    title: 'Reminders & Mindfulness',
+                                    status: _getRemindersStatus(),
+                                    onTap: () => _openCategory('Reminders'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.chart_bar_square,
+                                    iconColor: p.accent,
+                                    title: 'Executive Analytics Dashboard',
+                                    onTap: () => _openCategory('Dashboard'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.hourglass,
+                                    iconColor: const Color(0xFFAF52DE),
+                                    title: 'Life Audit & Horizon',
+                                    onTap: () => _openCategory('Life Audit'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.scope,
+                                    iconColor: p.green,
+                                    title: 'Targets & Goals',
+                                    onTap: () => _openCategory('Goals'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.flame,
+                                    iconColor: p.orange,
+                                    title: 'Sobriety Companion',
+                                    status: enableSobrietyMode
+                                        ? 'Active'
+                                        : 'Off',
+                                    onTap: () =>
+                                        _openCategory('Sobriety Companion'),
+                                  ),
+                                ],
+                              ),
+
+                              // Domain 6: System & Support
+                              HigSectionHeader(p: p, title: 'System & Support'),
+                              HigGroupedCard(
+                                p: p,
+                                children: [
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.arrow_2_circlepath,
+                                    iconColor: p.accent,
+                                    title: 'Update Center',
+                                    status: _betaTrack ? 'Beta' : 'Stable',
+                                    onTap: () =>
+                                        _openCategory('Updates & Notices'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.slider_horizontal_3,
+                                    iconColor: p.orange,
+                                    title: 'Advanced Tools',
+                                    onTap: () => _openCategory('Advanced'),
+                                  ),
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.info_circle,
+                                    iconColor: p.accent,
+                                    title: 'About NoteKar',
+                                    status: 'v$appVersion',
+                                    onTap: () => _openCategory('About'),
+                                  ),
+                                  if (_isGodModeUnlocked)
+                                    HigRow(
+                                      p: p,
+                                      icon: Icons.auto_awesome_rounded,
+                                      iconColor: const Color(0xFFFFD700),
+                                      title: 'God Mode',
+                                      status: 'Unlocked',
+                                      onTap: () => _openCategory('God Mode'),
+                                    ),
+                                  HigRow(
                                     p: p,
                                     icon: Icons.coffee_rounded,
+                                    iconColor: const Color(0xFFFFDD00),
                                     title: 'Buy Me a Coffee',
-                                    color: const Color(0xFFFFDD00),
-                                    rowKind: 'link',
+                                    status: 'Support',
                                     onTap: () => widget.onOpenLink(coffeeLink),
                                   ),
-                                  SettingsRow(
+                                  HigRow(
                                     p: p,
                                     icon: Icons.feedback_rounded,
+                                    iconColor: p.green,
                                     title: 'Feedback',
-                                    color: p.green,
-                                    rowKind: 'popup',
                                     onTap: _openFeedback,
                                   ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: Icons.email_rounded,
-                                    title: 'Email Support',
-                                    color: p.accent,
-                                    rowKind: 'link',
-                                    onTap: () =>
-                                        widget.onOpenLink(supportEmail),
-                                  ),
-                                  SettingsRow(
+                                  HigRow(
                                     p: p,
                                     customIcon: GithubIcon(
                                       size: 16,
                                       color: p.text,
                                     ),
                                     title: 'GitHub',
-                                    color: p.text,
-                                    rowKind: 'link',
                                     onTap: () => widget.onOpenLink(githubRepo),
                                   ),
                                 ],
@@ -3304,6 +3468,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               () => _searchNotesSelectedMoments.clear(),
                             ),
                             rainbowCards: _rainbowCards,
+                            onEditNote: _editNoteInSearch,
                           ),
                         if (show('Guides'))
                           SliverList(

@@ -6,6 +6,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.Toast
@@ -22,6 +24,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         if (action == ACTION_LOG_BG) {
             val logType = intent.getStringExtra(EXTRA_LOG_TYPE) ?: return
             performBackgroundLog(context, logType)
+        } else if (action == ACTION_PAUSE_RESUME_BG) {
+            togglePauseResume(context)
         }
     }
 
@@ -60,6 +64,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_LOG_BG = "app.notekar.notekar.ACTION_LOG_BG"
+        const val ACTION_PAUSE_RESUME_BG = "app.notekar.notekar.ACTION_PAUSE_RESUME_BG"
         const val EXTRA_LOG_TYPE = "log_type"
 
         private const val ACTION_OPEN = "app.notekar.notekar.ACTION_OPEN"
@@ -80,6 +85,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_FOCUS_RATIO = "focus_ratio"
         const val KEY_TOTAL_TRACKED = "total_tracked"
         const val KEY_TOTAL_WASTED = "total_wasted"
+        const val KEY_IS_PAUSED = "is_paused"
+        const val KEY_PAUSED_AT = "paused_at"
 
         fun launchIntent(
             context: Context,
@@ -211,11 +218,34 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             if (mode == "two-way") {
                 if (type == "in") {
+                    prefs.edit()
+                        .putBoolean(KEY_IS_PAUSED, false)
+                        .putLong(KEY_PAUSED_AT, 0L)
+                        .apply()
                     bgEditor.putString("flutter.m-inout", "out")
                     bgEditor.putLong("flutter.m-ses", now)
+                    bgEditor.putBoolean("flutter.is_paused", false)
+                    bgEditor.putBoolean("flutter.m-paused", false)
+                    bgEditor.remove("flutter.paused_at")
+                    bgEditor.remove("flutter.m-paused-at")
                 } else if (type == "out") {
+                    val wasPaused = prefs.getBoolean(KEY_IS_PAUSED, false)
+                    val pausedAt = prefs.getLong(KEY_PAUSED_AT, 0L)
+                    if (wasPaused && pausedAt > 0L) {
+                        val pauseDuration = now - pausedAt
+                        val adjustedStart = prefs.getLong(KEY_LAST_TIMESTAMP, now) + pauseDuration
+                        prefs.edit().putLong(KEY_LAST_TIMESTAMP, adjustedStart).apply()
+                    }
+                    prefs.edit()
+                        .putBoolean(KEY_IS_PAUSED, false)
+                        .putLong(KEY_PAUSED_AT, 0L)
+                        .apply()
                     bgEditor.putString("flutter.m-inout", "in")
                     bgEditor.remove("flutter.m-ses")
+                    bgEditor.putBoolean("flutter.is_paused", false)
+                    bgEditor.putBoolean("flutter.m-paused", false)
+                    bgEditor.remove("flutter.paused_at")
+                    bgEditor.remove("flutter.m-paused-at")
                 }
             }
             bgEditor.commit()
@@ -225,6 +255,9 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             // Update persistent control panel notification
             MainActivity.updatePersistentControlPanel(context)
+
+            // Update floating overlay timer if active
+            FloatingTimerService.updateState(context)
 
             // Notify running foreground activity
             MainActivity.notifyBackgroundLogRecorded()
@@ -236,6 +269,53 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 else -> "Moment"
             }
             Toast.makeText(context, "Logged $label successfully", Toast.LENGTH_SHORT).show()
+        }
+
+        fun togglePauseResume(context: Context) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val isPaused = prefs.getBoolean(KEY_IS_PAUSED, false)
+            val now = System.currentTimeMillis()
+            val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+
+            if (isPaused) {
+                val pausedAt = prefs.getLong(KEY_PAUSED_AT, now)
+                val pauseDuration = if (pausedAt > 0L) (now - pausedAt) else 0L
+                val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, now) + pauseDuration
+                prefs.edit()
+                    .putBoolean(KEY_IS_PAUSED, false)
+                    .putLong(KEY_PAUSED_AT, 0L)
+                    .putLong(KEY_LAST_TIMESTAMP, lastTimestamp)
+                    .apply()
+
+                flutterPrefs.edit()
+                    .putBoolean("flutter.is_paused", false)
+                    .putBoolean("flutter.m-paused", false)
+                    .putLong("flutter.m-ses", lastTimestamp)
+                    .remove("flutter.paused_at")
+                    .remove("flutter.m-paused-at")
+                    .commit()
+
+                Toast.makeText(context, "Session Resumed", Toast.LENGTH_SHORT).show()
+            } else {
+                prefs.edit()
+                    .putBoolean(KEY_IS_PAUSED, true)
+                    .putLong(KEY_PAUSED_AT, now)
+                    .apply()
+
+                flutterPrefs.edit()
+                    .putBoolean("flutter.is_paused", true)
+                    .putBoolean("flutter.m-paused", true)
+                    .putLong("flutter.paused_at", now)
+                    .putLong("flutter.m-paused-at", now)
+                    .commit()
+
+                Toast.makeText(context, "Session Paused", Toast.LENGTH_SHORT).show()
+            }
+
+            updateAllWidgets(context)
+            MainActivity.updatePersistentControlPanel(context)
+            MainActivity.notifyBackgroundLogRecorded()
+            FloatingTimerService.updateState(context)
         }
 
         fun updateWidget(
@@ -252,6 +332,10 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             val mode = prefs.getString(KEY_MODE, "two-way") ?: "two-way"
             val nextAction = prefs.getString(KEY_NEXT_ACTION, "in") ?: "in"
             val activeCategory = prefs.getString(KEY_ACTIVE_CATEGORY, "All") ?: "All"
+            val isPaused = prefs.getBoolean(KEY_IS_PAUSED, false)
+            val pausedAt = prefs.getLong(KEY_PAUSED_AT, 0L)
+            val lastTimestamp = prefs.getLong(KEY_LAST_TIMESTAMP, 0L)
+            val isCurrentlyIn = mode == "two-way" && nextAction == "out"
 
             val options = manager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(
@@ -268,7 +352,9 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_single, "TAP")
             views.setTextViewText(R.id.widget_note, "NOTE")
 
-            val modeText = if (activeCategory != "All" && activeCategory.isNotEmpty()) {
+            val modeText = if (isCurrentlyIn && isPaused) {
+                "PAUSED • ${activeCategory.uppercase(Locale.ROOT)}"
+            } else if (activeCategory != "All" && activeCategory.isNotEmpty()) {
                 if (mode == "single") {
                     "SINGLE • ${activeCategory.uppercase(Locale.ROOT)}"
                 } else {
@@ -290,10 +376,31 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
 
             if (compact) {
                 views.setViewVisibility(R.id.widget_clock, View.GONE)
+                views.setViewVisibility(R.id.widget_chronometer, View.GONE)
                 views.setViewVisibility(R.id.widget_history_card, View.GONE)
             } else {
-                views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
                 views.setViewVisibility(R.id.widget_history_card, View.VISIBLE)
+
+                if (isCurrentlyIn && lastTimestamp > 0L) {
+                    views.setViewVisibility(R.id.widget_clock, View.GONE)
+                    views.setViewVisibility(R.id.widget_chronometer, View.VISIBLE)
+                    val elapsed = if (isPaused && pausedAt > 0L) {
+                        pausedAt - lastTimestamp
+                    } else {
+                        System.currentTimeMillis() - lastTimestamp
+                    }
+                    val base = SystemClock.elapsedRealtime() - elapsed
+                    if (isPaused) {
+                        views.setChronometer(R.id.widget_chronometer, base, null, false)
+                        views.setTextColor(R.id.widget_chronometer, Color.parseColor("#FFFF9F0A"))
+                    } else {
+                        views.setChronometer(R.id.widget_chronometer, base, null, true)
+                        views.setTextColor(R.id.widget_chronometer, Color.parseColor("#FF30D158"))
+                    }
+                } else {
+                    views.setViewVisibility(R.id.widget_chronometer, View.GONE)
+                    views.setViewVisibility(R.id.widget_clock, View.VISIBLE)
+                }
 
                 // Show total logs on the right end of the top line
                 views.setTextViewText(R.id.widget_total_logs, "$todayCount Logs")
@@ -353,11 +460,28 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 launchBackgroundLogIntent(context, appWidgetId + 10, "single")
             )
 
-            views.setOnClickPendingIntent(
-                R.id.widget_in,
-                if (mode == "two-way") launchQuickSessionActivityIntent(context, appWidgetId + 20, "in")
-                else launchBackgroundLogIntent(context, appWidgetId + 20, "in")
-            )
+            if (isCurrentlyIn) {
+                views.setTextViewText(R.id.widget_in, if (isPaused) "▶ RESUME" else "⏸ PAUSE")
+                val pauseIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                    action = ACTION_PAUSE_RESUME_BG
+                }
+                views.setOnClickPendingIntent(
+                    R.id.widget_in,
+                    PendingIntent.getBroadcast(
+                        context,
+                        appWidgetId + 25,
+                        pauseIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+            } else {
+                views.setTextViewText(R.id.widget_in, "IN")
+                views.setOnClickPendingIntent(
+                    R.id.widget_in,
+                    if (mode == "two-way") launchQuickSessionActivityIntent(context, appWidgetId + 20, "in")
+                    else launchBackgroundLogIntent(context, appWidgetId + 20, "in")
+                )
+            }
 
             views.setOnClickPendingIntent(
                 R.id.widget_out,

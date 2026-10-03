@@ -7,6 +7,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -190,11 +191,28 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
         );
         await _tagService.addActivityTag(newTag);
       } else {
+        final oldLabel = existing.label;
         final updated = existing.copyWith(
           label: label,
           iconCodePoint: selectedGlyph,
         );
         await _tagService.updateActivityTag(updated);
+        if (oldLabel.toLowerCase() != label.toLowerCase()) {
+          final updatedNotes = await _tagService.renameTagAcrossAllNotes(
+            oldTag: oldLabel,
+            newTag: label,
+          );
+          if (mounted && updatedNotes > 0) {
+            showIosPillToast(
+              context: context,
+              p: widget.p,
+              message: 'Updated $updatedNotes notes to #$label'.localized(
+                context,
+              ),
+              icon: Icons.check_circle_rounded,
+            );
+          }
+        }
       }
       await _loadTags();
       widget.onTagsChanged?.call();
@@ -203,27 +221,45 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
 
   Future<void> _confirmDeleteTag(ActivityTag tag) async {
     HapticFeedback.lightImpact();
-    final ok = await showCupertinoDialog<bool>(
+    final action = await showCupertinoModalPopup<String>(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text('Delete Tag?'.localized(context)),
-        content: Text('Delete quick tag "${tag.label}"?'.localized(context)),
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text('Delete "${tag.label}"?'.localized(context)),
+        message: Text(
+          'Choose whether to remove this tag from your quick list or remove it from all historical notes.'
+              .localized(context),
+        ),
         actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'.localized(context)),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'quick_only'),
+            child: Text('Remove from Quick List Only'.localized(context)),
           ),
-          CupertinoDialogAction(
+          CupertinoActionSheetAction(
             isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Delete'.localized(context)),
+            onPressed: () => Navigator.pop(ctx, 'all_notes'),
+            child: Text('Remove from All Existing Notes'.localized(context)),
           ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text('Cancel'.localized(context)),
+        ),
       ),
     );
 
-    if (ok == true && mounted) {
+    if (action != null && mounted) {
       await _tagService.removeActivityTag(tag.id);
+      if (action == 'all_notes') {
+        final count = await _tagService.removeTagFromAllNotes(tag: tag.label);
+        if (mounted && count > 0) {
+          showIosPillToast(
+            context: context,
+            p: widget.p,
+            message: 'Removed from $count notes'.localized(context),
+            icon: Icons.delete_sweep_rounded,
+          );
+        }
+      }
       await _loadTags();
       widget.onTagsChanged?.call();
     }

@@ -84,5 +84,27 @@ void main() {
         expect(find.text(longNote), findsOneWidget);
       },
     );
+
+    test(
+      'Tag normalization and extractor accurately strip and parse hashtags',
+      () {
+        final tagService = TagService.instance;
+        expect(tagService.normalize('#Walking'), '#walking');
+        expect(tagService.normalize('  Gym  '), '#gym');
+        expect(TagService.stripHash('#DeepWork'), 'DeepWork');
+
+        final extracted = NoteTagExtractor.extractHashtags(
+          'Completed session #gym with great energy #focus',
+        );
+        expect(extracted, contains('#gym'));
+        expect(extracted, contains('#focus'));
+        expect(
+          NoteTagExtractor.cleanBodyText(
+            'Completed session #gym with great energy #focus',
+          ),
+          'Completed session with great energy',
+        );
+      },
+    );
   });
 }

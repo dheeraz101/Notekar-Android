@@ -21,6 +21,8 @@ class HomeSessionController extends ChangeNotifier {
   String _mode = 'two-way';
   String _inout = 'in';
   int? _sessionStart;
+  bool _isPaused = false;
+  int? _pausedAt;
   String _activeCategory = 'All';
   List<Moment> _recentMoments = [];
   Duration _todayTrackedDuration = Duration.zero;
@@ -34,6 +36,10 @@ class HomeSessionController extends ChangeNotifier {
   String get inout => _inout;
 
   int? get sessionStart => _sessionStart;
+
+  bool get isPaused => _isPaused;
+
+  int? get pausedAt => _pausedAt;
 
   String get activeCategory => _activeCategory;
 
@@ -55,6 +61,12 @@ class HomeSessionController extends ChangeNotifier {
     final ses = prefs.getInt('m-ses');
     if (ses != null && ses > 0) {
       _sessionStart = ses;
+    }
+    _isPaused = prefs.getBool('m-paused') ?? false;
+    _pausedAt = prefs.getInt('m-paused-at');
+    if (_sessionStart == null) {
+      _isPaused = false;
+      _pausedAt = null;
     }
     refresh();
   }
@@ -104,6 +116,29 @@ class HomeSessionController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> pauseSession() async {
+    if (!isSessionActive || _isPaused) return;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+    _isPaused = true;
+    _pausedAt = nowMs;
+    await prefs.setBool('m-paused', true);
+    await prefs.setInt('m-paused-at', nowMs);
+    notifyListeners();
+  }
+
+  Future<void> resumeSession() async {
+    if (!isSessionActive || !_isPaused || _pausedAt == null) return;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+    final pauseDuration = nowMs - _pausedAt!;
+    _sessionStart = (_sessionStart ?? nowMs) + pauseDuration;
+    _isPaused = false;
+    _pausedAt = null;
+    await prefs.setBool('m-paused', false);
+    await prefs.remove('m-paused-at');
+    await prefs.setInt('m-ses', _sessionStart!);
+    notifyListeners();
+  }
+
   /// Records a timestamp tap (single or two-way IN/OUT).
   Future<Moment> recordTap({String note = '', String? category}) async {
     final now = DateTime.now();
@@ -121,13 +156,25 @@ class HomeSessionController extends ChangeNotifier {
       if (_inout == 'in') {
         _inout = 'out';
         _sessionStart = nowMs;
+        _isPaused = false;
+        _pausedAt = null;
         await prefs.setString('m-inout', 'out');
         await prefs.setInt('m-ses', nowMs);
+        await prefs.setBool('m-paused', false);
+        await prefs.remove('m-paused-at');
       } else {
+        if (_isPaused && _pausedAt != null) {
+          final pauseDuration = nowMs - _pausedAt!;
+          _sessionStart = (_sessionStart ?? nowMs) + pauseDuration;
+        }
         _inout = 'in';
         _sessionStart = null;
+        _isPaused = false;
+        _pausedAt = null;
         await prefs.setString('m-inout', 'in');
         await prefs.remove('m-ses');
+        await prefs.setBool('m-paused', false);
+        await prefs.remove('m-paused-at');
       }
     }
 

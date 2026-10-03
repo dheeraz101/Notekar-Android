@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -36,6 +37,7 @@ class SearchNotesSettingsPage {
     ValueChanged<Moment>? onToggleSelectMoment,
     VoidCallback? onClearSelection,
     bool rainbowCards = false,
+    ValueChanged<Moment>? onEditNote,
   }) {
     final q = settingsQuery.trim().toLowerCase();
     final hashtagRegex = RegExp(r'#([A-Za-z0-9_]+)');
@@ -400,13 +402,17 @@ class SearchNotesSettingsPage {
                       return;
                     }
                     if (q.isNotEmpty) onSaveRecentSearch(q);
-                    HapticFeedback.mediumImpact();
-                    Clipboard.setData(ClipboardData(text: entry.note));
-                    showIosPillToast(
-                      context: context,
+                    HapticFeedback.selectionClick();
+                    NotePreviewSheet.show(
+                      context,
                       p: p,
-                      message: 'Note copied to clipboard'.localized(context),
-                      icon: Icons.copy_rounded,
+                      note: entry.note,
+                      title: entry.category ?? 'Note',
+                      category: entry.category,
+                      dateStr: datePretty(startTs ?? entry.timestamp),
+                      onEdit: onEditNote != null
+                          ? () => onEditNote(entry)
+                          : null,
                     );
                   },
                   onLongPress: () {
@@ -535,6 +541,21 @@ class SearchNotesSettingsPage {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                if (onEditNote != null)
+                                  PressableScale(
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      onEditNote(entry);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: Icon(
+                                        CupertinoIcons.pencil,
+                                        size: 15,
+                                        color: p.accent,
+                                      ),
+                                    ),
+                                  ),
                                 PressableScale(
                                   onTap: () {
                                     HapticFeedback.selectionClick();

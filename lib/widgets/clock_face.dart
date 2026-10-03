@@ -14,6 +14,8 @@ class LiveClockFace extends StatefulWidget {
     required this.highlightSeconds,
     this.use24HourFormat = true,
     this.sessionStart,
+    this.isPaused = false,
+    this.pausedAt,
     this.fontFamily = 'BebasNeue',
   });
 
@@ -24,6 +26,8 @@ class LiveClockFace extends StatefulWidget {
   final bool highlightSeconds;
   final bool use24HourFormat;
   final int? sessionStart;
+  final bool isPaused;
+  final int? pausedAt;
   final String fontFamily;
 
   @override
@@ -65,7 +69,10 @@ class _LiveClockFaceState extends State<LiveClockFace> {
     Duration? sessionElapsed;
     if (widget.sessionStart != null) {
       final startDt = DateTime.fromMillisecondsSinceEpoch(widget.sessionStart!);
-      sessionElapsed = _now.difference(startDt);
+      final effectiveNow = (widget.isPaused && widget.pausedAt != null)
+          ? DateTime.fromMillisecondsSinceEpoch(widget.pausedAt!)
+          : _now;
+      sessionElapsed = effectiveNow.difference(startDt);
       if (sessionElapsed.isNegative) sessionElapsed = Duration.zero;
     }
 
@@ -79,6 +86,7 @@ class _LiveClockFaceState extends State<LiveClockFace> {
       highlightSeconds: widget.highlightSeconds,
       use24HourFormat: widget.use24HourFormat,
       sessionElapsed: sessionElapsed,
+      isPaused: widget.isPaused,
       fontFamily: widget.fontFamily,
     );
   }
@@ -96,6 +104,7 @@ class ClockFace extends StatefulWidget {
     required this.highlightSeconds,
     this.use24HourFormat = true,
     this.sessionElapsed,
+    this.isPaused = false,
     this.fontFamily = 'BebasNeue',
   });
 
@@ -108,6 +117,7 @@ class ClockFace extends StatefulWidget {
   final bool highlightSeconds;
   final bool use24HourFormat;
   final Duration? sessionElapsed;
+  final bool isPaused;
   final String fontFamily;
 
   @override
@@ -174,15 +184,16 @@ class _ClockFaceState extends State<ClockFace> {
     final bool isContrastClock =
         widget.p.clock == const Color(0xFFFFFFFF) ||
         widget.p.clock == const Color(0xFF000000);
+    final sessionColor = widget.isPaused ? widget.p.orange : widget.p.green;
     final baseClockColor = isContrastClock
         ? widget.p.clock
-        : (isSessionActive ? widget.p.green : widget.p.clock);
+        : (isSessionActive ? sessionColor : widget.p.clock);
     final actionColor = isContrastClock
         ? (widget.p.clock == const Color(0xFF000000)
               ? const Color(0xDD000000)
               : const Color(0xFFFFFFFF))
         : (isSessionActive
-              ? widget.p.green
+              ? sessionColor
               : momentColor(widget.p, widget.pulseType));
     final clockColor = _bright
         ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)

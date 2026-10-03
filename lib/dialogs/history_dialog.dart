@@ -19,6 +19,7 @@ import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
@@ -41,6 +42,7 @@ class HistoryDialog extends StatefulWidget {
     required this.onDelete,
     required this.onRestore,
     required this.onUpdateNote,
+    this.onUpdateNoteWithTags,
     required this.onDuration,
     this.onOpenTrash,
     this.onClearAll,
@@ -66,6 +68,8 @@ class HistoryDialog extends StatefulWidget {
   final Future<void> Function(int id) onDelete;
   final Future<void> Function(Moment entry) onRestore;
   final Future<void> Function(int id, String note) onUpdateNote;
+  final Future<void> Function(int id, String note, List<String> tags)?
+  onUpdateNoteWithTags;
   final void Function(Moment a, Moment b) onDuration;
   final VoidCallback? onOpenTrash;
   final Future<void> Function()? onClearAll;
@@ -2019,7 +2023,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final index = _entries.indexWhere((item) => item.id == entry.id);
     if (index < 0) return;
 
-    final updated = entry.copyWith(note: note.trim(), tags: tags ?? entry.tags);
+    final effectiveTags =
+        tags ??
+        NoteTagExtractor.extractHashtags(
+          note,
+        ).map((t) => t.replaceFirst('#', '').toLowerCase()).toList();
+
+    final updated = entry.copyWith(note: note.trim(), tags: effectiveTags);
 
     setState(() {
       _entries[index] = updated;
@@ -2032,7 +2042,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _rebuildMemoizedLists();
     });
 
-    await widget.onUpdateNote(entry.id, updated.note);
+    if (widget.onUpdateNoteWithTags != null) {
+      await widget.onUpdateNoteWithTags!(entry.id, updated.note, updated.tags);
+    } else {
+      await widget.onUpdateNote(entry.id, updated.note);
+    }
   }
 
   void _handleSelection(Moment entry, bool selected) {

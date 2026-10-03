@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
+import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 String _formatDateShort(DateTime dt) {
@@ -44,6 +47,7 @@ class GoalsSheet extends StatelessWidget {
     this.isSessionRunning = false,
     this.onStartSession,
     this.onStopSession,
+    this.onManualEntry,
   });
 
   final Palette p;
@@ -52,6 +56,7 @@ class GoalsSheet extends StatelessWidget {
   final bool isSessionRunning;
   final ValueChanged<Goal>? onStartSession;
   final VoidCallback? onStopSession;
+  final ValueChanged<Goal>? onManualEntry;
 
   static Future<dynamic> show(
     BuildContext context, {
@@ -61,6 +66,7 @@ class GoalsSheet extends StatelessWidget {
     bool isSessionRunning = false,
     ValueChanged<Goal>? onStartSession,
     VoidCallback? onStopSession,
+    ValueChanged<Goal>? onManualEntry,
   }) {
     return showModalBottomSheet<dynamic>(
       context: context,
@@ -73,6 +79,7 @@ class GoalsSheet extends StatelessWidget {
         isSessionRunning: isSessionRunning,
         onStartSession: onStartSession,
         onStopSession: onStopSession,
+        onManualEntry: onManualEntry,
       ),
     );
   }
@@ -107,6 +114,7 @@ class GoalsSheet extends StatelessWidget {
           isSessionRunning: isSessionRunning,
           onStartSession: onStartSession,
           onStopSession: onStopSession,
+          onManualEntry: onManualEntry,
         ),
       ),
     );
@@ -124,6 +132,7 @@ class GoalsContentView extends StatefulWidget {
     this.onEditGoal,
     this.onStartSession,
     this.onStopSession,
+    this.onManualEntry,
     this.shrinkWrap = false,
     this.physics,
   });
@@ -136,6 +145,7 @@ class GoalsContentView extends StatefulWidget {
   final ValueChanged<Goal>? onEditGoal;
   final ValueChanged<Goal>? onStartSession;
   final VoidCallback? onStopSession;
+  final ValueChanged<Goal>? onManualEntry;
   final bool shrinkWrap;
   final ScrollPhysics? physics;
 
@@ -185,6 +195,89 @@ class GoalsContentViewState extends State<GoalsContentView>
       setState(() {
         _goals = list;
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleManualEntryForGoal(Goal goal) async {
+    HapticFeedback.lightImpact();
+    if (widget.onManualEntry != null) {
+      widget.onManualEntry!(goal);
+      return;
+    }
+
+    final categories = await CategoryService().getCategories();
+    if (!mounted) return;
+
+    final result = await showModalBottomSheet<ManualEntryResult>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      enableDrag: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (ctx) => ManualEntryDialog(
+        p: widget.p,
+        categories: categories,
+        initialCategory: goal.category,
+        initialGoal: goal,
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    final repo = MomentRepository();
+    await repo.ensureInitialized();
+    final startMs = result.startDateTime.millisecondsSinceEpoch;
+
+    if (result.isSession && result.endDateTime != null) {
+      var endMs = result.endDateTime!.millisecondsSinceEpoch;
+      if (endMs <= startMs) {
+        endMs = startMs + 60000;
+      }
+      final endDt = DateTime.fromMillisecondsSinceEpoch(endMs);
+
+      final inMoment = Moment(
+        id: repo.getNextId(),
+        timestamp: startMs,
+        type: 'in',
+        date: dateKey(result.startDateTime),
+        note: result.note,
+        tags: result.tags,
+        category: result.category,
+      );
+      final outMoment = Moment(
+        id: repo.getNextId(),
+        timestamp: endMs,
+        type: 'out',
+        date: dateKey(endDt),
+        note: '',
+        tags: const [],
+        category: result.category,
+      );
+
+      await repo.saveMoment(inMoment);
+      await repo.saveMoment(outMoment);
+
+      setState(() {
+        widget.moments.insert(0, inMoment);
+        widget.moments.insert(0, outMoment);
+      });
+    } else {
+      final singleMoment = Moment(
+        id: repo.getNextId(),
+        timestamp: startMs,
+        type: 'single',
+        date: dateKey(result.startDateTime),
+        note: result.note,
+        tags: result.tags,
+        category: result.category,
+      );
+
+      await repo.saveMoment(singleMoment);
+
+      setState(() {
+        widget.moments.insert(0, singleMoment);
       });
     }
   }
@@ -645,95 +738,142 @@ class GoalsContentViewState extends State<GoalsContentView>
           ),
           const SizedBox(height: 12),
 
-          // Action Button: [Stop Session] if active, or [Start Session]
-          if (isActiveGoal)
-            PressableScale(
-              onTap: () {
-                HapticFeedback.heavyImpact();
-                if (widget.onStopSession != null) {
-                  widget.onStopSession!();
-                } else {
-                  Navigator.of(context).pop({'action': 'stop_goal_session'});
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: widget.p.red.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: widget.p.red.withValues(alpha: 0.4),
+          // Action Buttons: [Stop/Start Session] + [+ Manual Entry]
+          Row(
+            children: [
+              Expanded(
+                child: isActiveGoal
+                    ? PressableScale(
+                        onTap: () {
+                          HapticFeedback.heavyImpact();
+                          if (widget.onStopSession != null) {
+                            widget.onStopSession!();
+                          } else {
+                            Navigator.of(
+                              context,
+                            ).pop({'action': 'stop_goal_session'});
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: widget.p.red.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: widget.p.red.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                CupertinoIcons.stop_fill,
+                                size: 13,
+                                color: widget.p.red,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Stop Session (${goal.category ?? 'Active'})'
+                                    .localized(context),
+                                style: TextStyle(
+                                  color: widget.p.red,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : PressableScale(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          if (widget.onStartSession != null) {
+                            widget.onStartSession!(goal);
+                          } else {
+                            Navigator.of(context).pop({
+                              'action': 'start_goal_session',
+                              'category': goal.category,
+                              'mode': goal.mode ?? 'two-way',
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: accentCol.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: accentCol.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                CupertinoIcons.play_arrow_solid,
+                                size: 13,
+                                color: accentCol,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Start ${goal.category ?? 'Session'}'.localized(
+                                  context,
+                                ),
+                                style: TextStyle(
+                                  color: accentCol,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 8),
+              PressableScale(
+                onTap: () => _handleManualEntryForGoal(goal),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.p.surface3,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: widget.p.border.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.plus_circle_fill,
+                        size: 13,
+                        color: widget.p.accent,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Manual Entry'.localized(context),
+                        style: TextStyle(
+                          color: widget.p.text,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.stop_fill,
-                      size: 13,
-                      color: widget.p.red,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Stop Session (${goal.category ?? 'Active'})'.localized(
-                        context,
-                      ),
-                      style: TextStyle(
-                        color: widget.p.red,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            )
-          else
-            PressableScale(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                if (widget.onStartSession != null) {
-                  widget.onStartSession!(goal);
-                } else {
-                  Navigator.of(context).pop({
-                    'action': 'start_goal_session',
-                    'category': goal.category,
-                    'mode': goal.mode ?? 'two-way',
-                  });
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: accentCol.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accentCol.withValues(alpha: 0.3)),
-                ),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.play_arrow_solid,
-                      size: 13,
-                      color: accentCol,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Start ${goal.category ?? 'Session'}'.localized(context),
-                      style: TextStyle(
-                        color: accentCol,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            ],
+          ),
         ],
       ),
     );

@@ -111,6 +111,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   String _inout = 'in';
   String _locale = 'system';
   int? _sessionStart;
+  bool _isPaused = false;
+  int? _pausedAt;
   int _tapDelay = 0;
   bool _remoteNotices = false;
   bool _reduceMotion = false;
@@ -150,6 +152,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _splashDismissed = ZenDoodleSplash.hasShownThisSession;
   bool _hasTappedBefore = false;
   Map<String, dynamic>? _pendingTap;
+  String? _pendingShortcutAction;
+  bool _floatingTimerEnabled = false;
   bool _enableNoteOnClick = false;
   bool _enableSobrietyMode = false;
   String _sobrietyResetType = 'any';
@@ -622,6 +626,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _categories = initialCategories;
       _activeCategory = initialActiveCategory;
       _hasTappedBefore = prefs.getBool('notekar.has_tapped_before') ?? false;
+      _floatingTimerEnabled = prefs.getBool('floating_timer_enabled') ?? false;
       _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
       _enableSobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
       _sobrietyResetType = prefs.getString('sobriety_reset_type') ?? 'any';
@@ -634,15 +639,21 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _sessionStart = prefs.getInt('m-ses');
+      _isPaused = prefs.getBool('m-paused') ?? false;
+      _pausedAt = prefs.getInt('m-paused-at');
       if (_sessionStart != null) {
         _mode = 'two-way';
-      } else if (_defaultMode == 'single') {
-        _mode = 'single';
-      } else if (_defaultMode == 'two-way') {
-        _mode = 'two-way';
       } else {
-        // 'last-used'
-        _mode = prefs.getString('m-mode') ?? 'two-way';
+        _isPaused = false;
+        _pausedAt = null;
+        if (_defaultMode == 'single') {
+          _mode = 'single';
+        } else if (_defaultMode == 'two-way') {
+          _mode = 'two-way';
+        } else {
+          // 'last-used'
+          _mode = prefs.getString('m-mode') ?? 'two-way';
+        }
       }
       _inout = prefs.getString('m-inout') ?? 'in';
       _tapDelay = prefs.getInt('m-delay') ?? 0;
@@ -832,6 +843,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (_pendingTap != null) {
         await _processPendingTap();
       }
+
+      if (_pendingShortcutAction != null) {
+        final action = _pendingShortcutAction!;
+        _pendingShortcutAction = null;
+        _executeShortcutAction(action);
+      }
     });
 
     startupTask.finish();
@@ -854,38 +871,85 @@ class _NoteKarHomeState extends State<NoteKarHome>
     const quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       if (!mounted) return;
-      if (shortcutType == 'quick_log_in') {
-        unawaited(_logEntry(forcedType: 'in'));
-      } else if (shortcutType == 'quick_log_out') {
-        unawaited(_logEntry(forcedType: 'out'));
-      } else if (shortcutType == 'compose_note') {
-        unawaited(_openNote());
-      } else if (shortcutType == 'open_history') {
-        unawaited(_openHistory());
+      if (!_startupComplete || (_privacyLock && !_privacyUnlocked)) {
+        _pendingShortcutAction = shortcutType;
+        return;
       }
+      _executeShortcutAction(shortcutType);
     });
-    quickActions.setShortcutItems(<ShortcutItem>[
-      const ShortcutItem(
-        type: 'quick_log_in',
-        localizedTitle: 'Instant Log (IN)',
-        icon: 'ic_launcher',
-      ),
-      const ShortcutItem(
-        type: 'quick_log_out',
-        localizedTitle: 'Instant Log (OUT)',
-        icon: 'ic_launcher',
-      ),
-      const ShortcutItem(
-        type: 'compose_note',
-        localizedTitle: 'Compose Note',
-        icon: 'ic_launcher',
-      ),
-      const ShortcutItem(
-        type: 'open_history',
-        localizedTitle: 'Open History',
-        icon: 'ic_launcher',
-      ),
-    ]);
+    _updateDynamicShortcuts();
+  }
+
+  void _executeShortcutAction(String shortcutType) {
+    if (shortcutType == 'quick_log_in') {
+      unawaited(_logEntry(forcedType: 'in'));
+    } else if (shortcutType == 'quick_log_out') {
+      unawaited(_logEntry(forcedType: 'out'));
+    } else if (shortcutType == 'quick_log_single') {
+      unawaited(_logEntry(forcedType: 'single'));
+    } else if (shortcutType == 'quick_pause_resume') {
+      _togglePauseResumeSession();
+    } else if (shortcutType == 'compose_note') {
+      unawaited(_openNote());
+    } else if (shortcutType == 'open_history') {
+      unawaited(_openHistory());
+    }
+  }
+
+  void _updateDynamicShortcuts() {
+    try {
+      const quickActions = QuickActions();
+      final items = <ShortcutItem>[];
+      if (_mode == 'two-way') {
+        if (_sessionStart != null || _inout == 'out') {
+          items.add(
+            const ShortcutItem(
+              type: 'quick_log_out',
+              localizedTitle: 'Log OUT',
+              icon: 'ic_launcher',
+            ),
+          );
+          items.add(
+            ShortcutItem(
+              type: 'quick_pause_resume',
+              localizedTitle: _isPaused ? 'Resume Session' : 'Pause Session',
+              icon: 'ic_launcher',
+            ),
+          );
+        } else {
+          items.add(
+            const ShortcutItem(
+              type: 'quick_log_in',
+              localizedTitle: 'Log IN',
+              icon: 'ic_launcher',
+            ),
+          );
+        }
+      } else {
+        items.add(
+          const ShortcutItem(
+            type: 'quick_log_single',
+            localizedTitle: '⚡ Quick Log',
+            icon: 'ic_launcher',
+          ),
+        );
+      }
+      items.add(
+        const ShortcutItem(
+          type: 'compose_note',
+          localizedTitle: 'Compose Note',
+          icon: 'ic_launcher',
+        ),
+      );
+      items.add(
+        const ShortcutItem(
+          type: 'open_history',
+          localizedTitle: 'Open History',
+          icon: 'ic_launcher',
+        ),
+      );
+      quickActions.setShortcutItems(items);
+    } catch (_) {}
   }
 
   Future<void> _unlockAfterFirstPaint(SharedPreferences prefs) async {
@@ -1189,17 +1253,53 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (_inout == 'in') {
         _sessionStart = now.millisecondsSinceEpoch;
         _inout = 'out';
+        _isPaused = false;
+        _pausedAt = null;
+        unawaited(_prefs?.setBool('m-paused', false));
+        unawaited(_prefs?.remove('m-paused-at'));
       } else {
+        if (_isPaused && _pausedAt != null) {
+          final pausedTurnMs = now.millisecondsSinceEpoch - _pausedAt!;
+          final adjustedStart =
+              (_sessionStart ?? now.millisecondsSinceEpoch) + pausedTurnMs;
+          final inMoment = _entries.where((e) => e.type == 'in').firstOrNull;
+          if (inMoment != null) {
+            final updatedIn = inMoment.copyWith(timestamp: adjustedStart);
+            unawaited(_repository.saveMoment(updatedIn));
+          }
+        }
         _sessionStart = null;
         _inout = 'in';
+        _isPaused = false;
+        _pausedAt = null;
+        unawaited(_prefs?.setBool('m-paused', false));
+        unawaited(_prefs?.remove('m-paused-at'));
       }
     } else if (forcedType != null) {
       if (forcedType == 'in') {
         _sessionStart = now.millisecondsSinceEpoch;
         _inout = 'out';
+        _isPaused = false;
+        _pausedAt = null;
+        unawaited(_prefs?.setBool('m-paused', false));
+        unawaited(_prefs?.remove('m-paused-at'));
       } else if (forcedType == 'out') {
+        if (_isPaused && _pausedAt != null) {
+          final pausedTurnMs = now.millisecondsSinceEpoch - _pausedAt!;
+          final adjustedStart =
+              (_sessionStart ?? now.millisecondsSinceEpoch) + pausedTurnMs;
+          final inMoment = _entries.where((e) => e.type == 'in').firstOrNull;
+          if (inMoment != null) {
+            final updatedIn = inMoment.copyWith(timestamp: adjustedStart);
+            unawaited(_repository.saveMoment(updatedIn));
+          }
+        }
         _sessionStart = null;
         _inout = 'in';
+        _isPaused = false;
+        _pausedAt = null;
+        unawaited(_prefs?.setBool('m-paused', false));
+        unawaited(_prefs?.remove('m-paused-at'));
       }
     }
 
@@ -1342,6 +1442,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         );
       }
       unawaited(_updateAndroidWidget());
+      _updateDynamicShortcuts();
       _showUndo();
 
       if (isGodModeTrigger) {
@@ -1439,6 +1540,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       withHaptic: false,
     );
     unawaited(_updateAndroidWidget());
+    _updateDynamicShortcuts();
   }
 
   void _toggleMode() {
@@ -1640,6 +1742,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     await _saveSetting('m-inout', _inout);
     unawaited(_deleteStoredEntry(id));
     unawaited(_updateAndroidWidget());
+    _updateDynamicShortcuts();
   }
 
   Future<void> _openNoteForLastCapture() async {
@@ -1681,9 +1784,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
 
     if (result != null) {
-      await _updateMomentNote(entry.id, result.note, tags: result.tags);
+      await _updateMomentNote(entry.id, result.note, result.tags);
       if (matchingIn != null) {
-        await _updateMomentNote(matchingIn.id, result.note, tags: result.tags);
+        await _updateMomentNote(matchingIn.id, result.note, result.tags);
       }
       _showToast(initialNote.isNotEmpty ? 'Note updated' : 'Note added');
     }
@@ -1732,16 +1835,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
   Future<void> _updateMomentNote(
     int id,
-    String note, {
+    String note, [
     List<String>? tags,
-  }) async {
+  ]) async {
     final index = _entries.indexWhere((item) => item.id == id);
     if (index < 0) return;
 
     final oldMoment = _entries[index];
+    final effectiveTags =
+        tags ??
+        NoteTagExtractor.extractHashtags(
+          note,
+        ).map((t) => t.replaceFirst('#', '').toLowerCase()).toList();
+
     final updatedMoment = oldMoment.copyWith(
       note: note.trim(),
-      tags: tags ?? oldMoment.tags,
+      tags: effectiveTags,
     );
 
     setState(() {
@@ -1804,6 +1913,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'streakMilestone': streakMilestone,
         'lastRelapseTime': lastRelapseTime,
         'activeCategory': _activeCategory,
+        'isPaused': _isPaused,
+        'pausedAt': _pausedAt ?? 0,
         'focusRatio': todayAudit.intentionalityRatio.round().clamp(0, 100),
         'totalTracked': todayAudit.formattedTotalTracked,
         'totalWasted': todayAudit.formattedTotalWasted,
@@ -1880,6 +1991,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     // Update native widget UI
     unawaited(_updateAndroidWidget());
+    _updateDynamicShortcuts();
   }
 
   Future<void> _startGoalSession({
@@ -1912,6 +2024,71 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out')) {
       await _logEntry(forcedType: 'out');
     }
+  }
+
+  Future<void> _togglePauseResumeSession() async {
+    if (_mode != 'two-way' || _sessionStart == null || _inout != 'out') return;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+
+    if (!_isPaused) {
+      setState(() {
+        _isPaused = true;
+        _pausedAt = nowMs;
+      });
+      await _saveSetting('m-paused', true);
+      await _saveSetting('m-paused-at', nowMs);
+      NotekarHaptics.selection(_hapticStyle);
+      _showToast('Session paused');
+    } else {
+      final pausedTurnMs = _pausedAt != null ? (nowMs - _pausedAt!) : 0;
+      final newStart = (_sessionStart ?? nowMs) + pausedTurnMs;
+      setState(() {
+        _isPaused = false;
+        _pausedAt = null;
+        _sessionStart = newStart;
+      });
+      await _saveSetting('m-paused', false);
+      await _prefs?.remove('m-paused-at');
+      await _saveSetting('m-ses', newStart);
+
+      final inMoment = _entries.where((e) => e.type == 'in').firstOrNull;
+      if (inMoment != null) {
+        final updatedIn = inMoment.copyWith(timestamp: newStart);
+        await _repository.saveMoment(updatedIn);
+      }
+
+      NotekarHaptics.light(_hapticStyle);
+    }
+    _updateDynamicShortcuts();
+    unawaited(_updateAndroidWidget());
+  }
+
+  Future<void> _toggleFloatingTimer(bool enabled) async {
+    if (enabled) {
+      final canDraw =
+          await _fileChannel.invokeMethod<bool>('canDrawOverlays') ?? false;
+      if (!canDraw) {
+        await _fileChannel.invokeMethod<void>('requestOverlayPermission');
+        if (!mounted) return;
+        _showToast(
+          'Grant "Display over other apps" permission to show floating timer'
+              .localized(context),
+          warning: true,
+        );
+        return;
+      }
+      await _fileChannel.invokeMethod<void>('startFloatingTimer');
+    } else {
+      await _fileChannel.invokeMethod<void>('stopFloatingTimer');
+    }
+    if (!mounted) return;
+    setState(() => _floatingTimerEnabled = enabled);
+    await _saveSetting('floating_timer_enabled', enabled);
+    if (!mounted) return;
+    _showToast(
+      (enabled ? 'Floating Timer Enabled' : 'Floating Timer Disabled')
+          .localized(context),
+    );
   }
 
   Future<String?> _showModeSelectorSheet() async {
@@ -2142,6 +2319,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onDelete: _deleteEntry,
         onRestore: _restoreEntry,
         onUpdateNote: _updateMomentNote,
+        onUpdateNoteWithTags: _updateMomentNote,
         confirmDelete: _confirmDelete,
         onDuration: _showDuration,
         onOpenTrash: _showRecentlyDeleted,
@@ -2199,6 +2377,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
         result['action'] == 'stop_goal_session' &&
         mounted) {
       await _stopGoalSession();
+    } else if (result is Map &&
+        result['action'] == 'manual_entry_goal' &&
+        mounted) {
+      final goal = result['goal'] as Goal?;
+      await _openManualEntry(
+        initialGoal: goal,
+        initialCategory: goal?.category,
+      );
     }
     _cachedGoals = await GoalsService.instance.getGoals();
     if (mounted) setState(() {});
@@ -2207,6 +2393,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   Future<void> _openManualEntry({
     DateTime? prefilledStartTime,
     DateTime? prefilledEndTime,
+    Goal? initialGoal,
+    String? initialCategory,
   }) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
@@ -2226,7 +2414,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       builder: (ctx) => ManualEntryDialog(
         p: p,
         categories: _categories,
-        initialCategory: _activeCategory,
+        initialCategory:
+            initialCategory ?? initialGoal?.category ?? _activeCategory,
+        initialGoal: initialGoal,
         prefilledStartTime: prefilledStartTime,
         prefilledEndTime: prefilledEndTime,
       ),
@@ -2292,6 +2482,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _showToast('Moment logged manually');
     }
 
+    _cachedGoals = await GoalsService.instance.getGoals();
+    if (mounted) setState(() {});
     unawaited(_updateAndroidWidget());
   }
 
@@ -2421,6 +2613,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         initialCategory: initialCategory,
         activeCategory: _activeCategory,
         isSessionRunning: _mode == 'two-way' && _sessionStart != null,
+        floatingTimerEnabled: _floatingTimerEnabled,
+        onFloatingTimerChanged: _toggleFloatingTimer,
         theme: _theme,
         defaultMode: _defaultMode,
         tapDelay: _tapDelay,
@@ -2737,6 +2931,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
         result['action'] == 'stop_goal_session' &&
         mounted) {
       await _stopGoalSession();
+    } else if (result is Map &&
+        result['action'] == 'manual_entry_goal' &&
+        mounted) {
+      final goal = result['goal'] as Goal?;
+      await _openManualEntry(
+        initialGoal: goal,
+        initialCategory: goal?.category,
+      );
     }
     _cachedGoals = await GoalsService.instance.getGoals();
     if (mounted) setState(() {});
@@ -3345,6 +3547,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
         if (ok && _prefs != null && !_startupChecksStarted) {
           unawaited(_runStartupChecks(_prefs!));
         }
+        if (ok && _pendingShortcutAction != null) {
+          final action = _pendingShortcutAction!;
+          _pendingShortcutAction = null;
+          _executeShortcutAction(action);
+        }
       }
       if (!ok && mounted) {
         _showToast(
@@ -3382,6 +3589,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _syncPrivacyOverlay();
       if (_prefs != null && !_startupChecksStarted) {
         unawaited(_runStartupChecks(_prefs!));
+      }
+      if (_pendingShortcutAction != null) {
+        final action = _pendingShortcutAction!;
+        _pendingShortcutAction = null;
+        _executeShortcutAction(action);
       }
     }
   }
@@ -3758,6 +3970,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
                         highlightSeconds: _highlightSeconds,
                         use24HourFormat: _use24HourFormat,
                         sessionStart: _mode == 'two-way' ? _sessionStart : null,
+                        isPaused: _isPaused,
+                        pausedAt: _pausedAt,
                         fontFamily: _clockFont,
                       ),
                       if (_startupComplete &&
@@ -3774,6 +3988,69 @@ class _NoteKarHomeState extends State<NoteKarHome>
               ),
             ),
           ),
+
+          // Apple HIG Two-Way Session Pause/Resume Control Pill
+          if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out'))
+            Positioned(
+              left: 0,
+              right: 0,
+              top: MediaQuery.sizeOf(context).height * 0.5 + 84,
+              child: Center(
+                child: PressableScale(
+                  onTap: _togglePauseResumeSession,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _isPaused
+                          ? palette.orange.withValues(alpha: 0.16)
+                          : palette.surface2.withValues(alpha: 0.88),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: _isPaused
+                            ? palette.orange.withValues(alpha: 0.55)
+                            : palette.border.withValues(alpha: 0.65),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isPaused
+                              ? CupertinoIcons.play_arrow_solid
+                              : CupertinoIcons.pause_fill,
+                          size: 13,
+                          color: _isPaused ? palette.orange : palette.text,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _isPaused
+                              ? 'Resume Session'.localized(context)
+                              : 'Pause Session'.localized(context),
+                          style: TextStyle(
+                            color: _isPaused ? palette.orange : palette.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (_lastTapPosition != null && !_reduceMotion)
             IgnorePointer(
               child: Stack(

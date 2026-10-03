@@ -36,6 +36,16 @@
                 android:textStyle="bold"
                 android:includeFontPadding="false" />
 
+            <Chronometer
+                android:id="@+id/widget_chronometer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF30D158"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/widget_mode"
                 android:layout_width="wrap_content"

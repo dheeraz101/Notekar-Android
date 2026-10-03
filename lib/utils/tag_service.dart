@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:notekar/models/activity_tag.dart';
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Centralized tag management service.
@@ -233,6 +235,112 @@ class TagService {
       }
     }
     return null;
+  }
+
+  /// Renames an existing hashtag across all moments in storage and updates tag lists.
+  /// Replaces both occurrences in `moment.tags` and inline `#oldtag` in `moment.note`.
+  Future<int> renameTagAcrossAllNotes({
+    required String oldTag,
+    required String newTag,
+  }) async {
+    final oldClean = stripHash(oldTag).trim().toLowerCase();
+    final newClean = stripHash(newTag).trim().toLowerCase();
+    if (oldClean.isEmpty || newClean.isEmpty || oldClean == newClean) {
+      return 0;
+    }
+
+    final repo = MomentRepository();
+    await repo.ensureInitialized();
+    final moments = repo.getAllMoments();
+
+    final oldHashtagRegex = RegExp(
+      r'#' + RegExp.escape(oldClean) + r'(?=$|[^\w])',
+      caseSensitive: false,
+    );
+
+    int updatedCount = 0;
+    for (final moment in moments) {
+      bool changed = false;
+      var note = moment.note;
+      var tags = List<String>.from(moment.tags);
+
+      if (tags.any((t) => t.toLowerCase() == oldClean)) {
+        tags.removeWhere((t) => t.toLowerCase() == oldClean);
+        if (!tags.any((t) => t.toLowerCase() == newClean)) {
+          tags.add(newClean);
+        }
+        changed = true;
+      }
+
+      if (oldHashtagRegex.hasMatch(note)) {
+        note = note.replaceAll(oldHashtagRegex, '#$newClean');
+        changed = true;
+      }
+
+      if (changed) {
+        final updated = moment.copyWith(note: note, tags: tags);
+        await repo.saveMoment(updated);
+        updatedCount++;
+      }
+    }
+
+    _recentTags = _recentTags.map((t) {
+      if (stripHash(t).toLowerCase() == oldClean) {
+        return '#$newClean';
+      }
+      return t;
+    }).toList();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_recentTagsKey, _recentTags);
+
+    return updatedCount;
+  }
+
+  /// Removes a hashtag across all moments in storage and removes it from tag lists.
+  Future<int> removeTagFromAllNotes({required String tag}) async {
+    final clean = stripHash(tag).trim().toLowerCase();
+    if (clean.isEmpty) return 0;
+
+    final repo = MomentRepository();
+    await repo.ensureInitialized();
+    final moments = repo.getAllMoments();
+
+    final hashtagRegex = RegExp(
+      r'#' + RegExp.escape(clean) + r'(?=$|[^\w])',
+      caseSensitive: false,
+    );
+
+    int updatedCount = 0;
+    for (final moment in moments) {
+      bool changed = false;
+      var note = moment.note;
+      var tags = List<String>.from(moment.tags);
+
+      if (tags.any((t) => t.toLowerCase() == clean)) {
+        tags.removeWhere((t) => t.toLowerCase() == clean);
+        changed = true;
+      }
+
+      if (hashtagRegex.hasMatch(note)) {
+        note = note
+            .replaceAll(hashtagRegex, '')
+            .replaceAll(RegExp(r'\s+'), ' ')
+            .trim();
+        changed = true;
+      }
+
+      if (changed) {
+        final updated = moment.copyWith(note: note, tags: tags);
+        await repo.saveMoment(updated);
+        updatedCount++;
+      }
+    }
+
+    _recentTags.removeWhere((t) => stripHash(t).toLowerCase() == clean);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_recentTagsKey, _recentTags);
+
+    return updatedCount;
   }
 
   Future<void> _saveActivityTags() async {

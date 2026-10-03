@@ -198,6 +198,8 @@ class MainActivity : FlutterActivity() {
                         val streakMilestone = call.argument<String>("streakMilestone") ?: ""
                         val lastRelapseTime = call.argument<String>("lastRelapseTime") ?: ""
                         val activeCategory = call.argument<String>("activeCategory") ?: "All"
+                        val isPaused = call.argument<Boolean>("isPaused") ?: false
+                        val pausedAt = call.argument<Number>("pausedAt")?.toLong() ?: 0L
                         val focusRatio = call.argument<Int>("focusRatio") ?: 0
                         val totalTracked = call.argument<String>("totalTracked") ?: "0m"
                         val totalWasted = call.argument<String>("totalWasted") ?: "0m"
@@ -220,12 +222,15 @@ class MainActivity : FlutterActivity() {
                             .putString(NoteKarWidgetProvider.KEY_STREAK_MILESTONE, streakMilestone)
                             .putString(NoteKarWidgetProvider.KEY_LAST_RELAPSE_TIME, lastRelapseTime)
                             .putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, activeCategory)
+                            .putBoolean(NoteKarWidgetProvider.KEY_IS_PAUSED, isPaused)
+                            .putLong(NoteKarWidgetProvider.KEY_PAUSED_AT, pausedAt)
                             .putInt(NoteKarWidgetProvider.KEY_FOCUS_RATIO, focusRatio)
                             .putString(NoteKarWidgetProvider.KEY_TOTAL_TRACKED, totalTracked)
                             .putString(NoteKarWidgetProvider.KEY_TOTAL_WASTED, totalWasted)
                             .apply()
 
                         NoteKarWidgetProvider.updateAllWidgets(this)
+                        FloatingTimerService.updateState(this)
 
                         val fp =
                             getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
@@ -603,6 +608,40 @@ class MainActivity : FlutterActivity() {
                     } catch (e: Exception) {
                         result.error("USAGE_STATS_ERROR", e.message, null)
                     }
+                }
+
+                "canDrawOverlays" -> {
+                    val canDraw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        Settings.canDrawOverlays(this)
+                    } else {
+                        true
+                    }
+                    result.success(canDraw)
+                }
+
+                "requestOverlayPermission" -> {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            val intent = Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:$packageName")
+                            )
+                            startActivity(intent)
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("OVERLAY_PERMISSION_ERROR", e.message, null)
+                    }
+                }
+
+                "startFloatingTimer" -> {
+                    FloatingTimerService.start(this)
+                    result.success(true)
+                }
+
+                "stopFloatingTimer" -> {
+                    FloatingTimerService.stop(this)
+                    result.success(true)
                 }
 
                 else -> result.notImplemented()
@@ -1317,11 +1356,14 @@ class MainActivity : FlutterActivity() {
 
             val isTwoWay = mode == "two-way"
             val isCurrentlyIn = isTwoWay && nextAction == "out"
+            val isPaused = widgetPrefs.getBoolean(NoteKarWidgetProvider.KEY_IS_PAUSED, false)
+            val pausedAt = widgetPrefs.getLong(NoteKarWidgetProvider.KEY_PAUSED_AT, 0L)
 
             val categorySuffix =
                 if (activeCategory != "All" && activeCategory.isNotEmpty()) " • $activeCategory" else ""
 
             val title = when {
+                isCurrentlyIn && isPaused -> "⏸ PAUSED$categorySuffix"
                 isCurrentlyIn -> "🟢 IN$categorySuffix"
                 isTwoWay -> "⚪ Ready$categorySuffix"
                 else -> "⚡ Single Mode$categorySuffix"
@@ -1339,6 +1381,8 @@ class MainActivity : FlutterActivity() {
             }
 
             val contentText = when {
+                isCurrentlyIn && isPaused ->
+                    "Session Paused • Tap Resume to continue"
                 isCurrentlyIn && formattedTime.isNotEmpty() ->
                     "Active since $formattedTime • $auditSummary"
                 sobrietyEnabled && streakDays.isNotEmpty() ->
@@ -1350,7 +1394,13 @@ class MainActivity : FlutterActivity() {
             }
 
             val expandedText = buildString {
-                append("Status: ").append(if (isCurrentlyIn) "Active Session" else "Standby")
+                append("Status: ").append(
+                    when {
+                        isCurrentlyIn && isPaused -> "Session Paused"
+                        isCurrentlyIn -> "Active Session"
+                        else -> "Standby"
+                    }
+                )
                 if (categorySuffix.isNotEmpty()) append(" ($activeCategory)")
                 append("\n")
                 if (formattedTime.isNotEmpty()) {
@@ -1383,7 +1433,7 @@ class MainActivity : FlutterActivity() {
                 .setOnlyAlertOnce(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
-            if (isCurrentlyIn && lastTimestamp > 0L) {
+            if (isCurrentlyIn && !isPaused && lastTimestamp > 0L) {
                 builder.setUsesChronometer(true)
                 builder.setWhen(lastTimestamp)
                 builder.setShowWhen(true)
@@ -1399,6 +1449,27 @@ class MainActivity : FlutterActivity() {
                 context,
                 1006,
                 toggleIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val pauseIntent = Intent(context, NoteKarWidgetProvider::class.java).apply {
+                action = NoteKarWidgetProvider.ACTION_PAUSE_RESUME_BG
+            }
+            val pausePending = PendingIntent.getBroadcast(
+                context,
+                1005,
+                pauseIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val modesIntent = Intent(context, QuickNoteActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(QuickNoteActivity.EXTRA_SHOW_MODES, true)
+            }
+            val modesPending = PendingIntent.getActivity(
+                context,
+                1008,
+                modesIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
@@ -1445,17 +1516,17 @@ class MainActivity : FlutterActivity() {
             if (isTwoWay) {
                 if (isCurrentlyIn) {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, if (isPaused) "▶ Resume" else "⏸ Pause", pausePending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                 } else {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log IN", sessionInPending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 }
             } else {
                 builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogActionPending)
+                builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                 builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
-                builder.addAction(R.drawable.ic_stat_notekar, "⇄ Two-Way", togglePending)
             }
 
             manager.notify(PERSISTENT_NOTIFICATION_ID, builder.build())
