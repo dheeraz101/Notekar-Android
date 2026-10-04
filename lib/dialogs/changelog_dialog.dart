@@ -47,20 +47,6 @@ class ChangelogDialog extends StatefulWidget {
         tag: 'Search',
       ),
       (
-        title: 'Settings Domain Model',
-        desc:
-            'Settings have been re-architected into 6 core domains. Toggles like Haptics and 24-Hour Format are now hoisted to the main page for faster access.',
-        icon: Icons.account_tree_rounded,
-        tag: 'UX',
-      ),
-      (
-        title: 'Integrated Pause Controls',
-        desc:
-            'The standalone session pause pill was removed. You can now seamlessly pause and resume active sessions directly from the mode toggle in the minimal toolbar.',
-        icon: Icons.pause_circle_filled_rounded,
-        tag: 'UI',
-      ),
-      (
         title: 'Circuit Breaker Fault Isolation',
         desc:
             'Automated 3-strike circuit breaker protecting Digital Wellbeing and third-party integrations from cascading crashes.',

@@ -40,26 +40,6 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             'Isolate.run · LifeAuditService.calculateAsync · DashboardMetricsService.calculateAsync · Zero-Copy Ports',
       ),
       (
-        title: 'Settings Domain Model',
-        category: 'USER EXPERIENCE',
-        headline: 'Less clutter. More control.',
-        desc:
-            'The massive flat list of settings has been logically categorized into 6 core domains. Toggles like Haptics and 24-Hour Format are now hoisted to the main dashboard for faster access without digging into sub-menus.',
-        icon: Icons.account_tree_rounded,
-        badgeColor: Color(0xFF34C759),
-        specs: 'Domain Segregation · Hoisted State · Progressive Disclosure',
-      ),
-      (
-        title: 'Integrated Pause Controls',
-        category: 'USER INTERFACE',
-        headline: 'Pause seamlessly inside the toolbar.',
-        desc:
-            'The standalone floating session pause pill was removed. You can now pause and resume active sessions directly by tapping the mode toggle icon in the minimal toolbar.',
-        icon: Icons.pause_circle_filled_rounded,
-        badgeColor: Color(0xFFFF9F0A),
-        specs: 'Unified Dock · Mode Icon Morphing · Visual Simplification',
-      ),
-      (
         title: 'High-Performance Search Indexing',
         category: 'SEARCH & RETRIEVAL',
         headline: 'Sub-Millisecond Inverted Token Index.',
