@@ -585,73 +585,84 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
   }
 
   Widget _buildRiskRadarCard(BuildContext context) {
-    final radar = RiskRadarService.analyze(entries);
-    final isHigh = radar.riskLevel == 'High';
-    final cardColor = isHigh
-        ? p.red.withValues(alpha: 0.08)
-        : p.orange.withValues(alpha: 0.08);
-    final accentColor = isHigh ? p.red : p.orange;
+    return FutureBuilder<RiskRadarResult>(
+      future: RiskRadarService.analyzeAsync(entries),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 120,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final radar = snapshot.data!;
+        final isHigh = radar.riskLevel == 'High';
+        final cardColor = isHigh
+            ? p.red.withValues(alpha: 0.08)
+            : p.orange.withValues(alpha: 0.08);
+        final accentColor = isHigh ? p.red : p.orange;
 
-    return Container(
-      margin: const EdgeInsets.only(top: 12, bottom: 0),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: accentColor.withValues(alpha: 0.4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        return Container(
+          margin: const EdgeInsets.only(top: 12, bottom: 0),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: accentColor.withValues(alpha: 0.4)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.radar_rounded, color: accentColor, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Intelligent Risk Radar'.localized(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: p.text,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 14.5,
+              Row(
+                children: [
+                  Icon(Icons.radar_rounded, color: accentColor, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Intelligent Risk Radar'.localized(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: p.text,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14.5,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '${radar.riskLevel} Risk (${radar.riskScore}%)',
+                      style: TextStyle(
+                        color: accentColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '${radar.riskLevel} Risk (${radar.riskScore}%)',
-                  style: TextStyle(
-                    color: accentColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+              const SizedBox(height: 12),
+              Text(
+                radar.alertMessage.localized(context),
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.4,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            radar.alertMessage.localized(context),
-            style: TextStyle(
-              color: p.text,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

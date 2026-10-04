@@ -675,6 +675,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     }
 
     return ListView.builder(
+      key: const PageStorageKey<String>('history_calendar_list_view'),
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       itemCount: filteredItems.length,
       itemBuilder: (ctx, idx) {

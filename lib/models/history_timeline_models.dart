@@ -398,3 +398,128 @@ String _monthShort(int m) {
     _ => '',
   };
 }
+
+class TimelineIsolateResult {
+  final List<TimelineDaySection> sections;
+  final Map<int, String> singleNumberMap;
+  TimelineIsolateResult(this.sections, this.singleNumberMap);
+}
+
+class TimelineIsolatePayload {
+  final List<Moment> entries;
+  final bool includeGaps;
+  final String filter;
+  final String? selectedDateKey;
+  final String today;
+  final DateTime weekAgo;
+
+  TimelineIsolatePayload({
+    required this.entries,
+    required this.includeGaps,
+    required this.filter,
+    this.selectedDateKey,
+    required this.today,
+    required this.weekAgo,
+  });
+}
+
+TimelineIsolateResult buildTimelineDataInIsolate(
+  TimelineIsolatePayload payload,
+) {
+  // 1. Build Single Number Map
+  final map = <int, String>{};
+  final singles = payload.entries.where((e) => e.type == 'single').toList();
+  if (singles.isNotEmpty) {
+    // Sort oldest first to assign sequential numbers
+    singles.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    String currentDay = '';
+    int count = 0;
+    for (int i = 0; i < singles.length; i++) {
+      if (singles[i].date != currentDay) {
+        currentDay = singles[i].date;
+        count = 1;
+      } else {
+        count++;
+      }
+      map[singles[i].id] = count.toString().padLeft(2, '0');
+    }
+  }
+
+  // 2. Build Sections
+  final allSections = buildTimelineDaySections(
+    payload.entries,
+    includeGaps: payload.includeGaps,
+  );
+
+  var sections = allSections;
+  if (payload.filter == 'today') {
+    sections = sections.where((s) => s.dateKey == payload.today).toList();
+  } else if (payload.filter == 'week') {
+    sections = sections.where((s) {
+      return s.dateKey == payload.today || s.date.isAfter(payload.weekAgo);
+    }).toList();
+  } else if (payload.filter == 'date') {
+    if (payload.selectedDateKey != null) {
+      sections = sections
+          .where((s) => s.dateKey == payload.selectedDateKey)
+          .toList();
+    }
+  } else if (payload.filter == 'sessions') {
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items.whereType<TimelineSessionItem>().toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
+  } else if (payload.filter == 'single') {
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items
+                .whereType<TimelineSingleItem>()
+                .where((item) => item.moment.type == 'single')
+                .toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
+  } else if (payload.filter == 'notes') {
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items.where((it) {
+              if (it is TimelineSingleItem && it.moment.note.isNotEmpty) {
+                return true;
+              }
+              if (it is TimelineSessionItem &&
+                  ((it.inMoment.note.isNotEmpty) ||
+                      (it.outMoment?.note.isNotEmpty ?? false))) {
+                return true;
+              }
+              return false;
+            }).toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
+  }
+
+  return TimelineIsolateResult(sections, map);
+}

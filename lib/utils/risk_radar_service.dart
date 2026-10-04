@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:notekar/models/moment.dart';
 
 class RiskRadarResult {
@@ -17,6 +19,10 @@ class RiskRadarResult {
 }
 
 class RiskRadarService {
+  static Future<RiskRadarResult> analyzeAsync(List<Moment> entries) {
+    return Isolate.run(() => analyze(entries));
+  }
+
   static RiskRadarResult analyze(List<Moment> entries) {
     if (entries.isEmpty) {
       return RiskRadarResult(

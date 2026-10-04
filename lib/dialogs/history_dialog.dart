@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -180,116 +181,30 @@ class _HistoryDialogState extends State<HistoryDialog> {
     }
   }
 
-  void _rebuildSingleNumberMap() {
-    if (!widget.useNumbersInSingle) {
-      _singleNumberMap = {};
-      return;
-    }
-    final map = <int, String>{};
-    final singles = _entries.where((e) => e.type == 'single').toList()
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+  bool _isProcessingTimeline = false;
 
-    if (widget.resetSingleDaily) {
-      final Map<String, List<Moment>> grouped = {};
-      for (final e in singles) {
-        grouped.putIfAbsent(e.date, () => []).add(e);
-      }
-      for (final dayEntries in grouped.values) {
-        for (int i = 0; i < dayEntries.length; i++) {
-          final count = (i % 100).toString().padLeft(2, '0');
-          map[dayEntries[i].id] = count;
-        }
-      }
-    } else {
-      for (int i = 0; i < singles.length; i++) {
-        final count = (i % 100).toString().padLeft(2, '0');
-        map[singles[i].id] = count;
-      }
-    }
-    _singleNumberMap = map;
-  }
+  Future<void> _rebuildMemoizedLists() async {
+    setState(() {
+      _isProcessingTimeline = true;
+    });
 
-  void _rebuildMemoizedLists() {
-    _rebuildSingleNumberMap();
-    final today = dateKey(DateTime.now());
-    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
-
-    // ALWAYS pair sessions across the full history first so pairings are preserved
-    // across midnight, multiple sessions, and filter transitions.
-    final allSections = buildTimelineDaySections(
-      _entries,
+    final payload = TimelineIsolatePayload(
+      entries: _entries,
       includeGaps: _showGapCards,
+      filter: _filter,
+      selectedDateKey: _selectedDateKey,
+      today: dateKey(DateTime.now()),
+      weekAgo: DateTime.now().subtract(const Duration(days: 7)),
     );
 
-    var sections = allSections;
-    if (_filter == 'today') {
-      sections = sections.where((s) => s.dateKey == today).toList();
-    } else if (_filter == 'week') {
-      sections = sections.where((s) {
-        return s.dateKey == today || s.date.isAfter(weekAgo);
-      }).toList();
-    } else if (_filter == 'date') {
-      if (_selectedDateKey != null) {
-        sections = sections
-            .where((s) => s.dateKey == _selectedDateKey)
-            .toList();
-      }
-    } else if (_filter == 'sessions') {
-      sections = sections
-          .map(
-            (s) => TimelineDaySection(
-              dateKey: s.dateKey,
-              date: s.date,
-              displayTitle: s.displayTitle,
-              totalTrackedDuration: s.totalTrackedDuration,
-              totalLogs: s.totalLogs,
-              items: s.items.whereType<TimelineSessionItem>().toList(),
-            ),
-          )
-          .where((s) => s.items.isNotEmpty)
-          .toList();
-    } else if (_filter == 'single') {
-      sections = sections
-          .map(
-            (s) => TimelineDaySection(
-              dateKey: s.dateKey,
-              date: s.date,
-              displayTitle: s.displayTitle,
-              totalTrackedDuration: s.totalTrackedDuration,
-              totalLogs: s.totalLogs,
-              items: s.items
-                  .whereType<TimelineSingleItem>()
-                  .where((item) => item.moment.type == 'single')
-                  .toList(),
-            ),
-          )
-          .where((s) => s.items.isNotEmpty)
-          .toList();
-    } else if (_filter == 'notes') {
-      sections = sections
-          .map(
-            (s) => TimelineDaySection(
-              dateKey: s.dateKey,
-              date: s.date,
-              displayTitle: s.displayTitle,
-              totalTrackedDuration: s.totalTrackedDuration,
-              totalLogs: s.totalLogs,
-              items: s.items.where((it) {
-                if (it is TimelineSessionItem) {
-                  return it.inMoment.note.trim().isNotEmpty ||
-                      (it.outMoment?.note.trim().isNotEmpty ?? false);
-                } else if (it is TimelineSingleItem) {
-                  return it.moment.note.trim().isNotEmpty;
-                }
-                return false;
-              }).toList(),
-            ),
-          )
-          .where((s) => s.items.isNotEmpty)
-          .toList();
-    }
+    final result = await Isolate.run(() => buildTimelineDataInIsolate(payload));
 
+    if (!mounted) return;
+
+    final sections = result.sections;
+    _singleNumberMap = result.singleNumberMap;
     _daySections = sections;
+
     final allRows = <_TimelineRowItem>[];
     for (final sec in _daySections) {
       if (sec.items.isEmpty) continue;
@@ -304,8 +219,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
         );
       }
     }
-    _allTimelineRows = allRows;
-    _updateVisibleItems();
+
+    setState(() {
+      _allTimelineRows = allRows;
+      _updateVisibleItems();
+      _isProcessingTimeline = false;
+    });
   }
 
   void _updateVisibleItems() {
@@ -999,7 +918,21 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 child: SizedBox.shrink(),
                               );
                             }(),
-                            if (_timelineRows.isEmpty)
+                            if (_isProcessingTimeline)
+                              const SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            else if (_isProcessingTimeline)
+                              const SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            else if (_timelineRows.isEmpty)
                               SliverFillRemaining(
                                 hasScrollBody: false,
                                 child: HIGEmptyState(

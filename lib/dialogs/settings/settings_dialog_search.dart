@@ -1130,49 +1130,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         onBoolChanged: null,
         status: 'Custom',
       ),
-      item(
-        title: 'Compact History',
-        subtitle: 'Denser rows for scanning many moments',
-        category: 'Moments',
-        icon: Icons.view_agenda_rounded,
-        keywords: [
-          'compact',
-          'history',
-          'density',
-          'list',
-          'rows',
-          'pinch-to-density',
-          'pinch zoom',
-          'comfortable',
-          'two fingers',
-        ],
-        kind: 'switch',
-        boolValue: compactHistory,
-        onBoolChanged: (bool value) async {
-          if (value && useNumbersInSingle) {
-            final confirmed = await showFeatureConflictDialog(
-              context,
-              p: p,
-              title: 'Turn Off Single Numbers?',
-              message:
-                  'Compact History cannot be enabled while Single Moment Numbering is active. Disable Single Numbers to use compact rows.',
-              confirmLabel: 'Turn Off & Enable',
-              icon: Icons.compress_rounded,
-              iconColor: p.accent,
-            );
-            if (!confirmed) return;
-            update(() => useNumbersInSingle = false);
-            widget.onUseNumbersInSingle?.call(false);
-          }
-          update(() {
-            compactHistory = value;
-            historyDensity = value ? 'compact' : 'comfortable';
-          });
-          widget.onCompactHistory(value);
-          widget.onHistoryDensity(historyDensity);
-        },
-        status: null,
-      ),
+
       item(
         title: 'Confirm Delete',
         subtitle: 'Show a prompt before deleting moments',
