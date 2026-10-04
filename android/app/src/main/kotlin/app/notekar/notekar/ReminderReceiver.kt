@@ -103,8 +103,8 @@ class ReminderReceiver : BroadcastReceiver() {
 
     companion object {
         const val PREFS_NAME = "notekar_default_reminders_prefs"
-        const val CHANNEL_ID = "notekar_default_reminders"
-        const val REFLECTION_CHANNEL_ID = "notekar_default_reminders"
+        const val CHANNEL_ID = NotificationConsistencyManager.CHANNEL_DEFAULT_REMINDERS
+        const val REFLECTION_CHANNEL_ID = NotificationConsistencyManager.CHANNEL_DEFAULT_REMINDERS
         const val NOTIFICATION_ID_BASE = 4000
         const val ACTION_TRIGGER = "app.notekar.notekar.TRIGGER_REMINDER"
 

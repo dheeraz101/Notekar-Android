@@ -48,7 +48,7 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
     companion object {
         private const val ACTION_CHECK = "app.notekar.notekar.CHECK_REMOTE_NOTICES"
-        private const val CHANNEL_ID = "notekar_low_wisdom"
+        private const val CHANNEL_ID = NotificationConsistencyManager.CHANNEL_LOW_WISDOM
         private const val KEY_ENABLED = "remote_notices_enabled"
         private const val KEY_CHECK_ON_OPEN = "remote_notices_check_on_open"
         private const val KEY_FEED_URL = "remote_notice_feed_url"
@@ -291,15 +291,7 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
             action: String
         ) {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                notificationManager.createNotificationChannel(
-                    NotificationChannel(
-                        CHANNEL_ID,
-                        "App notices",
-                        NotificationManager.IMPORTANCE_DEFAULT
-                    )
-                )
-            }
+            NotificationConsistencyManager.setupChannels(context)
             val appAction = normalizeAction(action).ifBlank { actionFromUrl(url) }
             val openIntent = if (appAction.isNotBlank()) {
                 Intent(context, MainActivity::class.java).apply {

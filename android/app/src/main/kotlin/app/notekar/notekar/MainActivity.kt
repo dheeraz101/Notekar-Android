@@ -997,15 +997,7 @@ class MainActivity : FlutterActivity() {
     private fun showUpdateNotification(title: String, body: String, url: String) {
         if (!canPostNotifications()) return
         val notificationManager = getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(
-                NotificationChannel(
-                    UPDATE_CHANNEL_ID,
-                    "App updates",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-            )
-        }
+        NotificationConsistencyManager.setupChannels(this)
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -1255,8 +1247,8 @@ class MainActivity : FlutterActivity() {
         private const val PRIVACY_LOCK_REQUEST = 4023
         private const val UPDATE_NOTIFICATION_ID = 3100
         private const val PERSISTENT_NOTIFICATION_ID = 3105
-        private const val UPDATE_CHANNEL_ID = "notekar_default_reminders"
-        private const val PERSISTENT_CHANNEL_ID = "notekar_high_ongoing"
+        private const val UPDATE_CHANNEL_ID = NotificationConsistencyManager.CHANNEL_DEFAULT_REMINDERS
+        private const val PERSISTENT_CHANNEL_ID = NotificationConsistencyManager.CHANNEL_HIGH_ONGOING
         const val EXTRA_LAUNCH_ACTION = "app.notekar.notekar.extra.LAUNCH_ACTION"
         const val ACTION_NOTE = "app.notekar.notekar.ACTION_NOTE"
         const val ACTION_MOMENT = "app.notekar.notekar.ACTION_MOMENT"
@@ -1269,18 +1261,7 @@ class MainActivity : FlutterActivity() {
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    PERSISTENT_CHANNEL_ID,
-                    "Persistent Control Panel",
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    description =
-                        "Quick actions to log check-in/out or compose notes from lock screen"
-                    setShowBadge(false)
-                }
-                manager.createNotificationChannel(channel)
-            }
+            NotificationConsistencyManager.setupChannels(context)
 
             val widgetPrefs = context.getSharedPreferences(
                 NoteKarWidgetProvider.PREFS_NAME,
