@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -183,24 +183,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
   bool _isProcessingTimeline = false;
 
-  Future<void> _rebuildMemoizedLists() async {
-    setState(() {
-      _isProcessingTimeline = true;
-    });
-
-    final payload = TimelineIsolatePayload(
-      entries: _entries,
-      includeGaps: _showGapCards,
-      filter: _filter,
-      selectedDateKey: _selectedDateKey,
-      today: dateKey(DateTime.now()),
-      weekAgo: DateTime.now().subtract(const Duration(days: 7)),
-    );
-
-    final result = await Isolate.run(() => buildTimelineDataInIsolate(payload));
-
-    if (!mounted) return;
-
+  void _populateTimelineRows(TimelineIsolateResult result) {
     final sections = result.sections;
     _singleNumberMap = result.singleNumberMap;
     _daySections = sections;
@@ -220,10 +203,42 @@ class _HistoryDialogState extends State<HistoryDialog> {
       }
     }
 
+    _allTimelineRows = allRows;
+    _updateVisibleItems();
+    _isProcessingTimeline = false;
+  }
+
+  Future<void> _rebuildMemoizedLists() async {
+    final payload = TimelineIsolatePayload(
+      entries: _entries,
+      includeGaps: _showGapCards,
+      filter: _filter,
+      selectedDateKey: _selectedDateKey,
+      today: dateKey(DateTime.now()),
+      weekAgo: DateTime.now().subtract(const Duration(days: 7)),
+    );
+
+    // Fast synchronous path for smaller datasets (<200 moments) avoids isolate spawning overhead,
+    // eliminates unsendable closure capturing issues, and allows immediate rendering on first frame.
+    if (kIsWeb || _entries.length < 200) {
+      final result = buildTimelineDataInIsolate(payload);
+      _populateTimelineRows(result);
+      if (mounted) {
+        setState(() {});
+      }
+      return;
+    }
+
     setState(() {
-      _allTimelineRows = allRows;
-      _updateVisibleItems();
-      _isProcessingTimeline = false;
+      _isProcessingTimeline = true;
+    });
+
+    final result = await compute(buildTimelineDataInIsolate, payload);
+
+    if (!mounted) return;
+
+    setState(() {
+      _populateTimelineRows(result);
     });
   }
 
@@ -918,14 +933,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 child: SizedBox.shrink(),
                               );
                             }(),
-                            if (_isProcessingTimeline)
-                              const SliverFillRemaining(
-                                hasScrollBody: false,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            else if (_isProcessingTimeline)
+                            if (_isProcessingTimeline && _timelineRows.isEmpty)
                               const SliverFillRemaining(
                                 hasScrollBody: false,
                                 child: Center(
