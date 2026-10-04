@@ -1255,8 +1255,8 @@ class MainActivity : FlutterActivity() {
         private const val PRIVACY_LOCK_REQUEST = 4023
         private const val UPDATE_NOTIFICATION_ID = 3100
         private const val PERSISTENT_NOTIFICATION_ID = 3105
-        private const val UPDATE_CHANNEL_ID = "notekar_updates"
-        private const val PERSISTENT_CHANNEL_ID = "notekar_persistent_control"
+        private const val UPDATE_CHANNEL_ID = "notekar_default_reminders"
+        private const val PERSISTENT_CHANNEL_ID = "notekar_high_ongoing"
         const val EXTRA_LAUNCH_ACTION = "app.notekar.notekar.extra.LAUNCH_ACTION"
         const val ACTION_NOTE = "app.notekar.notekar.ACTION_NOTE"
         const val ACTION_MOMENT = "app.notekar.notekar.ACTION_MOMENT"

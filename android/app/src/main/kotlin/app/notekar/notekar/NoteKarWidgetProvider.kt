@@ -222,8 +222,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                         .putBoolean(KEY_IS_PAUSED, false)
                         .putLong(KEY_PAUSED_AT, 0L)
                         .apply()
-                    bgEditor.putString("flutter.m-inout", "out")
-                    bgEditor.putLong("flutter.m-ses", now)
+                    
+                    
                     bgEditor.putBoolean("flutter.is_paused", false)
                     bgEditor.putBoolean("flutter.m-paused", false)
                     bgEditor.remove("flutter.paused_at")
@@ -240,8 +240,8 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                         .putBoolean(KEY_IS_PAUSED, false)
                         .putLong(KEY_PAUSED_AT, 0L)
                         .apply()
-                    bgEditor.putString("flutter.m-inout", "in")
-                    bgEditor.remove("flutter.m-ses")
+                    
+                    
                     bgEditor.putBoolean("flutter.is_paused", false)
                     bgEditor.putBoolean("flutter.m-paused", false)
                     bgEditor.remove("flutter.paused_at")

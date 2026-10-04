@@ -48,7 +48,7 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
 
     companion object {
         private const val ACTION_CHECK = "app.notekar.notekar.CHECK_REMOTE_NOTICES"
-        private const val CHANNEL_ID = "notekar_remote_notices"
+        private const val CHANNEL_ID = "notekar_low_wisdom"
         private const val KEY_ENABLED = "remote_notices_enabled"
         private const val KEY_CHECK_ON_OPEN = "remote_notices_check_on_open"
         private const val KEY_FEED_URL = "remote_notice_feed_url"
@@ -454,6 +454,6 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
         }
 
         private fun prefs(context: Context) =
-            context.getSharedPreferences("notekar_remote_notices", Context.MODE_PRIVATE)
+            context.getSharedPreferences("notekar_low_wisdom", Context.MODE_PRIVATE)
     }
 }
