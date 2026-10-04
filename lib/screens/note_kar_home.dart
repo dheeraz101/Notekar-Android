@@ -1476,6 +1476,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Widget _buildMinimalToolbarCapsule(Palette palette, double bottomInset) {
+    final isSessionActive =
+        _mode == 'two-way' && (_sessionStart != null || _inout == 'out');
     return HomeMinimalToolbarCapsule(
       palette: palette,
       mode: _mode,
@@ -1483,6 +1485,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       onToggleMode: _toggleMode,
       onOpenHistory: _openHistory,
       onOpenSettings: _openSettings,
+      isSessionActive: isSessionActive,
+      isPaused: _isPaused,
+      onTogglePause: _togglePauseResumeSession,
     );
   }
 
@@ -3962,68 +3967,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ),
           ),
 
-          // Two-Way Session Pause/Resume Control Dock
-          if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out'))
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 84 + bottomInset,
-              child: Center(
-                child: PressableScale(
-                  onTap: _togglePauseResumeSession,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _isPaused
-                          ? palette.orange.withValues(alpha: 0.16)
-                          : palette.surface2.withValues(alpha: 0.88),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: _isPaused
-                            ? palette.orange.withValues(alpha: 0.55)
-                            : palette.border.withValues(alpha: 0.65),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _isPaused
-                              ? CupertinoIcons.play_arrow_solid
-                              : CupertinoIcons.pause_fill,
-                          size: 13,
-                          color: _isPaused ? palette.orange : palette.text,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _isPaused
-                              ? 'Resume Session'.localized(context)
-                              : 'Pause Session'.localized(context),
-                          style: TextStyle(
-                            color: _isPaused ? palette.orange : palette.text,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
           if (_lastTapPosition != null && !_reduceMotion)
             IgnorePointer(
               child: Stack(

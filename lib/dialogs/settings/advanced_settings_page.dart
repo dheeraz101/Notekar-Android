@@ -30,6 +30,7 @@ class AdvancedSettingsPage extends StatelessWidget {
     required this.onResetAllData,
     required this.onFactoryReset,
     required this.onOpenCategory,
+    this.isGodModeUnlocked = false,
   });
 
   final Palette p;
@@ -43,6 +44,7 @@ class AdvancedSettingsPage extends StatelessWidget {
   final bool highContrast;
   final String healthStatus;
   final bool soundEffects;
+  final bool isGodModeUnlocked;
 
   final ValueChanged<String> onHapticStyleChanged;
   final ValueChanged<bool>? onSoundEffectsChanged;
@@ -114,6 +116,15 @@ class AdvancedSettingsPage extends StatelessWidget {
                 parent: 'Advanced',
               ),
             ),
+            if (isGodModeUnlocked)
+              SettingsRow(
+                p: p,
+                icon: Icons.auto_awesome_rounded,
+                title: 'God Mode'.localized(context),
+                status: 'Unlocked'.localized(context),
+                color: const Color(0xFFFFD700),
+                onTap: () => onOpenCategory('God Mode', parent: 'Advanced'),
+              ),
             SettingsRow(
               p: p,
               icon: Icons.developer_mode_rounded,

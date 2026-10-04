@@ -2204,6 +2204,40 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 _buildCriticalAdvisoryBanner(p),
                               _buildAppleIdProfileCard(p),
 
+                              // Domain 1: Quick Settings
+                              HigSectionHeader(p: p, title: 'Quick Settings'),
+                              HigGroupedCard(
+                                p: p,
+                                children: [
+                                  HigRow(
+                                    p: p,
+                                    icon: CupertinoIcons.waveform,
+                                    iconColor: p.accent,
+                                    title: 'Haptic Feedback',
+                                    status:
+                                        hapticStyle[0].toUpperCase() +
+                                        hapticStyle.substring(1),
+                                    onTap: () {
+                                      final next = hapticStyle == 'standard'
+                                          ? 'light'
+                                          : (hapticStyle == 'light'
+                                                ? 'off'
+                                                : 'standard');
+                                      widget.onHapticStyle(next);
+                                    },
+                                  ),
+                                  if (widget.onUse24Hour != null)
+                                    HigSwitchRow(
+                                      p: p,
+                                      icon: CupertinoIcons.clock,
+                                      iconColor: p.blue,
+                                      title: '24-Hour Format',
+                                      value: use24Hour,
+                                      onChanged: widget.onUse24Hour!,
+                                    ),
+                                ],
+                              ),
+
                               // Domain 2: Workflow & Capture
                               HigSectionHeader(
                                 p: p,
@@ -2406,15 +2440,6 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     status: 'v$appVersion',
                                     onTap: () => _openCategory('About'),
                                   ),
-                                  if (_isGodModeUnlocked)
-                                    HigRow(
-                                      p: p,
-                                      icon: Icons.auto_awesome_rounded,
-                                      iconColor: const Color(0xFFFFD700),
-                                      title: 'God Mode',
-                                      status: 'Unlocked',
-                                      onTap: () => _openCategory('God Mode'),
-                                    ),
                                   HigRow(
                                     p: p,
                                     icon: Icons.coffee_rounded,
@@ -3871,6 +3896,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                             child: AdvancedSettingsPage(
                               p: p,
                               subCategory: category ?? 'Advanced',
+                              isGodModeUnlocked: _isGodModeUnlocked,
                               currentLocale: currentLocale,
                               onLocaleChanged: (value) {
                                 setState(() => currentLocale = value);

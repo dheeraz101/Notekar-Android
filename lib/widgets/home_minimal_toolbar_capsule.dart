@@ -14,6 +14,9 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
     required this.onToggleMode,
     required this.onOpenHistory,
     required this.onOpenSettings,
+    this.isSessionActive = false,
+    this.isPaused = false,
+    this.onTogglePause,
   });
 
   final Palette palette;
@@ -22,6 +25,9 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
   final VoidCallback onToggleMode;
   final VoidCallback onOpenHistory;
   final VoidCallback onOpenSettings;
+  final bool isSessionActive;
+  final bool isPaused;
+  final VoidCallback? onTogglePause;
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +57,23 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           PressableScale(
-            onTap: onToggleMode,
+            onTap: isSessionActive && onTogglePause != null
+                ? onTogglePause!
+                : onToggleMode,
             child: Padding(
               padding: const EdgeInsets.all(6),
               child: Icon(
-                mode == 'single'
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.all_inclusive_rounded,
+                isSessionActive
+                    ? (isPaused
+                          ? CupertinoIcons.play_arrow_solid
+                          : CupertinoIcons.pause_fill)
+                    : (mode == 'single'
+                          ? Icons.radio_button_checked_rounded
+                          : Icons.all_inclusive_rounded),
                 size: 16,
-                color: palette.accent,
+                color: isSessionActive
+                    ? (isPaused ? palette.orange : palette.text)
+                    : palette.accent,
               ),
             ),
           ),
