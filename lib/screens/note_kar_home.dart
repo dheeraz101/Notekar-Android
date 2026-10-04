@@ -891,18 +891,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _executeShortcutAction(String shortcutType) {
-    if (shortcutType == 'quick_log_in') {
+    if (shortcutType == 'quick_session') {
+      if (_mode != 'two-way') {
+        _setMode('two-way');
+      }
       unawaited(_logEntry(forcedType: 'in'));
-    } else if (shortcutType == 'quick_log_out') {
+    } else if (shortcutType == 'quick_session_end') {
       unawaited(_logEntry(forcedType: 'out'));
-    } else if (shortcutType == 'quick_log_single') {
-      unawaited(_logEntry(forcedType: 'single'));
-    } else if (shortcutType == 'quick_pause_resume') {
-      _togglePauseResumeSession();
-    } else if (shortcutType == 'compose_note') {
-      unawaited(_openNote());
-    } else if (shortcutType == 'open_history') {
-      unawaited(_openHistory());
+    } else if (shortcutType == 'log_past_moment') {
+      unawaited(_openManualEntry());
+    } else if (shortcutType == 'open_search') {
+      unawaited(_openSettings(initialCategory: 'Search Notes'));
     }
   }
 
@@ -910,54 +909,44 @@ class _NoteKarHomeState extends State<NoteKarHome>
     try {
       const quickActions = QuickActions();
       final items = <ShortcutItem>[];
-      if (_mode == 'two-way') {
-        if (_sessionStart != null || _inout == 'out') {
-          items.add(
-            const ShortcutItem(
-              type: 'quick_log_out',
-              localizedTitle: 'Log OUT',
-              icon: 'ic_launcher',
-            ),
-          );
-          items.add(
-            ShortcutItem(
-              type: 'quick_pause_resume',
-              localizedTitle: _isPaused ? 'Resume Session' : 'Pause Session',
-              icon: 'ic_launcher',
-            ),
-          );
-        } else {
-          items.add(
-            const ShortcutItem(
-              type: 'quick_log_in',
-              localizedTitle: 'Log IN',
-              icon: 'ic_launcher',
-            ),
-          );
-        }
+
+      // Shortcut 1: Quick Session (Starts timer immediately)
+      if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out')) {
+        items.add(
+          const ShortcutItem(
+            type: 'quick_session_end',
+            localizedTitle: 'End Session',
+            icon: 'ic_launcher',
+          ),
+        );
       } else {
         items.add(
           const ShortcutItem(
-            type: 'quick_log_single',
-            localizedTitle: '⚡ Quick Log',
+            type: 'quick_session',
+            localizedTitle: 'Quick Session',
             icon: 'ic_launcher',
           ),
         );
       }
+
+      // Shortcut 2: Log Past Moment (Opens manual entry)
       items.add(
         const ShortcutItem(
-          type: 'compose_note',
-          localizedTitle: 'Compose Note',
+          type: 'log_past_moment',
+          localizedTitle: 'Log Past Moment',
           icon: 'ic_launcher',
         ),
       );
+
+      // Shortcut 3: Search (Opens History search)
       items.add(
         const ShortcutItem(
-          type: 'open_history',
-          localizedTitle: 'Open History',
+          type: 'open_search',
+          localizedTitle: 'Search',
           icon: 'ic_launcher',
         ),
       );
+
       quickActions.setShortcutItems(items);
     } catch (_) {}
   }
