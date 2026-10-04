@@ -1,4 +1,7 @@
 import 'package:notekar/utils/app_utils.dart';
+import 'package:isar/isar.dart';
+
+part 'moment.g.dart';
 
 String? extractHashtagCategory(String? text) {
   if (text == null || text.trim().isEmpty) return null;
@@ -18,6 +21,7 @@ String? extractHashtagCategory(String? text) {
   return tag[0].toUpperCase() + tag.substring(1);
 }
 
+@collection
 class Moment {
   Moment({
     required this.id,
@@ -29,13 +33,13 @@ class Moment {
     this.tags = const [],
   });
 
-  final int id;
-  final int timestamp;
-  final String type;
-  final String date;
-  final String note;
-  final String? category;
-  final List<String> tags;
+  Id id;
+  int timestamp;
+  String type;
+  String date;
+  String note;
+  String? category;
+  List<String> tags;
 
   factory Moment.fromJson(Map<String, dynamic> json) {
     final type = (json['type'] as String?) ?? 'single';
@@ -63,6 +67,7 @@ class Moment {
     );
   }
 
+  @ignore
   bool get isValid {
     if (id <= 0) return false;
     if (timestamp <= 0) return false;
@@ -76,6 +81,7 @@ class Moment {
 
   /// Returns the union of explicit tags and inline #hashtags from note.
   /// Used for filtering, search, and display.
+  @ignore
   List<String> get effectiveTags {
     final result = <String>{...tags};
     final regex = RegExp(r'#([a-zA-Z0-9_-]+)');

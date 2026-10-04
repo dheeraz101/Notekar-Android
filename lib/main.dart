@@ -5,8 +5,9 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import 'package:notekar/l10n/app_localizations.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/note_kar_home.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -111,9 +112,9 @@ void main() async {
   setupErrorHandling();
 
   final sharedPrefsFuture = SharedPreferences.getInstance();
-  final hivePreloadFuture = _initHivePreload();
+  final isarPreloadFuture = _initIsarPreload();
 
-  final results = await Future.wait([sharedPrefsFuture, hivePreloadFuture]);
+  final results = await Future.wait([sharedPrefsFuture, isarPreloadFuture]);
 
   final prefs = results[0] as SharedPreferences;
   CircuitBreakerService.instance.init(prefs);
@@ -139,13 +140,13 @@ void main() async {
   );
 }
 
-Future<void> _initHivePreload() async {
+Future<void> _initIsarPreload() async {
   const channel = MethodChannel('notekar/files');
   try {
     final dataDir = await channel.invokeMethod<String>('appDataDir');
-    Hive.init(dataDir ?? Directory.systemTemp.path);
+    await Isar.open([MomentSchema], directory: dataDir ?? Directory.systemTemp.path);
   } catch (_) {
-    Hive.init(Directory.systemTemp.path);
+    await Isar.open([MomentSchema], directory: Directory.systemTemp.path);
   }
 }
 

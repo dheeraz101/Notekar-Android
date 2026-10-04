@@ -4,8 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/services/search_index_service.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -13,185 +12,64 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MomentRepository {
   static final MomentRepository _instance = MomentRepository._internal();
-
   factory MomentRepository() => _instance;
-
   MomentRepository._internal();
 
-  static const String _entryBoxName = 'notekar_entries_v1';
-  static const String _trashBoxName = 'notekar_trash_v1';
   static const String _nextIdKey = 'notekar.nextId';
   static const String _legacyEntriesKey = 'notekar.entries';
+  static const String _autoSnapshotKey = 'notekar.auto_rolling_snapshot';
+  static const String _lastSnapshotTimeKey = 'notekar.last_auto_snapshot_ms';
+  static const String keyCorruptedFlag = 'notekar.database_corrupted_flag';
+  static const String keyRecoveredFromSnapshot = 'notekar.database_recovered_from_snapshot';
 
-  late Box<dynamic> _box;
-  late Box<dynamic> _trashBox;
+  late Isar _isar;
+  late Isar _trashIsar;
   late SharedPreferences _prefs;
   final _logger = AppLogger();
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
 
+  List<Moment>? _cachedMoments;
+  List<Moment>? _cachedTrashMoments;
+  Map<int, Moment>? _momentIdIndex;
+
   Future<void> ensureInitialized({SharedPreferences? preloadedPrefs}) async {
     if (_isInitialized) return;
     await initialize(preloadedPrefs: preloadedPrefs);
   }
 
-  // In-memory cache to boost read performance
-  List<Moment>? _cachedMoments;
-  List<Moment>? _cachedTrashMoments;
-  Map<int, Moment>? _momentIdIndex;
+  Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
+    if (_isInitialized) return;
+    _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
 
-  Future<List<int>?> _getOrGenerateEncryptionKey() async {
-    const secureStorage = FlutterSecureStorage(
-      aOptions: AndroidOptions(resetOnError: true),
+    String? dataDirPath;
+    try {
+      const channel = MethodChannel('notekar/files');
+      dataDirPath = await channel.invokeMethod<String>('appDataDir');
+    } catch (_) {}
+    dataDirPath ??= Directory.systemTemp.path;
+
+    _isar = await Isar.open([MomentSchema], name: 'notekar_entries_v1', directory: dataDirPath);
+    _trashIsar = await Isar.open([MomentSchema], name: 'notekar_trash_v1', directory: dataDirPath);
+
+    _isInitialized = true;
+
+    unawaited(
+      Future(() async {
+        await _autoPurgeOldTrash();
+      }),
     );
-    try {
-      final base64Key = await secureStorage.read(key: 'hive_secure_key');
-      if (base64Key != null) {
-        return base64.decode(base64Key);
-      }
 
-      // Check if we need to migrate plain text boxes
-      final hasOldData =
-          await Hive.boxExists(_entryBoxName) ||
-          await Hive.boxExists(_trashBoxName);
-      Map<dynamic, dynamic>? oldEntries;
-      Map<dynamic, dynamic>? oldTrash;
+    unawaited(
+      Future(() {
+        getAllMoments();
+        getTrashMoments();
+        triggerAutoSnapshotIfNeeded();
+      }),
+    );
 
-      if (hasOldData) {
-        try {
-          final box = await Hive.openBox<dynamic>(_entryBoxName);
-          final trashBox = await Hive.openBox<dynamic>(_trashBoxName);
-          oldEntries = Map<dynamic, dynamic>.from(box.toMap());
-          oldTrash = Map<dynamic, dynamic>.from(trashBox.toMap());
-          await box.close();
-          await trashBox.close();
-        } catch (e, stack) {
-          _logger.error(
-            'Failed to read old plain text data for migration',
-            e,
-            stack,
-          );
-        }
-      }
-
-      final newKey = Hive.generateSecureKey();
-      await secureStorage.write(
-        key: 'hive_secure_key',
-        value: base64.encode(newKey),
-      );
-
-      if (oldEntries != null || oldTrash != null) {
-        // Re-write to encrypted boxes after key generation
-        final cipher = HiveAesCipher(newKey);
-        final box = await Hive.openBox<dynamic>(
-          _entryBoxName,
-          encryptionCipher: cipher,
-        );
-        final trashBox = await Hive.openBox<dynamic>(
-          _trashBoxName,
-          encryptionCipher: cipher,
-        );
-        if (oldEntries != null) await box.putAll(oldEntries);
-        if (oldTrash != null) await trashBox.putAll(oldTrash);
-        await box.close();
-        await trashBox.close();
-      }
-
-      return newKey;
-    } catch (e, stack) {
-      _logger.error(
-        'Secure storage failure, falling back to unencrypted or cached key',
-        e,
-        stack,
-      );
-      final fallbackBase64 = _prefs.getString('hive_fallback_key');
-      if (fallbackBase64 != null) {
-        return base64.decode(fallbackBase64);
-      }
-      final fallbackKey = Hive.generateSecureKey();
-      await _prefs.setString('hive_fallback_key', base64.encode(fallbackKey));
-      return fallbackKey;
-    }
-  }
-
-  static const String _autoSnapshotKey = 'notekar.auto_rolling_snapshot';
-  static const String _lastSnapshotTimeKey = 'notekar.last_auto_snapshot_ms';
-  static const String keyCorruptedFlag = 'notekar.database_corrupted_flag';
-  static const String keyRecoveredFromSnapshot =
-      'notekar.database_recovered_from_snapshot';
-
-  Future<void> _emergencyBackupCorruptedBox(String boxName) async {
-    try {
-      String? dataDirPath;
-      try {
-        const channel = MethodChannel('notekar/files');
-        dataDirPath = await channel.invokeMethod<String>('appDataDir');
-      } catch (_) {}
-      dataDirPath ??= Directory.systemTemp.path;
-
-      final dir = Directory(dataDirPath);
-      if (!dir.existsSync()) return;
-
-      final backupDir = Directory(
-        '${dir.path}${Platform.pathSeparator}corrupted_backups',
-      );
-      if (!backupDir.existsSync()) {
-        backupDir.createSync(recursive: true);
-      }
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final files = dir.listSync();
-      for (final f in files) {
-        if (f is File && f.path.contains(boxName)) {
-          final fileName = f.uri.pathSegments.last;
-          final dest = File(
-            '${backupDir.path}${Platform.pathSeparator}${timestamp}_$fileName',
-          );
-          f.copySync(dest.path);
-          _logger.warn('Emergency copy of corrupted box created: ${dest.path}');
-        }
-      }
-    } catch (e, stack) {
-      _logger.error(
-        'Failed to create emergency backup of corrupted box $boxName',
-        e,
-        stack,
-      );
-    }
-  }
-
-  Future<void> _attemptSnapshotRestore(Box<dynamic> box) async {
-    try {
-      final snapshotRaw = _prefs.getString(_autoSnapshotKey);
-      if (snapshotRaw == null || snapshotRaw.isEmpty) return;
-      final decoded = jsonDecode(snapshotRaw);
-      if (decoded is List && decoded.isNotEmpty) {
-        final Map<int, dynamic> entries = {};
-        int maxId = 0;
-        for (final item in decoded) {
-          if (item is Map) {
-            final m = Moment.fromJson(Map<String, dynamic>.from(item));
-            entries[m.id] = m.toJson();
-            if (m.id > maxId) maxId = m.id;
-          }
-        }
-        if (entries.isNotEmpty) {
-          await box.putAll(entries);
-          await _prefs.setInt(_nextIdKey, maxId + 1);
-          await _prefs.setBool(keyRecoveredFromSnapshot, true);
-          _logger.info(
-            'Successfully restored ${entries.length} moments from rolling snapshot after corruption',
-          );
-        }
-      }
-    } catch (e, stack) {
-      _logger.error(
-        'Failed restoring from snapshot after corruption',
-        e,
-        stack,
-      );
-    }
+    _logger.info('MomentRepository initialized with ${_isar.moments.countSync()} entries, ${_trashIsar.moments.countSync()} trash entries');
   }
 
   Future<void> triggerAutoSnapshotIfNeeded({bool force = false}) async {
@@ -214,127 +92,18 @@ class MomentRepository {
     }
   }
 
-  Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
-    if (_isInitialized) return;
-    _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
-
-    final encryptionKey = await _getOrGenerateEncryptionKey();
-    final cipher = encryptionKey != null ? HiveAesCipher(encryptionKey) : null;
-
-    // Database Corruption Recovery Wrapper with Emergency Pre-wipe Backups
-    try {
-      _box = await Hive.openBox<dynamic>(
-        _entryBoxName,
-        encryptionCipher: cipher,
-      );
-    } catch (e, stack) {
-      _logger.error(
-        'Failed to open entry box due to corruption. Creating emergency backup & recreating...',
-        e,
-        stack,
-      );
-      await _emergencyBackupCorruptedBox(_entryBoxName);
-      await _prefs.setBool(keyCorruptedFlag, true);
-      await _prefs.setString(
-        'notekar.last_corrupted_time',
-        DateTime.now().toIso8601String(),
-      );
-      try {
-        await Hive.deleteBoxFromDisk(_entryBoxName);
-        _box = await Hive.openBox<dynamic>(
-          _entryBoxName,
-          encryptionCipher: cipher,
-        );
-        // Attempt automatic restore from rolling snapshot if available
-        await _attemptSnapshotRestore(_box);
-      } catch (innerE, innerStack) {
-        _logger.error(
-          'Failed to recreate corrupted entry box.',
-          innerE,
-          innerStack,
-        );
-        rethrow;
-      }
-    }
-
-    try {
-      _trashBox = await Hive.openBox<dynamic>(
-        _trashBoxName,
-        encryptionCipher: cipher,
-      );
-    } catch (e, stack) {
-      _logger.error(
-        'Failed to open trash box due to corruption. Creating emergency backup & recreating...',
-        e,
-        stack,
-      );
-      await _emergencyBackupCorruptedBox(_trashBoxName);
-      try {
-        await Hive.deleteBoxFromDisk(_trashBoxName);
-        _trashBox = await Hive.openBox<dynamic>(
-          _trashBoxName,
-          encryptionCipher: cipher,
-        );
-      } catch (innerE, innerStack) {
-        _logger.error(
-          'Failed to recreate corrupted trash box.',
-          innerE,
-          innerStack,
-        );
-        rethrow;
-      }
-    }
-
-    _isInitialized = true;
-
-    unawaited(
-      Future(() async {
-        await _autoPurgeOldTrash();
-        if (_box.length > 300) {
-          unawaited(_box.compact());
-        }
-        if (_trashBox.length > 300) {
-          unawaited(_trashBox.compact());
-        }
-      }),
-    );
-
-    // Pre-populate the cache in the background for zero-delay read paths
-    unawaited(
-      Future(() {
-        getAllMoments();
-        getTrashMoments();
-        triggerAutoSnapshotIfNeeded();
-      }),
-    );
-
-    _logger.info(
-      'MomentRepository initialized with ${_box.length} entries, ${_trashBox.length} trash entries',
-    );
-  }
-
   Future<void> _autoPurgeOldTrash() async {
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
       final thirtyDaysAgo = now - const Duration(days: 30).inMilliseconds;
-      final keysToRemove = <dynamic>[];
-
-      for (final key in _trashBox.keys) {
-        final raw = _trashBox.get(key);
-        if (raw is Map) {
-          final timestamp = raw['timestamp'];
-          if (timestamp is num && timestamp < thirtyDaysAgo) {
-            keysToRemove.add(key);
-          }
-        }
-      }
-
-      if (keysToRemove.isNotEmpty) {
-        await _trashBox.deleteAll(keysToRemove);
-        _cachedTrashMoments = null; // Invalidate cache
-        _logger.info(
-          'Auto-purged ${keysToRemove.length} trash entries older than 30 days',
-        );
+      
+      final oldTrash = _trashIsar.moments.filter().timestampLessThan(thirtyDaysAgo).findAllSync();
+      if (oldTrash.isNotEmpty) {
+        await _trashIsar.writeTxn(() async {
+          await _trashIsar.moments.deleteAll(oldTrash.map((e) => e.id).toList());
+        });
+        _cachedTrashMoments = null;
+        _logger.info('Auto-purged ${oldTrash.length} trash entries older than 30 days');
       }
     } catch (e, stack) {
       _logger.error('Failed auto-purging old trash entries', e, stack);
@@ -349,22 +118,17 @@ class MomentRepository {
       return [];
     }
     try {
-      final moments = _box.values
-          .whereType<Map<dynamic, dynamic>>()
-          .map((item) => Moment.fromJson(Map<String, dynamic>.from(item)))
-          .toList();
-      moments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final moments = _isar.moments.where().sortByTimestampDesc().findAllSync();
       _cachedMoments = moments;
       _momentIdIndex = {for (final m in moments) m.id: m};
       SearchIndexService.instance.buildIndex(moments);
       return moments;
     } catch (e, stack) {
-      _logger.error('Failed to load moments from Hive', e, stack);
+      _logger.error('Failed to load moments from Isar', e, stack);
       return [];
     }
   }
 
-  /// O(1) direct lookup of a moment by its unique ID via the secondary index.
   Moment? getMomentById(int id) {
     if (_momentIdIndex != null) {
       return _momentIdIndex![id];
@@ -373,64 +137,16 @@ class MomentRepository {
     return _momentIdIndex?[id];
   }
 
-  /// High-performance O(log N) binary range slicing for timestamp queries.
-  ///
-  /// Extracts all moments between [startMs] and [endMs] inclusive,
-  /// leveraging the descending sorted timestamp array without full linear table scans.
   List<Moment> getMomentsBetween(int startMs, int endMs) {
-    final moments = getAllMoments();
-    if (moments.isEmpty || startMs > endMs) return const [];
-
-    // Binary search for the first element with timestamp <= endMs
-    int low = 0;
-    int high = moments.length - 1;
-    int startIdx = moments.length;
-
-    while (low <= high) {
-      final mid = (low + high) ~/ 2;
-      if (moments[mid].timestamp <= endMs) {
-        startIdx = mid;
-        high = mid - 1; // look for earlier (higher timestamp) matching index
-      } else {
-        low = mid + 1;
-      }
-    }
-
-    if (startIdx >= moments.length || moments[startIdx].timestamp < startMs) {
-      return const [];
-    }
-
-    // Binary search for the last element with timestamp >= startMs
-    low = startIdx;
-    high = moments.length - 1;
-    int endIdx = startIdx;
-
-    while (low <= high) {
-      final mid = (low + high) ~/ 2;
-      if (moments[mid].timestamp >= startMs) {
-        endIdx = mid;
-        low = mid + 1; // look for later (lower timestamp) matching index
-      } else {
-        high = mid - 1;
-      }
-    }
-
-    return moments.sublist(startIdx, endIdx + 1);
+    if (!_isInitialized) return const [];
+    return _isar.moments.filter().timestampBetween(startMs, endMs).sortByTimestampDesc().findAllSync();
   }
 
-  /// Guaranteed OS maintenance routine: updates rolling snapshot, purges old trash,
-  /// and compacts storage boxes.
   Future<void> performDailyMaintenance() async {
     try {
       _logger.info('Performing daily background maintenance...');
       await triggerAutoSnapshotIfNeeded(force: true);
       await _autoPurgeOldTrash();
-      if (_box.length > 200) {
-        await _box.compact();
-      }
-      if (_trashBox.length > 200) {
-        await _trashBox.compact();
-      }
       _logger.info('Daily background maintenance completed successfully');
     } catch (e, stack) {
       _logger.error('Failed executing daily background maintenance', e, stack);
@@ -445,23 +161,11 @@ class MomentRepository {
       return [];
     }
     try {
-      final moments = <Moment>[];
-      for (final value in _trashBox.values) {
-        if (value is Map) {
-          try {
-            moments.add(Moment.fromJson(Map<String, dynamic>.from(value)));
-          } catch (_) {
-            _logger.error('Failed to parse trash moment from Map');
-          }
-        } else if (value is Moment) {
-          moments.add(value);
-        }
-      }
-      moments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final moments = _trashIsar.moments.where().sortByTimestampDesc().findAllSync();
       _cachedTrashMoments = moments;
       return moments;
     } catch (e, stack) {
-      _logger.error('Failed to load trash moments from Hive', e, stack);
+      _logger.error('Failed to load trash moments from Isar', e, stack);
       return [];
     }
   }
@@ -469,12 +173,14 @@ class MomentRepository {
   Future<void> saveMoment(Moment moment) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      await _box.put(moment.id, moment.toJson());
+      await _isar.writeTxn(() async {
+        await _isar.moments.put(moment);
+      });
       final currentNextId = _prefs.getInt(_nextIdKey) ?? 0;
       if (moment.id >= currentNextId) {
         await _prefs.setInt(_nextIdKey, moment.id + 1);
       }
-      // Update local cache and secondary indices
+      
       if (_cachedMoments != null) {
         _cachedMoments!.removeWhere((m) => m.id == moment.id);
         _cachedMoments!.add(moment);
@@ -491,29 +197,22 @@ class MomentRepository {
   Future<void> deleteMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final raw = _box.get(id);
-      if (raw != null) {
-        Map<String, dynamic>? jsonMap;
-        if (raw is Map) {
-          jsonMap = Map<String, dynamic>.from(raw);
-        } else if (raw is Moment) {
-          jsonMap = raw.toJson();
-        }
-        if (jsonMap != null) {
-          await _trashBox.put(id, jsonMap);
-          // Update trash cache
-          if (_cachedTrashMoments != null) {
-            final moment = Moment.fromJson(jsonMap);
-            _cachedTrashMoments!.removeWhere((m) => m.id == id);
-            _cachedTrashMoments!.add(moment);
-            _cachedTrashMoments!.sort(
-              (a, b) => b.timestamp.compareTo(a.timestamp),
-            );
-          }
+      final moment = await _isar.moments.get(id);
+      if (moment != null) {
+        await _trashIsar.writeTxn(() async {
+          await _trashIsar.moments.put(moment);
+        });
+        if (_cachedTrashMoments != null) {
+          _cachedTrashMoments!.removeWhere((m) => m.id == id);
+          _cachedTrashMoments!.add(moment);
+          _cachedTrashMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
         }
       }
-      await _box.delete(id);
-      // Update entries cache and secondary indices
+      
+      await _isar.writeTxn(() async {
+        await _isar.moments.delete(id);
+      });
+      
       if (_cachedMoments != null) {
         _cachedMoments!.removeWhere((m) => m.id == id);
       }
@@ -528,28 +227,24 @@ class MomentRepository {
   Future<void> restoreTrashMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final raw = _trashBox.get(id);
-      if (raw != null) {
-        Map<String, dynamic>? jsonMap;
-        if (raw is Map) {
-          jsonMap = Map<String, dynamic>.from(raw);
-        } else if (raw is Moment) {
-          jsonMap = raw.toJson();
+      final moment = await _trashIsar.moments.get(id);
+      if (moment != null) {
+        await _isar.writeTxn(() async {
+          await _isar.moments.put(moment);
+        });
+        
+        if (_cachedMoments != null) {
+          _cachedMoments!.removeWhere((m) => m.id == id);
+          _cachedMoments!.add(moment);
+          _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
         }
-        if (jsonMap != null) {
-          await _box.put(id, jsonMap);
-          // Update entries cache and secondary indices
-          final moment = Moment.fromJson(jsonMap);
-          if (_cachedMoments != null) {
-            _cachedMoments!.removeWhere((m) => m.id == id);
-            _cachedMoments!.add(moment);
-            _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-          }
-          _momentIdIndex?[moment.id] = moment;
-          SearchIndexService.instance.indexMoment(moment);
-        }
-        await _trashBox.delete(id);
-        // Update trash cache
+        _momentIdIndex?[moment.id] = moment;
+        SearchIndexService.instance.indexMoment(moment);
+        
+        await _trashIsar.writeTxn(() async {
+          await _trashIsar.moments.delete(id);
+        });
+        
         if (_cachedTrashMoments != null) {
           _cachedTrashMoments!.removeWhere((m) => m.id == id);
         }
@@ -563,10 +258,14 @@ class MomentRepository {
   Future<void> restoreAllTrash() async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final entries = _trashBox.toMap();
-      await _box.putAll(entries);
-      await _trashBox.clear();
-      // Invalidate caches
+      final allTrash = await _trashIsar.moments.where().findAll();
+      await _isar.writeTxn(() async {
+        await _isar.moments.putAll(allTrash);
+      });
+      await _trashIsar.writeTxn(() async {
+        await _trashIsar.moments.clear();
+      });
+      
       _cachedMoments = null;
       _cachedTrashMoments = null;
     } catch (e, stack) {
@@ -578,8 +277,9 @@ class MomentRepository {
   Future<void> permanentlyDeleteTrashMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      await _trashBox.delete(id);
-      // Update trash cache
+      await _trashIsar.writeTxn(() async {
+        await _trashIsar.moments.delete(id);
+      });
       if (_cachedTrashMoments != null) {
         _cachedTrashMoments!.removeWhere((m) => m.id == id);
       }
@@ -592,7 +292,9 @@ class MomentRepository {
   Future<void> clearTrash() async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      await _trashBox.clear();
+      await _trashIsar.writeTxn(() async {
+        await _trashIsar.moments.clear();
+      });
       _cachedTrashMoments = [];
     } catch (e, stack) {
       _logger.error('Failed to clear trash', e, stack);
@@ -603,13 +305,17 @@ class MomentRepository {
   Future<void> clearAll() async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      final entries = _box.toMap();
-      if (entries.isNotEmpty) {
-        await _trashBox.putAll(entries);
+      final allEntries = await _isar.moments.where().findAll();
+      if (allEntries.isNotEmpty) {
+        await _trashIsar.writeTxn(() async {
+          await _trashIsar.moments.putAll(allEntries);
+        });
       }
-      await _box.clear();
+      await _isar.writeTxn(() async {
+        await _isar.moments.clear();
+      });
+      
       await _prefs.remove(_nextIdKey);
-      // Update caches
       _cachedMoments = [];
       _cachedTrashMoments = null;
     } catch (e, stack) {
@@ -621,16 +327,17 @@ class MomentRepository {
   Future<void> replaceAll(List<Moment> moments) async {
     if (!_isInitialized) await ensureInitialized();
     try {
-      await _box.clear();
-      final Map<int, dynamic> entries = {};
+      await _isar.writeTxn(() async {
+        await _isar.moments.clear();
+        await _isar.moments.putAll(moments);
+      });
+      
       int maxId = 0;
       for (final m in moments) {
-        entries[m.id] = m.toJson();
         maxId = math.max(maxId, m.id);
       }
-      await _box.putAll(entries);
       await _prefs.setInt(_nextIdKey, maxId + 1);
-      // Update cache
+      
       final copy = List<Moment>.from(moments);
       copy.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _cachedMoments = copy;
@@ -658,12 +365,12 @@ class MomentRepository {
           )
           .toList();
 
-      for (final entry in entries) {
-        await _box.put(entry.id, entry.toJson());
-      }
+      await _isar.writeTxn(() async {
+        await _isar.moments.putAll(entries);
+      });
 
       await _prefs.remove(_legacyEntriesKey);
-      _cachedMoments = null; // Invalidate cache
+      _cachedMoments = null; 
       _logger.info('Successfully migrated ${entries.length} legacy entries');
       return entries;
     } catch (e, stack) {
