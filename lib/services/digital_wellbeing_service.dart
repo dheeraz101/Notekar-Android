@@ -212,29 +212,30 @@ class DigitalWellbeingService {
 
     final fallback = _cachedSnapshot ?? DigitalWellbeingSnapshot.empty;
     return await CircuitBreakerService.instance.run(
-      serviceId: 'digital_wellbeing_stats',
-      action: () async {
-        final nowMs = now.millisecondsSinceEpoch;
-        final startOfDay = DateTime(now.year, now.month, now.day);
-        final startMs = startOfDay.millisecondsSinceEpoch;
+          serviceId: 'digital_wellbeing_stats',
+          action: () async {
+            final nowMs = now.millisecondsSinceEpoch;
+            final startOfDay = DateTime(now.year, now.month, now.day);
+            final startMs = startOfDay.millisecondsSinceEpoch;
 
-        final res = await _channel.invokeMapMethod<dynamic, dynamic>(
-          'getDailyUsageStats',
-          {'startTimeMs': startMs, 'endTimeMs': nowMs},
-        );
+            final res = await _channel.invokeMapMethod<dynamic, dynamic>(
+              'getDailyUsageStats',
+              {'startTimeMs': startMs, 'endTimeMs': nowMs},
+            );
 
-        if (res == null) {
-          return fallback;
-        }
+            if (res == null) {
+              return fallback;
+            }
 
-        final snapshot = DigitalWellbeingSnapshot.fromMap(res);
-        _cachedSnapshot = snapshot;
-        _lastFetchTime = now;
-        permissionNotifier.value = snapshot.hasPermission;
-        snapshotNotifier.value = snapshot;
-        return snapshot;
-      },
-      fallback: fallback,
-    ) ?? fallback;
+            final snapshot = DigitalWellbeingSnapshot.fromMap(res);
+            _cachedSnapshot = snapshot;
+            _lastFetchTime = now;
+            permissionNotifier.value = snapshot.hasPermission;
+            snapshotNotifier.value = snapshot;
+            return snapshot;
+          },
+          fallback: fallback,
+        ) ??
+        fallback;
   }
 }

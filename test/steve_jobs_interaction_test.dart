@@ -621,11 +621,10 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
-        expect(find.text('Life Audit & The Void'), findsOneWidget);
-        expect(find.text('Spatial Bebas Neue Clock'), findsOneWidget);
-        expect(find.text('Two-Way Session Continuity'), findsOneWidget);
-        expect(find.text('WhatsApp-Grade Note Input'), findsOneWidget);
-        expect(find.text('Smart Onboarding & 7 Locales'), findsOneWidget);
+        for (final inv
+            in FeedbackChangelogSettingsPage.latestRelease.innovations) {
+          expect(find.text(inv.title), findsOneWidget);
+        }
         expect(
           find.text('"Details matter, it’s worth waiting to get it right."'),
           findsOneWidget,

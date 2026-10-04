@@ -153,14 +153,18 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             DiagnosticRow(
               p: widget.p,
               label: 'Digital Wellbeing Stats',
-              value: CircuitBreakerService.instance.isOpen('digital_wellbeing_stats')
+              value:
+                  CircuitBreakerService.instance.isOpen(
+                    'digital_wellbeing_stats',
+                  )
                   ? 'Tripped (Isolated)'
                   : 'Healthy',
             ),
             DiagnosticRow(
               p: widget.p,
               label: 'Stats Failures',
-              value: '${CircuitBreakerService.instance.getFailureCount('digital_wellbeing_stats')}/3',
+              value:
+                  '${CircuitBreakerService.instance.getFailureCount('digital_wellbeing_stats')}/3',
             ),
           ],
         ),
@@ -183,7 +187,11 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.restart_alt_rounded, color: widget.p.accent, size: 16),
+                Icon(
+                  Icons.restart_alt_rounded,
+                  color: widget.p.accent,
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Reset Circuit Breakers',

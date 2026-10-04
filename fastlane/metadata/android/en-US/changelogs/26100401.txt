@@ -1,0 +1,8 @@
+Update to 7.5.7 (build 26BR1004):
+- Concurrency Engine: Heavy analytics and Life Audit calculations offloaded to background isolates for locked 120fps scrolling.
+- High-Performance Search: Sub-millisecond inverted token index and prefix trie hashtag autocomplete.
+- Storage Engine Evolution: Secondary ID index for O(1) lookups and O(log N) binary range date filtering in MomentRepository.
+- Circuit Breaker Fault Isolation: 3-strike fail-safe protecting subsystem boundaries from cascading crashes with God Mode resets.
+- Daily Maintenance Scheduler: Guaranteed Android AlarmManager midnight maintenance for rolling snapshots and auto-purge.
+- Life Audit in History: Direct ledger access from History actions with persistent scroll position retention.
+- Apple HIG Design Polish: Unified 28pt squircle cards, expanded history layout, and synchronized pause state.

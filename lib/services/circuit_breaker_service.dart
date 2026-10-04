@@ -114,7 +114,9 @@ class CircuitBreakerService {
     if (prefs != null) {
       final keysToRemove = prefs
           .getKeys()
-          .where((k) => k.startsWith('cb_failures_') || k.startsWith('cb_state_'))
+          .where(
+            (k) => k.startsWith('cb_failures_') || k.startsWith('cb_state_'),
+          )
           .toList();
       for (final key in keysToRemove) {
         await prefs.remove(key);

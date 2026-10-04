@@ -101,7 +101,10 @@ void main() {
       SearchIndexService.instance.buildIndex([m1, m2]);
 
       final allTags = SearchIndexService.instance.getAllKnownTags();
-      expect(allTags, containsAll(['#deepwork', '#planning', '#fitness', '#deeprest']));
+      expect(
+        allTags,
+        containsAll(['#deepwork', '#planning', '#fitness', '#deeprest']),
+      );
 
       // Tag suggestions with prefix 'deep'
       final deepSuggestions = SearchIndexService.instance.suggestTags('deep');
@@ -128,7 +131,10 @@ void main() {
       );
 
       SearchIndexService.instance.buildIndex([m1]);
-      expect(SearchIndexService.instance.getAllKnownTags(), contains('#meeting'));
+      expect(
+        SearchIndexService.instance.getAllKnownTags(),
+        contains('#meeting'),
+      );
 
       // Update moment
       final updatedM1 = m1.copyWith(note: 'Updated note #conference');
@@ -151,67 +157,89 @@ void main() {
   });
 
   group('Under-The-Hood Upgrades: Concurrency Engine (Isolate Offloading)', () {
-    test('LifeAuditService.calculateAsync returns consistent summary', () async {
-      final now = DateTime(2026, 10, 4, 12, 0);
-      final entries = List.generate(
-        120,
-        (i) => Moment(
-          id: i + 1,
-          timestamp: now.subtract(Duration(hours: i * 2)).millisecondsSinceEpoch,
-          type: 'single',
-          date: '2026-10-04',
-          note: 'Log $i',
-        ),
-      );
+    test(
+      'LifeAuditService.calculateAsync returns consistent summary',
+      () async {
+        final now = DateTime(2026, 10, 4, 12, 0);
+        final entries = List.generate(
+          120,
+          (i) => Moment(
+            id: i + 1,
+            timestamp: now
+                .subtract(Duration(hours: i * 2))
+                .millisecondsSinceEpoch,
+            type: 'single',
+            date: '2026-10-04',
+            note: 'Log $i',
+          ),
+        );
 
-      final syncSummary = LifeAuditService.calculate(
-        entries: entries,
-        timeframe: LifeAuditTimeframe.week,
-        referenceNow: now,
-      );
+        final syncSummary = LifeAuditService.calculate(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.week,
+          referenceNow: now,
+        );
 
-      final asyncSummary = await LifeAuditService.calculateAsync(
-        entries: entries,
-        timeframe: LifeAuditTimeframe.week,
-        referenceNow: now,
-      );
+        final asyncSummary = await LifeAuditService.calculateAsync(
+          entries: entries,
+          timeframe: LifeAuditTimeframe.week,
+          referenceNow: now,
+        );
 
-      expect(asyncSummary.daysCount, syncSummary.daysCount);
-      expect(asyncSummary.consciousHoursPerDay, syncSummary.consciousHoursPerDay);
-      expect(asyncSummary.totalTrackedDuration, syncSummary.totalTrackedDuration);
-      expect(asyncSummary.dailyRecords.length, syncSummary.dailyRecords.length);
-    });
+        expect(asyncSummary.daysCount, syncSummary.daysCount);
+        expect(
+          asyncSummary.consciousHoursPerDay,
+          syncSummary.consciousHoursPerDay,
+        );
+        expect(
+          asyncSummary.totalTrackedDuration,
+          syncSummary.totalTrackedDuration,
+        );
+        expect(
+          asyncSummary.dailyRecords.length,
+          syncSummary.dailyRecords.length,
+        );
+      },
+    );
 
-    test('DashboardMetricsService.calculateAsync returns consistent data', () async {
-      final now = DateTime(2026, 10, 4, 12, 0);
-      final entries = List.generate(
-        100,
-        (i) => Moment(
-          id: i + 1,
-          timestamp: now.subtract(Duration(hours: i * 3)).millisecondsSinceEpoch,
-          type: i % 2 == 0 ? 'in' : 'out',
-          date: '2026-10-04',
-          note: 'Session $i #focus',
-          category: 'Work',
-        ),
-      );
+    test(
+      'DashboardMetricsService.calculateAsync returns consistent data',
+      () async {
+        final now = DateTime(2026, 10, 4, 12, 0);
+        final entries = List.generate(
+          100,
+          (i) => Moment(
+            id: i + 1,
+            timestamp: now
+                .subtract(Duration(hours: i * 3))
+                .millisecondsSinceEpoch,
+            type: i % 2 == 0 ? 'in' : 'out',
+            date: '2026-10-04',
+            note: 'Session $i #focus',
+            category: 'Work',
+          ),
+        );
 
-      final syncData = DashboardMetricsService.calculate(
-        entries: entries,
-        timeframe: DashboardTimeframe.week,
-        p: palette,
-      );
+        final syncData = DashboardMetricsService.calculate(
+          entries: entries,
+          timeframe: DashboardTimeframe.week,
+          p: palette,
+        );
 
-      final asyncData = await DashboardMetricsService.calculateAsync(
-        entries: entries,
-        timeframe: DashboardTimeframe.week,
-        p: palette,
-      );
+        final asyncData = await DashboardMetricsService.calculateAsync(
+          entries: entries,
+          timeframe: DashboardTimeframe.week,
+          p: palette,
+        );
 
-      expect(asyncData.timeframe, syncData.timeframe);
-      expect(asyncData.totalMoments, syncData.totalMoments);
-      expect(asyncData.dailyRhythm.days.length, syncData.dailyRhythm.days.length);
-    });
+        expect(asyncData.timeframe, syncData.timeframe);
+        expect(asyncData.totalMoments, syncData.totalMoments);
+        expect(
+          asyncData.dailyRhythm.days.length,
+          syncData.dailyRhythm.days.length,
+        );
+      },
+    );
   });
 
   group('Under-The-Hood Upgrades: MomentRepository Indexed Queries', () {
@@ -230,32 +258,59 @@ void main() {
       }
     });
 
-    test('getMomentsBetween performs binary range slicing on sorted moments', () async {
-      final repo = MomentRepository();
-      await repo.ensureInitialized();
+    test(
+      'getMomentsBetween performs binary range slicing on sorted moments',
+      () async {
+        final repo = MomentRepository();
+        await repo.ensureInitialized();
 
-      // Save moments at different timestamps
-      final m1 = Moment(id: 1, timestamp: 1000, type: 'single', date: '2026-10-04', note: 'One');
-      final m2 = Moment(id: 2, timestamp: 2000, type: 'single', date: '2026-10-04', note: 'Two');
-      final m3 = Moment(id: 3, timestamp: 3000, type: 'single', date: '2026-10-04', note: 'Three');
-      final m4 = Moment(id: 4, timestamp: 4000, type: 'single', date: '2026-10-04', note: 'Four');
+        // Save moments at different timestamps
+        final m1 = Moment(
+          id: 1,
+          timestamp: 1000,
+          type: 'single',
+          date: '2026-10-04',
+          note: 'One',
+        );
+        final m2 = Moment(
+          id: 2,
+          timestamp: 2000,
+          type: 'single',
+          date: '2026-10-04',
+          note: 'Two',
+        );
+        final m3 = Moment(
+          id: 3,
+          timestamp: 3000,
+          type: 'single',
+          date: '2026-10-04',
+          note: 'Three',
+        );
+        final m4 = Moment(
+          id: 4,
+          timestamp: 4000,
+          type: 'single',
+          date: '2026-10-04',
+          note: 'Four',
+        );
 
-      await repo.saveMoment(m1);
-      await repo.saveMoment(m2);
-      await repo.saveMoment(m3);
-      await repo.saveMoment(m4);
+        await repo.saveMoment(m1);
+        await repo.saveMoment(m2);
+        await repo.saveMoment(m3);
+        await repo.saveMoment(m4);
 
-      // Query range [2000, 3000]
-      final range = repo.getMomentsBetween(2000, 3000);
-      expect(range.length, 2);
-      expect(range.map((m) => m.id), containsAll([2, 3]));
+        // Query range [2000, 3000]
+        final range = repo.getMomentsBetween(2000, 3000);
+        expect(range.length, 2);
+        expect(range.map((m) => m.id), containsAll([2, 3]));
 
-      // Direct O(1) ID lookup
-      expect(repo.getMomentById(3)?.note, 'Three');
-      expect(repo.getMomentById(99), isNull);
+        // Direct O(1) ID lookup
+        expect(repo.getMomentById(3)?.note, 'Three');
+        expect(repo.getMomentById(99), isNull);
 
-      // Perform maintenance
-      await repo.performDailyMaintenance();
-    });
+        // Perform maintenance
+        await repo.performDailyMaintenance();
+      },
+    );
   });
 }

@@ -170,17 +170,13 @@ class DashboardMetricsService {
     required Palette p,
   }) {
     if (entries.length < 50) {
-      return Future.value(calculate(
-        entries: entries,
-        timeframe: timeframe,
-        p: p,
-      ));
+      return Future.value(
+        calculate(entries: entries, timeframe: timeframe, p: p),
+      );
     }
-    return Isolate.run(() => calculate(
-      entries: entries,
-      timeframe: timeframe,
-      p: p,
-    ));
+    return Isolate.run(
+      () => calculate(entries: entries, timeframe: timeframe, p: p),
+    );
   }
 
   static ExecutiveDashboardData calculate({

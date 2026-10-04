@@ -23,217 +23,100 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.6',
-    date: 'October 02, 2026',
-    edition: 'Dynamic Momentum & Digital Wellbeing',
+    version: '7.5.7',
+    date: 'October 04, 2026',
+    edition: 'High-Performance Engine & Fault Isolation',
     badgeColor: Color(0xFFFF9F0A),
     innovations: [
       (
-        title: 'Dynamic Momentum Capsule',
-        category: 'MINIMALIST CANVAS',
-        headline: 'Pure Canvas. Seamless Momentum.',
+        title: 'Concurrency Engine (Isolates)',
+        category: 'PERFORMANCE ARCHITECTURE',
+        headline: 'Locked 120fps. Zero UI Thread Jank.',
         desc:
-            'Today\'s Momentum card now opens seamlessly from inside the top dynamic pill upon tap, keeping your home screen pure, minimal, and completely distraction-free.',
-        icon: Icons.speed_rounded,
+            'Heavy analytical computations across Life Audit and Executive Dashboard metrics are now executed on background threads via Dart 3 Isolate.run, guaranteeing buttery-smooth 120fps scrolling even with tens of thousands of notes.',
+        icon: Icons.bolt_rounded,
         badgeColor: Color(0xFF0A84FF),
         specs:
-            'DynamicHeaderCapsule · Live Duration · Streak Flame · 1-Tap Hub Link',
+            'Isolate.run · LifeAuditService.calculateAsync · DashboardMetricsService.calculateAsync · Zero-Copy Ports',
       ),
       (
-        title: 'Android Digital Wellbeing',
-        category: 'INTENTIONALITY INTELLIGENCE',
-        headline: 'Smart Buckets. Intentionality Delta.',
+        title: 'High-Performance Search Indexing',
+        category: 'SEARCH & RETRIEVAL',
+        headline: 'Sub-Millisecond Inverted Token Index.',
         desc:
-            'Opt-in native integration with Android UsageStatsManager groups device screen time into generic categories to reveal your Intentionality Reality Delta with 100% offline privacy.',
-        icon: Icons.pie_chart_outline_rounded,
+            'Replaced O(N) linear scans with a dedicated in-memory inverted token index, prefix trie autocomplete, and instant hashtag and category intersection lookups with relevance scoring.',
+        icon: Icons.search_rounded,
         badgeColor: Color(0xFF34C759),
         specs:
-            'Smart Buckets · UsageStatsManager · Reality Delta · Zero Telemetry',
+            'Inverted Token Index · Prefix Trie · Set Intersections · Candidate Relevance Scoring',
       ),
       (
-        title: 'Data Safety & Recovery Shield',
-        category: 'DATA RESILIENCE',
-        headline: 'Automated Snapshots. Forgiving Streaks.',
+        title: 'Circuit Breaker Fault Isolation',
+        category: 'RELIABILITY & RESILIENCE',
+        headline: 'Fail-Safe Architecture. Zero Cascading Crashes.',
         desc:
-            'Hive database corruption now automatically triggers a timestamped local backup before recovery. Streak Guardian grace-day logic no longer penalizes users permanently after a relapse.',
-        icon: Icons.shield_rounded,
-        badgeColor: Color(0xFFFF9F0A),
-        specs:
-            'Emergency Auto-Snapshots · Relapse Reset · Streak Shield Recovery',
-      ),
-      (
-        title: 'Flagship Apple HIG Goals Engine',
-        category: 'GOALS & SENSORY',
-        headline: 'Pacing Metrics. Doodle Splash. 1-Tap Start.',
-        desc:
-            'Rebuilt goals system featuring pacing indicators, Cupertino segmented controls, WhatsApp-style dark mode doodle splash with official NoteKar emblem, and acoustic swipe-to-delete sounds.',
-        icon: Icons.track_changes_rounded,
-        badgeColor: Color(0xFFAF52DE),
-        specs:
-            'Pacing Indicators · Doodle Splash · Monogram Emblem · Acoustic Feedback',
-      ),
-      (
-        title: 'Platform Security & Receiver Hardening',
-        category: 'PLATFORM SECURITY',
-        headline: 'Signature Permissions. Anti-Spoofing.',
-        desc:
-            'Exported Android broadcast receivers are now secured with signature-level permissions, preventing unauthorized apps or malicious background intents from injecting fake data.',
-        icon: Icons.security_rounded,
+            'Implemented an automated 3-strike circuit breaker mechanism across subsystem boundaries (Digital Wellbeing, Analytics, MethodChannels) that gracefully trips on unhandled exceptions and includes manual resets in Diagnostics and God Mode.',
+        icon: Icons.offline_bolt_rounded,
         badgeColor: Color(0xFFFF2D55),
         specs:
-            'Signature Permissions · IPC Protection · Anti-Spoofing Architecture',
+            'CircuitBreakerService · 3-Strike Threshold · God Mode Overrides · Diagnostics Status',
       ),
       (
-        title: 'Authentic Analytics & Design Tokens',
-        category: 'SYSTEM ARCHITECTURE',
-        headline: 'True Durations. Systematic Design Tokens.',
+        title: 'Secondary Indices & Binary Range Slicing',
+        category: 'STORAGE ENGINE EVOLUTION',
+        headline: 'O(1) Lookups. O(log N) Date Slicing.',
         desc:
-            'Purged fabricated 15-minute durations on single taps, fixed 12 PM noon risk radar display, decomposed 12,000+ lines of god classes, and introduced systematic NkTokens design tokens.',
-        icon: Icons.insights_rounded,
+            'MomentRepository now features in-memory secondary indices for O(1) ID lookups and binary range slicing that queries date intervals in O(log N) without full table scans, backed by encrypted Hive storage.',
+        icon: Icons.layers_rounded,
+        badgeColor: Color(0xFFAF52DE),
+        specs:
+            'Secondary ID Index · Binary Range Slicing · Incremental Updates · Hive AES Cipher',
+      ),
+      (
+        title: 'Guaranteed Daily Maintenance Scheduler',
+        category: 'BACKGROUND LIFECYCLE',
+        headline: 'OS-Level Alarms. Automated Local Resilience.',
+        desc:
+            'Native Android AlarmManager schedules exact midnight maintenance (ACTION_DAILY_MAINTENANCE) to generate rolling snapshots, purge expired trash, and compact databases while the user sleeps.',
+        icon: Icons.schedule_rounded,
+        badgeColor: Color(0xFFFF9500),
+        specs:
+            'AlarmManager.RTC_WAKEUP · Rolling Snapshots · 30-Day Trash Auto-Purge · Storage Compaction',
+      ),
+      (
+        title: 'Life Audit in History & Infinite Scroll Retention',
+        category: 'USER EXPERIENCE',
+        headline: 'Direct Ledger Access. Preserved Scroll State.',
+        desc:
+            'Life Audit & Horizon ledger is now directly accessible from the History sheet action menu, and PageStorageKey integration ensures timeline scroll position is preserved across sheet state toggles.',
+        icon: Icons.auto_graph_rounded,
         badgeColor: Color(0xFF5856D6),
         specs:
-            'NkTokens · God-Class Deconstruction · True Analytics · Noon Fix',
+            'History Actions · PageStorageKey · In-Sheet Life Audit Router · Seamless Multi-Horizons',
       ),
       (
-        title: 'Personal Identity & Memento Mori',
-        category: 'LIFE AWARENESS',
-        headline: 'Profile Avatars. Memento Mori Horizon.',
+        title: 'Native State Controller Decoupling',
+        category: 'SYSTEM FOUNDATION',
+        headline: 'Single Source of Truth. Synchronized IPC.',
         desc:
-            'Personalize NoteKar with a custom profile avatar, user alias, and an interactive Memento Mori Life Horizon card showing exact lifespan percentage, weeks lived, and remaining seasons.',
-        icon: Icons.person_rounded,
-        badgeColor: Color(0xFF0A84FF),
+            'Decoupled global state management into SettingsController with InheritedNotifier and synchronized Android Kotlin background service pause state with Flutter foreground listeners.',
+        icon: Icons.settings_suggest_rounded,
+        badgeColor: Color(0xFF007AFF),
         specs:
-            'Profile Avatar · Lifespan Metrics · Dedicated Cupertino DOB Picker',
-      ),
-      (
-        title: 'Plus Notes & Journaling',
-        category: 'NOTE ARCHITECTURE',
-        headline: 'Unrestricted Canvas. Seamless History Editing.',
-        desc:
-            'Dedicated long-form writing canvas with top-left Plus button, combined with full history editing parity and customizable quick hashtags.',
-        icon: Icons.note_add_rounded,
-        badgeColor: Color(0xFFFF9F0A),
-        specs:
-            'Unrestricted Canvas · Plus Button · History Note Parity · Custom Tags',
-      ),
-      (
-        title: 'Resilient Home Widgets',
-        category: 'ANDROID SUBSYSTEM',
-        headline: 'RemoteViews Restored. Zero Crash Guarantee.',
-        desc:
-            'Sobriety and Life Audit launcher widgets completely revitalized with FrameLayout layouts, initial placement sizing fixes, graceful zero-states, and direct settings deep-linking.',
-        icon: Icons.widgets_rounded,
-        badgeColor: Color(0xFF34C759),
-        specs: 'FrameLayout RemoteViews · Deep Linking · Zero-State Support',
-      ),
-      (
-        title: 'Life Audit & The Void',
-        category: 'EXISTENTIAL COMPASS',
-        headline: 'Every Second Accounted. The Void Revealed.',
-        desc:
-            'Uncompromising 24-hour conscious partition architecture confronting the cost of unaccounted time across 6 multi-horizons from today to a full solar year.',
-        icon: Icons.auto_graph_rounded,
-        badgeColor: Color(0xFFFF9500),
-        specs: '24h Partitions · 6 Horizons · Seneca Reality Colophon',
-      ),
-      (
-        title: 'Spatial Bebas Neue Clock',
-        category: 'SPATIAL HARMONY',
-        headline: 'Optical Midpoint. Authentic Tall Type.',
-        desc:
-            'Chronometer face is mathematically centered within the usable viewport, paired with authentic, bundled open-source Bebas Neue tall numerals.',
-        icon: Icons.schedule_rounded,
-        badgeColor: Color(0xFF0A84FF),
-        specs: 'Usable Viewport Centered · Bebas Neue 144pt · Tabular Figures',
-      ),
-      (
-        title: 'Two-Way Session Continuity',
-        category: 'STATE ENGINE',
-        headline: 'Unbroken Focus. Zero State Loss.',
-        desc:
-            'Switch dynamically between Single and Two-Way modes mid-session without resetting stopwatch clocks, losing elapsed intervals, or dropping note state.',
-        icon: Icons.sync_alt_rounded,
-        badgeColor: Color(0xFF34C759),
-        specs: 'Live Continuity · Seamless Transition · Dual Timer Guard',
-      ),
-      (
-        title: 'WhatsApp-Grade Note Input',
-        category: 'TEXT ENGINE',
-        headline: 'Typing on Glass. Zero Latency.',
-        desc:
-            'Re-engineered note dialogue with sentence auto-capitalization, composition truncation guards, and decoupled character state updates for zero input lag.',
-        icon: Icons.edit_note_rounded,
-        badgeColor: Color(0xFFAF52DE),
-        specs: 'Zero Input Lag · Composition Safe · Sentences Capped',
-      ),
-      (
-        title: 'Smart Onboarding & 7 Locales',
-        category: 'SYSTEM ARCHITECTURE',
-        headline: 'Contextual Discovery. Global Reach.',
-        desc:
-            'Feature tours unified into onboarding, standalone unseen cards for updating users, and comprehensive 7-language offline localizations.',
-        icon: Icons.translate_rounded,
-        badgeColor: Color(0xFFFF2D55),
-        specs: '7 Offline Locales · Unseen Update Cards · Devanagari Type',
-      ),
-    ],
-    highlights: [
-      (
-        title: 'Dynamic Momentum Capsule',
-        desc:
-            'Today\'s Momentum card opens seamlessly inside the top pill, keeping the home canvas pure and distraction-free.',
-        icon: Icons.speed_rounded,
-        tag: 'Capture',
-      ),
-      (
-        title: 'Android Digital Wellbeing',
-        desc:
-            'Opt-in Smart Buckets and Intentionality Reality Delta dashboard comparing focus to total screen time.',
-        icon: Icons.pie_chart_outline_rounded,
-        tag: 'Wellbeing',
-      ),
-      (
-        title: 'Data Safety & Recovery',
-        desc:
-            'Automated corrupted-box snapshots prevent data loss; streak grace shields restore cleanly upon new streaks.',
-        icon: Icons.shield_rounded,
-        tag: 'Safety',
-      ),
-      (
-        title: 'Apple HIG Goals Engine',
-        desc:
-            'Pacing metrics, squircle launch splash, Zen doodle animation, and 1-tap session launching.',
-        icon: Icons.track_changes_rounded,
-        tag: 'Goals',
-      ),
-      (
-        title: 'Platform Security Hardening',
-        desc:
-            'Secured broadcast receivers with signature permissions against external intent spoofing.',
-        icon: Icons.security_rounded,
-        tag: 'Security',
-      ),
-      (
-        title: 'Authentic Analytics Engine',
-        desc:
-            'Purged fabricated durations, accurate cross-boundary sessions, and corrected 12 PM noon risk radar display.',
-        icon: Icons.insights_rounded,
-        tag: 'Analytics',
+            'SettingsController · InheritedNotifier · SharedPreferences Sync · Android IPC Alignment',
       ),
     ],
     items: [
-      '• Dynamic momentum capsule, Android Digital Wellbeing, Apple HIG goals, and core data resilience.',
-      '+ Dynamic Momentum Capsule: Today\'s Momentum embedded inside DynamicHeaderCapsule with live progress',
-      '+ Android Digital Wellbeing: Smart Buckets and Intentionality Reality Delta dashboard',
-      '+ Apple HIG Goals Engine: Pacing metrics, Cupertino segmented controls, and 1-tap session launch',
-      '+ Squircle Splash & Zen Doodle: Liquid splash transition with fluid doodle animation',
-      '+ Corrupted-Box Snapshots: Automatic database backup before repair to eliminate silent data loss',
-      '+ Streak Guardian Repair: Fixed permanent shield lockout on relapse, restoring streak forgiveness',
-      '+ Platform Security: Exported broadcast receivers protected with signature-level permissions',
-      '+ God-Class Deconstruction: Split 12,000+ lines into modular lifecycle delegates and NkTokens',
-      '+ Authentic Analytics: Purged fabricated 15m single tap durations for true session integrity',
-      '+ Noon Risk Radar Fix: Corrected "12 AM" display for 12:00 PM noon time blocks',
-      '* All 234 automated unit and widget test suites passing with zero lints and 100% offline privacy',
+      '• Concurrency engine, inverted search indexing, circuit breaker fault isolation, and secondary indices.',
+      '+ Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates',
+      '+ High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService',
+      '+ Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository',
+      '+ Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & God Mode',
+      '+ History & Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation',
+      '+ Guaranteed OS Maintenance: Android AlarmManager midnight maintenance trigger (ACTION_DAILY_MAINTENANCE)',
+      '+ State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state',
+      '+ Settings Search Indexing: Indexed routing for Fault Isolation, Floating Timer Pill, and Acoustic Feedback',
+      '* All 243 automated unit and widget test suites passing with zero lints and 100% offline privacy',
     ],
   );
 

@@ -173,7 +173,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
         _showGapCards = savedGaps;
         _rainbowCards = savedRainbow;
         _sleepHours = prefs.getDouble('time_audit_sleep_hours') ?? 10.0;
-        _essentialsHours = prefs.getDouble('time_audit_essentials_hours') ?? 4.0;
+        _essentialsHours =
+            prefs.getDouble('time_audit_essentials_hours') ?? 4.0;
       });
       _rebuildMemoizedLists();
     }
@@ -744,7 +745,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           }
                         },
                         child: CustomScrollView(
-                          key: const PageStorageKey<String>('history_timeline_scroll_view'),
+                          key: const PageStorageKey<String>(
+                            'history_timeline_scroll_view',
+                          ),
                           controller: _scrollController,
                           physics: const BouncingScrollPhysics(
                             parent: AlwaysScrollableScrollPhysics(),

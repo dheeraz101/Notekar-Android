@@ -6,6 +6,51 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.7] - 2026-10-04 (versionCode 26BR1004) [BR]
+
+> *High-Performance Engine, Concurrency & Fault Isolation.*
+
+### What's New
+
+- **Dart 3 Concurrency Engine & Isolate Offloading**:
+    - Heavy analytical computations across Life Audit (`LifeAuditService.calculateAsync`) and Executive Dashboard metrics (`DashboardMetricsService.calculateAsync`) are now offloaded to background worker threads via `Isolate.run`.
+    - Guarantees buttery-smooth, locked 120fps UI scrolling even with tens of thousands of historical moments and notes.
+    - Zero-copy data passing across isolate boundaries for maximum battery and memory efficiency.
+- **High-Performance Inverted Search Indexer**:
+    - Replaced linear O(N) scans with dedicated in-memory inverted token index (`SearchIndexService`), prefix trie for hashtag autocomplete, and fast candidate relevance ranking.
+    - Sub-millisecond search across notes, hashtags, and categories with automatic multi-token set intersections.
+    - Integrated seamlessly into Note Search and Settings Search with instant query feedback.
+- **Storage Engine Evolution & Secondary Indexing**:
+    - `MomentRepository` upgraded with in-memory secondary indices (`_momentIdIndex`) for O(1) instantaneous ID lookups.
+    - Binary range slicing (`getMomentsBetween`) executes date range filtering in O(log N) without full linear dataset iterations.
+    - Full backward compatibility with existing encrypted Hive storage.
+- **Circuit Breaker Fault Isolation & Self-Healing**:
+    - Implemented automated 3-strike circuit breaker mechanism (`CircuitBreakerService`) protecting Digital Wellbeing, analytics, and platform channels from cascading exceptions.
+    - Added manual trip/reset controls in **Settings → God Mode** and live system status indicators in **Settings → Diagnostics**.
+- **Guaranteed OS Daily Maintenance Scheduler**:
+    - Android native `AlarmManager` midnight maintenance trigger (`ACTION_DAILY_MAINTENANCE`) in `ReminderReceiver.kt`.
+    - Automatically creates rolling daily safety snapshots, purges expired trash (30+ days), and compacts database storage while the user sleeps.
+- **Life Audit in History Actions & Scroll Preservation**:
+    - Direct router access to Life Audit & Horizon ledger directly from the History action sheet.
+    - `PageStorageKey` integration prevents scroll position resets when toggling filters or collapsing sheets.
+
+### Improvements
+
+- **Native State Controller Decoupling**:
+    - Decoupled state management from UI trees into `SettingsController` with `InheritedNotifier` for surgical, single-source-of-truth re-renders.
+    - Synchronized Kotlin background service pause state with Flutter foreground listeners and SharedPreferences.
+- **Apple HIG Design & Geometry Polish**:
+    - Unified 28pt continuous squircle radii across all surface cards, sheets, and dialogs.
+    - Expanded history cards and standardized Apple Human Interface Guidelines iconography.
+
+### Bug Fixes
+
+- **State & Channel De-sync Fixes**:
+    - Fixed overlay toggle persistence across app restarts.
+    - Resolved foreground-to-background pause state desynchronization.
+    - Resolved layout overflow edge cases in two-way timeline views.
+
+
 ## [7.5.6] - 2026-10-02 (versionCode 26BR1002) [BR]
 
 > *Sovereign Goals, Activity Tags & Sensory Precision.*

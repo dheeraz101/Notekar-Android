@@ -171,8 +171,9 @@ class GodModeSettingsPage extends StatelessWidget {
                   showIosPillToast(
                     context: context,
                     p: p,
-                    message: 'All Circuit Breakers have been reset'
-                        .localized(context),
+                    message: 'All Circuit Breakers have been reset'.localized(
+                      context,
+                    ),
                     icon: Icons.check_circle_outline_rounded,
                   );
                 }

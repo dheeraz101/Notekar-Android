@@ -3,10 +3,7 @@ import 'package:notekar/utils/app_logger.dart';
 
 /// Scored search result item for ranking moments by relevance.
 class ScoredMomentMatch {
-  const ScoredMomentMatch({
-    required this.moment,
-    required this.score,
-  });
+  const ScoredMomentMatch({required this.moment, required this.score});
 
   final Moment moment;
   final int score;
@@ -102,7 +99,9 @@ class SearchIndexService {
     }
 
     // 3. Index type
-    _typeInvertedIndex.putIfAbsent(moment.type.toLowerCase(), () => <int>{}).add(id);
+    _typeInvertedIndex
+        .putIfAbsent(moment.type.toLowerCase(), () => <int>{})
+        .add(id);
 
     // 4. Index hashtags (both explicit tags and inline #tags)
     for (final tag in moment.effectiveTags) {

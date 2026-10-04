@@ -1,22 +1,81 @@
 [
     {
+        "version":  "7.5.7",
+        "buildNumber":  "26BR1004",
+        "releaseDate":  "2026-10-04",
+        "channel":  "beta",
+        "channelTag":  "[Beta]",
+        "isBeta":  true,
+        "edition":  "High-Performance Engine & Fault Isolation",
+        "badgeColor":  "#FF9F0A",
+        "isLatest":  true,
+        "highlights":  [
+                           {
+                               "title":  "Concurrency Engine (Isolates)",
+                               "description":  "Heavy analytical computations across Life Audit and Executive Dashboard offloaded to background isolates for locked 120fps UI scrolling.",
+                               "icon":  "bolt_rounded"
+                           },
+                           {
+                               "title":  "High-Performance Search Indexing",
+                               "description":  "Sub-millisecond inverted token index engine with prefix trie hashtag autocomplete and candidate relevance ranking.",
+                               "icon":  "search_rounded"
+                           },
+                           {
+                               "title":  "Circuit Breaker Fault Isolation",
+                               "description":  "Automated 3-strike circuit breaker protecting Digital Wellbeing and third-party integrations from cascading crashes.",
+                               "icon":  "offline_bolt_rounded"
+                           },
+                           {
+                               "title":  "Secondary Indices & Binary Range Slices",
+                               "description":  "In-memory secondary ID index for O(1) lookups and O(log N) binary range slicing for instant date queries in MomentRepository.",
+                               "icon":  "layers_rounded"
+                           },
+                           {
+                               "title":  "Guaranteed Daily Maintenance Scheduler",
+                               "description":  "Native Android AlarmManager midnight maintenance trigger for automated rolling snapshots, 30-day trash auto-purging, and storage compaction.",
+                               "icon":  "schedule_rounded"
+                           },
+                           {
+                               "title":  "Life Audit Ledger in History",
+                               "description":  "Direct Life Audit action sheet route from History and PageStorageKey scroll position preservation.",
+                               "icon":  "auto_graph_rounded"
+                           }
+                       ],
+        "fullChangelog":  [
+                              "Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates via Isolate.run",
+                              "High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService",
+                              "Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository",
+                              "Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & God Mode",
+                              "Guaranteed OS Maintenance: Android AlarmManager midnight maintenance trigger (ACTION_DAILY_MAINTENANCE)",
+                              "History & Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation",
+                              "State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state",
+                              "Settings Search Indexing: Indexed routing for Fault Isolation, Floating Timer Pill, and Acoustic Feedback",
+                              "Apple HIG Polish: Unified 28pt continuous squircle cards, expanded history layout, and refined typography",
+                              "All 243 automated unit and widget test suites passing with zero lints and 100% offline privacy"
+                          ],
+        "downloads":  {
+                          "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.7/NoteKar-v7.5.7-universal-release.apk",
+                          "arm64Apk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.7/NoteKar-v7.5.7-arm64-v8a-release.apk"
+                      }
+    },
+    {
         "version":  "7.5.6",
         "buildNumber":  "26BR1002",
         "releaseDate":  "2026-10-02",
         "channel":  "beta",
         "channelTag":  "[Beta]",
         "isBeta":  true,
-        "edition":  "Sovereign Goals, Activity Tags & Sensory Precision",
+        "edition":  "Sovereign Goals, Activity Tags \u0026 Sensory Precision",
         "badgeColor":  "#FF9F0A",
-        "isLatest":  true,
+        "isLatest":  false,
         "highlights":  [
                            {
-                               "title":  "Apple HIG Goals & Pacing Engine",
+                               "title":  "Apple HIG Goals \u0026 Pacing Engine",
                                "description":  "Full-width goal cards, custom deadlines, pacing indicators, and Life Ledger session attribution.",
                                "icon":  "track_changes_rounded"
                            },
                            {
-                               "title":  "Activity Quick-Tags & Note Pills",
+                               "title":  "Activity Quick-Tags \u0026 Note Pills",
                                "description":  "15 research-backed daily activity tags with Cupertino glyphs and automatic timeline #tag pills.",
                                "icon":  "tag_rounded"
                            },

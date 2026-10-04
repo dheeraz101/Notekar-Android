@@ -204,7 +204,20 @@ class LifeAuditService {
     String? protectedGraceDate,
   }) {
     if (entries.length < 50) {
-      return Future.value(calculate(
+      return Future.value(
+        calculate(
+          entries: entries,
+          timeframe: timeframe,
+          sleepHours: sleepHours,
+          essentialsHours: essentialsHours,
+          referenceNow: referenceNow,
+          activeSessionStart: activeSessionStart,
+          protectedGraceDate: protectedGraceDate,
+        ),
+      );
+    }
+    return Isolate.run(
+      () => calculate(
         entries: entries,
         timeframe: timeframe,
         sleepHours: sleepHours,
@@ -212,17 +225,8 @@ class LifeAuditService {
         referenceNow: referenceNow,
         activeSessionStart: activeSessionStart,
         protectedGraceDate: protectedGraceDate,
-      ));
-    }
-    return Isolate.run(() => calculate(
-      entries: entries,
-      timeframe: timeframe,
-      sleepHours: sleepHours,
-      essentialsHours: essentialsHours,
-      referenceNow: referenceNow,
-      activeSessionStart: activeSessionStart,
-      protectedGraceDate: protectedGraceDate,
-    ));
+      ),
+    );
   }
 
   /// Calculates the complete Life Audit summary across all moments for the specified timeframe.
