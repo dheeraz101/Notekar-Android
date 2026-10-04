@@ -345,7 +345,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       child: AppSheet(
         p: widget.p,
         title: _inSheetView == 'manual'
-            ? 'Manual Entry'.localized(context)
+            ? 'Log Past Moment'.localized(context)
             : _inSheetView == 'goals'
             ? 'Targets & Goals'.localized(context)
             : _inSheetView == 'create_goal'
@@ -1670,7 +1670,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
           await widget.onDelete(m.id);
         }
         if (mounted) {
-          _showNotice('Manual entry reverted'.localized(context));
+          _showNotice('Moment reverted'.localized(context));
         }
       },
     );

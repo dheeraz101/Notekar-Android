@@ -324,6 +324,11 @@ void main() {
                   onResetSettings: () {},
                   onResetAllData: () {},
                   onFactoryReset: () {},
+                  onExportCsv: () {},
+                  onExportJson: () {},
+                  onExportBackup: () {},
+                  onResetCircuitBreakers: () {},
+
                   onOpenCategory: (_, {required String parent}) {},
                 ),
               ),
@@ -377,6 +382,11 @@ void main() {
                   onResetSettings: () {},
                   onResetAllData: () {},
                   onFactoryReset: () {},
+                  onExportCsv: () {},
+                  onExportJson: () {},
+                  onExportBackup: () {},
+                  onResetCircuitBreakers: () {},
+
                   onOpenCategory: (_, {required String parent}) {},
                 ),
               ),

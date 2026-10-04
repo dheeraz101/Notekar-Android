@@ -2211,7 +2211,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.waveform,
+                                    icon: Icons.waves_rounded,
                                     iconColor: p.accent,
                                     title: 'Haptic Feedback',
                                     status:
@@ -2226,10 +2226,24 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       widget.onHapticStyle(next);
                                     },
                                   ),
+                                  HigSwitchRow(
+                                    p: p,
+                                    icon: Icons.animation_rounded,
+                                    iconColor: p.text,
+                                    title: 'Reduce Motion',
+                                    value: reduceMotion,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        reduceMotion = val;
+                                        if (val) homeMenuAnimations = false;
+                                      });
+                                      widget.onReduceMotion(val);
+                                    },
+                                  ),
                                   if (widget.onUse24Hour != null)
                                     HigSwitchRow(
                                       p: p,
-                                      icon: CupertinoIcons.clock,
+                                      icon: Icons.schedule_rounded,
                                       iconColor: p.blue,
                                       title: '24-Hour Format',
                                       value: use24Hour,
@@ -2248,7 +2262,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.bolt,
+                                    icon: Icons.bolt_rounded,
                                     iconColor: p.green,
                                     title: 'Logging & Sessions',
                                     status: defaultModeLabel(defaultMode),
@@ -2256,27 +2270,17 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.tag,
+                                    icon: Icons.local_offer_rounded,
                                     iconColor: p.accent,
                                     title: 'Activity Tags',
                                     status: 'Quick Tags',
                                     onTap: () => _openCategory('Activity Tags'),
                                   ),
-                                  if (widget.onFloatingTimerChanged != null)
-                                    HigSwitchRow(
-                                      p: p,
-                                      icon: CupertinoIcons.timer,
-                                      iconColor: p.orange,
-                                      title: 'Floating Timer Pill',
-                                      subtitle:
-                                          'Draggable on-screen live timer during active session',
-                                      value: widget.floatingTimerEnabled,
-                                      onChanged: widget.onFloatingTimerChanged!,
-                                    ),
+
                                   if (widget.onSoundEffects != null)
                                     HigSwitchRow(
                                       p: p,
-                                      icon: CupertinoIcons.speaker_2,
+                                      icon: Icons.volume_up_rounded,
                                       iconColor: p.accent,
                                       title: 'Acoustic Feedback',
                                       subtitle:
@@ -2316,7 +2320,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.clock,
+                                    icon: Icons.schedule_rounded,
                                     iconColor: p.blue,
                                     title: 'Clock Face & Typography',
                                     status: widget.clockFont,
@@ -2335,7 +2339,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.shield,
+                                    icon: Icons.security_rounded,
                                     iconColor: p.green,
                                     title: 'Privacy & App Lock',
                                     status: privacyLock ? 'On' : 'Off',
@@ -2344,7 +2348,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.folder,
+                                    icon: Icons.folder_rounded,
                                     iconColor: p.accent,
                                     title: 'Data & Backups',
                                     status: '${entries.length} Logs',
@@ -2352,7 +2356,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.trash,
+                                    icon: Icons.delete_rounded,
                                     iconColor: p.red,
                                     title: 'Trash Bin',
                                     onTap: () => _openCategory('Trash Bin'),
@@ -2370,7 +2374,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.bell,
+                                    icon: Icons.notifications_rounded,
                                     iconColor: p.orange,
                                     title: 'Reminders & Mindfulness',
                                     status: _getRemindersStatus(),
@@ -2378,28 +2382,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.chart_bar_square,
+                                    icon: Icons.bar_chart_rounded,
                                     iconColor: p.accent,
                                     title: 'Executive Analytics Dashboard',
                                     onTap: () => _openCategory('Dashboard'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.hourglass,
+                                    icon: Icons.hourglass_empty_rounded,
                                     iconColor: const Color(0xFFAF52DE),
                                     title: 'Life Audit & Horizon',
                                     onTap: () => _openCategory('Life Audit'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.scope,
+                                    icon: Icons.track_changes_rounded,
                                     iconColor: p.green,
                                     title: 'Targets & Goals',
                                     onTap: () => _openCategory('Goals'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.flame,
+                                    icon: Icons.local_fire_department_rounded,
                                     iconColor: p.orange,
                                     title: 'Sobriety Companion',
                                     status: enableSobrietyMode
@@ -2418,7 +2422,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.arrow_2_circlepath,
+                                    icon: Icons.sync_rounded,
                                     iconColor: p.accent,
                                     title: 'Update Center',
                                     status: _betaTrack ? 'Beta' : 'Stable',
@@ -2427,14 +2431,14 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.slider_horizontal_3,
+                                    icon: Icons.tune_rounded,
                                     iconColor: p.orange,
                                     title: 'Advanced Tools',
                                     onTap: () => _openCategory('Advanced'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.info_circle,
+                                    icon: Icons.info_outline_rounded,
                                     iconColor: p.accent,
                                     title: 'About NoteKar',
                                     status: 'v$appVersion',
@@ -3946,6 +3950,19 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   unawaited(_confirmResetAll(p)),
                               onFactoryReset: () =>
                                   unawaited(_confirmFactoryReset(p)),
+                              onExportCsv: () => unawaited(
+                                _runExport('CSV', widget.onExportCsv),
+                              ),
+                              onExportJson: () => unawaited(
+                                _runExport('JSON', widget.onExportJson),
+                              ),
+                              onExportBackup: () => unawaited(
+                                _runExport('Backup', widget.onExportBackup),
+                              ),
+                              onResetCircuitBreakers: () {
+                                widget.onFeedback('All Circuit Breakers Reset');
+                              },
+
                               onOpenCategory: (category, {required parent}) =>
                                   _openCategory(category, parent: parent),
                             ),

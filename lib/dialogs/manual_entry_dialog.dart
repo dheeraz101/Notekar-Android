@@ -78,7 +78,7 @@ class ManualEntryDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSheet(
       p: p,
-      title: 'Manual Entry',
+      title: 'Log Past Moment',
       child: ManualEntryContent(
         p: p,
         categories: categories,

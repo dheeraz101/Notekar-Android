@@ -861,7 +861,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Manual Entry'.localized(context),
+                        'Log Past Moment'.localized(context),
                         style: TextStyle(
                           color: widget.p.text,
                           fontSize: 12.5,

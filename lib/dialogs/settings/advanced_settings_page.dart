@@ -30,6 +30,10 @@ class AdvancedSettingsPage extends StatelessWidget {
     required this.onResetAllData,
     required this.onFactoryReset,
     required this.onOpenCategory,
+    required this.onExportCsv,
+    required this.onExportJson,
+    required this.onExportBackup,
+    required this.onResetCircuitBreakers,
     this.isGodModeUnlocked = false,
   });
 
@@ -54,6 +58,10 @@ class AdvancedSettingsPage extends StatelessWidget {
   final VoidCallback onResetSettings;
   final VoidCallback onResetAllData;
   final VoidCallback onFactoryReset;
+  final VoidCallback onExportCsv;
+  final VoidCallback onExportJson;
+  final VoidCallback onExportBackup;
+  final VoidCallback onResetCircuitBreakers;
   final void Function(String category, {required String parent}) onOpenCategory;
 
   @override
@@ -107,7 +115,7 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.link,
+              icon: Icons.link_rounded,
               title: 'Automation'.localized(context),
               status: 'Bridge'.localized(context),
               color: p.accent,
@@ -116,15 +124,35 @@ class AdvancedSettingsPage extends StatelessWidget {
                 parent: 'Advanced',
               ),
             ),
-            if (isGodModeUnlocked)
-              SettingsRow(
-                p: p,
-                icon: Icons.auto_awesome_rounded,
-                title: 'God Mode'.localized(context),
-                status: 'Unlocked'.localized(context),
-                color: const Color(0xFFFFD700),
-                onTap: () => onOpenCategory('God Mode', parent: 'Advanced'),
-              ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'These tools are intended for system maintenance and troubleshooting.'
+                  .localized(context),
+        ),
+        const SizedBox(height: spacing12),
+        SettingsGroup(
+          p: p,
+          title: 'God Mode / Advanced Systems',
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.power_settings_new_rounded,
+              title: 'Circuit Breakers'.localized(context),
+              status: 'Reset'.localized(context),
+              color: p.orange,
+              onTap: onResetCircuitBreakers,
+            ),
+            SettingsRow(
+              p: p,
+              icon: Icons.description_rounded,
+              title: 'Log Exporter (JSON)'.localized(context),
+              color: p.accent,
+              onTap: onExportJson,
+            ),
             SettingsRow(
               p: p,
               icon: Icons.developer_mode_rounded,
@@ -137,20 +165,24 @@ class AdvancedSettingsPage extends StatelessWidget {
             SettingsRow(
               p: p,
               icon: Icons.restart_alt_rounded,
-              title: 'Reset'.localized(context),
+              title: 'Factory Reset'.localized(context),
               status: 'Wipe'.localized(context),
               color: p.red,
               onTap: () => onOpenCategory('Reset', parent: 'Advanced'),
             ),
+            SettingsRow(
+              p: p,
+              icon: Icons.auto_awesome_rounded,
+              title: 'God Mode'.localized(context),
+              status: isGodModeUnlocked
+                  ? 'Unlocked'.localized(context)
+                  : 'Locked'.localized(context),
+              color: const Color(0xFFFFD700),
+              onTap: () => onOpenCategory('God Mode', parent: 'Advanced'),
+            ),
           ],
         ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'These tools are intended for system maintenance and troubleshooting.'
-                  .localized(context),
-        ),
-        const SizedBox(height: spacing48),
+        const SizedBox(height: spacing24),
       ],
     );
   }

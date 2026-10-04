@@ -372,6 +372,11 @@ void main() {
                 onResetSettings: () async {},
                 onResetAllData: () async {},
                 onFactoryReset: () async {},
+                onExportCsv: () async {},
+                onExportJson: () async {},
+                onExportBackup: () async {},
+                onResetCircuitBreakers: () {},
+
                 onOpenCategory: (_, {required parent}) {},
               ),
             ),

@@ -923,7 +923,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
     final parts = <String>[];
     if (data.totalTracked.inMinutes > 0 && data.totalMoments > 0) {
       parts.add(
-        '$periodLabel, you dedicated ${data.formattedTotalTracked} of focused attention across ${data.totalMoments} ${data.totalMoments == 1 ? 'entry' : 'entries'}.'
+        '$periodLabel, you dedicated ${data.formattedTotalTracked} of focused attention across ${data.totalMoments} ${data.totalMoments == 1 ? 'moment' : 'moments'}.'
             .localized(context),
       );
     } else if (data.totalTracked.inMinutes > 0) {

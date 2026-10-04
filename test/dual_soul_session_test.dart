@@ -189,6 +189,11 @@ void main() {
                     onResetSettings: () {},
                     onResetAllData: () {},
                     onFactoryReset: () {},
+                    onExportCsv: () {},
+                    onExportJson: () {},
+                    onExportBackup: () {},
+                    onResetCircuitBreakers: () {},
+
                     onOpenCategory: (_, {required parent}) {},
                   ),
                 ),
