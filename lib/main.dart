@@ -1,3 +1,4 @@
+import 'package:workmanager/workmanager.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -67,6 +68,42 @@ void setupErrorHandling() {
       ),
     );
   };
+}
+
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+  Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: false,
+  );
+  Workmanager().registerPeriodicTask(
+    "midnight-job",
+    "midnight_analytics_backup",
+    frequency: const Duration(hours: 24),
+    constraints: Constraints(
+      networkType: NetworkType.not_required,
+      requiresBatteryNotLow: true,
+    ),
+  );
+      final prefs = await SharedPreferences.getInstance();
+      
+      if (task == 'midnight_analytics_backup') {
+        // Run daily maintenance and backups
+        await MomentRepository().ensureInitialized(preloadedPrefs: prefs);
+        await MomentRepository().performDailyMaintenance();
+      } else if (task == 'ACTION_LOG_BG') {
+        // Enqueue from Android Widget
+        // Handle background log
+      }
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
+    }
+  });
 }
 
 void main() async {
