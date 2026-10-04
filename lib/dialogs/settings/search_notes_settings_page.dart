@@ -59,114 +59,22 @@ class SearchNotesSettingsPage {
       }
     }
 
-    final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
-
-    final filteredEntries = entries
+    final notes = SearchIndexService.instance
+        .search(
+          allMoments: entries,
+          query: q,
+          mode: filterCriteria.mode,
+          category: filterCriteria.category,
+          hashtag: filterCriteria.hashtag,
+          sessionLookup: sessionLookup,
+        )
         .where(
           (e) =>
               e.note.trim().isNotEmpty &&
               !e.note.contains('God Mode Unlocked') &&
               !e.note.contains('#godmode'),
         )
-        .where((e) {
-          final session = sessionLookup[e.id];
-          final isTwoWay = e.type == 'in' || e.type == 'out' || session != null;
-
-          // Filter by mode
-          if (filterCriteria.mode == 'single' && isTwoWay) return false;
-          if (filterCriteria.mode == 'two-way' && !isTwoWay) return false;
-
-          // Filter by category
-          if (filterCriteria.category != null &&
-              filterCriteria.category!.isNotEmpty) {
-            final cat = filterCriteria.category!.toLowerCase();
-            final matchesCat =
-                (e.category != null && e.category!.toLowerCase() == cat) ||
-                e.note.toLowerCase().contains('#$cat');
-            if (!matchesCat) return false;
-          }
-
-          // Filter by hashtag
-          if (filterCriteria.hashtag != null &&
-              filterCriteria.hashtag!.isNotEmpty) {
-            final tag = filterCriteria.hashtag!.toLowerCase();
-            final cleanTag = tag.startsWith('#') ? tag : '#$tag';
-            if (!e.note.toLowerCase().contains(cleanTag)) return false;
-          }
-
-          return true;
-        });
-
-    final List<Moment> notes;
-    if (tokens.isEmpty) {
-      notes = filteredEntries.toList()
-        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    } else {
-      final scored = <({Moment moment, int score})>[];
-      for (final e in filteredEntries) {
-        final session = sessionLookup[e.id];
-        final isTwoWay = e.type == 'in' || e.type == 'out' || session != null;
-        final modeKeywords = isTwoWay ? '2-way two-way twoway' : 'single';
-        final sessionDetails = session != null
-            ? '${timeOnly(session.startTimestamp)} ${session.outMoment != null ? timeOnly(session.outMoment!.timestamp) : 'ongoing'} ${_formatDuration(session.duration)}'
-            : '';
-        final noteLower = e.note.toLowerCase();
-        final dateLower = datePretty(e.timestamp).toLowerCase();
-        final timeLower = timeOnly(e.timestamp).toLowerCase();
-        final typeLower = e.type.toLowerCase();
-        final catLower = (e.category ?? '').toLowerCase();
-
-        bool matchesAll = true;
-        int score = 0;
-
-        if (noteLower == q) {
-          score += 1000;
-        } else if (noteLower.startsWith(q)) {
-          score += 500;
-        } else if (noteLower.contains(q)) {
-          score += 250;
-        }
-
-        for (final token in tokens) {
-          bool tokenMatched = false;
-          if (noteLower.contains(token)) {
-            tokenMatched = true;
-            score += 150;
-            if (noteLower.startsWith(token)) score += 50;
-          }
-          if (catLower.contains(token)) {
-            tokenMatched = true;
-            score += 80;
-          }
-          if (typeLower.contains(token) || modeKeywords.contains(token)) {
-            tokenMatched = true;
-            score += 40;
-          }
-          if (dateLower.contains(token) ||
-              timeLower.contains(token) ||
-              sessionDetails.toLowerCase().contains(token)) {
-            tokenMatched = true;
-            score += 20;
-          }
-
-          if (!tokenMatched) {
-            matchesAll = false;
-            break;
-          }
-        }
-
-        if (matchesAll && score > 0) {
-          scored.add((moment: e, score: score));
-        }
-      }
-
-      scored.sort((a, b) {
-        final cmp = b.score.compareTo(a.score);
-        if (cmp != 0) return cmp;
-        return b.moment.timestamp.compareTo(a.moment.timestamp);
-      });
-      notes = scored.map((e) => e.moment).toList();
-    }
+        .toList();
 
     return [
       SliverPersistentHeader(
