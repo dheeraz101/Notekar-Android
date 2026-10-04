@@ -20,7 +20,8 @@ class MomentRepository {
   static const String _autoSnapshotKey = 'notekar.auto_rolling_snapshot';
   static const String _lastSnapshotTimeKey = 'notekar.last_auto_snapshot_ms';
   static const String keyCorruptedFlag = 'notekar.database_corrupted_flag';
-  static const String keyRecoveredFromSnapshot = 'notekar.database_recovered_from_snapshot';
+  static const String keyRecoveredFromSnapshot =
+      'notekar.database_recovered_from_snapshot';
 
   late Isar _isar;
   late Isar _trashIsar;
@@ -50,8 +51,16 @@ class MomentRepository {
     } catch (_) {}
     dataDirPath ??= Directory.systemTemp.path;
 
-    _isar = await Isar.open([MomentSchema], name: 'notekar_entries_v1', directory: dataDirPath);
-    _trashIsar = await Isar.open([MomentSchema], name: 'notekar_trash_v1', directory: dataDirPath);
+    _isar = await Isar.open(
+      [MomentSchema],
+      name: 'notekar_entries_v1',
+      directory: dataDirPath,
+    );
+    _trashIsar = await Isar.open(
+      [MomentSchema],
+      name: 'notekar_trash_v1',
+      directory: dataDirPath,
+    );
 
     _isInitialized = true;
 
@@ -69,7 +78,9 @@ class MomentRepository {
       }),
     );
 
-    _logger.info('MomentRepository initialized with ${_isar.moments.countSync()} entries, ${_trashIsar.moments.countSync()} trash entries');
+    _logger.info(
+      'MomentRepository initialized with ${_isar.moments.countSync()} entries, ${_trashIsar.moments.countSync()} trash entries',
+    );
   }
 
   Future<void> triggerAutoSnapshotIfNeeded({bool force = false}) async {
@@ -96,14 +107,21 @@ class MomentRepository {
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
       final thirtyDaysAgo = now - const Duration(days: 30).inMilliseconds;
-      
-      final oldTrash = _trashIsar.moments.filter().timestampLessThan(thirtyDaysAgo).findAllSync();
+
+      final oldTrash = _trashIsar.moments
+          .filter()
+          .timestampLessThan(thirtyDaysAgo)
+          .findAllSync();
       if (oldTrash.isNotEmpty) {
         await _trashIsar.writeTxn(() async {
-          await _trashIsar.moments.deleteAll(oldTrash.map((e) => e.id).toList());
+          await _trashIsar.moments.deleteAll(
+            oldTrash.map((e) => e.id).toList(),
+          );
         });
         _cachedTrashMoments = null;
-        _logger.info('Auto-purged ${oldTrash.length} trash entries older than 30 days');
+        _logger.info(
+          'Auto-purged ${oldTrash.length} trash entries older than 30 days',
+        );
       }
     } catch (e, stack) {
       _logger.error('Failed auto-purging old trash entries', e, stack);
@@ -139,7 +157,11 @@ class MomentRepository {
 
   List<Moment> getMomentsBetween(int startMs, int endMs) {
     if (!_isInitialized) return const [];
-    return _isar.moments.filter().timestampBetween(startMs, endMs).sortByTimestampDesc().findAllSync();
+    return _isar.moments
+        .filter()
+        .timestampBetween(startMs, endMs)
+        .sortByTimestampDesc()
+        .findAllSync();
   }
 
   Future<void> performDailyMaintenance() async {
@@ -161,7 +183,10 @@ class MomentRepository {
       return [];
     }
     try {
-      final moments = _trashIsar.moments.where().sortByTimestampDesc().findAllSync();
+      final moments = _trashIsar.moments
+          .where()
+          .sortByTimestampDesc()
+          .findAllSync();
       _cachedTrashMoments = moments;
       return moments;
     } catch (e, stack) {
@@ -180,7 +205,7 @@ class MomentRepository {
       if (moment.id >= currentNextId) {
         await _prefs.setInt(_nextIdKey, moment.id + 1);
       }
-      
+
       if (_cachedMoments != null) {
         _cachedMoments!.removeWhere((m) => m.id == moment.id);
         _cachedMoments!.add(moment);
@@ -205,14 +230,16 @@ class MomentRepository {
         if (_cachedTrashMoments != null) {
           _cachedTrashMoments!.removeWhere((m) => m.id == id);
           _cachedTrashMoments!.add(moment);
-          _cachedTrashMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          _cachedTrashMoments!.sort(
+            (a, b) => b.timestamp.compareTo(a.timestamp),
+          );
         }
       }
-      
+
       await _isar.writeTxn(() async {
         await _isar.moments.delete(id);
       });
-      
+
       if (_cachedMoments != null) {
         _cachedMoments!.removeWhere((m) => m.id == id);
       }
@@ -232,7 +259,7 @@ class MomentRepository {
         await _isar.writeTxn(() async {
           await _isar.moments.put(moment);
         });
-        
+
         if (_cachedMoments != null) {
           _cachedMoments!.removeWhere((m) => m.id == id);
           _cachedMoments!.add(moment);
@@ -240,11 +267,11 @@ class MomentRepository {
         }
         _momentIdIndex?[moment.id] = moment;
         SearchIndexService.instance.indexMoment(moment);
-        
+
         await _trashIsar.writeTxn(() async {
           await _trashIsar.moments.delete(id);
         });
-        
+
         if (_cachedTrashMoments != null) {
           _cachedTrashMoments!.removeWhere((m) => m.id == id);
         }
@@ -265,7 +292,7 @@ class MomentRepository {
       await _trashIsar.writeTxn(() async {
         await _trashIsar.moments.clear();
       });
-      
+
       _cachedMoments = null;
       _cachedTrashMoments = null;
     } catch (e, stack) {
@@ -314,7 +341,7 @@ class MomentRepository {
       await _isar.writeTxn(() async {
         await _isar.moments.clear();
       });
-      
+
       await _prefs.remove(_nextIdKey);
       _cachedMoments = [];
       _cachedTrashMoments = null;
@@ -331,13 +358,13 @@ class MomentRepository {
         await _isar.moments.clear();
         await _isar.moments.putAll(moments);
       });
-      
+
       int maxId = 0;
       for (final m in moments) {
         maxId = math.max(maxId, m.id);
       }
       await _prefs.setInt(_nextIdKey, maxId + 1);
-      
+
       final copy = List<Moment>.from(moments);
       copy.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _cachedMoments = copy;
@@ -370,7 +397,7 @@ class MomentRepository {
       });
 
       await _prefs.remove(_legacyEntriesKey);
-      _cachedMoments = null; 
+      _cachedMoments = null;
       _logger.info('Successfully migrated ${entries.length} legacy entries');
       return entries;
     } catch (e, stack) {

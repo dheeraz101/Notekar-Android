@@ -1,4 +1,3 @@
-import 'package:workmanager/workmanager.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -14,6 +13,7 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'services/circuit_breaker_service.dart';
 import 'utils/settings_controller.dart';
@@ -71,27 +71,20 @@ void setupErrorHandling() {
   };
 }
 
-
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
-  Workmanager().initialize(
-    callbackDispatcher,
-    isInDebugMode: false,
-  );
-  Workmanager().registerPeriodicTask(
-    "midnight-job",
-    "midnight_analytics_backup",
-    frequency: const Duration(hours: 24),
-    constraints: Constraints(
-      networkType: NetworkType.not_required,
-      requiresBatteryNotLow: true,
-    ),
-  );
+      Workmanager().initialize(callbackDispatcher);
+      Workmanager().registerPeriodicTask(
+        "midnight-job",
+        "midnight_analytics_backup",
+        frequency: const Duration(hours: 24),
+        constraints: Constraints(requiresBatteryNotLow: true),
+      );
       final prefs = await SharedPreferences.getInstance();
-      
+
       if (task == 'midnight_analytics_backup') {
         // Run daily maintenance and backups
         await MomentRepository().ensureInitialized(preloadedPrefs: prefs);
@@ -144,7 +137,9 @@ Future<void> _initIsarPreload() async {
   const channel = MethodChannel('notekar/files');
   try {
     final dataDir = await channel.invokeMethod<String>('appDataDir');
-    await Isar.open([MomentSchema], directory: dataDir ?? Directory.systemTemp.path);
+    await Isar.open([
+      MomentSchema,
+    ], directory: dataDir ?? Directory.systemTemp.path);
   } catch (_) {
     await Isar.open([MomentSchema], directory: Directory.systemTemp.path);
   }
