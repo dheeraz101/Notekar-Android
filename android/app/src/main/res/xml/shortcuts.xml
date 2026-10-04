@@ -1,11 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
-        android:shortcutId="new_note"
+        android:shortcutId="quick_session"
         android:enabled="true"
         android:icon="@mipmap/ic_launcher"
-        android:shortcutShortLabel="@string/shortcut_note_short"
-        android:shortcutLongLabel="@string/shortcut_note_long">
+        android:shortcutShortLabel="Quick Session"
+        android:shortcutLongLabel="Start a fast session">
+        <intent
+            android:action="app.notekar.notekar.ACTION_NOTE"
+            android:targetPackage="app.notekar.notekar"
+            android:targetClass="app.notekar.notekar.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="log_past_moment"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="Log Past Moment"
+        android:shortcutLongLabel="Log Past Moment">
+        <intent
+            android:action="app.notekar.notekar.ACTION_NOTE"
+            android:targetPackage="app.notekar.notekar"
+            android:targetClass="app.notekar.notekar.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="open_search"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="Search"
+        android:shortcutLongLabel="Search History">
         <intent
             android:action="app.notekar.notekar.ACTION_NOTE"
             android:targetPackage="app.notekar.notekar"
