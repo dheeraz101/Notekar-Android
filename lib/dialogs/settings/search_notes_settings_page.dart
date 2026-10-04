@@ -609,7 +609,7 @@ class SearchNotesSettingsPage {
                                     child: Padding(
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Icon(
-                                        CupertinoIcons.pencil,
+                                        CupertinoIcons.square_pencil,
                                         size: 15,
                                         color: p.accent,
                                       ),

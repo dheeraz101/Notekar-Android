@@ -209,7 +209,9 @@ class _UndoToastState extends State<UndoToast>
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(shape: BoxShape.circle),
                   child: Icon(
-                    isEditNote ? CupertinoIcons.pencil : CupertinoIcons.add,
+                    isEditNote
+                        ? CupertinoIcons.square_pencil
+                        : CupertinoIcons.add,
                     size: 18,
                     color: widget.p.accent,
                   ),

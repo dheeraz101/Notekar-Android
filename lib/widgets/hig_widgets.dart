@@ -22,7 +22,7 @@ class HigSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 18, bottom: 6),
+      padding: const EdgeInsets.only(left: 14, right: 14, top: 18, bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -63,7 +63,7 @@ class HigSectionFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 12),
+      padding: const EdgeInsets.only(left: 14, right: 14, top: 6, bottom: 12),
       child: Text(
         text.localized(context),
         style: TextStyle(
@@ -83,7 +83,7 @@ class HigGroupedCard extends StatelessWidget {
     super.key,
     required this.p,
     required this.children,
-    this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    this.margin = const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
   });
 
   final Palette p;
@@ -115,7 +115,7 @@ class HigGroupedCard extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: p.surface2,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(color: p.border.withValues(alpha: 0.5), width: 0.6),
       ),
       clipBehavior: Clip.antiAlias,

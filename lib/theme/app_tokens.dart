@@ -68,7 +68,7 @@ class NkRadii {
   final double xsVal = 6.0;
   final double smVal = 8.0;
   final double mdVal = 12.0;
-  final double cardVal = 16.0;
+  final double cardVal = 28.0;
   final double sheetVal = 24.0;
   final double dialogVal = 28.0;
   final double pillVal = 999.0;
@@ -76,7 +76,7 @@ class NkRadii {
   BorderRadius get xs => BorderRadius.circular(6.0);
   BorderRadius get sm => BorderRadius.circular(8.0);
   BorderRadius get md => BorderRadius.circular(12.0);
-  BorderRadius get card => BorderRadius.circular(16.0);
+  BorderRadius get card => BorderRadius.circular(28.0);
   BorderRadius get sheet => BorderRadius.circular(24.0);
   BorderRadius get dialog => BorderRadius.circular(28.0);
   BorderRadius get pill => BorderRadius.circular(999.0);

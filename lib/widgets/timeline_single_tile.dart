@@ -51,7 +51,7 @@ class TimelineSingleTile extends StatelessWidget {
     final cat = moment.category ?? 'Moment';
     final meta = getCategoryMeta(cat, p);
 
-    final tileRadius = BorderRadius.circular(compact ? 9 : 12);
+    final tileRadius = BorderRadius.circular(compact ? 12 : 20);
 
     return IntrinsicHeight(
       child: Row(
@@ -159,7 +159,7 @@ class TimelineSingleTile extends StatelessWidget {
                                     p.surface2,
                                   )
                                 : p.surface2),
-                      borderRadius: BorderRadius.circular(compact ? 9 : 12),
+                      borderRadius: tileRadius,
                       border: Border.all(
                         color: selected
                             ? p.accent.withValues(alpha: 0.4)
@@ -323,7 +323,7 @@ class TimelineSingleTile extends StatelessWidget {
                           PressableScale(
                             onTap: onEditNote,
                             child: Icon(
-                              Icons.edit_outlined,
+                              CupertinoIcons.square_pencil,
                               size: compact ? 12 : 14,
                               color: p.text3,
                             ),

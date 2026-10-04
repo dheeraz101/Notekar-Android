@@ -57,7 +57,7 @@ class SettingsGroup extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: p.surface2,
-            borderRadius: BorderRadius.circular(16), // Unified 16pt card radius
+            borderRadius: BorderRadius.circular(28), // Unified 28pt card radius
             border: Border.all(
               color: p.border.withValues(
                 alpha: p.name == 'amoled'

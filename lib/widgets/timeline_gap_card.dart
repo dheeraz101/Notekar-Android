@@ -41,7 +41,7 @@ class TimelineGapCard extends StatelessWidget {
     final timeSpan = '${timeOnly(startTimestamp)} – ${timeOnly(endTimestamp)}';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       child: PressableScale(
         onTap: () {
           if (onTap != null) {
@@ -53,7 +53,7 @@ class TimelineGapCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: p.surface2.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: p.border.withValues(alpha: 0.35),
               width: 0.8,

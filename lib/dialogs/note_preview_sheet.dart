@@ -226,7 +226,7 @@ class NotePreviewSheet extends StatelessWidget {
                       Navigator.pop(context);
                       onEdit!();
                     },
-                    icon: const Icon(CupertinoIcons.pencil, size: 16),
+                    icon: const Icon(CupertinoIcons.square_pencil, size: 16),
                     label: const Text(
                       'Edit Note',
                       style: TextStyle(fontWeight: FontWeight.w800),

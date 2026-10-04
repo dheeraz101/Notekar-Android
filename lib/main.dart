@@ -12,6 +12,9 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils/settings_controller.dart';
+import 'utils/settings_provider.dart';
+
 void setupErrorHandling() {
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -82,7 +85,13 @@ void main() async {
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(NoteKarApp(prefs: prefs));
+  final settingsController = SettingsController(prefs);
+  runApp(
+    SettingsProvider(
+      controller: settingsController,
+      child: NoteKarApp(prefs: prefs),
+    ),
+  );
 }
 
 Future<void> _initHivePreload() async {

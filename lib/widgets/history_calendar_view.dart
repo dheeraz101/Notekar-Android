@@ -110,7 +110,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 children: [
                   Icon(
                     hasNote
-                        ? CupertinoIcons.pencil
+                        ? CupertinoIcons.square_pencil
                         : CupertinoIcons.plus_bubble,
                     size: 19,
                     color: widget.p.accent,
@@ -394,7 +394,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
 
         // 2. Day Header Bar (Tap for Day Reflection Sheet)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
           child: PressableScale(
             onTap: () {
               HapticFeedback.lightImpact();
@@ -675,7 +675,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       itemCount: filteredItems.length,
       itemBuilder: (ctx, idx) {
         final it = filteredItems[idx];
@@ -710,7 +710,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: cardColor,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: borderColor, width: borderWidth),
                 ),
                 child: Column(
@@ -850,7 +850,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: cardColor,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: borderColor, width: borderWidth),
                 ),
                 child: Row(

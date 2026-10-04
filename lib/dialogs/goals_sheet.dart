@@ -514,7 +514,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       ),
                     ),
                     child: Icon(
-                      CupertinoIcons.pencil,
+                      CupertinoIcons.square_pencil,
                       size: 16,
                       color: widget.p.text2,
                     ),

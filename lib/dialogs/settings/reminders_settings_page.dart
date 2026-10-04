@@ -739,10 +739,10 @@ class _ReminderMessagePageState extends State<ReminderMessagePage> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _focusNode.hasFocus
-                              ? Icons.check_rounded
-                              : Icons.edit_rounded,
+                              ? CupertinoIcons.checkmark_alt
+                              : CupertinoIcons.square_pencil,
                           color: _focusNode.hasFocus ? p.accent : p.text3,
-                          size: 20,
+                          size: 19,
                         ),
                         onPressed: () {
                           if (_focusNode.hasFocus) {

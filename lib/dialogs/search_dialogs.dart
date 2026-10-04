@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -698,28 +699,12 @@ class SearchNotesBox extends StatelessWidget {
                 width: isFilterActive ? 1.5 : 1,
               ),
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.tune_rounded,
-                  size: 20,
-                  color: isFilterActive ? p.accent : p.text,
-                ),
-                if (isFilterActive)
-                  Positioned(
-                    top: 9,
-                    right: 9,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: p.accent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
+            child: Icon(
+              isFilterActive
+                  ? CupertinoIcons.line_horizontal_3_decrease_circle_fill
+                  : CupertinoIcons.slider_horizontal_3,
+              size: 20,
+              color: isFilterActive ? p.accent : p.text,
             ),
           ),
         ),

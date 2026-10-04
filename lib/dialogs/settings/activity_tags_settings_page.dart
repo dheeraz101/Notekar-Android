@@ -493,7 +493,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
-                            CupertinoIcons.pencil,
+                            CupertinoIcons.square_pencil,
                             size: 14,
                             color: widget.p.text2,
                           ),

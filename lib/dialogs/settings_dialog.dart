@@ -454,7 +454,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: p.red.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(color: p.red.withValues(alpha: 0.35), width: 1),
           ),
           child: Row(
@@ -581,7 +581,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: p.surface2,
-                borderRadius: BorderRadius.circular(26),
+                borderRadius: BorderRadius.circular(28),
                 border: Border.all(
                   color: p.border.withValues(alpha: 0.5),
                   width: 0.8,

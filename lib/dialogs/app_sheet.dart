@@ -103,9 +103,9 @@ class _AppSheetState extends State<AppSheet> {
             ? const BorderRadius.vertical(top: Radius.circular(38))
             : null,
         padding: EdgeInsets.fromLTRB(
-          spacing16,
+          12.0,
           spacing8,
-          spacing16,
+          12.0,
           widget.removeBottomPadding
               ? MediaQuery.paddingOf(context).bottom
               : (widget.docked

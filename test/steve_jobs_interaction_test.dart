@@ -680,7 +680,7 @@ void main() {
 
         final swipeWidget = tester.widget<SwipeableCardBed>(swipeFinder);
         expect(swipeWidget.deleteColor, equals(p.red));
-        expect(swipeWidget.borderRadius, equals(BorderRadius.circular(16)));
+        expect(swipeWidget.borderRadius, equals(BorderRadius.circular(24)));
 
         // Verify tap works seamlessly
         await tester.tap(find.byType(TimelineSessionCard));
@@ -729,7 +729,7 @@ void main() {
 
         final swipeWidget = tester.widget<SwipeableCardBed>(swipeFinder);
         expect(swipeWidget.deleteColor, equals(p.red));
-        expect(swipeWidget.borderRadius, equals(BorderRadius.circular(12)));
+        expect(swipeWidget.borderRadius, equals(BorderRadius.circular(20)));
 
         // Verify swipe left triggers delete
         await tester.drag(

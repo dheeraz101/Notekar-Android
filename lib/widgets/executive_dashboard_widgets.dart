@@ -1085,7 +1085,11 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Icon(CupertinoIcons.pencil, size: 11, color: p.text3),
+                          Icon(
+                            CupertinoIcons.square_pencil,
+                            size: 11,
+                            color: p.text3,
+                          ),
                         ],
                       ),
                     ),

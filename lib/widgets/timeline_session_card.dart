@@ -82,7 +82,7 @@ class TimelineSessionCard extends StatelessWidget {
     final matchingGoal = _findMatchingGoal();
     final durationStr = _formatDuration(session.duration);
     final hasNote = session.note.isNotEmpty;
-    final cardRadius = BorderRadius.circular(compact ? 12 : 16);
+    final cardRadius = BorderRadius.circular(compact ? 16 : 24);
     final cat = session.category ?? 'Session';
     final meta = getCategoryMeta(cat, p);
 

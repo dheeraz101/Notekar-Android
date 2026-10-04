@@ -599,7 +599,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 ),
               ),
         child: SizedBox(
-          width: 410,
+          width: double.infinity,
           height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
           child: _inSheetView == 'manual'
               ? FutureBuilder<List<String>>(
@@ -673,7 +673,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   allEntries: _entries,
                   onEditNote: _openDirectNoteEditor,
                   onOpenManualEntry: _handleOpenManualEntry,
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 32),
                 )
               : _viewMode == 'calendar'
               ? HistoryCalendarView(
@@ -724,7 +724,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           slivers: [
                             SliverPadding(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: spacing16,
+                                horizontal: 2.0,
                               ),
                               sliver: SliverToBoxAdapter(
                                 child: AppSheetLargeTitle(
@@ -756,7 +756,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                               scrollDirection: Axis.horizontal,
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: spacing16,
+                                                    horizontal: 2.0,
                                                   ),
                                               child: Row(
                                                 children: [
@@ -879,7 +879,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: spacing16),
+                                          const SizedBox(width: 4),
                                         ],
                                       ),
                                       AnimatedSize(
@@ -892,9 +892,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                             : Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
-                                                      spacing16,
+                                                      0,
                                                       spacing8,
-                                                      spacing16,
+                                                      0,
                                                       0,
                                                     ),
                                                 child: Container(
@@ -952,9 +952,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                 return SliverToBoxAdapter(
                                   child: Padding(
                                     padding: const EdgeInsets.fromLTRB(
-                                      spacing16,
                                       0,
-                                      spacing16,
+                                      0,
+                                      0,
                                       spacing12,
                                     ),
                                     child: _TodayInlineInsightCard(
@@ -1005,9 +1005,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                         if (hasOlderRows) {
                                           return Padding(
                                             padding: const EdgeInsets.fromLTRB(
-                                              spacing16,
+                                              0,
                                               4,
-                                              spacing16,
+                                              0,
                                               8,
                                             ),
                                             child: PressableScale(
@@ -1060,9 +1060,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.fromLTRB(
-                                              spacing16,
+                                              4.0,
                                               _compactRows ? 8 : spacing16,
-                                              spacing16,
+                                              4.0,
                                               _compactRows ? 4 : spacing8,
                                             ),
                                             child: Column(
@@ -1277,7 +1277,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                         );
                                         return Padding(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: spacing16,
+                                            horizontal: 0.0,
                                           ),
                                           child: TimelineSessionCard(
                                             p: widget.p,
@@ -1332,7 +1332,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: spacing16,
+                                          horizontal: 0.0,
                                         ),
                                         child: TimelineSingleTile(
                                           p: widget.p,
@@ -2245,8 +2245,8 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                   _MinimalActionButton(
                     p: p,
                     icon: hasNote
-                        ? Icons.edit_note_rounded
-                        : Icons.note_add_rounded,
+                        ? CupertinoIcons.square_pencil
+                        : CupertinoIcons.plus_bubble,
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
                   ),
@@ -2328,8 +2328,8 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                   child: MomentOptionPill(
                     p: p,
                     icon: hasNote
-                        ? Icons.edit_note_rounded
-                        : Icons.note_add_rounded,
+                        ? CupertinoIcons.square_pencil
+                        : CupertinoIcons.plus_bubble,
                     label: hasNote ? 'Edit Note' : 'Add Note',
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,

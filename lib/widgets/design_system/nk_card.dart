@@ -8,7 +8,7 @@ import 'package:notekar/theme/app_tokens.dart';
 /// `HigGroupedCard`, and ad-hoc containers).
 ///
 /// Standardized on:
-/// - Radius: [NkRadii.card] (16pt)
+/// - Radius: [NkRadii.card] (28pt)
 /// - Surface: [Palette.surface2]
 /// - Border: [Palette.border] hairline
 /// - Dividers: Inset hairline dividers aligned to content text
@@ -23,7 +23,7 @@ class NkCard extends StatelessWidget {
     this.onAction,
     this.showDividers = true,
     this.dividerIndent = 54.0,
-    this.margin = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+    this.margin = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 6.0),
     this.padding,
     this.clipBehavior = Clip.antiAlias,
   }) : child = null;
@@ -36,7 +36,7 @@ class NkCard extends StatelessWidget {
     this.description,
     this.actionText,
     this.onAction,
-    this.margin = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+    this.margin = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 6.0),
     this.padding,
     this.clipBehavior = Clip.antiAlias,
   }) : children = const [],
