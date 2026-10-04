@@ -7,6 +7,7 @@ import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/search_index_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
@@ -40,19 +41,10 @@ class SearchNotesSettingsPage {
     ValueChanged<Moment>? onEditNote,
   }) {
     final q = settingsQuery.trim().toLowerCase();
-    final hashtagRegex = RegExp(r'#([A-Za-z0-9_]+)');
-    final Set<String> allTagsSet = {};
-    for (final e in entries) {
-      if (e.note.isNotEmpty) {
-        for (final m in hashtagRegex.allMatches(e.note)) {
-          final tag = m.group(0)!;
-          if (!tag.toLowerCase().contains('godmode')) {
-            allTagsSet.add(tag);
-          }
-        }
-      }
-    }
-    final allTags = allTagsSet.toList()..sort();
+    final allTags = SearchIndexService.instance
+        .getAllKnownTags()
+        .where((tag) => !tag.toLowerCase().contains('godmode'))
+        .toList();
 
     final daySections = buildTimelineDaySections(entries);
     final Map<int, TimelineSessionItem> sessionLookup = {};

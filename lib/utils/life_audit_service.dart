@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -190,6 +191,38 @@ class LifeAuditService {
   }) {
     final conscious = 24.0 - sleepHours - essentialsHours;
     return conscious.clamp(1.0, 20.0);
+  }
+
+  /// Computes Life Audit summary asynchronously in a background isolate for smooth 120fps UI.
+  static Future<LifeAuditSummary> calculateAsync({
+    required List<Moment> entries,
+    required LifeAuditTimeframe timeframe,
+    double sleepHours = defaultSleepHours,
+    double essentialsHours = defaultEssentialsHours,
+    DateTime? referenceNow,
+    int? activeSessionStart,
+    String? protectedGraceDate,
+  }) {
+    if (entries.length < 50) {
+      return Future.value(calculate(
+        entries: entries,
+        timeframe: timeframe,
+        sleepHours: sleepHours,
+        essentialsHours: essentialsHours,
+        referenceNow: referenceNow,
+        activeSessionStart: activeSessionStart,
+        protectedGraceDate: protectedGraceDate,
+      ));
+    }
+    return Isolate.run(() => calculate(
+      entries: entries,
+      timeframe: timeframe,
+      sleepHours: sleepHours,
+      essentialsHours: essentialsHours,
+      referenceNow: referenceNow,
+      activeSessionStart: activeSessionStart,
+      protectedGraceDate: protectedGraceDate,
+    ));
   }
 
   /// Calculates the complete Life Audit summary across all moments for the specified timeframe.

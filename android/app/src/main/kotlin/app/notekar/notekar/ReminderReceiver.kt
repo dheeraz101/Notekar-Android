@@ -27,6 +27,13 @@ class ReminderReceiver : BroadcastReceiver() {
             return
         }
 
+        if (action == ACTION_DAILY_MAINTENANCE) {
+            scheduleDailyMaintenance(context)
+            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            prefs.edit().putLong("flutter.notekar.last_midnight_maintenance_ms", System.currentTimeMillis()).apply()
+            return
+        }
+
         val id = intent.getStringExtra(EXTRA_ID) ?: return
         val title = intent.getStringExtra(EXTRA_TITLE) ?: "NoteKar Reminder"
         val body = intent.getStringExtra(EXTRA_BODY) ?: "Time to log a moment!"
@@ -186,7 +193,48 @@ class ReminderReceiver : BroadcastReceiver() {
             }
         }
 
+        const val ACTION_DAILY_MAINTENANCE = "app.notekar.notekar.ACTION_DAILY_MAINTENANCE"
+        const val MAINTENANCE_ID = "daily_midnight_maintenance"
+
+        fun scheduleDailyMaintenance(context: Context) {
+            val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
+            val intent = Intent(context, ReminderReceiver::class.java).apply {
+                action = ACTION_DAILY_MAINTENANCE
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                MAINTENANCE_ID.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val calendar = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_YEAR, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 1)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                }
+            } catch (_: Exception) {}
+        }
+
         fun rescheduleAll(context: Context) {
+            scheduleDailyMaintenance(context)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val keys = prefs.all.keys
             for (key in keys) {

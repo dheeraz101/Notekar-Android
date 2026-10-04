@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -162,6 +163,26 @@ class ExecutiveDashboardData {
 }
 
 class DashboardMetricsService {
+  /// Computes Executive Dashboard metrics asynchronously in a background isolate for smooth 120fps UI.
+  static Future<ExecutiveDashboardData> calculateAsync({
+    required List<Moment> entries,
+    required DashboardTimeframe timeframe,
+    required Palette p,
+  }) {
+    if (entries.length < 50) {
+      return Future.value(calculate(
+        entries: entries,
+        timeframe: timeframe,
+        p: p,
+      ));
+    }
+    return Isolate.run(() => calculate(
+      entries: entries,
+      timeframe: timeframe,
+      p: p,
+    ));
+  }
+
   static ExecutiveDashboardData calculate({
     required List<Moment> entries,
     required DashboardTimeframe timeframe,

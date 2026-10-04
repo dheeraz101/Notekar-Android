@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:notekar/models/activity_tag.dart';
 import 'package:notekar/models/moment.dart';
@@ -200,6 +201,23 @@ class TagService {
   /// Extract the tag name without # prefix.
   static String stripHash(String tag) {
     return tag.startsWith('#') ? tag.substring(1) : tag;
+  }
+
+  /// Get all unique tags asynchronously on a background isolate for large entry sets.
+  Future<List<String>> getAllKnownTagsAsync(List<Moment> entries) {
+    if (entries.length < 50) {
+      return Future.value(getAllKnownTags(entries));
+    }
+    final seedTags = <String>{...customTags, ..._recentTags};
+    return Isolate.run(() {
+      final all = Set<String>.from(seedTags);
+      for (final entry in entries) {
+        for (final tag in entry.effectiveTags) {
+          all.add('#$tag');
+        }
+      }
+      return all.toList()..sort();
+    });
   }
 
   /// Get all unique tags ever used across all entries.

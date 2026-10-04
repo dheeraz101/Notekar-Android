@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/services/search_index_service.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,6 +39,7 @@ class MomentRepository {
   // In-memory cache to boost read performance
   List<Moment>? _cachedMoments;
   List<Moment>? _cachedTrashMoments;
+  Map<int, Moment>? _momentIdIndex;
 
   Future<List<int>?> _getOrGenerateEncryptionKey() async {
     const secureStorage = FlutterSecureStorage(
@@ -353,10 +355,85 @@ class MomentRepository {
           .toList();
       moments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _cachedMoments = moments;
+      _momentIdIndex = {for (final m in moments) m.id: m};
+      SearchIndexService.instance.buildIndex(moments);
       return moments;
     } catch (e, stack) {
       _logger.error('Failed to load moments from Hive', e, stack);
       return [];
+    }
+  }
+
+  /// O(1) direct lookup of a moment by its unique ID via the secondary index.
+  Moment? getMomentById(int id) {
+    if (_momentIdIndex != null) {
+      return _momentIdIndex![id];
+    }
+    getAllMoments();
+    return _momentIdIndex?[id];
+  }
+
+  /// High-performance O(log N) binary range slicing for timestamp queries.
+  ///
+  /// Extracts all moments between [startMs] and [endMs] inclusive,
+  /// leveraging the descending sorted timestamp array without full linear table scans.
+  List<Moment> getMomentsBetween(int startMs, int endMs) {
+    final moments = getAllMoments();
+    if (moments.isEmpty || startMs > endMs) return const [];
+
+    // Binary search for the first element with timestamp <= endMs
+    int low = 0;
+    int high = moments.length - 1;
+    int startIdx = moments.length;
+
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      if (moments[mid].timestamp <= endMs) {
+        startIdx = mid;
+        high = mid - 1; // look for earlier (higher timestamp) matching index
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    if (startIdx >= moments.length || moments[startIdx].timestamp < startMs) {
+      return const [];
+    }
+
+    // Binary search for the last element with timestamp >= startMs
+    low = startIdx;
+    high = moments.length - 1;
+    int endIdx = startIdx;
+
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      if (moments[mid].timestamp >= startMs) {
+        endIdx = mid;
+        low = mid + 1; // look for later (lower timestamp) matching index
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return moments.sublist(startIdx, endIdx + 1);
+  }
+
+  /// Guaranteed OS maintenance routine: updates rolling snapshot, purges old trash,
+  /// and compacts storage boxes.
+  Future<void> performDailyMaintenance() async {
+    try {
+      _logger.info('Performing daily background maintenance...');
+      await triggerAutoSnapshotIfNeeded(force: true);
+      await _autoPurgeOldTrash();
+      if (_box.length > 200) {
+        await _box.compact();
+      }
+      if (_trashBox.length > 200) {
+        await _trashBox.compact();
+      }
+      _logger.info('Daily background maintenance completed successfully');
+    } catch (e, stack) {
+      _logger.error('Failed executing daily background maintenance', e, stack);
     }
   }
 
@@ -397,12 +474,14 @@ class MomentRepository {
       if (moment.id >= currentNextId) {
         await _prefs.setInt(_nextIdKey, moment.id + 1);
       }
-      // Update local cache
+      // Update local cache and secondary indices
       if (_cachedMoments != null) {
         _cachedMoments!.removeWhere((m) => m.id == moment.id);
         _cachedMoments!.add(moment);
         _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       }
+      _momentIdIndex?[moment.id] = moment;
+      SearchIndexService.instance.indexMoment(moment);
     } catch (e, stack) {
       _logger.error('Failed to save moment ${moment.id}', e, stack);
       rethrow;
@@ -434,10 +513,12 @@ class MomentRepository {
         }
       }
       await _box.delete(id);
-      // Update entries cache
+      // Update entries cache and secondary indices
       if (_cachedMoments != null) {
         _cachedMoments!.removeWhere((m) => m.id == id);
       }
+      _momentIdIndex?.remove(id);
+      SearchIndexService.instance.unindexMoment(id);
     } catch (e, stack) {
       _logger.error('Failed to delete moment $id', e, stack);
       rethrow;
@@ -457,13 +538,15 @@ class MomentRepository {
         }
         if (jsonMap != null) {
           await _box.put(id, jsonMap);
-          // Update entries cache
+          // Update entries cache and secondary indices
+          final moment = Moment.fromJson(jsonMap);
           if (_cachedMoments != null) {
-            final moment = Moment.fromJson(jsonMap);
             _cachedMoments!.removeWhere((m) => m.id == id);
             _cachedMoments!.add(moment);
             _cachedMoments!.sort((a, b) => b.timestamp.compareTo(a.timestamp));
           }
+          _momentIdIndex?[moment.id] = moment;
+          SearchIndexService.instance.indexMoment(moment);
         }
         await _trashBox.delete(id);
         // Update trash cache

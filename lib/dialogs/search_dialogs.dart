@@ -7,6 +7,7 @@ import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/search_index_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -81,26 +82,6 @@ class NoteSearchContent extends StatefulWidget {
   State<NoteSearchContent> createState() => _NoteSearchContentState();
 }
 
-class _NoteSearchRow {
-  const _NoteSearchRow({
-    required this.entry,
-    required this.noteLower,
-    required this.catLower,
-    required this.dateLower,
-    required this.timeLower,
-    required this.typeLower,
-    required this.searchText,
-  });
-
-  final Moment entry;
-  final String noteLower;
-  final String catLower;
-  final String dateLower;
-  final String timeLower;
-  final String typeLower;
-  final String searchText;
-}
-
 class _NoteSearchContentState extends State<NoteSearchContent> {
   static const _pageSize = 100;
   final _controller = TextEditingController();
@@ -109,13 +90,11 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   String _query = '';
   TimelineFilterCriteria _filterCriteria = const TimelineFilterCriteria();
   final List<Moment> _selectedMoments = [];
-  late List<_NoteSearchRow> _searchRows;
   late List<String> _knownTags;
 
   @override
   void initState() {
     super.initState();
-    _searchRows = _buildSearchRows(widget.entries);
     _knownTags = TagService.instance.getAllKnownTags(widget.entries);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -126,7 +105,6 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   void didUpdateWidget(covariant NoteSearchContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.entries, widget.entries)) {
-      _searchRows = _buildSearchRows(widget.entries);
       _knownTags = TagService.instance.getAllKnownTags(widget.entries);
     }
   }
@@ -139,126 +117,13 @@ class _NoteSearchContentState extends State<NoteSearchContent> {
   }
 
   List<Moment> get _matches {
-    final rawQuery = _query.trim().toLowerCase();
-    final tokens = rawQuery
-        .split(RegExp(r'\s+'))
-        .where((t) => t.isNotEmpty)
-        .toList();
-
-    final filtered = _searchRows.where((r) {
-      final isTwoWay = r.entry.type == 'in' || r.entry.type == 'out';
-      if (_filterCriteria.mode == 'single' && isTwoWay) return false;
-      if (_filterCriteria.mode == 'two-way' && !isTwoWay) return false;
-
-      if (_filterCriteria.category != null &&
-          _filterCriteria.category!.isNotEmpty) {
-        final cat = _filterCriteria.category!.toLowerCase();
-        final matchesCat =
-            (r.entry.category != null &&
-                r.entry.category!.toLowerCase() == cat) ||
-            r.entry.note.toLowerCase().contains('#$cat');
-        if (!matchesCat) return false;
-      }
-
-      if (_filterCriteria.hashtag != null &&
-          _filterCriteria.hashtag!.isNotEmpty) {
-        final tag = _filterCriteria.hashtag!.toLowerCase();
-        final cleanTag = tag.startsWith('#') ? tag : '#$tag';
-        if (!r.entry.note.toLowerCase().contains(cleanTag)) return false;
-      }
-
-      return true;
-    });
-
-    if (tokens.isEmpty) {
-      return filtered.map((r) => r.entry).toList();
-    }
-
-    final scored = <({Moment entry, int score})>[];
-
-    for (final r in filtered) {
-      bool matchesAll = true;
-      int score = 0;
-
-      if (r.noteLower == rawQuery) {
-        score += 1000;
-      } else if (r.noteLower.startsWith(rawQuery)) {
-        score += 500;
-      } else if (r.noteLower.contains(rawQuery)) {
-        score += 250;
-      }
-
-      for (final token in tokens) {
-        bool tokenMatched = false;
-        if (r.noteLower.contains(token)) {
-          tokenMatched = true;
-          score += 150;
-          if (r.noteLower.startsWith(token)) score += 50;
-        }
-        if (r.catLower.contains(token)) {
-          tokenMatched = true;
-          score += 80;
-        }
-        if (r.typeLower.contains(token)) {
-          tokenMatched = true;
-          score += 40;
-        }
-        if (r.dateLower.contains(token) || r.timeLower.contains(token)) {
-          tokenMatched = true;
-          score += 20;
-        }
-
-        if (!tokenMatched) {
-          matchesAll = false;
-          break;
-        }
-      }
-
-      if (matchesAll && score > 0) {
-        scored.add((entry: r.entry, score: score));
-      }
-    }
-
-    scored.sort((a, b) {
-      final cmp = b.score.compareTo(a.score);
-      if (cmp != 0) return cmp;
-      return b.entry.timestamp.compareTo(a.entry.timestamp);
-    });
-
-    return scored.map((e) => e.entry).toList();
-  }
-
-  List<_NoteSearchRow> _buildSearchRows(List<Moment> entries) {
-    return entries
-        .where(
-          (entry) =>
-              entry.note.trim().isNotEmpty &&
-              !entry.note.contains('God Mode Unlocked') &&
-              !entry.note.contains('#godmode'),
-        )
-        .map((entry) {
-          final noteLower = entry.note.toLowerCase();
-          final catLower = (entry.category ?? '').toLowerCase();
-          final dateLower = datePretty(entry.timestamp).toLowerCase();
-          final timeLower = timeOnly(entry.timestamp).toLowerCase();
-          final typeLower = entry.type.toLowerCase();
-          final tagsLower = entry.effectiveTags
-              .map((t) => '#$t')
-              .join(' ')
-              .toLowerCase();
-
-          return _NoteSearchRow(
-            entry: entry,
-            noteLower: noteLower,
-            catLower: catLower,
-            dateLower: dateLower,
-            timeLower: timeLower,
-            typeLower: typeLower,
-            searchText:
-                '$noteLower $tagsLower $dateLower $timeLower $typeLower $catLower',
-          );
-        })
-        .toList();
+    return SearchIndexService.instance.search(
+      allMoments: widget.entries,
+      query: _query,
+      mode: _filterCriteria.mode,
+      category: _filterCriteria.category,
+      hashtag: _filterCriteria.hashtag,
+    );
   }
 
   List<Moment> get _visibleRows => _matches.take(_visibleCount).toList();
