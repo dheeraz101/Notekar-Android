@@ -717,6 +717,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           }
                         },
                         child: CustomScrollView(
+                          key: const PageStorageKey<String>('history_timeline_scroll_view'),
                           controller: _scrollController,
                           physics: const BouncingScrollPhysics(
                             parent: AlwaysScrollableScrollPhysics(),

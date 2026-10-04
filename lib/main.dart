@@ -12,6 +12,7 @@ import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/update_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'services/circuit_breaker_service.dart';
 import 'utils/settings_controller.dart';
 import 'utils/settings_provider.dart';
 
@@ -77,6 +78,7 @@ void main() async {
   final results = await Future.wait([sharedPrefsFuture, hivePreloadFuture]);
 
   final prefs = results[0] as SharedPreferences;
+  CircuitBreakerService.instance.init(prefs);
   unawaited(AdaptiveEngine().initialize(prefs: prefs));
 
   if (prefs.getBool('auto_delete_update_cache') ?? false) {

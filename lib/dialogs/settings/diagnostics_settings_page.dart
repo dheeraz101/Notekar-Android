@@ -10,6 +10,7 @@ import 'package:notekar/utils/app_logger.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/network_logger.dart';
+import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
@@ -139,6 +140,63 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             DiagnosticRow(p: widget.p, label: 'Last Moment', value: latest),
           ],
         ),
+        const SizedBox(height: 16),
+        SettingsGroup(
+          p: widget.p,
+          title: 'Fault Isolation & Circuit Breakers',
+          children: [
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Protection Mode',
+              value: 'Active (3-failure auto-isolate)',
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Digital Wellbeing Stats',
+              value: CircuitBreakerService.instance.isOpen('digital_wellbeing_stats')
+                  ? 'Tripped (Isolated)'
+                  : 'Healthy',
+            ),
+            DiagnosticRow(
+              p: widget.p,
+              label: 'Stats Failures',
+              value: '${CircuitBreakerService.instance.getFailureCount('digital_wellbeing_stats')}/3',
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        PressableScale(
+          onTap: () async {
+            await CircuitBreakerService.instance.resetAll();
+            if (mounted) setState(() {});
+            widget.onCopyDiagnosticsFeedback('All Circuit Breakers Reset');
+          },
+          child: Container(
+            width: double.infinity,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: widget.p.surface2,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: widget.p.border.withValues(alpha: 0.5)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.restart_alt_rounded, color: widget.p.accent, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  'Reset Circuit Breakers',
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 20),
         PressableScale(
           onTap: () {
@@ -203,6 +261,9 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
       'Last update check: ${widget.lastUpdateCheckedAt == null ? 'Not checked yet' : relativeAge(widget.lastUpdateCheckedAt!)}',
       'App notices: ${widget.remoteNotices ? 'Enabled' : 'Disabled'}',
       'Last moment: $latest',
+      '',
+      'Circuit Breakers:',
+      'Digital Wellbeing: ${CircuitBreakerService.instance.isOpen('digital_wellbeing_stats') ? 'TRIPPED (OPEN)' : 'HEALTHY (CLOSED)'}',
       '',
       'Internal Logs:',
       logs.isEmpty ? 'No internal logs available' : logs,

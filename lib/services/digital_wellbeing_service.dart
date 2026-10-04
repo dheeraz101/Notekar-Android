@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/services/circuit_breaker_service.dart';
 
 /// Represents usage metrics for a specific app within a timeframe.
 class AppUsageEntry {
@@ -209,28 +210,31 @@ class DigitalWellbeingService {
       return _cachedSnapshot!;
     }
 
-    try {
-      final nowMs = now.millisecondsSinceEpoch;
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final startMs = startOfDay.millisecondsSinceEpoch;
+    final fallback = _cachedSnapshot ?? DigitalWellbeingSnapshot.empty;
+    return await CircuitBreakerService.instance.run(
+      serviceId: 'digital_wellbeing_stats',
+      action: () async {
+        final nowMs = now.millisecondsSinceEpoch;
+        final startOfDay = DateTime(now.year, now.month, now.day);
+        final startMs = startOfDay.millisecondsSinceEpoch;
 
-      final res = await _channel.invokeMapMethod<dynamic, dynamic>(
-        'getDailyUsageStats',
-        {'startTimeMs': startMs, 'endTimeMs': nowMs},
-      );
+        final res = await _channel.invokeMapMethod<dynamic, dynamic>(
+          'getDailyUsageStats',
+          {'startTimeMs': startMs, 'endTimeMs': nowMs},
+        );
 
-      if (res == null) {
-        return _cachedSnapshot ?? DigitalWellbeingSnapshot.empty;
-      }
+        if (res == null) {
+          return fallback;
+        }
 
-      final snapshot = DigitalWellbeingSnapshot.fromMap(res);
-      _cachedSnapshot = snapshot;
-      _lastFetchTime = now;
-      permissionNotifier.value = snapshot.hasPermission;
-      snapshotNotifier.value = snapshot;
-      return snapshot;
-    } catch (_) {
-      return _cachedSnapshot ?? DigitalWellbeingSnapshot.empty;
-    }
+        final snapshot = DigitalWellbeingSnapshot.fromMap(res);
+        _cachedSnapshot = snapshot;
+        _lastFetchTime = now;
+        permissionNotifier.value = snapshot.hasPermission;
+        snapshotNotifier.value = snapshot;
+        return snapshot;
+      },
+      fallback: fallback,
+    ) ?? fallback;
   }
 }
