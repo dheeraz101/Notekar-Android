@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/pioneer_badge_dialog.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class GodModeSettingsPage extends StatelessWidget {
@@ -142,6 +144,46 @@ class GodModeSettingsPage extends StatelessWidget {
           p: p,
           text:
               'Cryptographic SHA-256 sovereign integrity credentials and telemetry.'
+                  .localized(context),
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Fault Isolation & Circuit Breakers Group
+        SettingsGroup(
+          p: p,
+          title: 'System Reliability & Fault Isolation'
+              .localized(context)
+              .toUpperCase(),
+          children: [
+            SettingsRow(
+              p: p,
+              icon: Icons.power_settings_new_rounded,
+              title: 'Reset All Circuit Breakers'.localized(context),
+              subtitle: 'Clear tripped breakers and restore bypassed services'
+                  .localized(context),
+              status: 'Reset'.localized(context),
+              color: p.orange,
+              onTap: () async {
+                HapticFeedback.mediumImpact();
+                await CircuitBreakerService.instance.resetAll();
+                if (context.mounted) {
+                  showIosPillToast(
+                    context: context,
+                    p: p,
+                    message: 'All Circuit Breakers have been reset'
+                        .localized(context),
+                    icon: Icons.check_circle_outline_rounded,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Instantly restore all background circuits tripped by the failure isolation subsystem.'
                   .localized(context),
         ),
 

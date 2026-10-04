@@ -11,6 +11,7 @@ import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
+import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -130,9 +131,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
   bool _showGapCards = false;
   bool _rainbowCards = false;
   TimelineDaySection? _activeInsightsSection;
-  String? _inSheetView; // null, 'manual', 'goals', 'create_goal'
+  String? _inSheetView; // null, 'manual', 'goals', 'create_goal', 'life_audit'
   Goal? _editingGoal;
   List<Goal> _goals = [];
+  double _sleepHours = 10.0;
+  double _essentialsHours = 4.0;
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -169,6 +172,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
         _viewMode = savedViewMode;
         _showGapCards = savedGaps;
         _rainbowCards = savedRainbow;
+        _sleepHours = prefs.getDouble('time_audit_sleep_hours') ?? 10.0;
+        _essentialsHours = prefs.getDouble('time_audit_essentials_hours') ?? 4.0;
       });
       _rebuildMemoizedLists();
     }
@@ -426,6 +431,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
             : _inSheetView == 'create_goal'
             ? (_editingGoal == null ? 'New Target Goal' : 'Edit Target Goal')
                   .localized(context)
+            : _inSheetView == 'life_audit'
+            ? 'Life Audit & Horizon'.localized(context)
             : _activeInsightsSection != null
             ? _activeInsightsSection!.displayTitle
             : 'History'.localized(context),
@@ -665,6 +672,26 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       _inSheetView = 'goals';
                     });
                   },
+                )
+              : _inSheetView == 'life_audit'
+              ? SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  child: LifeAuditPage(
+                    p: widget.p,
+                    entries: _entries,
+                    sleepHours: _sleepHours,
+                    essentialsHours: _essentialsHours,
+                    onSleepHoursChanged: (val) async {
+                      setState(() => _sleepHours = val);
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setDouble('time_audit_sleep_hours', val);
+                    },
+                    onEssentialsHoursChanged: (val) async {
+                      setState(() => _essentialsHours = val);
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setDouble('time_audit_essentials_hours', val);
+                    },
+                  ),
                 )
               : _activeInsightsSection != null
               ? DayDetailContent(
@@ -1764,6 +1791,27 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 const SizedBox(width: 10),
                 Text(
                   'Targets & Goals'.localized(context),
+                  style: TextStyle(
+                    color: widget.p.text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() => _inSheetView = 'life_audit');
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.hourglass, size: 20, color: widget.p.text),
+                const SizedBox(width: 10),
+                Text(
+                  'Life Audit & Horizon'.localized(context),
                   style: TextStyle(
                     color: widget.p.text,
                     fontSize: 16,

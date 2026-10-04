@@ -62,6 +62,77 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
 
     return [
       item(
+        title: 'Fault Isolation & Circuit Breakers',
+        subtitle:
+            'Manage automatic subsystem failure breakers and fault recovery',
+        category: 'Diagnostics',
+        icon: Icons.power_settings_new_rounded,
+        keywords: [
+          'circuit breaker',
+          'fault isolation',
+          'circuit',
+          'breaker',
+          'failure',
+          'crash',
+          'resilience',
+          'isolate',
+          'reset breakers',
+          'digital wellbeing',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'View',
+      ),
+      item(
+        title: 'Floating Timer Pill',
+        subtitle: 'Draggable on-screen live timer during active session',
+        category: 'Workflow & Capture',
+        icon: CupertinoIcons.timer,
+        keywords: [
+          'floating timer',
+          'timer pill',
+          'floating',
+          'pip',
+          'overlay',
+          'live timer',
+          'screen timer',
+        ],
+        kind: 'switch',
+        boolValue: widget.floatingTimerEnabled,
+        onBoolChanged: widget.onFloatingTimerChanged != null
+            ? (val) => widget.onFloatingTimerChanged!(val)
+            : null,
+        status: null,
+      ),
+      item(
+        title: 'Acoustic Feedback',
+        subtitle: 'Subtle sound feedback on capture and detents',
+        category: 'Workflow & Capture',
+        icon: CupertinoIcons.speaker_2,
+        keywords: [
+          'sound',
+          'audio',
+          'sound effects',
+          'acoustic feedback',
+          'click',
+          'audio feedback',
+          'detent',
+          'volume',
+        ],
+        kind: 'switch',
+        boolValue: soundEffects,
+        onBoolChanged: (val) async {
+          update(() => soundEffects = val);
+          widget.onSoundEffects?.call(val);
+          AppSound.setEnabled(val);
+          if (val) AppSound.click();
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('m-acoustic-feedback', val);
+        },
+        status: null,
+      ),
+      item(
         title: 'Personal Profile',
         subtitle: 'Configure your name, photo, birth date, and avatar',
         category: 'Personalization',
@@ -2642,7 +2713,9 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       _openCategory('Commits', parent: 'Developer Options');
       return;
     }
-    if (result.title == 'Diagnostics') {
+    if (result.title == 'Diagnostics' ||
+        result.title == 'Fault Isolation & Circuit Breakers' ||
+        result.title == 'Circuit Breakers') {
       _openCategory('Diagnostics', parent: 'Developer Options');
       return;
     }
