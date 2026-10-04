@@ -304,13 +304,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _fileChannel.setMethodCallHandler((call) async {
       if (call.method == 'onBackgroundLogRecorded') {
         if (_prefs != null) {
+          await _prefs!.reload();
           await _syncBackgroundLogs(_prefs!);
           final savedInOut = _prefs!.getString('m-inout');
           final savedSes = _prefs!.getInt('m-ses');
+          final savedPaused = _prefs!.getBool('m-paused') ?? false;
+          final savedPausedAt = _prefs!.getInt('m-paused-at');
           if (mounted) {
             setState(() {
               if (savedInOut != null) _inout = savedInOut;
               _sessionStart = savedSes;
+              _isPaused = savedPaused;
+              _pausedAt = savedPausedAt;
             });
           }
         }
@@ -492,11 +497,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
           final savedMode = _prefs!.getString('m-mode');
           final savedInOut = _prefs!.getString('m-inout');
           final savedSes = _prefs!.getInt('m-ses');
+          final savedPaused = _prefs!.getBool('m-paused') ?? false;
+          final savedPausedAt = _prefs!.getInt('m-paused-at');
           if (mounted) {
             setState(() {
               if (savedMode != null) _mode = savedMode;
               if (savedInOut != null) _inout = savedInOut;
               _sessionStart = savedSes;
+              _isPaused = savedPaused;
+              _pausedAt = savedPausedAt;
             });
           }
         }());
@@ -1052,6 +1061,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (prefs == null) return;
     if (value is String) await prefs.setString(key, value);
     if (value is int) await prefs.setInt(key, value);
+    if (value is bool) await prefs.setBool(key, value);
   }
 
   Future<void> _showWelcomeIfNeeded(SharedPreferences prefs) async {
@@ -1911,13 +1921,21 @@ class _NoteKarHomeState extends State<NoteKarHome>
         if (entry.type == 'in') {
           _inout = 'out';
           _sessionStart = entry.timestamp;
+          _isPaused = false;
+          _pausedAt = null;
           await prefs.setString('m-inout', 'out');
           await prefs.setInt('m-ses', entry.timestamp);
+          await prefs.setBool('m-paused', false);
+          await prefs.remove('m-paused-at');
         } else if (entry.type == 'out') {
           _inout = 'in';
           _sessionStart = null;
+          _isPaused = false;
+          _pausedAt = null;
           await prefs.setString('m-inout', 'in');
           await prefs.remove('m-ses');
+          await prefs.setBool('m-paused', false);
+          await prefs.remove('m-paused-at');
         }
       }
     }
@@ -2033,10 +2051,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
     setState(() => _floatingTimerEnabled = enabled);
     await _saveSetting('floating_timer_enabled', enabled);
     if (!mounted) return;
-    _showToast(
-      (enabled ? 'Floating Timer Enabled' : 'Floating Timer Disabled')
-          .localized(context),
-    );
+    final isActive = _mode == 'two-way' && _sessionStart != null;
+    final message = enabled
+        ? (isActive
+              ? 'Floating Timer enabled'
+              : 'Floating Timer enabled (will show during active session)')
+        : 'Floating Timer disabled';
+    _showToast(message.localized(context));
   }
 
   Future<String?> _showModeSelectorSheet() async {
@@ -3941,12 +3962,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ),
           ),
 
-          // Apple HIG Two-Way Session Pause/Resume Control Pill
+          // Two-Way Session Pause/Resume Control Dock
           if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out'))
             Positioned(
               left: 0,
               right: 0,
-              top: MediaQuery.sizeOf(context).height * 0.5 + 84,
+              bottom: 84 + bottomInset,
               child: Center(
                 child: PressableScale(
                   onTap: _togglePauseResumeSession,
