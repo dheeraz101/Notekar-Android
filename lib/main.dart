@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:isar/isar.dart';
 import 'package:notekar/l10n/app_localizations.dart';
-import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/screens/note_kar_home.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -134,15 +131,9 @@ void main() async {
 }
 
 Future<void> _initIsarPreload() async {
-  const channel = MethodChannel('notekar/files');
   try {
-    final dataDir = await channel.invokeMethod<String>('appDataDir');
-    await Isar.open([
-      MomentSchema,
-    ], directory: dataDir ?? Directory.systemTemp.path);
-  } catch (_) {
-    await Isar.open([MomentSchema], directory: Directory.systemTemp.path);
-  }
+    await MomentRepository().ensureInitialized();
+  } catch (_) {}
 }
 
 class NoteKarApp extends StatefulWidget {

@@ -35,32 +35,53 @@ class MomentRepository {
   List<Moment>? _cachedTrashMoments;
   Map<int, Moment>? _momentIdIndex;
 
-  Future<void> ensureInitialized({SharedPreferences? preloadedPrefs}) async {
+  Future<void> ensureInitialized({
+    SharedPreferences? preloadedPrefs,
+    String? directoryPath,
+  }) async {
     if (_isInitialized) return;
-    await initialize(preloadedPrefs: preloadedPrefs);
+    await initialize(
+      preloadedPrefs: preloadedPrefs,
+      directoryPath: directoryPath,
+    );
   }
 
-  Future<void> initialize({SharedPreferences? preloadedPrefs}) async {
+  Future<void> initialize({
+    SharedPreferences? preloadedPrefs,
+    String? directoryPath,
+  }) async {
     if (_isInitialized) return;
     _prefs = preloadedPrefs ?? await SharedPreferences.getInstance();
 
-    String? dataDirPath;
-    try {
-      const channel = MethodChannel('notekar/files');
-      dataDirPath = await channel.invokeMethod<String>('appDataDir');
-    } catch (_) {}
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      try {
+        await Isar.initializeIsarCore(download: true);
+      } catch (_) {}
+    }
+
+    String? dataDirPath = directoryPath;
+    if (dataDirPath == null) {
+      try {
+        const channel = MethodChannel('notekar/files');
+        dataDirPath = await channel.invokeMethod<String>('appDataDir');
+      } catch (_) {}
+    }
     dataDirPath ??= Directory.systemTemp.path;
 
-    _isar = await Isar.open(
-      [MomentSchema],
-      name: 'notekar_entries_v1',
-      directory: dataDirPath,
-    );
-    _trashIsar = await Isar.open(
-      [MomentSchema],
-      name: 'notekar_trash_v1',
-      directory: dataDirPath,
-    );
+    _isar =
+        Isar.getInstance('notekar_entries_v1') ??
+        await Isar.open(
+          [MomentSchema],
+          name: 'notekar_entries_v1',
+          directory: dataDirPath,
+        );
+    _trashIsar =
+        Isar.getInstance('notekar_trash_v1') ??
+        await Isar.open(
+          [MomentSchema],
+          name: 'notekar_trash_v1',
+          directory: dataDirPath,
+        );
 
     _isInitialized = true;
 
@@ -81,6 +102,25 @@ class MomentRepository {
     _logger.info(
       'MomentRepository initialized with ${_isar.moments.countSync()} entries, ${_trashIsar.moments.countSync()} trash entries',
     );
+  }
+
+  Future<void> close() async {
+    if (_isInitialized) {
+      try {
+        if (_isar.isOpen) {
+          await _isar.close();
+        }
+      } catch (_) {}
+      try {
+        if (_trashIsar.isOpen) {
+          await _trashIsar.close();
+        }
+      } catch (_) {}
+      _isInitialized = false;
+      _cachedMoments = null;
+      _cachedTrashMoments = null;
+      _momentIdIndex = null;
+    }
   }
 
   Future<void> triggerAutoSnapshotIfNeeded({bool force = false}) async {

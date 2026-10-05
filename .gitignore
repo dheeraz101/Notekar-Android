@@ -92,6 +92,9 @@ output/
 **/*.idsig
 **/*.sha1
 **/*.sha256
+**/*.dll
+**/*.so
+**/*.dylib
 # 🚀 Un-ignore Release Documentation (MD and JSON files ONLY)
 !releases/**/*.md
 !versions/**/*.json

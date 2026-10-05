@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/search_index_service.dart';
@@ -247,14 +246,16 @@ void main() {
 
     setUp(() async {
       tempDir = await Directory.systemTemp.createTemp('notekar_test_repo_');
-      Hive.init(tempDir.path);
       SharedPreferences.setMockInitialValues({});
+      await MomentRepository().ensureInitialized(directoryPath: tempDir.path);
     });
 
     tearDown(() async {
-      await Hive.close();
+      await MomentRepository().close();
       if (tempDir.existsSync()) {
-        await tempDir.delete(recursive: true);
+        try {
+          await tempDir.delete(recursive: true);
+        } catch (_) {}
       }
     });
 
@@ -262,7 +263,7 @@ void main() {
       'getMomentsBetween performs binary range slicing on sorted moments',
       () async {
         final repo = MomentRepository();
-        await repo.ensureInitialized();
+        await repo.ensureInitialized(directoryPath: tempDir.path);
 
         // Save moments at different timestamps
         final m1 = Moment(
