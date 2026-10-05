@@ -389,7 +389,6 @@ extension _HomeBackupLifecycleExtension on _NoteKarHomeState {
         _hapticStyle = nextHapticStyle;
         _haptics = _hapticStyle != 'off';
         _historyDensity = nextHistoryDensity;
-        _compactHistory = _historyDensity == 'compact';
         _backupReminderDays = nextBackupReminderDays;
         _homeMenuAnimations = nextHomeMenuAnimations;
         _inout = 'in';

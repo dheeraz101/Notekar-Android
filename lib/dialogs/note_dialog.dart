@@ -326,7 +326,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    CupertinoIcons.plus_app,
+                                    Icons.add_box_rounded,
                                     size: 13,
                                     color: widget.p.accent,
                                   ),
@@ -358,8 +358,8 @@ class _NoteDialogState extends State<NoteDialog> {
                               ),
                               child: Icon(
                                 _isExpanded
-                                    ? CupertinoIcons.chevron_down
-                                    : CupertinoIcons.chevron_up,
+                                    ? Icons.keyboard_arrow_down_rounded
+                                    : Icons.keyboard_arrow_up_rounded,
                                 size: 14,
                                 color: widget.p.text2,
                               ),
@@ -379,7 +379,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                CupertinoIcons.xmark,
+                                Icons.close_rounded,
                                 size: 12,
                                 color: widget.p.text2,
                               ),
@@ -420,7 +420,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        CupertinoIcons.add,
+                                        Icons.add_rounded,
                                         size: 12,
                                         color: widget.p.accent,
                                       ),
@@ -563,7 +563,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                   Row(
                                     children: [
                                       Icon(
-                                        CupertinoIcons.exclamationmark_shield,
+                                        Icons.security_rounded,
                                         color: widget.p.orange,
                                         size: 18,
                                       ),
@@ -600,7 +600,7 @@ class _NoteDialogState extends State<NoteDialog> {
                                     Row(
                                       children: [
                                         Icon(
-                                          CupertinoIcons.shield_fill,
+                                          Icons.security_rounded,
                                           color: widget.p.green,
                                           size: 18,
                                         ),

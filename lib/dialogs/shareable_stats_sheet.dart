@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart'
@@ -494,7 +495,7 @@ class _ShareableStatsSheetState extends State<ShareableStatsSheet> {
                       Row(
                         children: [
                           Icon(
-                            CupertinoIcons.circle_grid_hex,
+                            Icons.grid_view_rounded,
                             size: 13,
                             color: p.accent,
                           ),
@@ -551,7 +552,7 @@ class _ShareableStatsSheetState extends State<ShareableStatsSheet> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          CupertinoIcons.share,
+                          Icons.share_rounded,
                           color: Colors.white,
                           size: 18,
                         ),

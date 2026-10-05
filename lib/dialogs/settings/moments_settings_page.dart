@@ -12,7 +12,7 @@ class MomentsSettingsPage extends StatelessWidget {
     required this.p,
     required this.showTrashBin,
     required this.trash,
-    this.compactHistory = false,
+    this.historyDensity = 'comfortable',
     required this.confirmDelete,
     required this.extendedDuration,
     required this.minimalMomentOptions,
@@ -20,7 +20,7 @@ class MomentsSettingsPage extends StatelessWidget {
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
     this.countOnSave = false,
-    this.onCompactHistoryChanged,
+    
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
     required this.onExtendedDurationChanged,
@@ -34,7 +34,7 @@ class MomentsSettingsPage extends StatelessWidget {
   final Palette p;
   final bool showTrashBin;
   final List<Moment> trash;
-  final bool compactHistory;
+  final String historyDensity;
   final bool confirmDelete;
   final bool extendedDuration;
   final bool minimalMomentOptions;
@@ -43,7 +43,7 @@ class MomentsSettingsPage extends StatelessWidget {
   final bool resetSingleDaily;
   final bool countOnSave;
 
-  final ValueChanged<bool>? onCompactHistoryChanged;
+  
   final ValueChanged<String> onHistoryDensityChanged;
   final ValueChanged<bool> onConfirmDeleteChanged;
   final ValueChanged<bool> onExtendedDurationChanged;
@@ -84,7 +84,7 @@ class MomentsSettingsPage extends StatelessWidget {
               color: p.accent,
               value: useNumbersInSingle,
               onChanged: (value) async {
-                if (value && compactHistory) {
+                if (value && historyDensity == 'compact') {
                   final confirmed = await showFeatureConflictDialog(
                     context,
                     p: p,
@@ -96,7 +96,7 @@ class MomentsSettingsPage extends StatelessWidget {
                     iconColor: p.accent,
                   );
                   if (!confirmed) return;
-                  onCompactHistoryChanged?.call(false);
+                  
                   onHistoryDensityChanged('comfortable');
                 }
                 onUseNumbersInSingleChanged(value);

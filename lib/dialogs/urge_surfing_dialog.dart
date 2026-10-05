@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -421,17 +420,17 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
   IconData _getGroundingIcon(int step) {
     switch (step) {
       case 5:
-        return CupertinoIcons.eye_fill;
+        return Icons.visibility_rounded;
       case 4:
-        return CupertinoIcons.hand_draw_fill;
+        return Icons.draw_rounded;
       case 3:
-        return CupertinoIcons.speaker_2_fill;
+        return Icons.volume_up_rounded;
       case 2:
-        return CupertinoIcons.wind;
+        return Icons.air_rounded;
       case 1:
-        return CupertinoIcons.heart_fill;
+        return Icons.favorite_rounded;
       default:
-        return CupertinoIcons.circle;
+        return Icons.circle_outlined;
     }
   }
 }

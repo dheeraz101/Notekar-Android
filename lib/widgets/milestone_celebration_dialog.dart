@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
@@ -355,7 +354,7 @@ Future<void> showMilestoneUnlockDialog({
                                   );
                                 },
                                 icon: const Icon(
-                                  CupertinoIcons.share,
+                                  Icons.share_rounded,
                                   size: 18,
                                 ),
                                 label: Text(

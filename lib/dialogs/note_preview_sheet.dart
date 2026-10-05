@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -132,7 +131,7 @@ class NotePreviewSheet extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          actTag?.icon ?? CupertinoIcons.tag_fill,
+                          actTag?.icon ?? Icons.label_rounded,
                           size: 11,
                           color: p.accent,
                         ),
@@ -206,7 +205,7 @@ class NotePreviewSheet extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                   },
-                  icon: const Icon(CupertinoIcons.doc_on_clipboard, size: 16),
+                  icon: const Icon(Icons.content_paste_rounded, size: 16),
                   label: const Text('Copy Note'),
                 ),
               ),
@@ -226,7 +225,7 @@ class NotePreviewSheet extends StatelessWidget {
                       Navigator.pop(context);
                       onEdit!();
                     },
-                    icon: const Icon(CupertinoIcons.square_pencil, size: 16),
+                    icon: const Icon(Icons.edit_rounded, size: 16),
                     label: const Text(
                       'Edit Note',
                       style: TextStyle(fontWeight: FontWeight.w800),

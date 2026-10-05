@@ -158,7 +158,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Visualize weeks lived vs remaining horizon, capped at 100 years',
         category: 'Dashboard',
-        icon: CupertinoIcons.hourglass,
+        icon: Icons.hourglass_bottom_rounded,
         keywords: [
           'memento mori',
           'life horizon',
@@ -197,7 +197,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Mode Glyph Icons',
         subtitle: 'Select minimal glyph icons for active and custom modes',
         category: 'Modes & Categories',
-        icon: CupertinoIcons.sparkles,
+        icon: Icons.auto_awesome_rounded,
         keywords: [
           'mode icons',
           'glyph',
@@ -797,7 +797,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Confront the cost of unaccounted time across daily, weekly, and yearly horizons',
         category: 'Life Audit',
-        icon: CupertinoIcons.circle_grid_hex,
+        icon: Icons.grid_view_rounded,
         keywords: [
           'life audit',
           'audit',
@@ -849,7 +849,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Upcoming Features',
         subtitle: 'Roadmap, voice notes, AI insights, and P2P sync',
         category: 'About',
-        icon: CupertinoIcons.sparkles,
+        icon: Icons.auto_awesome_rounded,
         keywords: [
           'upcoming',
           'features',
@@ -1091,7 +1091,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Plus Notes',
         subtitle: 'Unrestricted long-form journaling and meeting logs',
         category: 'Moments',
-        icon: CupertinoIcons.plus_app,
+        icon: Icons.add_box_rounded,
         keywords: [
           'plus',
           'plus note',
@@ -1228,7 +1228,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         kind: 'switch',
         boolValue: useNumbersInSingle,
         onBoolChanged: (bool value) async {
-          if (value && compactHistory) {
+          if (value && historyDensity == 'compact') {
             final confirmed = await showFeatureConflictDialog(
               context,
               p: p,
@@ -1241,10 +1241,10 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
             );
             if (!confirmed) return;
             update(() {
-              compactHistory = false;
+              
               historyDensity = 'comfortable';
             });
-            widget.onCompactHistory(false);
+            
             widget.onHistoryDensity('comfortable');
           }
           update(() => useNumbersInSingle = value);
@@ -1943,7 +1943,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'URL schemes, text selection, share target, Markdown sync, and Tasker broadcast API',
         category: 'Integrations & Automation',
-        icon: CupertinoIcons.link,
+        icon: Icons.link_rounded,
         keywords: [
           'integration',
           'integrations',
@@ -1972,7 +1972,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Log moments, trigger IN/OUT, or navigate with notekar:// links',
         category: 'Integrations & Automation',
-        icon: CupertinoIcons.link,
+        icon: Icons.link_rounded,
         keywords: [
           'notekar://',
           'url scheme',
@@ -1993,7 +1993,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Text Selection Context Menu',
         subtitle: 'Highlight text anywhere in Android and tap "Log in NoteKar"',
         category: 'Integrations & Automation',
-        icon: CupertinoIcons.selection_pin_in_out,
+        icon: Icons.adjust_rounded,
         keywords: [
           'process text',
           'text selection',
@@ -2011,7 +2011,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Android Share Target',
         subtitle: 'Share text and URLs from external apps directly to NoteKar',
         category: 'Integrations & Automation',
-        icon: CupertinoIcons.share,
+        icon: Icons.share_rounded,
         keywords: [
           'share sheet',
           'action send',
@@ -2049,7 +2049,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Calendar Sessions (.ics) Export',
         subtitle: 'Export Two-Way IN/OUT intervals as RFC 5545 calendar events',
         category: 'Integrations & Automation',
-        icon: CupertinoIcons.calendar,
+        icon: Icons.calendar_today_rounded,
         keywords: [
           'calendar',
           'ics',
@@ -2071,7 +2071,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Send app.notekar.notekar.ACTION_LOG_MOMENT broadcasts offline',
         category: 'Integrations & Automation',
-        icon: CupertinoIcons.radiowaves_right,
+        icon: Icons.rss_feed_rounded,
         keywords: [
           'tasker',
           'macrodroid',

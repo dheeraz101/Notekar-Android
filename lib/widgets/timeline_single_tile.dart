@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/moment.dart';
@@ -323,7 +323,7 @@ class TimelineSingleTile extends StatelessWidget {
                           PressableScale(
                             onTap: onEditNote,
                             child: Icon(
-                              CupertinoIcons.square_pencil,
+                              Icons.edit_rounded,
                               size: compact ? 12 : 14,
                               color: p.text3,
                             ),

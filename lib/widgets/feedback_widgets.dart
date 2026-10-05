@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:notekar/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -210,8 +210,8 @@ class _UndoToastState extends State<UndoToast>
                   decoration: const BoxDecoration(shape: BoxShape.circle),
                   child: Icon(
                     isEditNote
-                        ? CupertinoIcons.square_pencil
-                        : CupertinoIcons.add,
+                        ? Icons.edit_rounded
+                        : Icons.add_rounded,
                     size: 18,
                     color: widget.p.accent,
                   ),

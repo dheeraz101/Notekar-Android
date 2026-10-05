@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -218,7 +218,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.calendar,
+              icon: Icons.calendar_today_rounded,
               title: 'Export Calendar (.ics)'.localized(context),
               status: 'Calendar'.localized(context),
               color: p.orange,

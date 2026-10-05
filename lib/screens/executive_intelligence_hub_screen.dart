@@ -281,7 +281,7 @@ class _ExecutiveIntelligenceHubScreenState
                     width: 0.8,
                   ),
                 ),
-                child: Icon(CupertinoIcons.news, size: 17, color: p.text2),
+                child: Icon(Icons.article_rounded, size: 17, color: p.text2),
               ),
             ),
           ),

@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -310,7 +310,7 @@ class _PersonalProfileSettingsPageState
                                                     ),
                                                   )
                                                 : Icon(
-                                                    CupertinoIcons.person_fill,
+                                                    Icons.person_rounded,
                                                     size: 46,
                                                     color: p.accent,
                                                   ),
@@ -349,7 +349,7 @@ class _PersonalProfileSettingsPageState
                           ],
                         ),
                         child: const Icon(
-                          CupertinoIcons.camera_fill,
+                          Icons.camera_alt_rounded,
                           color: Colors.white,
                           size: 14,
                         ),
@@ -499,7 +499,7 @@ class _PersonalProfileSettingsPageState
                   ),
                   child: Row(
                     children: [
-                      Icon(CupertinoIcons.calendar, size: 18, color: p.accent),
+                      Icon(Icons.calendar_today_rounded, size: 18, color: p.accent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -514,7 +514,7 @@ class _PersonalProfileSettingsPageState
                         ),
                       ),
                       Icon(
-                        CupertinoIcons.chevron_down,
+                        Icons.keyboard_arrow_down_rounded,
                         size: 14,
                         color: p.text3,
                       ),
@@ -540,7 +540,7 @@ class _PersonalProfileSettingsPageState
                 children: [
                   Row(
                     children: [
-                      Icon(CupertinoIcons.hourglass, size: 16, color: p.orange),
+                      Icon(Icons.hourglass_bottom_rounded, size: 16, color: p.orange),
                       const SizedBox(width: 8),
                       Text(
                         'MEMENTO MORI HORIZON',
@@ -828,7 +828,7 @@ class _PersonalProfileSettingsPageState
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
-                        CupertinoIcons.clock,
+                        Icons.access_time_rounded,
                         size: 18,
                         color: p.accent,
                       ),
@@ -931,7 +931,7 @@ class _PersonalProfileSettingsPageState
             NkButton.secondary(
               p: p,
               label: 'Share Card'.localized(context),
-              icon: CupertinoIcons.share,
+              icon: Icons.share_rounded,
               onPressed: () {
                 HapticFeedback.selectionClick();
                 ShareableProfileCardSheet.show(context, p: p);

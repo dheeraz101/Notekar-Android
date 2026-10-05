@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
@@ -100,7 +100,7 @@ class GoalsSheet extends StatelessWidget {
           height: 36,
           alignment: Alignment.center,
           decoration: BoxDecoration(color: p.surface3, shape: BoxShape.circle),
-          child: Icon(CupertinoIcons.add, size: 18, color: p.accent),
+          child: Icon(Icons.add_rounded, size: 18, color: p.accent),
         ),
       ),
       child: SizedBox(
@@ -375,7 +375,7 @@ class GoalsContentViewState extends State<GoalsContentView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            CupertinoIcons.flag_circle,
+            Icons.flag_circle_rounded,
             size: 54,
             color: widget.p.text3.withValues(alpha: 0.35),
           ),
@@ -413,7 +413,7 @@ class GoalsContentViewState extends State<GoalsContentView>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(CupertinoIcons.add, size: 16, color: Colors.white),
+                  const Icon(Icons.add_rounded, size: 16, color: Colors.white),
                   const SizedBox(width: 6),
                   Text(
                     'Create First Goal'.localized(context),
@@ -460,7 +460,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                     Icon(
                       goal.category != null
                           ? meta.icon
-                          : CupertinoIcons.flag_fill,
+                          : Icons.flag_rounded,
                       size: 12,
                       color: accentCol,
                     ),
@@ -514,7 +514,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       ),
                     ),
                     child: Icon(
-                      CupertinoIcons.square_pencil,
+                      Icons.edit_rounded,
                       size: 16,
                       color: widget.p.text2,
                     ),
@@ -540,7 +540,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       ),
                     ),
                     child: Icon(
-                      CupertinoIcons.trash,
+                      Icons.delete_rounded,
                       size: 16,
                       color: widget.p.red,
                     ),
@@ -626,7 +626,7 @@ class GoalsContentViewState extends State<GoalsContentView>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(CupertinoIcons.clock, size: 13, color: widget.p.text3),
+                  Icon(Icons.access_time_rounded, size: 13, color: widget.p.text3),
                   const SizedBox(width: 5),
                   Text(
                     '${progress.trackedFormatted} of ${progress.targetFormatted}',
@@ -689,8 +689,8 @@ class GoalsContentViewState extends State<GoalsContentView>
                   children: [
                     Icon(
                       progress.isCompleted
-                          ? CupertinoIcons.checkmark_seal_fill
-                          : CupertinoIcons.flame_fill,
+                          ? Icons.verified_rounded
+                          : Icons.local_fire_department_rounded,
                       size: 14,
                       color: progress.isCompleted
                           ? widget.p.green
@@ -768,7 +768,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                CupertinoIcons.stop_fill,
+                                Icons.stop_rounded,
                                 size: 13,
                                 color: widget.p.red,
                               ),
@@ -814,7 +814,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                CupertinoIcons.play_arrow_solid,
+                                Icons.play_arrow_rounded,
                                 size: 13,
                                 color: accentCol,
                               ),
@@ -855,7 +855,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        CupertinoIcons.plus_circle_fill,
+                        Icons.add_circle_rounded,
                         size: 13,
                         color: widget.p.accent,
                       ),
@@ -1137,7 +1137,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                 vertical: 7,
                               ),
                               child: Icon(
-                                CupertinoIcons.minus,
+                                Icons.remove_rounded,
                                 size: 14,
                                 color: _targetHours > 1
                                     ? widget.p.text
@@ -1161,7 +1161,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                                 vertical: 7,
                               ),
                               child: Icon(
-                                CupertinoIcons.plus,
+                                Icons.add_rounded,
                                 size: 14,
                                 color: widget.p.text,
                               ),
@@ -1325,7 +1325,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         Row(
                           children: [
                             Icon(
-                              CupertinoIcons.calendar,
+                              Icons.calendar_today_rounded,
                               size: 16,
                               color: widget.p.accent,
                             ),
@@ -1358,7 +1358,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                             ),
                             const SizedBox(width: 5),
                             Icon(
-                              CupertinoIcons.chevron_right,
+                              Icons.chevron_right_rounded,
                               size: 13,
                               color: widget.p.accent,
                             ),
@@ -1417,7 +1417,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            CupertinoIcons.circle_grid_hex,
+                            Icons.grid_view_rounded,
                             size: 13,
                             color: _category == null
                                 ? Colors.white

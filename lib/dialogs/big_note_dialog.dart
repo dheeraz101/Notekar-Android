@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
@@ -269,7 +269,7 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              CupertinoIcons.doc_text,
+                              Icons.description_rounded,
                               size: 16,
                               color: p.accent,
                             ),
@@ -498,7 +498,7 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        CupertinoIcons.add,
+                                        Icons.add_rounded,
                                         size: 12,
                                         color: p.accent,
                                       ),
@@ -525,19 +525,19 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                         Row(
                           children: [
                             _buildQuickAction(
-                              icon: CupertinoIcons.time,
+                              icon: Icons.schedule_rounded,
                               label: 'Time',
                               onTap: _insertTimestamp,
                             ),
                             const SizedBox(width: 6),
                             _buildQuickAction(
-                              icon: CupertinoIcons.list_bullet,
+                              icon: Icons.format_list_bulleted_rounded,
                               label: 'Bullet',
                               onTap: () => _insertSnippet('\n• '),
                             ),
                             const SizedBox(width: 6),
                             _buildQuickAction(
-                              icon: CupertinoIcons.check_mark_circled,
+                              icon: Icons.check_circle_outline_rounded,
                               label: 'Checklist',
                               onTap: () => _insertSnippet('\n[ ] '),
                             ),

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -1019,7 +1018,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
-                      CupertinoIcons.hourglass,
+                      Icons.hourglass_bottom_rounded,
                       size: 16,
                       color: p.accent,
                     ),
@@ -1086,7 +1085,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Icon(
-                            CupertinoIcons.square_pencil,
+                            Icons.edit_rounded,
                             size: 11,
                             color: p.text3,
                           ),
@@ -1112,7 +1111,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(CupertinoIcons.clock, size: 13, color: p.accent),
+                      Icon(Icons.access_time_rounded, size: 13, color: p.accent),
                       const SizedBox(width: 6),
                       Text(
                         'Life Clock: '.localized(context),
@@ -1141,7 +1140,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildMetricTile(
-                        icon: CupertinoIcons.sparkles,
+                        icon: Icons.auto_awesome_rounded,
                         label: 'Lived So Far'.localized(context),
                         value: '${horizon.livedWeeks} wks',
                         subvalue:
@@ -1152,7 +1151,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildMetricTile(
-                        icon: CupertinoIcons.sunrise_fill,
+                        icon: Icons.wb_twilight_rounded,
                         label: 'Horizon Left'.localized(context),
                         value: '${horizon.remainingWeeks} wks',
                         subvalue:
@@ -1178,7 +1177,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        CupertinoIcons.bolt_horizontal_circle,
+                        Icons.electric_bolt_rounded,
                         size: 14,
                         color: p.green,
                       ),
@@ -1348,7 +1347,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        CupertinoIcons.flame_fill,
+                        Icons.local_fire_department_rounded,
                         size: 14,
                         color: p.accent,
                       ),
@@ -1392,7 +1391,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                           Row(
                             children: [
                               Icon(
-                                CupertinoIcons.timelapse,
+                                Icons.timelapse_rounded,
                                 size: 14,
                                 color: p.accent,
                               ),
@@ -1410,7 +1409,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                             ],
                           ),
                           Icon(
-                            CupertinoIcons.chevron_right,
+                            Icons.chevron_right_rounded,
                             size: 13,
                             color: p.text3,
                           ),
@@ -1426,7 +1425,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
-                      CupertinoIcons.quote_bubble,
+                      Icons.format_quote_rounded,
                       size: 13,
                       color: p.text3.withValues(alpha: 0.7),
                     ),

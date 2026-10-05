@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart'
@@ -161,7 +162,7 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  CupertinoIcons.hourglass,
+                                  Icons.hourglass_bottom_rounded,
                                   color: p.accent,
                                   size: 12,
                                 ),
@@ -403,7 +404,7 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                       Row(
                         children: [
                           Icon(
-                            CupertinoIcons.shield_fill,
+                            Icons.security_rounded,
                             size: 13,
                             color: p.green,
                           ),
@@ -460,7 +461,7 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          CupertinoIcons.share,
+                          Icons.share_rounded,
                           color: Colors.white,
                           size: 18,
                         ),

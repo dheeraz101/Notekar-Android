@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -128,7 +127,7 @@ class HomeCategoryPills extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(CupertinoIcons.plus, size: 13, color: p.accent),
+                  Icon(Icons.add_rounded, size: 13, color: p.accent),
                   const SizedBox(width: 4),
                   Text(
                     'Add',

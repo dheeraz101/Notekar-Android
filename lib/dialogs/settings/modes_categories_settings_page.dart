@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart'
@@ -364,7 +365,7 @@ class _ModesCategoriesSettingsPageState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  CupertinoIcons.plus_circle_fill,
+                  Icons.add_circle_rounded,
                   size: 18,
                   color: widget.p.accent,
                 ),
@@ -1148,7 +1149,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(CupertinoIcons.trash, size: 18, color: p.red),
+                    Icon(Icons.delete_rounded, size: 18, color: p.red),
                     const SizedBox(width: 8),
                     Text(
                       'Delete Mode'.localized(context),

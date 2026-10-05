@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
@@ -200,7 +200,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                               Icon(
                                 dontShowCheckbox
                                     ? CupertinoIcons.check_mark_circled_solid
-                                    : CupertinoIcons.circle,
+                                    : Icons.circle_outlined,
                                 size: 18,
                                 color: dontShowCheckbox
                                     ? p.accent

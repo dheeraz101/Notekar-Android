@@ -1,9 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -91,7 +91,7 @@ class SettingsDialog extends StatefulWidget {
     required this.reduceMotion,
     required this.largeText,
     required this.highContrast,
-    required this.compactHistory,
+    
     required this.confirmDelete,
     required this.showSeconds,
     required this.highlightSeconds,
@@ -132,7 +132,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onReduceMotion,
     required this.onLargeText,
     required this.onHighContrast,
-    required this.onCompactHistory,
+    
     required this.onConfirmDelete,
     required this.onShowSeconds,
     required this.onHighlightSeconds,
@@ -216,7 +216,7 @@ class SettingsDialog extends StatefulWidget {
   final bool reduceMotion;
   final bool largeText;
   final bool highContrast;
-  final bool compactHistory;
+  
   final bool confirmDelete;
   final bool showSeconds;
   final bool highlightSeconds;
@@ -261,7 +261,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<bool> onReduceMotion;
   final ValueChanged<bool> onLargeText;
   final ValueChanged<bool> onHighContrast;
-  final ValueChanged<bool> onCompactHistory;
+  
   final ValueChanged<bool> onConfirmDelete;
   final ValueChanged<bool> onShowSeconds;
   final ValueChanged<bool> onHighlightSeconds;
@@ -328,7 +328,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool reduceMotion;
   late bool largeText;
   late bool highContrast;
-  late bool compactHistory;
+  
   late bool confirmDelete;
   late bool showSeconds;
   late bool highlightSeconds;
@@ -630,7 +630,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   const SizedBox(width: 8),
                   Icon(
-                    CupertinoIcons.chevron_forward,
+                    Icons.chevron_right_rounded,
                     color: p.text3.withValues(alpha: 0.6),
                     size: 16,
                   ),
@@ -1261,7 +1261,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     reduceMotion = widget.reduceMotion;
     largeText = widget.largeText;
     highContrast = widget.highContrast;
-    compactHistory = widget.compactHistory;
+    
     confirmDelete = widget.confirmDelete;
     showSeconds = widget.showSeconds;
     highlightSeconds = widget.highlightSeconds;
@@ -2301,7 +2301,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.paintbrush,
+                                    icon: Icons.brush_rounded,
                                     iconColor: p.accent,
                                     title: 'Theme & Accent',
                                     status:
@@ -2311,7 +2311,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: CupertinoIcons.app_badge,
+                                    icon: Icons.notifications_rounded,
                                     iconColor: const Color(0xFFAF52DE),
                                     title: 'App Icons',
                                     status:
@@ -3300,7 +3300,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               showTrashBin: widget.onOpenTrash != null,
                               trash: _trash,
-                              compactHistory: compactHistory,
+                              
                               confirmDelete: confirmDelete,
                               extendedDuration: extendedDuration,
                               minimalMomentOptions: minimalMomentOptions,
@@ -3310,10 +3310,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               notesCount: entries
                                   .where((e) => e.note.isNotEmpty)
                                   .length,
-                              onCompactHistoryChanged: (value) {
-                                setState(() => compactHistory = value);
-                                widget.onCompactHistory(value);
-                              },
+                              
                               onHistoryDensityChanged: (value) {
                                 setState(() => historyDensity = value);
                                 widget.onHistoryDensity(value);
@@ -3475,7 +3472,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                             }),
                             settingsSearchController: _noteSearchController,
                             settingsSearchFocusNode: _noteSearchFocusNode,
-                            compactHistory: compactHistory,
+                            historyDensity: historyDensity,
+                            
                             reduceMotion: reduceMotion,
                             enableTranslucency: enableTranslucency,
                             recentSearches: _recentNoteSearches,

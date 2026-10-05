@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -280,7 +279,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
               ),
             ),
             const SizedBox(width: 4),
-            Icon(CupertinoIcons.chevron_down, size: 11, color: p.text3),
+            Icon(Icons.keyboard_arrow_down_rounded, size: 11, color: p.text3),
           ],
         ),
       ),
@@ -396,7 +395,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        CupertinoIcons.chevron_up,
+                        Icons.keyboard_arrow_up_rounded,
                         size: 13,
                         color: p.text2,
                       ),
@@ -526,7 +525,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  CupertinoIcons.flame_fill,
+                                  Icons.local_fire_department_rounded,
                                   size: 11,
                                   color: p.orange,
                                 ),
@@ -550,7 +549,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    CupertinoIcons.shield_fill,
+                                    Icons.security_rounded,
                                     size: 10,
                                     color: p.accent,
                                   ),
@@ -586,7 +585,7 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
                           ),
                           const SizedBox(width: 3),
                           Icon(
-                            CupertinoIcons.chevron_right,
+                            Icons.chevron_right_rounded,
                             size: 10,
                             color: p.text3.withValues(alpha: 0.6),
                           ),

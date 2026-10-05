@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -400,7 +399,7 @@ class UserProfileService extends ChangeNotifier {
     } else {
       content = Center(
         child: Icon(
-          CupertinoIcons.person_fill,
+          Icons.person_rounded,
           size: size * 0.52,
           color: p.accent,
         ),

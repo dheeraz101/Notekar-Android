@@ -223,7 +223,7 @@ class HigRow extends StatelessWidget {
           if (showChevron && onTap != null) ...[
             const SizedBox(width: 6),
             Icon(
-              CupertinoIcons.chevron_forward,
+              Icons.chevron_right_rounded,
               size: 15,
               color: p.text3.withValues(alpha: 0.5),
             ),

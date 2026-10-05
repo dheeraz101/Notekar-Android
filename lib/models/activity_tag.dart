@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 // ignore_for_file: non_const_argument_for_const_parameter
-import 'package:flutter/cupertino.dart';
 
 /// Represents a research-backed or user-created daily activity quick tag.
 class ActivityTag {
@@ -25,44 +25,44 @@ class ActivityTag {
 
   /// Map of compile-time constant CupertinoIcons to prevent dynamic IconData tree-shaking failures
   static IconData iconForCodePoint(int codePoint) {
-    return _iconLookup[codePoint] ?? CupertinoIcons.tag_fill;
+    return _iconLookup[codePoint] ?? Icons.label_rounded;
   }
 
   static final Map<int, IconData> _iconLookup = {
-    CupertinoIcons.tag_fill.codePoint: CupertinoIcons.tag_fill,
-    CupertinoIcons.compass_fill.codePoint: CupertinoIcons.compass_fill,
-    CupertinoIcons.flame_fill.codePoint: CupertinoIcons.flame_fill,
-    CupertinoIcons.book_fill.codePoint: CupertinoIcons.book_fill,
-    CupertinoIcons.device_laptop.codePoint: CupertinoIcons.device_laptop,
-    CupertinoIcons.drop_fill.codePoint: CupertinoIcons.drop_fill,
-    CupertinoIcons.sparkles.codePoint: CupertinoIcons.sparkles,
-    CupertinoIcons.doc_text_fill.codePoint: CupertinoIcons.doc_text_fill,
-    CupertinoIcons.heart_circle_fill.codePoint:
-        CupertinoIcons.heart_circle_fill,
-    CupertinoIcons.car_fill.codePoint: CupertinoIcons.car_fill,
-    CupertinoIcons.flame.codePoint: CupertinoIcons.flame,
-    CupertinoIcons.trash.codePoint: CupertinoIcons.trash,
-    CupertinoIcons.gamecontroller_fill.codePoint:
-        CupertinoIcons.gamecontroller_fill,
-    CupertinoIcons.person_2_fill.codePoint: CupertinoIcons.person_2_fill,
-    CupertinoIcons.suit_club_fill.codePoint: CupertinoIcons.suit_club_fill,
-    CupertinoIcons.moon_fill.codePoint: CupertinoIcons.moon_fill,
-    0xf56b: CupertinoIcons.tag_fill,
-    0xf657: CupertinoIcons.compass_fill,
-    0xf54f: CupertinoIcons.flame_fill,
-    0xf524: CupertinoIcons.book_fill,
-    0xf598: CupertinoIcons.device_laptop,
-    0xf772: CupertinoIcons.drop_fill,
-    0xf6e5: CupertinoIcons.sparkles,
-    0xf70e: CupertinoIcons.doc_text_fill,
-    0xf6e9: CupertinoIcons.heart_circle_fill,
-    0xf555: CupertinoIcons.car_fill,
-    0xf626: CupertinoIcons.flame,
-    0xf708: CupertinoIcons.trash,
-    0xf666: CupertinoIcons.gamecontroller_fill,
-    0xf6fb: CupertinoIcons.person_2_fill,
-    0xf64f: CupertinoIcons.suit_club_fill,
-    0xf72a: CupertinoIcons.moon_fill,
+    Icons.label_rounded.codePoint: Icons.label_rounded,
+    Icons.explore_rounded.codePoint: Icons.explore_rounded,
+    Icons.local_fire_department_rounded.codePoint: Icons.local_fire_department_rounded,
+    Icons.menu_book_rounded.codePoint: Icons.menu_book_rounded,
+    Icons.laptop_mac_rounded.codePoint: Icons.laptop_mac_rounded,
+    Icons.water_drop_rounded.codePoint: Icons.water_drop_rounded,
+    Icons.auto_awesome_rounded.codePoint: Icons.auto_awesome_rounded,
+    Icons.description_rounded.codePoint: Icons.description_rounded,
+    Icons.favorite_rounded.codePoint:
+        Icons.favorite_rounded,
+    Icons.directions_car_rounded.codePoint: Icons.directions_car_rounded,
+    Icons.local_fire_department_rounded.codePoint: Icons.local_fire_department_rounded,
+    Icons.delete_rounded.codePoint: Icons.delete_rounded,
+    Icons.sports_esports_rounded.codePoint:
+        Icons.sports_esports_rounded,
+    Icons.people_rounded.codePoint: Icons.people_rounded,
+    Icons.park_rounded.codePoint: Icons.park_rounded,
+    Icons.dark_mode_rounded.codePoint: Icons.dark_mode_rounded,
+    0xf56b: Icons.label_rounded,
+    0xf657: Icons.explore_rounded,
+    0xf54f: Icons.local_fire_department_rounded,
+    0xf524: Icons.menu_book_rounded,
+    0xf598: Icons.laptop_mac_rounded,
+    0xf772: Icons.water_drop_rounded,
+    0xf6e5: Icons.auto_awesome_rounded,
+    0xf70e: Icons.description_rounded,
+    0xf6e9: Icons.favorite_rounded,
+    0xf555: Icons.directions_car_rounded,
+    0xf626: Icons.local_fire_department_rounded,
+    0xf708: Icons.delete_rounded,
+    0xf666: Icons.sports_esports_rounded,
+    0xf6fb: Icons.people_rounded,
+    0xf64f: Icons.park_rounded,
+    0xf72a: Icons.dark_mode_rounded,
   };
 
   Color get color => Color(colorValue);
@@ -112,7 +112,7 @@ class ActivityTag {
       label: json['label'] as String? ?? 'Tag',
       iconCodePoint:
           (json['iconCodePoint'] as num?)?.toInt() ??
-          CupertinoIcons.tag_fill.codePoint,
+          Icons.label_rounded.codePoint,
       iconFontFamily: json['iconFontFamily'] as String? ?? 'CupertinoIcons',
       iconFontPackage: json['iconFontPackage'] as String? ?? 'cupertino_icons',
       colorValue: (json['colorValue'] as num?)?.toInt() ?? 0xFF0A84FF,
@@ -125,105 +125,105 @@ class ActivityTag {
     ActivityTag(
       id: 'tag_walking',
       label: 'Walking',
-      iconCodePoint: CupertinoIcons.compass_fill.codePoint,
+      iconCodePoint: Icons.explore_rounded.codePoint,
       colorValue: 0xFF30D158, // Green
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_gym',
       label: 'Gym',
-      iconCodePoint: CupertinoIcons.flame_fill.codePoint,
+      iconCodePoint: Icons.local_fire_department_rounded.codePoint,
       colorValue: 0xFFFF453A, // Red
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_studying',
       label: 'Studying',
-      iconCodePoint: CupertinoIcons.book_fill.codePoint,
+      iconCodePoint: Icons.menu_book_rounded.codePoint,
       colorValue: 0xFF0A84FF, // Blue
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_deep_work',
       label: 'Deep Work',
-      iconCodePoint: CupertinoIcons.device_laptop.codePoint,
+      iconCodePoint: Icons.laptop_mac_rounded.codePoint,
       colorValue: 0xFF5E5CE6, // Indigo
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_bathing',
       label: 'Bathing',
-      iconCodePoint: CupertinoIcons.drop_fill.codePoint,
+      iconCodePoint: Icons.water_drop_rounded.codePoint,
       colorValue: 0xFF64D2FF, // Teal/Sky
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_washroom',
       label: 'Washroom',
-      iconCodePoint: CupertinoIcons.sparkles.codePoint,
+      iconCodePoint: Icons.auto_awesome_rounded.codePoint,
       colorValue: 0xFF64D2FF,
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_reading',
       label: 'Reading',
-      iconCodePoint: CupertinoIcons.doc_text_fill.codePoint,
+      iconCodePoint: Icons.description_rounded.codePoint,
       colorValue: 0xFFFF9F0A, // Orange
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_meditation',
       label: 'Meditation',
-      iconCodePoint: CupertinoIcons.heart_circle_fill.codePoint,
+      iconCodePoint: Icons.favorite_rounded.codePoint,
       colorValue: 0xFFBF5AF2, // Purple
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_commute',
       label: 'Commute',
-      iconCodePoint: CupertinoIcons.car_fill.codePoint,
+      iconCodePoint: Icons.directions_car_rounded.codePoint,
       colorValue: 0xFFFFD60A, // Yellow
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_cooking',
       label: 'Cooking',
-      iconCodePoint: CupertinoIcons.flame.codePoint,
+      iconCodePoint: Icons.local_fire_department_rounded.codePoint,
       colorValue: 0xFFFF9F0A,
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_chores',
       label: 'Chores',
-      iconCodePoint: CupertinoIcons.trash.codePoint,
+      iconCodePoint: Icons.delete_rounded.codePoint,
       colorValue: 0xFF8E8E93, // Gray
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_gaming',
       label: 'Gaming',
-      iconCodePoint: CupertinoIcons.gamecontroller_fill.codePoint,
+      iconCodePoint: Icons.sports_esports_rounded.codePoint,
       colorValue: 0xFFFF375F, // Pink
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_family',
       label: 'Family',
-      iconCodePoint: CupertinoIcons.person_2_fill.codePoint,
+      iconCodePoint: Icons.people_rounded.codePoint,
       colorValue: 0xFF30D158,
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_dining',
       label: 'Dining',
-      iconCodePoint: CupertinoIcons.suit_club_fill.codePoint,
+      iconCodePoint: Icons.park_rounded.codePoint,
       colorValue: 0xFFFF9F0A,
       isCustom: false,
     ),
     ActivityTag(
       id: 'tag_sleep',
       label: 'Sleep',
-      iconCodePoint: CupertinoIcons.moon_fill.codePoint,
+      iconCodePoint: Icons.dark_mode_rounded.codePoint,
       colorValue: 0xFF5E5CE6,
       isCustom: false,
     ),

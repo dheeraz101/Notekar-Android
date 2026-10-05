@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
@@ -152,19 +151,19 @@ class SettingsRow extends StatelessWidget {
       switch (rowKind) {
         case 'link':
           trailingIndicator = Icon(
-            CupertinoIcons.arrow_up_right,
+            Icons.north_east_rounded,
             color: p.text3,
             size: 14,
           );
         case 'popup':
           trailingIndicator = Icon(
-            CupertinoIcons.info,
+            Icons.info_outline_rounded,
             color: p.text3,
             size: 16,
           );
         default:
           trailingIndicator = Icon(
-            CupertinoIcons.chevron_right,
+            Icons.chevron_right_rounded,
             color: p.text3,
             size: 15,
           );
@@ -1035,7 +1034,7 @@ void showBetaInfoPopup(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
+                      Icon(Icons.auto_awesome_rounded, size: 13, color: p.accent),
                       const SizedBox(width: 5),
                       Text(
                         'BETA'.localized(context),

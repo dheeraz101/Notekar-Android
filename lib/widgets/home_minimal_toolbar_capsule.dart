@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -65,8 +64,8 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
               child: Icon(
                 isSessionActive
                     ? (isPaused
-                          ? CupertinoIcons.play_arrow_solid
-                          : CupertinoIcons.pause_fill)
+                          ? Icons.play_arrow_rounded
+                          : Icons.pause_rounded)
                     : (mode == 'single'
                           ? Icons.radio_button_checked_rounded
                           : Icons.all_inclusive_rounded),
@@ -87,7 +86,7 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
             onTap: onOpenHistory,
             child: Padding(
               padding: const EdgeInsets.all(6),
-              child: Icon(CupertinoIcons.clock, size: 16, color: palette.text),
+              child: Icon(Icons.access_time_rounded, size: 16, color: palette.text),
             ),
           ),
           Container(
@@ -101,7 +100,7 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(6),
               child: Icon(
-                CupertinoIcons.gear_alt,
+                Icons.settings_rounded,
                 size: 16,
                 color: palette.text2,
               ),

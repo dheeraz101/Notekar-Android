@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -402,7 +402,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      CupertinoIcons.chevron_back,
+                      Icons.chevron_left_rounded,
                       color: widget.p.text,
                       size: 19,
                     ),
@@ -448,8 +448,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                             duration: const Duration(milliseconds: 200),
                             child: Icon(
                               _viewMode == 'list'
-                                  ? CupertinoIcons.calendar
-                                  : CupertinoIcons.list_bullet,
+                                  ? Icons.calendar_today_rounded
+                                  : Icons.format_list_bulleted_rounded,
                               key: ValueKey(_viewMode),
                               size: 19,
                               color: widget.p.text,
@@ -479,7 +479,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              CupertinoIcons.search,
+                              Icons.search_rounded,
                               color: widget.p.text,
                               size: 18,
                             ),
@@ -509,7 +509,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      CupertinoIcons.add,
+                      Icons.add_rounded,
                       color: widget.p.accent,
                       size: 19,
                     ),
@@ -533,7 +533,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      CupertinoIcons.ellipsis_circle,
+                      Icons.more_horiz_rounded,
                       color: widget.p.text,
                       size: 20,
                     ),
@@ -1707,7 +1707,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    CupertinoIcons.plus_circle,
+                    Icons.add_circle_outline_rounded,
                     size: 20,
                     color: widget.p.accent,
                   ),
@@ -1731,7 +1731,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(CupertinoIcons.flag, size: 20, color: widget.p.text),
+                Icon(Icons.flag_rounded, size: 20, color: widget.p.text),
                 const SizedBox(width: 10),
                 Text(
                   'Targets & Goals'.localized(context),
@@ -1752,7 +1752,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(CupertinoIcons.hourglass, size: 20, color: widget.p.text),
+                Icon(Icons.hourglass_bottom_rounded, size: 20, color: widget.p.text),
                 const SizedBox(width: 10),
                 Text(
                   'Life Audit & Horizon'.localized(context),
@@ -1774,7 +1774,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  CupertinoIcons.slider_horizontal_3,
+                  Icons.tune_rounded,
                   size: 20,
                   color: widget.p.text,
                 ),
@@ -1801,7 +1801,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    CupertinoIcons.trash,
+                    Icons.delete_rounded,
                     size: 20,
                     color: CupertinoColors.destructiveRed,
                   ),
@@ -1877,7 +1877,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 children: [
                   if (_filter == f) ...[
                     Icon(
-                      CupertinoIcons.check_mark,
+                      Icons.check_rounded,
                       size: 16,
                       color: widget.p.accent,
                     ),
@@ -2238,8 +2238,8 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                   _MinimalActionButton(
                     p: p,
                     icon: hasNote
-                        ? CupertinoIcons.square_pencil
-                        : CupertinoIcons.plus_bubble,
+                        ? Icons.edit_rounded
+                        : Icons.add_comment_rounded,
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
                   ),
@@ -2321,8 +2321,8 @@ class _MomentActionsDialogState extends State<MomentActionsDialog> {
                   child: MomentOptionPill(
                     p: p,
                     icon: hasNote
-                        ? CupertinoIcons.square_pencil
-                        : CupertinoIcons.plus_bubble,
+                        ? Icons.edit_rounded
+                        : Icons.add_comment_rounded,
                     label: hasNote ? 'Edit Note' : 'Add Note',
                     color: p.accent,
                     onTap: widget.onAddOrEditNote,
@@ -2699,7 +2699,7 @@ class _TodayInlineInsightCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
+                    Icon(Icons.auto_awesome_rounded, size: 13, color: p.accent),
                     const SizedBox(width: 5),
                     Flexible(
                       child: Text(

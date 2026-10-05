@@ -967,7 +967,7 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                     Row(
                       children: [
                         const Icon(
-                          CupertinoIcons.lock_shield_fill,
+                          Icons.gpp_good_rounded,
                           color: CupertinoColors.systemGreen,
                           size: 13,
                         ),

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
@@ -265,7 +264,7 @@ class DayDetailContent extends StatelessWidget {
                 label: 'Morning',
                 sub: '6am - 12pm',
                 duration: Duration(milliseconds: morningMs),
-                icon: CupertinoIcons.sunrise_fill,
+                icon: Icons.wb_twilight_rounded,
                 color: p.orange,
               ),
               const SizedBox(width: 8),
@@ -273,7 +272,7 @@ class DayDetailContent extends StatelessWidget {
                 label: 'Afternoon',
                 sub: '12pm - 5pm',
                 duration: Duration(milliseconds: afternoonMs),
-                icon: CupertinoIcons.sun_max_fill,
+                icon: Icons.light_mode_rounded,
                 color: p.accent,
               ),
             ],
@@ -285,7 +284,7 @@ class DayDetailContent extends StatelessWidget {
                 label: 'Evening',
                 sub: '5pm - 9pm',
                 duration: Duration(milliseconds: eveningMs),
-                icon: CupertinoIcons.sunset_fill,
+                icon: Icons.wb_twilight_rounded,
                 color: p.blue,
               ),
               const SizedBox(width: 8),
@@ -293,7 +292,7 @@ class DayDetailContent extends StatelessWidget {
                 label: 'Night',
                 sub: '9pm - 6am',
                 duration: Duration(milliseconds: nightMs),
-                icon: CupertinoIcons.moon_stars_fill,
+                icon: Icons.bedtime_rounded,
                 color: p.text2,
               ),
             ],

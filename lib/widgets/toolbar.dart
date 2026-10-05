@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:notekar/models/palette.dart';
@@ -185,7 +184,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
                     child: TextToolButton(
                       p: p,
                       label: historyLabel,
-                      icon: showGoalPill ? null : CupertinoIcons.clock,
+                      icon: showGoalPill ? null : Icons.access_time_rounded,
                       blur: widget.blur,
                       onTap: widget.onHistory,
                     ),
@@ -297,12 +296,12 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
                                 ),
                                 child: isGoalActive
                                     ? Icon(
-                                        CupertinoIcons.flag_fill,
+                                        Icons.flag_rounded,
                                         color: p.accent,
                                         size: widget.largeControls ? 18 : 16,
                                       )
                                     : AnimatedHomeIcon(
-                                        icon: CupertinoIcons.clock,
+                                        icon: Icons.access_time_rounded,
                                         color: p.text,
                                         size: widget.largeControls ? 20 : 18,
                                         motionNotifier: widget.animateIcons
@@ -348,7 +347,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
                                 shape: BoxShape.circle,
                               ),
                               child: AnimatedHomeIcon(
-                                icon: CupertinoIcons.clock,
+                                icon: Icons.access_time_rounded,
                                 color: p.text,
                                 size: widget.largeControls ? 20 : 18,
                                 motionNotifier: widget.animateIcons
@@ -371,7 +370,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
           const SizedBox(width: spacing8),
           CircleToolButton(
             p: p,
-            icon: CupertinoIcons.settings,
+            icon: Icons.settings_rounded,
             color: p.text,
             label: widget.showLabels ? 'Settings' : null,
             size: widget.largeControls ? 56 : 48,
@@ -784,8 +783,8 @@ class ModeToolButton extends StatelessWidget {
                   key: ValueKey<bool>(single),
                   child: AnimatedHomeIcon(
                     icon: single
-                        ? CupertinoIcons.arrow_up
-                        : CupertinoIcons.arrow_up_arrow_down,
+                        ? Icons.arrow_upward_rounded
+                        : Icons.swap_vert_rounded,
                     color: color,
                     size: large ? 20 : 18,
                     motionNotifier: motionNotifier,

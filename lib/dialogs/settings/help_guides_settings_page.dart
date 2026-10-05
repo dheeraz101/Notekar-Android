@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -84,12 +83,12 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.sparkles,
+              icon: Icons.auto_awesome_rounded,
               title: 'Upcoming Features'.localized(context),
               color: p.accent,
               status: 'Roadmap'.localized(context),
               trailing: Icon(
-                CupertinoIcons.chevron_right,
+                Icons.chevron_right_rounded,
                 color: p.text3,
                 size: 16,
               ),

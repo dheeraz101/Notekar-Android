@@ -751,7 +751,7 @@ void main() {
                       onClearQuery: () {},
                       settingsSearchController: searchController,
                       settingsSearchFocusNode: searchFocus,
-                      compactHistory: false,
+                      historyDensity: 'comfortable',
                       reduceMotion: false,
                       enableTranslucency: false,
                       recentSearches: [],

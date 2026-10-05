@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
@@ -26,7 +25,7 @@ class SearchNotesSettingsPage {
     required VoidCallback onClearQuery,
     required TextEditingController settingsSearchController,
     required FocusNode settingsSearchFocusNode,
-    required bool compactHistory,
+    required String historyDensity,
     required bool reduceMotion,
     required bool enableTranslucency,
     required List<String> recentSearches,
@@ -353,7 +352,7 @@ class SearchNotesSettingsPage {
                   : p.border.withValues(alpha: 0.6);
 
               return Padding(
-                padding: EdgeInsets.only(bottom: compactHistory ? 10 : 14),
+                padding: EdgeInsets.only(bottom: historyDensity == 'compact' ? 10 : 14),
                 child: PressableScale(
                   onTap: () {
                     if (selectedMoments.isNotEmpty) {
@@ -476,7 +475,7 @@ class SearchNotesSettingsPage {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          CupertinoIcons.doc_text,
+                                          Icons.description_rounded,
                                           size: 10,
                                           color: p.accent,
                                         ),
@@ -509,7 +508,7 @@ class SearchNotesSettingsPage {
                                     child: Padding(
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Icon(
-                                        CupertinoIcons.square_pencil,
+                                        Icons.edit_rounded,
                                         size: 15,
                                         color: p.accent,
                                       ),

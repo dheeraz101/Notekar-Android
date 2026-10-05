@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/history_timeline_models.dart';
@@ -128,7 +127,7 @@ class HomeClockComplication extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(CupertinoIcons.scope, size: 11, color: p.accent),
+        Icon(Icons.track_changes_rounded, size: 11, color: p.accent),
         const SizedBox(width: 5),
         Text(
           '${_formatDuration(totalToday)} / 10h',
@@ -210,22 +209,22 @@ class HomeClockComplication extends StatelessWidget {
     final (phase, icon, col) = switch (hour) {
       >= 6 && < 12 => (
         'Morning Horizon',
-        CupertinoIcons.sunrise_fill,
+        Icons.wb_twilight_rounded,
         p.orange,
       ),
       >= 12 && < 17 => (
         'Peak Focus Window',
-        CupertinoIcons.sun_max_fill,
+        Icons.light_mode_rounded,
         p.accent,
       ),
       >= 17 && < 21 => (
         'Evening Wind-Down',
-        CupertinoIcons.sunset_fill,
+        Icons.wb_twilight_rounded,
         const Color(0xFFAF52DE),
       ),
       _ => (
         'Night Recovery',
-        CupertinoIcons.moon_stars_fill,
+        Icons.bedtime_rounded,
         const Color(0xFF30B0C7),
       ),
     };

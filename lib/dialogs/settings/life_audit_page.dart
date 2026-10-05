@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
@@ -138,7 +138,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   color: p.accent.withValues(alpha: 0.14),
                 ),
                 child: Icon(
-                  CupertinoIcons.circle_grid_hex,
+                  Icons.grid_view_rounded,
                   size: 18,
                   color: p.accent,
                 ),
@@ -711,7 +711,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(CupertinoIcons.share, size: 12, color: p.accent),
+                      Icon(Icons.share_rounded, size: 12, color: p.accent),
                       const SizedBox(width: 4),
                       Text(
                         'Share'.localized(context),
@@ -968,7 +968,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               ),
               child: Column(
                 children: [
-                  Icon(CupertinoIcons.clock, size: 28, color: p.text3),
+                  Icon(Icons.access_time_rounded, size: 28, color: p.text3),
                   const SizedBox(height: 8),
                   Text(
                     'No Ledger History Yet'.localized(context),
@@ -1124,7 +1124,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         children: [
           Row(
             children: [
-              Icon(CupertinoIcons.flame, size: 18, color: p.orange),
+              Icon(Icons.local_fire_department_rounded, size: 18, color: p.orange),
               const SizedBox(width: 8),
               Text(
                 'THE STOIC REALITY'.localized(context),

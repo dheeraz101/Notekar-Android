@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -215,7 +215,7 @@ class _PersonalizationSetupDialogState
                                                     ),
                                                   )
                                                 : Icon(
-                                                    CupertinoIcons.person_fill,
+                                                    Icons.person_rounded,
                                                     size: 40,
                                                     color: p.accent,
                                                   ),
@@ -248,7 +248,7 @@ class _PersonalizationSetupDialogState
                           border: Border.all(color: p.surface, width: 2),
                         ),
                         child: const Icon(
-                          CupertinoIcons.camera_fill,
+                          Icons.camera_alt_rounded,
                           color: Colors.white,
                           size: 14,
                         ),
@@ -411,7 +411,7 @@ class _PersonalizationSetupDialogState
                 ),
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.calendar, size: 18, color: p.accent),
+                    Icon(Icons.calendar_today_rounded, size: 18, color: p.accent),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -425,7 +425,7 @@ class _PersonalizationSetupDialogState
                         ),
                       ),
                     ),
-                    Icon(CupertinoIcons.chevron_down, size: 14, color: p.text3),
+                    Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: p.text3),
                   ],
                 ),
               ),
@@ -450,7 +450,7 @@ class _PersonalizationSetupDialogState
                       Row(
                         children: [
                           Icon(
-                            CupertinoIcons.hourglass,
+                            Icons.hourglass_bottom_rounded,
                             size: 15,
                             color: p.orange,
                           ),
@@ -599,7 +599,7 @@ class _PersonalizationSetupDialogState
                                             vertical: 8,
                                           ),
                                           child: Icon(
-                                            CupertinoIcons.minus,
+                                            Icons.remove_rounded,
                                             size: 15,
                                             color: _mementoMoriYears > minVal
                                                 ? p.text
@@ -632,7 +632,7 @@ class _PersonalizationSetupDialogState
                                             vertical: 8,
                                           ),
                                           child: Icon(
-                                            CupertinoIcons.plus,
+                                            Icons.add_rounded,
                                             size: 15,
                                             color: _mementoMoriYears < maxVal
                                                 ? p.text

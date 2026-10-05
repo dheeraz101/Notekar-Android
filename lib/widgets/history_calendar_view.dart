@@ -110,8 +110,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 children: [
                   Icon(
                     hasNote
-                        ? CupertinoIcons.square_pencil
-                        : CupertinoIcons.plus_bubble,
+                        ? Icons.edit_rounded
+                        : Icons.add_comment_rounded,
                     size: 19,
                     color: widget.p.accent,
                   ),
@@ -138,7 +138,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    CupertinoIcons.trash,
+                    Icons.delete_rounded,
                     size: 19,
                     color: CupertinoColors.destructiveRed,
                   ),
@@ -429,7 +429,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
               child: Row(
                 children: [
                   Icon(
-                    CupertinoIcons.calendar,
+                    Icons.calendar_today_rounded,
                     size: 18,
                     color: widget.p.accent,
                   ),
@@ -483,7 +483,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           ),
                           const SizedBox(width: 3),
                           Icon(
-                            CupertinoIcons.chevron_right,
+                            Icons.chevron_right_rounded,
                             size: 12,
                             color: widget.p.accent,
                           ),
@@ -551,7 +551,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        CupertinoIcons.moon_zzz,
+                        Icons.bedtime_rounded,
                         size: 44,
                         color: widget.p.text3.withValues(alpha: 0.4),
                       ),
@@ -646,7 +646,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              CupertinoIcons.line_horizontal_3_decrease_circle,
+              Icons.filter_list_rounded,
               size: 40,
               color: widget.p.text3.withValues(alpha: 0.4),
             ),
@@ -760,7 +760,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                     Row(
                       children: [
                         Icon(
-                          CupertinoIcons.time,
+                          Icons.schedule_rounded,
                           size: 13,
                           color: widget.p.text3,
                         ),

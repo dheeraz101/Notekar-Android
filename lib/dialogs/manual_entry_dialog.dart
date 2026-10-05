@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, TimeOfDay;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -248,7 +249,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                                 ),
                                 child: selectedColor == col
                                     ? const Icon(
-                                        CupertinoIcons.check_mark,
+                                        Icons.check_rounded,
                                         size: 14,
                                         color: Colors.white,
                                       )
@@ -577,7 +578,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ),
               child: Row(
                 children: [
-                  Icon(CupertinoIcons.calendar, size: 18, color: p.accent),
+                  Icon(Icons.calendar_today_rounded, size: 18, color: p.accent),
                   const SizedBox(width: 10),
                   Text(
                     'Date',
@@ -597,7 +598,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(CupertinoIcons.chevron_right, size: 14, color: p.text3),
+                  Icon(Icons.chevron_right_rounded, size: 14, color: p.text3),
                 ],
               ),
             ),
@@ -806,7 +807,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              CupertinoIcons.flag_fill,
+                              Icons.flag_rounded,
                               size: 11,
                               color: _selectedGoal?.id == g.id
                                   ? p.accent

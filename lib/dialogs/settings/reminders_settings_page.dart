@@ -740,7 +740,7 @@ class _ReminderMessagePageState extends State<ReminderMessagePage> {
                         icon: Icon(
                           _focusNode.hasFocus
                               ? CupertinoIcons.checkmark_alt
-                              : CupertinoIcons.square_pencil,
+                              : Icons.edit_rounded,
                           color: _focusNode.hasFocus ? p.accent : p.text3,
                           size: 19,
                         ),

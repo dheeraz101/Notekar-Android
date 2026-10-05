@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
@@ -174,7 +173,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        CupertinoIcons.flag_fill,
+                        Icons.flag_rounded,
                         size: 20,
                         color: p.accent,
                       ),
@@ -206,7 +205,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                       ),
                     ),
                     Icon(
-                      CupertinoIcons.chevron_right,
+                      Icons.chevron_right_rounded,
                       size: 16,
                       color: p.text3,
                     ),
@@ -240,7 +239,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        CupertinoIcons.flag_fill,
+                        Icons.flag_rounded,
                         size: 18,
                         color: p.accent,
                       ),
@@ -298,7 +297,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                             ),
                             const SizedBox(width: 3),
                             Icon(
-                              CupertinoIcons.chevron_right,
+                              Icons.chevron_right_rounded,
                               size: 10,
                               color: p.accent,
                             ),
@@ -338,7 +337,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                                     Icon(
                                       goal.category != null
                                           ? meta.icon
-                                          : CupertinoIcons.flag_fill,
+                                          : Icons.flag_rounded,
                                       size: 13,
                                       color: accentCol,
                                     ),
@@ -872,7 +871,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(CupertinoIcons.share, size: 11, color: p.accent),
+                      Icon(Icons.share_rounded, size: 11, color: p.accent),
                       const SizedBox(width: 4),
                       Text(
                         'Share Stats'.localized(context),

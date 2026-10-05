@@ -144,7 +144,7 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
-                      CupertinoIcons.sparkles,
+                      Icons.auto_awesome_rounded,
                       color: widget.p.accent,
                       size: 22,
                     ),
@@ -208,7 +208,7 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
                 child: Row(
                   children: [
                     Icon(
-                      CupertinoIcons.checkmark_circle_fill,
+                      Icons.check_circle_rounded,
                       color: widget.p.accent,
                       size: 18,
                     ),
@@ -236,7 +236,7 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
                       ),
                     ),
                     Icon(
-                      CupertinoIcons.chevron_right,
+                      Icons.chevron_right_rounded,
                       size: 14,
                       color: widget.p.text3,
                     ),
@@ -294,7 +294,7 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(CupertinoIcons.clock, size: 15, color: widget.p.text2),
+                    Icon(Icons.access_time_rounded, size: 15, color: widget.p.text2),
                     const SizedBox(width: 8),
                     Text(
                       'Choose Custom End Time'.localized(context),

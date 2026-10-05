@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart'
@@ -227,7 +228,7 @@ class _ShareableMilestoneSheetState extends State<ShareableMilestoneSheet> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          CupertinoIcons.lock_shield_fill,
+                          Icons.gpp_good_rounded,
                           color: Colors.white,
                           size: 14,
                         ),
@@ -269,7 +270,7 @@ class _ShareableMilestoneSheetState extends State<ShareableMilestoneSheet> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(CupertinoIcons.share, size: 18),
+                        const Icon(Icons.share_rounded, size: 18),
                         const SizedBox(width: 8),
                         Text(
                           'Export Milestone Card'.localized(context),

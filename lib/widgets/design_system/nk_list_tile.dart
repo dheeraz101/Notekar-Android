@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -54,7 +53,7 @@ class NkListTile extends StatelessWidget {
       switch (trailingKind) {
         case NkTrailingKind.chevron:
           effectiveTrailing = Icon(
-            CupertinoIcons.chevron_forward,
+            Icons.chevron_right_rounded,
             size: 15.0,
             color: p.text3.withValues(alpha: 0.6),
           );

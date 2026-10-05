@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -267,7 +266,7 @@ class SundayDispatchSheet extends StatelessWidget {
                       label: 'Conscious Focus',
                       value: '${focusHours}h',
                       color: p.accent,
-                      icon: CupertinoIcons.scope,
+                      icon: Icons.track_changes_rounded,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -277,7 +276,7 @@ class SundayDispatchSheet extends StatelessWidget {
                       value: peakDayName,
                       sub: peakWindow.capitalize(),
                       color: p.orange,
-                      icon: CupertinoIcons.sparkles,
+                      icon: Icons.auto_awesome_rounded,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -286,7 +285,7 @@ class SundayDispatchSheet extends StatelessWidget {
                       label: 'Reclaimed Rest',
                       value: '${restHours}h',
                       color: p.green,
-                      icon: CupertinoIcons.moon_stars_fill,
+                      icon: Icons.bedtime_rounded,
                     ),
                   ),
                 ],
@@ -403,7 +402,7 @@ class SundayDispatchSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(
-                        CupertinoIcons.arrow_down_doc_fill,
+                        Icons.file_download_rounded,
                         size: 16,
                         color: Colors.white,
                       ),
@@ -515,7 +514,7 @@ class SundayDispatchSheet extends StatelessWidget {
       context: context,
       p: p,
       message: 'Markdown Copied • Sovereign Archive Ready',
-      icon: CupertinoIcons.doc_checkmark_fill,
+      icon: Icons.fact_check_rounded,
     );
   }
 

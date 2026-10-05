@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -99,7 +98,7 @@ class LoggingSettingsPage extends StatelessWidget {
             children: [
               SettingsRow(
                 p: p,
-                icon: CupertinoIcons.trash,
+                icon: Icons.delete_rounded,
                 title: 'Trash Bin'.localized(context),
                 status:
                     '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',

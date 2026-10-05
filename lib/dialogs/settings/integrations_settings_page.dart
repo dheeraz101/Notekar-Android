@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
@@ -128,7 +127,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.selection_pin_in_out,
+              icon: Icons.adjust_rounded,
               title: 'Text Selection Menu'.localized(context),
               status: 'Active'.localized(context),
               color: p.accent,
@@ -136,7 +135,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.share,
+              icon: Icons.share_rounded,
               title: 'Share Target'.localized(context),
               status: 'Active'.localized(context),
               color: p.green,

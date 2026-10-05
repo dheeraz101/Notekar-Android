@@ -60,7 +60,6 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
       _haptics = true;
       _largeText = false;
       _highContrast = false;
-      _compactHistory = false;
       _confirmDelete = false;
       _showSeconds = true;
       _highlightSeconds = true;
@@ -292,7 +291,6 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
       _acousticFeedback = true;
       _largeText = false;
       _highContrast = false;
-      _compactHistory = false;
       _confirmDelete = false;
       _showSeconds = true;
       _highlightSeconds = true;
@@ -343,7 +341,6 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
     await _prefs?.remove('m-reduced-haptics');
     await _prefs?.setBool('m-large-text', _largeText);
     await _prefs?.setBool('m-high-contrast', _highContrast);
-    await _prefs?.setBool('m-compact-history', _compactHistory);
     await _prefs?.setBool('m-confirm-delete', _confirmDelete);
     await _prefs?.setBool('m-show-seconds', _showSeconds);
     await _prefs?.setBool('m-highlight-seconds', _highlightSeconds);
@@ -427,7 +424,6 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
       _haptics = _hapticStyle != 'off';
       _largeText = snapshot['largeText'] as bool;
       _highContrast = snapshot['highContrast'] as bool;
-      _compactHistory = snapshot['compactHistory'] as bool;
       _confirmDelete = snapshot['confirmDelete'] as bool;
       _showSeconds = snapshot['showSeconds'] as bool;
       _highlightSeconds = snapshot['highlightSeconds'] as bool;
@@ -461,7 +457,6 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
     await _prefs?.remove('m-reduced-haptics');
     await _prefs?.setBool('m-large-text', _largeText);
     await _prefs?.setBool('m-high-contrast', _highContrast);
-    await _prefs?.setBool('m-compact-history', _compactHistory);
     await _prefs?.setBool('m-confirm-delete', _confirmDelete);
     await _prefs?.setBool('m-show-seconds', _showSeconds);
     await _prefs?.setBool('m-highlight-seconds', _highlightSeconds);

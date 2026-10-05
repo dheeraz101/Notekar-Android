@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:flutter/material.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
@@ -35,7 +36,7 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
                   color: p.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(CupertinoIcons.sparkles, color: p.accent, size: 24),
+                child: Icon(Icons.auto_awesome_rounded, color: p.accent, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(

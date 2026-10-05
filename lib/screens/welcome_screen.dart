@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
@@ -889,7 +888,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               ),
               _buildFeatureRow(
                 p: p,
-                icon: CupertinoIcons.plus_app,
+                icon: Icons.add_box_rounded,
                 iconColor: p.green,
                 title: 'Life Ledger & Plus Notes'.localized(context),
                 text:

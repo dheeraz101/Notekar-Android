@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -132,7 +133,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _lastBackupAt;
   bool _largeText = false;
   bool _highContrast = false;
-  bool _compactHistory = false;
+  
   bool _confirmDelete = false;
   bool _showSeconds = true;
   bool _highlightSeconds = true;
@@ -682,15 +683,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
           ? savedAppIconStyle
           : 'default';
       _csvDelimiter = prefs.getString('m-csv-delimiter') ?? ',';
-      final savedCompact = prefs.getBool('m-compact-history') ?? false;
-      _historyDensity = savedCompact ? 'compact' : 'comfortable';
+            
       _privacyLock = prefs.getBool('m-privacy-lock') ?? false;
       _privacyLockType = prefs.getString('m-privacy-lock-type') ?? 'system';
       _backupReminderDays = prefs.getInt('m-backup-reminder-days') ?? 0;
       _lastBackupAt = prefs.getInt('m-last-backup-at');
       _largeText = prefs.getBool('m-large-text') ?? false;
       _highContrast = prefs.getBool('m-high-contrast') ?? false;
-      _compactHistory = savedCompact;
+      
       _confirmDelete = prefs.getBool('m-confirm-delete') ?? false;
       _adaptiveModeColor =
           prefs.getBool('m-adaptive-color') ??
@@ -1072,7 +1072,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             countOnSave: _countOnSave,
             enableSobrietyMode: _enableSobrietyMode,
             sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
-            compactHistory: _compactHistory,
+            
             onAppIconStyle: (value) async {
               setState(() => _appIconStyle = value);
               await _setAppIconStyle(value, showToast: false);
@@ -1111,14 +1111,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _sobrietyMilestoneTheme = value);
               _prefs?.setString('sobriety_milestone_theme', value);
             },
-            onCompactHistory: (value) {
-              setState(() {
-                _compactHistory = value;
-                _historyDensity = value ? 'compact' : 'comfortable';
-              });
-              _saveSetting('m-compact-history', value);
-              _saveSetting('m-history-density', _historyDensity);
-            },
+            
             pages: const [
               'welcome',
               'language',
@@ -1141,8 +1134,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _sobrietyMilestoneTheme =
               prefs.getString('sobriety_milestone_theme') ??
               _sobrietyMilestoneTheme;
-          _compactHistory =
-              prefs.getBool('m-compact-history') ?? _compactHistory;
+          
           _historyDensity =
               prefs.getString('m-history-density') ?? _historyDensity;
           _appIconStyle = prefs.getString('m-app-icon-style') ?? _appIconStyle;
@@ -2116,7 +2108,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                             ),
                             if (cat == _activeCategory)
                               Icon(
-                                CupertinoIcons.checkmark,
+                                Icons.check_rounded,
                                 size: 16,
                                 color: p.accent,
                               ),
@@ -2265,7 +2257,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       builder: (sheetContext) => HistoryDialog(
         p: p,
         entries: _entries,
-        compactRows: _compactHistory,
+        compactRows: _historyDensity == 'compact',
         largeText: _largeText,
         minimalMomentOptions: _minimalMomentOptions,
         useNumbersInSingle: _useNumbersInSingle,
@@ -2592,7 +2584,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         reduceMotion: _reduceMotion,
         largeText: _largeText,
         highContrast: _highContrast,
-        compactHistory: _compactHistory,
+        
         confirmDelete: _confirmDelete,
         soundEffects: _acousticFeedback,
         showSeconds: _showSeconds,
@@ -2679,10 +2671,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onHistoryDensity: (value) {
           setState(() {
             _historyDensity = value;
-            _compactHistory = value != 'comfortable';
+            
           });
           _saveSetting('m-history-density', value);
-          _prefs?.setBool('m-compact-history', value != 'comfortable');
+          
         },
         onPrivacyLock: _setPrivacyLock,
         onResetPrivacyPin: _resetPrivacyPin,
@@ -2709,10 +2701,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           setState(() => _highContrast = value);
           _prefs?.setBool('m-high-contrast', value);
         },
-        onCompactHistory: (value) {
-          setState(() => _compactHistory = value);
-          _prefs?.setBool('m-compact-history', value);
-        },
+        
         onConfirmDelete: (value) {
           setState(() => _confirmDelete = value);
           _prefs?.setBool('m-confirm-delete', value);

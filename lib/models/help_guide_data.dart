@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class HelpGuideItem {
@@ -101,7 +100,7 @@ const List<HelpGuideItem> allGuideItems = [
     ],
   ),
   HelpGuideItem(
-    icon: CupertinoIcons.ellipsis_vertical_circle,
+    icon: Icons.more_vert_rounded,
     title: 'History 3-Dots Action Menu',
     content:
         'Tap the 3-dots menu in the top right of the History sheet to access secondary power tools without visual clutter: Delete All, Add Manual Entry, Filters, and Targets & Goals are consolidated into a clean, dedicated card.',
@@ -556,7 +555,7 @@ const List<HelpGuideItem> allGuideItems = [
     keywords: ['cipher', 'easter egg', 'god mode', 'enigma', 'secret'],
   ),
   HelpGuideItem(
-    icon: CupertinoIcons.link,
+    icon: Icons.link_rounded,
     title: 'Deep Linking & URL Schemes',
     content:
         'Trigger instant logs, Two-Way intervals, prefill notes, or jump to specific screens using custom URL schemes (e.g. notekar://log?type=single&note=Coffee, notekar://in, notekar://out, notekar://open?page=history). Perfect for NFC tags, browser bookmarks, and launchers.',
@@ -564,7 +563,7 @@ const List<HelpGuideItem> allGuideItems = [
     keywords: ['deep link', 'url scheme', 'automation', 'nfc', 'notekar://'],
   ),
   HelpGuideItem(
-    icon: CupertinoIcons.selection_pin_in_out,
+    icon: Icons.adjust_rounded,
     title: 'Global Text Selection ("Log in NoteKar")',
     content:
         'Highlight text anywhere across Android in Chrome, WhatsApp, Kindle, Books, or Twitter and choose "Log in NoteKar" from the context menu to capture notes offline with an instant toast.',
@@ -586,7 +585,7 @@ const List<HelpGuideItem> allGuideItems = [
     keywords: ['obsidian', 'logseq', 'markdown', 'journal', 'export'],
   ),
   HelpGuideItem(
-    icon: CupertinoIcons.calendar,
+    icon: Icons.calendar_today_rounded,
     title: 'Calendar Sessions (.ics) Export',
     content:
         'Export your tracked Two-Way IN/OUT intervals as RFC 5545 calendar events into an .ics file for 1-tap import into Google Calendar, Samsung Calendar, Outlook, or Proton.',
@@ -600,7 +599,7 @@ const List<HelpGuideItem> allGuideItems = [
     ],
   ),
   HelpGuideItem(
-    icon: CupertinoIcons.radiowaves_right,
+    icon: Icons.rss_feed_rounded,
     title: 'Tasker & Automation Broadcasts',
     content:
         'Trigger offline background moment logging via the system broadcast intent app.notekar.notekar.ACTION_LOG_MOMENT with extras type (single, in, out, note) and note.',
@@ -616,7 +615,7 @@ const List<HelpGuideItem> allGuideItems = [
     keywords: ['cache', 'rm -rf', 'clean', 'storage', 'apk purge'],
   ),
   HelpGuideItem(
-    icon: CupertinoIcons.plus_app,
+    icon: Icons.add_box_rounded,
     title: 'Plus Notes (Unrestricted Journaling)',
     content:
         'When a quick micro-note isn\'t enough, tap "Plus" in the note editor to write expansive journals, reflections, or meeting logs with an unrestricted character limit.',

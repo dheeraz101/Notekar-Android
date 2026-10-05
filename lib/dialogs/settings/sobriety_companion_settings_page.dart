@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
@@ -483,23 +483,23 @@ class MilestoneThemePage extends StatelessWidget {
       'science' => CupertinoIcons.lab_flask,
       'warrior' => CupertinoIcons.shield,
       'navy' => CupertinoIcons.compass,
-      'clan' => CupertinoIcons.flag,
-      'ancient' => CupertinoIcons.calendar,
-      'samurai' => CupertinoIcons.shield_fill,
+      'clan' => Icons.flag_rounded,
+      'ancient' => Icons.calendar_today_rounded,
+      'samurai' => Icons.security_rounded,
       'space' => CupertinoIcons.paperplane,
       'kingdom' => CupertinoIcons.person_2,
       'monk' => CupertinoIcons.person,
-      'phoenix' => CupertinoIcons.flame,
+      'phoenix' => Icons.local_fire_department_rounded,
       'animals' => CupertinoIcons.paw,
       'pokemon' || 'jjk' => CupertinoIcons.bolt,
-      'onepiece' || 'bleach' => CupertinoIcons.exclamationmark_shield,
+      'onepiece' || 'bleach' => Icons.security_rounded,
       'naruto' || 'vinland' || 'demonslayer' => CupertinoIcons.waveform,
-      'ben10' => CupertinoIcons.time,
+      'ben10' => Icons.schedule_rounded,
       'aot' => CupertinoIcons.square_grid_2x2,
       'mha' || 'fma' || 'dbz' => CupertinoIcons.infinite,
       'codegeass' || 'deathnote' => CupertinoIcons.eye,
       'gintama' || 'hxh' => CupertinoIcons.sportscourt,
-      'sololeveling' || 'starwars' => CupertinoIcons.sparkles,
+      'sololeveling' || 'starwars' => Icons.auto_awesome_rounded,
       'rpg' || 'tech' => CupertinoIcons.hammer,
       'chess' => CupertinoIcons.gamecontroller,
       _ => CupertinoIcons.star,
@@ -715,7 +715,7 @@ class MilestonesPage extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(CupertinoIcons.share, size: 16),
+                      icon: const Icon(Icons.share_rounded, size: 16),
                       label: Text(
                         'Share Card'.localized(context),
                         style: const TextStyle(
