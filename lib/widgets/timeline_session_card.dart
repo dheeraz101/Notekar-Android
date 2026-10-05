@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/models/goal.dart';
@@ -471,8 +469,7 @@ class TimelineSessionCard extends StatelessWidget {
                                                     children: [
                                                       Icon(
                                                         actTag?.icon ??
-                                                            CupertinoIcons
-                                                                .tag_fill,
+                                                            Icons.label_rounded,
                                                         size: 9.5,
                                                         color: p.accent,
                                                       ),
