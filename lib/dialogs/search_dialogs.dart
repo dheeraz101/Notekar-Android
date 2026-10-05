@@ -564,9 +564,7 @@ class SearchNotesBox extends StatelessWidget {
               ),
             ),
             child: Icon(
-              isFilterActive
-                  ? Icons.filter_list_rounded
-                  : Icons.tune_rounded,
+              isFilterActive ? Icons.filter_list_rounded : Icons.tune_rounded,
               size: 20,
               color: isFilterActive ? p.accent : p.text,
             ),

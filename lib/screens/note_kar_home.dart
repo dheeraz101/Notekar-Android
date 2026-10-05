@@ -9,7 +9,6 @@ import 'package:flutter/cupertino.dart'
     show
         CupertinoAlertDialog,
         CupertinoDialogAction,
-        
         CupertinoTextField,
         CupertinoTheme,
         CupertinoThemeData,
@@ -132,7 +131,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _lastBackupAt;
   bool _largeText = false;
   bool _highContrast = false;
-  
+
   bool _confirmDelete = false;
   bool _showSeconds = true;
   bool _highlightSeconds = true;
@@ -682,14 +681,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
           ? savedAppIconStyle
           : 'default';
       _csvDelimiter = prefs.getString('m-csv-delimiter') ?? ',';
-            
+
       _privacyLock = prefs.getBool('m-privacy-lock') ?? false;
       _privacyLockType = prefs.getString('m-privacy-lock-type') ?? 'system';
       _backupReminderDays = prefs.getInt('m-backup-reminder-days') ?? 0;
       _lastBackupAt = prefs.getInt('m-last-backup-at');
       _largeText = prefs.getBool('m-large-text') ?? false;
       _highContrast = prefs.getBool('m-high-contrast') ?? false;
-      
+
       _confirmDelete = prefs.getBool('m-confirm-delete') ?? false;
       _adaptiveModeColor =
           prefs.getBool('m-adaptive-color') ??
@@ -1071,7 +1070,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
             countOnSave: _countOnSave,
             enableSobrietyMode: _enableSobrietyMode,
             sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
-            
+
             onAppIconStyle: (value) async {
               setState(() => _appIconStyle = value);
               await _setAppIconStyle(value, showToast: false);
@@ -1110,7 +1109,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
               setState(() => _sobrietyMilestoneTheme = value);
               _prefs?.setString('sobriety_milestone_theme', value);
             },
-            
+
             pages: const [
               'welcome',
               'language',
@@ -1133,7 +1132,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _sobrietyMilestoneTheme =
               prefs.getString('sobriety_milestone_theme') ??
               _sobrietyMilestoneTheme;
-          
+
           _historyDensity =
               prefs.getString('m-history-density') ?? _historyDensity;
           _appIconStyle = prefs.getString('m-app-icon-style') ?? _appIconStyle;
@@ -2583,7 +2582,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         reduceMotion: _reduceMotion,
         largeText: _largeText,
         highContrast: _highContrast,
-        
+
         confirmDelete: _confirmDelete,
         soundEffects: _acousticFeedback,
         showSeconds: _showSeconds,
@@ -2670,10 +2669,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onHistoryDensity: (value) {
           setState(() {
             _historyDensity = value;
-            
           });
           _saveSetting('m-history-density', value);
-          
         },
         onPrivacyLock: _setPrivacyLock,
         onResetPrivacyPin: _resetPrivacyPin,
@@ -2700,7 +2697,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           setState(() => _highContrast = value);
           _prefs?.setBool('m-high-contrast', value);
         },
-        
+
         onConfirmDelete: (value) {
           setState(() => _confirmDelete = value);
           _prefs?.setBool('m-confirm-delete', value);

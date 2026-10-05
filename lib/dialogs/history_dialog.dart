@@ -1752,7 +1752,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.hourglass_bottom_rounded, size: 20, color: widget.p.text),
+                Icon(
+                  Icons.hourglass_bottom_rounded,
+                  size: 20,
+                  color: widget.p.text,
+                ),
                 const SizedBox(width: 10),
                 Text(
                   'Life Audit & Horizon'.localized(context),
@@ -1773,11 +1777,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.tune_rounded,
-                  size: 20,
-                  color: widget.p.text,
-                ),
+                Icon(Icons.tune_rounded, size: 20, color: widget.p.text),
                 const SizedBox(width: 10),
                 Text(
                   'Filter Timeline'.localized(context),
@@ -1876,11 +1876,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (_filter == f) ...[
-                    Icon(
-                      Icons.check_rounded,
-                      size: 16,
-                      color: widget.p.accent,
-                    ),
+                    Icon(Icons.check_rounded, size: 16, color: widget.p.accent),
                     const SizedBox(width: 8),
                   ],
                   Text(

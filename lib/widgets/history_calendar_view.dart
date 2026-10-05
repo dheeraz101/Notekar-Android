@@ -109,9 +109,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    hasNote
-                        ? Icons.edit_rounded
-                        : Icons.add_comment_rounded,
+                    hasNote ? Icons.edit_rounded : Icons.add_comment_rounded,
                     size: 19,
                     color: widget.p.accent,
                   ),

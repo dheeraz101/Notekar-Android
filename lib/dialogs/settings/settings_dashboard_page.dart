@@ -204,11 +204,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
-                      color: p.text3,
-                    ),
+                    Icon(Icons.chevron_right_rounded, size: 16, color: p.text3),
                   ],
                 ),
               ),

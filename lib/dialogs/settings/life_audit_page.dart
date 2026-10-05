@@ -137,11 +137,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                   shape: BoxShape.circle,
                   color: p.accent.withValues(alpha: 0.14),
                 ),
-                child: Icon(
-                  Icons.grid_view_rounded,
-                  size: 18,
-                  color: p.accent,
-                ),
+                child: Icon(Icons.grid_view_rounded, size: 18, color: p.accent),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1124,7 +1120,11 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.local_fire_department_rounded, size: 18, color: p.orange),
+              Icon(
+                Icons.local_fire_department_rounded,
+                size: 18,
+                color: p.orange,
+              ),
               const SizedBox(width: 8),
               Text(
                 'THE STOIC REALITY'.localized(context),

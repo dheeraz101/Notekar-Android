@@ -209,9 +209,7 @@ class _UndoToastState extends State<UndoToast>
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(shape: BoxShape.circle),
                   child: Icon(
-                    isEditNote
-                        ? Icons.edit_rounded
-                        : Icons.add_rounded,
+                    isEditNote ? Icons.edit_rounded : Icons.add_rounded,
                     size: 18,
                     color: widget.p.accent,
                   ),

@@ -294,7 +294,11 @@ class _SmartTrimSheetState extends State<SmartTrimSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.access_time_rounded, size: 15, color: widget.p.text2),
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: 15,
+                      color: widget.p.text2,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Choose Custom End Time'.localized(context),

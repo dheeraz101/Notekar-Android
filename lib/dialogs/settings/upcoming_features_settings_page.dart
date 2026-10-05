@@ -36,7 +36,11 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
                   color: p.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.auto_awesome_rounded, color: p.accent, size: 24),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: p.accent,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(

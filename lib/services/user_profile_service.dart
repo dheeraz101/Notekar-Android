@@ -398,11 +398,7 @@ class UserProfileService extends ChangeNotifier {
       content = _buildFallbackMonogram(p, size);
     } else {
       content = Center(
-        child: Icon(
-          Icons.person_rounded,
-          size: size * 0.52,
-          color: p.accent,
-        ),
+        child: Icon(Icons.person_rounded, size: size * 0.52, color: p.accent),
       );
     }
 

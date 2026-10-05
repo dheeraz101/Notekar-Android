@@ -86,7 +86,11 @@ class HomeMinimalToolbarCapsule extends StatelessWidget {
             onTap: onOpenHistory,
             child: Padding(
               padding: const EdgeInsets.all(6),
-              child: Icon(Icons.access_time_rounded, size: 16, color: palette.text),
+              child: Icon(
+                Icons.access_time_rounded,
+                size: 16,
+                color: palette.text,
+              ),
             ),
           ),
           Container(

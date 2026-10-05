@@ -458,9 +458,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      goal.category != null
-                          ? meta.icon
-                          : Icons.flag_rounded,
+                      goal.category != null ? meta.icon : Icons.flag_rounded,
                       size: 12,
                       color: accentCol,
                     ),
@@ -626,7 +624,11 @@ class GoalsContentViewState extends State<GoalsContentView>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.access_time_rounded, size: 13, color: widget.p.text3),
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 13,
+                    color: widget.p.text3,
+                  ),
                   const SizedBox(width: 5),
                   Text(
                     '${progress.trackedFormatted} of ${progress.targetFormatted}',

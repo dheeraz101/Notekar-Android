@@ -352,7 +352,9 @@ class SearchNotesSettingsPage {
                   : p.border.withValues(alpha: 0.6);
 
               return Padding(
-                padding: EdgeInsets.only(bottom: historyDensity == 'compact' ? 10 : 14),
+                padding: EdgeInsets.only(
+                  bottom: historyDensity == 'compact' ? 10 : 14,
+                ),
                 child: PressableScale(
                   onTap: () {
                     if (selectedMoments.isNotEmpty) {

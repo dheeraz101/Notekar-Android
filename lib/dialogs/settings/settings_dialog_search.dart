@@ -1241,10 +1241,9 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
             );
             if (!confirmed) return;
             update(() {
-              
               historyDensity = 'comfortable';
             });
-            
+
             widget.onHistoryDensity('comfortable');
           }
           update(() => useNumbersInSingle = value);

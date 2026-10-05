@@ -68,7 +68,11 @@ class TimelineGapCard extends StatelessWidget {
                   color: p.surface3.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.hourglass_bottom_rounded, size: 14, color: p.text3),
+                child: Icon(
+                  Icons.hourglass_bottom_rounded,
+                  size: 14,
+                  color: p.text3,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -118,11 +122,7 @@ class TimelineGapCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.bedtime_rounded,
-                          size: 11,
-                          color: p.accent,
-                        ),
+                        Icon(Icons.bedtime_rounded, size: 11, color: p.accent),
                         const SizedBox(width: 4),
                         Text(
                           'Rest',

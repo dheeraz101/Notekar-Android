@@ -1084,11 +1084,7 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Icon(
-                            Icons.edit_rounded,
-                            size: 11,
-                            color: p.text3,
-                          ),
+                          Icon(Icons.edit_rounded, size: 11, color: p.text3),
                         ],
                       ),
                     ),
@@ -1111,7 +1107,11 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.access_time_rounded, size: 13, color: p.accent),
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 13,
+                        color: p.accent,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Life Clock: '.localized(context),

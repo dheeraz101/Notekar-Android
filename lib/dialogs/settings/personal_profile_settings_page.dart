@@ -499,7 +499,11 @@ class _PersonalProfileSettingsPageState
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 18, color: p.accent),
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 18,
+                        color: p.accent,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -540,7 +544,11 @@ class _PersonalProfileSettingsPageState
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.hourglass_bottom_rounded, size: 16, color: p.orange),
+                      Icon(
+                        Icons.hourglass_bottom_rounded,
+                        size: 16,
+                        color: p.orange,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'MEMENTO MORI HORIZON',

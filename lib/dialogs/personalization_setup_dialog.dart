@@ -411,7 +411,11 @@ class _PersonalizationSetupDialogState
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today_rounded, size: 18, color: p.accent),
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 18,
+                      color: p.accent,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -425,7 +429,11 @@ class _PersonalizationSetupDialogState
                         ),
                       ),
                     ),
-                    Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: p.text3),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 14,
+                      color: p.text3,
+                    ),
                   ],
                 ),
               ),

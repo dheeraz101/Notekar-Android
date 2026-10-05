@@ -31,19 +31,19 @@ class ActivityTag {
   static final Map<int, IconData> _iconLookup = {
     Icons.label_rounded.codePoint: Icons.label_rounded,
     Icons.explore_rounded.codePoint: Icons.explore_rounded,
-    Icons.local_fire_department_rounded.codePoint: Icons.local_fire_department_rounded,
+    Icons.local_fire_department_rounded.codePoint:
+        Icons.local_fire_department_rounded,
     Icons.menu_book_rounded.codePoint: Icons.menu_book_rounded,
     Icons.laptop_mac_rounded.codePoint: Icons.laptop_mac_rounded,
     Icons.water_drop_rounded.codePoint: Icons.water_drop_rounded,
     Icons.auto_awesome_rounded.codePoint: Icons.auto_awesome_rounded,
     Icons.description_rounded.codePoint: Icons.description_rounded,
-    Icons.favorite_rounded.codePoint:
-        Icons.favorite_rounded,
+    Icons.favorite_rounded.codePoint: Icons.favorite_rounded,
     Icons.directions_car_rounded.codePoint: Icons.directions_car_rounded,
-    Icons.local_fire_department_rounded.codePoint: Icons.local_fire_department_rounded,
+    Icons.local_fire_department_rounded.codePoint:
+        Icons.local_fire_department_rounded,
     Icons.delete_rounded.codePoint: Icons.delete_rounded,
-    Icons.sports_esports_rounded.codePoint:
-        Icons.sports_esports_rounded,
+    Icons.sports_esports_rounded.codePoint: Icons.sports_esports_rounded,
     Icons.people_rounded.codePoint: Icons.people_rounded,
     Icons.park_rounded.codePoint: Icons.park_rounded,
     Icons.dark_mode_rounded.codePoint: Icons.dark_mode_rounded,

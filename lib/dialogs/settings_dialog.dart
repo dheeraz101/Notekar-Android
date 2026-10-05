@@ -91,7 +91,7 @@ class SettingsDialog extends StatefulWidget {
     required this.reduceMotion,
     required this.largeText,
     required this.highContrast,
-    
+
     required this.confirmDelete,
     required this.showSeconds,
     required this.highlightSeconds,
@@ -132,7 +132,7 @@ class SettingsDialog extends StatefulWidget {
     required this.onReduceMotion,
     required this.onLargeText,
     required this.onHighContrast,
-    
+
     required this.onConfirmDelete,
     required this.onShowSeconds,
     required this.onHighlightSeconds,
@@ -216,7 +216,7 @@ class SettingsDialog extends StatefulWidget {
   final bool reduceMotion;
   final bool largeText;
   final bool highContrast;
-  
+
   final bool confirmDelete;
   final bool showSeconds;
   final bool highlightSeconds;
@@ -261,7 +261,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<bool> onReduceMotion;
   final ValueChanged<bool> onLargeText;
   final ValueChanged<bool> onHighContrast;
-  
+
   final ValueChanged<bool> onConfirmDelete;
   final ValueChanged<bool> onShowSeconds;
   final ValueChanged<bool> onHighlightSeconds;
@@ -328,7 +328,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late bool reduceMotion;
   late bool largeText;
   late bool highContrast;
-  
+
   late bool confirmDelete;
   late bool showSeconds;
   late bool highlightSeconds;
@@ -1261,7 +1261,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     reduceMotion = widget.reduceMotion;
     largeText = widget.largeText;
     highContrast = widget.highContrast;
-    
+
     confirmDelete = widget.confirmDelete;
     showSeconds = widget.showSeconds;
     highlightSeconds = widget.highlightSeconds;
@@ -3300,7 +3300,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               showTrashBin: widget.onOpenTrash != null,
                               trash: _trash,
-                              
+
                               confirmDelete: confirmDelete,
                               extendedDuration: extendedDuration,
                               minimalMomentOptions: minimalMomentOptions,
@@ -3310,7 +3310,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                               notesCount: entries
                                   .where((e) => e.note.isNotEmpty)
                                   .length,
-                              
+
                               onHistoryDensityChanged: (value) {
                                 setState(() => historyDensity = value);
                                 widget.onHistoryDensity(value);
@@ -3473,7 +3473,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                             settingsSearchController: _noteSearchController,
                             settingsSearchFocusNode: _noteSearchFocusNode,
                             historyDensity: historyDensity,
-                            
+
                             reduceMotion: reduceMotion,
                             enableTranslucency: enableTranslucency,
                             recentSearches: _recentNoteSearches,

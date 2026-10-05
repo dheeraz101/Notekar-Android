@@ -353,10 +353,7 @@ Future<void> showMilestoneUnlockDialog({
                                     },
                                   );
                                 },
-                                icon: const Icon(
-                                  Icons.share_rounded,
-                                  size: 18,
-                                ),
+                                icon: const Icon(Icons.share_rounded, size: 18),
                                 label: Text(
                                   'Share'.localized(context),
                                   style: const TextStyle(

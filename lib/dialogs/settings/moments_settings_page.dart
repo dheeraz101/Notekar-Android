@@ -20,7 +20,7 @@ class MomentsSettingsPage extends StatelessWidget {
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
     this.countOnSave = false,
-    
+
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
     required this.onExtendedDurationChanged,
@@ -43,7 +43,6 @@ class MomentsSettingsPage extends StatelessWidget {
   final bool resetSingleDaily;
   final bool countOnSave;
 
-  
   final ValueChanged<String> onHistoryDensityChanged;
   final ValueChanged<bool> onConfirmDeleteChanged;
   final ValueChanged<bool> onExtendedDurationChanged;
@@ -96,7 +95,7 @@ class MomentsSettingsPage extends StatelessWidget {
                     iconColor: p.accent,
                   );
                   if (!confirmed) return;
-                  
+
                   onHistoryDensityChanged('comfortable');
                 }
                 onUseNumbersInSingleChanged(value);

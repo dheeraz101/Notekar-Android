@@ -207,11 +207,7 @@ class HomeClockComplication extends StatelessWidget {
     final hour = now.hour;
 
     final (phase, icon, col) = switch (hour) {
-      >= 6 && < 12 => (
-        'Morning Horizon',
-        Icons.wb_twilight_rounded,
-        p.orange,
-      ),
+      >= 6 && < 12 => ('Morning Horizon', Icons.wb_twilight_rounded, p.orange),
       >= 12 && < 17 => (
         'Peak Focus Window',
         Icons.light_mode_rounded,
@@ -222,11 +218,7 @@ class HomeClockComplication extends StatelessWidget {
         Icons.wb_twilight_rounded,
         const Color(0xFFAF52DE),
       ),
-      _ => (
-        'Night Recovery',
-        Icons.bedtime_rounded,
-        const Color(0xFF30B0C7),
-      ),
+      _ => ('Night Recovery', Icons.bedtime_rounded, const Color(0xFF30B0C7)),
     };
 
     return Row(
