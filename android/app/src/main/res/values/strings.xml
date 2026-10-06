@@ -9,6 +9,12 @@
     <string name="shortcut_out_long">Save Two-Way OUT Moment</string>
     <string name="shortcut_note_short">Note</string>
     <string name="shortcut_note_long">New Note</string>
+    <string name="shortcut_quick_session_short">Quick Session</string>
+    <string name="shortcut_quick_session_long">Start a fast session</string>
+    <string name="shortcut_log_past_moment_short">Log Past Moment</string>
+    <string name="shortcut_log_past_moment_long">Log Past Moment</string>
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search History</string>
     <string name="widget_description">Save NoteKar moments quickly from the home screen.</string>
     <string name="widget_title">NoteKar Quick Log</string>
     <string name="widget_open">Open</string>

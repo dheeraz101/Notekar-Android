@@ -4,8 +4,8 @@
         android:shortcutId="quick_session"
         android:enabled="true"
         android:icon="@mipmap/ic_launcher"
-        android:shortcutShortLabel="Quick Session"
-        android:shortcutLongLabel="Start a fast session">
+        android:shortcutShortLabel="@string/shortcut_quick_session_short"
+        android:shortcutLongLabel="@string/shortcut_quick_session_long">
         <intent
             android:action="app.notekar.notekar.ACTION_NOTE"
             android:targetPackage="app.notekar.notekar"
@@ -15,8 +15,8 @@
         android:shortcutId="log_past_moment"
         android:enabled="true"
         android:icon="@mipmap/ic_launcher"
-        android:shortcutShortLabel="Log Past Moment"
-        android:shortcutLongLabel="Log Past Moment">
+        android:shortcutShortLabel="@string/shortcut_log_past_moment_short"
+        android:shortcutLongLabel="@string/shortcut_log_past_moment_long">
         <intent
             android:action="app.notekar.notekar.ACTION_NOTE"
             android:targetPackage="app.notekar.notekar"
@@ -26,8 +26,8 @@
         android:shortcutId="open_search"
         android:enabled="true"
         android:icon="@mipmap/ic_launcher"
-        android:shortcutShortLabel="Search"
-        android:shortcutLongLabel="Search History">
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
         <intent
             android:action="app.notekar.notekar.ACTION_NOTE"
             android:targetPackage="app.notekar.notekar"
