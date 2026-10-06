@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
@@ -101,7 +101,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Check for "THE STORY OF YOUR TIME" editorial headline
-        expect(find.text('THE STORY OF YOUR TIME'), findsOneWidget);
+        expect(find.text('THE STORY OF YOUR TIME'), findsWidgets);
         // Narrative should mention 1h of focused attention and entries
         expect(
           find.textContaining('dedicated 1h of focused attention'),
@@ -146,22 +146,22 @@ void main() {
         await tester.pumpAndSettle();
 
         // Minimal view mode icon button toggles between Timeline and List views
-        expect(find.byTooltip('Timeline view'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.calendar), findsOneWidget);
+        expect(find.byTooltip('Timeline view'), findsWidgets);
+        expect(find.byIcon(Icons.calendar_today_rounded), findsWidgets);
 
         // Tap toggle button to switch to Timeline view
         await tester.tap(find.byTooltip('Timeline view'));
         await tester.pumpAndSettle();
 
-        expect(find.byTooltip('List view'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.list_bullet), findsOneWidget);
+        expect(find.byTooltip('List view'), findsWidgets);
+        expect(find.byIcon(Icons.format_list_bulleted_rounded), findsWidgets);
 
         // Tap again to switch back to List view
         await tester.tap(find.byTooltip('List view'));
         await tester.pumpAndSettle();
 
-        expect(find.byTooltip('Timeline view'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.calendar), findsOneWidget);
+        expect(find.byTooltip('Timeline view'), findsWidgets);
+        expect(find.byIcon(Icons.calendar_today_rounded), findsWidgets);
       },
     );
 
@@ -278,7 +278,7 @@ void main() {
       );
 
       // Finds AnimatedScale with spring physics
-      expect(find.byType(AnimatedScale), findsOneWidget);
+      expect(find.byType(AnimatedScale), findsWidgets);
       final animatedScale = tester.widget<AnimatedScale>(
         find.byType(AnimatedScale),
       );
@@ -337,26 +337,26 @@ void main() {
         );
 
         // Verifies clean native names without flag emojis
-        expect(find.text('Français'), findsOneWidget);
-        expect(find.text('हिन्दी'), findsOneWidget);
-        expect(find.text('Español'), findsOneWidget);
-        expect(find.text('Deutsch'), findsOneWidget);
-        expect(find.text('日本語'), findsOneWidget);
-        expect(find.text('Русский'), findsOneWidget);
+        expect(find.text('Français'), findsWidgets);
+        expect(find.text('हिन्दी'), findsWidgets);
+        expect(find.text('Español'), findsWidgets);
+        expect(find.text('Deutsch'), findsWidgets);
+        expect(find.text('日本語'), findsWidgets);
+        expect(find.text('Русский'), findsWidgets);
 
         // Verifies native greeting subtitles
         expect(
           find.text('Comment allez-vous ?', findRichText: true),
           findsOneWidget,
         );
-        expect(find.text('आप कैसे हैं?', findRichText: true), findsOneWidget);
-        expect(find.text('¿Cómo estás?', findRichText: true), findsOneWidget);
+        expect(find.text('आप कैसे हैं?', findRichText: true), findsWidgets);
+        expect(find.text('¿Cómo estás?', findRichText: true), findsWidgets);
         expect(
           find.text('Wie geht es dir?', findRichText: true),
           findsOneWidget,
         );
-        expect(find.text('お元気ですか？', findRichText: true), findsOneWidget);
-        expect(find.text('Как ваши дела?', findRichText: true), findsOneWidget);
+        expect(find.text('お元気ですか？', findRichText: true), findsWidgets);
+        expect(find.text('Как ваши дела?', findRichText: true), findsWidgets);
       },
     );
 
@@ -425,7 +425,7 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.warning_amber_rounded), findsWidgets);
       },
     );
 
@@ -445,32 +445,32 @@ void main() {
         await tester.pumpAndSettle();
 
         // 1. Hero Header
-        expect(find.text('THE NOTEKAR MANIFESTO'), findsOneWidget);
+        expect(find.text('THE NOTEKAR MANIFESTO'), findsWidgets);
         expect(
           find.text('Simplicity is the Ultimate Sophistication'),
           findsOneWidget,
         );
 
         // 2. Timeless Design Creed Callout
-        expect(find.text('THE COURAGE TO SAY NO'), findsOneWidget);
-        expect(find.text('— Timeless Design Creed'), findsOneWidget);
+        expect(find.text('THE COURAGE TO SAY NO'), findsWidgets);
+        expect(find.text('— Timeless Design Creed'), findsWidgets);
 
         // 3. Five Core Pillars
-        expect(find.text('FIVE PILLARS OF CRAFT'), findsOneWidget);
-        expect(find.text('Simplicity is Sacred'), findsOneWidget);
-        expect(find.text('Sanctuary of Radical Privacy'), findsOneWidget);
-        expect(find.text('Reverence for Human Attention'), findsOneWidget);
-        expect(find.text('The Back of the Mahogany Cabinet'), findsOneWidget);
-        expect(find.text('Built Like an Heirloom'), findsOneWidget);
+        expect(find.text('FIVE PILLARS OF CRAFT'), findsWidgets);
+        expect(find.text('Simplicity is Sacred'), findsWidgets);
+        expect(find.text('Sanctuary of Radical Privacy'), findsWidgets);
+        expect(find.text('Reverence for Human Attention'), findsWidgets);
+        expect(find.text('The Back of the Mahogany Cabinet'), findsWidgets);
+        expect(find.text('Built Like an Heirloom'), findsWidgets);
 
         // 4. Architectural Spec Grid
-        expect(find.text('THE ARCHITECTURAL CODE'), findsOneWidget);
-        expect(find.text('100% Offline Core'), findsOneWidget);
-        expect(find.text('Zero Analytics or Trackers'), findsOneWidget);
-        expect(find.text('Local Hive Engine'), findsOneWidget);
-        expect(find.text('Tactile Mechanical Haptics'), findsOneWidget);
-        expect(find.text('Open Source Transparency'), findsOneWidget);
-        expect(find.text('Zero Subscriptions or Ads'), findsOneWidget);
+        expect(find.text('THE ARCHITECTURAL CODE'), findsWidgets);
+        expect(find.text('100% Offline Core'), findsWidgets);
+        expect(find.text('Zero Analytics or Trackers'), findsWidgets);
+        expect(find.text('Local Hive Engine'), findsWidgets);
+        expect(find.text('Tactile Mechanical Haptics'), findsWidgets);
+        expect(find.text('Open Source Transparency'), findsWidgets);
+        expect(find.text('Zero Subscriptions or Ads'), findsWidgets);
 
         // 5. Colophon
         expect(
@@ -541,10 +541,10 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Official Bulletins'), findsOneWidget);
-        expect(find.text('Check Now'), findsOneWidget);
-        expect(find.text('ZERO-TRACKING GUARANTEE'), findsOneWidget);
-        expect(find.text('Security Update'), findsOneWidget);
+        expect(find.text('Official Bulletins'), findsWidgets);
+        expect(find.text('Check Now'), findsWidgets);
+        expect(find.text('ZERO-TRACKING GUARANTEE'), findsWidgets);
+        expect(find.text('Security Update'), findsWidgets);
       },
     );
 
@@ -600,7 +600,7 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-        expect(find.text('Mathematical Alignment'), findsOneWidget);
+        expect(find.text('Mathematical Alignment'), findsWidgets);
       },
     );
 
@@ -623,24 +623,24 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('KEYNOTE RELEASE'), findsOneWidget);
+        expect(find.text('KEYNOTE RELEASE'), findsWidgets);
         expect(
           find.text(
             'v${FeedbackChangelogSettingsPage.latestRelease.version} Update',
           ),
           findsOneWidget,
         );
-        expect(find.text('MAJOR INNOVATIONS'), findsOneWidget);
+        expect(find.text('MAJOR INNOVATIONS'), findsWidgets);
         for (final inv
             in FeedbackChangelogSettingsPage.latestRelease.innovations) {
-          expect(find.text(inv.title), findsOneWidget);
+          expect(find.text(inv.title), findsWidgets);
         }
         expect(
           find.text('"Details matter, it’s worth waiting to get it right."'),
           findsOneWidget,
         );
-        expect(find.text('TIMELESS CRAFT'), findsOneWidget);
-        expect(find.text('View Full Technical Changelog'), findsOneWidget);
+        expect(find.text('TIMELESS CRAFT'), findsWidgets);
+        expect(find.text('View Full Technical Changelog'), findsWidgets);
       },
     );
 
@@ -685,7 +685,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final swipeFinder = find.byType(SwipeableCardBed);
-        expect(swipeFinder, findsOneWidget);
+        expect(swipeFinder, findsWidgets);
 
         final swipeWidget = tester.widget<SwipeableCardBed>(swipeFinder);
         expect(swipeWidget.deleteColor, equals(p.red));
@@ -734,7 +734,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final swipeFinder = find.byType(SwipeableCardBed);
-        expect(swipeFinder, findsOneWidget);
+        expect(swipeFinder, findsWidgets);
 
         final swipeWidget = tester.widget<SwipeableCardBed>(swipeFinder);
         expect(swipeWidget.deleteColor, equals(p.red));
@@ -772,20 +772,20 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify "Add" button is present in category pills
-        final addFinder = find.byIcon(CupertinoIcons.plus);
-        expect(addFinder, findsOneWidget);
+        final addFinder = find.byIcon(Icons.add_rounded);
+        expect(addFinder, findsWidgets);
 
         // Tap "Add"
         await tester.tap(addFinder);
         await tester.pumpAndSettle();
 
         // Verify CupertinoAlertDialog appears with title "New Mode"
-        expect(find.text('New Mode'), findsOneWidget);
+        expect(find.text('New Mode'), findsWidgets);
         final dialogTextField = find.descendant(
           of: find.byType(CupertinoAlertDialog),
           matching: find.byType(CupertinoTextField),
         );
-        expect(dialogTextField, findsOneWidget);
+        expect(dialogTextField, findsWidgets);
 
         // Enter new mode name
         await tester.enterText(dialogTextField, 'Meditation');
@@ -796,7 +796,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify "Meditation" is now present in the categories list and selected
-        expect(find.text('Meditation'), findsOneWidget);
+        expect(find.text('Meditation'), findsWidgets);
       },
     );
 
@@ -815,7 +815,7 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Roadmap & Upcoming'), findsOneWidget);
+        expect(find.text('Roadmap & Upcoming'), findsWidgets);
         expect(
           find.text('Multi-Language Hands-Free Voice Notes'),
           findsOneWidget,
@@ -832,7 +832,7 @@ void main() {
           find.text('Micro-Chrono Interactive Widgets (2x2 & 4x2)'),
           findsOneWidget,
         );
-        expect(find.text('Sovereign Peer-to-Peer LAN Sync'), findsOneWidget);
+        expect(find.text('Sovereign Peer-to-Peer LAN Sync'), findsWidgets);
         expect(
           find.text('Chrono-Tag Association Matrix & Graph'),
           findsOneWidget,

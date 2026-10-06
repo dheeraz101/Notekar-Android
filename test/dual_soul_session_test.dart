@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -122,7 +121,7 @@ void main() {
         );
 
         // Must NOT contain sparkles icon
-        expect(find.byIcon(CupertinoIcons.sparkles), findsNothing);
+        expect(find.byIcon(Icons.auto_awesome_rounded), findsNothing);
         // Must contain ambient text
         expect(find.textContaining('1 moment today'), findsOneWidget);
       },

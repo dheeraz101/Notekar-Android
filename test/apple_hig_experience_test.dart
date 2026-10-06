@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
@@ -116,7 +115,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final searchFinder = find.byIcon(CupertinoIcons.search);
+        final searchFinder = find.byIcon(Icons.search_rounded);
         expect(searchFinder, findsOneWidget);
 
         await tester.tap(searchFinder);
@@ -214,7 +213,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // In resting state: shows chevron down
-      expect(find.byIcon(CupertinoIcons.chevron_down), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsOneWidget);
       expect(find.text('MODES & RHYTHM'), findsNothing);
 
       // Tap resting capsule to expand
@@ -223,14 +222,14 @@ void main() {
 
       expect(expandedState, isTrue);
       expect(find.text('MODES & RHYTHM'), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_up), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
 
       // Tap close chevron to collapse
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_up));
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
       await tester.pumpAndSettle();
 
       expect(expandedState, isFalse);
-      expect(find.byIcon(CupertinoIcons.chevron_down), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsOneWidget);
     });
 
     testWidgets(
@@ -284,9 +283,12 @@ void main() {
 
         // Expanded card now reveals Unified Rhythm card with streak, grace shield, conscious %
         expect(find.text('MODES & RHYTHM'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.flame_fill), findsOneWidget);
+        expect(
+          find.byIcon(Icons.local_fire_department_rounded),
+          findsOneWidget,
+        );
         expect(find.text('7d'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.shield_fill), findsOneWidget);
+        expect(find.byIcon(Icons.security_rounded), findsOneWidget);
         expect(find.text('2'), findsOneWidget);
         expect(find.textContaining('Conscious'), findsOneWidget);
 

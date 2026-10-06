@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart'
-    show CupertinoAlertDialog, CupertinoIcons, CupertinoTheme;
+    show CupertinoAlertDialog, CupertinoTheme;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
@@ -259,7 +259,7 @@ void main() {
         expect(find.text('Deep Focus'), findsOneWidget);
         expect(find.text('Create New Mode'), findsOneWidget);
         // Mode rows do not have delete/trash icons in the row
-        expect(find.byIcon(CupertinoIcons.trash), findsNothing);
+        expect(find.byIcon(Icons.delete_rounded), findsNothing);
         // Default beta note is rendered on Modes page
         expect(find.byType(SettingsBetaNote), findsOneWidget);
         final betaNote = tester.widget<SettingsBetaNote>(

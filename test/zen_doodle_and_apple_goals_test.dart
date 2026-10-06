@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/personalization_setup_dialog.dart';
@@ -300,7 +300,7 @@ void main() {
       expect(find.text('85 Years'), findsOneWidget);
 
       // Tap [+] stepper button
-      await tester.tap(find.byIcon(CupertinoIcons.plus));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pumpAndSettle();
 
       // Should now be 86 Years
