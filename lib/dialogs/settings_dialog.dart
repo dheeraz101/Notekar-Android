@@ -66,7 +66,6 @@ import 'package:notekar/utils/update_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/glass.dart';
 import 'package:notekar/widgets/guide_help_rows.dart';
-import 'package:notekar/widgets/hig_widgets.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -2204,277 +2203,120 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 _buildCriticalAdvisoryBanner(p),
                               _buildAppleIdProfileCard(p),
 
-                              // Domain 1: Quick Settings
-                              HigSectionHeader(p: p, title: 'Quick Settings'),
-                              HigGroupedCard(
+                              SettingsGroup(
                                 p: p,
+                                insetDividers: true,
                                 children: [
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.waveform_path_ecg,
-                                    iconColor: p.accent,
-                                    title: 'Haptic Feedback',
-                                    status:
-                                        hapticStyle[0].toUpperCase() +
-                                        hapticStyle.substring(1),
-                                    onTap: () {
-                                      final next = hapticStyle == 'standard'
-                                          ? 'light'
-                                          : (hapticStyle == 'light'
-                                                ? 'off'
-                                                : 'standard');
-                                      widget.onHapticStyle(next);
-                                    },
-                                  ),
-                                  HigSwitchRow(
-                                    p: p,
-                                    icon: CupertinoIcons.play_circle,
-                                    iconColor: p.text,
-                                    title: 'Reduce Motion',
-                                    value: reduceMotion,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        reduceMotion = val;
-                                        if (val) homeMenuAnimations = false;
-                                      });
-                                      widget.onReduceMotion(val);
-                                    },
-                                  ),
-                                  if (widget.onUse24Hour != null)
-                                    HigSwitchRow(
-                                      p: p,
-                                      icon: CupertinoIcons.clock,
-                                      iconColor: p.blue,
-                                      title: '24-Hour Format',
-                                      value: use24Hour,
-                                      onChanged: widget.onUse24Hour!,
-                                    ),
-                                ],
-                              ),
-
-                              // Domain 2: Workflow & Capture
-                              HigSectionHeader(
-                                p: p,
-                                title: 'Workflow & Capture',
-                              ),
-                              HigGroupedCard(
-                                p: p,
-                                children: [
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.bolt,
-                                    iconColor: p.green,
-                                    title: 'Logging & Sessions',
-                                    status: defaultModeLabel(defaultMode),
-                                    onTap: () => _openCategory('Logging'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.tag,
-                                    iconColor: p.accent,
-                                    title: 'Activity Tags',
-                                    status: 'Quick Tags',
-                                    onTap: () => _openCategory('Activity Tags'),
-                                  ),
-
-                                  if (widget.onSoundEffects != null)
-                                    HigSwitchRow(
-                                      p: p,
-                                      icon: CupertinoIcons.speaker_2,
-                                      iconColor: p.accent,
-                                      title: 'Acoustic Feedback',
-                                      subtitle:
-                                          'Subtle sound feedback on capture and detents',
-                                      value: widget.soundEffects,
-                                      onChanged: widget.onSoundEffects!,
-                                    ),
-                                ],
-                              ),
-
-                              // Domain 3: Appearance & Display
-                              HigSectionHeader(
-                                p: p,
-                                title: 'Appearance & Display',
-                              ),
-                              HigGroupedCard(
-                                p: p,
-                                children: [
-                                  HigRow(
+                                  SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.paintbrush,
-                                    iconColor: p.accent,
-                                    title: 'Theme & Accent',
+                                    title: 'Appearance',
                                     status:
-                                        '${theme[0].toUpperCase()}${theme.substring(1)}',
+                                        theme[0].toUpperCase() +
+                                        theme.substring(1),
+                                    color: p.accent,
                                     onTap: () =>
                                         _openCategory('Personalization'),
                                   ),
-                                  HigRow(
+                                  SettingsRow(
                                     p: p,
-                                    icon: CupertinoIcons.app_badge,
-                                    iconColor: const Color(0xFFAF52DE),
-                                    title: 'App Icons',
-                                    status:
-                                        '${widget.appIconStyle[0].toUpperCase()}${widget.appIconStyle.substring(1)}',
-                                    onTap: () => _openCategory('App Icons'),
+                                    icon: CupertinoIcons.bolt,
+                                    title: 'Logging',
+                                    status: defaultModeLabel(defaultMode),
+                                    color: p.green,
+                                    onTap: () => _openCategory('Logging'),
                                   ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.clock,
-                                    iconColor: p.blue,
-                                    title: 'Clock Face & Typography',
-                                    status: widget.clockFont,
-                                    onTap: () => _openCategory('Display'),
-                                  ),
-                                ],
-                              ),
-
-                              // Domain 4: Privacy, Security & Data
-                              HigSectionHeader(
-                                p: p,
-                                title: 'Privacy, Security & Data',
-                              ),
-                              HigGroupedCard(
-                                p: p,
-                                children: [
-                                  HigRow(
+                                  SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.shield,
-                                    iconColor: p.green,
-                                    title: 'Privacy & App Lock',
+                                    title: 'Privacy & Security',
                                     status: privacyLock ? 'On' : 'Off',
+                                    color: p.green,
                                     onTap: () =>
                                         _openCategory('Privacy & Security'),
                                   ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.folder,
-                                    iconColor: p.accent,
-                                    title: 'Data & Backups',
-                                    status: '${entries.length} Logs',
-                                    onTap: () => _openCategory('Data & Backup'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.trash,
-                                    iconColor: p.red,
-                                    title: 'Trash Bin',
-                                    onTap: () => _openCategory('Trash Bin'),
-                                  ),
-                                ],
-                              ),
-
-                              // Domain 5: Intelligence & Habits
-                              HigSectionHeader(
-                                p: p,
-                                title: 'Intelligence & Habits',
-                              ),
-                              HigGroupedCard(
-                                p: p,
-                                children: [
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.bell,
-                                    iconColor: p.orange,
-                                    title: 'Reminders & Mindfulness',
-                                    status: _getRemindersStatus(),
-                                    onTap: () => _openCategory('Reminders'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.chart_bar_square,
-                                    iconColor: p.accent,
-                                    title: 'Executive Analytics Dashboard',
-                                    onTap: () => _openCategory('Dashboard'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.hourglass,
-                                    iconColor: const Color(0xFFAF52DE),
-                                    title: 'Life Audit & Horizon',
-                                    onTap: () => _openCategory('Life Audit'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.scope,
-                                    iconColor: p.green,
-                                    title: 'Targets & Goals',
-                                    onTap: () => _openCategory('Goals'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.flame,
-                                    iconColor: p.orange,
-                                    title: 'Sobriety Companion',
-                                    status: enableSobrietyMode
-                                        ? 'Active'
-                                        : 'Off',
-                                    onTap: () =>
-                                        _openCategory('Sobriety Companion'),
-                                  ),
-                                ],
-                              ),
-
-                              // Domain 6: System & Support
-                              HigSectionHeader(p: p, title: 'System & Support'),
-                              HigGroupedCard(
-                                p: p,
-                                children: [
-                                  HigRow(
+                                  SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.arrow_2_circlepath,
-                                    iconColor: p.accent,
-                                    title: 'Update Center',
+                                    title: 'Updates & Notices',
                                     status: _betaTrack ? 'Beta' : 'Stable',
+                                    color: p.accent,
                                     onTap: () =>
                                         _openCategory('Updates & Notices'),
                                   ),
-                                  HigRow(
+                                  SettingsRow(
                                     p: p,
-                                    icon: CupertinoIcons.slider_horizontal_3,
-                                    iconColor: p.orange,
-                                    title: 'Advanced Tools',
-                                    onTap: () => _openCategory('Advanced'),
-                                  ),
-                                  HigRow(
-                                    p: p,
-                                    icon: CupertinoIcons.info_circle,
-                                    iconColor: p.accent,
-                                    title: 'About NoteKar',
-                                    status: 'v$appVersion',
+                                    icon: CupertinoIcons.book,
+                                    title: 'About',
+                                    status: 'Docs',
+                                    color: p.accent,
                                     onTap: () => _openCategory('About'),
                                   ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: CupertinoIcons.slider_horizontal_3,
+                                    title: 'Advanced',
+                                    status: 'Tools',
+                                    color: p.orange,
+                                    onTap: () => _openCategory('Advanced'),
+                                  ),
                                   if (_isGodModeUnlocked)
-                                    HigRow(
+                                    SettingsRow(
                                       p: p,
                                       icon: CupertinoIcons.sparkles,
-                                      iconColor: const Color(0xFFFFD700),
                                       title: 'God Mode',
                                       status: 'Unlocked',
+                                      color: const Color(0xFFFFD700),
                                       onTap: () => _openCategory('God Mode'),
                                     ),
-                                  HigRow(
+                                ],
+                              ),
+                              SettingsPageDescription(
+                                p: p,
+                                text:
+                                    'Personalize and configure NoteKar to fit your specific workflow.',
+                              ),
+                              const SizedBox(height: spacing16),
+                              SettingsGroup(
+                                p: p,
+                                insetDividers: true,
+                                title: 'Support & Community',
+                                children: [
+                                  SettingsRow(
                                     p: p,
                                     icon: CupertinoIcons.gift,
-                                    iconColor: const Color(0xFFFFDD00),
                                     title: 'Buy Me a Coffee',
-                                    status: 'Support',
+                                    color: const Color(0xFFFFDD00),
+                                    rowKind: 'link',
                                     onTap: () => widget.onOpenLink(coffeeLink),
                                   ),
-                                  HigRow(
+                                  SettingsRow(
                                     p: p,
-                                    icon: CupertinoIcons.chat_bubble_text,
-                                    iconColor: p.green,
+                                    icon:
+                                        CupertinoIcons.bubble_left_bubble_right,
                                     title: 'Feedback',
+                                    color: p.green,
+                                    rowKind: 'popup',
                                     onTap: _openFeedback,
                                   ),
-                                  HigRow(
+                                  SettingsRow(
+                                    p: p,
+                                    icon: CupertinoIcons.mail,
+                                    title: 'Email Support',
+                                    color: p.accent,
+                                    rowKind: 'link',
+                                    onTap: () =>
+                                        widget.onOpenLink(supportEmail),
+                                  ),
+                                  SettingsRow(
                                     p: p,
                                     customIcon: GithubIcon(
                                       size: 16,
                                       color: p.text,
                                     ),
                                     title: 'GitHub',
+                                    color: p.text,
+                                    rowKind: 'link',
                                     onTap: () => widget.onOpenLink(githubRepo),
                                   ),
                                 ],

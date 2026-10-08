@@ -49,7 +49,36 @@ class LoggingSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing8),
         SettingsGroup(
           p: p,
-          title: 'Capture & Session Controls'.localized(context),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.chart_bar_square,
+              title: 'Dashboard'.localized(context),
+              status: '$entriesCount ${'Logs'.localized(context)}',
+              color: p.accent,
+              onTap: () => onOpenCategory('Dashboard', parent: 'Logging'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.hourglass,
+              title: 'Life Audit'.localized(context),
+              status: 'Time Wastage'.localized(context),
+              color: p.red,
+              onTap: () => onOpenCategory('Life Audit', parent: 'Logging'),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Executive activity intelligence, time wastage auditing, 24-hour baseline accounting, and mortality insights.'
+                  .localized(context),
+        ),
+        const SizedBox(height: 12),
+        SettingsGroup(
+          p: p,
+          title: 'Logging Controls'.localized(context),
           insetDividers: true,
           children: [
             SettingsRow(
@@ -84,12 +113,28 @@ class LoggingSettingsPage extends StatelessWidget {
               color: p.accent,
               onTap: () => onOpenCategory('Activity Tags', parent: 'Logging'),
             ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.bell,
+              title: 'Reminders'.localized(context),
+              status: remindersStatus,
+              color: p.accent,
+              onTap: () => onOpenCategory('Reminders', parent: 'Logging'),
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.arrow_up_doc,
+              title: 'Backup & Export'.localized(context),
+              status: 'Data'.localized(context),
+              color: p.green,
+              onTap: () => onOpenCategory('Backup & Export', parent: 'Logging'),
+            ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'Configure capture defaults, sequential counters, custom focus modes, and activity tags.'
+              'These settings define how moments are recorded and prepared for export.'
                   .localized(context),
         ),
         if (showTrashBin && trash.isNotEmpty) ...[
