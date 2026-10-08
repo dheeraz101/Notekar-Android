@@ -80,7 +80,7 @@ class ChangelogDialog extends StatefulWidget {
       '+ Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates',
       '+ High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService',
       '+ Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository',
-      '+ Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & God Mode',
+      '+ Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & Advanced Settings',
       '+ History & Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation',
       '+ Guaranteed OS Maintenance: Android AlarmManager midnight maintenance trigger (ACTION_DAILY_MAINTENANCE)',
       '+ State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state',

@@ -55,11 +55,11 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         category: 'RELIABILITY & RESILIENCE',
         headline: 'Fail-Safe Architecture. Zero Cascading Crashes.',
         desc:
-            'Implemented an automated 3-strike circuit breaker mechanism across subsystem boundaries (Digital Wellbeing, Analytics, MethodChannels) that gracefully trips on unhandled exceptions and includes manual resets in Diagnostics and God Mode.',
+            'Implemented an automated 3-strike circuit breaker mechanism across subsystem boundaries (Digital Wellbeing, Analytics, MethodChannels) that gracefully trips on unhandled exceptions and includes manual resets in Diagnostics and Advanced Settings.',
         icon: CupertinoIcons.bolt_fill,
         badgeColor: Color(0xFFFF2D55),
         specs:
-            'CircuitBreakerService · 3-Strike Threshold · God Mode Overrides · Diagnostics Status',
+            'CircuitBreakerService · 3-Strike Threshold · Fault Isolation Overrides · Diagnostics Status',
       ),
       (
         title: 'Secondary Indices & Binary Range Slicing',
@@ -111,7 +111,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       '+ Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates',
       '+ High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService',
       '+ Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository',
-      '+ Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & God Mode',
+      '+ Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & Advanced Settings',
       '+ History & Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation',
       '+ Guaranteed OS Maintenance: Android AlarmManager midnight maintenance trigger (ACTION_DAILY_MAINTENANCE)',
       '+ State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state',

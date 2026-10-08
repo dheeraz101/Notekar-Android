@@ -644,7 +644,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   Future<void> _loadRemindersSettings() async {
     _prefs = await SharedPreferences.getInstance();
-    if (_isGodModeUnlocked) {
+    if (_prefs?.getBool('god_mode_unlocked') == null && _isGodModeUnlocked) {
       unawaited(_prefs?.setBool('god_mode_unlocked', true));
     }
     setState(() {
@@ -1215,10 +1215,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
   List<Moment> get entries => widget.entriesNotifier.value;
 
   bool get _isGodModeUnlocked {
-    if (_prefs?.getBool('god_mode_unlocked') == true) return true;
+    final pref = _prefs?.getBool('god_mode_unlocked');
+    if (pref != null) return pref;
     return entries.any(
       (e) =>
-          e.note.contains('God Mode Unlocked') || e.note.contains('#godmode'),
+          e.note.toLowerCase().contains('god mode unlocked') ||
+          e.note.toLowerCase().contains('#godmode'),
     );
   }
 
@@ -1608,6 +1610,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   void _openCategory(String name, {String? parent}) {
+    if (name == 'God Mode' && !_isGodModeUnlocked) {
+      return;
+    }
     if (name == 'Network Monitor') {
       _loadNetworkLogs();
     }
@@ -3927,26 +3932,33 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 final godModeEntries = entries
                                     .where(
                                       (e) =>
-                                          e.note.contains(
-                                            'God Mode Unlocked',
+                                          e.note.toLowerCase().contains(
+                                            'god mode unlocked',
                                           ) ||
-                                          e.note.contains('#godmode'),
+                                          e.note.toLowerCase().contains(
+                                            '#godmode',
+                                          ),
                                     )
                                     .toList();
                                 if (godModeEntries.isNotEmpty) {
                                   final updated = List<Moment>.from(entries)
                                     ..removeWhere(
                                       (e) =>
-                                          e.note.contains(
-                                            'God Mode Unlocked',
+                                          e.note.toLowerCase().contains(
+                                            'god mode unlocked',
                                           ) ||
-                                          e.note.contains('#godmode'),
+                                          e.note.toLowerCase().contains(
+                                            '#godmode',
+                                          ),
                                     );
                                   widget.entriesNotifier.value = updated;
                                   final repo = MomentRepository();
                                   await repo.ensureInitialized();
                                   for (final gm in godModeEntries) {
                                     await repo.deleteMoment(gm.id);
+                                    await repo.permanentlyDeleteTrashMoment(
+                                      gm.id,
+                                    );
                                   }
                                 }
                                 if (theme == 'matrix' || theme == 'eink') {

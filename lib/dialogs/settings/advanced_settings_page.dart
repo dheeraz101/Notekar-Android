@@ -134,7 +134,7 @@ class AdvancedSettingsPage extends StatelessWidget {
         const SizedBox(height: spacing12),
         SettingsGroup(
           p: p,
-          title: 'God Mode / Advanced Systems',
+          title: 'Advanced Systems'.localized(context),
           insetDividers: true,
           children: [
             SettingsRow(
@@ -169,16 +169,15 @@ class AdvancedSettingsPage extends StatelessWidget {
               color: p.red,
               onTap: () => onOpenCategory('Reset', parent: 'Advanced'),
             ),
-            SettingsRow(
-              p: p,
-              icon: CupertinoIcons.sparkles,
-              title: 'God Mode'.localized(context),
-              status: isGodModeUnlocked
-                  ? 'Unlocked'.localized(context)
-                  : 'Locked'.localized(context),
-              color: const Color(0xFFFFD700),
-              onTap: () => onOpenCategory('God Mode', parent: 'Advanced'),
-            ),
+            if (isGodModeUnlocked)
+              SettingsRow(
+                p: p,
+                icon: CupertinoIcons.sparkles,
+                title: 'God Mode'.localized(context),
+                status: 'Unlocked'.localized(context),
+                color: const Color(0xFFFFD700),
+                onTap: () => onOpenCategory('God Mode', parent: 'Advanced'),
+              ),
           ],
         ),
         const SizedBox(height: spacing24),

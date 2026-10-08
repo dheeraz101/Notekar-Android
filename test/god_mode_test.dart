@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/pioneer_badge_dialog.dart';
+import 'package:notekar/dialogs/settings/advanced_settings_page.dart';
 import 'package:notekar/dialogs/settings/app_icons_settings_page.dart';
 import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/models/moment.dart';
@@ -167,6 +168,101 @@ void main() {
         expect(find.text('Kindle E-Ink Paperwhite'), findsOneWidget);
         expect(find.text('VIP Pioneer Badge'), findsOneWidget);
         expect(find.text('Revoke God Mode'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'AdvancedSettingsPage keeps God Mode secret and completely hidden when locked',
+      (tester) async {
+        final p = paletteFor('dark');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AdvancedSettingsPage(
+                  p: p,
+                  subCategory: 'Advanced',
+                  currentLocale: 'en',
+                  hapticStyle: 'medium',
+                  reduceMotion: false,
+                  largeText: false,
+                  highContrast: false,
+                  healthStatus: 'Good',
+                  soundEffects: false,
+                  isGodModeUnlocked: false,
+                  onHapticStyleChanged: (_) {},
+                  onSoundEffectsChanged: (_) {},
+                  onReduceMotionChanged: (_) {},
+                  onLargeTextChanged: (_) {},
+                  onHighContrastChanged: (_) {},
+                  onLocaleChanged: (_) {},
+                  onResetSettings: () {},
+                  onResetAllData: () {},
+                  onFactoryReset: () {},
+                  onOpenCategory: (_, {required parent}) {},
+                  onExportCsv: () {},
+                  onExportJson: () {},
+                  onExportBackup: () {},
+                  onResetCircuitBreakers: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Section title must be 'ADVANCED SYSTEMS', NOT 'GOD MODE / ADVANCED SYSTEMS'
+        expect(find.text('ADVANCED SYSTEMS'), findsOneWidget);
+        expect(find.text('GOD MODE / ADVANCED SYSTEMS'), findsNothing);
+
+        // God Mode row must NOT be visible at all
+        expect(find.text('God Mode'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'AdvancedSettingsPage reveals God Mode row only when unlocked',
+      (tester) async {
+        final p = paletteFor('dark');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AdvancedSettingsPage(
+                  p: p,
+                  subCategory: 'Advanced',
+                  currentLocale: 'en',
+                  hapticStyle: 'medium',
+                  reduceMotion: false,
+                  largeText: false,
+                  highContrast: false,
+                  healthStatus: 'Good',
+                  soundEffects: false,
+                  isGodModeUnlocked: true,
+                  onHapticStyleChanged: (_) {},
+                  onSoundEffectsChanged: (_) {},
+                  onReduceMotionChanged: (_) {},
+                  onLargeTextChanged: (_) {},
+                  onHighContrastChanged: (_) {},
+                  onLocaleChanged: (_) {},
+                  onResetSettings: () {},
+                  onResetAllData: () {},
+                  onFactoryReset: () {},
+                  onOpenCategory: (_, {required parent}) {},
+                  onExportCsv: () {},
+                  onExportJson: () {},
+                  onExportBackup: () {},
+                  onResetCircuitBreakers: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('ADVANCED SYSTEMS'), findsOneWidget);
+        expect(find.text('God Mode'), findsOneWidget);
+        expect(find.text('Unlocked'), findsOneWidget);
       },
     );
   });

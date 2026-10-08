@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
@@ -58,7 +59,7 @@ void main() {
         final looseIcon = tester.firstRenderObject<RenderBox>(
           find.descendant(
             of: find.byKey(const ValueKey('settings_loose')),
-            matching: find.byIcon(Icons.search_rounded),
+            matching: find.byIcon(CupertinoIcons.search),
           ),
         );
         final looseIconCenterY =
@@ -81,7 +82,7 @@ void main() {
         final tightIcon = tester.firstRenderObject<RenderBox>(
           find.descendant(
             of: find.byKey(const ValueKey('settings_tight_56')),
-            matching: find.byIcon(Icons.search_rounded),
+            matching: find.byIcon(CupertinoIcons.search),
           ),
         );
         final tightIconCenterY =
@@ -97,7 +98,7 @@ void main() {
         final tightClose = tester.firstRenderObject<RenderBox>(
           find.descendant(
             of: find.byKey(const ValueKey('settings_tight_56')),
-            matching: find.byIcon(Icons.close_rounded),
+            matching: find.byIcon(CupertinoIcons.xmark),
           ),
         );
         final tightCloseCenterY =
