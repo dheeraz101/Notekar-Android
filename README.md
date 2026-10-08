@@ -16,8 +16,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![F-Droid Compatible](https://img.shields.io/badge/F--Droid-100%25%20Compliant-brightgreen.svg?style=flat-square&logo=f-droid&logoColor=white)](https://f-droid.org)
-[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://notekarapp.vercel.app/privacy.html)
+[![Privacy](https://img.shields.io/badge/Privacy-Offline--First-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://notekarapp.vercel.app/privacy.html)
 [![Translations](https://img.shields.io/badge/l10n-7%20Live%20%7C%2050%2B%20Target-orange.svg?style=flat-square&logo=googletranslate&logoColor=white)](TRANSLATIONS.md)
 [![GitHub Stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/issues)
@@ -90,7 +89,7 @@
 - [🌐 Multilingual & Global Community](#-multilingual--global-community)
 - [💡 The Story Behind the Name ("NoteKar")](#-the-story-behind-the-name-notekar)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
-- [🤖 F-Droid & Reproducible Build Compliance](#-f-droid--reproducible-build-compliance)
+- [🤖 Open Source & Clean Software Standards](#-open-source--clean-software-standards)
 - [💻 Building & Running Locally](#-building--running-locally)
 - [🔑 Release Signing & Keystore Setup](#-release-signing--keystore-setup)
 - [🤝 Contributing & Community](#-contributing--community)
@@ -117,7 +116,7 @@ In an era of bloatware, mandatory logins, infinite algorithmic distraction, and 
 │  ✍️ WHATSAPP-GRADE TYPING   │  Zero-lag note entry with auto-capitalization.  │
 │  📜 LIFE LEDGER TIMELINE    │  Apple HIG paired sessions & 1-tap live end.    │
 │  📊 EXECUTIVE INTELLIGENCE  │  Circadian rhythm & 90-day heatmap (on-device). │
-│  🛡️ 100% OFFLINE SOVEREIGN  │  AES-256 encrypted Hive NoSQL. Zero telemetry.  │
+│  🛡️ OFFLINE-FIRST SOVEREIGN │  Local Isar engine. Zero telemetry.             │
 │  🌉 SYSTEM BRIDGES          │  Obsidian MD live export, .ICS calendar sync.   │
 │  🌱 SOBRIETY & MINDFULNESS  │  21 neuroscience milestones & lockscreen breath.│
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -128,7 +127,7 @@ In an era of bloatware, mandatory logins, infinite algorithmic distraction, and 
 ## 📸 Visual UI Gallery
 
 Designed with an obsession for Apple Human Interface Guidelines (HIG), dynamic tactile feedback,
-fluid 120 FPS transitions, and OLED-perfect pitch black surfaces.
+fluid transitions, and OLED-perfect pitch black surfaces.
 
 |                                            Welcome & Onboarding                                            |                                             VIP Sovereign Theme                                              |                                               Permissions Setup                                               |                                             Home Log Canvas                                             |                                            History & Timeline                                            |
 |:----------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
@@ -295,14 +294,14 @@ insights computed 100% on-device:
 - **Dedicated Migration Card**: Located in **Settings → Backup & Export → Third-Party Migration** with strict Apple HIG styling and zero subtitle clutter.
 - **Format Auto-Sniffing & Parsing**:
   - **Loop Habit Tracker (`.csv`)**: Seamlessly imports habit check-in logs, maps habit titles to NoteKar categories, and parses historical timestamps.
-  - **HabitKit (`.json`)**: Recursively ingests habit completions, colors, and records into encrypted Hive storage.
+  - **HabitKit (`.json`)**: Recursively ingests habit completions, colors, and records into local storage.
 - **Zero Cloud & Air-Gapped**: All parsing and schema transformation runs purely on-device in memory, maintaining absolute data sovereignty.
 - **Extensible Architecture**: Engineered with a modular adapter pattern for upcoming migration from Obsidian, Logseq, and other time-tracking tools.
 
 ### ⚡ 12. Device Health Diagnostics & 3-Tier Adaptive Engine
 
 - **Hardware Capability Profiling**: NoteKar's `AdaptiveEngine` automatically inspects device RAM and processor cores to assign one of three performance tiers:
-  - **High Performance / Pro**: 120 FPS ProMotion spring physics, full multi-pass Gaussian backdrop glass blur, live particle celebrations, and unthrottled background polling.
+  - **High Performance / Pro**: smooth spring physics, full multi-pass Gaussian backdrop glass blur, live particle celebrations, and unthrottled background polling.
   - **Balanced**: 60 FPS standard refresh, efficient single-pass glass blur, and balanced animations for mid-range chipsets.
   - **Power Saver**: 30-60 FPS capped refresh, solid high-contrast opaque surfaces (blur disabled), reduced motion, and throttled background tasks to preserve battery life and eliminate thermal throttling.
 - **Hardware Diagnostics Telemetry**: Inspect system health, SoC cores, memory footprint (with resilient SELinux heap estimation), platform details, and target render capabilities in **Settings → Device Health**.
@@ -334,7 +333,7 @@ graph TD
     A -->|Tasker Broadcast am broadcast| B
     B -->|Export .md| C[Obsidian / Logseq / Notion Vault]
     B -->|Export .ics| D[Google / Outlook / Apple Calendar]
-    B -->|AES-256 Hive Encrypted| E[Local Private Storage]
+    B -->|Local Isar Engine| E[Local Private Storage]
 ```
 
 ### 🔗 1. Deep Linking URL Schemes (`notekar://`)
@@ -402,8 +401,7 @@ am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type out --es note "F
 
 NoteKar operates on a strict **Zero Knowledge / Sovereign Data** architecture:
 
-- 🔒 **AES-256 Hardware Encryption**: All logs and timestamps are stored in a local Hive NoSQL
-  database encrypted with keys generated inside the **Android Keystore System**.
+- 🔒 **Local-First Storage Engine**: All logs and timestamps are stored in a local Isar database and SharedPreferences on-device.
 - 🛡️ **Biometric & PIN Vault**: Protect app access with fingerprint/face unlock and SHA-256 salted
   PIN codes.
 - 👁️ **Recent App Obfuscation**: Android `FLAG_SECURE` prevents screenshots and masks contents in
@@ -456,9 +454,9 @@ NoteKar started as **YABP** (Yet Another Boring Project), a boilerplate experime
 | Layer                      | Technology                                                    | Details                                        |
 |:---------------------------|:--------------------------------------------------------------|:-----------------------------------------------|
 | **Language**               | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/) | Type-safe reactive codebase                    |
-| **Framework**              | [Flutter](https://flutter.dev/) (`^3.12.0`)                   | High-performance 120 FPS rendering             |
+| **Framework**              | [Flutter](https://flutter.dev/) (`^3.12.0`)                   | High-performance rendering             |
 | **Typography**             | [Bebas Neue](assets/fonts/BebasNeue-Regular.ttf) (OFL)        | Bundled offline tall chronometer font          |
-| **Local Storage**          | [Hive](https://pub.dev/packages/hive)                         | AES-256 encrypted NoSQL key-value store        |
+| **Local Storage**          | [Isar](https://isar.dev/)                         | Fast, ACID-compliant local database engine        |
 | **State Management**       | [Reactive Singletons & ValueNotifiers](https://flutter.dev/)  | Ultra-low memory overhead                      |
 | **Design System**          | Custom Apple HIG & iOS 26 High-Radius Style                   | Dynamic glass, haptics, and AMOLED dark mode   |
 | **Hardware Compatibility** | Android 5.0+ (API Level 21+)                                  | Doze-compliant, low-end device adaptive engine |
@@ -488,9 +486,9 @@ Notekar - Flutter/
 
 ---
 
-## 🤖 F-Droid & Reproducible Build Compliance
-
-NoteKar Android complies with all official F-Droid free software guidelines:
+## 🤖 Open Source & Clean Software Standards?
+?
+NoteKar Android adheres to clean open-source software standards:
 
 - ✅ **100% Free & Open Source**: Licensed under the OSI-approved **MIT License**.
 - ✅ **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or proprietary
@@ -582,7 +580,7 @@ Contributions are what make the open-source community such an amazing place to l
 
 ## 🚀 Product Roadmap & Upcoming Innovations
 
-NoteKar's architectural evolution balances Apple HIG sensory minimalism, uncompromising offline sovereignty, and conscious temporal intelligence. The following innovations are actively planned and in development:
+NoteKar's architectural evolution balances Apple HIG sensory minimalism, uncompromising offline sovereignty, and conscious temporal intelligence. The following innovations are exploratory, non-binding conceptual proposals under consideration:
 
 ### 🎙️ 1. Multi-Language Hands-Free Voice Notes & Edge Whisper STT
 
@@ -694,13 +692,13 @@ Each release carries an edition name (e.g., *"Sovereign Goals, Activity Tags & S
 <details>
 <summary><b>Is NoteKar available on the Play Store?</b></summary>
 
-NoteKar is distributed as a direct APK download from [GitHub Releases](https://github.com/dheeraz101/Notekar-Android/releases). This keeps the app free from Play Store restrictions and ensures you always get the latest version directly from the source. NoteKar is also F-Droid compliant.
+NoteKar is distributed as a direct APK download from [GitHub Releases](https://github.com/dheeraz101/Notekar-Android/releases). This keeps the app free from Play Store restrictions and ensures you always get the latest version directly from the source. NoteKar is fully open-source under the MIT license.
 </details>
 
 <details>
 <summary><b>How is my data secured?</b></summary>
 
-NoteKar uses **hardware-backed AES-256 encryption** via Android Keystore. Your timestamps and notes are encrypted at rest on your device. Combined with the zero-network architecture, your data has no exposure surface.
+NoteKar stores your moments and notes locally on your device using the fast Isar database engine and Android SharedPreferences. Combined with the offline-first architecture, your personal records remain under your physical control.
 </details>
 
 ---
@@ -714,7 +712,7 @@ NoteKar uses **hardware-backed AES-256 encryption** via Android Keystore. Your t
 > 
 > **Design Philosophy & Attribution**: NoteKar's spatial chronometer typography, dynamic tactile feedback, fluid transitions, and glassmorphic bottom sheets are inspired by the design principles of Apple Human Interface Guidelines (HIG) and iOS modern interfaces. NoteKar is a strictly independent craft built natively with Flutter, Dart, and Kotlin. It does not use, include, copy, or redistribute proprietary Apple or Google code, assets, or services.
 > 
-> **Data Sovereignty Guarantee**: All timestamp captures, conscious hour partitions, sobriety milestones, and existential reflections remain strictly offline on your physical hardware, protected with AES-256 Android Keystore encryption. NoteKar operates zero cloud relays, zero analytics telemetry, and zero third-party tracking SDKs.
+> **Data Sovereignty Guarantee**: All timestamp captures, conscious hour partitions, sobriety milestones, and existential reflections remain strictly offline on your physical hardware, stored safely on your physical hardware. NoteKar operates zero cloud relays, zero analytics telemetry, and zero third-party tracking SDKs.
 
 ---
 

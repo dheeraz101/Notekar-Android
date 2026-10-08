@@ -64,7 +64,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
               icon: CupertinoIcons.circle_grid_hex,
               title: 'Local Storage'.localized(context),
               text:
-                  'All moments and notes are stored locally on your device using an encrypted-ready database (Hive). No data is ever uploaded to a cloud server unless you manually export a backup file.'
+                  'All moments and notes are stored locally on your device using a high-performance local database (Isar) and SharedPreferences. No personal records or notes are sent to external servers unless you choose to export them.'
                       .localized(context),
             ),
             _PolicySection(
@@ -134,9 +134,9 @@ class LegalAboutSettingsPage extends StatelessWidget {
             _PolicySection(
               p: p,
               icon: CupertinoIcons.doc_text,
-              title: 'App Usage'.localized(context),
+              title: 'App Usage & Reflection Aids'.localized(context),
               text:
-                  'NoteKar is provided "as is" for personal use. You are responsible for your own data backups and for ensuring your use of the app complies with local laws.'
+                  'NoteKar is a personal productivity, time-logging, and reflection utility. Life Audit projections and sobriety aids are informational self-reflection supports, not medical, psychological, legal, or financial advice.'
                       .localized(context),
             ),
             _PolicySection(
@@ -144,7 +144,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
               icon: CupertinoIcons.chevron_left_slash_chevron_right,
               title: 'Open Source'.localized(context),
               text:
-                  'NoteKar is open source software. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.'
+                  'NoteKar is open source software under the MIT license. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.'
                       .localized(context),
             ),
           ],

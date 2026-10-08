@@ -101,7 +101,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Preview planned innovations including offline multi-language voice notes, on-device AI temporal insights, and peer-to-peer sync.'
+              'Non-binding exploratory proposals under community review, such as local voice notes and on-device temporal insights. These represent proposals rather than committed release dates.'
                   .localized(context),
         ),
 

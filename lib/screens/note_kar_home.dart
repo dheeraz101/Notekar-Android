@@ -1930,7 +1930,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
     await prefs.remove('pending_count');
 
-    // Reload the full list from Hive to refresh states
+    // Reload the full list from storage to refresh states
     final updatedEntries = _repository.getAllMoments();
     if (mounted) {
       setState(() {

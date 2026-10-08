@@ -729,10 +729,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             children: [
               _buildFeatureRow(
                 p: p,
-                icon: Icons.vpn_key_rounded,
-                title: 'Hardware-Backed Encryption'.localized(context),
+                icon: Icons.security_rounded,
+                title: 'Local-First Storage'.localized(context),
                 text:
-                    'All databases are locked with 256-bit AES keys generated inside the secure Android Keystore, protecting data even on rooted devices.'
+                    'All timestamps and notes are stored securely on your local device with zero cloud relays or external servers.'
                         .localized(context),
               ),
               _buildFeatureRow(

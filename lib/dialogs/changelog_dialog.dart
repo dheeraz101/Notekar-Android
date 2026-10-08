@@ -35,7 +35,7 @@ class ChangelogDialog extends StatefulWidget {
       (
         title: 'Concurrency Engine (Isolates)',
         desc:
-            'Offloads Life Audit and Executive Dashboard heavy calculations to background isolates via Isolate.run for locked 120fps UI scrolling.',
+            'Offloads Life Audit and Executive Dashboard heavy calculations to background isolates via Isolate.run for fluid, jank-free UI scrolling.',
         icon: Icons.bolt_rounded,
         tag: 'Engine',
       ),

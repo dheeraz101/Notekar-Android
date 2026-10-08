@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
-import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
@@ -17,7 +16,7 @@ void main() {
 
   group('LifeAuditPage Apple HIG Cupertino Sliders and Calibrate Route', () {
     testWidgets('Uses CupertinoSlider instead of Material Slider for sleep and essentials', (tester) async {
-      final p = Palette.dark();
+      final p = paletteFor('dark');
       double sleep = 8.0;
       double essentials = 3.0;
 
@@ -45,12 +44,12 @@ void main() {
     });
 
     testWidgets('Calibrate button triggers onOpenPersonalProfile callback', (tester) async {
-      final p = Palette.dark();
+      final p = paletteFor('dark');
       bool calibratedOpened = false;
 
       // Ensure profile has no DOB so Calibrate button is visible
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(UserProfileService.keyDob);
+      await prefs.remove(UserProfileService.keyUserDob);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -76,6 +75,8 @@ void main() {
       final calibrateFinder = find.text('Calibrate');
       expect(calibrateFinder, findsOneWidget);
 
+      await tester.ensureVisible(calibrateFinder);
+      await tester.pumpAndSettle();
       await tester.tap(calibrateFinder);
       await tester.pumpAndSettle();
 

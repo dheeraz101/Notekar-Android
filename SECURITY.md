@@ -1,30 +1,31 @@
 # Security Policy: NoteKar Android
 
-NoteKar Android prioritizes app security and user privacy. Because NoteKar Android is an **offline-first application using local Hive storage**, user logs are saved locally on the user's device.
+NoteKar Android prioritizes app security and user privacy. Because NoteKar Android is an **offline-first application using local Isar and SharedPreferences storage**, all user timestamps and notes remain locally on the user's device.
 
 ---
 
 ## Supported Versions
 
-We provide security updates for the following release channels:
+Security updates and patches are provided for the following active channels:
 
 | Version Channel | Supported |
 | :--- | :--- |
-| Latest Release (v7.x) | :white_check_mark: |
-| Development / Beta Branches | :white_check_mark: |
+| Latest Active Release (v7.x) | :white_check_mark: |
+| Active Beta Channel | :white_check_mark: |
 | Older Legacy Releases | :x: |
 
 ---
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability or privacy risk in NoteKar Android, please **do not open a public issue on GitHub**. Report it privately to our team:
+If you discover a security vulnerability or privacy leak in NoteKar Android, please **do not open a public issue on GitHub**. Report it privately to the maintainer:
 
 - 📧 **Email:** [yabp.support@gmail.com](mailto:yabp.support@gmail.com)
 
 ### Please Include:
-- Vulnerability description and potential security impact.
-- Steps to reproduce or proof-of-concept.
-- Android OS version and device model.
+- Description of the vulnerability and potential security impact.
+- Clear steps to reproduce or minimal proof-of-concept.
+- Android OS version, build tag, and device model.
+- ⚠️ **Redaction Notice:** Please ensure you **do not** include personal notes, private timestamps, tokens, credentials, or sensitive device logs in your report.
 
-We will acknowledge receipt within **48 hours** and provide periodic updates regarding patch releases.
+The maintainer will review reports on a best-effort basis and prioritize actionable patches in subsequent builds.

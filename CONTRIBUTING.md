@@ -37,7 +37,7 @@ Please review and follow our **[Code of Conduct](CODE_OF_CONDUCT.md)** in all re
 Before committing changes, ensure your code passes static analysis, formatting, and test verification:
 ```bash
 flutter analyze
-dart format .
+dart format lib/ test/
 flutter test
 ```
 
@@ -55,7 +55,7 @@ Want to add or improve a language translation? Check out our dedicated **[Transl
 2. Test thoroughly on an Android device or emulator.
 3. Commit with clear, descriptive messages:
    ```bash
-   git commit -m "feat(hive): add custom export options"
+   git commit -m "feat(storage): add custom export options"
    ```
 4. Push to your branch and submit a Pull Request.
 

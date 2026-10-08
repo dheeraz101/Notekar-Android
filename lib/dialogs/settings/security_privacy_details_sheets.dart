@@ -66,18 +66,18 @@ void showSecurityDetailsSheet({
                 context: context,
                 p: p,
                 icon: CupertinoIcons.checkmark_circle,
-                title: 'Zero Malware & Detections',
+                title: 'Clean Artifact Verification',
                 text:
-                    'NoteKar is audited and verified clean (0/60+ engine detections) by VirusTotal security scanners on every release compilation.',
+                    'NoteKar release artifacts are compiled openly and can be cross-referenced against public VirusTotal scanner reports and GitHub commit checksums.',
               ),
               const SizedBox(height: 12),
               _buildInfoDetailRow(
                 context: context,
                 p: p,
                 icon: CupertinoIcons.lock,
-                title: 'Hardware-Backed Encryption',
+                title: 'Local-Only Storage Architecture',
                 text:
-                    'Databases are sealed with 256-bit AES cryptographic keys generated inside the hardware secure Android Keystore.',
+                    'Moments and notes are stored strictly on-device in Isar and SharedPreferences. Application Lock and privacy modes protect your interface from casual observation.',
               ),
               const SizedBox(height: 12),
               _buildInfoDetailRow(
@@ -163,7 +163,7 @@ void showPrivacyDetailsSheet({
               ),
               const SizedBox(height: 16),
               Text(
-                'Privacy is not a setting; it is our architecture. NoteKar is designed to operate with zero server connections:'
+                'NoteKar is designed around an offline-first architecture for all core logging and personal records:'
                     .localized(context),
                 style: TextStyle(color: p.text2, fontSize: 13.5, height: 1.45),
               ),
@@ -172,9 +172,9 @@ void showPrivacyDetailsSheet({
                 context: context,
                 p: p,
                 icon: CupertinoIcons.cloud,
-                title: '100% Offline Database',
+                title: 'Offline-First Database',
                 text:
-                    'Your check-ins, habits, and notes are saved directly to local storage. There is no cloud sync, meaning your records never leave this device.',
+                    'Your check-ins, habits, and notes are saved directly to local storage. There is no user account or log-sync backend; your records stay on this device.',
               ),
               const SizedBox(height: 12),
               _buildInfoDetailRow(
@@ -190,9 +190,9 @@ void showPrivacyDetailsSheet({
                 context: context,
                 p: p,
                 icon: CupertinoIcons.lock_shield,
-                title: 'Local Control & Decryption',
+                title: 'Local Control & Export',
                 text:
-                    'You have complete command of your data. You can inspect logs, clean databases, export backups, or wipe all records instantly.',
+                    'You have complete command of your data. You can inspect logs, manage the database, export JSON/CSV backups, or wipe all records locally.',
               ),
               const SizedBox(height: 24),
               SizedBox(

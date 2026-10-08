@@ -51,7 +51,7 @@
                               "State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state",
                               "Settings Search Indexing: Indexed routing for Fault Isolation, Floating Timer Pill, and Acoustic Feedback",
                               "Apple HIG Polish: Unified 28pt continuous squircle cards, expanded history layout, and refined typography",
-                              "All 243 automated unit and widget test suites passing with zero lints and 100% offline privacy"
+                              "Automated unit and widget test suites passing with zero analyzer issues and offline-first core architecture"
                           ],
         "downloads":  {
                           "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.7/NoteKar-v7.5.7-universal-release.apk",
@@ -1079,8 +1079,8 @@
                                "icon":  "route_rounded"
                            },
                            {
-                               "title":  "Hardware Keystore AES-256",
-                               "description":  "Hardware-backed database encryption keys inside Android Keystore.",
+                               "title":  "Hardware Privacy & App Lock",
+                               "description":  "Device app lock and screen content obfuscation for local privacy.",
                                "icon":  "security_rounded"
                            }
                        ],
@@ -1088,7 +1088,7 @@
                               "+ Add Duolingo-style vertical milestone progress trail with neuroscience recovery details",
                               "+ Add local database backup manager with individual Restore and Delete options",
                               "+ Add Streak Freeze Shields to prevent binary reset frustration",
-                              "+ Hardware-backed database encryption using AES-256 keys inside Android Keystore",
+                              "+ Device app lock and screen content obfuscation for local privacy",
                               "+ Apple HIG visuals: speech bubble onboarding tooltip, Cupertino chevrons, and aligned navbar",
                               "+ App-switcher content obfuscation and dynamic screenshot blocking"
                           ],
@@ -1291,7 +1291,7 @@
         "channel":  "beta",
         "channelTag":  "[Beta]",
         "isBeta":  true,
-        "edition":  "Hardware Keystore AES-256 \u0026 QS Tile",
+        "edition":  "Hardware Privacy & App Lock \u0026 QS Tile",
         "badgeColor":  "#FF9F0A",
         "isLatest":  false,
         "highlights":  [
@@ -1302,7 +1302,7 @@
                            }
                        ],
         "fullChangelog":  [
-                              "+ Hardware-Backed database encryption using 256-bit AES keys inside Android Keystore",
+                              "+ Device app lock and screen content obfuscation for local privacy",
                               "+ Persistent low-priority status bar drawer control panel for lock screen checking",
                               "+ Native Quick Settings Status Bar tile to compose notes or check status instantly",
                               "+ Dynamic home launcher shortcuts for fast background check-in/out commands",

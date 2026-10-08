@@ -6,7 +6,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [7.5.7] - 2026-10-04 (versionCode 26BR1004) [BR]
+## [7.5.7] - 2026-10-04 (Build tag 26BR1004) [BR]
 
 > *High-Performance Engine, Concurrency & Fault Isolation.*
 
@@ -14,7 +14,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Dart 3 Concurrency Engine & Isolate Offloading**:
     - Heavy analytical computations across Life Audit (`LifeAuditService.calculateAsync`) and Executive Dashboard metrics (`DashboardMetricsService.calculateAsync`) are now offloaded to background worker threads via `Isolate.run`.
-    - Guarantees buttery-smooth, locked 120fps UI scrolling even with tens of thousands of historical moments and notes.
+    - Guarantees buttery-smooth UI scrolling even with tens of thousands of historical moments and notes.
     - Zero-copy data passing across isolate boundaries for maximum battery and memory efficiency.
 - **High-Performance Inverted Search Indexer**:
     - Replaced linear O(N) scans with dedicated in-memory inverted token index (`SearchIndexService`), prefix trie for hashtag autocomplete, and fast candidate relevance ranking.
@@ -23,7 +23,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Storage Engine Evolution & Secondary Indexing**:
     - `MomentRepository` upgraded with in-memory secondary indices (`_momentIdIndex`) for O(1) instantaneous ID lookups.
     - Binary range slicing (`getMomentsBetween`) executes date range filtering in O(log N) without full linear dataset iterations.
-    - Full backward compatibility with existing encrypted Hive storage.
+    - Full backward compatibility with existing local database storage.
 - **Circuit Breaker Fault Isolation & Self-Healing**:
     - Implemented automated 3-strike circuit breaker mechanism (`CircuitBreakerService`) protecting Digital Wellbeing, analytics, and platform channels from cascading exceptions.
     - Added manual trip/reset controls in **Settings → God Mode** and live system status indicators in **Settings → Diagnostics**.
@@ -110,7 +110,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     - Acoustic swipe-to-delete sound effect, refined bottom note composer, and independent goals navigation.
     - Implemented 4 strategic retention pillars for lock screen awareness, ambient pulse, and deficit targets.
 - **Automated Corrupted-Box Data Safety Net**:
-    - Hive database corruption now creates emergency timestamped local file snapshots before recovery, eliminating silent data loss.
+    - Database corruption now creates emergency timestamped local file snapshots before recovery, eliminating silent data loss.
     - Restored Streak Guardian grace-day logic: relapses no longer permanently lock out earned shields; grace days reset cleanly for new streaks.
 
 ### Improvements
@@ -837,8 +837,7 @@ timekeeping.*
   file management, swipe-to-delete, and quick local backups.
 - **Streak Shields (Streak Freeze)**: Safety-net mechanic preventing binary reset frustration by
   allowing users to protect their progress.
-- **Hardware Encryption**: Hardware-backed database encryption using AES-256 keys inside Android
-  Keystore.
+- **Device Privacy & App Lock**: Screen content obfuscation in app switcher and biometric/PIN protection.
 - **Apple HIG Visuals**: Floating speech-bubble onboarding tooltip, high-resolution iOS emoji
   parsing, native Cupertino chevrons/icons, and aligned bottom navigation bar button heights.
 - **Device Security**: App-switcher content obfuscation, screenshot blocking, and in-app App Lock.
@@ -976,7 +975,7 @@ timekeeping.*
 
 ### Added
 
-- Feat: Hardware-Backed database encryption using 256-bit AES keys inside Android Keystore
+- Feat: Device app lock and screen content obfuscation for local privacy
 - Feat: Persistent low-priority status bar drawer control panel for lock screen checking
 - Feat: Apple-style cryptographic upgrade onboarding/release presentation screens
 - Feat: Native Quick Settings Status Bar tile to compose notes or check status instantly
@@ -1129,7 +1128,7 @@ timekeeping.*
 ### Added
 
 - Native Android rebuild powered by Flutter.
-- Offline-first local database persistence via Hive.
+- Offline-first local database persistence via local storage engine.
 - Compatibility with standard Android OS Auto Backup (Google Drive system backup).
 - Tap delay configuration controls (0s - 60s) to prevent accidental double taps.
 - Dual operating modes: Two-Way (IN/OUT session tracking) and Single (one-shot timestamping).

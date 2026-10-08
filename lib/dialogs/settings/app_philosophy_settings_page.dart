@@ -283,9 +283,9 @@ class AppPhilosophySettingsPage extends StatelessWidget {
               p: p,
               icon: CupertinoIcons.bolt,
               color: p.orange,
-              title: 'Local Hive Engine'.localized(context),
+              title: 'Local Storage Engine'.localized(context),
               subtitle:
-                  'Sub-millisecond disk queries with encrypted-ready local storage'
+                  'Sub-millisecond queries with offline-first local storage'
                       .localized(context),
             ),
             _SpecRow(

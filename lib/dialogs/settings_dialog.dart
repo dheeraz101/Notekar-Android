@@ -405,7 +405,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   double _timeAuditSleepHours = 10.0;
   double _timeAuditEssentialsHours = 4.0;
 
-  String _vtRatio = '0 / 60+ clean';
+  String _vtRatio = 'Verified clean';
   String _vtStatus = 'Undetected';
   String _vtScanDate = 'July 2026';
   String _vtUrl =
@@ -751,7 +751,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _loadCachedVirusTotalInfo() {
     if (_prefs == null) return;
     setState(() {
-      _vtRatio = _prefs!.getString('notekar.vt_ratio') ?? '0 / 60+ clean';
+      _vtRatio = _prefs!.getString('notekar.vt_ratio') ?? 'Verified clean';
       _vtStatus = _prefs!.getString('notekar.vt_status') ?? 'Undetected';
       _vtScanDate = _prefs!.getString('notekar.vt_scandate') ?? 'July 2026';
       _vtUrl =
@@ -769,13 +769,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
       );
       if (info != null && mounted) {
         final malicious = info['malicious'] as int? ?? 0;
-        final total = info['total'] as int? ?? 68;
+        final total = info['total'] as int? ?? 0;
         final scanDateUnix = info['scanDate'] as int? ?? 0;
         final url = info['url'] as String? ?? _vtUrl;
 
-        String ratio = '$malicious / $total clean';
-        if (malicious == 0) {
-          ratio = '0 / 60+ clean';
+        String ratio = total > 0 ? '$malicious / $total engines' : 'Verified clean';
+        if (malicious == 0 && total > 0) {
+          ratio = '0 / $total clean';
         }
 
         String status = malicious == 0 ? 'Undetected' : 'Detected';

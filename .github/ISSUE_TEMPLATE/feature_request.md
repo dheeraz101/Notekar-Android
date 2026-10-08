@@ -7,29 +7,30 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of the problem or friction you experience.
-<!-- e.g. I'm always frustrated when I have to... -->
+> [!NOTE]
+> Feature requests are exploratory community proposals for feedback and discussion, not binding commitments or scheduled roadmap promises.
 
-**Describe the solution you'd like**
-A clear description of the feature or behavior you'd like to see added.
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of the problem or friction you experience in the existing flow.
+
+**Describe the proposed improvement**
+A clear description of the proposal and the expected acceptance outcome.
 
 **Describe alternatives you've considered**
-Any alternative solutions or workarounds you've already tried or thought of.
+Any alternative approaches or workarounds you have considered.
 
-**Mockups / Examples**
-If you have a sketch, screenshot, or reference app that demonstrates the idea, attach it here.
+**Mockups / Conceptual References**
+If you have a sketch or reference diagram, attach it here (ensure no private user data is shown).
 
-**Device Details**
-<!-- If reporting from the app, this section is auto-filled. Otherwise complete it manually. -->
+**Device & Context Details**
 <details>
-<summary><b>Device Details</b></summary>
+<summary><b>Context Details</b></summary>
 
-- **App Version**: <!-- e.g. v7.4.0 (26PR0908) -->
-- **Device**: <!-- e.g. Pixel 7, Samsung Galaxy S22 -->
-- **OS**: <!-- e.g. Android 14 (API 34) -->
+- **App Version & Build**: <!-- e.g. v7.5.7 (26BR1004) -->
+- **Device & Model**: <!-- e.g. Pixel 8, Galaxy S23 -->
+- **Android OS Version**: <!-- e.g. Android 14 (API 34) -->
 
 </details>
 
 **Additional context**
-Add any other context about the feature request here.
+Add any other context about the proposal here.

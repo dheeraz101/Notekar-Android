@@ -31,9 +31,9 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       (
         title: 'Concurrency Engine (Isolates)',
         category: 'PERFORMANCE ARCHITECTURE',
-        headline: 'Locked 120fps. Zero UI Thread Jank.',
+        headline: 'Zero UI Thread Jank. Background Concurrency.',
         desc:
-            'Heavy analytical computations across Life Audit and Executive Dashboard metrics are now executed on background threads via Dart 3 Isolate.run, guaranteeing buttery-smooth 120fps scrolling even with tens of thousands of notes.',
+            'Heavy analytical computations across Life Audit and Executive Dashboard metrics are now executed on background threads via Dart 3 Isolate.run, enabling buttery-smooth high-refresh scrolling even with tens of thousands of notes.',
         icon: CupertinoIcons.bolt,
         badgeColor: Color(0xFF0A84FF),
         specs:
@@ -66,11 +66,11 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         category: 'STORAGE ENGINE EVOLUTION',
         headline: 'O(1) Lookups. O(log N) Date Slicing.',
         desc:
-            'MomentRepository now features in-memory secondary indices for O(1) ID lookups and binary range slicing that queries date intervals in O(log N) without full table scans, backed by encrypted Hive storage.',
+            'MomentRepository now features in-memory secondary indices for O(1) ID lookups and binary range slicing that queries date intervals in O(log N) without full table scans, backed by high-performance local storage.',
         icon: CupertinoIcons.square_stack_3d_up,
         badgeColor: Color(0xFFAF52DE),
         specs:
-            'Secondary ID Index · Binary Range Slicing · Incremental Updates · Hive AES Cipher',
+            'Secondary ID Index · Binary Range Slicing · Incremental Updates · Local Storage',
       ),
       (
         title: 'Guaranteed Daily Maintenance Scheduler',

@@ -972,7 +972,7 @@ const List<HelpGuideItem> allHelpFaqItems = [
   HelpGuideItem(
     title: 'Is NoteKar safe to use?',
     content:
-        'Absolutely. NoteKar is open-source and offline-first. To guarantee maximum trust and safety, every compiled release is automatically uploaded and verified clean by 60+ anti-malware engines via VirusTotal. You can inspect the live scan report under Updates & Notices.',
+        'Yes. NoteKar is open-source and offline-first for all personal logs and notes. Release artifacts are compiled openly from public repository commits and can be cross-verified against VirusTotal scans and GitHub checksums. You can inspect updates and reports under Updates & Notices.',
     isFaq: true,
     keywords: [
       'safe',

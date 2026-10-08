@@ -470,7 +470,7 @@ void main() {
         expect(find.text('THE ARCHITECTURAL CODE'), findsWidgets);
         expect(find.text('100% Offline Core'), findsWidgets);
         expect(find.text('Zero Analytics or Trackers'), findsWidgets);
-        expect(find.text('Local Hive Engine'), findsWidgets);
+        expect(find.text('Local Storage Engine'), findsWidgets);
         expect(find.text('Tactile Mechanical Haptics'), findsWidgets);
         expect(find.text('Open Source Transparency'), findsWidgets);
         expect(find.text('Zero Subscriptions or Ads'), findsWidgets);

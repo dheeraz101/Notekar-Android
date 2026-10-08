@@ -301,7 +301,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       ),
       item(
         title: 'Security & Integrity',
-        subtitle: 'Cryptographically verified with 0/60+ VirusTotal detections',
+        subtitle: 'Cryptographically verified open-source release',
         category: 'Privacy & Security',
         icon: CupertinoIcons.shield_fill,
         keywords: [
