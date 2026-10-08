@@ -757,6 +757,15 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final welcomeSeen = prefs.getBool(_welcomeSeenKey) ?? false;
+      // Initialize MomentRepository and load database entries
+      await _repository.initialize(preloadedPrefs: prefs);
+      await TagMigrationService.migrateIfNeeded();
+      await TagService.instance.load();
+      final migrated = await _repository.migrateLegacyData();
+      final entries = _repository.getAllMoments();
+      final trash = _repository.getTrashMoments();
+      final nextId = _repository.getNextId();
+
       final lastSeenVersion = prefs.getString(_lastSeenVersionKey) ?? '';
       final appIconsWalkthroughSeen =
           prefs.getBool('notekar.appIconsWalkthroughSeen_v9') ?? false;
@@ -774,15 +783,6 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await _showWelcomeIfNeeded(prefs);
         }
       }
-
-      // Initialize MomentRepository and load database entries
-      await _repository.initialize(preloadedPrefs: prefs);
-      await TagMigrationService.migrateIfNeeded();
-      await TagService.instance.load();
-      final migrated = await _repository.migrateLegacyData();
-      final entries = _repository.getAllMoments();
-      final trash = _repository.getTrashMoments();
-      final nextId = _repository.getNextId();
 
       if (!mounted) return;
 
@@ -2441,7 +2441,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     unawaited(_updateAndroidWidget());
   }
 
-  Future<void> _claimRestGap(DateTime start, DateTime end) async {
+  Future<List<Moment>> _claimRestGap(DateTime start, DateTime end) async {
     final startMoment = Moment(
       id: _nextId++,
       timestamp: start.millisecondsSinceEpoch,
@@ -2471,6 +2471,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (mounted) {
       _showToast('🌿 Rest & Recovery logged');
     }
+    return [startMoment, endMoment];
   }
 
   Future<void> _evaluateStreakGuardian(List<Moment> moments) async {

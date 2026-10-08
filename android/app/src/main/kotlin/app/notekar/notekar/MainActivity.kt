@@ -1502,12 +1502,10 @@ class MainActivity : FlutterActivity() {
                 } else {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log IN", sessionInPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
-                    builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
                 }
             } else {
                 builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogActionPending)
                 builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
-                builder.addAction(R.drawable.ic_stat_notekar, "+ Note", notePending)
             }
 
             manager.notify(PERSISTENT_NOTIFICATION_ID, builder.build())

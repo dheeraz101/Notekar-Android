@@ -279,6 +279,7 @@
             android:theme="@style/Theme.NoteKar.TranslucentDialog"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustResize"
             android:taskAffinity="app.notekar.notekar.quicknote"
             android:exported="false" />
 

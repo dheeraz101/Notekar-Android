@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSlider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
@@ -32,7 +33,7 @@ class LifeAuditPage extends StatefulWidget {
   final double essentialsHours;
   final ValueChanged<double> onSleepHoursChanged;
   final ValueChanged<double> onEssentialsHoursChanged;
-  final VoidCallback? onOpenPersonalProfile;
+  final FutureOr<void> Function()? onOpenPersonalProfile;
   final VoidCallback? onLearnMoreBeta;
 
   @override
@@ -271,25 +272,17 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               ),
             ],
           ),
-          SliderTheme(
-            data: SliderThemeData(
-              activeTrackColor: Colors.blueGrey.shade600,
-              inactiveTrackColor: p.surface3,
-              thumbColor: Colors.blueGrey.shade300,
-              trackHeight: 4,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-            ),
-            child: Slider(
-              value: widget.sleepHours,
-              min: 4.0,
-              max: 12.0,
-              divisions: 16,
-              onChanged: (val) {
-                NotekarHaptics.selection('soft');
-                widget.onSleepHoursChanged(val);
-              },
-            ),
+          CupertinoSlider(
+            value: widget.sleepHours,
+            min: 4.0,
+            max: 12.0,
+            divisions: 16,
+            activeColor: p.accent,
+            thumbColor: p.text,
+            onChanged: (val) {
+              NotekarHaptics.selection('soft');
+              widget.onSleepHoursChanged(val);
+            },
           ),
 
           // Essentials Slider
@@ -314,25 +307,17 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               ),
             ],
           ),
-          SliderTheme(
-            data: SliderThemeData(
-              activeTrackColor: Colors.amber.shade700,
-              inactiveTrackColor: p.surface3,
-              thumbColor: Colors.amber.shade400,
-              trackHeight: 4,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-            ),
-            child: Slider(
-              value: widget.essentialsHours,
-              min: 1.0,
-              max: 8.0,
-              divisions: 14,
-              onChanged: (val) {
-                NotekarHaptics.selection('soft');
-                widget.onEssentialsHoursChanged(val);
-              },
-            ),
+          CupertinoSlider(
+            value: widget.essentialsHours,
+            min: 1.0,
+            max: 8.0,
+            divisions: 14,
+            activeColor: p.orange,
+            thumbColor: p.text,
+            onChanged: (val) {
+              NotekarHaptics.selection('soft');
+              widget.onEssentialsHoursChanged(val);
+            },
           ),
         ],
       ),
@@ -681,15 +666,18 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'The Cost of the Void'.localized(context).toUpperCase(),
-                style: TextStyle(
-                  color: isSevere ? p.red : p.orange,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.1,
+              Expanded(
+                child: Text(
+                  'The Cost of the Void'.localized(context).toUpperCase(),
+                  style: TextStyle(
+                    color: isSevere ? p.red : p.orange,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.1,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               PressableScale(
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -1017,29 +1005,36 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: statusColor,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: statusColor,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                r.displayLabel,
-                                style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 13,
-                                  fontWeight: r.isToday
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    r.displayLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: p.text,
+                                      fontSize: 13,
+                                      fontWeight: r.isToday
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             r.wastedDuration.inMinutes > 0
                                 ? '${r.formattedWasted} ${'lost'.localized(context)}'
@@ -1221,8 +1216,9 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
               ),
               if (!hasDob)
                 PressableScale(
-                  onTap: () {
-                    widget.onOpenPersonalProfile?.call();
+                  onTap: () async {
+                    await widget.onOpenPersonalProfile?.call();
+                    if (mounted) setState(() {});
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

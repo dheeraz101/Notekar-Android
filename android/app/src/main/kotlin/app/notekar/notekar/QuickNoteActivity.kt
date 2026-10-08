@@ -16,6 +16,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import org.json.JSONArray
 
@@ -42,14 +43,42 @@ class QuickNoteActivity : Activity() {
             }
         }
 
-        // Dialog Card
-        val card = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            val lp = FrameLayout.LayoutParams(
-                (320 * density).toInt(),
+        // Scrollable container to ensure dialog and buttons remain accessible above keyboard
+        val scrollView = ScrollView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            isFillViewport = true
+            overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
+            setOnClickListener {
+                finish()
+            }
+        }
+
+        val scrollCenter = FrameLayout(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 gravity = Gravity.CENTER
+            }
+            setOnClickListener {
+                finish()
+            }
+        }
+
+        // Dialog Card
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val cardWidth = Math.min((340 * density).toInt(), (resources.displayMetrics.widthPixels * 0.92f).toInt())
+            val lp = FrameLayout.LayoutParams(
+                cardWidth,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+                topMargin = (24 * density).toInt()
+                bottomMargin = (24 * density).toInt()
             }
             layoutParams = lp
             padding(20, 20, 20, 20)
@@ -79,7 +108,10 @@ class QuickNoteActivity : Activity() {
         val isEndingSession = isSession && resolvedType == "out"
 
         var selectedCategory =
-            widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, "Work") ?: "Work"
+            widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, null)
+                ?: flutterPrefs.getString("flutter.notekar.active_category", null)
+                ?: flutterPrefs.getString("flutter.active_category", null)
+                ?: "Work"
         if (selectedCategory == "All") selectedCategory = "Work"
         var selectedGoalTitle: String? = null
 
@@ -109,7 +141,8 @@ class QuickNoteActivity : Activity() {
         // 1. Show Mode / Category Selector Strip
         if (isStartingSession || showModes || !isEndingSession) {
             val categories = mutableListOf<String>()
-            val customCatsJson = flutterPrefs.getString("flutter.custom_categories", null)
+            val customCatsJson = flutterPrefs.getString("flutter.notekar.custom_categories", null)
+                ?: flutterPrefs.getString("flutter.custom_categories", null)
             if (customCatsJson != null && customCatsJson.startsWith("[")) {
                 try {
                     val arr = JSONArray(customCatsJson)
@@ -209,7 +242,10 @@ class QuickNoteActivity : Activity() {
                         }
                         widgetPrefs.edit().putString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, cat)
                             .apply()
-                        flutterPrefs.edit().putString("flutter.active_category", cat).apply()
+                        flutterPrefs.edit()
+                            .putString("flutter.notekar.active_category", cat)
+                            .putString("flutter.active_category", cat)
+                            .apply()
                         NoteKarWidgetProvider.updateAllWidgets(this@QuickNoteActivity)
                         MainActivity.updatePersistentControlPanel(this@QuickNoteActivity)
                     }
@@ -428,49 +464,90 @@ class QuickNoteActivity : Activity() {
                 orientation = LinearLayout.HORIZONTAL
             }
 
-            for (tag in customTags) {
-                val cleanTag = if (tag.startsWith("#")) tag else "#$tag"
-                val chip = TextView(this).apply {
-                    text = cleanTag
-                    setTextColor(Color.parseColor("#CCFFFFFF"))
-                    textSize = 12f
-                    gravity = Gravity.CENTER
-                    background = StateListDrawable().apply {
-                        addState(
-                            intArrayOf(android.R.attr.state_pressed),
-                            GradientDrawable().apply {
-                                setColor(Color.parseColor("#33FFFFFF"))
+            val renderTagChips = { query: String? ->
+                tagRow.removeAllViews()
+                val q = query?.removePrefix("#")?.lowercase()?.trim()
+                val filteredTags = if (q.isNullOrEmpty()) {
+                    customTags
+                } else {
+                    customTags.filter { it.removePrefix("#").lowercase().contains(q) }
+                }
+
+                for (tag in filteredTags) {
+                    val cleanTag = if (tag.startsWith("#")) tag else "#$tag"
+                    val isFiltered = !q.isNullOrEmpty()
+                    val chip = TextView(this).apply {
+                        text = cleanTag
+                        setTextColor(if (isFiltered) Color.WHITE else Color.parseColor("#CCFFFFFF"))
+                        textSize = 12f
+                        gravity = Gravity.CENTER
+                        background = StateListDrawable().apply {
+                            addState(
+                                intArrayOf(android.R.attr.state_pressed),
+                                GradientDrawable().apply {
+                                    setColor(Color.parseColor("#4D3B82F6"))
+                                    cornerRadius = 14 * density
+                                })
+                            addState(intArrayOf(), GradientDrawable().apply {
+                                setColor(Color.parseColor(if (isFiltered) "#4D3B82F6" else "#1FFFFFFF"))
                                 cornerRadius = 14 * density
+                                setStroke((1 * density).toInt(), Color.parseColor(if (isFiltered) "#803B82F6" else "#26FFFFFF"))
                             })
-                        addState(intArrayOf(), GradientDrawable().apply {
-                            setColor(Color.parseColor("#1FFFFFFF"))
-                            cornerRadius = 14 * density
-                            setStroke((1 * density).toInt(), Color.parseColor("#26FFFFFF"))
-                        })
-                    }
-                    val hPad = (10 * density).toInt()
-                    val vPad = (5 * density).toInt()
-                    setPadding(hPad, vPad, hPad, vPad)
+                        }
+                        val hPad = (10 * density).toInt()
+                        val vPad = (5 * density).toInt()
+                        setPadding(hPad, vPad, hPad, vPad)
 
-                    val chipLp = LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    ).apply {
-                        marginEnd = (6 * density).toInt()
-                    }
-                    layoutParams = chipLp
+                        val chipLp = LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            marginEnd = (6 * density).toInt()
+                        }
+                        layoutParams = chipLp
 
-                    setOnClickListener {
-                        val currentText = input.text.toString()
-                        val separator =
-                            if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
-                        val newText = "$currentText$separator$cleanTag "
-                        input.setText(newText)
-                        input.setSelection(newText.length)
+                        setOnClickListener {
+                            val currentText = input.text.toString()
+                            val cursorPosition = input.selectionEnd
+                            val safeCursor = if (cursorPosition in 0..currentText.length) cursorPosition else currentText.length
+                            val prefix = currentText.substring(0, safeCursor)
+                            val suffix = currentText.substring(safeCursor)
+                            val hashIndex = prefix.lastIndexOf('#')
+                            val newText = if (hashIndex != -1 && !prefix.substring(hashIndex).contains(" ")) {
+                                prefix.substring(0, hashIndex) + cleanTag + " " + suffix
+                            } else {
+                                val separator =
+                                    if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
+                                "$currentText$separator$cleanTag "
+                            }
+                            input.setText(newText)
+                            input.setSelection(newText.length)
+                        }
+                    }
+                    tagRow.addView(chip)
+                }
+                tagScroll.visibility = if (filteredTags.isEmpty()) View.GONE else View.VISIBLE
+            }
+
+            renderTagChips(null)
+
+            input.addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    val text = s?.toString() ?: ""
+                    val cursor = input.selectionEnd
+                    val safeCursor = if (cursor in 0..text.length) cursor else text.length
+                    val textUpToCursor = text.substring(0, safeCursor)
+                    val lastWord = textUpToCursor.split("\\s+".toRegex()).lastOrNull() ?: ""
+                    if (lastWord.startsWith("#")) {
+                        renderTagChips(lastWord)
+                    } else {
+                        renderTagChips(null)
                     }
                 }
-                tagRow.addView(chip)
-            }
+                override fun afterTextChanged(s: android.text.Editable?) {}
+            })
+
             tagScroll.addView(tagRow)
             card.addView(tagScroll)
         } catch (_: Exception) {
@@ -644,7 +721,9 @@ class QuickNoteActivity : Activity() {
         }
 
         card.addView(buttonsContainer)
-        root.addView(card)
+        scrollCenter.addView(card)
+        scrollView.addView(scrollCenter)
+        root.addView(scrollView)
 
         setContentView(root)
 

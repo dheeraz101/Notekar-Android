@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
+import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -170,29 +170,13 @@ class _ExecutiveIntelligenceHubScreenState
                             p: p,
                             entries: _moments,
                             timeframe: _selectedTimeframe,
-                            onConfigure: () {
-                              Navigator.of(context).push(
-                                CupertinoPageRoute<void>(
-                                  builder: (_) => Scaffold(
-                                    backgroundColor: p.bg,
-                                    appBar: CupertinoNavigationBar(
-                                      backgroundColor: p.surface.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                      middle: Text(
-                                        'Personal Profile'.localized(context),
-                                        style: TextStyle(color: p.text),
-                                      ),
-                                    ),
-                                    body: SingleChildScrollView(
-                                      child: PersonalProfileSettingsPage(
-                                        p: p,
-                                        onSaved: () => setState(() {}),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                            onConfigure: () async {
+                              await PersonalizationSetupDialog.show(
+                                context,
+                                p: p,
+                                onSaved: () => setState(() {}),
                               );
+                              setState(() {});
                             },
                           ),
                         ],

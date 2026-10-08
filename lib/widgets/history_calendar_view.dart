@@ -13,6 +13,7 @@ import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/timeline_gap_card.dart';
 
 /// Apple HIG Calendar Day-Swipe Timeline View.
 /// Allows horizontal swiping across days, showing 24h visual timeline blocks.
@@ -25,6 +26,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.initialDateKey,
     this.onEditNote,
     this.onOpenManualEntry,
+    this.onClaimRest,
     this.onOpenInsights,
     this.onDelete,
     this.rainbowCards = false,
@@ -40,6 +42,7 @@ class HistoryCalendarView extends StatefulWidget {
     DateTime? prefilledEndTime,
   })?
   onOpenManualEntry;
+  final void Function(DateTime start, DateTime end)? onClaimRest;
   final ValueChanged<TimelineDaySection>? onOpenInsights;
   final ValueChanged<Moment>? onDelete;
   final bool rainbowCards;
@@ -923,6 +926,29 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                   ],
                 ),
               ),
+            ),
+          );
+        } else if (it is TimelineGapItem) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: TimelineGapCard(
+              p: widget.p,
+              startTimestamp: it.startTimestamp,
+              endTimestamp: it.endTimestamp,
+              onTap: () {
+                widget.onOpenManualEntry?.call(
+                  prefilledStartTime:
+                      DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
+                  prefilledEndTime:
+                      DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
+                );
+              },
+              onClaimRest: widget.onClaimRest != null
+                  ? () => widget.onClaimRest!(
+                        DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
+                        DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
+                      )
+                  : null,
             ),
           );
         }

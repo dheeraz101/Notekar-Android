@@ -11,6 +11,7 @@ import 'package:notekar/dialogs/day_detail_sheet.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
+import 'package:notekar/dialogs/personalization_setup_dialog.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/dialogs/settings/life_audit_page.dart';
 import 'package:notekar/models/goal.dart';
@@ -82,7 +83,7 @@ class HistoryDialog extends StatefulWidget {
     DateTime? prefilledEndTime,
   })?
   onOpenManualEntry;
-  final Future<void> Function(DateTime start, DateTime end)? onClaimRest;
+  final Future<dynamic> Function(DateTime start, DateTime end)? onClaimRest;
   final Future<void> Function(int inMomentId, Moment outEntry)?
   onEndLiveSession;
   final Future<void> Function(Moment inMoment)? onRestoreLiveSession;
@@ -139,6 +140,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
   List<Goal> _goals = [];
   double _sleepHours = 10.0;
   double _essentialsHours = 4.0;
+  DateTime? _manualPrefilledStartTime;
+  DateTime? _manualPrefilledEndTime;
+  bool _isClaimingRest = false;
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -555,9 +559,19 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       p: widget.p,
                       categories: cats,
                       initialCategory: 'All',
-                      onSubmit: _handleManualEntrySubmit,
+                      prefilledStartTime: _manualPrefilledStartTime,
+                      prefilledEndTime: _manualPrefilledEndTime,
+                      onSubmit: (res) {
+                        _manualPrefilledStartTime = null;
+                        _manualPrefilledEndTime = null;
+                        _handleManualEntrySubmit(res);
+                      },
                       onCancel: () {
-                        setState(() => _inSheetView = null);
+                        setState(() {
+                          _manualPrefilledStartTime = null;
+                          _manualPrefilledEndTime = null;
+                          _inSheetView = null;
+                        });
                       },
                     );
                   },
@@ -619,6 +633,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     entries: _entries,
                     sleepHours: _sleepHours,
                     essentialsHours: _essentialsHours,
+                    onOpenPersonalProfile: () async {
+                      await PersonalizationSetupDialog.show(
+                        context,
+                        p: widget.p,
+                        onSaved: () {
+                          if (mounted) setState(() {});
+                        },
+                      );
+                      if (mounted) setState(() {});
+                    },
                     onSleepHoursChanged: (val) async {
                       setState(() => _sleepHours = val);
                       final prefs = await SharedPreferences.getInstance();
@@ -648,6 +672,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   initialDateKey: _selectedDateKey,
                   onEditNote: _openDirectNoteEditor,
                   onOpenManualEntry: _handleOpenManualEntry,
+                  onClaimRest: _claimRest,
                   onOpenInsights: (sec) {
                     setState(() => _activeInsightsSection = sec);
                   },
@@ -1551,42 +1576,72 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _claimRest(DateTime start, DateTime end) async {
-    NotekarHaptics.success('standard');
-    final maxId = _entries.isEmpty
-        ? 0
-        : _entries.map((e) => e.id).reduce(math.max);
-    final inMoment = Moment(
-      id: math.max(maxId + 1, start.millisecondsSinceEpoch),
-      timestamp: start.millisecondsSinceEpoch,
-      type: 'in',
-      date: dateKey(start),
-      note: 'Rest & Recovery',
-      category: 'Rest',
-      tags: const ['rest'],
-    );
-    final outMoment = Moment(
-      id: math.max(maxId + 2, end.millisecondsSinceEpoch),
-      timestamp: end.millisecondsSinceEpoch,
-      type: 'out',
-      date: dateKey(end),
-      note: 'Rest & Recovery',
-      category: 'Rest',
-      tags: const ['rest'],
-    );
-    setState(() {
-      _entries = [outMoment, inMoment, ..._entries]
-        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      _availableDateKeys = _entries.map((item) => item.date).toSet();
-      _rebuildMemoizedLists();
-    });
-    _showNotice(
-      '🌿 Rest & Recovery accounted in Life Audit',
-      onUndo: () => _removeSession(
-        TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
-      ),
-    );
-    if (widget.onClaimRest != null) {
-      await widget.onClaimRest!(start, end);
+    if (_isClaimingRest) return;
+    _isClaimingRest = true;
+    try {
+      NotekarHaptics.success('standard');
+      List<Moment> savedMoments = const [];
+      if (widget.onClaimRest != null) {
+        final res = await widget.onClaimRest!(start, end);
+        if (res is List<Moment> && res.isNotEmpty) {
+          savedMoments = res;
+        }
+      }
+
+      if (savedMoments.isEmpty) {
+        final maxId = _entries.isEmpty
+            ? 0
+            : _entries.map((e) => e.id).reduce(math.max);
+        final inMoment = Moment(
+          id: math.max(maxId + 1, start.millisecondsSinceEpoch),
+          timestamp: start.millisecondsSinceEpoch,
+          type: 'in',
+          date: dateKey(start),
+          note: 'Rest & Recovery',
+          category: 'Rest',
+          tags: const ['rest'],
+        );
+        final outMoment = Moment(
+          id: math.max(maxId + 2, end.millisecondsSinceEpoch),
+          timestamp: end.millisecondsSinceEpoch,
+          type: 'out',
+          date: dateKey(end),
+          note: 'Rest & Recovery',
+          category: 'Rest',
+          tags: const ['rest'],
+        );
+        savedMoments = [inMoment, outMoment];
+        for (final m in savedMoments) {
+          await widget.onRestore(m);
+        }
+      }
+
+      if (savedMoments.length >= 2 && mounted) {
+        final inMoment = savedMoments.firstWhere(
+          (m) => m.type == 'in',
+          orElse: () => savedMoments.first,
+        );
+        final outMoment = savedMoments.firstWhere(
+          (m) => m.type == 'out',
+          orElse: () => savedMoments.last,
+        );
+
+        setState(() {
+          _entries = [...savedMoments, ..._entries]
+            ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          _availableDateKeys = _entries.map((item) => item.date).toSet();
+          _rebuildMemoizedLists();
+        });
+
+        _showNotice(
+          '🌿 Rest & Recovery accounted in Life Audit',
+          onUndo: () => _removeSession(
+            TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
+          ),
+        );
+      }
+    } finally {
+      _isClaimingRest = false;
     }
   }
 
@@ -1594,7 +1649,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
     DateTime? prefilledStartTime,
     DateTime? prefilledEndTime,
   }) async {
-    setState(() => _inSheetView = 'manual');
+    setState(() {
+      _manualPrefilledStartTime = prefilledStartTime;
+      _manualPrefilledEndTime = prefilledEndTime;
+      _inSheetView = 'manual';
+    });
   }
 
   Future<void> _handleManualEntrySubmit(ManualEntryResult result) async {

@@ -1243,50 +1243,53 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: widget.p.surface3,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.all(3),
-                child: CupertinoSlidingSegmentedControl<GoalTimeframe>(
-                  backgroundColor: Colors.transparent,
-                  thumbColor: widget.p.surface2,
-                  groupValue: _timeframe,
-                  children: {
-                    for (final tf in GoalTimeframe.values)
-                      tf: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 7),
-                        child: Text(
-                          tf.label.localized(context),
-                          style: TextStyle(
-                            color: _timeframe == tf
-                                ? widget.p.text
-                                : widget.p.text2,
-                            fontSize: 11,
-                            fontWeight: _timeframe == tf
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                  },
-                  onValueChanged: (val) {
-                    if (val != null) {
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: GoalTimeframe.values.map((tf) {
+                  final isSelected = _timeframe == tf;
+                  return PressableScale(
+                    onTap: () {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        _timeframe = val;
-                        if (val == GoalTimeframe.custom &&
+                        _timeframe = tf;
+                        if (tf == GoalTimeframe.custom &&
                             _targetDate == null) {
                           _targetDate = DateTime.now()
                               .add(const Duration(days: 14))
                               .millisecondsSinceEpoch;
                         }
                       });
-                    }
-                  },
-                ),
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? widget.p.accent
+                            : widget.p.surface2,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? widget.p.accent
+                              : widget.p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        tf.label.localized(context),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : widget.p.text,
+                          fontSize: 12,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
               if (_timeframe == GoalTimeframe.custom) ...[
                 const SizedBox(height: 10),
