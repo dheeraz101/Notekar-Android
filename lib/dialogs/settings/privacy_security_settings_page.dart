@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -75,7 +76,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.security_rounded, size: 14),
+                      const Icon(CupertinoIcons.shield, size: 14),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -118,7 +119,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.fingerprint_rounded, size: 14),
+                      const Icon(CupertinoIcons.lock, size: 14),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -147,14 +148,14 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.analytics_outlined,
+              icon: CupertinoIcons.chart_bar,
               title: 'No Analytics',
               color: p.green,
               status: 'None',
             ),
             SettingsRow(
               p: p,
-              icon: Icons.wifi_off_rounded,
+              icon: CupertinoIcons.wifi_slash,
               title: 'Network Use',
               color: p.accent,
               status: 'Limited',
@@ -173,7 +174,7 @@ class PrivacySecuritySettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.lock_outlined,
+              icon: CupertinoIcons.lock,
               title: 'App Lock',
               color: p.orange,
               status: privacyLock ? 'On' : 'Off',

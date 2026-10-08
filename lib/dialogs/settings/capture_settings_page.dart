@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -46,7 +47,7 @@ class CaptureSettingsPage extends StatelessWidget {
                 context,
               ),
               trailing: defaultMode == 'single'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () {
                 if (defaultMode == 'single') return;
@@ -60,7 +61,7 @@ class CaptureSettingsPage extends StatelessWidget {
                 context,
               ),
               trailing: defaultMode == 'two-way'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () {
                 if (defaultMode == 'two-way') return;
@@ -74,7 +75,7 @@ class CaptureSettingsPage extends StatelessWidget {
                   'Resumes whichever mode was active when you last used the app.'
                       .localized(context),
               trailing: defaultMode == 'last-used'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () {
                 if (defaultMode == 'last-used') return;
@@ -119,7 +120,7 @@ class CaptureSettingsPage extends StatelessWidget {
                 children: [
                   DelayStepButton(
                     p: p,
-                    icon: Icons.remove_rounded,
+                    icon: CupertinoIcons.minus,
                     enabled: (delayIndex < 0 ? 0 : delayIndex) > 0,
                     onTap: () {
                       final current = delayIndex < 0 ? 0 : delayIndex;
@@ -162,7 +163,7 @@ class CaptureSettingsPage extends StatelessWidget {
                   ),
                   DelayStepButton(
                     p: p,
-                    icon: Icons.add_rounded,
+                    icon: CupertinoIcons.plus,
                     enabled:
                         (delayIndex < 0 ? 0 : delayIndex) <
                         delayValues.length - 1,

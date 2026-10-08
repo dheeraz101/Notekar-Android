@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/reset_sheets.dart';
 import 'package:notekar/models/moment.dart';
@@ -42,13 +43,16 @@ class TrashBinSettingsPage {
                         message:
                             'This will return all items currently in the trash to your history.',
                         confirmLabel: 'Restore All',
-                        icon: Icons.restore_rounded,
+                        icon: CupertinoIcons.arrow_counterclockwise,
                       );
                       if (confirmed) {
                         onRestoreAllTrash();
                       }
                     },
-                    icon: const Icon(Icons.restore_rounded, size: 18),
+                    icon: const Icon(
+                      CupertinoIcons.arrow_counterclockwise,
+                      size: 18,
+                    ),
                     label: Text(
                       'Restore All'.localized(context),
                       style: const TextStyle(fontWeight: FontWeight.w700),
@@ -75,13 +79,13 @@ class TrashBinSettingsPage {
                             'Permanently delete all trash? This cannot be undone.',
                         confirmLabel: 'Empty',
                         isDestructive: true,
-                        icon: Icons.delete_forever_rounded,
+                        icon: CupertinoIcons.trash_fill,
                       );
                       if (confirmed) {
                         onClearTrash();
                       }
                     },
-                    icon: const Icon(Icons.delete_forever_rounded, size: 18),
+                    icon: const Icon(CupertinoIcons.trash_fill, size: 18),
                     label: Text(
                       'Empty Trash'.localized(context),
                       style: const TextStyle(fontWeight: FontWeight.w700),
@@ -99,7 +103,7 @@ class TrashBinSettingsPage {
               hasScrollBody: false,
               child: HIGEmptyState(
                 p: p,
-                icon: Icons.delete_outline_rounded,
+                icon: CupertinoIcons.trash,
                 title: 'Trash is Empty',
                 message: 'Deleted moments will appear here for 30 days.',
               ),
@@ -177,7 +181,7 @@ class TrashBinSettingsPage {
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.restore_rounded,
+                          CupertinoIcons.arrow_counterclockwise,
                           color: p.text2,
                           size: 20,
                         ),
@@ -185,7 +189,7 @@ class TrashBinSettingsPage {
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.delete_forever_rounded,
+                          CupertinoIcons.trash_fill,
                           color: p.text2,
                           size: 20,
                         ),
@@ -197,7 +201,7 @@ class TrashBinSettingsPage {
                             message: 'This moment will be erased forever.',
                             confirmLabel: 'Delete',
                             isDestructive: true,
-                            icon: Icons.delete_forever_rounded,
+                            icon: CupertinoIcons.trash_fill,
                           );
                           if (confirmed) {
                             onDeleteTrashPermanent(moment.id);

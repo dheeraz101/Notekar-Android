@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -129,7 +130,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                               color: p.surface2,
                             ),
                             child: Icon(
-                              Icons.close_rounded,
+                              CupertinoIcons.clear,
                               size: 18,
                               color: p.text2,
                             ),
@@ -183,7 +184,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                                     if (intervals[i] ==
                                         reflectionReminderIntervalMins)
                                       Icon(
-                                        Icons.check_rounded,
+                                        CupertinoIcons.checkmark,
                                         color: p.accent,
                                         size: 20,
                                       ),
@@ -291,7 +292,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                                     color: p.surface2,
                                   ),
                                   child: Icon(
-                                    Icons.close_rounded,
+                                    CupertinoIcons.clear,
                                     size: 18,
                                     color: p.text2,
                                   ),
@@ -445,11 +446,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                     width: 1.5,
                   ),
                 ),
-                child: Icon(
-                  Icons.self_improvement_rounded,
-                  color: p.accent,
-                  size: 30,
-                ),
+                child: Icon(CupertinoIcons.sparkles, color: p.accent, size: 30),
               ),
               const SizedBox(height: 12),
               Text(
@@ -639,7 +636,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                   _buildGuideStep(
                     context,
                     p: p,
-                    icon: Icons.air_rounded,
+                    icon: CupertinoIcons.wind,
                     title: 'Take Three Deep Breaths'.localized(context),
                     desc:
                         'When the alert wakes your screen, pause whatever you are doing. Inhale deeply, exhale slowly, and ground yourself in the present moment.'
@@ -649,7 +646,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                   _buildGuideStep(
                     context,
                     p: p,
-                    icon: Icons.history_toggle_off_rounded,
+                    icon: CupertinoIcons.stopwatch,
                     title: 'Acknowledge the Elapsed Hour'.localized(context),
                     desc:
                         'Look back at the last 60 minutes with kindness. Did you spend it intentionally, or did time slip away? Awareness is the first step to freedom.'
@@ -659,7 +656,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                   _buildGuideStep(
                     context,
                     p: p,
-                    icon: Icons.crisis_alert_rounded,
+                    icon: CupertinoIcons.bell_fill,
                     title: 'Set One Focus For Next Hour'.localized(context),
                     desc:
                         'Choose a single primary intention for the upcoming hour before continuing your tasks.'
@@ -669,7 +666,7 @@ class TimeReflectionSettingsPage extends StatelessWidget {
                   _buildGuideStep(
                     context,
                     p: p,
-                    icon: Icons.edit_note_rounded,
+                    icon: CupertinoIcons.pencil,
                     title: 'Log a Quick Moment'.localized(context),
                     desc:
                         'Tap "Log Current Moment" to capture an insight, gratitude, or achievement directly into NoteKar.'

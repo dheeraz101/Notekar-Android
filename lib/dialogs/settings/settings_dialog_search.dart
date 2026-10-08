@@ -66,7 +66,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Manage automatic subsystem failure breakers and fault recovery',
         category: 'Diagnostics',
-        icon: Icons.power_settings_new_rounded,
+        icon: CupertinoIcons.power,
         keywords: [
           'circuit breaker',
           'fault isolation',
@@ -158,7 +158,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Visualize weeks lived vs remaining horizon, capped at 100 years',
         category: 'Dashboard',
-        icon: Icons.hourglass_bottom_rounded,
+        icon: CupertinoIcons.hourglass,
         keywords: [
           'memento mori',
           'life horizon',
@@ -178,7 +178,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Allocate and track intentional hour targets across weeks, months, or tags',
         category: 'Targets & Goals',
-        icon: Icons.track_changes_rounded,
+        icon: CupertinoIcons.scope,
         keywords: [
           'goals',
           'targets',
@@ -197,7 +197,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Mode Glyph Icons',
         subtitle: 'Select minimal glyph icons for active and custom modes',
         category: 'Modes & Categories',
-        icon: Icons.auto_awesome_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: [
           'mode icons',
           'glyph',
@@ -213,7 +213,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'App Version',
         subtitle: 'The current software version installed',
         category: 'Advanced',
-        icon: Icons.info_outline_rounded,
+        icon: CupertinoIcons.info_circle,
         keywords: [
           'version',
           'app version',
@@ -231,7 +231,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Build Number',
         subtitle: 'The compiled internal build identifier',
         category: 'Advanced',
-        icon: Icons.tag_rounded,
+        icon: CupertinoIcons.tag,
         keywords: [
           'build number',
           'build id',
@@ -247,7 +247,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Release Date',
         subtitle: 'When the current version was compiled',
         category: 'Advanced',
-        icon: Icons.calendar_today_rounded,
+        icon: CupertinoIcons.calendar,
         keywords: [
           'build date',
           'release date',
@@ -265,7 +265,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Developer & Creator',
         subtitle: 'Designed & developed by Dheeraj',
         category: 'Advanced',
-        icon: Icons.code_rounded,
+        icon: CupertinoIcons.chevron_left_slash_chevron_right,
         keywords: [
           'developer',
           'author',
@@ -284,7 +284,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Open Source Codebase',
         subtitle: 'Licensed under MIT. Code available on GitHub',
         category: 'Advanced',
-        icon: Icons.folder_open_rounded,
+        icon: CupertinoIcons.folder_open,
         keywords: [
           'is the app opensource',
           'opensource',
@@ -303,7 +303,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Security & Integrity',
         subtitle: 'Cryptographically verified with 0/60+ VirusTotal detections',
         category: 'Privacy & Security',
-        icon: Icons.gpp_good_rounded,
+        icon: CupertinoIcons.shield_fill,
         keywords: [
           'is the app secure',
           'is the app safe to use',
@@ -325,7 +325,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Privacy & Local Storage',
         subtitle: '100% Offline-first. Zero trackers. Zero data collection',
         category: 'Privacy & Security',
-        icon: Icons.shield_rounded,
+        icon: CupertinoIcons.shield,
         keywords: [
           'is the app private',
           'privacy policy',
@@ -344,7 +344,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Network Monitor',
         subtitle: 'Audit application network traffic logs',
         category: 'Advanced',
-        icon: Icons.network_check_rounded,
+        icon: CupertinoIcons.wifi,
         keywords: [
           'network monitor',
           'traffic',
@@ -370,7 +370,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Theme',
         subtitle: 'Dark, light, or amoled mode',
         category: 'Display',
-        icon: Icons.brightness_6_rounded,
+        icon: CupertinoIcons.brightness,
         keywords: ['theme', 'dark', 'light', 'amoled', 'appearance', 'mode'],
         kind: 'selector',
         boolValue: null,
@@ -381,7 +381,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Language',
         subtitle: 'Select application language',
         category: 'Language',
-        icon: Icons.language_rounded,
+        icon: CupertinoIcons.globe,
         keywords: [
           'language',
           'locale',
@@ -477,7 +477,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Show Seconds',
         subtitle: 'Display seconds on the home clock',
         category: 'Display',
-        icon: Icons.timer_rounded,
+        icon: CupertinoIcons.timer,
         keywords: ['seconds', 'clock', 'time', 'display'],
         kind: 'switch',
         boolValue: showSeconds,
@@ -491,7 +491,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Highlight Seconds',
         subtitle: 'Colored seconds in two-way mode',
         category: 'Display',
-        icon: Icons.auto_awesome_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: ['seconds', 'highlight', 'color', 'clock'],
         kind: 'switch',
         boolValue: highlightSeconds,
@@ -506,7 +506,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Choose between 12-hour AM/PM or international 24-hour time across the app',
         category: 'Display',
-        icon: Icons.schedule_rounded,
+        icon: CupertinoIcons.clock,
         keywords: [
           '24-hour',
           '12-hour',
@@ -524,7 +524,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Choose between Condensed Digital or Geometric Modern typography for the home clock',
         category: 'Display',
-        icon: Icons.font_download_rounded,
+        icon: CupertinoIcons.textformat,
         keywords: [
           'font',
           'clock typography',
@@ -540,7 +540,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Button Labels',
         subtitle: 'Show text labels under toolbar icons',
         category: 'Display',
-        icon: Icons.label_rounded,
+        icon: CupertinoIcons.tag_fill,
         keywords: ['labels', 'text', 'icons', 'toolbar', 'names'],
         kind: 'switch',
         boolValue: buttonLabels,
@@ -554,7 +554,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Large Controls',
         subtitle: 'Increase touch targets for primary actions',
         category: 'Display',
-        icon: Icons.ads_click_rounded,
+        icon: CupertinoIcons.hand_point_right,
         keywords: ['large', 'size', 'buttons', 'controls', 'touch'],
         kind: 'switch',
         boolValue: largeControls,
@@ -568,7 +568,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Toolbar Backplate',
         subtitle: 'Show a subtle background pill for the toolbar',
         category: 'Display',
-        icon: Icons.shape_line_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: ['toolbar', 'backplate', 'pill', 'background', 'style'],
         kind: 'switch',
         boolValue: homeMenuPill,
@@ -582,7 +582,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Live Icon Motion',
         subtitle: 'Physics-based icon animations on the home screen',
         category: 'Display',
-        icon: Icons.motion_photos_auto_rounded,
+        icon: CupertinoIcons.play_circle,
         keywords: ['motion', 'animation', 'icon', 'physics', 'live', 'effects'],
         kind: 'switch',
         boolValue: homeMenuAnimations,
@@ -600,7 +600,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Enable Translucency',
         subtitle: 'Glass-like blur effects on system surfaces',
         category: 'Display',
-        icon: Icons.opacity_rounded,
+        icon: CupertinoIcons.drop,
         keywords: ['blur', 'glass', 'transparency', 'translucent', 'effects'],
         kind: 'switch',
         boolValue: enableTranslucency,
@@ -614,7 +614,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'History Text',
         subtitle: 'Show "HISTORY" label on the home button',
         category: 'Display',
-        icon: Icons.format_list_bulleted_rounded,
+        icon: CupertinoIcons.list_bullet,
         keywords: ['history', 'text', 'label', 'home'],
         kind: 'switch',
         boolValue: showHistoryText,
@@ -628,7 +628,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Last Saved Hint',
         subtitle: 'Show time since the last moment was saved',
         category: 'Display',
-        icon: Icons.tips_and_updates_rounded,
+        icon: CupertinoIcons.lightbulb,
         keywords: ['hint', 'last saved', 'time', 'feedback'],
         kind: 'switch',
         boolValue: showLastSavedHint,
@@ -642,7 +642,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Accent Color',
         subtitle: 'Choose a primary color for the interface',
         category: 'Accent Color',
-        icon: Icons.palette_rounded,
+        icon: CupertinoIcons.paintbrush,
         keywords: ['accent', 'color', 'theme', 'tint', 'highlights'],
         kind: 'selector',
         boolValue: null,
@@ -653,7 +653,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'App Icons',
         subtitle: 'Personalize with 8 handcrafted luxury editions',
         category: 'App Icons',
-        icon: Icons.apps_rounded,
+        icon: CupertinoIcons.square_grid_2x2,
         keywords: [
           'icon',
           'launcher',
@@ -688,7 +688,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Developer Options',
         subtitle: 'Diagnostics, device health, network monitor, and commits',
         category: 'Developer Options',
-        icon: Icons.developer_mode_rounded,
+        icon: CupertinoIcons.wrench,
         keywords: [
           'developer',
           'options',
@@ -708,7 +708,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Sobriety Tracker',
         subtitle: 'Track recovery streak, milestone badges, and export cards',
         category: 'Sobriety Companion',
-        icon: Icons.spa_rounded,
+        icon: CupertinoIcons.leaf_arrow_circlepath,
         keywords: [
           'sobriety',
           'tracker',
@@ -731,7 +731,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Chronological timeline with session pairing, live end & calendar',
         category: 'Help & Guides',
-        icon: Icons.auto_stories_rounded,
+        icon: CupertinoIcons.book,
         keywords: [
           'history',
           'timeline',
@@ -759,7 +759,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Grounded daily rhythm, 90-day activity grid & circadian trends',
         category: 'Dashboard',
-        icon: Icons.dashboard_customize_outlined,
+        icon: CupertinoIcons.square_stack_3d_up,
         keywords: [
           'dashboard',
           'analytics',
@@ -797,7 +797,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Confront the cost of unaccounted time across daily, weekly, and yearly horizons',
         category: 'Life Audit',
-        icon: Icons.grid_view_rounded,
+        icon: CupertinoIcons.circle_grid_hex,
         keywords: [
           'life audit',
           'audit',
@@ -827,7 +827,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'App Philosophy',
         subtitle: 'Timeless craft and radical privacy',
         category: 'About',
-        icon: Icons.auto_awesome_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: [
           'philosophy',
           'manifesto',
@@ -849,7 +849,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Upcoming Features',
         subtitle: 'Roadmap, voice notes, AI insights, and P2P sync',
         category: 'About',
-        icon: Icons.auto_awesome_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: [
           'upcoming',
           'features',
@@ -872,7 +872,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Track unaccounted time, sleep, logistics, and productive hours across horizons',
         category: 'Life Audit',
-        icon: Icons.timelapse_rounded,
+        icon: CupertinoIcons.stopwatch,
         keywords: [
           'life audit',
           'audit',
@@ -895,7 +895,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Dashboard',
         subtitle: 'Interactive summaries, grids, trends, and correlations',
         category: 'Dashboard',
-        icon: Icons.dashboard_customize_outlined,
+        icon: CupertinoIcons.square_stack_3d_up,
         keywords: [
           'dashboard',
           'analytics',
@@ -925,7 +925,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Logging',
         subtitle: 'Configure default mode, tap cooldowns, and reminders',
         category: 'Logging',
-        icon: Icons.bolt_rounded,
+        icon: CupertinoIcons.bolt,
         keywords: [
           'logging',
           'captures',
@@ -945,7 +945,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Focus categories, custom modes, and category history breakdown',
         category: 'Modes',
-        icon: Icons.category_rounded,
+        icon: CupertinoIcons.square_grid_2x2,
         keywords: [
           'modes',
           'mode',
@@ -968,7 +968,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Clock-centered hit box with edge-to-edge width to prevent ghost touches',
         category: 'Logging',
-        icon: Icons.touch_app_rounded,
+        icon: CupertinoIcons.hand_point_right_fill,
         keywords: [
           'ergonomic',
           'tap zone',
@@ -989,7 +989,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Quick Log, Sobriety Companion, and Life Audit widgets for home screen',
         category: 'Logging',
-        icon: Icons.widgets_rounded,
+        icon: CupertinoIcons.square_grid_2x2,
         keywords: [
           'widget',
           'widgets',
@@ -1009,7 +1009,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Startup Mode',
         subtitle: 'Default mode when opening the app',
         category: 'Capture',
-        icon: Icons.bolt_rounded,
+        icon: CupertinoIcons.bolt,
         keywords: [
           'startup',
           'mode',
@@ -1033,7 +1033,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Resume whichever mode was active when you last closed the app',
         category: 'Capture',
-        icon: Icons.history_toggle_off_rounded,
+        icon: CupertinoIcons.clock,
         keywords: [
           'last used',
           'remember',
@@ -1053,7 +1053,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Tap Delay',
         subtitle: 'Minimum time between accidental taps',
         category: 'Capture',
-        icon: Icons.slow_motion_video_rounded,
+        icon: CupertinoIcons.play_circle,
         keywords: ['delay', 'tap', 'cooldown', 'accident', 'speed'],
         kind: 'selector',
         boolValue: null,
@@ -1065,7 +1065,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Tap to compose a note before logging. When disabled, tapping logs instantly and holding prompts for a note.',
         category: 'Capture',
-        icon: Icons.edit_note_rounded,
+        icon: CupertinoIcons.pencil,
         keywords: [
           'note',
           'click',
@@ -1091,7 +1091,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Plus Notes',
         subtitle: 'Unrestricted long-form journaling and meeting logs',
         category: 'Moments',
-        icon: Icons.add_box_rounded,
+        icon: CupertinoIcons.plus_app,
         keywords: [
           'plus',
           'plus note',
@@ -1113,7 +1113,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Customizable Hashtags',
         subtitle: 'Tailor quick tag chips in note editor with long press',
         category: 'Moments',
-        icon: Icons.tag_rounded,
+        icon: CupertinoIcons.tag,
         keywords: [
           'tag',
           'tags',
@@ -1135,7 +1135,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Confirm Delete',
         subtitle: 'Show a prompt before deleting moments',
         category: 'Moments',
-        icon: Icons.delete_sweep_rounded,
+        icon: CupertinoIcons.trash,
         keywords: [
           'delete',
           'confirm',
@@ -1159,7 +1159,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Extended Duration',
         subtitle: 'Show days, months, and years in time between moments',
         category: 'Moments',
-        icon: Icons.timer_rounded,
+        icon: CupertinoIcons.timer,
         keywords: [
           'time',
           'duration',
@@ -1182,7 +1182,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Compare time elapsed between any two moments in history calendar or search',
         category: 'Moments',
-        icon: Icons.compare_arrows_rounded,
+        icon: CupertinoIcons.arrow_right_arrow_left,
         keywords: [
           'time difference',
           'compare',
@@ -1200,7 +1200,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Minimal Moment Options',
         subtitle: 'Use a compact horizontal row of icons for actions',
         category: 'Moments',
-        icon: Icons.auto_awesome_motion_rounded,
+        icon: CupertinoIcons.square_stack_3d_down_right,
         keywords: ['minimal', 'icons', 'actions', 'compact', 'row', 'history'],
         kind: 'switch',
         boolValue: minimalMomentOptions,
@@ -1215,7 +1215,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Display sequential 2-digit numbers (00–99) instead of icons in single history moments',
         category: 'Moments',
-        icon: Icons.pin_outlined,
+        icon: CupertinoIcons.pin,
         keywords: [
           'single',
           'numbers',
@@ -1236,7 +1236,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
               message:
                   'Sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. Turn off Compact History to enable numbers in single mode.',
               confirmLabel: 'Turn Off & Enable',
-              icon: Icons.pin_outlined,
+              icon: CupertinoIcons.pin,
               iconColor: p.accent,
             );
             if (!confirmed) return;
@@ -1256,7 +1256,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Restart single count from 00 every calendar day while preserving past history',
         category: 'Moments',
-        icon: Icons.restart_alt_rounded,
+        icon: CupertinoIcons.arrow_counterclockwise,
         keywords: [
           'reset',
           'daily',
@@ -1279,7 +1279,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Show the 2-digit count on the tap pulse animation instead of "SINGLE saved"',
         category: 'Moments',
-        icon: Icons.touch_app_outlined,
+        icon: CupertinoIcons.hand_point_right,
         keywords: [
           'save',
           'count',
@@ -1301,7 +1301,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Trash Bin',
         subtitle: deletedSubtitle,
         category: 'Logging',
-        icon: Icons.delete_outline_rounded,
+        icon: CupertinoIcons.trash,
         keywords: ['trash', 'deleted', 'restore', 'remove', 'history', 'bin'],
         kind: 'nav',
         boolValue: null,
@@ -1313,7 +1313,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Subtle category chromatic tinting across timeline, calendar, and search cards',
         category: 'Logging',
-        icon: Icons.palette_outlined,
+        icon: CupertinoIcons.paintbrush,
         keywords: [
           'rainbow',
           'rainbow cards',
@@ -1337,7 +1337,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Updates & Notices',
         subtitle: 'Software update, app notices, changelog',
         category: 'Updates & Notices',
-        icon: Icons.update_rounded,
+        icon: CupertinoIcons.arrow_2_circlepath,
         keywords: [
           'update',
           'github',
@@ -1356,7 +1356,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Rm -rf Cache',
         subtitle: 'Automatically delete update packages as they are installed',
         category: 'Updates & Notices',
-        icon: Icons.auto_delete_outlined,
+        icon: CupertinoIcons.trash,
         keywords: [
           'rm -rf cache',
           'rm -rf',
@@ -1383,7 +1383,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Official Bulletins',
         subtitle: 'Critical advisories, release highlights & bulletins',
         category: 'Updates & Notices',
-        icon: Icons.campaign_rounded,
+        icon: CupertinoIcons.speaker_2,
         keywords: [
           'official bulletins',
           'bulletins',
@@ -1403,7 +1403,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: "What's New",
         subtitle: 'Keynote release innovations & highlights',
         category: "What's New",
-        icon: Icons.auto_awesome_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: [
           'new',
           'latest',
@@ -1425,7 +1425,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Changelog',
         subtitle: 'Release history and fixes',
         category: 'Changelog',
-        icon: Icons.article_rounded,
+        icon: CupertinoIcons.doc_text,
         keywords: ['changes', 'release notes', 'version', 'history', 'log'],
         kind: 'nav',
         boolValue: null,
@@ -1436,7 +1436,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Update Track',
         subtitle: 'Choose between Stable and Beta releases',
         category: 'Updates & Notices',
-        icon: Icons.track_changes_rounded,
+        icon: CupertinoIcons.scope,
         keywords: ['update', 'track', 'beta', 'stable', 'release', 'notices'],
         kind: 'selector',
         boolValue: null,
@@ -1447,7 +1447,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'VirusTotal Scan',
         subtitle: 'Dynamic scan report, security ratio, and signature status',
         category: 'Updates & Notices',
-        icon: Icons.security_rounded,
+        icon: CupertinoIcons.shield,
         keywords: [
           'security',
           'virustotal',
@@ -1466,7 +1466,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Offline Commits Cache',
         subtitle: 'View downloaded update commits feed offline',
         category: 'Developer Options',
-        icon: Icons.history_rounded,
+        icon: CupertinoIcons.clock_fill,
         keywords: [
           'commits',
           'cache',
@@ -1488,7 +1488,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'CSV, JSON, download, restore, import, file, reminder, health',
         category: 'Data & Backup',
-        icon: Icons.import_export_rounded,
+        icon: CupertinoIcons.arrow_up_arrow_down,
         keywords: [
           'csv',
           'json',
@@ -1510,7 +1510,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Snapshot instant local backups and restore history point-in-time',
         category: 'Local Backups',
-        icon: Icons.history_edu_rounded,
+        icon: CupertinoIcons.book_fill,
         keywords: [
           'local backup',
           'backups',
@@ -1530,7 +1530,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Search and filter saved moments, tags, and reflection history',
         category: 'Search Notes',
-        icon: Icons.manage_search_rounded,
+        icon: CupertinoIcons.search,
         keywords: [
           'search',
           'notes',
@@ -1551,7 +1551,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Migrate from Other Apps',
         subtitle: 'Import Loop Habit Tracker CSV or HabitKit JSON',
         category: 'Data & Backup',
-        icon: Icons.swap_horiz_rounded,
+        icon: CupertinoIcons.arrow_right_arrow_left,
         keywords: [
           'migrate',
           'migration',
@@ -1572,7 +1572,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Backup Status',
         subtitle: 'Android backup, health, encryption, and Drive plans',
         category: 'Data & Backup',
-        icon: Icons.cloud_done_rounded,
+        icon: CupertinoIcons.cloud,
         keywords: [
           'android backup',
           'backup health',
@@ -1591,7 +1591,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Privacy & Security',
         subtitle: 'Local storage, network use, and data safety',
         category: 'Privacy & Security',
-        icon: Icons.verified_user_rounded,
+        icon: CupertinoIcons.checkmark_shield_fill,
         keywords: [
           'private',
           'security',
@@ -1625,7 +1625,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'App Lock',
         subtitle: 'Screen lock and lock timing',
         category: 'App Lock',
-        icon: Icons.lock_rounded,
+        icon: CupertinoIcons.lock,
         keywords: [
           'privacy lock',
           'app lock',
@@ -1659,7 +1659,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Obfuscate screens and block screenshots in the system switcher',
         category: 'Privacy & Security',
-        icon: Icons.screenshot_rounded,
+        icon: CupertinoIcons.viewfinder,
         keywords: [
           'hide content',
           'recents',
@@ -1689,7 +1689,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Show a sticky notification in the drawer to log check-in/out from lock screen',
         category: 'Logging',
-        icon: Icons.notification_important_rounded,
+        icon: CupertinoIcons.bell_fill,
         keywords: [
           'control panel',
           'persistent',
@@ -1720,7 +1720,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           title: 'Configure Lock',
           subtitle: 'Choose between System Lock or In-App PIN',
           category: 'Configure Lock',
-          icon: Icons.security_rounded,
+          icon: CupertinoIcons.shield,
           keywords: [
             'configure lock',
             'system lock',
@@ -1740,7 +1740,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           title: 'When to Lock',
           subtitle: 'Change screen lock timing delay',
           category: 'App Lock',
-          icon: Icons.timer_rounded,
+          icon: CupertinoIcons.timer,
           keywords: [
             'delay',
             'lock timing',
@@ -1760,7 +1760,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Accessibility',
         subtitle: 'Haptic style, motion, larger text, high contrast',
         category: 'Accessibility',
-        icon: Icons.accessibility_new_rounded,
+        icon: CupertinoIcons.person_crop_circle,
         keywords: [
           'haptic',
           'vibration',
@@ -1781,7 +1781,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Sound Effects',
         subtitle: 'Subtle acoustic click feedback on logging and interactions',
         category: 'Accessibility',
-        icon: Icons.volume_up_rounded,
+        icon: CupertinoIcons.speaker_2,
         keywords: [
           'sound',
           'sound effects',
@@ -1808,7 +1808,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Diagnostics',
         subtitle: 'Version, storage, backup, update status',
         category: 'Diagnostics',
-        icon: Icons.monitor_heart_rounded,
+        icon: CupertinoIcons.waveform_path_ecg,
         keywords: ['debug', 'support', 'info', 'bug', 'copy', 'logs'],
         kind: 'nav',
         boolValue: null,
@@ -1820,7 +1820,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Adaptive engine, hardware diagnostics, and performance status',
         category: 'Device Health',
-        icon: Icons.health_and_safety_rounded,
+        icon: CupertinoIcons.shield_fill,
         keywords: [
           'adaptive engine',
           'performance',
@@ -1851,7 +1851,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Performance Tiers & Capabilities',
         subtitle: 'Hardware tier, 120 FPS live physics, and visual tuning',
         category: 'Device Health',
-        icon: Icons.speed_rounded,
+        icon: CupertinoIcons.gauge,
         keywords: [
           'performance tier',
           'tier',
@@ -1875,7 +1875,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'System Blur & Visual Effects',
         subtitle: 'Glassmorphism blur support and live animations status',
         category: 'Device Health',
-        icon: Icons.blur_on_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: [
           'system blur',
           'blur',
@@ -1896,7 +1896,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Network Monitor',
         subtitle: 'Audit application network traffic logs',
         category: 'Network Monitor',
-        icon: Icons.network_check_rounded,
+        icon: CupertinoIcons.wifi,
         keywords: [
           'network monitor',
           'traffic',
@@ -1918,7 +1918,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           title: 'God Mode',
           subtitle: 'Secret themes and VIP pioneer badge',
           category: 'God Mode',
-          icon: Icons.auto_awesome_rounded,
+          icon: CupertinoIcons.sparkles,
           keywords: [
             'god mode',
             'godmode',
@@ -1942,7 +1942,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'URL schemes, text selection, share target, Markdown sync, and Tasker broadcast API',
         category: 'Integrations & Automation',
-        icon: Icons.link_rounded,
+        icon: CupertinoIcons.link,
         keywords: [
           'integration',
           'integrations',
@@ -1971,7 +1971,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Log moments, trigger IN/OUT, or navigate with notekar:// links',
         category: 'Integrations & Automation',
-        icon: Icons.link_rounded,
+        icon: CupertinoIcons.link,
         keywords: [
           'notekar://',
           'url scheme',
@@ -1992,7 +1992,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Text Selection Context Menu',
         subtitle: 'Highlight text anywhere in Android and tap "Log in NoteKar"',
         category: 'Integrations & Automation',
-        icon: Icons.adjust_rounded,
+        icon: CupertinoIcons.selection_pin_in_out,
         keywords: [
           'process text',
           'text selection',
@@ -2010,7 +2010,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Android Share Target',
         subtitle: 'Share text and URLs from external apps directly to NoteKar',
         category: 'Integrations & Automation',
-        icon: Icons.share_rounded,
+        icon: CupertinoIcons.share,
         keywords: [
           'share sheet',
           'action send',
@@ -2028,7 +2028,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Export date-grouped Markdown tables compatible with Obsidian & Logseq',
         category: 'Integrations & Automation',
-        icon: Icons.article_rounded,
+        icon: CupertinoIcons.doc_text,
         keywords: [
           'obsidian',
           'logseq',
@@ -2048,7 +2048,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Calendar Sessions (.ics) Export',
         subtitle: 'Export Two-Way IN/OUT intervals as RFC 5545 calendar events',
         category: 'Integrations & Automation',
-        icon: Icons.calendar_today_rounded,
+        icon: CupertinoIcons.calendar,
         keywords: [
           'calendar',
           'ics',
@@ -2070,7 +2070,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Send app.notekar.notekar.ACTION_LOG_MOMENT broadcasts offline',
         category: 'Integrations & Automation',
-        icon: Icons.rss_feed_rounded,
+        icon: CupertinoIcons.radiowaves_right,
         keywords: [
           'tasker',
           'macrodroid',
@@ -2091,7 +2091,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Reset All Data',
         subtitle: 'Erase every moment and note',
         category: 'Reset',
-        icon: Icons.delete_outline_rounded,
+        icon: CupertinoIcons.trash,
         keywords: [
           'clear',
           'erase',
@@ -2108,7 +2108,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Factory Reset',
         subtitle: 'Erase data and settings, then show welcome',
         category: 'Reset',
-        icon: Icons.restart_alt_rounded,
+        icon: CupertinoIcons.arrow_counterclockwise,
         keywords: ['fresh start', 'welcome', 'reset app', 'new app', 'wipe'],
         kind: 'nav',
         boolValue: null,
@@ -2119,7 +2119,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Reset Settings Only',
         subtitle: 'Restore preferences and keep moments',
         category: 'Reset',
-        icon: Icons.settings_backup_restore_rounded,
+        icon: CupertinoIcons.arrow_counterclockwise,
         keywords: ['preferences', 'defaults', 'settings reset', 'undo'],
         kind: 'nav',
         boolValue: null,
@@ -2130,7 +2130,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Privacy Policy',
         subtitle: 'Data safety and local storage commitment',
         category: 'Privacy Policy',
-        icon: Icons.privacy_tip_rounded,
+        icon: CupertinoIcons.shield,
         keywords: [
           'privacy',
           'policy',
@@ -2151,7 +2151,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Terms of Use',
         subtitle: 'App usage rules and open source terms',
         category: 'Terms of Use',
-        icon: Icons.gavel_rounded,
+        icon: CupertinoIcons.doc_text,
         keywords: [
           'terms',
           'usage',
@@ -2170,7 +2170,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Licenses',
         subtitle: 'Software credits and open source legal notices',
         category: 'Licenses',
-        icon: Icons.description_rounded,
+        icon: CupertinoIcons.doc_text,
         keywords: [
           'license',
           'legal',
@@ -2188,7 +2188,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Guides',
         subtitle: 'Learn taps, notes, history, and backups',
         category: 'Help & Guides',
-        icon: Icons.map_rounded,
+        icon: CupertinoIcons.map,
         keywords: [
           'guide',
           'help',
@@ -2214,7 +2214,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Help',
         subtitle: 'Fix updates, backups, notices, motion, and common issues',
         category: 'Help',
-        icon: Icons.help_outline_rounded,
+        icon: CupertinoIcons.question_circle,
         keywords: [
           'help',
           'problem',
@@ -2239,7 +2239,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Daily, inactivity, weekly, and monthly notification reminders',
         category: 'Reminders',
-        icon: Icons.notifications_active_outlined,
+        icon: CupertinoIcons.bell,
         keywords: [
           'reminders',
           'notifications',
@@ -2259,7 +2259,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Daily Reminder',
         subtitle: 'Toggle daily logging reminder alerts',
         category: 'Reminders',
-        icon: Icons.alarm_rounded,
+        icon: CupertinoIcons.alarm,
         keywords: ['daily', 'reminder', 'alarm', 'notification', 'schedule'],
         kind: 'switch',
         boolValue: _dailyReminderEnabled,
@@ -2274,7 +2274,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Inactivity Reminder',
         subtitle: 'Toggle inactivity-based timestamp reminders',
         category: 'Reminders',
-        icon: Icons.timer_off_outlined,
+        icon: CupertinoIcons.timer,
         keywords: ['inactivity', 'inactive', 'timer', 'alert', 'reminders'],
         kind: 'switch',
         boolValue: _inactivityReminderEnabled,
@@ -2289,7 +2289,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Weekly Reminder',
         subtitle: 'Toggle weekly notification alerts',
         category: 'Reminders',
-        icon: Icons.calendar_view_week_rounded,
+        icon: CupertinoIcons.calendar,
         keywords: ['weekly', 'days', 'sunday', 'monday', 'reminders'],
         kind: 'switch',
         boolValue: _weeklyReminderEnabled,
@@ -2305,7 +2305,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         subtitle:
             'Full-screen hourly mindfulness prompts and time awareness alerts',
         category: 'Time Reflection',
-        icon: Icons.self_improvement_rounded,
+        icon: CupertinoIcons.sparkles,
         keywords: [
           'reflection',
           'mindfulness',
@@ -2327,7 +2327,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Monthly Reminder',
         subtitle: 'Toggle monthly notification alerts',
         category: 'Reminders',
-        icon: Icons.calendar_month_rounded,
+        icon: CupertinoIcons.calendar,
         keywords: ['monthly', 'month', 'days', 'reminders'],
         kind: 'switch',
         boolValue: _monthlyReminderEnabled,
@@ -2342,7 +2342,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Language',
         subtitle: 'Choose from 7 built-in offline languages',
         category: 'Advanced',
-        icon: Icons.language_rounded,
+        icon: CupertinoIcons.globe,
         keywords: [
           'language',
           'languages',
@@ -2362,7 +2362,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Sleep Protection & Active Hours',
         subtitle: 'Mute mindful reminders overnight to protect sleep',
         category: 'Time Reflection',
-        icon: Icons.bedtime_rounded,
+        icon: CupertinoIcons.moon_fill,
         keywords: ['sleep', 'active', 'quiet', 'hours', 'night', 'schedule'],
         kind: 'nav',
         status:
@@ -2776,7 +2776,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                 padding: const EdgeInsets.only(top: 64),
                 child: HIGEmptyState(
                   p: p,
-                  icon: Icons.search_rounded,
+                  icon: CupertinoIcons.search,
                   title: 'Search Settings'.localized(context),
                   message:
                       'Type to find themes, notifications, security, diagnostic logs, and capture mode configurations.'
@@ -2875,7 +2875,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                       return [
                         SettingsRow(
                           p: p,
-                          icon: Icons.history_rounded,
+                          icon: CupertinoIcons.clock_fill,
                           title: term,
                           color: p.text3,
                           onTap: () {
@@ -2945,7 +2945,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                     else
                       GuideRow(
                         p: p,
-                        icon: item.icon ?? Icons.help_outline_rounded,
+                        icon: item.icon ?? CupertinoIcons.question_circle,
                         title: item.title,
                         text: item.content,
                       ),
@@ -2958,7 +2958,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
                 padding: const EdgeInsets.only(top: 64),
                 child: HIGEmptyState(
                   p: p,
-                  icon: Icons.search_off_rounded,
+                  icon: CupertinoIcons.search,
                   title: 'No Results',
                   message:
                       'No settings, guides, or help articles match "${_settingsQuery.trim()}". Try different keywords or check your spelling.',

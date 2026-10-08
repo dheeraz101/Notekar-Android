@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
@@ -151,19 +152,19 @@ class SettingsRow extends StatelessWidget {
       switch (rowKind) {
         case 'link':
           trailingIndicator = Icon(
-            Icons.north_east_rounded,
+            CupertinoIcons.arrow_up_right,
             color: p.text3,
             size: 14,
           );
         case 'popup':
           trailingIndicator = Icon(
-            Icons.info_outline_rounded,
+            CupertinoIcons.info_circle,
             color: p.text3,
             size: 16,
           );
         default:
           trailingIndicator = Icon(
-            Icons.chevron_right_rounded,
+            CupertinoIcons.chevron_forward,
             color: p.text3,
             size: 15,
           );
@@ -661,7 +662,7 @@ class ThemeChoice extends StatelessWidget {
                 border: Border.all(color: p.border, width: 0.5),
               ),
               child: active
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 18)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 16)
                   : null,
             ),
             const SizedBox(height: 8),
@@ -727,7 +728,7 @@ class AppIconChoice extends StatelessWidget {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: p.surface3,
-                  child: Icon(Icons.broken_image_rounded, color: p.text3),
+                  child: Icon(CupertinoIcons.photo, color: p.text3),
                 ),
               ),
             ),
@@ -961,7 +962,7 @@ class SettingsPageDescription extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 3.5),
               child: Icon(
-                icon ?? Icons.info_outline_rounded,
+                icon ?? CupertinoIcons.info_circle,
                 color: iconColor ?? p.text3.withValues(alpha: 0.6),
                 size: 13,
               ),
@@ -1034,11 +1035,7 @@ void showBetaInfoPopup(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.auto_awesome_rounded,
-                        size: 13,
-                        color: p.accent,
-                      ),
+                      Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
                       const SizedBox(width: 5),
                       Text(
                         'BETA'.localized(context),
@@ -1242,7 +1239,7 @@ class SettingsSearchBox extends StatelessWidget {
         textAlignVertical: TextAlignVertical.center,
         style: TextStyle(color: p.text, fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Icon(Icons.search_rounded, color: p.text3, size: 20),
+          prefixIcon: Icon(CupertinoIcons.search, color: p.text3, size: 18),
           prefixIconConstraints: const BoxConstraints(
             minWidth: 32,
             minHeight: 32,
@@ -1254,7 +1251,7 @@ class SettingsSearchBox extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: Icon(Icons.close_rounded, color: p.text3, size: 18),
+                    child: Icon(CupertinoIcons.xmark, color: p.text3, size: 16),
                   ),
                 ),
           suffixIconConstraints: const BoxConstraints(

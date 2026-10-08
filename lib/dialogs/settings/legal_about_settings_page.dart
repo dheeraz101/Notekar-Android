@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -60,7 +61,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
           children: [
             _PolicySection(
               p: p,
-              icon: Icons.storage_rounded,
+              icon: CupertinoIcons.circle_grid_hex,
               title: 'Local Storage'.localized(context),
               text:
                   'All moments and notes are stored locally on your device using an encrypted-ready database (Hive). No data is ever uploaded to a cloud server unless you manually export a backup file.'
@@ -68,7 +69,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
             ),
             _PolicySection(
               p: p,
-              icon: Icons.analytics_outlined,
+              icon: CupertinoIcons.chart_bar,
               title: 'No Tracking'.localized(context),
               text:
                   'We do not use any third-party analytics, tracking pixels, or advertising SDKs. Your app usage remains completely anonymous and private.'
@@ -76,7 +77,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
             ),
             _PolicySection(
               p: p,
-              icon: Icons.wifi_rounded,
+              icon: CupertinoIcons.wifi,
               title: 'Limited Connectivity'.localized(context),
               text:
                   'The app only uses the internet to check for software updates on GitHub and to fetch occasional app notices if enabled. No personal data is transmitted during these checks.'
@@ -87,7 +88,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
         const SizedBox(height: 32),
         FilledButton.icon(
           onPressed: () => onOpenLink(privacyPolicyUrl),
-          icon: const Icon(Icons.open_in_new_rounded, size: 18),
+          icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 18),
           label: Text(
             'Full Online Policy'.localized(context),
             style: const TextStyle(fontWeight: FontWeight.w800),
@@ -132,7 +133,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
           children: [
             _PolicySection(
               p: p,
-              icon: Icons.gavel_rounded,
+              icon: CupertinoIcons.doc_text,
               title: 'App Usage'.localized(context),
               text:
                   'NoteKar is provided "as is" for personal use. You are responsible for your own data backups and for ensuring your use of the app complies with local laws.'
@@ -140,7 +141,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
             ),
             _PolicySection(
               p: p,
-              icon: Icons.code_rounded,
+              icon: CupertinoIcons.chevron_left_slash_chevron_right,
               title: 'Open Source'.localized(context),
               text:
                   'NoteKar is open source software. Individual components and libraries are subject to their respective licenses, which can be viewed in the Licenses section.'
@@ -151,7 +152,7 @@ class LegalAboutSettingsPage extends StatelessWidget {
         const SizedBox(height: 32),
         FilledButton.icon(
           onPressed: () => onOpenLink(termsUrl),
-          icon: const Icon(Icons.open_in_new_rounded, size: 18),
+          icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 18),
           label: Text(
             'Full Online Terms'.localized(context),
             style: const TextStyle(fontWeight: FontWeight.w800),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/moment.dart';
@@ -32,7 +33,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
       context: context,
       p: widget.p,
       message: '$label copied'.localized(context),
-      icon: Icons.copy_rounded,
+      icon: CupertinoIcons.doc_on_doc,
     );
   }
 
@@ -55,7 +56,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
               title: 'Quick Log'.localized(context),
               subtitle: 'notekar://log?type=single&note=Coffee',
               trailing: IconButton(
-                icon: const Icon(Icons.copy_rounded, size: 18),
+                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
                 onPressed: () => _copyToClipboard(
                   'notekar://log?type=single&note=Coffee',
                   'URL',
@@ -71,7 +72,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
               title: 'Check-In & Out'.localized(context),
               subtitle: 'notekar://in?note=Focus%20Session',
               trailing: IconButton(
-                icon: const Icon(Icons.copy_rounded, size: 18),
+                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
                 onPressed: () => _copyToClipboard(
                   'notekar://in?note=Focus%20Session',
                   'URL',
@@ -86,7 +87,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
               title: 'Draft Note'.localized(context),
               subtitle: 'notekar://note?text=My%20Idea',
               trailing: IconButton(
-                icon: const Icon(Icons.copy_rounded, size: 18),
+                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
                 onPressed: () =>
                     _copyToClipboard('notekar://note?text=My%20Idea', 'URL'),
               ),
@@ -100,7 +101,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
               title: 'Open Screen'.localized(context),
               subtitle: 'notekar://open?page=history',
               trailing: IconButton(
-                icon: const Icon(Icons.copy_rounded, size: 18),
+                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
                 onPressed: () =>
                     _copyToClipboard('notekar://open?page=history', 'URL'),
               ),
@@ -127,7 +128,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.adjust_rounded,
+              icon: CupertinoIcons.selection_pin_in_out,
               title: 'Text Selection Menu'.localized(context),
               status: 'Active'.localized(context),
               color: p.accent,
@@ -135,7 +136,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.share_rounded,
+              icon: CupertinoIcons.share,
               title: 'Share Target'.localized(context),
               status: 'Active'.localized(context),
               color: p.green,
@@ -163,7 +164,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
               title: 'Log Moment Intent'.localized(context),
               subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT',
               trailing: IconButton(
-                icon: const Icon(Icons.copy_rounded, size: 18),
+                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
                 onPressed: () => _copyToClipboard(
                   'am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"',
                   'ADB Broadcast Command',

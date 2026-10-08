@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -88,7 +87,7 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.translate_rounded,
+              icon: CupertinoIcons.globe,
               title: 'Language'.localized(context),
               status: switch (currentLocale) {
                 'en' => 'English',
@@ -105,7 +104,7 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.accessibility_new_rounded,
+              icon: CupertinoIcons.person_crop_circle,
               title: 'Accessibility'.localized(context),
               status: hapticStyle.isEmpty
                   ? ''
@@ -115,7 +114,7 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.link_rounded,
+              icon: CupertinoIcons.link,
               title: 'Automation'.localized(context),
               status: 'Bridge'.localized(context),
               color: p.accent,
@@ -140,7 +139,7 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.power_settings_new_rounded,
+              icon: CupertinoIcons.bolt_slash_fill,
               title: 'Circuit Breakers'.localized(context),
               status: 'Reset'.localized(context),
               color: p.orange,
@@ -148,14 +147,14 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.description_rounded,
+              icon: CupertinoIcons.doc_text_fill,
               title: 'Log Exporter (JSON)'.localized(context),
               color: p.accent,
               onTap: onExportJson,
             ),
             SettingsRow(
               p: p,
-              icon: Icons.developer_mode_rounded,
+              icon: CupertinoIcons.wrench_fill,
               title: 'Developer Options'.localized(context),
               status: 'Tools'.localized(context),
               color: p.accent,
@@ -164,7 +163,7 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.restart_alt_rounded,
+              icon: CupertinoIcons.arrow_counterclockwise,
               title: 'Factory Reset'.localized(context),
               status: 'Wipe'.localized(context),
               color: p.red,
@@ -172,7 +171,7 @@ class AdvancedSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.auto_awesome_rounded,
+              icon: CupertinoIcons.sparkles,
               title: 'God Mode'.localized(context),
               status: isGodModeUnlocked
                   ? 'Unlocked'.localized(context)
@@ -242,7 +241,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                 title: lang.native,
                 subtitle: lang.subtitle,
                 trailing: currentLocale == lang.code
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                     : const SizedBox.shrink(),
                 onTap: () {
                   if (currentLocale == lang.code) return;
@@ -296,7 +295,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                 p: p,
                 title: style[0].toUpperCase() + style.substring(1),
                 trailing: hapticStyle == style
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                     : const SizedBox.shrink(),
                 onTap: () {
                   if (hapticStyle == style) return;
@@ -448,7 +447,7 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.restore_rounded,
+              icon: CupertinoIcons.arrow_counterclockwise,
               title: 'Reset Settings'.localized(context),
               subtitle: 'Restore default preferences and layout'.localized(
                 context,
@@ -465,7 +464,7 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.delete_forever_rounded,
+              icon: CupertinoIcons.trash_fill,
               title: 'Reset All Data'.localized(context),
               subtitle: 'Delete all recorded moments and sessions'.localized(
                 context,
@@ -482,7 +481,7 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.phonelink_erase_rounded,
+              icon: CupertinoIcons.trash_circle_fill,
               title: 'Factory Reset'.localized(context),
               subtitle: 'Erase all data and restore factory settings'.localized(
                 context,
@@ -496,7 +495,7 @@ class AdvancedSettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           showIcon: true,
-          icon: Icons.warning_amber_rounded,
+          icon: CupertinoIcons.exclamationmark_triangle_fill,
           iconColor: p.red,
           text:
               'Data wipe operations permanently erase local storage and cannot be undone. Export a backup beforehand from Data & Backup.'

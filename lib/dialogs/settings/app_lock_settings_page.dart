@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -103,7 +103,11 @@ class AppLockSettingsPage extends StatelessWidget {
                   p: p,
                   title: entry.value,
                   trailing: privacyLockDelayMinutes == int.parse(entry.key)
-                      ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                      ? Icon(
+                          CupertinoIcons.checkmark,
+                          color: p.accent,
+                          size: 18,
+                        )
                       : const SizedBox.shrink(),
                   onTap: () {
                     final minutes = int.parse(entry.key);
@@ -141,7 +145,7 @@ class AppLockSettingsPage extends StatelessWidget {
                 context,
               ),
               trailing: privacyLockType == 'system'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () => onPrivacyLockTypeChanged('system'),
             ),
@@ -152,7 +156,7 @@ class AppLockSettingsPage extends StatelessWidget {
                 context,
               ),
               trailing: privacyLockType == 'custom_pin'
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () => onPrivacyLockTypeChanged('custom_pin'),
             ),

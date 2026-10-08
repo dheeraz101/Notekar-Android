@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart'
     show
         CupertinoAlertDialog,
         CupertinoDialogAction,
+        CupertinoIcons,
         CupertinoSwitch,
         CupertinoTextField,
         CupertinoTheme,
@@ -178,7 +179,7 @@ class _ModesCategoriesSettingsPageState
                                 ),
                                 child: selectedColor == col
                                     ? const Icon(
-                                        Icons.check_rounded,
+                                        CupertinoIcons.checkmark,
                                         size: 15,
                                         color: Colors.white,
                                       )
@@ -310,7 +311,7 @@ class _ModesCategoriesSettingsPageState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.category_rounded,
+                  CupertinoIcons.square_grid_2x2,
                   color: widget.p.accent,
                   size: 24,
                 ),
@@ -363,7 +364,7 @@ class _ModesCategoriesSettingsPageState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.add_circle_rounded,
+                  CupertinoIcons.plus_circle_fill,
                   size: 18,
                   color: widget.p.accent,
                 ),
@@ -500,7 +501,7 @@ class _ModesCategoriesSettingsPageState
                               ),
                               child: selectedColor == col
                                   ? const Icon(
-                                      Icons.check_rounded,
+                                      CupertinoIcons.checkmark,
                                       size: 15,
                                       color: Colors.white,
                                     )
@@ -609,7 +610,7 @@ class _ModesCategoriesSettingsPageState
               ),
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: widget.p.text3, size: 18),
+          Icon(CupertinoIcons.chevron_forward, color: widget.p.text3, size: 18),
         ],
       ),
       onTap: () {
@@ -916,7 +917,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                           ),
                           child: _currentColor == col
                               ? const Icon(
-                                  Icons.check_rounded,
+                                  CupertinoIcons.checkmark,
                                   size: 17,
                                   color: Colors.white,
                                 )
@@ -1013,7 +1014,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                   value: _formatDuration(
                     Duration(milliseconds: categoryTotalMs),
                   ),
-                  icon: Icons.timer_outlined,
+                  icon: CupertinoIcons.stopwatch,
                   color: _currentColor,
                 ),
               ),
@@ -1022,7 +1023,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                 child: _buildMetricTile(
                   title: 'SESSIONS',
                   value: '$categoryTotalLogs',
-                  icon: Icons.layers_outlined,
+                  icon: CupertinoIcons.square_stack_3d_up,
                   color: p.accent,
                 ),
               ),
@@ -1031,7 +1032,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                 child: _buildMetricTile(
                   title: 'AVG SESSION',
                   value: '${avgSessionMins}m',
-                  icon: Icons.speed_rounded,
+                  icon: CupertinoIcons.gauge,
                   color: p.green,
                 ),
               ),
@@ -1059,7 +1060,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
               child: Column(
                 children: [
                   Icon(
-                    Icons.history_toggle_off_rounded,
+                    CupertinoIcons.clock,
                     size: 36,
                     color: p.text3.withValues(alpha: 0.5),
                   ),
@@ -1106,7 +1107,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                   label: 'Focus Time Share',
                   value: '${focusSharePct.toStringAsFixed(1)}%',
                   detail: 'of total conscious tracked duration',
-                  icon: Icons.pie_chart_outline_rounded,
+                  icon: CupertinoIcons.chart_pie,
                   color: _currentColor,
                 ),
                 Divider(color: p.border.withValues(alpha: 0.4), height: 16),
@@ -1116,7 +1117,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                     Duration(milliseconds: longestSessionMs),
                   ),
                   detail: 'peak uninterrupted immersion',
-                  icon: Icons.trending_up_rounded,
+                  icon: CupertinoIcons.graph_square,
                   color: p.accent,
                 ),
                 Divider(color: p.border.withValues(alpha: 0.4), height: 16),
@@ -1124,7 +1125,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                   label: 'Active Logging Days',
                   value: '${activeDays.length}',
                   detail: 'distinct days with this focus mode',
-                  icon: Icons.event_available_rounded,
+                  icon: CupertinoIcons.calendar,
                   color: p.green,
                 ),
               ],
@@ -1147,7 +1148,7 @@ class _ModeDetailSettingsPageState extends State<ModeDetailSettingsPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.delete_rounded, size: 18, color: p.red),
+                    Icon(CupertinoIcons.trash, size: 18, color: p.red),
                     const SizedBox(width: 8),
                     Text(
                       'Delete Mode'.localized(context),

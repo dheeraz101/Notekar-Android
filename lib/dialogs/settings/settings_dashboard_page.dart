@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
@@ -82,7 +83,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           child: NkButton.secondary(
             p: p,
             label: 'Open Full Intelligence Hub'.localized(context),
-            icon: Icons.open_in_full_rounded,
+            icon: CupertinoIcons.arrow_up_right_square,
             fullWidth: true,
             onPressed: () {
               Navigator.of(context).push(
@@ -173,7 +174,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.flag_rounded,
+                        CupertinoIcons.flag_fill,
                         size: 20,
                         color: p.accent,
                       ),
@@ -204,7 +205,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded, size: 16, color: p.text3),
+                    Icon(
+                      CupertinoIcons.chevron_forward,
+                      size: 16,
+                      color: p.text3,
+                    ),
                   ],
                 ),
               ),
@@ -235,7 +240,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.flag_rounded,
+                        CupertinoIcons.flag_fill,
                         size: 18,
                         color: p.accent,
                       ),
@@ -293,7 +298,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                             ),
                             const SizedBox(width: 3),
                             Icon(
-                              Icons.chevron_right_rounded,
+                              CupertinoIcons.chevron_forward,
                               size: 10,
                               color: p.accent,
                             ),
@@ -333,7 +338,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                                     Icon(
                                       goal.category != null
                                           ? meta.icon
-                                          : Icons.flag_rounded,
+                                          : CupertinoIcons.flag_fill,
                                       size: 13,
                                       color: accentCol,
                                     ),
@@ -501,7 +506,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.analytics_rounded, color: p.accent, size: 20),
+              Icon(
+                CupertinoIcons.chart_bar_square_fill,
+                color: p.accent,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Sobriety Trigger Analysis'.localized(context),
@@ -609,7 +618,11 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.radar_rounded, color: accentColor, size: 20),
+                  Icon(
+                    CupertinoIcons.antenna_radiowaves_left_right,
+                    color: accentColor,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -689,7 +702,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.workspace_premium_rounded,
+                  CupertinoIcons.star_fill,
                   color: p.accent,
                   size: 22,
                 ),
@@ -761,7 +774,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome_rounded, color: p.orange, size: 16),
+              Icon(CupertinoIcons.sparkles, color: p.orange, size: 16),
               const SizedBox(width: 6),
               Text(
                 'Daily Neuroscience Insight'.localized(context),
@@ -826,11 +839,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   color: p.accent.withValues(alpha: 0.16),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 13,
-                  color: p.accent,
-                ),
+                child: Icon(CupertinoIcons.sparkles, size: 13, color: p.accent),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -867,7 +876,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.share_rounded, size: 11, color: p.accent),
+                      Icon(CupertinoIcons.share, size: 11, color: p.accent),
                       const SizedBox(width: 4),
                       Text(
                         'Share Stats'.localized(context),
@@ -1059,7 +1068,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.timelapse_rounded,
+                          CupertinoIcons.stopwatch,
                           size: 17,
                           color: isSevere
                               ? p.red
@@ -1098,7 +1107,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                       ),
                       const SizedBox(width: 2),
                       Icon(
-                        Icons.chevron_right_rounded,
+                        CupertinoIcons.chevron_forward,
                         size: 16,
                         color: p.accent,
                       ),

@@ -425,7 +425,10 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(find.byIcon(Icons.warning_amber_rounded), findsWidgets);
+        expect(
+          find.byIcon(CupertinoIcons.exclamationmark_triangle_fill),
+          findsWidgets,
+        );
       },
     );
 

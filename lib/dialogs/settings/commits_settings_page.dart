@@ -126,7 +126,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
           message: 'No Internet Connection. Showing cached preview.'.localized(
             context,
           ),
-          icon: Icons.wifi_off_rounded,
+          icon: CupertinoIcons.wifi_slash,
         );
       }
     } catch (e) {
@@ -146,7 +146,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
             p: widget.p,
             message: 'No Internet Connection. Showing cached preview.'
                 .localized(context),
-            icon: Icons.wifi_off_rounded,
+            icon: CupertinoIcons.wifi_slash,
           );
         }
       }
@@ -184,7 +184,11 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                   color: p.accent.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.commit_rounded, color: p.accent, size: 28),
+                child: Icon(
+                  CupertinoIcons.circle_fill,
+                  color: p.accent,
+                  size: 28,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -226,7 +230,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                         )
                       else
                         const Icon(
-                          Icons.refresh_rounded,
+                          CupertinoIcons.arrow_2_circlepath,
                           color: Colors.white,
                           size: 16,
                         ),
@@ -282,7 +286,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                     )
                   else
                     const Icon(
-                      Icons.refresh_rounded,
+                      CupertinoIcons.arrow_2_circlepath,
                       color: Colors.white,
                       size: 16,
                     ),
@@ -313,7 +317,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.cloud_off_rounded, color: p.red, size: 20),
+                Icon(CupertinoIcons.cloud, color: p.red, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -374,7 +378,7 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.commit_rounded,
+                        CupertinoIcons.circle_fill,
                         color: p.accent,
                         size: 16,
                       ),

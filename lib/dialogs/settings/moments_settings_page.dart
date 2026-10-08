@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:notekar/dialogs/feature_conflict_dialog.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -91,7 +91,7 @@ class MomentsSettingsPage extends StatelessWidget {
                     message:
                         'Sequential single numbering (00–99) requires standard row spacing to display 2-digit badges. Turn off Compact History to enable numbers in single mode.',
                     confirmLabel: 'Turn Off & Enable',
-                    icon: Icons.pin_outlined,
+                    icon: CupertinoIcons.pin,
                     iconColor: p.accent,
                   );
                   if (!confirmed) return;
@@ -173,7 +173,7 @@ class MomentsSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.search_rounded,
+              icon: CupertinoIcons.search,
               title: 'Search Notes'.localized(context),
               color: p.accent,
               status: '$notesCount ${'Notes'.localized(context)}',

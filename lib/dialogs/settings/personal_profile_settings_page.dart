@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -84,7 +84,7 @@ class _PersonalProfileSettingsPageState
             context: context,
             p: p,
             message: 'Profile photo updated'.localized(context),
-            icon: Icons.check_circle_outline_rounded,
+            icon: CupertinoIcons.checkmark_circle,
           );
         }
       }
@@ -95,7 +95,7 @@ class _PersonalProfileSettingsPageState
           context: context,
           p: p,
           message: 'Could not access photo'.localized(context),
-          icon: Icons.photo_camera_outlined,
+          icon: CupertinoIcons.camera,
         );
       }
     }
@@ -152,7 +152,7 @@ class _PersonalProfileSettingsPageState
           context: context,
           p: p,
           message: 'Personal identity updated'.localized(context),
-          icon: Icons.check_circle_rounded,
+          icon: CupertinoIcons.checkmark_circle_fill,
         );
       }
     } catch (e, stack) {
@@ -163,7 +163,7 @@ class _PersonalProfileSettingsPageState
           context: context,
           p: p,
           message: 'Failed to save profile'.localized(context),
-          icon: Icons.error_outline_rounded,
+          icon: CupertinoIcons.exclamationmark_circle,
         );
       }
     }
@@ -310,7 +310,7 @@ class _PersonalProfileSettingsPageState
                                                     ),
                                                   )
                                                 : Icon(
-                                                    Icons.person_rounded,
+                                                    CupertinoIcons.person_fill,
                                                     size: 46,
                                                     color: p.accent,
                                                   ),
@@ -349,7 +349,7 @@ class _PersonalProfileSettingsPageState
                           ],
                         ),
                         child: const Icon(
-                          Icons.camera_alt_rounded,
+                          CupertinoIcons.camera_fill,
                           color: Colors.white,
                           size: 14,
                         ),
@@ -499,11 +499,7 @@ class _PersonalProfileSettingsPageState
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.calendar_today_rounded,
-                        size: 18,
-                        color: p.accent,
-                      ),
+                      Icon(CupertinoIcons.calendar, size: 18, color: p.accent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -518,7 +514,7 @@ class _PersonalProfileSettingsPageState
                         ),
                       ),
                       Icon(
-                        Icons.keyboard_arrow_down_rounded,
+                        CupertinoIcons.chevron_down,
                         size: 14,
                         color: p.text3,
                       ),
@@ -544,11 +540,7 @@ class _PersonalProfileSettingsPageState
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.hourglass_bottom_rounded,
-                        size: 16,
-                        color: p.orange,
-                      ),
+                      Icon(CupertinoIcons.hourglass, size: 16, color: p.orange),
                       const SizedBox(width: 8),
                       Text(
                         'MEMENTO MORI HORIZON',
@@ -806,7 +798,7 @@ class _PersonalProfileSettingsPageState
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.auto_awesome_rounded,
+                        CupertinoIcons.sparkles,
                         size: 14,
                         color: p.accent,
                       ),
@@ -836,7 +828,7 @@ class _PersonalProfileSettingsPageState
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
-                        Icons.access_time_rounded,
+                        CupertinoIcons.clock,
                         size: 18,
                         color: p.accent,
                       ),
@@ -939,7 +931,7 @@ class _PersonalProfileSettingsPageState
             NkButton.secondary(
               p: p,
               label: 'Share Card'.localized(context),
-              icon: Icons.share_rounded,
+              icon: CupertinoIcons.share,
               onPressed: () {
                 HapticFeedback.selectionClick();
                 ShareableProfileCardSheet.show(context, p: p);

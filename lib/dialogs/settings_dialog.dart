@@ -468,7 +468,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.warning_amber_rounded,
+                  CupertinoIcons.exclamationmark_triangle_fill,
                   color: p.red,
                   size: 20,
                 ),
@@ -504,7 +504,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           child: Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: Icon(
-                              Icons.close_rounded,
+                              CupertinoIcons.xmark,
                               size: 16,
                               color: p.text3,
                             ),
@@ -630,7 +630,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   const SizedBox(width: 8),
                   Icon(
-                    Icons.chevron_right_rounded,
+                    CupertinoIcons.chevron_forward,
                     color: p.text3.withValues(alpha: 0.6),
                     size: 16,
                   ),
@@ -1360,7 +1360,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         title: 'Offline',
         message:
             'No internet connection detected. Please connect to the internet to check for updates.',
-        icon: Icons.wifi_off_rounded,
+        icon: CupertinoIcons.wifi_slash,
         iconColor: Colors.orange,
       );
       return (status: 'Offline', info: null);
@@ -1473,7 +1473,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         message: deleted > 0
             ? 'Update cache cleared ($deleted files)'.localized(context)
             : 'Update cache cleared'.localized(context),
-        icon: Icons.cleaning_services_rounded,
+        icon: CupertinoIcons.sparkles,
       );
     }
   }
@@ -1603,7 +1603,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         context: context,
         p: p,
         message: 'Note updated'.localized(context),
-        icon: Icons.check_circle_rounded,
+        icon: CupertinoIcons.checkmark_circle_fill,
       );
     }
   }
@@ -1729,14 +1729,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
           context: context,
           p: widget.p,
           message: 'Saved to Downloads/$savedFileName'.localized(context),
-          icon: Icons.check_circle_rounded,
+          icon: CupertinoIcons.checkmark_circle_fill,
         );
       } else {
         showIosPillToast(
           context: context,
           p: widget.p,
           message: 'Failed to export Markdown journal.'.localized(context),
-          icon: Icons.error_outline_rounded,
+          icon: CupertinoIcons.exclamationmark_circle,
         );
       }
     }
@@ -1755,14 +1755,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
           context: context,
           p: widget.p,
           message: 'Saved to Downloads/$savedFileName'.localized(context),
-          icon: Icons.check_circle_rounded,
+          icon: CupertinoIcons.checkmark_circle_fill,
         );
       } else {
         showIosPillToast(
           context: context,
           p: widget.p,
           message: 'Failed to export Calendar sessions.'.localized(context),
-          icon: Icons.error_outline_rounded,
+          icon: CupertinoIcons.exclamationmark_circle,
         );
       }
     }
@@ -1886,7 +1886,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         title: 'System Error',
         message:
             'NoteKar encountered an unexpected error: $error\n\nWould you like to automatically report this crash details to our developer team?',
-        icon: Icons.error_outline_rounded,
+        icon: CupertinoIcons.exclamationmark_circle,
         iconColor: p.red,
         confirmLabel: 'Report',
         cancelLabel: 'Cancel',
@@ -2211,7 +2211,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: Icons.waves_rounded,
+                                    icon: CupertinoIcons.waveform_path_ecg,
                                     iconColor: p.accent,
                                     title: 'Haptic Feedback',
                                     status:
@@ -2228,7 +2228,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigSwitchRow(
                                     p: p,
-                                    icon: Icons.animation_rounded,
+                                    icon: CupertinoIcons.play_circle,
                                     iconColor: p.text,
                                     title: 'Reduce Motion',
                                     value: reduceMotion,
@@ -2243,7 +2243,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   if (widget.onUse24Hour != null)
                                     HigSwitchRow(
                                       p: p,
-                                      icon: Icons.schedule_rounded,
+                                      icon: CupertinoIcons.clock,
                                       iconColor: p.blue,
                                       title: '24-Hour Format',
                                       value: use24Hour,
@@ -2262,7 +2262,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: Icons.bolt_rounded,
+                                    icon: CupertinoIcons.bolt,
                                     iconColor: p.green,
                                     title: 'Logging & Sessions',
                                     status: defaultModeLabel(defaultMode),
@@ -2270,7 +2270,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.local_offer_rounded,
+                                    icon: CupertinoIcons.tag,
                                     iconColor: p.accent,
                                     title: 'Activity Tags',
                                     status: 'Quick Tags',
@@ -2280,7 +2280,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   if (widget.onSoundEffects != null)
                                     HigSwitchRow(
                                       p: p,
-                                      icon: Icons.volume_up_rounded,
+                                      icon: CupertinoIcons.speaker_2,
                                       iconColor: p.accent,
                                       title: 'Acoustic Feedback',
                                       subtitle:
@@ -2301,7 +2301,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: Icons.brush_rounded,
+                                    icon: CupertinoIcons.paintbrush,
                                     iconColor: p.accent,
                                     title: 'Theme & Accent',
                                     status:
@@ -2311,7 +2311,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.notifications_rounded,
+                                    icon: CupertinoIcons.app_badge,
                                     iconColor: const Color(0xFFAF52DE),
                                     title: 'App Icons',
                                     status:
@@ -2320,7 +2320,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.schedule_rounded,
+                                    icon: CupertinoIcons.clock,
                                     iconColor: p.blue,
                                     title: 'Clock Face & Typography',
                                     status: widget.clockFont,
@@ -2339,7 +2339,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: Icons.security_rounded,
+                                    icon: CupertinoIcons.shield,
                                     iconColor: p.green,
                                     title: 'Privacy & App Lock',
                                     status: privacyLock ? 'On' : 'Off',
@@ -2348,7 +2348,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.folder_rounded,
+                                    icon: CupertinoIcons.folder,
                                     iconColor: p.accent,
                                     title: 'Data & Backups',
                                     status: '${entries.length} Logs',
@@ -2356,7 +2356,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.delete_rounded,
+                                    icon: CupertinoIcons.trash,
                                     iconColor: p.red,
                                     title: 'Trash Bin',
                                     onTap: () => _openCategory('Trash Bin'),
@@ -2374,7 +2374,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: Icons.notifications_rounded,
+                                    icon: CupertinoIcons.bell,
                                     iconColor: p.orange,
                                     title: 'Reminders & Mindfulness',
                                     status: _getRemindersStatus(),
@@ -2382,28 +2382,28 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.bar_chart_rounded,
+                                    icon: CupertinoIcons.chart_bar_square,
                                     iconColor: p.accent,
                                     title: 'Executive Analytics Dashboard',
                                     onTap: () => _openCategory('Dashboard'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.hourglass_empty_rounded,
+                                    icon: CupertinoIcons.hourglass,
                                     iconColor: const Color(0xFFAF52DE),
                                     title: 'Life Audit & Horizon',
                                     onTap: () => _openCategory('Life Audit'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.track_changes_rounded,
+                                    icon: CupertinoIcons.scope,
                                     iconColor: p.green,
                                     title: 'Targets & Goals',
                                     onTap: () => _openCategory('Goals'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.local_fire_department_rounded,
+                                    icon: CupertinoIcons.flame,
                                     iconColor: p.orange,
                                     title: 'Sobriety Companion',
                                     status: enableSobrietyMode
@@ -2422,7 +2422,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 children: [
                                   HigRow(
                                     p: p,
-                                    icon: Icons.sync_rounded,
+                                    icon: CupertinoIcons.arrow_2_circlepath,
                                     iconColor: p.accent,
                                     title: 'Update Center',
                                     status: _betaTrack ? 'Beta' : 'Stable',
@@ -2431,22 +2431,31 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.tune_rounded,
+                                    icon: CupertinoIcons.slider_horizontal_3,
                                     iconColor: p.orange,
                                     title: 'Advanced Tools',
                                     onTap: () => _openCategory('Advanced'),
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.info_outline_rounded,
+                                    icon: CupertinoIcons.info_circle,
                                     iconColor: p.accent,
                                     title: 'About NoteKar',
                                     status: 'v$appVersion',
                                     onTap: () => _openCategory('About'),
                                   ),
+                                  if (_isGodModeUnlocked)
+                                    HigRow(
+                                      p: p,
+                                      icon: CupertinoIcons.sparkles,
+                                      iconColor: const Color(0xFFFFD700),
+                                      title: 'God Mode',
+                                      status: 'Unlocked',
+                                      onTap: () => _openCategory('God Mode'),
+                                    ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.coffee_rounded,
+                                    icon: CupertinoIcons.gift,
                                     iconColor: const Color(0xFFFFDD00),
                                     title: 'Buy Me a Coffee',
                                     status: 'Support',
@@ -2454,7 +2463,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   ),
                                   HigRow(
                                     p: p,
-                                    icon: Icons.feedback_rounded,
+                                    icon: CupertinoIcons.chat_bubble_text,
                                     iconColor: p.green,
                                     title: 'Feedback',
                                     onTap: _openFeedback,
@@ -2500,7 +2509,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
-                                            Icons.system_update_rounded,
+                                            CupertinoIcons
+                                                .arrow_2_circlepath_circle_fill,
                                             color: p.text,
                                             size: 16,
                                           ),
@@ -2548,7 +2558,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                         ),
                                         const SizedBox(width: 8),
                                         Icon(
-                                          Icons.chevron_right_rounded,
+                                          CupertinoIcons.chevron_forward,
                                           color: p.text3,
                                           size: 20,
                                         ),
@@ -2945,7 +2955,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       p: p,
                                       message: 'Notification permission needed'
                                           .localized(context),
-                                      icon: Icons.notifications_off_outlined,
+                                      icon: CupertinoIcons.bell_slash,
                                     );
                                     return;
                                   }
@@ -2993,7 +3003,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       p: p,
                                       message: 'Notification permission needed'
                                           .localized(context),
-                                      icon: Icons.notifications_off_outlined,
+                                      icon: CupertinoIcons.bell_slash,
                                     );
                                     return;
                                   }
@@ -3032,7 +3042,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       p: p,
                                       message: 'Notification permission needed'
                                           .localized(context),
-                                      icon: Icons.notifications_off_outlined,
+                                      icon: CupertinoIcons.bell_slash,
                                     );
                                     return;
                                   }
@@ -3090,7 +3100,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       p: p,
                                       message: 'Notification permission needed'
                                           .localized(context),
-                                      icon: Icons.notifications_off_outlined,
+                                      icon: CupertinoIcons.bell_slash,
                                     );
                                     return;
                                   }
@@ -3159,7 +3169,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                       p: p,
                                       message: 'Notification permission needed'
                                           .localized(context),
-                                      icon: Icons.notifications_off_outlined,
+                                      icon: CupertinoIcons.bell_slash,
                                     );
                                     return;
                                   }
@@ -3258,7 +3268,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   message:
                                       'Test alarm scheduled in 3 seconds! Lock phone or exit app.'
                                           .localized(context),
-                                  icon: Icons.alarm_rounded,
+                                  icon: CupertinoIcons.alarm,
                                   duration: const Duration(seconds: 3),
                                 );
                                 try {
@@ -3509,7 +3519,8 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     GuideRow(
                                       p: p,
                                       icon:
-                                          g.icon ?? Icons.help_outline_rounded,
+                                          g.icon ??
+                                          CupertinoIcons.question_circle,
                                       title: g.title,
                                       text: g.content,
                                     ),
@@ -3584,7 +3595,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                   children: [
                                     SettingsRow(
                                       p: p,
-                                      icon: Icons.bug_report_outlined,
+                                      icon: CupertinoIcons.ant,
                                       title: 'Diagnostics'.localized(context),
                                       status: 'View'.localized(context),
                                       color: p.accent,
@@ -3595,7 +3606,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     ),
                                     SettingsRow(
                                       p: p,
-                                      icon: Icons.memory_rounded,
+                                      icon: CupertinoIcons.gauge,
                                       title: 'Device Health'.localized(context),
                                       status: AdaptiveEngine().healthStatus
                                           .localized(context),
@@ -3607,7 +3618,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     ),
                                     SettingsRow(
                                       p: p,
-                                      icon: Icons.network_check_rounded,
+                                      icon: CupertinoIcons.wifi,
                                       title: 'Network Monitor'.localized(
                                         context,
                                       ),
@@ -3620,7 +3631,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     ),
                                     SettingsRow(
                                       p: p,
-                                      icon: Icons.history_rounded,
+                                      icon: CupertinoIcons.clock_fill,
                                       title: 'Commits'.localized(context),
                                       status: 'Activity'.localized(context),
                                       color: p.accent,
@@ -4110,7 +4121,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     p: p,
                                     message: 'God Mode has been revoked.'
                                         .localized(context),
-                                    icon: Icons.shield_outlined,
+                                    icon: CupertinoIcons.shield,
                                   );
                                 }
                               },

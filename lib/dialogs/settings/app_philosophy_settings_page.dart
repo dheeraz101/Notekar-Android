@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -103,7 +104,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.format_quote_rounded, color: p.accent, size: 22),
+                  Icon(CupertinoIcons.quote_bubble, color: p.accent, size: 22),
                   const SizedBox(width: 8),
                   Text(
                     'THE COURAGE TO SAY NO'.localized(context),
@@ -170,7 +171,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
         _PhilosophyPillarCard(
           p: p,
           number: '01',
-          icon: Icons.touch_app_rounded,
+          icon: CupertinoIcons.hand_point_right_fill,
           iconColor: p.accent,
           tag: '1-TAP TRUTH'.localized(context),
           title: 'Simplicity is Sacred'.localized(context),
@@ -185,7 +186,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
         _PhilosophyPillarCard(
           p: p,
           number: '02',
-          icon: Icons.shield_rounded,
+          icon: CupertinoIcons.shield_fill,
           iconColor: p.green,
           tag: 'ZERO TELEMETRY'.localized(context),
           title: 'Sanctuary of Radical Privacy'.localized(context),
@@ -200,7 +201,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
         _PhilosophyPillarCard(
           p: p,
           number: '03',
-          icon: Icons.spa_rounded,
+          icon: CupertinoIcons.leaf_arrow_circlepath,
           iconColor: p.orange,
           tag: 'CALM TECHNOLOGY'.localized(context),
           title: 'Reverence for Human Attention'.localized(context),
@@ -215,7 +216,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
         _PhilosophyPillarCard(
           p: p,
           number: '04',
-          icon: Icons.brush_rounded,
+          icon: CupertinoIcons.paintbrush,
           iconColor: const Color(0xFFAF52DE),
           // Deep Violet Accent
           tag: 'UNCOMPROMISING CRAFT'.localized(context),
@@ -231,7 +232,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
         _PhilosophyPillarCard(
           p: p,
           number: '05',
-          icon: Icons.all_inclusive_rounded,
+          icon: CupertinoIcons.infinite,
           iconColor: p.blue,
           tag: 'TIMELESS POSSESSION'.localized(context),
           title: 'Built Like an Heirloom'.localized(context),
@@ -262,7 +263,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
           children: [
             _SpecRow(
               p: p,
-              icon: Icons.cloud_off_rounded,
+              icon: CupertinoIcons.cloud,
               color: p.accent,
               title: '100% Offline Core'.localized(context),
               subtitle:
@@ -271,7 +272,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
             ),
             _SpecRow(
               p: p,
-              icon: Icons.visibility_off_rounded,
+              icon: CupertinoIcons.eye_slash,
               color: p.green,
               title: 'Zero Analytics or Trackers'.localized(context),
               subtitle:
@@ -280,7 +281,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
             ),
             _SpecRow(
               p: p,
-              icon: Icons.bolt_rounded,
+              icon: CupertinoIcons.bolt,
               color: p.orange,
               title: 'Local Hive Engine'.localized(context),
               subtitle:
@@ -289,7 +290,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
             ),
             _SpecRow(
               p: p,
-              icon: Icons.vibration_rounded,
+              icon: CupertinoIcons.waveform_path_ecg,
               color: const Color(0xFFAF52DE),
               title: 'Tactile Mechanical Haptics'.localized(context),
               subtitle:
@@ -298,7 +299,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
             ),
             _SpecRow(
               p: p,
-              icon: Icons.code_rounded,
+              icon: CupertinoIcons.chevron_left_slash_chevron_right,
               color: p.accent,
               title: 'Open Source Transparency'.localized(context),
               subtitle:
@@ -307,7 +308,7 @@ class AppPhilosophySettingsPage extends StatelessWidget {
             ),
             _SpecRow(
               p: p,
-              icon: Icons.money_off_rounded,
+              icon: CupertinoIcons.gift,
               color: p.red,
               title: 'Zero Subscriptions or Ads'.localized(context),
               subtitle:

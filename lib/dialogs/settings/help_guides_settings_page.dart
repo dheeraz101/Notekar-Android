@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -30,7 +31,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
               color: p.accent,
               status: 'Manifesto'.localized(context),
               trailing: Icon(
-                Icons.chevron_right_rounded,
+                CupertinoIcons.chevron_forward,
                 color: p.text3,
                 size: 20,
               ),
@@ -53,7 +54,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.auto_stories_rounded,
+              icon: CupertinoIcons.book,
               title: 'Guides'.localized(context),
               color: p.accent,
               status: 'Tutorials'.localized(context),
@@ -61,7 +62,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.help_outline_rounded,
+              icon: CupertinoIcons.question_circle,
               title: 'Help'.localized(context),
               color: p.orange,
               status: 'FAQ'.localized(context),
@@ -83,12 +84,12 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.auto_awesome_rounded,
+              icon: CupertinoIcons.sparkles,
               title: 'Upcoming Features'.localized(context),
               color: p.accent,
               status: 'Roadmap'.localized(context),
               trailing: Icon(
-                Icons.chevron_right_rounded,
+                CupertinoIcons.chevron_right,
                 color: p.text3,
                 size: 16,
               ),
@@ -111,7 +112,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.description_outlined,
+              icon: CupertinoIcons.doc_text,
               title: 'Licenses'.localized(context),
               color: p.accent,
               status: 'Open Source'.localized(context),
@@ -119,7 +120,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.article_outlined,
+              icon: CupertinoIcons.doc,
               title: 'Terms of Use'.localized(context),
               color: p.orange,
               status: 'MIT'.localized(context),
@@ -128,7 +129,7 @@ class HelpGuidesSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.security_rounded,
+              icon: CupertinoIcons.shield,
               title: 'Privacy Policy'.localized(context),
               color: p.green,
               status: 'Offline-First'.localized(context),

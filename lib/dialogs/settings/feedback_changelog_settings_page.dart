@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
@@ -34,7 +34,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'Locked 120fps. Zero UI Thread Jank.',
         desc:
             'Heavy analytical computations across Life Audit and Executive Dashboard metrics are now executed on background threads via Dart 3 Isolate.run, guaranteeing buttery-smooth 120fps scrolling even with tens of thousands of notes.',
-        icon: Icons.bolt_rounded,
+        icon: CupertinoIcons.bolt,
         badgeColor: Color(0xFF0A84FF),
         specs:
             'Isolate.run · LifeAuditService.calculateAsync · DashboardMetricsService.calculateAsync · Zero-Copy Ports',
@@ -45,7 +45,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'Sub-Millisecond Inverted Token Index.',
         desc:
             'Replaced O(N) linear scans with a dedicated in-memory inverted token index, prefix trie autocomplete, and instant hashtag and category intersection lookups with relevance scoring.',
-        icon: Icons.search_rounded,
+        icon: CupertinoIcons.search,
         badgeColor: Color(0xFF34C759),
         specs:
             'Inverted Token Index · Prefix Trie · Set Intersections · Candidate Relevance Scoring',
@@ -56,7 +56,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'Fail-Safe Architecture. Zero Cascading Crashes.',
         desc:
             'Implemented an automated 3-strike circuit breaker mechanism across subsystem boundaries (Digital Wellbeing, Analytics, MethodChannels) that gracefully trips on unhandled exceptions and includes manual resets in Diagnostics and God Mode.',
-        icon: Icons.offline_bolt_rounded,
+        icon: CupertinoIcons.bolt_fill,
         badgeColor: Color(0xFFFF2D55),
         specs:
             'CircuitBreakerService · 3-Strike Threshold · God Mode Overrides · Diagnostics Status',
@@ -67,7 +67,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'O(1) Lookups. O(log N) Date Slicing.',
         desc:
             'MomentRepository now features in-memory secondary indices for O(1) ID lookups and binary range slicing that queries date intervals in O(log N) without full table scans, backed by encrypted Hive storage.',
-        icon: Icons.layers_rounded,
+        icon: CupertinoIcons.square_stack_3d_up,
         badgeColor: Color(0xFFAF52DE),
         specs:
             'Secondary ID Index · Binary Range Slicing · Incremental Updates · Hive AES Cipher',
@@ -78,7 +78,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'OS-Level Alarms. Automated Local Resilience.',
         desc:
             'Native Android AlarmManager schedules exact midnight maintenance (ACTION_DAILY_MAINTENANCE) to generate rolling snapshots, purge expired trash, and compact databases while the user sleeps.',
-        icon: Icons.schedule_rounded,
+        icon: CupertinoIcons.clock,
         badgeColor: Color(0xFFFF9500),
         specs:
             'AlarmManager.RTC_WAKEUP · Rolling Snapshots · 30-Day Trash Auto-Purge · Storage Compaction',
@@ -89,7 +89,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'Direct Ledger Access. Preserved Scroll State.',
         desc:
             'Life Audit & Horizon ledger is now directly accessible from the History sheet action menu, and PageStorageKey integration ensures timeline scroll position is preserved across sheet state toggles.',
-        icon: Icons.auto_graph_rounded,
+        icon: CupertinoIcons.graph_circle,
         badgeColor: Color(0xFF5856D6),
         specs:
             'History Actions · PageStorageKey · In-Sheet Life Audit Router · Seamless Multi-Horizons',
@@ -100,7 +100,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         headline: 'Single Source of Truth. Synchronized IPC.',
         desc:
             'Decoupled global state management into SettingsController with InheritedNotifier and synchronized Android Kotlin background service pause state with Flutter foreground listeners.',
-        icon: Icons.settings_suggest_rounded,
+        icon: CupertinoIcons.slider_horizontal_3,
         badgeColor: Color(0xFF007AFF),
         specs:
             'SettingsController · InheritedNotifier · SharedPreferences Sync · Android IPC Alignment',
@@ -147,7 +147,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.bug_report_rounded,
+              icon: CupertinoIcons.ant,
               title: 'Report a Bug'.localized(context),
               subtitle: "Something isn't working as expected.".localized(
                 context,
@@ -157,7 +157,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.auto_awesome_rounded,
+              icon: CupertinoIcons.sparkles,
               title: 'Request a Feature'.localized(context),
               subtitle: 'Suggest a new idea or improvement.'.localized(context),
               color: p.accent,
@@ -220,7 +220,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.auto_awesome_rounded,
+                      CupertinoIcons.sparkles,
                       size: 12,
                       color: rel.badgeColor,
                     ),
@@ -275,7 +275,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded, size: 12, color: p.text3),
+                  Icon(CupertinoIcons.calendar, size: 12, color: p.text3),
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(
@@ -428,7 +428,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
           child: Column(
             children: [
               Icon(
-                Icons.format_quote_rounded,
+                CupertinoIcons.quote_bubble,
                 color: p.accent.withValues(alpha: 0.7),
                 size: 26,
               ),
@@ -474,7 +474,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.history_edu_rounded, color: p.accent, size: 18),
+                Icon(CupertinoIcons.book_fill, color: p.accent, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   'View Full Technical Changelog'.localized(context),
@@ -536,13 +536,13 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.history_rounded,
+              icon: CupertinoIcons.clock_fill,
               title: 'Full Release Archive on Web'.localized(context),
               subtitle: 'Browse all historical versions and beta releases.'
                   .localized(context),
               color: p.accent,
               trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
+                CupertinoIcons.chevron_forward,
                 size: 14,
                 color: p.text3,
               ),
@@ -566,21 +566,21 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
   Widget _buildExpressiveRow(BuildContext context, String item) {
     final trimmed = item.trim();
     String text = trimmed;
-    IconData iconData = Icons.circle;
+    IconData iconData = CupertinoIcons.circle_fill;
     double iconSize = 6;
     Color iconColor = p.accent;
     Color iconBg = p.accent.withValues(alpha: 0.12);
 
     if (trimmed.startsWith('+') || trimmed.toLowerCase().startsWith('add')) {
       text = trimmed.startsWith('+') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.add_rounded;
+      iconData = CupertinoIcons.plus;
       iconSize = 13;
       iconColor = const Color(0xFF30D158);
       iconBg = const Color(0xFF30D158).withValues(alpha: 0.15);
     } else if (trimmed.startsWith('-') ||
         trimmed.toLowerCase().startsWith('remove')) {
       text = trimmed.startsWith('-') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.remove_rounded;
+      iconData = CupertinoIcons.minus;
       iconSize = 13;
       iconColor = const Color(0xFFFF453A);
       iconBg = const Color(0xFFFF453A).withValues(alpha: 0.15);
@@ -588,7 +588,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         trimmed.toLowerCase().startsWith('fix') ||
         trimmed.toLowerCase().startsWith('resolve')) {
       text = trimmed.startsWith('!') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.build_circle_outlined;
+      iconData = CupertinoIcons.wrench;
       iconSize = 13;
       iconColor = const Color(0xFF0A84FF);
       iconBg = const Color(0xFF0A84FF).withValues(alpha: 0.15);
@@ -597,7 +597,7 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
         trimmed.toLowerCase().startsWith('optimize') ||
         trimmed.toLowerCase().startsWith('update')) {
       text = trimmed.startsWith('*') ? trimmed.substring(1).trim() : trimmed;
-      iconData = Icons.star_rounded;
+      iconData = CupertinoIcons.star_fill;
       iconSize = 14;
       iconColor = const Color(0xFFFF9F0A);
       iconBg = const Color(0xFFFF9F0A).withValues(alpha: 0.15);

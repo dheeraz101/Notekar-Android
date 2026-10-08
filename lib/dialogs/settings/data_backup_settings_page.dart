@@ -74,7 +74,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.archive_outlined,
+              icon: CupertinoIcons.archivebox,
               title: 'Backup & Export'.localized(context),
               status: '$entriesCount ${'Logs'.localized(context)}',
               color: p.green,
@@ -83,7 +83,7 @@ class DataBackupSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.health_and_safety_outlined,
+              icon: CupertinoIcons.shield,
               title: 'Backup Status'.localized(context),
               status: dataHealthStatus,
               color: p.accent,
@@ -118,7 +118,7 @@ class DataBackupSettingsPage extends StatelessWidget {
                     ? 'Disabled'.localized(context)
                     : 'Every $days Days'.localized(context),
                 trailing: backupReminderDays == days
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                     : const SizedBox.shrink(),
                 onTap: () {
                   if (backupReminderDays == days) return;
@@ -143,7 +143,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.table_chart_outlined,
+              icon: CupertinoIcons.table,
               title: 'Export CSV'.localized(context),
               status: 'Table'.localized(context),
               color: p.green,
@@ -152,7 +152,7 @@ class DataBackupSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.date_range_outlined,
+              icon: CupertinoIcons.calendar,
               title: 'Export Last 7 Days'.localized(context),
               status: 'Recent'.localized(context),
               color: p.green,
@@ -174,7 +174,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.code_rounded,
+              icon: CupertinoIcons.chevron_left_slash_chevron_right,
               title: 'Export JSON'.localized(context),
               status: 'Dev'.localized(context),
               color: p.accent,
@@ -196,7 +196,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.article_rounded,
+              icon: CupertinoIcons.doc_text,
               title: 'Export Journal (.md)'.localized(context),
               status: 'Markdown'.localized(context),
               color: const Color(0xFF7000FF),
@@ -218,7 +218,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.calendar_today_rounded,
+              icon: CupertinoIcons.calendar,
               title: 'Export Calendar (.ics)'.localized(context),
               status: 'Calendar'.localized(context),
               color: p.orange,
@@ -241,7 +241,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.archive_outlined,
+              icon: CupertinoIcons.archivebox,
               title: 'Export Backup'.localized(context),
               status: 'Full'.localized(context),
               color: p.accent,
@@ -250,7 +250,7 @@ class DataBackupSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.unarchive_outlined,
+              icon: CupertinoIcons.arrow_up_doc,
               title: 'Import Backup'.localized(context),
               status: 'Restore'.localized(context),
               color: p.orange,
@@ -259,7 +259,7 @@ class DataBackupSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.folder_zip_outlined,
+              icon: CupertinoIcons.folder,
               title: 'Local Backups'.localized(context),
               status: 'Manage'.localized(context),
               color: p.accent,
@@ -281,7 +281,7 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.swap_horiz_rounded,
+              icon: CupertinoIcons.arrow_right_arrow_left,
               title: 'Migrate from Other Apps'.localized(context),
               status: 'Import'.localized(context),
               color: const Color(0xFF00E5FF),
@@ -312,14 +312,14 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.android_rounded,
+              icon: CupertinoIcons.device_phone_portrait,
               title: 'Android Backup'.localized(context),
               color: p.green,
               status: 'Active'.localized(context),
             ),
             SettingsRow(
               p: p,
-              icon: Icons.favorite_outline_rounded,
+              icon: CupertinoIcons.heart,
               title: 'Data Health'.localized(context),
               color: p.green,
               status: dataHealthStatus,
@@ -340,14 +340,14 @@ class DataBackupSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.lock_outlined,
+              icon: CupertinoIcons.lock,
               title: 'Encrypted Backup'.localized(context),
               color: p.orange,
               status: 'Planned'.localized(context),
             ),
             SettingsRow(
               p: p,
-              icon: Icons.cloud_outlined,
+              icon: CupertinoIcons.cloud,
               title: 'Google Drive Backup'.localized(context),
               color: p.orange,
               status: 'Planned'.localized(context),
@@ -482,7 +482,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
         context: context,
         p: widget.p,
         message: 'Failed to read local backup file'.localized(context),
-        icon: Icons.warning_amber_rounded,
+        icon: CupertinoIcons.exclamationmark_triangle_fill,
       );
     }
   }
@@ -506,7 +506,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
           child: NkButton.primary(
             p: p,
             fullWidth: true,
-            icon: Icons.add_to_photos_outlined,
+            icon: CupertinoIcons.plus_square,
             label: 'Create Quick Local Backup'.localized(context),
             onPressed: () async {
               widget.onCreateQuickBackup();
@@ -526,7 +526,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
         else if (_backupFiles.isEmpty)
           NkEmptyState(
             p: p,
-            icon: Icons.folder_zip_outlined,
+            icon: CupertinoIcons.folder,
             title: 'No Local Backups Found'.localized(context),
             subtitle:
                 'Tap the button above to create an immediate local snapshot.'
@@ -552,7 +552,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
       message: 'This local backup file will be erased permanently.',
       confirmLabel: 'Delete',
       isDestructive: true,
-      icon: Icons.delete_forever_rounded,
+      icon: CupertinoIcons.trash_fill,
     );
     if (confirmed) {
       await _deleteBackup(file);
@@ -572,7 +572,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
         color: p.red,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+        child: const Icon(CupertinoIcons.trash, color: Colors.white),
       ),
       onDismissed: (direction) => _deleteBackup(file),
       child: Material(
@@ -590,11 +590,7 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
                   color: p.accent.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.folder_zip_outlined,
-                  color: p.accent,
-                  size: 20,
-                ),
+                child: Icon(CupertinoIcons.folder, color: p.accent, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -619,13 +615,17 @@ class _LocalBackupsPageState extends State<LocalBackupsPage> {
               ),
               IconButton(
                 tooltip: 'Restore Backup',
-                icon: Icon(Icons.restore_rounded, color: p.accent, size: 20),
+                icon: Icon(
+                  CupertinoIcons.arrow_counterclockwise,
+                  color: p.accent,
+                  size: 18,
+                ),
                 onPressed: () => _restoreFile(file),
               ),
               IconButton(
                 tooltip: 'Delete Backup',
                 icon: Icon(
-                  Icons.delete_forever_rounded,
+                  CupertinoIcons.trash_fill,
                   color: p.red.withValues(alpha: 0.8),
                   size: 20,
                 ),

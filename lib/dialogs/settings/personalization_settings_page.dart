@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -57,7 +57,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.dark_mode_outlined,
+              icon: CupertinoIcons.moon,
               title: 'Display'.localized(context),
               status: theme.isEmpty
                   ? ''
@@ -67,7 +67,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.color_lens_outlined,
+              icon: CupertinoIcons.paintbrush,
               title: 'Accent Color'.localized(context),
               status: accentColor.isEmpty
                   ? ''
@@ -78,7 +78,7 @@ class PersonalizationSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.apps_rounded,
+              icon: CupertinoIcons.square_grid_2x2,
               title: 'App Icons'.localized(context),
               status: switch (appIconStyle) {
                 'default' => 'Aurora',

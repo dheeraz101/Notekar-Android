@@ -33,22 +33,22 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
   bool _loading = true;
 
   static final List<int> _availableGlyphs = [
-    Icons.label_rounded.codePoint,
-    Icons.explore_rounded.codePoint,
-    Icons.local_fire_department_rounded.codePoint,
-    Icons.menu_book_rounded.codePoint,
-    Icons.laptop_mac_rounded.codePoint,
-    Icons.water_drop_rounded.codePoint,
-    Icons.auto_awesome_rounded.codePoint,
-    Icons.description_rounded.codePoint,
-    Icons.favorite_rounded.codePoint,
-    Icons.directions_car_rounded.codePoint,
-    Icons.local_fire_department_rounded.codePoint,
-    Icons.delete_rounded.codePoint,
-    Icons.sports_esports_rounded.codePoint,
-    Icons.people_rounded.codePoint,
-    Icons.park_rounded.codePoint,
-    Icons.dark_mode_rounded.codePoint,
+    CupertinoIcons.tag_fill.codePoint,
+    CupertinoIcons.compass_fill.codePoint,
+    CupertinoIcons.flame_fill.codePoint,
+    CupertinoIcons.book_fill.codePoint,
+    CupertinoIcons.device_laptop.codePoint,
+    CupertinoIcons.drop_fill.codePoint,
+    CupertinoIcons.sparkles.codePoint,
+    CupertinoIcons.doc_text_fill.codePoint,
+    CupertinoIcons.heart_circle_fill.codePoint,
+    CupertinoIcons.car_fill.codePoint,
+    CupertinoIcons.flame.codePoint,
+    CupertinoIcons.trash.codePoint,
+    CupertinoIcons.gamecontroller_fill.codePoint,
+    CupertinoIcons.person_2_fill.codePoint,
+    CupertinoIcons.suit_club_fill.codePoint,
+    CupertinoIcons.moon_fill.codePoint,
   ];
 
   @override
@@ -209,7 +209,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
               message: 'Updated $updatedNotes notes to #$label'.localized(
                 context,
               ),
-              icon: Icons.check_circle_rounded,
+              icon: CupertinoIcons.checkmark_circle_fill,
             );
           }
         }
@@ -256,7 +256,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
             context: context,
             p: widget.p,
             message: 'Removed from $count notes'.localized(context),
-            icon: Icons.delete_sweep_rounded,
+            icon: CupertinoIcons.trash,
           );
         }
       }
@@ -336,7 +336,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add_rounded, size: 14, color: widget.p.accent),
+                    Icon(CupertinoIcons.add, size: 14, color: widget.p.accent),
                     const SizedBox(width: 6),
                     Text(
                       'Add Quick Tag'.localized(context),
@@ -493,7 +493,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
-                            Icons.edit_rounded,
+                            CupertinoIcons.square_pencil,
                             size: 14,
                             color: widget.p.text2,
                           ),
@@ -513,7 +513,7 @@ class _ActivityTagsSettingsPageState extends State<ActivityTagsSettingsPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
-                            Icons.delete_rounded,
+                            CupertinoIcons.trash,
                             size: 14,
                             color: widget.p.red,
                           ),

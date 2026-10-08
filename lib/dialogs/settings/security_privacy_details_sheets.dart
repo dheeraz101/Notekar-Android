@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
@@ -36,7 +37,11 @@ void showSecurityDetailsSheet({
                     color: p.green.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(Icons.gpp_good_rounded, color: p.green, size: 32),
+                  child: Icon(
+                    CupertinoIcons.shield_fill,
+                    color: p.green,
+                    size: 32,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -60,7 +65,7 @@ void showSecurityDetailsSheet({
               _buildInfoDetailRow(
                 context: context,
                 p: p,
-                icon: Icons.check_circle_outline_rounded,
+                icon: CupertinoIcons.checkmark_circle,
                 title: 'Zero Malware & Detections',
                 text:
                     'NoteKar is audited and verified clean (0/60+ engine detections) by VirusTotal security scanners on every release compilation.',
@@ -69,7 +74,7 @@ void showSecurityDetailsSheet({
               _buildInfoDetailRow(
                 context: context,
                 p: p,
-                icon: Icons.lock_outline_rounded,
+                icon: CupertinoIcons.lock,
                 title: 'Hardware-Backed Encryption',
                 text:
                     'Databases are sealed with 256-bit AES cryptographic keys generated inside the hardware secure Android Keystore.',
@@ -78,7 +83,7 @@ void showSecurityDetailsSheet({
               _buildInfoDetailRow(
                 context: context,
                 p: p,
-                icon: Icons.code_rounded,
+                icon: CupertinoIcons.chevron_left_slash_chevron_right,
                 title: 'Auditable Open-Source Code',
                 text:
                     'Every line of code is hosted publicly on GitHub. You can audit, review, compile, or fork the app independently.',
@@ -138,7 +143,11 @@ void showPrivacyDetailsSheet({
                     color: p.accent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(Icons.shield_rounded, color: p.accent, size: 32),
+                  child: Icon(
+                    CupertinoIcons.shield_fill,
+                    color: p.accent,
+                    size: 32,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -162,7 +171,7 @@ void showPrivacyDetailsSheet({
               _buildInfoDetailRow(
                 context: context,
                 p: p,
-                icon: Icons.cloud_off_rounded,
+                icon: CupertinoIcons.cloud,
                 title: '100% Offline Database',
                 text:
                     'Your check-ins, habits, and notes are saved directly to local storage. There is no cloud sync, meaning your records never leave this device.',
@@ -171,7 +180,7 @@ void showPrivacyDetailsSheet({
               _buildInfoDetailRow(
                 context: context,
                 p: p,
-                icon: Icons.track_changes_rounded,
+                icon: CupertinoIcons.scope,
                 title: 'No Trackers or Analytics',
                 text:
                     'NoteKar contains zero telemetry, tracking SDKs, or commercial analytics. We do not inspect your usage habits or profiling details.',
@@ -180,7 +189,7 @@ void showPrivacyDetailsSheet({
               _buildInfoDetailRow(
                 context: context,
                 p: p,
-                icon: Icons.key_rounded,
+                icon: CupertinoIcons.lock_shield,
                 title: 'Local Control & Decryption',
                 text:
                     'You have complete command of your data. You can inspect logs, clean databases, export backups, or wipe all records instantly.',

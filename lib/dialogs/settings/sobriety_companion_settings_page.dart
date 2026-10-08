@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
@@ -54,7 +54,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
           children: [
             SettingsSwitchRow(
               p: p,
-              icon: Icons.self_improvement_rounded,
+              icon: CupertinoIcons.sparkles,
               title: 'Enable Sobriety Mode'.localized(context),
               subtitle:
                   'Adds a clean streak card to your home screen and adapts home screen widgets.'
@@ -79,7 +79,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
             children: [
               SettingsSwitchRow(
                 p: p,
-                icon: Icons.restart_alt_rounded,
+                icon: CupertinoIcons.arrow_counterclockwise,
                 title: 'Reset on Relapse Tag Only'.localized(context),
                 subtitle:
                     'Only moments tagged #relapse reset the streak. Turn off to reset on any new log.'
@@ -99,14 +99,14 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
             children: [
               SettingsRow(
                 p: p,
-                icon: Icons.analytics_rounded,
+                icon: CupertinoIcons.chart_bar_square_fill,
                 title: 'Trigger Analysis'.localized(context),
                 subtitle:
                     'View your relapse pattern insights, top moods, and peak vulnerability windows.'
                         .localized(context),
                 color: p.orange,
                 trailing: Icon(
-                  Icons.chevron_right_rounded,
+                  CupertinoIcons.chevron_forward,
                   color: p.text3,
                   size: 20,
                 ),
@@ -130,7 +130,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
             children: [
               SettingsRow(
                 p: p,
-                icon: Icons.calendar_today_rounded,
+                icon: CupertinoIcons.calendar,
                 title: 'Set Sobriety Start Date'.localized(context),
                 subtitle: sobrietyCustomStartMs != null
                     ? '${"From".localized(context)} ${datePretty(sobrietyCustomStartMs!)} ${"at".localized(context)} ${formatTimeShort(sobrietyCustomStartMs!)}'
@@ -147,13 +147,17 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
                           onSobrietyCustomStartMsChanged(null);
                         },
                         child: Icon(
-                          Icons.close_rounded,
+                          CupertinoIcons.clear,
                           color: p.text3,
                           size: 18,
                         ),
                       ),
                     const SizedBox(width: 4),
-                    Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                    Icon(
+                      CupertinoIcons.chevron_forward,
+                      color: p.text3,
+                      size: 20,
+                    ),
                   ],
                 ),
                 onTap: () async {
@@ -189,7 +193,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
             children: [
               SettingsRow(
                 p: p,
-                icon: Icons.palette_rounded,
+                icon: CupertinoIcons.paintbrush,
                 title: 'Theme Style'.localized(context),
                 subtitle: () {
                   final t = kMilestoneThemes.firstWhere(
@@ -200,7 +204,7 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
                 }(),
                 color: p.orange,
                 trailing: Icon(
-                  Icons.chevron_right_rounded,
+                  CupertinoIcons.chevron_forward,
                   color: p.text3,
                   size: 20,
                 ),
@@ -211,14 +215,14 @@ class SobrietyCompanionSettingsPage extends StatelessWidget {
               ),
               SettingsRow(
                 p: p,
-                icon: Icons.emoji_events_rounded,
+                icon: CupertinoIcons.star_fill,
                 title: 'View All Milestones'.localized(context),
                 subtitle:
                     'See all 21 milestones with descriptions from day 1 to 10 years.'
                         .localized(context),
                 color: p.orange,
                 trailing: Icon(
-                  Icons.chevron_right_rounded,
+                  CupertinoIcons.chevron_forward,
                   color: p.text3,
                   size: 20,
                 ),
@@ -280,7 +284,11 @@ class TriggerAnalysisPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(Icons.spa_rounded, color: p.accent, size: 28),
+            Icon(
+              CupertinoIcons.leaf_arrow_circlepath,
+              color: p.accent,
+              size: 28,
+            ),
             const SizedBox(height: 8),
             Text(
               'No relapses recorded yet!'.localized(context),
@@ -382,7 +390,11 @@ class TriggerAnalysisPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.analytics_rounded, color: p.orange, size: 20),
+              Icon(
+                CupertinoIcons.chart_bar_square_fill,
+                color: p.orange,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Sobriety Trigger Analysis'.localized(context),
@@ -483,23 +495,23 @@ class MilestoneThemePage extends StatelessWidget {
       'science' => CupertinoIcons.lab_flask,
       'warrior' => CupertinoIcons.shield,
       'navy' => CupertinoIcons.compass,
-      'clan' => Icons.flag_rounded,
-      'ancient' => Icons.calendar_today_rounded,
-      'samurai' => Icons.security_rounded,
+      'clan' => CupertinoIcons.flag,
+      'ancient' => CupertinoIcons.calendar,
+      'samurai' => CupertinoIcons.shield_fill,
       'space' => CupertinoIcons.paperplane,
       'kingdom' => CupertinoIcons.person_2,
       'monk' => CupertinoIcons.person,
-      'phoenix' => Icons.local_fire_department_rounded,
+      'phoenix' => CupertinoIcons.flame,
       'animals' => CupertinoIcons.paw,
       'pokemon' || 'jjk' => CupertinoIcons.bolt,
-      'onepiece' || 'bleach' => Icons.security_rounded,
+      'onepiece' || 'bleach' => CupertinoIcons.exclamationmark_shield,
       'naruto' || 'vinland' || 'demonslayer' => CupertinoIcons.waveform,
-      'ben10' => Icons.schedule_rounded,
+      'ben10' => CupertinoIcons.time,
       'aot' => CupertinoIcons.square_grid_2x2,
       'mha' || 'fma' || 'dbz' => CupertinoIcons.infinite,
       'codegeass' || 'deathnote' => CupertinoIcons.eye,
       'gintama' || 'hxh' => CupertinoIcons.sportscourt,
-      'sololeveling' || 'starwars' => Icons.auto_awesome_rounded,
+      'sololeveling' || 'starwars' => CupertinoIcons.sparkles,
       'rpg' || 'tech' => CupertinoIcons.hammer,
       'chess' => CupertinoIcons.gamecontroller,
       _ => CupertinoIcons.star,
@@ -529,7 +541,7 @@ class MilestoneThemePage extends StatelessWidget {
                 subtitle: theme.description,
                 color: p.orange,
                 trailing: sobrietyMilestoneTheme == theme.id
-                    ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                     : const SizedBox.shrink(),
                 onTap: () => onThemeChanged(theme.id),
               ),
@@ -619,7 +631,11 @@ class MilestonesPage extends StatelessWidget {
                     color: p.orange.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.terrain_rounded, color: p.orange, size: 28),
+                  child: Icon(
+                    CupertinoIcons.triangle,
+                    color: p.orange,
+                    size: 28,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -715,7 +731,7 @@ class MilestonesPage extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.share_rounded, size: 16),
+                      icon: const Icon(CupertinoIcons.share, size: 16),
                       label: Text(
                         'Share Card'.localized(context),
                         style: const TextStyle(
@@ -863,12 +879,12 @@ class MilestonesPage extends StatelessWidget {
                                         )
                                       : (isCurrentNext
                                             ? Icon(
-                                                Icons.star_rounded,
+                                                CupertinoIcons.star_fill,
                                                 color: p.orange,
                                                 size: 24,
                                               )
                                             : Icon(
-                                                Icons.lock_rounded,
+                                                CupertinoIcons.lock,
                                                 color: p.text3,
                                                 size: 18,
                                               )),

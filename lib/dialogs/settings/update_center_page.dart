@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/update_permission_sheet.dart';
@@ -200,7 +200,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                               Icon(
                                 dontShowCheckbox
                                     ? CupertinoIcons.check_mark_circled_solid
-                                    : Icons.circle_outlined,
+                                    : CupertinoIcons.circle,
                                 size: 18,
                                 color: dontShowCheckbox
                                     ? p.accent
@@ -287,7 +287,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             context: context,
             p: widget.p,
             message: 'Download failed'.localized(context),
-            icon: Icons.error_outline_rounded,
+            icon: CupertinoIcons.exclamationmark_circle,
           );
         }
         return;
@@ -313,7 +313,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             message: 'Integrity check failed: checksum mismatch'.localized(
               context,
             ),
-            icon: Icons.security_rounded,
+            icon: CupertinoIcons.shield,
           );
         }
       }
@@ -371,7 +371,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           context: context,
           p: widget.p,
           message: 'Installation failed to start'.localized(context),
-          icon: Icons.error_outline_rounded,
+          icon: CupertinoIcons.exclamationmark_circle,
         );
       }
     } catch (_) {
@@ -452,7 +452,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         context: context,
         p: widget.p,
         message: 'Build cache cleared'.localized(context),
-        icon: Icons.cleaning_services_rounded,
+        icon: CupertinoIcons.sparkles,
       );
       setState(() {
         _downloadedApkPath = null;
@@ -603,7 +603,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Icon(Icons.check_circle_outline_rounded, color: p.green, size: 48),
+            Icon(CupertinoIcons.checkmark_circle, color: p.green, size: 48),
             const SizedBox(height: 16),
             Text(
               'You are up to date'.localized(context),
@@ -677,7 +677,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         children: [
           Row(
             children: [
-              Icon(Icons.download_rounded, color: p.accent, size: 22),
+              Icon(
+                CupertinoIcons.arrow_down_circle_fill,
+                color: p.accent,
+                size: 22,
+              ),
               const SizedBox(width: 10),
               Text(
                 'Update Available'.localized(context),
@@ -851,7 +855,11 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.verified_user_rounded, color: p.green, size: 16),
+                    Icon(
+                      CupertinoIcons.checkmark_shield_fill,
+                      color: p.green,
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Package verified & ready'.localized(context),
@@ -983,8 +991,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
             children: [
               Icon(
                 hasCache
-                    ? Icons.cleaning_services_rounded
-                    : Icons.check_circle_outline_rounded,
+                    ? CupertinoIcons.sparkles
+                    : CupertinoIcons.checkmark_circle,
                 color: hasCache ? p.orange : p.green,
                 size: 20,
               ),
@@ -1066,7 +1074,7 @@ class BuildTrackSelectPage extends StatelessWidget {
               title: 'Stable Build',
               subtitle: 'Recommended for standard users.'.localized(context),
               trailing: !betaTrack
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () => onSaveTrackPreference(false),
             ),
@@ -1077,7 +1085,7 @@ class BuildTrackSelectPage extends StatelessWidget {
                   'Priority updates and early access to active development features.'
                       .localized(context),
               trailing: betaTrack
-                  ? Icon(Icons.check_rounded, color: p.accent, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                   : const SizedBox.shrink(),
               onTap: () => onSaveTrackPreference(true),
             ),
@@ -1209,7 +1217,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.system_update_outlined,
+              icon: CupertinoIcons.arrow_2_circlepath_circle,
               title: 'Software Update',
               color: p.text2,
               status: null,
@@ -1244,7 +1252,11 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(width: spacing8),
-                  Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                  Icon(
+                    CupertinoIcons.chevron_forward,
+                    color: p.text3,
+                    size: 20,
+                  ),
                 ],
               ),
               onTap: () =>
@@ -1252,7 +1264,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.track_changes_rounded,
+              icon: CupertinoIcons.scope,
               title: 'Build Channel',
               color: p.accent,
               status: betaTrack
@@ -1264,7 +1276,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
             if (onAutoDeleteUpdateCacheChanged != null)
               SettingsSwitchRow(
                 p: p,
-                icon: Icons.auto_delete_outlined,
+                icon: CupertinoIcons.trash,
                 title: 'Rm -rf Cache',
                 color: p.orange,
                 value: autoDeleteUpdateCache,
@@ -1307,7 +1319,11 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: spacing4),
-                    Icon(Icons.chevron_right_rounded, color: p.text3, size: 20),
+                    Icon(
+                      CupertinoIcons.chevron_forward,
+                      color: p.text3,
+                      size: 20,
+                    ),
                   ],
                 ),
                 onTap: () {
@@ -1332,7 +1348,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.auto_awesome_rounded,
+              icon: CupertinoIcons.sparkles,
               title: "What's New",
               color: p.orange,
               status: 'Recent'.localized(context),
@@ -1341,7 +1357,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.history_edu_rounded,
+              icon: CupertinoIcons.book_fill,
               title: 'Changelog',
               color: p.green,
               status: 'History'.localized(context),

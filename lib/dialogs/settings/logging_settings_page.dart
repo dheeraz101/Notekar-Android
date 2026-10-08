@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -53,7 +54,7 @@ class LoggingSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.touch_app_rounded,
+              icon: CupertinoIcons.hand_point_right_fill,
               title: 'Capture'.localized(context),
               status: defaultModeLabel(defaultMode),
               color: p.green,
@@ -61,7 +62,7 @@ class LoggingSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.history_rounded,
+              icon: CupertinoIcons.clock_fill,
               title: 'Moments'.localized(context),
               status: '$notesCount ${'Notes'.localized(context)}',
               color: p.orange,
@@ -69,7 +70,7 @@ class LoggingSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.category_rounded,
+              icon: CupertinoIcons.square_grid_2x2,
               title: 'Modes'.localized(context),
               status: 'Focus Modes'.localized(context),
               color: p.accent,
@@ -77,7 +78,7 @@ class LoggingSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.tag_rounded,
+              icon: CupertinoIcons.tag,
               title: 'Activity Tags'.localized(context),
               status: 'Quick Tags'.localized(context),
               color: p.accent,
@@ -98,7 +99,7 @@ class LoggingSettingsPage extends StatelessWidget {
             children: [
               SettingsRow(
                 p: p,
-                icon: Icons.delete_rounded,
+                icon: CupertinoIcons.trash,
                 title: 'Trash Bin'.localized(context),
                 status:
                     '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
@@ -119,7 +120,7 @@ class LoggingSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.self_improvement_rounded,
+              icon: CupertinoIcons.sparkles,
               title: 'Sobriety Companion',
               color: p.orange,
               status: enableSobrietyMode ? 'On' : 'Off',

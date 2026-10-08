@@ -188,7 +188,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.restart_alt_rounded,
+                  CupertinoIcons.arrow_counterclockwise,
                   color: widget.p.accent,
                   size: 16,
                 ),
@@ -230,7 +230,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                Icon(Icons.content_copy_rounded, color: Colors.white, size: 18),
+                Icon(CupertinoIcons.doc_on_doc, color: Colors.white, size: 18),
                 SizedBox(width: 8),
                 Text(
                   'Copy Diagnostics',
@@ -294,7 +294,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             child: Row(
               children: [
                 Icon(
-                  Icons.warning_amber_rounded,
+                  CupertinoIcons.exclamationmark_triangle_fill,
                   color: widget.p.orange,
                   size: 24,
                 ),
@@ -340,7 +340,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                   Row(
                     children: [
                       Icon(
-                        Icons.memory_rounded,
+                        CupertinoIcons.gauge,
                         color: widget.p.accent,
                         size: 20,
                       ),
@@ -630,7 +630,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             padding: const EdgeInsets.symmetric(vertical: 32.0),
             child: HIGEmptyState(
               p: widget.p,
-              icon: Icons.wifi_tethering_off_rounded,
+              icon: CupertinoIcons.wifi_slash,
               title: 'No Network Traffic',
               message:
                   'All network activities made by NoteKar are audited and recorded here.',
@@ -819,7 +819,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                           Row(
                             children: [
                               Icon(
-                                Icons.shield_outlined,
+                                CupertinoIcons.shield,
                                 color: widget.p.green,
                                 size: 13,
                               ),

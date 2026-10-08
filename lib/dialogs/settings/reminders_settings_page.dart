@@ -119,7 +119,7 @@ class RemindersSettingsPage extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.warning_amber_rounded,
+                        CupertinoIcons.exclamationmark_triangle_fill,
                         color: p.orange,
                         size: 24,
                       ),
@@ -173,7 +173,7 @@ class RemindersSettingsPage extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.battery_alert_rounded,
+                        CupertinoIcons.battery_25,
                         color: p.orange,
                         size: 24,
                       ),
@@ -191,7 +191,7 @@ class RemindersSettingsPage extends StatelessWidget {
                       if (onDismissBatteryOptimizationCard != null)
                         IconButton(
                           icon: Icon(
-                            Icons.close_rounded,
+                            CupertinoIcons.clear,
                             color: p.text3,
                             size: 20,
                           ),
@@ -237,7 +237,11 @@ class RemindersSettingsPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.autorenew_rounded, color: p.orange, size: 24),
+                      Icon(
+                        CupertinoIcons.arrow_2_circlepath,
+                        color: p.orange,
+                        size: 24,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -251,7 +255,7 @@ class RemindersSettingsPage extends StatelessWidget {
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.close_rounded,
+                          CupertinoIcons.clear,
                           color: p.text3,
                           size: 20,
                         ),
@@ -328,7 +332,7 @@ class RemindersSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.self_improvement_rounded,
+              icon: CupertinoIcons.sparkles,
               title: 'Mindfulness'.localized(context),
               status: reflectionReminderEnabled
                   ? switch (reflectionReminderIntervalMins) {
@@ -740,7 +744,7 @@ class _ReminderMessagePageState extends State<ReminderMessagePage> {
                         icon: Icon(
                           _focusNode.hasFocus
                               ? CupertinoIcons.checkmark_alt
-                              : Icons.edit_rounded,
+                              : CupertinoIcons.square_pencil,
                           color: _focusNode.hasFocus ? p.accent : p.text3,
                           size: 19,
                         ),
@@ -786,7 +790,7 @@ class _ReminderMessagePageState extends State<ReminderMessagePage> {
                         for (final item in widget.recents.take(5))
                           SettingsRow(
                             p: p,
-                            icon: Icons.history_rounded,
+                            icon: CupertinoIcons.clock_fill,
                             title: item,
                             color: p.text3,
                             onTap: () {

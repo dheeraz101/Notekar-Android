@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
@@ -135,7 +136,11 @@ class SearchNotesSettingsPage {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.compare_arrows_rounded, color: p.accent, size: 18),
+                  Icon(
+                    CupertinoIcons.arrow_right_arrow_left,
+                    color: p.accent,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -238,7 +243,7 @@ class SearchNotesSettingsPage {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.history_rounded,
+                              CupertinoIcons.clock_fill,
                               size: 14,
                               color: p.text3,
                             ),
@@ -271,8 +276,8 @@ class SearchNotesSettingsPage {
             child: HIGEmptyState(
               p: p,
               icon: q.isEmpty
-                  ? Icons.speaker_notes_off_rounded
-                  : Icons.search_off_rounded,
+                  ? CupertinoIcons.chat_bubble_text
+                  : CupertinoIcons.search,
               title: q.isEmpty ? 'No Notes Recorded' : 'No Matching Notes',
               message: q.isEmpty
                   ? 'Capture your first note by holding the clock face.'
@@ -436,8 +441,9 @@ class SearchNotesSettingsPage {
                                     children: [
                                       Icon(
                                         isTwoWay
-                                            ? Icons.sync_alt_rounded
-                                            : Icons.touch_app_rounded,
+                                            ? CupertinoIcons.arrow_2_circlepath
+                                            : CupertinoIcons
+                                                  .hand_point_right_fill,
                                         size: 11,
                                         color: isTwoWay
                                             ? p.accent
@@ -477,7 +483,7 @@ class SearchNotesSettingsPage {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          Icons.description_rounded,
+                                          CupertinoIcons.doc_text_fill,
                                           size: 10,
                                           color: p.accent,
                                         ),
@@ -510,7 +516,7 @@ class SearchNotesSettingsPage {
                                     child: Padding(
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Icon(
-                                        Icons.edit_rounded,
+                                        CupertinoIcons.pencil,
                                         size: 15,
                                         color: p.accent,
                                       ),
@@ -525,8 +531,9 @@ class SearchNotesSettingsPage {
                                     padding: const EdgeInsets.only(right: 6),
                                     child: Icon(
                                       isSelected
-                                          ? Icons.check_circle_rounded
-                                          : Icons.compare_arrows_rounded,
+                                          ? CupertinoIcons.checkmark_circle_fill
+                                          : CupertinoIcons
+                                                .arrow_right_arrow_left,
                                       size: 16,
                                       color: isSelected ? p.accent : p.text3,
                                     ),
@@ -577,7 +584,7 @@ class SearchNotesSettingsPage {
                               ),
                               const SizedBox(width: 8),
                               Icon(
-                                Icons.arrow_forward_rounded,
+                                CupertinoIcons.arrow_right,
                                 size: 11,
                                 color: p.text3,
                               ),

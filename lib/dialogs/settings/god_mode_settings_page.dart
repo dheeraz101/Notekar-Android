@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/pioneer_badge_dialog.dart';
 import 'package:notekar/models/palette.dart';
@@ -79,12 +78,12 @@ class GodModeSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.terminal_rounded,
+              icon: CupertinoIcons.chevron_left_slash_chevron_right,
               title: 'Matrix Phosphor Terminal'.localized(context),
               subtitle: 'Monospace green on OLED black'.localized(context),
               trailing: currentTheme == 'matrix'
                   ? const Icon(
-                      Icons.check_rounded,
+                      CupertinoIcons.checkmark,
                       color: Color(0xFF00FF41),
                       size: 20,
                     )
@@ -97,11 +96,11 @@ class GodModeSettingsPage extends StatelessWidget {
             ),
             SettingsRow(
               p: p,
-              icon: Icons.menu_book_rounded,
+              icon: CupertinoIcons.book,
               title: 'Kindle E-Ink Paperwhite'.localized(context),
               subtitle: '100% monochrome grayscale contrast'.localized(context),
               trailing: currentTheme == 'eink'
-                  ? Icon(Icons.check_rounded, color: p.text, size: 20)
+                  ? Icon(CupertinoIcons.checkmark, color: p.text, size: 20)
                   : const SizedBox.shrink(),
               color: p.text2,
               onTap: () {
@@ -127,7 +126,7 @@ class GodModeSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.badge_rounded,
+              icon: CupertinoIcons.person_badge_plus,
               title: 'VIP Pioneer Badge'.localized(context),
               status: 'View'.localized(context),
               color: const Color(0xFFFFD700),
@@ -158,7 +157,7 @@ class GodModeSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.power_settings_new_rounded,
+              icon: CupertinoIcons.bolt_slash_fill,
               title: 'Reset All Circuit Breakers'.localized(context),
               subtitle: 'Clear tripped breakers and restore bypassed services'
                   .localized(context),
@@ -174,7 +173,7 @@ class GodModeSettingsPage extends StatelessWidget {
                     message: 'All Circuit Breakers have been reset'.localized(
                       context,
                     ),
-                    icon: Icons.check_circle_outline_rounded,
+                    icon: CupertinoIcons.checkmark_circle,
                   );
                 }
               },
@@ -196,7 +195,7 @@ class GodModeSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: Icons.lock_reset_rounded,
+              icon: CupertinoIcons.lock_shield,
               title: 'Revoke God Mode'.localized(context),
               subtitle: 'Deactivates secret perks and relocks God Mode'
                   .localized(context),
