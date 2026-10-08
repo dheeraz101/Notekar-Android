@@ -309,6 +309,27 @@ void main() {
         expect(repo.getMomentById(3)?.note, 'Three');
         expect(repo.getMomentById(99), isNull);
 
+        final restStart = Moment(
+          id: 5,
+          timestamp: 5000,
+          type: 'in',
+          date: '2026-10-04',
+          note: 'Rest & Recovery',
+          category: 'Rest',
+        );
+        final restEnd = Moment(
+          id: 6,
+          timestamp: 6000,
+          type: 'out',
+          date: '2026-10-04',
+          note: 'Rest & Recovery',
+          category: 'Rest',
+        );
+        await repo.saveMoments([restStart, restEnd]);
+        expect(repo.getMomentById(5), isNotNull);
+        expect(repo.getMomentById(6), isNotNull);
+        expect(repo.getAllMoments().where((m) => m.id >= 5).length, 2);
+
         // Perform maintenance
         await repo.performDailyMaintenance();
       },

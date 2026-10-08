@@ -937,17 +937,19 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
               endTimestamp: it.endTimestamp,
               onTap: () {
                 widget.onOpenManualEntry?.call(
-                  prefilledStartTime:
-                      DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
-                  prefilledEndTime:
-                      DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
+                  prefilledStartTime: DateTime.fromMillisecondsSinceEpoch(
+                    it.startTimestamp,
+                  ),
+                  prefilledEndTime: DateTime.fromMillisecondsSinceEpoch(
+                    it.endTimestamp,
+                  ),
                 );
               },
               onClaimRest: widget.onClaimRest != null
                   ? () => widget.onClaimRest!(
-                        DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
-                        DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
-                      )
+                      DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
+                      DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
+                    )
                   : null,
             ),
           );

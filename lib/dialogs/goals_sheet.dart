@@ -1253,8 +1253,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                       HapticFeedback.selectionClick();
                       setState(() {
                         _timeframe = tf;
-                        if (tf == GoalTimeframe.custom &&
-                            _targetDate == null) {
+                        if (tf == GoalTimeframe.custom && _targetDate == null) {
                           _targetDate = DateTime.now()
                               .add(const Duration(days: 14))
                               .millisecondsSinceEpoch;
@@ -1267,9 +1266,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? widget.p.accent
-                            : widget.p.surface2,
+                        color: isSelected ? widget.p.accent : widget.p.surface2,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected

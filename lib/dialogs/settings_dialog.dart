@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
@@ -250,7 +250,7 @@ class SettingsDialog extends StatefulWidget {
   final ValueChanged<String> onDefaultMode;
   final ValueChanged<int> onDelay;
   final ValueChanged<String> onAccentColor;
-  final Future<void> Function(String value) onAppIconStyle;
+  final Future<bool> Function(String value) onAppIconStyle;
   final ValueChanged<String> onHapticStyle;
   final ValueChanged<String> onHistoryDensity;
   final Future<bool> Function(bool value) onPrivacyLock;
@@ -773,7 +773,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         final scanDateUnix = info['scanDate'] as int? ?? 0;
         final url = info['url'] as String? ?? _vtUrl;
 
-        String ratio = total > 0 ? '$malicious / $total engines' : 'Verified clean';
+        String ratio = total > 0
+            ? '$malicious / $total engines'
+            : 'Verified clean';
         if (malicious == 0 && total > 0) {
           ratio = '0 / $total clean';
         }
@@ -2666,9 +2668,15 @@ ${stackTrace ?? 'No stack trace provided.'}
                               p: p,
                               appIconStyle: appIconStyle,
                               godModeUnlocked: _isGodModeUnlocked,
-                              onAppIconStyleChanged: (value) {
-                                setState(() => appIconStyle = value);
-                                unawaited(widget.onAppIconStyle(value));
+                              onAppIconStyleChanged: (value) async {
+                                final applied = await widget.onAppIconStyle(
+                                  value,
+                                );
+                                if (applied && mounted) {
+                                  setState(() => appIconStyle = value);
+                                  return true;
+                                }
+                                return false;
                               },
                             ),
                           ),

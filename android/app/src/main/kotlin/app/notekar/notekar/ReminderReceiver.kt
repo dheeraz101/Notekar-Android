@@ -218,7 +218,9 @@ class ReminderReceiver : BroadcastReceiver() {
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
+                    // Maintenance is not user-time-critical. Avoid consuming
+                    // exact-alarm access for this housekeeping task.
+                    alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
@@ -398,9 +400,30 @@ class ReminderReceiver : BroadcastReceiver() {
             } catch (e2: SecurityException) {
                 android.util.Log.w(
                     "ReminderReceiver",
-                    "SecurityException scheduling reminder fallback",
+                    "Exact alarm access unavailable; scheduling an inexact reminder",
                     e2
                 )
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.set(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    }
+                } catch (fallbackError: Exception) {
+                    android.util.Log.e(
+                        "ReminderReceiver",
+                        "Could not schedule reminder, including inexact fallback",
+                        fallbackError
+                    )
+                }
             }
         }
 

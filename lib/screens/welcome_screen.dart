@@ -45,7 +45,7 @@ class WelcomeScreen extends StatefulWidget {
   final ValueChanged<String> onTheme;
   final ValueChanged<String> onDefaultMode;
   final String appIconStyle;
-  final ValueChanged<String>? onAppIconStyle;
+  final Future<bool> Function(String value)? onAppIconStyle;
   final bool useNumbersInSingle;
   final ValueChanged<bool>? onUseNumbersInSingle;
   final bool resetSingleDaily;
@@ -1013,17 +1013,34 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               return GestureDetector(
                 onTap: () async {
                   if (_appIconStyle == entry.key) return;
-                  NotekarHaptics.selection('standard');
-                  setState(() => _appIconStyle = entry.key);
-                  if (_prefs != null) {
-                    await _prefs!.setString('m-app-icon-style', entry.key);
-                  }
-                  widget.onAppIconStyle?.call(entry.key);
+                  final failureMessenger = ScaffoldMessenger.of(context);
+                  final failureMessage = 'App icon could not be changed'
+                      .localized(context);
+                  var applied = false;
                   try {
-                    await _fileChannel.invokeMethod<void>('setAppIconStyle', {
-                      'style': entry.key,
-                    });
-                  } catch (_) {}
+                    final callback = widget.onAppIconStyle;
+                    if (callback != null) {
+                      applied = await callback(entry.key);
+                    } else {
+                      await _fileChannel.invokeMethod<void>('setAppIconStyle', {
+                        'style': entry.key,
+                      });
+                      applied = true;
+                    }
+                  } catch (_) {
+                    applied = false;
+                  }
+                  if (!applied) {
+                    if (mounted) {
+                      failureMessenger.showSnackBar(
+                        SnackBar(content: Text(failureMessage)),
+                      );
+                    }
+                    return;
+                  }
+                  NotekarHaptics.selection('standard');
+                  if (mounted) setState(() => _appIconStyle = entry.key);
+                  await _prefs?.setString('m-app-icon-style', entry.key);
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),

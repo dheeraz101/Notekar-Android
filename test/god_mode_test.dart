@@ -105,7 +105,7 @@ void main() {
                   p: p,
                   appIconStyle: 'gold',
                   godModeUnlocked: true,
-                  onAppIconStyleChanged: (_) {},
+                  onAppIconStyleChanged: (_) async => true,
                 ),
               ),
             ),

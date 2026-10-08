@@ -15,35 +15,40 @@ void main() {
   });
 
   group('LifeAuditPage Apple HIG Cupertino Sliders and Calibrate Route', () {
-    testWidgets('Uses CupertinoSlider instead of Material Slider for sleep and essentials', (tester) async {
-      final p = paletteFor('dark');
-      double sleep = 8.0;
-      double essentials = 3.0;
+    testWidgets(
+      'Uses CupertinoSlider instead of Material Slider for sleep and essentials',
+      (tester) async {
+        final p = paletteFor('dark');
+        double sleep = 8.0;
+        double essentials = 3.0;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: LifeAuditPage(
-                p: p,
-                entries: const [],
-                sleepHours: sleep,
-                essentialsHours: essentials,
-                onSleepHoursChanged: (val) => sleep = val,
-                onEssentialsHoursChanged: (val) => essentials = val,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: LifeAuditPage(
+                  p: p,
+                  entries: const [],
+                  sleepHours: sleep,
+                  essentialsHours: essentials,
+                  onSleepHoursChanged: (val) => sleep = val,
+                  onEssentialsHoursChanged: (val) => essentials = val,
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // Verify CupertinoSliders are used
-      expect(find.byType(CupertinoSlider), findsNWidgets(2));
-      expect(find.byType(Slider), findsNothing);
-    });
+        // Verify CupertinoSliders are used
+        expect(find.byType(CupertinoSlider), findsNWidgets(2));
+        expect(find.byType(Slider), findsNothing);
+      },
+    );
 
-    testWidgets('Calibrate button triggers onOpenPersonalProfile callback', (tester) async {
+    testWidgets('Calibrate button triggers onOpenPersonalProfile callback', (
+      tester,
+    ) async {
       final p = paletteFor('dark');
       bool calibratedOpened = false;
 
@@ -85,12 +90,12 @@ void main() {
   });
 
   group('IosEmojiText Offline Rendering (H-42)', () {
-    testWidgets('renders text and emojis without network requests', (tester) async {
+    testWidgets('renders text and emojis without network requests', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: IosEmojiText('Deep Work 🚀 #focus 🧘'),
-          ),
+          home: Scaffold(body: IosEmojiText('Deep Work 🚀 #focus 🧘')),
         ),
       );
       await tester.pumpAndSettle();

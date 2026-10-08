@@ -252,14 +252,42 @@ Color accentColorFor(String name, {String theme = 'dark', bool light = false}) {
       isLight
           ? const Color(0xFF6D5BD0)
           : (isAmoled ? const Color(0xFFA78BFA) : const Color(0xFF8E44AD)),
+    'lavender' =>
+      isLight
+          ? const Color(0xFF6B5AA6)
+          : (isAmoled ? const Color(0xFFD0B0FF) : const Color(0xFFBF9AF7)),
     'rose' =>
       isLight
           ? const Color(0xFFB43B5E)
           : (isAmoled ? const Color(0xFFFF8FAB) : const Color(0xFFFF375F)),
+    'coral' =>
+      isLight
+          ? const Color(0xFFC14F3B)
+          : (isAmoled ? const Color(0xFFFF8A70) : const Color(0xFFFF7A59)),
     'amber' =>
       isLight
           ? const Color(0xFFB7791F)
           : (isAmoled ? const Color(0xFFFFC857) : const Color(0xFFFFCC00)),
+    'sand' =>
+      isLight
+          ? const Color(0xFF8C6D3F)
+          : (isAmoled ? const Color(0xFFE6CE91) : const Color(0xFFD6B779)),
+    'sage' =>
+      isLight
+          ? const Color(0xFF497457)
+          : (isAmoled ? const Color(0xFFA0D7AD) : const Color(0xFF8BC69B)),
+    'olive' =>
+      isLight
+          ? const Color(0xFF63742B)
+          : (isAmoled ? const Color(0xFFB9D971) : const Color(0xFFA6C750)),
+    'slate' =>
+      isLight
+          ? const Color(0xFF526273)
+          : (isAmoled ? const Color(0xFFB8C8D8) : const Color(0xFFA5B7CA)),
+    'brown' =>
+      isLight
+          ? const Color(0xFF795548)
+          : (isAmoled ? const Color(0xFFD7B1A1) : const Color(0xFFC69C89)),
 
     _ =>
       isLight

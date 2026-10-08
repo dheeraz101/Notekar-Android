@@ -1072,8 +1072,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
             sobrietyMilestoneTheme: _sobrietyMilestoneTheme,
 
             onAppIconStyle: (value) async {
+              final applied = await _setAppIconStyle(value, showToast: false);
+              if (!applied || !mounted) return false;
               setState(() => _appIconStyle = value);
-              await _setAppIconStyle(value, showToast: false);
+              await _saveSetting('m-app-icon-style', value);
+              return true;
             },
             onLocaleChanged: (value) {
               NoteKarApp.of(context)?.setLocale(value);
@@ -2460,13 +2463,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
       category: 'Rest',
       tags: const ['rest'],
     );
+    await _repository.saveMoments([startMoment, endMoment]);
+    if (!mounted) return [startMoment, endMoment];
     setState(() {
       _entries = [endMoment, startMoment, ..._entries]
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _lastId = endMoment.id;
     });
-    await _repository.saveMoment(startMoment);
-    await _repository.saveMoment(endMoment);
     unawaited(_updateAndroidWidget());
     if (mounted) {
       _showToast('🌿 Rest & Recovery logged');
@@ -2651,9 +2654,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _saveSetting('m-adaptive-color', value);
         },
         onAppIconStyle: (value) async {
+          final applied = await _setAppIconStyle(value);
+          if (!applied || !mounted) return false;
           setState(() => _appIconStyle = value);
           await _saveSetting('m-app-icon-style', value);
-          await _setAppIconStyle(value);
+          return true;
         },
         onHapticStyle: (value) {
           setState(() {
@@ -3579,9 +3584,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
   }
 
-  Future<void> _setAppIconStyle(String style, {bool showToast = true}) async {
-    if (_appIconChangeInFlight) return;
+  Future<bool> _setAppIconStyle(String style, {bool showToast = true}) async {
+    if (_appIconChangeInFlight) return false;
     _appIconChangeInFlight = true;
+    var succeeded = false;
     if (mounted && showToast) {
       unawaited(
         showGeneralDialog<void>(
@@ -3616,6 +3622,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await _fileChannel.invokeMethod<void>('setAppIconStyle', {
         'style': style,
       });
+      succeeded = true;
       if (showToast) {
         await Future<void>.delayed(const Duration(milliseconds: 2200));
       }
@@ -3630,6 +3637,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
       _appIconChangeInFlight = false;
     }
+    return succeeded;
   }
 
   DateTime? _getLatestRelapseTime() {

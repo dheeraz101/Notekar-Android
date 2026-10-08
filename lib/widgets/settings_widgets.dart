@@ -763,82 +763,228 @@ class ColorChoiceSetting extends StatelessWidget {
   final bool blur;
 
   static const _choices = [
-    ('blue', Color(0xFF0A84FF)),
-    ('green', Color(0xFF30D158)),
-    ('purple', Color(0xFFBF5AF2)),
-    ('pink', Color(0xFFFF6B8A)),
-    ('orange', Color(0xFFFF9F0A)),
-    ('graphite', Color(0xFF8E8E93)),
-    ('teal', Color(0xFF40C8C0)),
-    ('mint', Color(0xFF63D7A5)),
-    ('cyan', Color(0xFF64D2FF)),
-    ('indigo', Color(0xFF7D89FF)),
-    ('violet', Color(0xFFA78BFA)),
-    ('lavender', Color(0xFFC4B5FD)),
-    ('rose', Color(0xFFFF8FAB)),
-    ('coral', Color(0xFFFF8A7A)),
-    ('amber', Color(0xFFFFC857)),
-    ('sand', Color(0xFFD6B86A)),
-    ('sage', Color(0xFFA3B18A)),
-    ('olive', Color(0xFFB6C667)),
-    ('slate', Color(0xFF9BAAB3)),
-    ('brown', Color(0xFFB08A78)),
+    'blue',
+    'green',
+    'purple',
+    'pink',
+    'orange',
+    'graphite',
+    'teal',
+    'mint',
+    'cyan',
+    'indigo',
+    'violet',
+    'lavender',
+    'rose',
+    'coral',
+    'amber',
+    'sand',
+    'sage',
+    'olive',
+    'slate',
+    'brown',
   ];
 
   @override
   Widget build(BuildContext context) {
     return Glass(
       p: p,
-      radius: 32,
+      radius: 24,
       blur: blur,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 24),
-      child: Center(
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 14,
-          runSpacing: 14,
-          children: _choices.map((entry) {
-            final key = entry.$1;
-            final color = entry.$2;
-            final active = value == key;
-            return GestureDetector(
-              onTap: () => onChanged(key),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 140),
-                width: 64,
-                // Increased to fit card
-                height: 64,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: active ? color.withValues(alpha: 0.18) : p.surface2,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: active ? color : p.border,
-                    width: active ? 2.5 : 1,
-                  ),
-                  boxShadow: active
-                      ? [
-                          BoxShadow(
-                            color: color.withValues(alpha: 0.25),
-                            blurRadius: 14,
-                            offset: const Offset(0, 3),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: _choices.map((key) {
+              final color = accentColorFor(key, theme: p.name);
+              final active = value == key;
+              final label = key.localized(context);
+              return Semantics(
+                button: true,
+                selected: active,
+                label: '$label accent'.localized(context),
+                child: Tooltip(
+                  message: label,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkResponse(
+                      onTap: () => onChanged(key),
+                      radius: 30,
+                      containedInkWell: true,
+                      customBorder: const CircleBorder(),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeOutCubic,
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: active
+                              ? color.withValues(alpha: 0.16)
+                              : Colors.transparent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: active ? color : p.border,
+                            width: active ? 2 : 1,
                           ),
-                        ]
-                      : null,
+                        ),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: active ? 28 : 32,
+                          height: active ? 28 : 32,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                          ),
+                          child: active
+                              ? Icon(
+                                  CupertinoIcons.checkmark,
+                                  size: 15,
+                                  color: color.computeLuminance() > 0.48
+                                      ? Colors.black87
+                                      : Colors.white,
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 140),
-                  width: active ? 38 : 42,
-                  height: active ? 38 : 42,
-                  decoration: BoxDecoration(
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 20),
+          _AccentPreview(
+            p: p,
+            color: accentColorFor(value, theme: p.name),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccentPreview extends StatelessWidget {
+  const _AccentPreview({required this.p, required this.color});
+
+  final Palette p;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: p.border.withValues(alpha: 0.7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Live preview'.localized(context),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Today'.localized(context),
+                      style: TextStyle(color: p.text3, fontSize: 12),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'A focused day'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Selected'.localized(context),
+                  style: TextStyle(
                     color: color,
-                    shape: BoxShape.circle,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-            );
-          }).toList(),
-        ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: 0.68,
+              minHeight: 5,
+              backgroundColor: p.surface3,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                CupertinoIcons.checkmark_circle_fill,
+                color: color,
+                size: 17,
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  'Highlights and controls use this accent'.localized(context),
+                  style: TextStyle(color: p.text2, fontSize: 12),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Action'.localized(context),
+                  style: TextStyle(
+                    color: color.computeLuminance() > 0.48
+                        ? Colors.black87
+                        : Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

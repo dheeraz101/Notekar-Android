@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -83,7 +83,8 @@ class HistoryDialog extends StatefulWidget {
     DateTime? prefilledEndTime,
   })?
   onOpenManualEntry;
-  final Future<dynamic> Function(DateTime start, DateTime end)? onClaimRest;
+  final Future<List<Moment>> Function(DateTime start, DateTime end)?
+  onClaimRest;
   final Future<void> Function(int inMomentId, Moment outEntry)?
   onEndLiveSession;
   final Future<void> Function(Moment inMoment)? onRestoreLiveSession;
@@ -1579,13 +1580,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
     if (_isClaimingRest) return;
     _isClaimingRest = true;
     try {
-      NotekarHaptics.success('standard');
       List<Moment> savedMoments = const [];
       if (widget.onClaimRest != null) {
-        final res = await widget.onClaimRest!(start, end);
-        if (res is List<Moment> && res.isNotEmpty) {
-          savedMoments = res;
-        }
+        savedMoments = await widget.onClaimRest!(start, end);
       }
 
       if (savedMoments.isEmpty) {
@@ -1617,6 +1614,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       }
 
       if (savedMoments.length >= 2 && mounted) {
+        NotekarHaptics.success('standard');
         final inMoment = savedMoments.firstWhere(
           (m) => m.type == 'in',
           orElse: () => savedMoments.first,
@@ -1638,6 +1636,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
           onUndo: () => _removeSession(
             TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
           ),
+        );
+      }
+    } catch (error, stackTrace) {
+      debugPrint('Could not save claimed rest interval: $error\n$stackTrace');
+      if (mounted) {
+        _showNotice(
+          'Could not save Rest & Recovery. Your history was not changed.'
+              .localized(context),
         );
       }
     } finally {

@@ -107,12 +107,37 @@ class QuickNoteActivity : Activity() {
         val isStartingSession = isSession && resolvedType == "in"
         val isEndingSession = isSession && resolvedType == "out"
 
-        var selectedCategory =
+        val requestedCategory =
             widgetPrefs.getString(NoteKarWidgetProvider.KEY_ACTIVE_CATEGORY, null)
                 ?: flutterPrefs.getString("flutter.notekar.active_category", null)
                 ?: flutterPrefs.getString("flutter.active_category", null)
-                ?: "Work"
-        if (selectedCategory == "All") selectedCategory = "Work"
+                ?: "All"
+        // Match CategoryService.getCategories(): built-in modes plus the
+        // configured user modes. Never expose unrelated hard-coded suggestions.
+        val categories = mutableListOf("Work", "Deep Focus")
+        val customCatsJson = flutterPrefs.getString("flutter.notekar.custom_categories", null)
+            ?: flutterPrefs.getString("flutter.custom_categories", null)
+        if (customCatsJson != null && customCatsJson.startsWith("[")) {
+            try {
+                val arr = JSONArray(customCatsJson)
+                for (i in 0 until arr.length()) {
+                    val category = arr.optString(i)?.trim()
+                    if (!category.isNullOrEmpty() &&
+                        !category.equals("All", ignoreCase = true) &&
+                        categories.none { it.equals(category, ignoreCase = true) }
+                    ) {
+                        categories.add(category)
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
+        val configuredSelection = requestedCategory
+            .takeUnless { it.equals("All", ignoreCase = true) }
+        var selectedCategory = categories.firstOrNull {
+            configuredSelection != null &&
+                it.equals(configuredSelection, ignoreCase = true)
+        } ?: categories.first()
         var selectedGoalTitle: String? = null
 
         // Title
@@ -140,33 +165,6 @@ class QuickNoteActivity : Activity() {
 
         // 1. Show Mode / Category Selector Strip
         if (isStartingSession || showModes || !isEndingSession) {
-            val categories = mutableListOf<String>()
-            val customCatsJson = flutterPrefs.getString("flutter.notekar.custom_categories", null)
-                ?: flutterPrefs.getString("flutter.custom_categories", null)
-            if (customCatsJson != null && customCatsJson.startsWith("[")) {
-                try {
-                    val arr = JSONArray(customCatsJson)
-                    for (i in 0 until arr.length()) {
-                        val c = arr.optString(i)?.trim()
-                        if (!c.isNullOrEmpty() && c != "All") categories.add(c)
-                    }
-                } catch (_: Exception) {
-                }
-            }
-            if (categories.isEmpty()) {
-                categories.addAll(
-                    listOf(
-                        "Work",
-                        "Study",
-                        "Gym",
-                        "Reading",
-                        "Personal",
-                        "Health",
-                        "Routine"
-                    )
-                )
-            }
-
             val catLabel = TextView(this).apply {
                 text = "SELECT MODE"
                 setTextColor(Color.parseColor("#80FFFFFF"))

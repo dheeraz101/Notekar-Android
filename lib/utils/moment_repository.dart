@@ -259,6 +259,57 @@ class MomentRepository {
     }
   }
 
+  /// Persists related moments in one Isar transaction so paired sessions never
+  /// leave only one endpoint in the database if a write fails.
+  Future<void> saveMoments(List<Moment> moments) async {
+    if (moments.isEmpty) return;
+    if (!_isInitialized) await ensureInitialized();
+
+    final ids = moments.map((moment) => moment.id).toSet();
+    if (ids.length != moments.length) {
+      throw ArgumentError('Moment IDs in a batch must be unique.');
+    }
+
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.moments.putAll(moments);
+      });
+    } catch (e, stack) {
+      _logger.error('Failed to save moment batch', e, stack);
+      rethrow;
+    }
+
+    final maxId = moments.map((moment) => moment.id).reduce(math.max);
+    final currentNextId = _prefs.getInt(_nextIdKey) ?? 0;
+    if (maxId >= currentNextId) {
+      try {
+        await _prefs.setInt(_nextIdKey, maxId + 1);
+      } catch (e, stack) {
+        // The moments are already durable. Do not report a failed save after
+        // the transaction committed; the caller must still update its UI.
+        _logger.error(
+          'Failed to advance next moment ID after batch save',
+          e,
+          stack,
+        );
+      }
+    }
+
+    for (final moment in moments) {
+      if (_cachedMoments != null) {
+        _cachedMoments!.removeWhere((cached) => cached.id == moment.id);
+        _cachedMoments!.add(moment);
+      }
+      _momentIdIndex?[moment.id] = moment;
+      try {
+        SearchIndexService.instance.indexMoment(moment);
+      } catch (e, stack) {
+        _logger.error('Failed indexing saved moment ${moment.id}', e, stack);
+      }
+    }
+    _cachedMoments?.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  }
+
   Future<void> deleteMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
