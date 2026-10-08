@@ -2711,7 +2711,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Targets & Goals') {
-      _openCategory('Targets & Goals', parent: 'Dashboard');
+      Navigator.of(context).pop('open_history_goals');
       return;
     }
     if (result.title == 'Life Audit') {

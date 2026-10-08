@@ -43,6 +43,21 @@ class CircuitBreakerService {
     return false;
   }
 
+  /// Returns whether any registered circuit breaker is currently tripped (OPEN).
+  bool hasAnyTripped() {
+    if (_inMemoryStates.values.any((s) => s == CircuitState.open)) {
+      return true;
+    }
+    final prefs = _prefs;
+    if (prefs != null) {
+      final keys = prefs.getKeys().where((k) => k.startsWith('cb_state_'));
+      for (final key in keys) {
+        if (prefs.getString(key) == 'open') return true;
+      }
+    }
+    return false;
+  }
+
   /// Returns the current consecutive failure count for [serviceId].
   int getFailureCount(String serviceId) {
     return _inMemoryFailures[serviceId] ??

@@ -59,6 +59,7 @@ class HistoryDialog extends StatefulWidget {
     this.blur = false,
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
+    this.initialView,
   });
 
   final Palette p;
@@ -91,6 +92,7 @@ class HistoryDialog extends StatefulWidget {
   final bool blur;
   final bool useNumbersInSingle;
   final bool resetSingleDaily;
+  final String? initialView;
 
   @override
   State<HistoryDialog> createState() => _HistoryDialogState();
@@ -147,6 +149,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   @override
   void initState() {
     super.initState();
+    _inSheetView = widget.initialView;
     _compactRows = widget.compactRows;
     _entries = List<Moment>.from(widget.entries);
     _availableDateKeys = _entries.map((entry) => entry.date).toSet();

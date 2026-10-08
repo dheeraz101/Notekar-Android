@@ -24,7 +24,6 @@ import 'package:notekar/dialogs/settings/data_backup_settings_page.dart';
 import 'package:notekar/dialogs/settings/diagnostics_settings_page.dart';
 import 'package:notekar/dialogs/settings/display_settings_page.dart';
 import 'package:notekar/dialogs/settings/feedback_changelog_settings_page.dart';
-import 'package:notekar/dialogs/settings/goals_settings_page.dart';
 import 'package:notekar/dialogs/settings/god_mode_settings_page.dart';
 import 'package:notekar/dialogs/settings/help_guides_settings_page.dart';
 import 'package:notekar/dialogs/settings/integrations_settings_page.dart';
@@ -51,6 +50,7 @@ import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/help_guide_data.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
 import 'package:notekar/utils/app_logger.dart';
@@ -1390,12 +1390,124 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  Future<({bool backup, bool dontAskAgain})?> _showBetaBackupWarningDialog(
+    Palette p,
+  ) async {
+    bool dontAskAgain = false;
+    return showCupertinoDialog<({bool backup, bool dontAskAgain})>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return CupertinoTheme(
+            data: CupertinoThemeData(
+              brightness: p.name == 'light'
+                  ? Brightness.light
+                  : Brightness.dark,
+              primaryColor: p.accent,
+            ),
+            child: CupertinoAlertDialog(
+              title: Text('Switch to Beta Channel?'.localized(ctx)),
+              content: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Beta builds receive early pre-release features and may contain experimental changes. We strongly recommend creating a full backup before switching.'
+                          .localized(ctx),
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    GestureDetector(
+                      onTap: () {
+                        setDialogState(() {
+                          dontAskAgain = !dontAskAgain;
+                        });
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            dontAskAgain
+                                ? CupertinoIcons.checkmark_circle_fill
+                                : CupertinoIcons.circle,
+                            size: 18,
+                            color: dontAskAgain ? p.accent : p.text3,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Don't ask again".localized(ctx),
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(null);
+                  },
+                  child: Text('Cancel'.localized(ctx)),
+                ),
+                CupertinoDialogAction(
+                  onPressed: () {
+                    Navigator.of(
+                      ctx,
+                    ).pop((backup: true, dontAskAgain: dontAskAgain));
+                  },
+                  child: Text('Backup'.localized(ctx)),
+                ),
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () {
+                    Navigator.of(
+                      ctx,
+                    ).pop((backup: false, dontAskAgain: dontAskAgain));
+                  },
+                  child: Text('Okay'.localized(ctx)),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _saveTrackPreference(bool beta) async {
     final p = paletteFor(
       theme,
       highContrast: highContrast,
       accentName: accentColor,
     );
+
+    if (beta) {
+      final dontAsk = _prefs?.getBool('dont_ask_beta_backup_warning') ?? false;
+      if (!dontAsk) {
+        final decision = await _showBetaBackupWarningDialog(p);
+        if (decision == null) return;
+        if (decision.dontAskAgain) {
+          await _prefs?.setBool('dont_ask_beta_backup_warning', true);
+        }
+        if (decision.backup) {
+          widget.onExportBackup();
+        }
+      }
+    }
+
+    if (!mounted) return;
 
     // Show transition dialog with iOS style spinner
     showDialog(
@@ -2627,19 +2739,9 @@ ${stackTrace ?? 'No stack trace provided.'}
                                 'Life Audit',
                                 parent: 'Dashboard',
                               ),
-                              onOpenGoals: () => _openCategory(
-                                'Targets & Goals',
-                                parent: 'Dashboard',
-                              ),
-                            ),
-                          ),
-                        if (show('Targets & Goals') || show('Goals'))
-                          SliverToBoxAdapter(
-                            child: GoalsSettingsPage(
-                              p: p,
-                              moments: entries,
-                              activeCategory: widget.activeCategory,
-                              isSessionRunning: widget.isSessionRunning,
+                              onOpenGoals: () {
+                                Navigator.of(context).pop('open_history_goals');
+                              },
                             ),
                           ),
                         if (show('Life Audit'))
@@ -3815,8 +3917,31 @@ ${stackTrace ?? 'No stack trace provided.'}
                               onExportBackup: () => unawaited(
                                 _runExport('Backup', widget.onExportBackup),
                               ),
-                              onResetCircuitBreakers: () {
-                                widget.onFeedback('All Circuit Breakers Reset');
+                              isCircuitBreakerTripped: CircuitBreakerService
+                                  .instance
+                                  .hasAnyTripped(),
+                              onResetCircuitBreakers: () async {
+                                HapticFeedback.mediumImpact();
+                                final wasTripped = CircuitBreakerService
+                                    .instance
+                                    .hasAnyTripped();
+                                await CircuitBreakerService.instance.resetAll();
+                                setState(() {});
+                                if (context.mounted) {
+                                  showIosPillToast(
+                                    context: context,
+                                    p: p,
+                                    message: wasTripped
+                                        ? 'Safeguards reset. All background services restored.'
+                                              .localized(context)
+                                        : 'All background services are healthy. Safeguards refreshed.'
+                                              .localized(context),
+                                    icon: wasTripped
+                                        ? CupertinoIcons
+                                              .arrow_counterclockwise_circle_fill
+                                        : CupertinoIcons.checkmark_seal_fill,
+                                  );
+                                }
                               },
 
                               onOpenCategory: (category, {required parent}) =>

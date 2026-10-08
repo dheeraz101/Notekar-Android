@@ -2235,7 +2235,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
   }
 
-  Future<void> _openHistory() async {
+  Future<void> _openHistory({String? initialView}) async {
     _collapseHeaderIfExpanded();
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
@@ -2253,6 +2253,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         reverseDuration: Duration(milliseconds: 170),
       ),
       builder: (sheetContext) => HistoryDialog(
+        initialView: initialView,
         p: p,
         entries: _entries,
         compactRows: _historyDensity == 'compact',
@@ -2865,7 +2866,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       unawaited(_updateStreakShields());
     }
 
-    if (result == 'log') {
+    if (result == 'open_history_goals') {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _openHistory(initialView: 'goals');
+      });
+    } else if (result == 'log') {
       Future.delayed(const Duration(milliseconds: 200), () {
         _logEntry();
       });

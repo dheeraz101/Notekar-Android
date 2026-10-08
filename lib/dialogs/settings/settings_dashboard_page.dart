@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/shareable_stats_sheet.dart';
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
@@ -147,8 +146,6 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
           NotekarHaptics.selection('standard');
           if (widget.onOpenGoals != null) {
             widget.onOpenGoals!();
-          } else {
-            GoalsSheet.show(context, p: p, moments: entries);
           }
         }
 

@@ -34,6 +34,7 @@ class AdvancedSettingsPage extends StatelessWidget {
     required this.onExportBackup,
     required this.onResetCircuitBreakers,
     this.isGodModeUnlocked = false,
+    this.isCircuitBreakerTripped = false,
   });
 
   final Palette p;
@@ -48,6 +49,7 @@ class AdvancedSettingsPage extends StatelessWidget {
   final String healthStatus;
   final bool soundEffects;
   final bool isGodModeUnlocked;
+  final bool isCircuitBreakerTripped;
 
   final ValueChanged<String> onHapticStyleChanged;
   final ValueChanged<bool>? onSoundEffectsChanged;
@@ -139,10 +141,18 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.bolt_slash_fill,
-              title: 'Circuit Breakers'.localized(context),
-              status: 'Reset'.localized(context),
-              color: p.orange,
+              icon: isCircuitBreakerTripped
+                  ? CupertinoIcons.bolt_slash_fill
+                  : CupertinoIcons.shield_fill,
+              title: 'Background Safeguards (Circuit Breakers)'.localized(
+                context,
+              ),
+              subtitle: 'Auto-isolates failing background tasks · Tap to reset'
+                  .localized(context),
+              status: isCircuitBreakerTripped
+                  ? 'Action Needed'.localized(context)
+                  : 'Healthy'.localized(context),
+              color: isCircuitBreakerTripped ? p.red : p.green,
               onTap: onResetCircuitBreakers,
             ),
             SettingsRow(
