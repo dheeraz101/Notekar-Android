@@ -17,4 +17,10 @@ class SettingsProvider extends InheritedNotifier<SettingsController> {
     }
     return provider.notifier!;
   }
+
+  static SettingsController? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<SettingsProvider>()
+        ?.notifier;
+  }
 }
