@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // ignore_for_file: non_const_argument_for_const_parameter
 
 /// Represents a research-backed or user-created daily activity quick tag.

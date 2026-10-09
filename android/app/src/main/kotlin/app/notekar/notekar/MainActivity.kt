@@ -1423,7 +1423,7 @@ class MainActivity : FlutterActivity() {
                 .setOnlyAlertOnce(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setPublicVersion(
-                    NotificationCompat.Builder(context, CHANNEL_CONTROL_PANEL)
+                    NotificationCompat.Builder(context, PERSISTENT_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_stat_notekar)
                         .setContentTitle("NoteKar")
                         .setContentText("Tap to open NoteKar")
