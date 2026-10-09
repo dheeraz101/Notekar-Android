@@ -10,6 +10,8 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/swipeable_card_bed.dart';
+import 'package:notekar/widgets/timeline_media_attachment_card.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
 class TimelineSingleTile extends StatelessWidget {
   const TimelineSingleTile({
@@ -26,6 +28,8 @@ class TimelineSingleTile extends StatelessWidget {
     this.isLast = false,
     this.compact = false,
     this.rainbowCards = false,
+    this.isImageCollapsed = false,
+    this.onToggleImageCollapse,
   });
 
   final Palette p;
@@ -40,6 +44,8 @@ class TimelineSingleTile extends StatelessWidget {
   final bool isLast;
   final bool compact;
   final bool rainbowCards;
+  final bool isImageCollapsed;
+  final VoidCallback? onToggleImageCollapse;
 
   @override
   Widget build(BuildContext context) {
@@ -252,17 +258,24 @@ class TimelineSingleTile extends StatelessWidget {
                                 SizedBox(width: compact ? 5 : 7),
                               ],
                               Expanded(
-                                child: hasNote
+                                child:
+                                    (hasNote ||
+                                        moment.imagePath != null ||
+                                        moment.voicePath != null)
                                     ? GestureDetector(
                                         onTap: () {
-                                          NotePreviewSheet.show(
-                                            context,
-                                            p: p,
-                                            note: moment.note,
-                                            title: 'Moment Note',
-                                            category: moment.category,
-                                            onEdit: onEditNote,
-                                          );
+                                          if (hasNote) {
+                                            NotePreviewSheet.show(
+                                              context,
+                                              p: p,
+                                              note: moment.note,
+                                              title: 'Moment Note',
+                                              category: moment.category,
+                                              onEdit: onEditNote,
+                                            );
+                                          } else {
+                                            onEditNote();
+                                          }
                                         },
                                         onLongPress: onEditNote,
                                         behavior: HitTestBehavior.opaque,
@@ -355,6 +368,32 @@ class TimelineSingleTile extends StatelessWidget {
                                                         ),
                                                       );
                                                     }).toList(),
+                                                  ),
+                                                ],
+                                                if (moment.voicePath !=
+                                                    null) ...[
+                                                  const SizedBox(height: 4),
+                                                  TimelineVoicePlayerPill(
+                                                    p: p,
+                                                    voicePath:
+                                                        moment.voicePath!,
+                                                    durationMs:
+                                                        moment
+                                                            .voiceDurationMs ??
+                                                        0,
+                                                  ),
+                                                ],
+                                                if (moment.imagePath !=
+                                                    null) ...[
+                                                  const SizedBox(height: 5),
+                                                  TimelineMediaAttachmentCard(
+                                                    p: p,
+                                                    imagePath:
+                                                        moment.imagePath!,
+                                                    isCollapsed:
+                                                        isImageCollapsed,
+                                                    onToggleCollapse:
+                                                        onToggleImageCollapse,
                                                   ),
                                                 ],
                                               ],

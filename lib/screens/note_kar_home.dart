@@ -872,6 +872,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       position: pending['position'] as Offset?,
       forcedType: pending['forcedType'] as String?,
       timestamp: pending['timestamp'] as int?,
+      imagePath: pending['imagePath'] as String?,
+      voicePath: pending['voicePath'] as String?,
+      voiceDurationMs: pending['voiceDurationMs'] as int?,
     );
   }
 
@@ -1176,6 +1179,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     String? forcedType,
     int? timestamp,
     bool isFromInAppNotePopup = false,
+    String? imagePath,
+    String? voicePath,
+    int? voiceDurationMs,
   }) async {
     if (_isSaving) return;
     _isSaving = true;
@@ -1279,6 +1285,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'position': position,
         'forcedType': forcedType,
         'timestamp': now.millisecondsSinceEpoch,
+        'imagePath': imagePath,
+        'voicePath': voicePath,
+        'voiceDurationMs': voiceDurationMs,
       };
 
       // Rollback session state until DB load completes and actual log executes
@@ -1338,6 +1347,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       note: finalNoteText,
       category: resolvedCategory,
       tags: tags ?? const [],
+      imagePath: imagePath,
+      voicePath: voicePath,
+      voiceDurationMs: voiceDurationMs,
     );
 
     _hasTappedBefore = true;
@@ -1723,6 +1735,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
       pageBuilder: (_, _, _) => NoteDialog(
         p: p,
         initialNote: initialNote,
+        initialImagePath: entry.imagePath ?? matchingIn?.imagePath,
+        initialVoicePath: entry.voicePath ?? matchingIn?.voicePath,
+        initialVoiceDurationMs:
+            entry.voiceDurationMs ?? matchingIn?.voiceDurationMs,
         title: initialNote.isNotEmpty ? 'Edit Note' : 'Add Note',
         blur:
             _enableTranslucency &&
@@ -1738,9 +1754,25 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _mode == 'single' &&
           (noteLower.contains('godmode') || noteLower.contains('godmoe'));
       final effectiveNote = isGodModeTrigger ? 'Access granted' : result.note;
-      await _updateMomentNote(entry.id, effectiveNote, result.tags);
+      await _updateMomentNote(
+        entry.id,
+        effectiveNote,
+        result.tags,
+        result.imagePath,
+        result.voicePath,
+        result.voiceDurationMs,
+        true,
+      );
       if (matchingIn != null) {
-        await _updateMomentNote(matchingIn.id, effectiveNote, result.tags);
+        await _updateMomentNote(
+          matchingIn.id,
+          effectiveNote,
+          result.tags,
+          result.imagePath,
+          result.voicePath,
+          result.voiceDurationMs,
+          true,
+        );
       }
       if (isGodModeTrigger) {
         await _prefs?.setBool('god_mode_unlocked', true);
@@ -1803,6 +1835,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
     int id,
     String note, [
     List<String>? tags,
+    String? imagePath,
+    String? voicePath,
+    int? voiceDurationMs,
+    bool updateMedia = false,
   ]) async {
     final index = _entries.indexWhere((item) => item.id == id);
     if (index < 0) return;
@@ -1817,6 +1853,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final updatedMoment = oldMoment.copyWith(
       note: note.trim(),
       tags: effectiveTags,
+      imagePath: updateMedia ? imagePath : (imagePath ?? oldMoment.imagePath),
+      clearImagePath: updateMedia && imagePath == null,
+      voicePath: updateMedia ? voicePath : (voicePath ?? oldMoment.voicePath),
+      clearVoicePath: updateMedia && voicePath == null,
+      voiceDurationMs: updateMedia
+          ? voiceDurationMs
+          : (voiceDurationMs ?? oldMoment.voiceDurationMs),
     );
 
     setState(() {
@@ -1912,6 +1955,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
             final type = json['type'] as String? ?? 'single';
             final note = json['note'] as String? ?? '';
             final category = json['category'] as String?;
+            final imagePath = json['imagePath'] as String?;
+            final voicePath = json['voicePath'] as String?;
+            final voiceDurationMs = (json['voiceDurationMs'] as num?)?.toInt();
             final entry = Moment(
               id: nextId++,
               timestamp: timestamp,
@@ -1924,6 +1970,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       category != 'All')
                   ? category.trim()
                   : null,
+              imagePath: imagePath,
+              voicePath: voicePath,
+              voiceDurationMs: voiceDurationMs,
             );
             newEntries.add(entry);
           } catch (e) {
@@ -2225,6 +2274,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
           tags: result.tags,
           position: position,
           isFromInAppNotePopup: isFromInAppNotePopup,
+          imagePath: result.imagePath,
+          voicePath: result.voicePath,
+          voiceDurationMs: result.voiceDurationMs,
         ),
       );
     }
@@ -2328,6 +2380,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onRestore: _restoreEntry,
         onUpdateNote: _updateMomentNote,
         onUpdateNoteWithTags: _updateMomentNote,
+        onUpdateMomentNote: _updateMomentNote,
         confirmDelete: _confirmDelete,
         onDuration: _showDuration,
         onOpenTrash: _showRecentlyDeleted,

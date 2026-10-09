@@ -14,6 +14,9 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
+import 'package:notekar/widgets/timeline_media_attachment_card.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Apple HIG Calendar Day-Swipe Timeline View.
 /// Allows horizontal swiping across days, showing 24h visual timeline blocks.
@@ -33,6 +36,8 @@ class HistoryCalendarView extends StatefulWidget {
     this.onDelete,
     this.rainbowCards = false,
     this.onOpenGodModeSettings,
+    this.isMomentImageCollapsed,
+    this.onToggleMomentImageCollapse,
   });
 
   final Palette p;
@@ -52,6 +57,8 @@ class HistoryCalendarView extends StatefulWidget {
   final ValueChanged<Moment>? onDelete;
   final bool rainbowCards;
   final VoidCallback? onOpenGodModeSettings;
+  final bool Function(int id)? isMomentImageCollapsed;
+  final ValueChanged<int>? onToggleMomentImageCollapse;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -67,6 +74,45 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   final List<Moment> _selectedMoments = [];
   final Set<String> _localClaimedGaps = {};
   final Set<int> _endingSessionIds = {};
+  bool _showImagesAlways = true;
+  final Set<int> _localManuallyExpandedMomentIds = {};
+  final Set<int> _localManuallyCollapsedMomentIds = {};
+
+  bool _isMomentImageCollapsed(int id) {
+    if (widget.isMomentImageCollapsed != null) {
+      return widget.isMomentImageCollapsed!(id);
+    }
+    if (_localManuallyExpandedMomentIds.contains(id)) return false;
+    if (_localManuallyCollapsedMomentIds.contains(id)) return true;
+    return !_showImagesAlways;
+  }
+
+  void _toggleMomentImageCollapse(int id) {
+    if (widget.onToggleMomentImageCollapse != null) {
+      widget.onToggleMomentImageCollapse!(id);
+      setState(() {});
+      return;
+    }
+    setState(() {
+      final currentlyCollapsed = _isMomentImageCollapsed(id);
+      if (currentlyCollapsed) {
+        _localManuallyCollapsedMomentIds.remove(id);
+        _localManuallyExpandedMomentIds.add(id);
+      } else {
+        _localManuallyExpandedMomentIds.remove(id);
+        _localManuallyCollapsedMomentIds.add(id);
+      }
+    });
+  }
+
+  Future<void> _loadHistoryPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _showImagesAlways = prefs.getBool('history_show_images_always') ?? true;
+      });
+    }
+  }
 
   static const int _daysRange = 60; // 60 days lookback
 
@@ -205,6 +251,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   @override
   void initState() {
     super.initState();
+    _loadHistoryPreferences();
     _sectionMap = {for (final s in widget.sections) s.dateKey: s};
 
     final now = DateTime.now();
@@ -955,6 +1002,24 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         ),
                       ),
                     ],
+                    if (it.noteMoment.voicePath != null) ...[
+                      const SizedBox(height: 5),
+                      TimelineVoicePlayerPill(
+                        p: widget.p,
+                        voicePath: it.noteMoment.voicePath!,
+                        durationMs: it.noteMoment.voiceDurationMs ?? 0,
+                      ),
+                    ],
+                    if (it.noteMoment.imagePath != null) ...[
+                      const SizedBox(height: 6),
+                      TimelineMediaAttachmentCard(
+                        p: widget.p,
+                        imagePath: it.noteMoment.imagePath!,
+                        isCollapsed: _isMomentImageCollapsed(it.noteMoment.id),
+                        onToggleCollapse: () =>
+                            _toggleMomentImageCollapse(it.noteMoment.id),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1112,6 +1177,28 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                                         fontSize: 11.5,
                                       ),
                                     ),
+                                  ),
+                                ],
+                                if (it.moment.voicePath != null) ...[
+                                  const SizedBox(height: 4),
+                                  TimelineVoicePlayerPill(
+                                    p: widget.p,
+                                    voicePath: it.moment.voicePath!,
+                                    durationMs: it.moment.voiceDurationMs ?? 0,
+                                  ),
+                                ],
+                                if (it.moment.imagePath != null) ...[
+                                  const SizedBox(height: 5),
+                                  TimelineMediaAttachmentCard(
+                                    p: widget.p,
+                                    imagePath: it.moment.imagePath!,
+                                    isCollapsed: _isMomentImageCollapsed(
+                                      it.moment.id,
+                                    ),
+                                    onToggleCollapse: () =>
+                                        _toggleMomentImageCollapse(
+                                          it.moment.id,
+                                        ),
                                   ),
                                 ],
                               ],

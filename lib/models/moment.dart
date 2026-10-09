@@ -1,5 +1,5 @@
-import 'package:notekar/utils/app_utils.dart';
 import 'package:isar/isar.dart';
+import 'package:notekar/utils/app_utils.dart';
 
 part 'moment.g.dart';
 
@@ -31,6 +31,9 @@ class Moment {
     this.note = '',
     this.category,
     this.tags = const [],
+    this.imagePath,
+    this.voicePath,
+    this.voiceDurationMs,
   });
 
   Id id;
@@ -40,6 +43,9 @@ class Moment {
   String note;
   String? category;
   List<String> tags;
+  String? imagePath;
+  String? voicePath;
+  int? voiceDurationMs;
 
   factory Moment.fromJson(Map<String, dynamic> json) {
     final type = (json['type'] as String?) ?? 'single';
@@ -64,6 +70,9 @@ class Moment {
       note: note,
       category: resolvedCategory,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
+      imagePath: json['imagePath'] as String?,
+      voicePath: json['voicePath'] as String?,
+      voiceDurationMs: (json['voiceDurationMs'] as num?)?.toInt(),
     );
   }
 
@@ -102,6 +111,11 @@ class Moment {
     String? note,
     String? category,
     List<String>? tags,
+    String? imagePath,
+    bool clearImagePath = false,
+    String? voicePath,
+    bool clearVoicePath = false,
+    int? voiceDurationMs,
   }) {
     return Moment(
       id: id ?? this.id,
@@ -111,6 +125,11 @@ class Moment {
       note: note ?? this.note,
       category: category ?? this.category,
       tags: tags ?? this.tags,
+      imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
+      voicePath: clearVoicePath ? null : (voicePath ?? this.voicePath),
+      voiceDurationMs: clearVoicePath
+          ? null
+          : (voiceDurationMs ?? this.voiceDurationMs),
     );
   }
 
@@ -123,16 +142,29 @@ class Moment {
     if (category != null && category!.trim().isNotEmpty)
       'category': category!.trim(),
     if (tags.isNotEmpty) 'tags': tags,
+    if (imagePath != null && imagePath!.isNotEmpty) 'imagePath': imagePath,
+    if (voicePath != null && voicePath!.isNotEmpty) 'voicePath': voicePath,
+    if (voiceDurationMs != null && voiceDurationMs! > 0)
+      'voiceDurationMs': voiceDurationMs,
   };
 }
 
 /// Return type for NoteDialog and BigNoteDialog.
-/// Contains both the note text and explicitly selected tags.
+/// Contains both the note text, explicitly selected tags, and optional attachments.
 class NoteResult {
-  const NoteResult(this.note, this.tags);
+  const NoteResult(
+    this.note,
+    this.tags, {
+    this.imagePath,
+    this.voicePath,
+    this.voiceDurationMs,
+  });
 
   final String note;
   final List<String> tags;
+  final String? imagePath;
+  final String? voicePath;
+  final int? voiceDurationMs;
 }
 
 class HistoryListItem {

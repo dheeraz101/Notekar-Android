@@ -1,10 +1,16 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notekar/dialogs/big_note_dialog.dart';
 import 'package:notekar/models/activity_tag.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/audio_service.dart';
+import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -17,6 +23,9 @@ class NoteDialog extends StatefulWidget {
     super.key,
     required this.p,
     this.initialNote = '',
+    this.initialImagePath,
+    this.initialVoicePath,
+    this.initialVoiceDurationMs,
     this.title = 'Add Note',
     this.saveLabel = 'Save',
     this.allowEmpty = true,
@@ -27,6 +36,9 @@ class NoteDialog extends StatefulWidget {
 
   final Palette p;
   final String initialNote;
+  final String? initialImagePath;
+  final String? initialVoicePath;
+  final int? initialVoiceDurationMs;
   final String title;
   final String saveLabel;
   final bool allowEmpty;
@@ -52,12 +64,22 @@ class _NoteDialogState extends State<NoteDialog> {
   int _availableShields = 0;
   bool _shieldActivated = false;
 
+  String? _stagedImagePath;
+  String? _stagedVoicePath;
+  int? _stagedVoiceDurationMs;
+  bool _isRecording = false;
+  int _recordingSeconds = 0;
+  Timer? _recordingTimer;
+
   List<ActivityTag> _activityTags = const [];
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNote);
+    _stagedImagePath = widget.initialImagePath;
+    _stagedVoicePath = widget.initialVoicePath;
+    _stagedVoiceDurationMs = widget.initialVoiceDurationMs;
     _loadSobrietyMode();
     _loadTags();
 
@@ -74,6 +96,127 @@ class _NoteDialogState extends State<NoteDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+  }
+
+  @override
+  void dispose() {
+    _recordingTimer?.cancel();
+    if (_isRecording) {
+      AudioService.instance.cancelRecording();
+    }
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickPhoto(ImageSource source) async {
+    HapticFeedback.selectionClick();
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1800,
+        maxHeight: 1800,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        final saved = await MediaStorageService.instance.saveImage(
+          xFile: picked,
+        );
+        if (mounted) {
+          setState(() {
+            _stagedImagePath = saved;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to pick image: $e');
+    }
+  }
+
+  Future<void> _toggleVoiceRecording() async {
+    HapticFeedback.mediumImpact();
+    if (_isRecording) {
+      await _stopVoiceRecording();
+    } else {
+      await _startVoiceRecording();
+    }
+  }
+
+  Future<void> _startVoiceRecording() async {
+    final res = await AudioService.instance.startRecording();
+    if (res != null && mounted) {
+      setState(() {
+        _isRecording = true;
+        _recordingSeconds = 0;
+      });
+      _recordingTimer?.cancel();
+      _recordingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted && _isRecording) {
+          setState(() => _recordingSeconds++);
+        }
+      });
+    }
+  }
+
+  Future<void> _stopVoiceRecording() async {
+    _recordingTimer?.cancel();
+    _recordingTimer = null;
+    final res = await AudioService.instance.stopRecording();
+    if (mounted) {
+      setState(() {
+        _isRecording = false;
+        if (res != null) {
+          _stagedVoicePath = res['filePath'] as String?;
+          _stagedVoiceDurationMs =
+              (res['durationMs'] as num?)?.toInt() ??
+              (_recordingSeconds * 1000);
+        }
+      });
+    }
+  }
+
+  Future<void> _cancelVoiceRecording() async {
+    _recordingTimer?.cancel();
+    _recordingTimer = null;
+    await AudioService.instance.cancelRecording();
+    if (mounted) {
+      setState(() {
+        _isRecording = false;
+        _recordingSeconds = 0;
+      });
+    }
+  }
+
+  String _formatSeconds(int s) {
+    final m = s ~/ 60;
+    final sec = s % 60;
+    return '${m.toString().padLeft(1, '0')}:${sec.toString().padLeft(2, '0')}';
+  }
+
+  String _formatMs(int ms) {
+    final totalSec = ms ~/ 1000;
+    return _formatSeconds(totalSec);
+  }
+
+  Future<void> _openBigNote() async {
+    final result = await showDialog<NoteResult>(
+      context: context,
+      builder: (ctx) => BigNoteDialog(
+        p: widget.p,
+        initialNote: _controller.text,
+        initialImagePath: _stagedImagePath,
+        initialVoicePath: _stagedVoicePath,
+        initialVoiceDurationMs: _stagedVoiceDurationMs,
+        title: 'Plus Note',
+        blur: widget.blur,
+        largeText: widget.largeText,
+      ),
+    );
+    if (result != null && mounted) {
+      _controller.text = result.note;
+      Navigator.pop(context, result);
+    }
   }
 
   Future<void> _loadTags() async {
@@ -154,23 +297,6 @@ class _NoteDialogState extends State<NoteDialog> {
     }
   }
 
-  Future<void> _openBigNote() async {
-    final result = await showDialog<NoteResult>(
-      context: context,
-      builder: (ctx) => BigNoteDialog(
-        p: widget.p,
-        initialNote: _controller.text,
-        title: 'Plus Note',
-        blur: widget.blur,
-        largeText: widget.largeText,
-      ),
-    );
-    if (result != null && mounted) {
-      _controller.text = result.note;
-      Navigator.pop(context, result);
-    }
-  }
-
   Future<void> _loadSobrietyMode() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
@@ -178,13 +304,6 @@ class _NoteDialogState extends State<NoteDialog> {
       _sobrietyMode = prefs.getBool('enable_sobriety_mode') ?? false;
       _availableShields = prefs.getInt('streak_shields') ?? 1;
     });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
   }
 
   void _insertTag(String tag) {
@@ -669,6 +788,348 @@ class _NoteDialogState extends State<NoteDialog> {
 
                       const SizedBox(height: 10),
 
+                      // Active Voice Recording Indicator Bar
+                      if (_isRecording) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.p.red.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: widget.p.red.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Recording ${_formatSeconds(_recordingSeconds)}',
+                                style: TextStyle(
+                                  color: widget.p.red,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              PressableScale(
+                                onTap: _cancelVoiceRecording,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(
+                                    CupertinoIcons.trash,
+                                    size: 16,
+                                    color: widget.p.text3,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              PressableScale(
+                                onTap: _stopVoiceRecording,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.checkmark,
+                                        size: 12,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Done',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
+                      // Staged Image Preview Bar
+                      if (_stagedImagePath != null) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: widget.p.surface2,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: widget.p.border.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: SizedBox(
+                                  width: 44,
+                                  height: 44,
+                                  child: _buildStagedImageThumbnail(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Photo attached',
+                                      style: TextStyle(
+                                        color: widget.p.text,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Tap ✕ to remove',
+                                      style: TextStyle(
+                                        color: widget.p.text3,
+                                        fontSize: 10.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PressableScale(
+                                onTap: () =>
+                                    setState(() => _stagedImagePath = null),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface3,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    CupertinoIcons.xmark,
+                                    size: 13,
+                                    color: widget.p.text2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
+                      // Staged Voice Preview Bar
+                      if (_stagedVoicePath != null) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.p.surface2,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: widget.p.border.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.mic_fill,
+                                size: 16,
+                                color: widget.p.accent,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Voice Note (${_formatMs(_stagedVoiceDurationMs ?? 0)})',
+                                style: TextStyle(
+                                  color: widget.p.text,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              PressableScale(
+                                onTap: () => setState(() {
+                                  _stagedVoicePath = null;
+                                  _stagedVoiceDurationMs = null;
+                                }),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: widget.p.surface3,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    CupertinoIcons.xmark,
+                                    size: 13,
+                                    color: widget.p.text2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
+                      // Media Action Chips Row (Camera, Photo, Mic)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            PressableScale(
+                              onTap: () => _pickPhoto(ImageSource.camera),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: widget.p.border.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.camera_fill,
+                                      size: 12,
+                                      color: widget.p.accent,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Camera',
+                                      style: TextStyle(
+                                        color: widget.p.text2,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            PressableScale(
+                              onTap: () => _pickPhoto(ImageSource.gallery),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: widget.p.border.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons
+                                          .photo_fill_on_rectangle_fill,
+                                      size: 12,
+                                      color: widget.p.accent,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Photo',
+                                      style: TextStyle(
+                                        color: widget.p.text2,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            PressableScale(
+                              onTap: _toggleVoiceRecording,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _isRecording
+                                      ? widget.p.red.withValues(alpha: 0.15)
+                                      : widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: _isRecording
+                                        ? widget.p.red
+                                        : widget.p.border.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _isRecording
+                                          ? CupertinoIcons.stop_fill
+                                          : CupertinoIcons.mic_fill,
+                                      size: 12,
+                                      color: _isRecording
+                                          ? widget.p.red
+                                          : widget.p.accent,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _isRecording ? 'Stop' : 'Voice',
+                                      style: TextStyle(
+                                        color: _isRecording
+                                            ? widget.p.red
+                                            : widget.p.text2,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       // Input Bar Row: WhatsApp style (Input box on left + Circular action button on right)
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -819,6 +1280,26 @@ class _NoteDialogState extends State<NoteDialog> {
     );
   }
 
+  Widget _buildStagedImageThumbnail() {
+    if (_stagedImagePath == null) return const SizedBox.shrink();
+    final file = MediaStorageService.instance.resolveFileSync(_stagedImagePath);
+    if (file.existsSync()) {
+      return Image.file(file, fit: BoxFit.cover);
+    }
+    return FutureBuilder<File>(
+      future: MediaStorageService.instance.resolveFile(_stagedImagePath),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.existsSync()) {
+          return Image.file(snapshot.data!, fit: BoxFit.cover);
+        }
+        return Container(
+          color: widget.p.surface3,
+          child: Icon(CupertinoIcons.photo, size: 20, color: widget.p.text3),
+        );
+      },
+    );
+  }
+
   void _saveNote() {
     var note = _controller.text.trim();
 
@@ -856,7 +1337,8 @@ class _NoteDialogState extends State<NoteDialog> {
       }
     }
 
-    if (!widget.allowEmpty && note.isEmpty) {
+    final hasMedia = _stagedImagePath != null || _stagedVoicePath != null;
+    if (!widget.allowEmpty && note.isEmpty && !hasMedia) {
       HapticFeedback.selectionClick();
       setState(() => _showWarning = true);
       return;
@@ -877,7 +1359,16 @@ class _NoteDialogState extends State<NoteDialog> {
       );
     }
 
-    Navigator.pop(context, NoteResult(note, extractedTags));
+    Navigator.pop(
+      context,
+      NoteResult(
+        note,
+        extractedTags,
+        imagePath: _stagedImagePath,
+        voicePath: _stagedVoicePath,
+        voiceDurationMs: _stagedVoiceDurationMs,
+      ),
+    );
   }
 }
 

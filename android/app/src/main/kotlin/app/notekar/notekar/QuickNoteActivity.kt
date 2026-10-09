@@ -2,10 +2,12 @@ package app.notekar.notekar
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
+import android.media.MediaRecorder
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -17,10 +19,55 @@ import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ScrollView
-import android.widget.TextView
+import android.widget.Toast
 import org.json.JSONArray
+import java.io.File
+import java.io.FileOutputStream
 
 class QuickNoteActivity : Activity() {
+    private var stagedImagePath: String? = null
+    private var stagedVoicePath: String? = null
+    private var stagedVoiceDurationMs: Long? = null
+    private var mediaRecorder: MediaRecorder? = null
+    private var recordingStartTime: Long = 0L
+    private var isRecording = false
+    private var currentRecordingFile: File? = null
+    private var updateMediaStatus: (() -> Unit)? = null
+
+    private val REQ_PICK_IMAGE = 1001
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_PICK_IMAGE && resultCode == RESULT_OK && data?.data != null) {
+            try {
+                val uri = data.data!!
+                val dir = File(filesDir, "notekar_media/images").apply { mkdirs() }
+                val targetFile = File(dir, "img_${System.currentTimeMillis()}.jpg")
+                contentResolver.openInputStream(uri)?.use { inStream ->
+                    FileOutputStream(targetFile).use { outStream ->
+                        inStream.copyTo(outStream)
+                    }
+                }
+                stagedImagePath = "images/${targetFile.name}"
+                updateMediaStatus?.invoke()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Could not attach photo", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        if (isRecording) {
+            try {
+                mediaRecorder?.stop()
+                mediaRecorder?.release()
+                currentRecordingFile?.delete()
+            } catch (_: Exception) {
+            }
+        }
+        super.onDestroy()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,7 +118,10 @@ class QuickNoteActivity : Activity() {
         // Dialog Card
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            val cardWidth = Math.min((340 * density).toInt(), (resources.displayMetrics.widthPixels * 0.92f).toInt())
+            val cardWidth = Math.min(
+                (340 * density).toInt(),
+                (resources.displayMetrics.widthPixels * 0.92f).toInt()
+            )
             val lp = FrameLayout.LayoutParams(
                 cardWidth,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -136,7 +186,7 @@ class QuickNoteActivity : Activity() {
             .takeUnless { it.equals("All", ignoreCase = true) }
         var selectedCategory = categories.firstOrNull {
             configuredSelection != null &&
-                it.equals(configuredSelection, ignoreCase = true)
+                    it.equals(configuredSelection, ignoreCase = true)
         } ?: categories.first()
         var selectedGoalTitle: String? = null
         var selectedGoalId: String? = null
@@ -499,7 +549,10 @@ class QuickNoteActivity : Activity() {
                             addState(intArrayOf(), GradientDrawable().apply {
                                 setColor(Color.parseColor(if (isFiltered) "#4D3B82F6" else "#1FFFFFFF"))
                                 cornerRadius = 14 * density
-                                setStroke((1 * density).toInt(), Color.parseColor(if (isFiltered) "#803B82F6" else "#26FFFFFF"))
+                                setStroke(
+                                    (1 * density).toInt(),
+                                    Color.parseColor(if (isFiltered) "#803B82F6" else "#26FFFFFF")
+                                )
                             })
                         }
                         val hPad = (10 * density).toInt()
@@ -517,17 +570,19 @@ class QuickNoteActivity : Activity() {
                         setOnClickListener {
                             val currentText = input.text.toString()
                             val cursorPosition = input.selectionEnd
-                            val safeCursor = if (cursorPosition in 0..currentText.length) cursorPosition else currentText.length
+                            val safeCursor =
+                                if (cursorPosition in 0..currentText.length) cursorPosition else currentText.length
                             val prefix = currentText.substring(0, safeCursor)
                             val suffix = currentText.substring(safeCursor)
                             val hashIndex = prefix.lastIndexOf('#')
-                            val newText = if (hashIndex != -1 && !prefix.substring(hashIndex).contains(" ")) {
-                                prefix.substring(0, hashIndex) + cleanTag + " " + suffix
-                            } else {
-                                val separator =
-                                    if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
-                                "$currentText$separator$cleanTag "
-                            }
+                            val newText =
+                                if (hashIndex != -1 && !prefix.substring(hashIndex).contains(" ")) {
+                                    prefix.substring(0, hashIndex) + cleanTag + " " + suffix
+                                } else {
+                                    val separator =
+                                        if (currentText.isEmpty() || currentText.endsWith(" ")) "" else " "
+                                    "$currentText$separator$cleanTag "
+                                }
                             input.setText(newText)
                             input.setSelection(newText.length)
                         }
@@ -540,7 +595,14 @@ class QuickNoteActivity : Activity() {
             renderTagChips(null)
 
             input.addTextChangedListener(object : android.text.TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     val text = s?.toString() ?: ""
                     val cursor = input.selectionEnd
@@ -553,6 +615,7 @@ class QuickNoteActivity : Activity() {
                         renderTagChips(null)
                     }
                 }
+
                 override fun afterTextChanged(s: android.text.Editable?) {}
             })
 
@@ -560,6 +623,174 @@ class QuickNoteActivity : Activity() {
             card.addView(tagScroll)
         } catch (_: Exception) {
         }
+
+        // Media Attachments Container (Photo & Voice)
+        val mediaContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val lp = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = (10 * density).toInt()
+            }
+            layoutParams = lp
+        }
+
+        val mediaActionsRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            val lp = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams = lp
+        }
+
+        val statusView = TextView(this).apply {
+            textSize = 12f
+            setTextColor(Color.parseColor("#B3FFFFFF"))
+            visibility = View.GONE
+            val lp = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = (6 * density).toInt()
+            }
+            layoutParams = lp
+        }
+
+        fun refreshStatus() {
+            val hasImage = stagedImagePath != null
+            val hasVoice = stagedVoicePath != null
+            if (isRecording) {
+                statusView.text = "🔴 Recording... Tap 'Stop' when done"
+                statusView.setTextColor(Color.parseColor("#FFFF453A"))
+                statusView.visibility = View.VISIBLE
+            } else if (hasImage || hasVoice) {
+                val parts = mutableListOf<String>()
+                if (hasImage) parts.add("🖼️ Photo attached")
+                if (hasVoice) {
+                    val sec = (stagedVoiceDurationMs ?: 0L) / 1000
+                    parts.add("🎙️ Voice (${sec}s)")
+                }
+                statusView.text = "${parts.joinToString(" • ")} (Tap to remove)"
+                statusView.setTextColor(Color.parseColor("#B3FFFFFF"))
+                statusView.visibility = View.VISIBLE
+            } else {
+                statusView.visibility = View.GONE
+            }
+        }
+        updateMediaStatus = { refreshStatus() }
+
+        statusView.setOnClickListener {
+            stagedImagePath = null
+            stagedVoicePath = null
+            stagedVoiceDurationMs = null
+            refreshStatus()
+        }
+
+        val btnPhoto = TextView(this).apply {
+            text = "📷 Photo"
+            textSize = 12f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            val hPad = (10 * density).toInt()
+            val vPad = (5 * density).toInt()
+            setPadding(hPad, vPad, hPad, vPad)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#26FFFFFF"))
+                cornerRadius = 14 * density
+            }
+            val lp = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = (6 * density).toInt()
+            }
+            layoutParams = lp
+            setOnClickListener {
+                val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                    type = "image/*"
+                }
+                startActivityForResult(intent, REQ_PICK_IMAGE)
+            }
+        }
+        mediaActionsRow.addView(btnPhoto)
+
+        val btnVoice = TextView(this).apply {
+            text = "🎙️ Voice"
+            textSize = 12f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            val hPad = (10 * density).toInt()
+            val vPad = (5 * density).toInt()
+            setPadding(hPad, vPad, hPad, vPad)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#26FFFFFF"))
+                cornerRadius = 14 * density
+            }
+            val lp = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams = lp
+            setOnClickListener {
+                if (isRecording) {
+                    try {
+                        mediaRecorder?.stop()
+                        mediaRecorder?.release()
+                        mediaRecorder = null
+                        isRecording = false
+                        text = "🎙️ Voice"
+                        background = GradientDrawable().apply {
+                            setColor(Color.parseColor("#26FFFFFF"))
+                            cornerRadius = 14 * density
+                        }
+                        val duration = System.currentTimeMillis() - recordingStartTime
+                        if (currentRecordingFile?.exists() == true && currentRecordingFile!!.length() > 0) {
+                            stagedVoicePath = "voice/${currentRecordingFile!!.name}"
+                            stagedVoiceDurationMs = duration
+                        }
+                    } catch (_: Exception) {
+                        isRecording = false
+                    }
+                    refreshStatus()
+                } else {
+                    try {
+                        val dir = File(filesDir, "notekar_media/voice").apply { mkdirs() }
+                        val file = File(dir, "voice_${System.currentTimeMillis()}.m4a")
+                        currentRecordingFile = file
+                        mediaRecorder = MediaRecorder().apply {
+                            setAudioSource(MediaRecorder.AudioSource.MIC)
+                            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                            setAudioEncodingBitRate(128000)
+                            setAudioSamplingRate(44100)
+                            setOutputFile(file.absolutePath)
+                            prepare()
+                            start()
+                        }
+                        recordingStartTime = System.currentTimeMillis()
+                        isRecording = true
+                        text = "⏹️ Stop"
+                        background = GradientDrawable().apply {
+                            setColor(Color.parseColor("#FFCC0000"))
+                            cornerRadius = 14 * density
+                        }
+                    } catch (_: Exception) {
+                        Toast.makeText(
+                            this@QuickNoteActivity,
+                            "Mic unavailable",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    refreshStatus()
+                }
+            }
+        }
+        mediaActionsRow.addView(btnVoice)
+        mediaContainer.addView(mediaActionsRow)
+        mediaContainer.addView(statusView)
+        card.addView(mediaContainer)
 
         // Buttons Layout
         val buttonsContainer = LinearLayout(this).apply {
@@ -651,7 +882,10 @@ class QuickNoteActivity : Activity() {
                     resolvedType,
                     noteText,
                     category = selectedCategory,
-                    goalId = selectedGoalId
+                    goalId = selectedGoalId,
+                    imagePath = stagedImagePath,
+                    voicePath = stagedVoicePath,
+                    voiceDurationMs = stagedVoiceDurationMs
                 )
                 finish()
             }
@@ -687,7 +921,10 @@ class QuickNoteActivity : Activity() {
                         "note",
                         noteText,
                         category = selectedCategory,
-                        goalId = selectedGoalId
+                        goalId = selectedGoalId,
+                        imagePath = stagedImagePath,
+                        voicePath = stagedVoicePath,
+                        voiceDurationMs = stagedVoiceDurationMs
                     )
                     finish()
                 }
@@ -724,7 +961,10 @@ class QuickNoteActivity : Activity() {
                         targetType,
                         noteText,
                         category = selectedCategory,
-                        goalId = selectedGoalId
+                        goalId = selectedGoalId,
+                        imagePath = stagedImagePath,
+                        voicePath = stagedVoicePath,
+                        voiceDurationMs = stagedVoiceDurationMs
                     )
                     finish()
                 }

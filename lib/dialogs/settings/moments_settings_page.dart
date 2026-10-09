@@ -20,9 +20,11 @@ class MomentsSettingsPage extends StatelessWidget {
     this.useNumbersInSingle = false,
     this.resetSingleDaily = false,
     this.countOnSave = false,
+    this.showImagesAlways = true,
 
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
+    this.onShowImagesAlwaysChanged,
     required this.onExtendedDurationChanged,
     required this.onMinimalMomentOptionsChanged,
     required this.onUseNumbersInSingleChanged,
@@ -36,6 +38,7 @@ class MomentsSettingsPage extends StatelessWidget {
   final List<Moment> trash;
   final String historyDensity;
   final bool confirmDelete;
+  final bool showImagesAlways;
   final bool extendedDuration;
   final bool minimalMomentOptions;
   final int notesCount;
@@ -45,6 +48,7 @@ class MomentsSettingsPage extends StatelessWidget {
 
   final ValueChanged<String> onHistoryDensityChanged;
   final ValueChanged<bool> onConfirmDeleteChanged;
+  final ValueChanged<bool>? onShowImagesAlwaysChanged;
   final ValueChanged<bool> onExtendedDurationChanged;
   final ValueChanged<bool> onMinimalMomentOptionsChanged;
   final ValueChanged<bool> onUseNumbersInSingleChanged;
@@ -68,6 +72,15 @@ class MomentsSettingsPage extends StatelessWidget {
               color: p.red,
               value: confirmDelete,
               onChanged: onConfirmDeleteChanged,
+            ),
+            SettingsSwitchRow(
+              p: p,
+              title: 'Show Images Always',
+              subtitle:
+                  'Keep timeline photos expanded by default. When disabled, photos appear as compact bars.',
+              color: p.accent,
+              value: showImagesAlways,
+              onChanged: onShowImagesAlwaysChanged ?? (_) {},
             ),
           ],
         ),

@@ -56,16 +56,28 @@ class TimelineSessionItem extends TimelineItem {
     return '';
   }
 
-  /// The moment within this session that holds the user's note.
-  /// If the note was logged on OUT, returns outMoment; if on IN, returns inMoment.
-  /// If neither has a note, returns outMoment if completed, otherwise inMoment.
+  /// The moment within this session that holds the user's note or media.
+  /// If the note or media was logged on IN, returns inMoment.
+  /// If on OUT, returns outMoment.
+  /// If neither has a note/media, returns outMoment if completed, otherwise inMoment.
   Moment get noteMoment {
-    if (inMoment.note.trim().isNotEmpty) return inMoment;
-    if (outMoment != null && outMoment!.note.trim().isNotEmpty) {
+    if (inMoment.note.trim().isNotEmpty ||
+        inMoment.imagePath != null ||
+        inMoment.voicePath != null) {
+      return inMoment;
+    }
+    if (outMoment != null &&
+        (outMoment!.note.trim().isNotEmpty ||
+            outMoment!.imagePath != null ||
+            outMoment!.voicePath != null)) {
       return outMoment!;
     }
     return outMoment ?? inMoment;
   }
+
+  String? get imagePath => noteMoment.imagePath;
+  String? get voicePath => noteMoment.voicePath;
+  int? get voiceDurationMs => noteMoment.voiceDurationMs;
 
   @override
   String? get category {

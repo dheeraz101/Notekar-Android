@@ -350,6 +350,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late String currentLocale;
   late bool soundEffects;
   bool _rainbowCards = false;
+  bool _showImagesAlways = true;
   TimelineFilterCriteria _searchNotesFilterCriteria =
       const TimelineFilterCriteria();
   final List<Moment> _searchNotesSelectedMoments = [];
@@ -1286,6 +1287,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       if (mounted) {
         setState(() {
           _rainbowCards = prefs.getBool('m-rainbow-cards') ?? false;
+          _showImagesAlways =
+              prefs.getBool('history_show_images_always') ?? true;
         });
       }
     });
@@ -3261,6 +3264,7 @@ $cleanStack
                               trash: _trash,
 
                               confirmDelete: confirmDelete,
+                              showImagesAlways: _showImagesAlways,
                               extendedDuration: extendedDuration,
                               minimalMomentOptions: minimalMomentOptions,
                               useNumbersInSingle: useNumbersInSingle,
@@ -3277,6 +3281,15 @@ $cleanStack
                               onConfirmDeleteChanged: (value) {
                                 setState(() => confirmDelete = value);
                                 widget.onConfirmDelete(value);
+                              },
+                              onShowImagesAlwaysChanged: (value) async {
+                                setState(() => _showImagesAlways = value);
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setBool(
+                                  'history_show_images_always',
+                                  value,
+                                );
                               },
                               onExtendedDurationChanged: (value) {
                                 setState(() => extendedDuration = value);

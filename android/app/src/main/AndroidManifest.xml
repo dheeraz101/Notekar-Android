@@ -6,6 +6,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="app.notekar.notekar.permission.LOG_BROADCAST" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

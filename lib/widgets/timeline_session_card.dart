@@ -10,6 +10,8 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/swipeable_card_bed.dart';
+import 'package:notekar/widgets/timeline_media_attachment_card.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
 class TimelineSessionCard extends StatelessWidget {
   const TimelineSessionCard({
@@ -26,6 +28,8 @@ class TimelineSessionCard extends StatelessWidget {
     this.rainbowCards = false,
     this.isOngoing,
     this.goals,
+    this.isImageCollapsed = false,
+    this.onToggleImageCollapse,
   });
 
   final Palette p;
@@ -40,6 +44,8 @@ class TimelineSessionCard extends StatelessWidget {
   final bool rainbowCards;
   final bool? isOngoing;
   final List<Goal>? goals;
+  final bool isImageCollapsed;
+  final VoidCallback? onToggleImageCollapse;
 
   Goal? _findMatchingGoal() {
     final gList = goals;
@@ -83,6 +89,9 @@ class TimelineSessionCard extends StatelessWidget {
     final isOngoing = this.isOngoing ?? session.isOngoing;
     final matchingGoal = _findMatchingGoal();
     final durationStr = _formatDuration(session.duration);
+    final noteMoment = session.noteMoment;
+    final hasMedia =
+        noteMoment.imagePath != null || noteMoment.voicePath != null;
     final hasNote = session.note.isNotEmpty;
     final cardRadius = BorderRadius.circular(compact ? 16 : 24);
     final cat = session.category ?? 'Session';
@@ -341,6 +350,7 @@ class TimelineSessionCard extends StatelessWidget {
 
                 // Note Content / Mode & Note area
                 if (hasNote ||
+                    hasMedia ||
                     !compact ||
                     (session.category != null &&
                         session.category!.trim().isNotEmpty)) ...[
@@ -405,17 +415,19 @@ class TimelineSessionCard extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
                               child: Icon(
-                                hasNote
+                                (hasNote || hasMedia)
                                     ? Icons.notes_rounded
                                     : Icons.add_comment_outlined,
                                 size: compact ? 12 : 14,
-                                color: hasNote ? p.accent : p.text3,
+                                color: (hasNote || hasMedia)
+                                    ? p.accent
+                                    : p.text3,
                               ),
                             ),
                             SizedBox(width: compact ? 6 : 8),
                           ],
                           Expanded(
-                            child: hasNote
+                            child: (hasNote || hasMedia)
                                 ? Builder(
                                     builder: (ctx) {
                                       final tags =
@@ -499,6 +511,26 @@ class TimelineSessionCard extends StatelessWidget {
                                                   ),
                                                 );
                                               }).toList(),
+                                            ),
+                                          ],
+                                          if (noteMoment.voicePath != null) ...[
+                                            const SizedBox(height: 4),
+                                            TimelineVoicePlayerPill(
+                                              p: p,
+                                              voicePath: noteMoment.voicePath!,
+                                              durationMs:
+                                                  noteMoment.voiceDurationMs ??
+                                                  0,
+                                            ),
+                                          ],
+                                          if (noteMoment.imagePath != null) ...[
+                                            const SizedBox(height: 5),
+                                            TimelineMediaAttachmentCard(
+                                              p: p,
+                                              imagePath: noteMoment.imagePath!,
+                                              isCollapsed: isImageCollapsed,
+                                              onToggleCollapse:
+                                                  onToggleImageCollapse,
                                             ),
                                           ],
                                         ],

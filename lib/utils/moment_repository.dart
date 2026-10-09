@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/services/media_storage_service.dart';
 import 'package:notekar/services/search_index_service.dart';
 import 'package:notekar/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -153,6 +154,9 @@ class MomentRepository {
           .timestampLessThan(thirtyDaysAgo)
           .findAllSync();
       if (oldTrash.isNotEmpty) {
+        for (final m in oldTrash) {
+          unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+        }
         await _trashIsar.writeTxn(() async {
           await _trashIsar.moments.deleteAll(
             oldTrash.map((e) => e.id).toList(),
@@ -395,6 +399,10 @@ class MomentRepository {
   Future<void> permanentlyDeleteTrashMoment(int id) async {
     if (!_isInitialized) await ensureInitialized();
     try {
+      final moment = await _trashIsar.moments.get(id);
+      if (moment != null) {
+        unawaited(MediaStorageService.instance.deleteMediaForMoment(moment));
+      }
       await _trashIsar.writeTxn(() async {
         await _trashIsar.moments.delete(id);
       });
@@ -410,6 +418,10 @@ class MomentRepository {
   Future<void> clearTrash() async {
     if (!_isInitialized) await ensureInitialized();
     try {
+      final allTrash = await _trashIsar.moments.where().findAll();
+      for (final m in allTrash) {
+        unawaited(MediaStorageService.instance.deleteMediaForMoment(m));
+      }
       await _trashIsar.writeTxn(() async {
         await _trashIsar.moments.clear();
       });

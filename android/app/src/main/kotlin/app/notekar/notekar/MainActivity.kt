@@ -12,6 +12,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.media.RingtoneManager
 import android.media.SoundPool
 import android.net.Uri
@@ -39,6 +41,12 @@ class MainActivity : FlutterActivity() {
     private var soundPool: SoundPool? = null
     private var clickSoundId: Int = 0
     private var shhhSoundId: Int = 0
+
+    private var activeMediaRecorder: MediaRecorder? = null
+    private var activeRecordingFile: File? = null
+    private var activeRecordingStartTime: Long = 0L
+    private var activeMediaPlayer: MediaPlayer? = null
+    private var activePlayingPath: String? = null
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         try {
@@ -130,6 +138,215 @@ class MainActivity : FlutterActivity() {
                 }
 
                 "appDataDir" -> result.success(applicationContext.filesDir.absolutePath)
+
+                "startAudioRecording" -> {
+                    try {
+                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                            result.error("PERMISSION_DENIED", "RECORD_AUDIO permission not granted", null)
+                            return@setMethodCallHandler
+                        }
+                        activeMediaRecorder?.apply {
+                            try { stop() } catch (_: Exception) {}
+                            release()
+                        }
+                        val mediaDir = File(applicationContext.filesDir, "notekar_media/voice")
+                        if (!mediaDir.exists()) mediaDir.mkdirs()
+                        val file = File(mediaDir, "voice_${System.currentTimeMillis()}_${(1000..9999).random()}.m4a")
+                        val recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            MediaRecorder(applicationContext)
+                        } else {
+                            @Suppress("DEPRECATION")
+                            MediaRecorder()
+                        }
+                        recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
+                        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                        recorder.setAudioEncodingBitRate(128000)
+                        recorder.setAudioSamplingRate(44100)
+                        recorder.setOutputFile(file.absolutePath)
+                        recorder.prepare()
+                        recorder.start()
+                        activeMediaRecorder = recorder
+                        activeRecordingFile = file
+                        activeRecordingStartTime = System.currentTimeMillis()
+                        result.success(mapOf(
+                            "filePath" to "voice/${file.name}",
+                            "absolutePath" to file.absolutePath
+                        ))
+                    } catch (e: Exception) {
+                        result.error("RECORDING_START_FAILED", e.message, null)
+                    }
+                }
+
+                "stopAudioRecording" -> {
+                    try {
+                        val recorder = activeMediaRecorder
+                        val file = activeRecordingFile
+                        val durationMs = (System.currentTimeMillis() - activeRecordingStartTime).coerceAtLeast(0L)
+                        if (recorder != null) {
+                            try {
+                                recorder.stop()
+                            } catch (_: Exception) {}
+                            recorder.release()
+                            activeMediaRecorder = null
+                        }
+                        activeRecordingFile = null
+                        if (file != null && file.exists()) {
+                            result.success(mapOf(
+                                "filePath" to "voice/${file.name}",
+                                "absolutePath" to file.absolutePath,
+                                "durationMs" to durationMs
+                            ))
+                        } else {
+                            result.error("RECORDING_FAILED", "Recorded file not found", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("RECORDING_STOP_FAILED", e.message, null)
+                    }
+                }
+
+                "cancelAudioRecording" -> {
+                    try {
+                        activeMediaRecorder?.apply {
+                            try { stop() } catch (_: Exception) {}
+                            release()
+                        }
+                        activeMediaRecorder = null
+                        activeRecordingFile?.delete()
+                        activeRecordingFile = null
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                "playAudio" -> {
+                    try {
+                        val pathArg = call.argument<String>("path") ?: ""
+                        val speedArg = call.argument<Double>("speed") ?: 1.0
+                        val resolvedFile = if (File(pathArg).isAbsolute) {
+                            File(pathArg)
+                        } else {
+                            val clean = pathArg.removePrefix("notekar_media/").removePrefix("/")
+                            File(applicationContext.filesDir, "notekar_media/$clean")
+                        }
+                        if (!resolvedFile.exists()) {
+                            result.error("FILE_NOT_FOUND", "Audio file not found at: ${resolvedFile.path}", null)
+                            return@setMethodCallHandler
+                        }
+                        activeMediaPlayer?.apply {
+                            try { stop() } catch (_: Exception) {}
+                            release()
+                        }
+                        val player = MediaPlayer()
+                        player.setDataSource(resolvedFile.absolutePath)
+                        player.prepare()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            try {
+                                player.playbackParams = player.playbackParams.setSpeed(speedArg.toFloat())
+                            } catch (_: Exception) {}
+                        }
+                        player.start()
+                        activeMediaPlayer = player
+                        activePlayingPath = pathArg
+                        result.success(mapOf(
+                            "durationMs" to player.duration,
+                            "positionMs" to player.currentPosition
+                        ))
+                    } catch (e: Exception) {
+                        result.error("PLAYBACK_FAILED", e.message, null)
+                    }
+                }
+
+                "pauseAudio" -> {
+                    try {
+                        activeMediaPlayer?.let {
+                            if (it.isPlaying) it.pause()
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                "resumeAudio" -> {
+                    try {
+                        activeMediaPlayer?.start()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                "stopAudio" -> {
+                    try {
+                        activeMediaPlayer?.apply {
+                            try { stop() } catch (_: Exception) {}
+                            release()
+                        }
+                        activeMediaPlayer = null
+                        activePlayingPath = null
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                "seekAudio" -> {
+                    try {
+                        val positionMs = call.argument<Int>("positionMs") ?: 0
+                        activeMediaPlayer?.seekTo(positionMs)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                "setAudioSpeed" -> {
+                    try {
+                        val speedArg = call.argument<Double>("speed") ?: 1.0
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            activeMediaPlayer?.let {
+                                it.playbackParams = it.playbackParams.setSpeed(speedArg.toFloat())
+                            }
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                "getAudioPlaybackState" -> {
+                    try {
+                        val player = activeMediaPlayer
+                        if (player != null) {
+                            var isPlaying = false
+                            var pos = 0
+                            var dur = 0
+                            try {
+                                isPlaying = player.isPlaying
+                                pos = player.currentPosition
+                                dur = player.duration
+                            } catch (_: Exception) {}
+                            result.success(mapOf(
+                                "isPlaying" to isPlaying,
+                                "positionMs" to pos,
+                                "durationMs" to dur,
+                                "path" to (activePlayingPath ?: "")
+                            ))
+                        } else {
+                            result.success(mapOf(
+                                "isPlaying" to false,
+                                "positionMs" to 0,
+                                "durationMs" to 0,
+                                "path" to ""
+                            ))
+                        }
+                    } catch (e: Exception) {
+                        result.success(mapOf("isPlaying" to false, "positionMs" to 0, "durationMs" to 0, "path" to ""))
+                    }
+                }
+
                 "canUsePrivacyLock" -> result.success(canUsePrivacyLock())
                 "authenticatePrivacyLock" -> {
                     if (pendingPrivacyResult != null) {
@@ -680,6 +897,22 @@ class MainActivity : FlutterActivity() {
         try {
             soundPool?.release()
             soundPool = null
+        } catch (_: Exception) {
+        }
+        try {
+            activeMediaRecorder?.apply {
+                try { stop() } catch (_: Exception) {}
+                release()
+            }
+            activeMediaRecorder = null
+        } catch (_: Exception) {
+        }
+        try {
+            activeMediaPlayer?.apply {
+                try { stop() } catch (_: Exception) {}
+                release()
+            }
+            activeMediaPlayer = null
         } catch (_: Exception) {
         }
         super.onDestroy()

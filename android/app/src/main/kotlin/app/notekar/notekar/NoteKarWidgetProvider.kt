@@ -172,7 +172,10 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             type: String,
             note: String = "",
             category: String? = null,
-            goalId: String? = null
+            goalId: String? = null,
+            imagePath: String? = null,
+            voicePath: String? = null,
+            voiceDurationMs: Long? = null
         ) {
             val now = System.currentTimeMillis()
             val json = org.json.JSONObject().apply {
@@ -186,6 +189,15 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
                 }
                 if (!goalId.isNullOrEmpty()) {
                     put("goalId", goalId)
+                }
+                if (!imagePath.isNullOrEmpty()) {
+                    put("imagePath", imagePath)
+                }
+                if (!voicePath.isNullOrEmpty()) {
+                    put("voicePath", voicePath)
+                }
+                if (voiceDurationMs != null && voiceDurationMs > 0) {
+                    put("voiceDurationMs", voiceDurationMs)
                 }
             }
             val logString = json.toString()

@@ -45,6 +45,7 @@ class HistoryDialog extends StatefulWidget {
     required this.onRestore,
     required this.onUpdateNote,
     this.onUpdateNoteWithTags,
+    this.onUpdateMomentNote,
     required this.onDuration,
     this.onOpenTrash,
     this.onClearAll,
@@ -74,6 +75,16 @@ class HistoryDialog extends StatefulWidget {
   final Future<void> Function(int id, String note) onUpdateNote;
   final Future<void> Function(int id, String note, List<String> tags)?
   onUpdateNoteWithTags;
+  final Future<void> Function(
+    int id,
+    String note, [
+    List<String>? tags,
+    String? imagePath,
+    String? voicePath,
+    int? voiceDurationMs,
+    bool updateMedia,
+  ])?
+  onUpdateMomentNote;
   final void Function(Moment a, Moment b) onDuration;
   final VoidCallback? onOpenTrash;
   final Future<void> Function()? onClearAll;
@@ -149,6 +160,28 @@ class _HistoryDialogState extends State<HistoryDialog> {
   bool _isEndingLiveSession = false;
   final Set<String> _claimedGaps = {};
   final Set<int> _endingSessionIds = {};
+  bool _showImagesAlways = true;
+  final Set<int> _manuallyExpandedMomentIds = {};
+  final Set<int> _manuallyCollapsedMomentIds = {};
+
+  bool _isMomentImageCollapsed(int id) {
+    if (_manuallyExpandedMomentIds.contains(id)) return false;
+    if (_manuallyCollapsedMomentIds.contains(id)) return true;
+    return !_showImagesAlways;
+  }
+
+  void _toggleMomentImageCollapse(int id) {
+    setState(() {
+      final currentlyCollapsed = _isMomentImageCollapsed(id);
+      if (currentlyCollapsed) {
+        _manuallyCollapsedMomentIds.remove(id);
+        _manuallyExpandedMomentIds.add(id);
+      } else {
+        _manuallyExpandedMomentIds.remove(id);
+        _manuallyCollapsedMomentIds.add(id);
+      }
+    });
+  }
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -181,11 +214,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
       final savedViewMode = prefs.getString('history_view_mode') ?? 'list';
       final savedGaps = prefs.getBool('show_gap_cards') ?? false;
       final savedRainbow = prefs.getBool('m-rainbow-cards') ?? false;
+      final savedShowImagesAlways =
+          prefs.getBool('history_show_images_always') ?? true;
       setState(() {
         _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
         _viewMode = savedViewMode;
         _showGapCards = savedGaps;
         _rainbowCards = savedRainbow;
+        _showImagesAlways = savedShowImagesAlways;
         _sleepHours = prefs.getDouble('time_audit_sleep_hours') ?? 10.0;
         _essentialsHours =
             prefs.getDouble('time_audit_essentials_hours') ?? 4.0;
@@ -704,6 +740,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   onDelete: _removeEntry,
                   rainbowCards: _rainbowCards,
                   onOpenGodModeSettings: _openGodModeSettings,
+                  isMomentImageCollapsed: _isMomentImageCollapsed,
+                  onToggleMomentImageCollapse: _toggleMomentImageCollapse,
                 )
               : Stack(
                   children: [
@@ -1384,6 +1422,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                   session.inMoment.id,
                                                 ),
                                             goals: _goals,
+                                            isImageCollapsed:
+                                                _isMomentImageCollapsed(
+                                                  session.noteMoment.id,
+                                                ),
+                                            onToggleImageCollapse: () =>
+                                                _toggleMomentImageCollapse(
+                                                  session.noteMoment.id,
+                                                ),
                                             onEditNote: () =>
                                                 _openDirectNoteEditor(
                                                   session.noteMoment,
@@ -1451,6 +1497,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           rainbowCards: _rainbowCards,
                                           isFirst: elem.isFirst,
                                           isLast: elem.isLast,
+                                          isImageCollapsed:
+                                              _isMomentImageCollapsed(
+                                                moment.id,
+                                              ),
+                                          onToggleImageCollapse: () =>
+                                              _toggleMomentImageCollapse(
+                                                moment.id,
+                                              ),
                                           onEditNote: () =>
                                               _openDirectNoteEditor(moment),
                                           onDelete: () => _removeEntry(moment),
@@ -1615,8 +1669,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _openDirectNoteEditor(Moment entry) async {
-    final isAdd = entry.note.trim().isEmpty;
+    final isAdd =
+        entry.note.trim().isEmpty &&
+        entry.imagePath == null &&
+        entry.voicePath == null;
     final previousNote = entry.note;
+    final previousImagePath = entry.imagePath;
+    final previousVoicePath = entry.voicePath;
+    final previousVoiceDuration = entry.voiceDurationMs;
     final title = (isAdd ? 'Add Note' : 'Edit Note').localized(context);
     final saveLabel = (isAdd ? 'Add Note' : 'Save').localized(context);
     final addedNotice = 'Note added'.localized(context);
@@ -1632,6 +1692,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
       pageBuilder: (_, _, _) => NoteDialog(
         p: widget.p,
         initialNote: entry.note,
+        initialImagePath: entry.imagePath,
+        initialVoicePath: entry.voicePath,
+        initialVoiceDurationMs: entry.voiceDurationMs,
         title: title,
         saveLabel: saveLabel,
         allowEmpty: false,
@@ -1639,11 +1702,28 @@ class _HistoryDialogState extends State<HistoryDialog> {
     );
 
     if (result == null || !mounted) return;
-    await _updateEntryNote(entry, result.note, tags: result.tags);
+    await _updateEntryNote(
+      entry,
+      result.note,
+      tags: result.tags,
+      imagePath: result.imagePath,
+      voicePath: result.voicePath,
+      voiceDurationMs: result.voiceDurationMs,
+      updateMedia: true,
+    );
     _showNotice(
       isAdd ? addedNotice : updatedNotice,
       onUndo: () {
-        unawaited(_updateEntryNote(entry, previousNote));
+        unawaited(
+          _updateEntryNote(
+            entry,
+            previousNote,
+            imagePath: previousImagePath,
+            voicePath: previousVoicePath,
+            voiceDurationMs: previousVoiceDuration,
+            updateMedia: true,
+          ),
+        );
         _showNotice(
           isAdd
               ? 'Note removed'.localized(context)
@@ -2247,6 +2327,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
     Moment entry,
     String note, {
     List<String>? tags,
+    String? imagePath,
+    String? voicePath,
+    int? voiceDurationMs,
+    bool updateMedia = false,
   }) async {
     final index = _entries.indexWhere((item) => item.id == entry.id);
     if (index < 0) return;
@@ -2257,7 +2341,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
           note,
         ).map((t) => t.replaceFirst('#', '').toLowerCase()).toList();
 
-    final updated = entry.copyWith(note: note.trim(), tags: effectiveTags);
+    final updated = updateMedia
+        ? entry.copyWith(
+            note: note.trim(),
+            tags: effectiveTags,
+            imagePath: imagePath,
+            clearImagePath: imagePath == null,
+            voicePath: voicePath,
+            clearVoicePath: voicePath == null,
+            voiceDurationMs: voiceDurationMs,
+          )
+        : entry.copyWith(note: note.trim(), tags: effectiveTags);
 
     setState(() {
       _entries[index] = updated;
@@ -2270,7 +2364,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _rebuildMemoizedLists();
     });
 
-    if (widget.onUpdateNoteWithTags != null) {
+    if (widget.onUpdateMomentNote != null) {
+      await widget.onUpdateMomentNote!(
+        entry.id,
+        updated.note,
+        updated.tags,
+        updated.imagePath,
+        updated.voicePath,
+        updated.voiceDurationMs,
+        updateMedia,
+      );
+    } else if (widget.onUpdateNoteWithTags != null) {
       await widget.onUpdateNoteWithTags!(entry.id, updated.note, updated.tags);
     } else {
       await widget.onUpdateNote(entry.id, updated.note);
@@ -2311,8 +2415,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
         onAddOrEditNote: () async {
           Navigator.pop(context);
 
-          final isAdd = entry.note.trim().isEmpty;
+          final isAdd =
+              entry.note.trim().isEmpty &&
+              entry.imagePath == null &&
+              entry.voicePath == null;
           final previousNote = entry.note;
+          final previousImagePath = entry.imagePath;
+          final previousVoicePath = entry.voicePath;
+          final previousVoiceDuration = entry.voiceDurationMs;
           final addedNotice = (isAdd ? 'Note added' : 'Note updated').localized(
             context,
           );
@@ -2327,6 +2437,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
             pageBuilder: (_, _, _) => NoteDialog(
               p: widget.p,
               initialNote: entry.note,
+              initialImagePath: entry.imagePath,
+              initialVoicePath: entry.voicePath,
+              initialVoiceDurationMs: entry.voiceDurationMs,
               title: isAdd ? 'Add Note' : 'Edit Note',
               saveLabel: isAdd ? 'Add Note' : 'Save',
               allowEmpty: false,
@@ -2335,25 +2448,64 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
           if (result == null || !mounted) return;
 
-          await _updateEntryNote(entry, result.note, tags: result.tags);
+          await _updateEntryNote(
+            entry,
+            result.note,
+            tags: result.tags,
+            imagePath: result.imagePath,
+            voicePath: result.voicePath,
+            voiceDurationMs: result.voiceDurationMs,
+            updateMedia: true,
+          );
           _showNotice(
             addedNotice,
             onUndo: () {
-              unawaited(_updateEntryNote(entry, previousNote));
+              unawaited(
+                _updateEntryNote(
+                  entry,
+                  previousNote,
+                  imagePath: previousImagePath,
+                  voicePath: previousVoicePath,
+                  voiceDurationMs: previousVoiceDuration,
+                  updateMedia: true,
+                ),
+              );
               _showNotice(removedNotice);
             },
           );
         },
-        onDeleteNote: entry.note.trim().isEmpty
+        onDeleteNote:
+            (entry.note.trim().isEmpty &&
+                entry.imagePath == null &&
+                entry.voicePath == null)
             ? null
             : () async {
                 Navigator.pop(context);
                 final previous = entry.note;
-                await _updateEntryNote(entry, '');
+                final previousImagePath = entry.imagePath;
+                final previousVoicePath = entry.voicePath;
+                final previousVoiceDuration = entry.voiceDurationMs;
+                await _updateEntryNote(
+                  entry,
+                  '',
+                  imagePath: null,
+                  voicePath: null,
+                  voiceDurationMs: null,
+                  updateMedia: true,
+                );
                 _showNotice(
                   'Note deleted',
                   onUndo: () {
-                    unawaited(_updateEntryNote(entry, previous));
+                    unawaited(
+                      _updateEntryNote(
+                        entry,
+                        previous,
+                        imagePath: previousImagePath,
+                        voicePath: previousVoicePath,
+                        voiceDurationMs: previousVoiceDuration,
+                        updateMedia: true,
+                      ),
+                    );
                     _showNotice('Note restored');
                   },
                 );

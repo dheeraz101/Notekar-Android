@@ -23,14 +23,29 @@ const MomentSchema = CollectionSchema(
       type: IsarType.string,
     ),
     r'date': PropertySchema(id: 1, name: r'date', type: IsarType.string),
-    r'note': PropertySchema(id: 2, name: r'note', type: IsarType.string),
-    r'tags': PropertySchema(id: 3, name: r'tags', type: IsarType.stringList),
+    r'imagePath': PropertySchema(
+      id: 2,
+      name: r'imagePath',
+      type: IsarType.string,
+    ),
+    r'note': PropertySchema(id: 3, name: r'note', type: IsarType.string),
+    r'tags': PropertySchema(id: 4, name: r'tags', type: IsarType.stringList),
     r'timestamp': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'timestamp',
       type: IsarType.long,
     ),
-    r'type': PropertySchema(id: 5, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 6, name: r'type', type: IsarType.string),
+    r'voiceDurationMs': PropertySchema(
+      id: 7,
+      name: r'voiceDurationMs',
+      type: IsarType.long,
+    ),
+    r'voicePath': PropertySchema(
+      id: 8,
+      name: r'voicePath',
+      type: IsarType.string,
+    ),
   },
   estimateSize: _momentEstimateSize,
   serialize: _momentSerialize,
@@ -59,6 +74,12 @@ int _momentEstimateSize(
     }
   }
   bytesCount += 3 + object.date.length * 3;
+  {
+    final value = object.imagePath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.note.length * 3;
   bytesCount += 3 + object.tags.length * 3;
   {
@@ -68,6 +89,12 @@ int _momentEstimateSize(
     }
   }
   bytesCount += 3 + object.type.length * 3;
+  {
+    final value = object.voicePath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -79,10 +106,13 @@ void _momentSerialize(
 ) {
   writer.writeString(offsets[0], object.category);
   writer.writeString(offsets[1], object.date);
-  writer.writeString(offsets[2], object.note);
-  writer.writeStringList(offsets[3], object.tags);
-  writer.writeLong(offsets[4], object.timestamp);
-  writer.writeString(offsets[5], object.type);
+  writer.writeString(offsets[2], object.imagePath);
+  writer.writeString(offsets[3], object.note);
+  writer.writeStringList(offsets[4], object.tags);
+  writer.writeLong(offsets[5], object.timestamp);
+  writer.writeString(offsets[6], object.type);
+  writer.writeLong(offsets[7], object.voiceDurationMs);
+  writer.writeString(offsets[8], object.voicePath);
 }
 
 Moment _momentDeserialize(
@@ -95,10 +125,13 @@ Moment _momentDeserialize(
     category: reader.readStringOrNull(offsets[0]),
     date: reader.readString(offsets[1]),
     id: id,
-    note: reader.readStringOrNull(offsets[2]) ?? '',
-    tags: reader.readStringList(offsets[3]) ?? const [],
-    timestamp: reader.readLong(offsets[4]),
-    type: reader.readString(offsets[5]),
+    imagePath: reader.readStringOrNull(offsets[2]),
+    note: reader.readStringOrNull(offsets[3]) ?? '',
+    tags: reader.readStringList(offsets[4]) ?? const [],
+    timestamp: reader.readLong(offsets[5]),
+    type: reader.readString(offsets[6]),
+    voiceDurationMs: reader.readLongOrNull(offsets[7]),
+    voicePath: reader.readStringOrNull(offsets[8]),
   );
   return object;
 }
@@ -115,13 +148,19 @@ P _momentDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readStringList(offset) ?? const []) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 4:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readLongOrNull(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -579,6 +618,168 @@ extension MomentQueryFilter on QueryBuilder<Moment, Moment, QFilterCondition> {
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'imagePath'),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'imagePath'),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'imagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'imagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'imagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'imagePath',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'imagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'imagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'imagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'imagePath',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'imagePath', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> imagePathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'imagePath', value: ''),
       );
     });
   }
@@ -1134,6 +1335,242 @@ extension MomentQueryFilter on QueryBuilder<Moment, Moment, QFilterCondition> {
       );
     });
   }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voiceDurationMsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'voiceDurationMs'),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition>
+  voiceDurationMsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'voiceDurationMs'),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voiceDurationMsEqualTo(
+    int? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'voiceDurationMs', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition>
+  voiceDurationMsGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'voiceDurationMs',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voiceDurationMsLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'voiceDurationMs',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voiceDurationMsBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'voiceDurationMs',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'voicePath'),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'voicePath'),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'voicePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'voicePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'voicePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'voicePath',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'voicePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'voicePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'voicePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'voicePath',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'voicePath', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterFilterCondition> voicePathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'voicePath', value: ''),
+      );
+    });
+  }
 }
 
 extension MomentQueryObject on QueryBuilder<Moment, Moment, QFilterCondition> {}
@@ -1162,6 +1599,18 @@ extension MomentQuerySortBy on QueryBuilder<Moment, Moment, QSortBy> {
   QueryBuilder<Moment, Moment, QAfterSortBy> sortByDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> sortByImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> sortByImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.desc);
     });
   }
 
@@ -1198,6 +1647,30 @@ extension MomentQuerySortBy on QueryBuilder<Moment, Moment, QSortBy> {
   QueryBuilder<Moment, Moment, QAfterSortBy> sortByTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> sortByVoiceDurationMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voiceDurationMs', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> sortByVoiceDurationMsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voiceDurationMs', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> sortByVoicePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voicePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> sortByVoicePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voicePath', Sort.desc);
     });
   }
 }
@@ -1239,6 +1712,18 @@ extension MomentQuerySortThenBy on QueryBuilder<Moment, Moment, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Moment, Moment, QAfterSortBy> thenByImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> thenByImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'imagePath', Sort.desc);
+    });
+  }
+
   QueryBuilder<Moment, Moment, QAfterSortBy> thenByNote() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.asc);
@@ -1274,6 +1759,30 @@ extension MomentQuerySortThenBy on QueryBuilder<Moment, Moment, QSortThenBy> {
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> thenByVoiceDurationMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voiceDurationMs', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> thenByVoiceDurationMsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voiceDurationMs', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> thenByVoicePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voicePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QAfterSortBy> thenByVoicePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'voicePath', Sort.desc);
+    });
+  }
 }
 
 extension MomentQueryWhereDistinct on QueryBuilder<Moment, Moment, QDistinct> {
@@ -1290,6 +1799,14 @@ extension MomentQueryWhereDistinct on QueryBuilder<Moment, Moment, QDistinct> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'date', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QDistinct> distinctByImagePath({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'imagePath', caseSensitive: caseSensitive);
     });
   }
 
@@ -1320,6 +1837,20 @@ extension MomentQueryWhereDistinct on QueryBuilder<Moment, Moment, QDistinct> {
       return query.addDistinctBy(r'type', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<Moment, Moment, QDistinct> distinctByVoiceDurationMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'voiceDurationMs');
+    });
+  }
+
+  QueryBuilder<Moment, Moment, QDistinct> distinctByVoicePath({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'voicePath', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension MomentQueryProperty on QueryBuilder<Moment, Moment, QQueryProperty> {
@@ -1338,6 +1869,12 @@ extension MomentQueryProperty on QueryBuilder<Moment, Moment, QQueryProperty> {
   QueryBuilder<Moment, String, QQueryOperations> dateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<Moment, String?, QQueryOperations> imagePathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'imagePath');
     });
   }
 
@@ -1362,6 +1899,18 @@ extension MomentQueryProperty on QueryBuilder<Moment, Moment, QQueryProperty> {
   QueryBuilder<Moment, String, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<Moment, int?, QQueryOperations> voiceDurationMsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'voiceDurationMs');
+    });
+  }
+
+  QueryBuilder<Moment, String?, QQueryOperations> voicePathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'voicePath');
     });
   }
 }
