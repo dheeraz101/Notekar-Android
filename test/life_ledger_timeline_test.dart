@@ -409,6 +409,43 @@ void main() {
       },
     );
 
+    testWidgets(
+      'TimelineSessionCard safely renders when isOngoing is false with null endTimestamp',
+      (tester) async {
+        final ongoingRestSession = TimelineSessionItem(
+          inMoment: Moment(
+            id: 201,
+            timestamp: DateTime.now()
+                .subtract(const Duration(minutes: 45))
+                .millisecondsSinceEpoch,
+            type: 'in',
+            date: dateKey(DateTime.now()),
+            note: 'Rest & Recovery',
+            category: 'Rest',
+          ),
+        );
+
+        // Rendering with isOngoing: false when outMoment is null should not throw null-check error
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TimelineSessionCard(
+                p: p,
+                session: ongoingRestSession,
+                isOngoing: false,
+                onEditNote: () {},
+                onDeleteSession: () {},
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Rest'), findsOneWidget);
+        expect(find.text('Rest & Recovery'), findsOneWidget);
+      },
+    );
+
     test('fullDateLabel formats correctly', () {
       expect(fullDateLabel('2026-09-05'), '05 Sep 2026');
       expect(fullDateLabel('2026-01-01'), '01 Jan 2026');

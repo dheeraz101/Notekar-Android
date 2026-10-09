@@ -42,10 +42,11 @@ class TimelineSessionCard extends StatelessWidget {
   final List<Goal>? goals;
 
   Goal? _findMatchingGoal() {
-    if (goals == null || goals!.isEmpty) return null;
+    final gList = goals;
+    if (gList == null || gList.isEmpty) return null;
     final cat = session.category;
     if (cat != null && cat.trim().isNotEmpty) {
-      return goals!
+      return gList
           .where(
             (g) =>
                 !g.isArchived &&
@@ -54,7 +55,7 @@ class TimelineSessionCard extends StatelessWidget {
           )
           .firstOrNull;
     }
-    return goals!
+    return gList
         .where(
           (g) =>
               !g.isArchived &&
@@ -310,7 +311,10 @@ class TimelineSessionCard extends StatelessWidget {
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          timeOnly(session.endTimestamp!),
+                          timeOnly(
+                            session.endTimestamp ??
+                                DateTime.now().millisecondsSinceEpoch,
+                          ),
                           style: TextStyle(
                             color: p.text,
                             fontSize: compact ? 12 : 13,

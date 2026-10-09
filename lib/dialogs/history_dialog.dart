@@ -1310,11 +1310,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                             selected: isSelected,
                                             compact: _compactRows,
                                             rainbowCards: _rainbowCards,
-                                            isOngoing:
-                                                session.isOngoing &&
-                                                !_endingSessionIds.contains(
-                                                  session.inMoment.id,
-                                                ),
+                                            isOngoing: session.isOngoing,
                                             goals: _goals,
                                             onEditNote: () =>
                                                 _openDirectNoteEditor(
