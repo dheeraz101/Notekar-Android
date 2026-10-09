@@ -4,8 +4,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
-/// Dedicated Apple HIG Settings Page presenting NoteKar's product roadmap
-/// and upcoming architectural innovations for conscious timekeepers and chronometer purists.
+/// Minimal Apple HIG Roadmap and Upcoming Features settings page.
 class UpcomingFeaturesSettingsPage extends StatelessWidget {
   const UpcomingFeaturesSettingsPage({super.key, required this.p});
 
@@ -18,8 +17,9 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
       children: [
         const SizedBox(height: spacing8),
 
-        // Hero Philosophy Card
+        // Hero Header Card
         Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: p.surface2,
@@ -29,13 +29,13 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: p.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(CupertinoIcons.sparkles, color: p.accent, size: 24),
+                child: Icon(CupertinoIcons.sparkles, color: p.accent, size: 20),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -43,21 +43,21 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Roadmap & Upcoming'.localized(context),
+                      'Roadmap & Innovations'.localized(context),
                       style: TextStyle(
                         color: p.text,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
-                      'Our architectural pipeline for sovereign chronometer craft, edge intelligence, and uncompromising offline privacy.'
+                      'Sovereign chronometer craft, private local intelligence, and zero telemetry.'
                           .localized(context),
                       style: TextStyle(
                         color: p.text2,
                         fontSize: 12,
-                        height: 1.35,
+                        height: 1.3,
                       ),
                     ),
                   ],
@@ -69,142 +69,143 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing16),
 
-        // 1. Voice & Edge Intelligence
+        // 1. Shipped & Active
         SettingsGroup(
           p: p,
-          title: 'AUDIO & EDGE INTELLIGENCE'.localized(context),
+          title: 'SHIPPED & ACTIVE'.localized(context),
           insetDividers: true,
           children: [
-            _RoadmapCard(
+            _FeatureRow(
               p: p,
-              icon: CupertinoIcons.mic_fill,
-              color: p.accent,
-              title: 'Multi-Language Hands-Free Voice Notes',
-              tag: 'Q4 2026',
-              tagColor: p.accent,
-              description:
-                  '100% offline, on-device neural speech-to-text powered by edge Whisper. Dictate notes hands-free during commutes, walks, or workouts with automatic punctuation and hashtag extraction.',
-              bulletPoints: const [
-                '7 Live Localized Languages: English, Hindi, Spanish, French, German, Japanese, and Russian.',
-                'Zero audio uploaded to cloud servers; 100% private local neural weights.',
-                'Instant tag parsing (#deepwork, #reading) from transcribed speech.',
-              ],
+              icon: CupertinoIcons.stopwatch_fill,
+              iconColor: p.accent,
+              title: 'In/Out Chronometer Engine'.localized(context),
+              subtitle: 'Real-time live sessions & day distribution accounting'
+                  .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
             ),
-            _RoadmapCard(
+            _FeatureRow(
               p: p,
-              icon: CupertinoIcons.waveform_path_ecg,
-              color: p.green,
-              title: 'AI Temporal Synthesis & Circadian Narrative',
-              tag: 'IN DEVELOPMENT',
-              tagColor: p.green,
-              description:
-                  'On-device local LLM synthesizing daily and weekly intentionality ratios, identifying circadian peak focus hours, and confronting subconscious time leaks.',
-              bulletPoints: const [
-                'Contextual daily narrative: "The Story of Your Time" generated privately.',
-                'Circadian flow state detection and chronotype alignment recommendations.',
-                'Mathematical confrontation with the unaccounted Void without moral judgment.',
-              ],
+              icon: CupertinoIcons.hourglass,
+              iconColor: p.red,
+              title: 'Life Audit & 24h Baseline'.localized(context),
+              subtitle: 'Time wastage auditing & mortality balance insights'
+                  .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
             ),
-          ],
-        ),
-
-        const SizedBox(height: spacing16),
-
-        // 2. System UI & Interactive Widgets
-        SettingsGroup(
-          p: p,
-          title: 'SYSTEM EXTENSIONS & WIDGETS'.localized(context),
-          insetDividers: true,
-          children: [
-            _RoadmapCard(
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.sparkles,
+              iconColor: p.orange,
+              title: 'Sobriety Companion'.localized(context),
+              subtitle: 'Clean streaks, relapse analysis & habit triggers'
+                  .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
+            ),
+            _FeatureRow(
               p: p,
               icon: CupertinoIcons.bell_fill,
-              color: const Color(0xFFFF9500),
-              // iOS Orange
-              title: 'Dynamic Live Activities & Interactive Lockscreen',
-              tag: 'PLANNED',
-              tagColor: const Color(0xFFFF9500),
-              description:
-                  'Real-time chronometer ticker in persistent notification with dynamic actions to pause, resume, change modes, or log tags directly without unlocking.',
-              bulletPoints: const [
-                'Live session duration ticker synchronized with hardware clock.',
-                '1-tap mode swapping (Work, Deep Focus, Study) directly from lockscreen.',
-                'Interactive quick tag pills right inside the notification panel.',
-              ],
+              iconColor: p.accent,
+              title: 'Lockscreen Notification Panel'.localized(context),
+              subtitle: 'Sticky persistent drawer control & quick note popup'
+                  .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
             ),
-            _RoadmapCard(
+            _FeatureRow(
               p: p,
-              icon: CupertinoIcons.square_grid_2x2_fill,
-              color: p.accent,
-              title: 'Micro-Chrono Interactive Widgets (2x2 & 4x2)',
-              tag: 'PLANNED',
-              tagColor: p.accent,
-              description:
-                  'Next-generation Android App Widgets featuring real-time session elapsed tickers, circular day-progress gauge arcs, and instant mode-switching controls.',
-              bulletPoints: const [
-                'Live circular 24h Intentionality gauge reflecting waking hours utilized.',
-                'Tactile one-touch IN/OUT transitions with immediate RemoteViews feedback.',
-                'Sobriety streak progress bar with daily milestone celebration states.',
-              ],
+              icon: CupertinoIcons.lock_shield_fill,
+              iconColor: p.green,
+              title: 'Offline Encrypted Backups'.localized(context),
+              subtitle: 'Local AES encrypted archive, JSON & CSV data exports'
+                  .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
             ),
           ],
         ),
 
         const SizedBox(height: spacing16),
 
-        // 3. Sovereignty & Knowledge Graphs
+        // 2. Upcoming Roadmap
         SettingsGroup(
           p: p,
-          title: 'SOVEREIGNTY & ANALYTICS'.localized(context),
+          title: 'UPCOMING INNOVATIONS'.localized(context),
           insetDividers: true,
           children: [
-            _RoadmapCard(
+            _FeatureRow(
               p: p,
-              icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
-              color: const Color(0xFF5856D6),
-              // iOS Purple
-              title: 'Sovereign Peer-to-Peer LAN Sync',
-              tag: 'RESEARCH',
-              tagColor: const Color(0xFF5856D6),
-              description:
-                  'Zero-cloud peer-to-peer encrypted synchronization over local Wi-Fi / QR handshake. Seamlessly sync moments with Desktop (macOS, Windows, Linux) and Wear OS companion without accounts.',
-              bulletPoints: const [
-                'End-to-end encrypted TLS local socket transmission.',
-                'Zero user accounts, telephone numbers, or cloud databases required.',
-                'Conflict-free Replicated Data Type (CRDT) merge algorithms.',
-              ],
+              icon: CupertinoIcons.globe,
+              iconColor: p.accent,
+              title: 'Full-Fledged Language Support'.localized(context),
+              subtitle:
+                  'Expanding translations across 7+ regional and global languages'
+                      .localized(context),
+              status: 'In Progress'.localized(context),
+              statusColor: p.orange,
             ),
-            _RoadmapCard(
+            _FeatureRow(
               p: p,
-              icon: CupertinoIcons.circle_grid_hex_fill,
-              color: const Color(0xFFFF2D55),
-              // iOS Pink
-              title: 'Chrono-Tag Association Matrix & Graph',
-              tag: 'CONCEPT',
-              tagColor: const Color(0xFFFF2D55),
-              description:
-                  'Visual network graph mapping nonlinear correlations between focus modes, custom hashtags, and times of day to uncover hidden habit patterns.',
-              bulletPoints: const [
-                'Interactive node graph showing which habits occur together.',
-                'Heatmap correlations between mood/energy tags and focus duration.',
-                'Exportable temporal vector embeddings for local graph visualization.',
-              ],
+              icon: CupertinoIcons.square_grid_2x2_fill,
+              iconColor: p.accent,
+              title: 'Interactive Android Widgets'.localized(context),
+              subtitle:
+                  'Glanceable 2x2 and 4x2 home screen widgets with live ticker'
+                      .localized(context),
+              status: 'Planned'.localized(context),
+              statusColor: p.accent,
+            ),
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.speedometer,
+              iconColor: p.green,
+              title: 'Performance & Cold Start'.localized(context),
+              subtitle:
+                  'Sub-second startup, low-memory profiling & faster renders'
+                      .localized(context),
+              status: 'In Progress'.localized(context),
+              statusColor: p.orange,
+            ),
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.photo_fill_on_rectangle_fill,
+              iconColor: const Color(0xFFFF2D55),
+              title: 'Photo & Receipt Logging'.localized(context),
+              subtitle:
+                  'Private offline media attachments to ground moments with visuals'
+                      .localized(context),
+              status: 'Planned'.localized(context),
+              statusColor: p.accent,
+            ),
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.mic_fill,
+              iconColor: const Color(0xFF5856D6),
+              title: 'Hands-Free Voice Dictation'.localized(context),
+              subtitle:
+                  '100% on-device speech-to-text with auto hashtag parsing'
+                      .localized(context),
+              status: 'Planned'.localized(context),
+              statusColor: p.accent,
             ),
           ],
         ),
 
-        const SizedBox(height: spacing24),
+        const SizedBox(height: spacing20),
 
         // Colophon Note
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'All roadmap innovations adhere strictly to NoteKar\'s 100% offline sovereign manifesto. No feature will ever compromise local storage or require internet surveillance.'
+            'All NoteKar innovations adhere strictly to 100% offline sovereignty. No cloud servers, no trackers.'
                 .localized(context),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: p.text3,
-              fontSize: 12,
+              fontSize: 11.5,
               height: 1.4,
               fontStyle: FontStyle.italic,
             ),
@@ -217,114 +218,88 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
   }
 }
 
-class _RoadmapCard extends StatelessWidget {
-  const _RoadmapCard({
+class _FeatureRow extends StatelessWidget {
+  const _FeatureRow({
     required this.p,
     required this.icon,
-    required this.color,
+    required this.iconColor,
     required this.title,
-    required this.tag,
-    required this.tagColor,
-    required this.description,
-    required this.bulletPoints,
+    required this.subtitle,
+    required this.status,
+    required this.statusColor,
   });
 
   final Palette p;
   final IconData icon;
-  final Color color;
+  final Color iconColor;
   final String title;
-  final String tag;
-  final Color tagColor;
-  final String description;
-  final List<String> bulletPoints;
+  final String subtitle;
+  final String status;
+  final Color statusColor;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 18),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, color: iconColor, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
                   title,
                   style: TextStyle(
                     color: p.text,
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: tagColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: tagColor.withValues(alpha: 0.35),
-                    width: 0.8,
-                  ),
-                ),
-                child: Text(
-                  tag,
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
                   style: TextStyle(
-                    color: tagColor,
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.4,
+                    color: p.text2,
+                    fontSize: 11.5,
+                    height: 1.25,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            description,
-            style: TextStyle(color: p.text2, fontSize: 13, height: 1.4),
-          ),
-          const SizedBox(height: 10),
-          for (final bullet in bulletPoints) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 5),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• ',
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      bullet,
-                      style: TextStyle(
-                        color: p.text3,
-                        fontSize: 12,
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                ],
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: statusColor.withValues(alpha: 0.25),
+                width: 0.5,
               ),
             ),
-          ],
+            child: Text(
+              status,
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
         ],
       ),
     );

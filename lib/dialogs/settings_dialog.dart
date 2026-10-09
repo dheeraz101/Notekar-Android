@@ -2365,16 +2365,6 @@ $cleanStack
                                   ),
                                   SettingsRow(
                                     p: p,
-                                    icon: CupertinoIcons.link,
-                                    title: 'Integrations & Automation',
-                                    status: 'External',
-                                    color: p.accent,
-                                    onTap: () => _openCategory(
-                                      'Integrations & Automation',
-                                    ),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
                                     icon: CupertinoIcons.slider_horizontal_3,
                                     title: 'Advanced',
                                     status: 'Tools',

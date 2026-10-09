@@ -909,36 +909,78 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                       0,
                                                       0,
                                                     ),
-                                                child: Container(
-                                                  width: double.infinity,
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        vertical: 8,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: widget.p.accent
-                                                        .withValues(
-                                                          alpha: 0.12,
+                                                child: PressableScale(
+                                                  onTap: () => setState(
+                                                    () => _selected.clear(),
+                                                  ),
+                                                  child: Container(
+                                                    width: double.infinity,
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 7,
+                                                          horizontal: 14,
                                                         ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          999,
-                                                        ),
-                                                    border: Border.all(
+                                                    decoration: BoxDecoration(
                                                       color: widget.p.accent
                                                           .withValues(
-                                                            alpha: 0.20,
+                                                            alpha: 0.12,
                                                           ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            999,
+                                                          ),
+                                                      border: Border.all(
+                                                        color: widget.p.accent
+                                                            .withValues(
+                                                              alpha: 0.20,
+                                                            ),
+                                                      ),
                                                     ),
-                                                  ),
-                                                  child: Text(
-                                                    'Selected ${_selected.length} of 2 for duration',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      color: widget.p.accent,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w800,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          'Selected ${_selected.length} of 2 for duration',
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                            color:
+                                                                widget.p.accent,
+                                                            fontSize: 12,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        Container(
+                                                          width: 17,
+                                                          height: 17,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                color: widget
+                                                                    .p
+                                                                    .accent
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.22,
+                                                                    ),
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                              ),
+                                                          child: Icon(
+                                                            Icons.close_rounded,
+                                                            size: 11,
+                                                            color:
+                                                                widget.p.accent,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ),

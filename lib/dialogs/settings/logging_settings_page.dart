@@ -195,15 +195,24 @@ class LoggingSettingsPage extends StatelessWidget {
               color: p.accent,
               onChanged: onShowPersistentNotificationChanged,
             ),
-            SettingsSwitchRow(
-              p: p,
-              title: 'Log ⚡ Quick Note Popup',
-              subtitle:
-                  'Open popup to pick quick activity tags and add notes when tapping Log ⚡ in notification drawer.'
-                      .localized(context),
-              value: notifLogAction != 'silent',
-              color: p.accent,
-              onChanged: onNotifLogActionChanged ?? (_) {},
+            if (showPersistentNotification)
+              SettingsSwitchRow(
+                p: p,
+                title: 'Quick Note Popup'.localized(context),
+                subtitle:
+                    'Prompt for tags and notes when logging from notification.'
+                        .localized(context),
+                value: notifLogAction != 'silent',
+                color: p.accent,
+                onChanged: onNotifLogActionChanged ?? (_) {},
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: _NotificationPreviewCard(
+                p: p,
+                enabled: showPersistentNotification,
+                quickNoteEnabled: notifLogAction != 'silent',
+              ),
             ),
           ],
         ),
@@ -238,6 +247,195 @@ class LoggingSettingsPage extends StatelessWidget {
         ),
         const SizedBox(height: spacing48),
       ],
+    );
+  }
+}
+
+class _NotificationPreviewCard extends StatelessWidget {
+  const _NotificationPreviewCard({
+    required this.p,
+    required this.enabled,
+    required this.quickNoteEnabled,
+  });
+
+  final Palette p;
+  final bool enabled;
+  final bool quickNoteEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: p.surface2.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: p.border.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            Icon(CupertinoIcons.bell_slash_fill, size: 16, color: p.text3),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Persistent drawer notification is turned off.'.localized(
+                  context,
+                ),
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: p.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Notification Header
+          Row(
+            children: [
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: p.accent,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  CupertinoIcons.clock_fill,
+                  size: 10,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'NoteKar',
+                style: TextStyle(
+                  color: p.text2,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: Text(
+                  '•',
+                  style: TextStyle(color: p.text3, fontSize: 11),
+                ),
+              ),
+              Text(
+                'Active Session'.localized(context),
+                style: TextStyle(color: p.text3, fontSize: 11),
+              ),
+              const Spacer(),
+              Text('now', style: TextStyle(color: p.text3, fontSize: 10)),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Notification Content
+          Text(
+            'Deep Work • Focus Mode'.localized(context),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '01:24:18 elapsed · Chronometer live ticker'.localized(context),
+            style: TextStyle(color: p.text2, fontSize: 11.5),
+          ),
+          const SizedBox(height: 10),
+
+          // Action Chips
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(CupertinoIcons.square_fill, size: 9, color: p.accent),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Check Out'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: p.surface3,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: p.border),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      quickNoteEnabled
+                          ? CupertinoIcons.pencil_circle
+                          : CupertinoIcons.bolt_fill,
+                      size: 10,
+                      color: p.text,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      (quickNoteEnabled ? 'Quick Note' : 'Quick Log').localized(
+                        context,
+                      ),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

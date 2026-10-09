@@ -76,6 +76,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectedStyle, 'black');
+    await tester.ensureVisible(find.text('Crimson'));
     await tester.tap(find.text('Crimson'));
     await tester.pumpAndSettle();
     expect(selectedStyle, 'black');

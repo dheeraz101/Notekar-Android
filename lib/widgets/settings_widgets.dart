@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -421,6 +422,7 @@ class SettingsSwitchRow extends StatefulWidget {
     this.enabled = true,
     this.disabledMessage,
     this.onDisabledTap,
+    this.isSecurity = false,
   });
 
   final Palette p;
@@ -433,6 +435,7 @@ class SettingsSwitchRow extends StatefulWidget {
   final bool enabled;
   final String? disabledMessage;
   final ValueChanged<String>? onDisabledTap;
+  final bool isSecurity;
 
   @override
   State<SettingsSwitchRow> createState() => _SettingsSwitchRowState();
@@ -481,6 +484,9 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
           final message = widget.disabledMessage;
           if (message != null) widget.onDisabledTap?.call(message);
           return;
+        }
+        if (widget.isSecurity) {
+          HapticFeedback.heavyImpact();
         }
         widget.onChanged(!value);
       },
@@ -563,18 +569,37 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                 child: RepaintBoundary(
                   child: Stack(
                     children: [
-                      // "On" Indicator (Accessibility style)
+                      // "On" Indicator (Apple HIG Accessibility '|' Bar)
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
                         opacity: value ? 1.0 : 0.0,
                         child: Align(
-                          alignment: const Alignment(-0.55, 0),
+                          alignment: const Alignment(-0.58, 0),
                           child: Container(
-                            width: 1.8,
-                            height: 10,
+                            width: 2.0,
+                            height: 10.5,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: Colors.white.withValues(alpha: 0.85),
                               borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // "Off" Indicator (Apple HIG Accessibility 'O' Ring)
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: !value ? 1.0 : 0.0,
+                        child: Align(
+                          alignment: const Alignment(0.58, 0),
+                          child: Container(
+                            width: 8.5,
+                            height: 8.5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: p.text3.withValues(alpha: 0.50),
+                                width: 1.6,
+                              ),
                             ),
                           ),
                         ),

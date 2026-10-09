@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -6,7 +8,7 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
-class AdvancedSettingsPage extends StatelessWidget {
+class AdvancedSettingsPage extends StatefulWidget {
   const AdvancedSettingsPage({
     super.key,
     required this.p,
@@ -66,20 +68,30 @@ class AdvancedSettingsPage extends StatelessWidget {
   final void Function(String category, {required String parent}) onOpenCategory;
 
   @override
+  State<AdvancedSettingsPage> createState() => _AdvancedSettingsPageState();
+}
+
+class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
+  bool _isResettingCircuitBreakers = false;
+  bool _isExportingLogs = false;
+
+  @override
   Widget build(BuildContext context) {
-    if (subCategory == 'Advanced') {
+    if (widget.subCategory == 'Advanced') {
       return _buildAdvanced(context);
-    } else if (subCategory == 'Language') {
+    } else if (widget.subCategory == 'Language') {
       return _buildLanguage(context);
-    } else if (subCategory == 'Accessibility') {
+    } else if (widget.subCategory == 'Accessibility') {
       return _buildAccessibility(context);
-    } else if (subCategory == 'Reset') {
+    } else if (widget.subCategory == 'Reset') {
       return _buildReset(context);
     }
     return const SizedBox.shrink();
   }
 
   Widget _buildAdvanced(BuildContext context) {
+    final p = widget.p;
+
     return Column(
       children: [
         const SizedBox(height: spacing8),
@@ -91,7 +103,7 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               icon: CupertinoIcons.globe,
               title: 'Language'.localized(context),
-              status: switch (currentLocale) {
+              status: switch (widget.currentLocale) {
                 'en' => 'English',
                 'fr' => 'Français',
                 'hi' => 'हिन्दी',
@@ -102,17 +114,20 @@ class AdvancedSettingsPage extends StatelessWidget {
                 _ => 'System Default',
               }.localized(context),
               color: p.accent,
-              onTap: () => onOpenCategory('Language', parent: 'Advanced'),
+              onTap: () =>
+                  widget.onOpenCategory('Language', parent: 'Advanced'),
             ),
             SettingsRow(
               p: p,
               icon: CupertinoIcons.person_crop_circle,
               title: 'Accessibility'.localized(context),
-              status: hapticStyle.isEmpty
+              status: widget.hapticStyle.isEmpty
                   ? ''
-                  : hapticStyle[0].toUpperCase() + hapticStyle.substring(1),
+                  : widget.hapticStyle[0].toUpperCase() +
+                        widget.hapticStyle.substring(1),
               color: p.orange,
-              onTap: () => onOpenCategory('Accessibility', parent: 'Advanced'),
+              onTap: () =>
+                  widget.onOpenCategory('Accessibility', parent: 'Advanced'),
             ),
             SettingsRow(
               p: p,
@@ -120,7 +135,7 @@ class AdvancedSettingsPage extends StatelessWidget {
               title: 'Automation'.localized(context),
               status: 'Bridge'.localized(context),
               color: p.accent,
-              onTap: () => onOpenCategory(
+              onTap: () => widget.onOpenCategory(
                 'Integrations & Automation',
                 parent: 'Advanced',
               ),
@@ -134,6 +149,8 @@ class AdvancedSettingsPage extends StatelessWidget {
                   .localized(context),
         ),
         const SizedBox(height: spacing12),
+
+        // System Tools Group
         SettingsGroup(
           p: p,
           title: 'Advanced Systems'.localized(context),
@@ -141,35 +158,14 @@ class AdvancedSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              icon: isCircuitBreakerTripped
-                  ? CupertinoIcons.bolt_slash_fill
-                  : CupertinoIcons.shield_fill,
-              title: 'Background Safeguards (Circuit Breakers)'.localized(
-                context,
-              ),
-              subtitle: 'Auto-isolates failing background tasks · Tap to reset'
-                  .localized(context),
-              status: isCircuitBreakerTripped
-                  ? 'Action Needed'.localized(context)
-                  : 'Healthy'.localized(context),
-              color: isCircuitBreakerTripped ? p.red : p.green,
-              onTap: onResetCircuitBreakers,
-            ),
-            SettingsRow(
-              p: p,
-              icon: CupertinoIcons.doc_text_fill,
-              title: 'Log Exporter (JSON)'.localized(context),
-              color: p.accent,
-              onTap: onExportJson,
-            ),
-            SettingsRow(
-              p: p,
               icon: CupertinoIcons.wrench_fill,
               title: 'Developer Options'.localized(context),
               status: 'Tools'.localized(context),
               color: p.accent,
-              onTap: () =>
-                  onOpenCategory('Developer Options', parent: 'Advanced'),
+              onTap: () => widget.onOpenCategory(
+                'Developer Options',
+                parent: 'Advanced',
+              ),
             ),
             SettingsRow(
               p: p,
@@ -177,18 +173,89 @@ class AdvancedSettingsPage extends StatelessWidget {
               title: 'Factory Reset'.localized(context),
               status: 'Wipe'.localized(context),
               color: p.red,
-              onTap: () => onOpenCategory('Reset', parent: 'Advanced'),
+              onTap: () => widget.onOpenCategory('Reset', parent: 'Advanced'),
             ),
-            if (isGodModeUnlocked)
+            if (widget.isGodModeUnlocked)
               SettingsRow(
                 p: p,
                 icon: CupertinoIcons.sparkles,
                 title: 'God Mode'.localized(context),
                 status: 'Unlocked'.localized(context),
                 color: const Color(0xFFFFD700),
-                onTap: () => onOpenCategory('God Mode', parent: 'Advanced'),
+                onTap: () =>
+                    widget.onOpenCategory('God Mode', parent: 'Advanced'),
               ),
           ],
+        ),
+
+        const SizedBox(height: spacing12),
+
+        // Diagnostics & Safeguards (Moved to bottom with spinner feedback)
+        SettingsGroup(
+          p: p,
+          title: 'Diagnostics & Safeguards'.localized(context).toUpperCase(),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              icon: widget.isCircuitBreakerTripped
+                  ? CupertinoIcons.bolt_slash_fill
+                  : CupertinoIcons.shield_fill,
+              title: 'Circuit Breakers'.localized(context),
+              subtitle: 'Auto-isolates failing background tasks'.localized(
+                context,
+              ),
+              status: widget.isCircuitBreakerTripped
+                  ? 'Tripped'.localized(context)
+                  : 'Healthy'.localized(context),
+              color: widget.isCircuitBreakerTripped ? p.red : p.green,
+              trailing: _isResettingCircuitBreakers
+                  ? CupertinoActivityIndicator(radius: 8, color: p.accent)
+                  : Icon(
+                      CupertinoIcons.arrow_clockwise,
+                      size: 16,
+                      color: p.accent,
+                    ),
+              onTap: () async {
+                if (_isResettingCircuitBreakers) return;
+                setState(() => _isResettingCircuitBreakers = true);
+                await Future.delayed(const Duration(milliseconds: 1400));
+                if (!mounted) return;
+                widget.onResetCircuitBreakers();
+                setState(() => _isResettingCircuitBreakers = false);
+              },
+            ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.doc_text_fill,
+              title: 'Log Exporter'.localized(context),
+              subtitle: 'Export system diagnostic events as JSON'.localized(
+                context,
+              ),
+              color: p.accent,
+              trailing: _isExportingLogs
+                  ? CupertinoActivityIndicator(radius: 8, color: p.accent)
+                  : Icon(
+                      CupertinoIcons.arrow_up_doc,
+                      size: 16,
+                      color: p.accent,
+                    ),
+              onTap: () async {
+                if (_isExportingLogs) return;
+                setState(() => _isExportingLogs = true);
+                await Future.delayed(const Duration(milliseconds: 1400));
+                if (!mounted) return;
+                widget.onExportJson();
+                setState(() => _isExportingLogs = false);
+              },
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Self-healing circuit breakers and diagnostic logs for troubleshooting.'
+                  .localized(context),
         ),
         const SizedBox(height: spacing24),
       ],
@@ -196,6 +263,8 @@ class AdvancedSettingsPage extends StatelessWidget {
   }
 
   Widget _buildLanguage(BuildContext context) {
+    final p = widget.p;
+
     final availableLanguages = [
       (
         code: 'system',
@@ -244,20 +313,59 @@ class AdvancedSettingsPage extends StatelessWidget {
           p: p,
           title: 'Available Languages'.localized(context).toUpperCase(),
           children: [
-            for (final lang in availableLanguages)
-              SettingsRow(
-                p: p,
-                title: lang.native,
-                subtitle: lang.subtitle,
-                trailing: currentLocale == lang.code
-                    ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
-                    : const SizedBox.shrink(),
-                onTap: () {
-                  if (currentLocale == lang.code) return;
-                  HapticFeedback.selectionClick();
-                  onLocaleChanged?.call(lang.code);
-                },
-              ),
+            for (final lang in availableLanguages) ...[
+              () {
+                final isBeta = lang.code != 'system' && lang.code != 'en';
+                final isSelected = widget.currentLocale == lang.code;
+                return SettingsRow(
+                  p: p,
+                  title: lang.native,
+                  subtitle: lang.subtitle,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isBeta) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: p.orange.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: p.orange.withValues(alpha: 0.28),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            'BETA',
+                            style: TextStyle(
+                              color: p.orange,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        if (isSelected) const SizedBox(width: 8),
+                      ],
+                      if (isSelected)
+                        Icon(
+                          CupertinoIcons.checkmark,
+                          color: p.accent,
+                          size: 18,
+                        ),
+                    ],
+                  ),
+                  onTap: () {
+                    if (widget.currentLocale == lang.code) return;
+                    HapticFeedback.selectionClick();
+                    widget.onLocaleChanged?.call(lang.code);
+                  },
+                );
+              }(),
+            ],
           ],
         ),
         SettingsPageDescription(
@@ -284,14 +392,16 @@ class AdvancedSettingsPage extends StatelessWidget {
               ),
           ],
         ),
-        if (onLearnMoreBeta != null)
-          SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta!),
+        if (widget.onLearnMoreBeta != null)
+          SettingsBetaNote(p: p, onLearnMore: widget.onLearnMoreBeta!),
         const SizedBox(height: spacing48),
       ],
     );
   }
 
   Widget _buildAccessibility(BuildContext context) {
+    final p = widget.p;
+
     return Column(
       children: [
         const SizedBox(height: spacing8),
@@ -303,13 +413,13 @@ class AdvancedSettingsPage extends StatelessWidget {
               SettingsRow(
                 p: p,
                 title: style[0].toUpperCase() + style.substring(1),
-                trailing: hapticStyle == style
+                trailing: widget.hapticStyle == style
                     ? Icon(CupertinoIcons.checkmark, color: p.accent, size: 18)
                     : const SizedBox.shrink(),
                 onTap: () {
-                  if (hapticStyle == style) return;
+                  if (widget.hapticStyle == style) return;
                   HapticFeedback.selectionClick();
-                  onHapticStyleChanged(style);
+                  widget.onHapticStyleChanged(style);
                 },
               ),
           ],
@@ -331,8 +441,8 @@ class AdvancedSettingsPage extends StatelessWidget {
                   'Play instant tactile auditory feedback on clicks, taps, and swipe actions.'
                       .localized(context),
               color: p.accent,
-              value: soundEffects,
-              onChanged: onSoundEffectsChanged ?? (_) {},
+              value: widget.soundEffects,
+              onChanged: widget.onSoundEffectsChanged ?? (_) {},
             ),
           ],
         ),
@@ -350,8 +460,8 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               title: 'Reduced Motion',
               color: p.green,
-              value: reduceMotion,
-              onChanged: onReduceMotionChanged,
+              value: widget.reduceMotion,
+              onChanged: widget.onReduceMotionChanged,
             ),
           ],
         ),
@@ -369,7 +479,7 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               title: 'Large Text',
               color: p.accent,
-              value: largeText,
+              value: widget.largeText,
               onChanged: (val) {
                 final systemScale = MediaQuery.of(context).textScaler.scale(1);
                 if (val && systemScale >= 1.15) {
@@ -401,7 +511,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                             isDestructiveAction: false,
                             onPressed: () {
                               Navigator.of(ctx).pop();
-                              onLargeTextChanged(true);
+                              widget.onLargeTextChanged(true);
                             },
                             child: Text('Enable Anyway'.localized(ctx)),
                           ),
@@ -410,7 +520,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  onLargeTextChanged(val);
+                  widget.onLargeTextChanged(val);
                 }
               },
             ),
@@ -430,8 +540,8 @@ class AdvancedSettingsPage extends StatelessWidget {
               p: p,
               title: 'High Contrast Mode',
               color: p.orange,
-              value: highContrast,
-              onChanged: onHighContrastChanged,
+              value: widget.highContrast,
+              onChanged: widget.onHighContrastChanged,
             ),
           ],
         ),
@@ -447,6 +557,8 @@ class AdvancedSettingsPage extends StatelessWidget {
   }
 
   Widget _buildReset(BuildContext context) {
+    final p = widget.p;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -462,7 +574,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                 context,
               ),
               color: p.orange,
-              onTap: onResetSettings,
+              onTap: widget.onResetSettings,
             ),
           ],
         ),
@@ -479,7 +591,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                 context,
               ),
               color: p.red,
-              onTap: onResetAllData,
+              onTap: widget.onResetAllData,
             ),
           ],
         ),
@@ -496,7 +608,7 @@ class AdvancedSettingsPage extends StatelessWidget {
                 context,
               ),
               color: p.red,
-              onTap: onFactoryReset,
+              onTap: widget.onFactoryReset,
             ),
           ],
         ),

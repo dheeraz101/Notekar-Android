@@ -59,6 +59,7 @@ class AppLockSettingsPage extends StatelessWidget {
               title: 'App Lock',
               color: p.accent,
               value: privacyLock,
+              isSecurity: true,
               onChanged: onPrivacyLockChanged,
             ),
             if (privacyLock && isSystemLockAvailable)

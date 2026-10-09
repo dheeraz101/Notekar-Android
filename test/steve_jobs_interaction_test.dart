@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
@@ -818,28 +818,12 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Roadmap & Upcoming'), findsWidgets);
-        expect(
-          find.text('Multi-Language Hands-Free Voice Notes'),
-          findsOneWidget,
-        );
-        expect(
-          find.text('AI Temporal Synthesis & Circadian Narrative'),
-          findsOneWidget,
-        );
-        expect(
-          find.text('Dynamic Live Activities & Interactive Lockscreen'),
-          findsOneWidget,
-        );
-        expect(
-          find.text('Micro-Chrono Interactive Widgets (2x2 & 4x2)'),
-          findsOneWidget,
-        );
-        expect(find.text('Sovereign Peer-to-Peer LAN Sync'), findsWidgets);
-        expect(
-          find.text('Chrono-Tag Association Matrix & Graph'),
-          findsOneWidget,
-        );
+        expect(find.text('Roadmap & Innovations'), findsWidgets);
+        expect(find.text('Full-Fledged Language Support'), findsOneWidget);
+        expect(find.text('Interactive Android Widgets'), findsOneWidget);
+        expect(find.text('Performance & Cold Start'), findsOneWidget);
+        expect(find.text('Photo & Receipt Logging'), findsOneWidget);
+        expect(find.text('Hands-Free Voice Dictation'), findsOneWidget);
       },
     );
   });

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
@@ -75,6 +76,15 @@ class DisplaySettingsPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: spacing8),
+        _DisplayLivePreview(
+          p: p,
+          theme: theme,
+          clockFont: clockFont,
+          use24HourFormat: use24HourFormat,
+          showSeconds: showSeconds,
+          highlightSeconds: highlightSeconds,
+        ),
+        const SizedBox(height: spacing12),
         SettingsGroup(
           p: p,
           title: 'Theme',
@@ -538,6 +548,177 @@ class DisplaySettingsPage extends StatelessWidget {
         ),
         const SizedBox(height: spacing48),
       ],
+    );
+  }
+}
+
+class _DisplayLivePreview extends StatelessWidget {
+  const _DisplayLivePreview({
+    required this.p,
+    required this.theme,
+    required this.clockFont,
+    required this.use24HourFormat,
+    required this.showSeconds,
+    required this.highlightSeconds,
+  });
+
+  final Palette p;
+  final String theme;
+  final String clockFont;
+  final bool use24HourFormat;
+  final bool showSeconds;
+  final bool highlightSeconds;
+
+  @override
+  Widget build(BuildContext context) {
+    final timeStr = use24HourFormat ? '14:32' : '02:32';
+    final secondsStr = showSeconds ? ':48' : '';
+    final periodStr = use24HourFormat ? '' : ' PM';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.8)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(CupertinoIcons.eye_fill, size: 11, color: p.accent),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Live Display Preview'.localized(context),
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${theme.toUpperCase()} • $clockFont',
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontFamily: clockFont,
+                fontSize: 34,
+                fontWeight: FontWeight.w800,
+                color: p.text,
+                letterSpacing: 0.5,
+              ),
+              children: [
+                TextSpan(text: timeStr),
+                if (showSeconds)
+                  TextSpan(
+                    text: secondsStr,
+                    style: TextStyle(
+                      color: highlightSeconds ? p.accent : p.text3,
+                      fontSize: 26,
+                    ),
+                  ),
+                if (!use24HourFormat)
+                  TextSpan(
+                    text: periodStr,
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: p.surface3,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: p.border),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: p.accent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Deep Work Focus'.localized(context),
+                      style: TextStyle(
+                        color: p.text,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Check In'.localized(context),
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -516,8 +516,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 onTap: () => setState(() => _selectedMoments.clear()),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 5,
                   ),
                   decoration: BoxDecoration(
                     color: widget.p.accent.withValues(alpha: 0.12),
@@ -526,15 +526,34 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                       color: widget.p.accent.withValues(alpha: 0.20),
                     ),
                   ),
-                  child: Text(
-                    'Selected ${_selectedMoments.length} of 2 for duration'
-                        .localized(context),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: widget.p.accent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Selected ${_selectedMoments.length} of 2 for duration'
+                            .localized(context),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: widget.p.accent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 17,
+                        height: 17,
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.22),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 11,
+                          color: widget.p.accent,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

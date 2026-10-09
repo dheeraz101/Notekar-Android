@@ -70,7 +70,66 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
       children: [
         const SizedBox(height: spacing8),
 
-        // URL Schemes
+        // 1. Top Card: Broadcast API Master Toggle
+        SettingsGroup(
+          p: p,
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              icon: CupertinoIcons.antenna_radiowaves_left_right,
+              title: 'Enable Broadcast API'.localized(context),
+              subtitle:
+                  'Allow external automation tools to log moments via intent broadcasts'
+                      .localized(context),
+              value: _enableExternalAutomation,
+              onChanged: _toggleAutomation,
+              color: p.accent,
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Enables external automation tools like Tasker, MacroDroid, or Termux to trigger NoteKar.'
+                  .localized(context),
+        ),
+
+        const SizedBox(height: spacing16),
+
+        // 2. Broadcast API Intent Details
+        SettingsGroup(
+          p: p,
+          title: 'AUTOMATION BROADCAST API'.localized(context).toUpperCase(),
+          insetDividers: true,
+          children: [
+            SettingsRow(
+              p: p,
+              title: 'Log Moment Intent'.localized(context),
+              subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT',
+              trailing: IconButton(
+                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
+                onPressed: () => _copyToClipboard(
+                  'am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"',
+                  'ADB Broadcast Command',
+                ),
+              ),
+              color: p.accent,
+              onTap: () => _copyToClipboard(
+                'am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"',
+                'ADB Broadcast Command',
+              ),
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Send offline broadcast intents from Tasker or Termux with extras to log moments.'
+                  .localized(context),
+        ),
+        const SizedBox(height: spacing16),
+
+        // 3. URL Schemes
         SettingsGroup(
           p: p,
           title: 'URL Schemes'.localized(context).toUpperCase(),
@@ -145,7 +204,7 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
 
         const SizedBox(height: spacing16),
 
-        // System Bridges
+        // 4. System Bridges
         SettingsGroup(
           p: p,
           title: 'System Bridges'.localized(context).toUpperCase(),
@@ -173,50 +232,6 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
           p: p,
           text:
               'Capture quotes, reading notes, and links directly from Chrome, WhatsApp, or other apps.'
-                  .localized(context),
-        ),
-
-        const SizedBox(height: spacing16),
-
-        // Tasker Broadcast API
-        SettingsGroup(
-          p: p,
-          title: 'Automation Broadcast API'.localized(context).toUpperCase(),
-          insetDividers: true,
-          children: [
-            SettingsSwitchRow(
-              p: p,
-              icon: CupertinoIcons.antenna_radiowaves_left_right,
-              title: 'Enable Broadcast API'.localized(context),
-              subtitle: 'Allow external automation tools to log moments'
-                  .localized(context),
-              value: _enableExternalAutomation,
-              onChanged: _toggleAutomation,
-              color: p.accent,
-            ),
-            SettingsRow(
-              p: p,
-              title: 'Log Moment Intent'.localized(context),
-              subtitle: 'app.notekar.notekar.ACTION_LOG_MOMENT',
-              trailing: IconButton(
-                icon: const Icon(CupertinoIcons.doc_on_doc, size: 18),
-                onPressed: () => _copyToClipboard(
-                  'am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"',
-                  'ADB Broadcast Command',
-                ),
-              ),
-              color: p.accent,
-              onTap: () => _copyToClipboard(
-                'am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"',
-                'ADB Broadcast Command',
-              ),
-            ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Send offline broadcast intents from Tasker, MacroDroid, or Termux with extras to log moments.'
                   .localized(context),
         ),
 
