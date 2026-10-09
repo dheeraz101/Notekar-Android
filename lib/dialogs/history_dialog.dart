@@ -144,6 +144,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
   DateTime? _manualPrefilledStartTime;
   DateTime? _manualPrefilledEndTime;
   bool _isClaimingRest = false;
+  bool _isEndingLiveSession = false;
+  final Set<String> _claimedGaps = {};
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -562,7 +564,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       initialCategory: 'All',
                       prefilledStartTime: _manualPrefilledStartTime,
                       prefilledEndTime: _manualPrefilledEndTime,
+                      lockToSession: _manualPrefilledEndTime != null,
                       onSubmit: (res) {
+                        if (_manualPrefilledStartTime != null &&
+                            _manualPrefilledEndTime != null) {
+                          _claimedGaps.add(
+                            '${_manualPrefilledStartTime!.millisecondsSinceEpoch}-${_manualPrefilledEndTime!.millisecondsSinceEpoch}',
+                          );
+                        }
                         _manualPrefilledStartTime = null;
                         _manualPrefilledEndTime = null;
                         _handleManualEntrySubmit(res);
@@ -674,6 +683,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   onEditNote: _openDirectNoteEditor,
                   onOpenManualEntry: _handleOpenManualEntry,
                   onClaimRest: _claimRest,
+                  onEndLiveSession: _endLiveSession,
+                  claimedGaps: _claimedGaps,
                   onOpenInsights: (sec) {
                     setState(() => _activeInsightsSection = sec);
                   },
@@ -1243,10 +1254,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                       if (elem.item is TimelineGapItem) {
                                         final gap =
                                             elem.item as TimelineGapItem;
+                                        final gapKey =
+                                            '${gap.startTimestamp}-${gap.endTimestamp}';
+                                        if (_claimedGaps.contains(gapKey)) {
+                                          return const SizedBox.shrink();
+                                        }
                                         return TimelineGapCard(
                                           p: widget.p,
                                           startTimestamp: gap.startTimestamp,
                                           endTimestamp: gap.endTimestamp,
+                                          isProcessing: _isClaimingRest,
                                           onTap: () {
                                             _handleOpenManualEntry(
                                               prefilledStartTime:
@@ -1577,8 +1594,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _claimRest(DateTime start, DateTime end) async {
-    if (_isClaimingRest) return;
+    final gapKey =
+        '${start.millisecondsSinceEpoch}-${end.millisecondsSinceEpoch}';
+    if (_claimedGaps.contains(gapKey) || _isClaimingRest) return;
     _isClaimingRest = true;
+    _claimedGaps.add(gapKey);
+    if (mounted) setState(() {});
+
     try {
       List<Moment> savedMoments = const [];
       if (widget.onClaimRest != null) {
@@ -1633,12 +1655,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
         _showNotice(
           '🌿 Rest & Recovery accounted in Life Audit',
-          onUndo: () => _removeSession(
-            TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
-          ),
+          onUndo: () {
+            _claimedGaps.remove(gapKey);
+            _removeSession(
+              TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
+            );
+          },
         );
       }
     } catch (error, stackTrace) {
+      _claimedGaps.remove(gapKey);
       debugPrint('Could not save claimed rest interval: $error\n$stackTrace');
       if (mounted) {
         _showNotice(
@@ -1677,6 +1703,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         endMs = startMs + 60000;
       }
       final endDt = DateTime.fromMillisecondsSinceEpoch(endMs);
+      _claimedGaps.add('$startMs-$endMs');
 
       final inMoment = Moment(
         id: math.max(maxId + 1, startMs),
@@ -1983,85 +2010,86 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _endLiveSession(TimelineSessionItem session) async {
-    NotekarHaptics.success('standard');
+    if (_isEndingLiveSession) return;
+    _isEndingLiveSession = true;
+    try {
+      NotekarHaptics.success('standard');
 
-    // Find any subsequent session boundaries (in or out) that occurred strictly after this session started
-    final laterSessionMoments =
-        _entries
-            .where(
-              (m) =>
-                  m.timestamp > session.startTimestamp &&
-                  (m.type == 'in' || m.type == 'out'),
-            )
-            .toList()
-          ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      // Find any subsequent session boundaries (in or out) that occurred strictly after this session started
+      final laterSessionMoments =
+          _entries
+              .where(
+                (m) =>
+                    m.timestamp > session.startTimestamp &&
+                    (m.type == 'in' || m.type == 'out'),
+              )
+              .toList()
+            ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-    final int effectiveTimestamp;
-    if (laterSessionMoments.isNotEmpty) {
-      final nextMoment = laterSessionMoments.first;
-      // If the immediate next moment is already an unconsumed 'out', avoid creating duplicates
-      if (nextMoment.type == 'out') {
-        _rebuildMemoizedLists();
-        _showNotice('Session ended'.localized(context));
-        return;
-      }
-      final nextSessionStart = nextMoment.timestamp;
-      final diff = nextSessionStart - session.startTimestamp;
-      if (diff > 2000) {
-        effectiveTimestamp = nextSessionStart - 1000;
-      } else if (diff > 1) {
-        effectiveTimestamp = session.startTimestamp + (diff ~/ 2);
+      final int effectiveTimestamp;
+      if (laterSessionMoments.isNotEmpty) {
+        final nextMoment = laterSessionMoments.first;
+        final nextSessionStart = nextMoment.timestamp;
+        final diff = nextSessionStart - session.startTimestamp;
+        if (diff > 2000) {
+          effectiveTimestamp = nextSessionStart - 1000;
+        } else if (diff > 1) {
+          effectiveTimestamp = session.startTimestamp + (diff ~/ 2);
+        } else {
+          effectiveTimestamp = session.startTimestamp + 1;
+        }
       } else {
-        effectiveTimestamp = session.startTimestamp + 1;
+        effectiveTimestamp = math.max(
+          DateTime.now().millisecondsSinceEpoch,
+          session.startTimestamp + 1000,
+        );
       }
-    } else {
-      effectiveTimestamp = math.max(
-        DateTime.now().millisecondsSinceEpoch,
-        session.startTimestamp + 1000,
-      );
-    }
 
-    final maxId = _entries.isEmpty
-        ? 0
-        : _entries.map((e) => e.id).reduce(math.max);
-    final outEntry = Moment(
-      id: math.max(maxId + 1, effectiveTimestamp),
-      timestamp: effectiveTimestamp,
-      type: 'out',
-      date: dateKey(DateTime.fromMillisecondsSinceEpoch(effectiveTimestamp)),
-      note: '',
-      category: session.category,
-    );
-    setState(() {
-      _entries = [outEntry, ..._entries]
-        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      _availableDateKeys = _entries.map((item) => item.date).toSet();
-      _rebuildMemoizedLists();
-    });
-    _showNotice(
-      'Session ended'.localized(context),
-      onUndo: () async {
-        _noticeTimer?.cancel();
-        setState(() {
-          _entries = _entries.where((item) => item.id != outEntry.id).toList();
-          _availableDateKeys = _entries.map((item) => item.date).toSet();
-          _notice = null;
-          _noticeUndo = null;
-          _rebuildMemoizedLists();
-        });
-        await widget.onDelete(outEntry.id);
-        if (widget.onRestoreLiveSession != null) {
-          await widget.onRestoreLiveSession!(session.inMoment);
-        }
-        if (mounted) {
-          _showNotice('Session restored'.localized(context));
-        }
-      },
-    );
-    if (widget.onEndLiveSession != null) {
-      await widget.onEndLiveSession!(session.inMoment.id, outEntry);
-    } else {
-      await widget.onRestore(outEntry);
+      final maxId = _entries.isEmpty
+          ? 0
+          : _entries.map((e) => e.id).reduce(math.max);
+      final outEntry = Moment(
+        id: math.max(maxId + 1, effectiveTimestamp),
+        timestamp: effectiveTimestamp,
+        type: 'out',
+        date: dateKey(DateTime.fromMillisecondsSinceEpoch(effectiveTimestamp)),
+        note: '',
+        category: session.category,
+      );
+      setState(() {
+        _entries = [outEntry, ..._entries]
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        _availableDateKeys = _entries.map((item) => item.date).toSet();
+        _rebuildMemoizedLists();
+      });
+      _showNotice(
+        'Session ended'.localized(context),
+        onUndo: () async {
+          _noticeTimer?.cancel();
+          setState(() {
+            _entries =
+                _entries.where((item) => item.id != outEntry.id).toList();
+            _availableDateKeys = _entries.map((item) => item.date).toSet();
+            _notice = null;
+            _noticeUndo = null;
+            _rebuildMemoizedLists();
+          });
+          await widget.onDelete(outEntry.id);
+          if (widget.onRestoreLiveSession != null) {
+            await widget.onRestoreLiveSession!(session.inMoment);
+          }
+          if (mounted) {
+            _showNotice('Session restored'.localized(context));
+          }
+        },
+      );
+      if (widget.onEndLiveSession != null) {
+        await widget.onEndLiveSession!(session.inMoment.id, outEntry);
+      } else {
+        await widget.onRestore(outEntry);
+      }
+    } finally {
+      _isEndingLiveSession = false;
     }
   }
 

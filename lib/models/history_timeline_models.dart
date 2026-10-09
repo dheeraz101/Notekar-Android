@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_utils.dart';
 
@@ -214,49 +215,72 @@ List<TimelineDaySection> buildTimelineDaySections(
 }) {
   if (entries.isEmpty) return [];
 
-  // 1. Sort all moments chronologically ascending (earliest to latest) to pair sessions globally.
-  // When timestamps match exactly, 'in' MUST precede 'out' so sessions pair correctly.
+  // 1. Sort all moments chronologically ascending (earliest to latest).
   final chronoSorted = List<Moment>.from(entries)
     ..sort((a, b) {
       final cmp = a.timestamp.compareTo(b.timestamp);
       if (cmp != 0) return cmp;
-      if (a.type == 'in' && b.type != 'in') return -1;
-      if (b.type == 'in' && a.type != 'in') return 1;
       return a.id.compareTo(b.id);
     });
 
+  // Group moments by timestamp while preserving chronological order
+  final Map<int, List<Moment>> byTimestamp = {};
+  for (final m in chronoSorted) {
+    byTimestamp.putIfAbsent(m.timestamp, () => []).add(m);
+  }
+
   final List<TimelineItem> allItems = [];
-  final Set<int> consumedOutIds = {};
+  Moment? activeIn;
 
-  for (int i = 0; i < chronoSorted.length; i++) {
-    final m = chronoSorted[i];
-    if (consumedOutIds.contains(m.id)) continue;
+  for (final entry in byTimestamp.entries) {
+    final momentsAtT = entry.value;
+    final singles =
+        momentsAtT.where((m) => m.type != 'in' && m.type != 'out').toList();
+    final outs = momentsAtT.where((m) => m.type == 'out').toList();
+    final ins = momentsAtT.where((m) => m.type == 'in').toList();
 
-    if (m.type == 'in') {
-      Moment? matchedOut;
-      for (int j = i + 1; j < chronoSorted.length; j++) {
-        final next = chronoSorted[j];
-        if (next.type == 'in') {
-          break; // Next session started before this ended
-        }
-        if (next.type == 'out' && !consumedOutIds.contains(next.id)) {
-          matchedOut = next;
-          consumedOutIds.add(next.id);
-          break;
-        }
-      }
-
-      if (matchedOut != null) {
-        final session = TimelineSessionItem(inMoment: m, outMoment: matchedOut);
-        allItems.add(session);
-      } else {
-        allItems.add(TimelineSessionItem(inMoment: m, outMoment: null));
-      }
-    } else if (m.type == 'out') {
-      allItems.add(TimelineSingleItem(moment: m));
-    } else {
-      allItems.add(TimelineSingleItem(moment: m));
+    // 1. Process single moments
+    for (final s in singles) {
+      allItems.add(TimelineSingleItem(moment: s));
     }
+
+    // 2. If a session is open from an earlier moment, an 'out' at timestamp T closes it
+    if (activeIn != null && outs.isNotEmpty) {
+      allItems.add(
+        TimelineSessionItem(inMoment: activeIn, outMoment: outs.removeAt(0)),
+      );
+      activeIn = null;
+    }
+
+    // 3. Pair remaining 'in' and 'out' moments at the same timestamp T
+    while (ins.isNotEmpty && outs.isNotEmpty) {
+      allItems.add(
+        TimelineSessionItem(inMoment: ins.removeAt(0), outMoment: outs.removeAt(0)),
+      );
+    }
+
+    // 4. Any leftover 'in' moments: if an earlier active session was still unclosed, close it as ongoing
+    if (ins.isNotEmpty) {
+      if (activeIn != null) {
+        allItems.add(TimelineSessionItem(inMoment: activeIn, outMoment: null));
+        activeIn = null;
+      }
+      while (ins.length > 1) {
+        allItems.add(
+          TimelineSessionItem(inMoment: ins.removeAt(0), outMoment: null),
+        );
+      }
+      activeIn = ins.removeAt(0);
+    }
+
+    // 5. Any leftover 'out' moments without matching 'in' are emitted as single items
+    while (outs.isNotEmpty) {
+      allItems.add(TimelineSingleItem(moment: outs.removeAt(0)));
+    }
+  }
+
+  if (activeIn != null) {
+    allItems.add(TimelineSessionItem(inMoment: activeIn, outMoment: null));
   }
 
   // 2. Group timeline items by day based on the item's anchor date
@@ -296,7 +320,9 @@ List<TimelineDaySection> buildTimelineDaySections(
         if (i < dayItems.length - 1) {
           final next = dayItems[i + 1];
           final currentEnd = switch (current) {
-            TimelineSessionItem s => s.endTimestamp ?? s.startTimestamp,
+            TimelineSessionItem s =>
+              s.endTimestamp ??
+                  math.max(s.startTimestamp, DateTime.now().millisecondsSinceEpoch),
             TimelineSingleItem s => s.moment.timestamp,
             TimelineGapItem g => g.endTimestamp,
           };

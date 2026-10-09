@@ -9,6 +9,7 @@ import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
+import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -66,6 +67,7 @@ class ManualEntryDialog extends StatelessWidget {
     this.initialGoal,
     this.prefilledStartTime,
     this.prefilledEndTime,
+    this.lockToSession = false,
   });
 
   final Palette p;
@@ -74,6 +76,7 @@ class ManualEntryDialog extends StatelessWidget {
   final Goal? initialGoal;
   final DateTime? prefilledStartTime;
   final DateTime? prefilledEndTime;
+  final bool lockToSession;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +90,7 @@ class ManualEntryDialog extends StatelessWidget {
         initialGoal: initialGoal,
         prefilledStartTime: prefilledStartTime,
         prefilledEndTime: prefilledEndTime,
+        lockToSession: lockToSession,
         onSubmit: (res) => Navigator.pop(context, res),
         onCancel: () => Navigator.pop(context),
       ),
@@ -103,6 +107,7 @@ class ManualEntryContent extends StatefulWidget {
     this.initialGoal,
     this.prefilledStartTime,
     this.prefilledEndTime,
+    this.lockToSession = false,
     required this.onSubmit,
     this.onCancel,
   });
@@ -113,6 +118,7 @@ class ManualEntryContent extends StatefulWidget {
   final Goal? initialGoal;
   final DateTime? prefilledStartTime;
   final DateTime? prefilledEndTime;
+  final bool lockToSession;
   final ValueChanged<ManualEntryResult> onSubmit;
   final VoidCallback? onCancel;
 
@@ -139,7 +145,8 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _isSession = widget.prefilledEndTime != null;
+    final isGapLocked = widget.lockToSession || widget.prefilledEndTime != null;
+    _isSession = isGapLocked ? true : false;
 
     final start =
         widget.prefilledStartTime ?? now.subtract(const Duration(hours: 1));
@@ -159,10 +166,12 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       } else {
         _activeCategory = widget.initialCategory ?? 'All';
       }
-      if (_selectedGoal!.mode == 'two-way') {
-        _isSession = true;
-      } else if (_selectedGoal!.mode == 'single') {
-        _isSession = false;
+      if (!isGapLocked) {
+        if (_selectedGoal!.mode == 'two-way') {
+          _isSession = true;
+        } else if (_selectedGoal!.mode == 'single') {
+          _isSession = false;
+        }
       }
     } else {
       _activeCategory = widget.initialCategory ?? 'All';
@@ -392,6 +401,10 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   }
 
   void _submit() {
+    final isGapLocked = widget.lockToSession || widget.prefilledEndTime != null;
+    if (isGapLocked) {
+      _isSession = true;
+    }
     final startDt = _combine(_selectedDate, _startTime);
     final now = DateTime.now();
 
@@ -459,9 +472,37 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
 
     return SingleChildScrollView(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Optional Header Badge: Filling Untracked Interval
+          if (widget.lockToSession || widget.prefilledEndTime != null) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: p.accent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: p.accent.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.hourglass_top_rounded, size: 14, color: p.accent),
+                  const SizedBox(width: 6),
+                  Text(
+                    'FILLING UNTRACKED INTERVAL'.localized(context),
+                    style: TextStyle(
+                      color: p.accent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           // Segmented Control: Single vs Session
           Container(
             padding: const EdgeInsets.all(3),
@@ -475,6 +516,16 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                 Expanded(
                   child: PressableScale(
                     onTap: () {
+                      if (widget.lockToSession ||
+                          widget.prefilledEndTime != null) {
+                        HapticFeedback.heavyImpact();
+                        setState(() {
+                          _errorMessage =
+                              'Untracked interval must be logged as a completed session.'
+                                  .localized(context);
+                        });
+                        return;
+                      }
                       HapticFeedback.selectionClick();
                       setState(() {
                         _isSession = false;

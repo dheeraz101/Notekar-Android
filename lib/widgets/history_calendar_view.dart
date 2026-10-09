@@ -27,6 +27,8 @@ class HistoryCalendarView extends StatefulWidget {
     this.onEditNote,
     this.onOpenManualEntry,
     this.onClaimRest,
+    this.onEndLiveSession,
+    this.claimedGaps,
     this.onOpenInsights,
     this.onDelete,
     this.rainbowCards = false,
@@ -43,6 +45,8 @@ class HistoryCalendarView extends StatefulWidget {
   })?
   onOpenManualEntry;
   final void Function(DateTime start, DateTime end)? onClaimRest;
+  final ValueChanged<TimelineSessionItem>? onEndLiveSession;
+  final Set<String>? claimedGaps;
   final ValueChanged<TimelineDaySection>? onOpenInsights;
   final ValueChanged<Moment>? onDelete;
   final bool rainbowCards;
@@ -59,6 +63,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   late Map<String, TimelineDaySection> _sectionMap;
   TimelineFilterCriteria _filterCriteria = const TimelineFilterCriteria();
   final List<Moment> _selectedMoments = [];
+  final Set<String> _localClaimedGaps = {};
 
   static const int _daysRange = 60; // 60 days lookback
 
@@ -607,6 +612,13 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
 
   Widget _buildDayHourlyCanvas(TimelineDaySection sec) {
     final filteredItems = sec.items.where((it) {
+      if (it is TimelineGapItem) {
+        final gapKey = '${it.startTimestamp}-${it.endTimestamp}';
+        if ((widget.claimedGaps?.contains(gapKey) ?? false) ||
+            _localClaimedGaps.contains(gapKey)) {
+          return false;
+        }
+      }
       if (_filterCriteria.mode == 'single' && it is! TimelineSingleItem) {
         return false;
       }
@@ -698,10 +710,12 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                     : widget.p.surface2);
           final borderColor = isSelected
               ? widget.p.accent
-              : (widget.rainbowCards
-                    ? meta.color.withValues(alpha: 0.45)
-                    : meta.color.withValues(alpha: 0.35));
-          final borderWidth = isSelected ? 1.8 : 1.0;
+              : (it.isOngoing
+                    ? widget.p.green.withValues(alpha: 0.45)
+                    : (widget.rainbowCards
+                        ? meta.color.withValues(alpha: 0.45)
+                        : meta.color.withValues(alpha: 0.35)));
+          final borderWidth = (isSelected || it.isOngoing) ? 1.8 : 1.0;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -745,6 +759,87 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                             ],
                           ),
                         ),
+                        if (it.isOngoing) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.p.green.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: widget.p.green.withValues(alpha: 0.4),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: widget.p.green,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Text(
+                                  'LIVE',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (widget.onEndLiveSession != null) ...[
+                            const SizedBox(width: 6),
+                            PressableScale(
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                widget.onEndLiveSession!(it);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                  vertical: 2.5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.red.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: widget.p.red.withValues(alpha: 0.4),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.stop_circle_rounded,
+                                      size: 11,
+                                      color: widget.p.red,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      'End'.localized(context),
+                                      style: TextStyle(
+                                        color: widget.p.red,
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                         const Spacer(),
                         Text(
                           _formatDuration(it.duration),
@@ -929,12 +1024,19 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             ),
           );
         } else if (it is TimelineGapItem) {
+          final gapKey = '${it.startTimestamp}-${it.endTimestamp}';
+          final isClaimed =
+              (widget.claimedGaps?.contains(gapKey) ?? false) ||
+              _localClaimedGaps.contains(gapKey);
+          if (isClaimed) return const SizedBox.shrink();
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: TimelineGapCard(
               p: widget.p,
               startTimestamp: it.startTimestamp,
               endTimestamp: it.endTimestamp,
+              isProcessing: isClaimed,
               onTap: () {
                 widget.onOpenManualEntry?.call(
                   prefilledStartTime: DateTime.fromMillisecondsSinceEpoch(
@@ -946,10 +1048,13 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 );
               },
               onClaimRest: widget.onClaimRest != null
-                  ? () => widget.onClaimRest!(
-                      DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
-                      DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
-                    )
+                  ? () {
+                      setState(() => _localClaimedGaps.add(gapKey));
+                      widget.onClaimRest!(
+                        DateTime.fromMillisecondsSinceEpoch(it.startTimestamp),
+                        DateTime.fromMillisecondsSinceEpoch(it.endTimestamp),
+                      );
+                    }
                   : null,
             ),
           );

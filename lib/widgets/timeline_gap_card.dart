@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
@@ -5,7 +7,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Clean Apple HIG card representing an untracked gap between sessions or moments.
-class TimelineGapCard extends StatelessWidget {
+class TimelineGapCard extends StatefulWidget {
   const TimelineGapCard({
     super.key,
     required this.p,
@@ -13,6 +15,7 @@ class TimelineGapCard extends StatelessWidget {
     required this.endTimestamp,
     this.onTap,
     this.onClaimRest,
+    this.isProcessing = false,
   });
 
   final Palette p;
@@ -20,9 +23,26 @@ class TimelineGapCard extends StatelessWidget {
   final int endTimestamp;
   final VoidCallback? onTap;
   final VoidCallback? onClaimRest;
+  final bool isProcessing;
+
+  @override
+  State<TimelineGapCard> createState() => _TimelineGapCardState();
+}
+
+class _TimelineGapCardState extends State<TimelineGapCard> {
+  bool _localProcessing = false;
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  bool get _busy => widget.isProcessing || _localProcessing;
 
   Duration get duration => Duration(
-    milliseconds: (endTimestamp - startTimestamp).clamp(0, 86400000),
+    milliseconds: (widget.endTimestamp - widget.startTimestamp).clamp(0, 86400000),
   );
 
   String _formatDuration(Duration d) {
@@ -37,16 +57,19 @@ class TimelineGapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = widget.p;
     final durText = _formatDuration(duration);
-    final timeSpan = '${timeOnly(startTimestamp)} – ${timeOnly(endTimestamp)}';
+    final timeSpan =
+        '${timeOnly(widget.startTimestamp)} – ${timeOnly(widget.endTimestamp)}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       child: PressableScale(
         onTap: () {
-          if (onTap != null) {
+          if (widget.isProcessing) return;
+          if (widget.onTap != null) {
             HapticFeedback.lightImpact();
-            onTap!();
+            widget.onTap!();
           }
         },
         child: Container(
@@ -100,11 +123,17 @@ class TimelineGapCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (onClaimRest != null && duration.inMinutes >= 15) ...[
+              if (widget.onClaimRest != null && duration.inMinutes >= 15) ...[
                 PressableScale(
                   onTap: () {
+                    if (_busy) return;
+                    setState(() => _localProcessing = true);
                     HapticFeedback.lightImpact();
-                    onClaimRest!();
+                    widget.onClaimRest!();
+                    _debounceTimer?.cancel();
+                    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+                      if (mounted) setState(() => _localProcessing = false);
+                    });
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -112,22 +141,26 @@ class TimelineGapCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.12),
+                      color: p.accent.withValues(alpha: _busy ? 0.05 : 0.12),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: p.accent.withValues(alpha: 0.35),
+                        color: p.accent.withValues(alpha: _busy ? 0.15 : 0.35),
                         width: 0.8,
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.bedtime_rounded, size: 11, color: p.accent),
+                        Icon(
+                          Icons.bedtime_rounded,
+                          size: 11,
+                          color: _busy ? p.text3 : p.accent,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          'Rest',
+                          _busy ? 'Rest...' : 'Rest',
                           style: TextStyle(
-                            color: p.accent,
+                            color: _busy ? p.text3 : p.accent,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -138,7 +171,7 @@ class TimelineGapCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
               ],
-              if (onTap != null) ...[
+              if (widget.onTap != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
