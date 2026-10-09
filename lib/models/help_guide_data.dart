@@ -82,7 +82,7 @@ const List<HelpGuideItem> allGuideItems = [
     icon: Icons.track_changes_rounded,
     title: 'Goals & Intentional Targets',
     content:
-        'Set intentional hourly targets (e.g. 20 hours per week or month) scoped to specific categories or all modes. Track progress bars, completion indicators, and deficit countdowns ("X hours to go") directly from the History 3-dots menu, Executive Dashboard, or Settings > Targets & Goals.',
+        'Set intentional hourly targets (weekly, monthly, yearly, or custom) scoped to specific categories or all modes. Features Apple HIG cards with gradient progress indicators, daily pacing targets for month/year goals, live Twitter/X title countdown, and direct 1-tap flag access from the History header.',
     isFaq: false,
     keywords: [
       'goal',
@@ -95,15 +95,73 @@ const List<HelpGuideItem> allGuideItems = [
       'progress',
       'weekly goal',
       'monthly goal',
+      'yearly goal',
+      'daily pacing',
+      'flag',
       'timeframe',
       'executive dashboard',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.photo_camera_rounded,
+    title: 'Multimodal Logging: Photos & Voice Notes',
+    content:
+        'Attach visual photos and voice audio recordings to any moment or session. Capture receipts, whiteboards, or memories directly from camera or gallery, and record quick spoken voice notes with real-time audio waveforms. Works seamlessly from the bottom composer, widgets, and notification popups.',
+    isFaq: false,
+    keywords: [
+      'photo',
+      'image',
+      'camera',
+      'gallery',
+      'voice',
+      'audio',
+      'voice note',
+      'mic',
+      'recording',
+      'multimodal',
+      'waveform',
+      'attachment',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.image_outlined,
+    title: 'Twitter/X-Style Media Cards & Lightbox',
+    content:
+        'Moments with photos display sleek Twitter/X-style media cards in your history timeline. Tap to collapse or expand previews smoothly, or tap into the full-screen Lightbox with pinch-to-zoom and pan support. Audio voice notes feature an Apple Voice Memos-style pill player with interactive scrubbing.',
+    isFaq: false,
+    keywords: [
+      'twitter',
+      'media card',
+      'lightbox',
+      'zoom',
+      'preview',
+      'collapse image',
+      'voice player',
+      'scrubbing',
+      'audio player',
+    ],
+  ),
+  HelpGuideItem(
+    icon: Icons.visibility_rounded,
+    title: 'Show Images Always & Ephemeral Collapse',
+    content:
+        'Configure whether moment photos start expanded or collapsed in Settings > History Controls. When disabled, images start collapsed into a compact preview pill. You can freely toggle any image in your timeline, and your global preference is restored when the sheet reopens.',
+    isFaq: false,
+    keywords: [
+      'show images always',
+      'collapse',
+      'expand',
+      'preview',
+      'history controls',
+      'image setting',
+      'ephemeral',
     ],
   ),
   HelpGuideItem(
     icon: Icons.more_vert_rounded,
     title: 'History 3-Dots Action Menu',
     content:
-        'Tap the 3-dots menu in the top right of the History sheet to access secondary power tools without visual clutter: Delete All, Add Manual Entry, Filters, and Targets & Goals are consolidated into a clean, dedicated card.',
+        'Tap the 3-dots menu in the top right of the History sheet to access secondary power tools without visual clutter: Switch between Timeline View & Calendar Day View, Delete All, Add Manual Entry, and Filters.',
     isFaq: false,
     keywords: [
       'history menu',
@@ -112,7 +170,8 @@ const List<HelpGuideItem> allGuideItems = [
       'manual entry',
       'delete all',
       'history actions',
-      'targets',
+      'calendar view',
+      'timeline view',
     ],
   ),
   HelpGuideItem(

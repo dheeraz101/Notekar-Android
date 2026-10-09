@@ -85,8 +85,7 @@ class GoalsService {
         startWindow = DateTime(now.year, 1, 1);
         endWindow = DateTime(now.year + 1, 1, 1);
       case GoalTimeframe.custom:
-        final createdDt = DateTime.fromMillisecondsSinceEpoch(goal.createdAt);
-        startWindow = DateTime(createdDt.year, createdDt.month, createdDt.day);
+        startWindow = DateTime(2000, 1, 1);
         if (goal.targetDate != null) {
           final targetDt = DateTime.fromMillisecondsSinceEpoch(
             goal.targetDate!,
@@ -104,8 +103,7 @@ class GoalsService {
           endWindow = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
         }
       case GoalTimeframe.none:
-        final createdDt = DateTime.fromMillisecondsSinceEpoch(goal.createdAt);
-        startWindow = DateTime(createdDt.year, createdDt.month, createdDt.day);
+        startWindow = DateTime(2000, 1, 1);
         endWindow = DateTime.fromMillisecondsSinceEpoch(8640000000000000);
     }
 
@@ -199,7 +197,12 @@ class GoalsService {
       final targetCat = goal.category!.toLowerCase();
       final cat = m.category?.toLowerCase() ?? '';
       final note = m.note.toLowerCase();
-      final matches = cat == targetCat || note.contains('#$targetCat');
+      final inTags = m.tags.any((t) {
+        final tl = t.toLowerCase();
+        return tl == targetCat || tl == '#$targetCat';
+      });
+      final matches =
+          cat == targetCat || note.contains('#$targetCat') || inTags;
       if (!matches) return false;
     }
 

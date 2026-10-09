@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/dialogs/note_dialog.dart';
 import 'package:notekar/models/goal.dart';
+import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/services/goals_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -22,6 +27,9 @@ class ManualEntryResult {
     required this.tags,
     this.category,
     this.linkedGoal,
+    this.imagePath,
+    this.voicePath,
+    this.voiceDurationMs,
   });
 
   final bool isSession;
@@ -31,6 +39,9 @@ class ManualEntryResult {
   final List<String> tags;
   final String? category;
   final Goal? linkedGoal;
+  final String? imagePath;
+  final String? voicePath;
+  final int? voiceDurationMs;
 }
 
 /// Reusable Apple HIG Cupertino Date & Time picker bottom sheet.
@@ -67,6 +78,7 @@ class ManualEntryDialog extends StatelessWidget {
     this.prefilledStartTime,
     this.prefilledEndTime,
     this.lockToSession = false,
+    this.moments,
   });
 
   final Palette p;
@@ -76,6 +88,7 @@ class ManualEntryDialog extends StatelessWidget {
   final DateTime? prefilledStartTime;
   final DateTime? prefilledEndTime;
   final bool lockToSession;
+  final List<Moment>? moments;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +103,7 @@ class ManualEntryDialog extends StatelessWidget {
         prefilledStartTime: prefilledStartTime,
         prefilledEndTime: prefilledEndTime,
         lockToSession: lockToSession,
+        moments: moments,
         onSubmit: (res) => Navigator.pop(context, res),
         onCancel: () => Navigator.pop(context),
       ),
@@ -107,6 +121,7 @@ class ManualEntryContent extends StatefulWidget {
     this.prefilledStartTime,
     this.prefilledEndTime,
     this.lockToSession = false,
+    this.moments,
     required this.onSubmit,
     this.onCancel,
   });
@@ -118,6 +133,7 @@ class ManualEntryContent extends StatefulWidget {
   final DateTime? prefilledStartTime;
   final DateTime? prefilledEndTime;
   final bool lockToSession;
+  final List<Moment>? moments;
   final ValueChanged<ManualEntryResult> onSubmit;
   final VoidCallback? onCancel;
 
@@ -134,6 +150,11 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   late List<String> _categories;
   List<Goal> _goals = [];
   Goal? _selectedGoal;
+  List<Moment> _allMoments = [];
+
+  String? _imagePath;
+  String? _voicePath;
+  int? _voiceDurationMs;
 
   final TextEditingController _noteController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -144,8 +165,11 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final isGapLocked = widget.lockToSession || widget.prefilledEndTime != null;
-    _isSession = isGapLocked ? true : false;
+    final isLocked =
+        widget.lockToSession ||
+        widget.prefilledEndTime != null ||
+        widget.initialGoal != null;
+    _isSession = isLocked ? true : false;
 
     final start =
         widget.prefilledStartTime ?? now.subtract(const Duration(hours: 1));
@@ -165,19 +189,63 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       } else {
         _activeCategory = widget.initialCategory ?? 'All';
       }
-      if (!isGapLocked) {
-        if (_selectedGoal!.mode == 'two-way') {
-          _isSession = true;
-        } else if (_selectedGoal!.mode == 'single') {
-          _isSession = false;
-        }
-      }
+      _isSession = true;
     } else {
       _activeCategory = widget.initialCategory ?? 'All';
     }
 
     _loadTags();
     _loadGoals();
+    _loadMoments();
+  }
+
+  Future<void> _loadMoments() async {
+    if (widget.moments != null) {
+      if (mounted) setState(() => _allMoments = widget.moments!);
+      return;
+    }
+    final list = MomentRepository().getAllMoments();
+    if (mounted) {
+      setState(() => _allMoments = list);
+    }
+  }
+
+  Future<void> _openNoteComposer() async {
+    HapticFeedback.lightImpact();
+    final res = await showGeneralDialog<NoteResult>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      barrierDismissible: true,
+      barrierLabel: 'Close Note Dialog',
+      transitionDuration: const Duration(milliseconds: 200),
+      transitionBuilder: (ctx, anim, _, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.2),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+          child: FadeTransition(opacity: anim, child: child),
+        );
+      },
+      pageBuilder: (ctx, _, _) => NoteDialog(
+        p: widget.p,
+        initialNote: _noteController.text,
+        initialImagePath: _imagePath,
+        initialVoicePath: _voicePath,
+        initialVoiceDurationMs: _voiceDurationMs,
+        title: 'Add Note & Media'.localized(context),
+        allowEmpty: true,
+      ),
+    );
+
+    if (res != null && mounted) {
+      setState(() {
+        _noteController.text = res.note;
+        _imagePath = res.imagePath;
+        _voicePath = res.voicePath;
+        _voiceDurationMs = res.voiceDurationMs;
+      });
+    }
   }
 
   Future<void> _showAddCategoryDialog() async {
@@ -450,6 +518,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
           ? _activeCategory
           : (_selectedGoal?.category),
       linkedGoal: _selectedGoal,
+      imagePath: _imagePath,
+      voicePath: _voicePath,
+      voiceDurationMs: _voiceDurationMs,
     );
 
     HapticFeedback.mediumImpact();
@@ -469,35 +540,210 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
         ? 'Today (${datePretty(_selectedDate.millisecondsSinceEpoch)})'
         : datePretty(_selectedDate.millisecondsSinceEpoch);
 
+    final isSessionLocked =
+        widget.lockToSession ||
+        widget.prefilledEndTime != null ||
+        widget.initialGoal != null ||
+        _selectedGoal != null;
+
+    if (isSessionLocked && !_isSession) {
+      _isSession = true;
+    }
+
+    final startDt = _combine(_selectedDate, _startTime);
+    final endDt = _combine(_selectedDate, _endTime);
+    final sessionMinutes = endDt.difference(startDt).inMinutes;
+
+    GoalProgress? goalProgress;
+    int? extraMinutes;
+    bool isGoalCompleted = false;
+    if (_selectedGoal != null) {
+      goalProgress = GoalsService.instance.calculateProgress(
+        _selectedGoal!,
+        _allMoments,
+      );
+      if (_isSession && sessionMinutes > 0) {
+        final newTotal = goalProgress.currentMinutes + sessionMinutes;
+        if (newTotal >= _selectedGoal!.targetMinutes) {
+          isGoalCompleted = true;
+          extraMinutes = newTotal - _selectedGoal!.targetMinutes;
+        }
+      }
+    }
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Mode Control: Locked to Session for Untracked Intervals vs Segmented Control
-          if (widget.lockToSession || widget.prefilledEndTime != null) ...[
+          // Mode Control: Locked to Session vs Segmented Control
+          if (_selectedGoal != null) ...[
             Padding(
-              padding: const EdgeInsets.only(bottom: spacing8),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: p.accent.withValues(alpha: 0.3),
+              padding: const EdgeInsets.only(bottom: spacing12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_clock_rounded, size: 14, color: p.accent),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'SESSION LOCKED FOR GOAL (${_selectedGoal!.title.toUpperCase()})',
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      'FILLING UNTRACKED INTERVAL',
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            if (widget.lockToSession) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: spacing12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: p.accent.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock_clock_rounded, size: 14, color: p.accent),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'FILLING UNTRACKED INTERVAL',
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            // Segmented Control: Single vs Session
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: p.surface3,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: p.border.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        if (widget.lockToSession) {
+                          setState(() {
+                            _errorMessage =
+                                'Untracked interval must be logged as a completed session.';
+                          });
+                          return;
+                        }
+                        setState(() {
+                          _isSession = false;
+                          _errorMessage = null;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: !_isSession
+                              ? (p.name == 'light'
+                                    ? Colors.white
+                                    : (p.name == 'amoled'
+                                          ? const Color(0xFF28282C)
+                                          : const Color(0xFF48484A)))
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                          boxShadow: !_isSession
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.12),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Point in Time',
+                            style: TextStyle(
+                              color: !_isSession ? p.text : p.text3,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _isSession = true;
+                          _errorMessage = null;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _isSession
+                              ? (p.name == 'light'
+                                    ? Colors.white
+                                    : (p.name == 'amoled'
+                                          ? const Color(0xFF28282C)
+                                          : const Color(0xFF48484A)))
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                          boxShadow: _isSession
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.12),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Time Span (Session)',
+                            style: TextStyle(
+                              color: _isSession ? p.text : p.text3,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -505,117 +751,6 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ),
             ),
           ],
-          // Segmented Control: Single vs Session
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: p.surface3,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: p.border.withValues(alpha: 0.5)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: PressableScale(
-                    onTap: () {
-                      if (widget.lockToSession ||
-                          widget.prefilledEndTime != null) {
-                        HapticFeedback.heavyImpact();
-                        setState(() {
-                          _errorMessage =
-                              'Untracked interval must be logged as a completed session.'
-                                  .localized(context);
-                        });
-                        return;
-                      }
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _isSession = false;
-                        _errorMessage = null;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: !_isSession
-                            ? (p.name == 'light'
-                                  ? Colors.white
-                                  : (p.name == 'amoled'
-                                        ? const Color(0xFF28282C)
-                                        : const Color(0xFF48484A)))
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                        boxShadow: !_isSession
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Point in Time',
-                          style: TextStyle(
-                            color: !_isSession ? p.text : p.text3,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: PressableScale(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _isSession = true;
-                        _errorMessage = null;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _isSession
-                            ? (p.name == 'light'
-                                  ? Colors.white
-                                  : (p.name == 'amoled'
-                                        ? const Color(0xFF28282C)
-                                        : const Color(0xFF48484A)))
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                        boxShadow: _isSession
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Time Span (Session)',
-                          style: TextStyle(
-                            color: _isSession ? p.text : p.text3,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           const SizedBox(height: spacing16),
 
@@ -659,7 +794,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
 
           const SizedBox(height: spacing12),
 
-          // Time Selector Row
+          // Time Selector Row (Apple HIG Style with Tabular Figures)
           Row(
             children: [
               Expanded(
@@ -668,11 +803,11 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
-                      vertical: 12,
+                      vertical: 14,
                     ),
                     decoration: BoxDecoration(
                       color: p.surface2,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: p.border.withValues(alpha: 0.6),
                       ),
@@ -680,22 +815,34 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _isSession ? 'START TIME' : 'TIME',
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.schedule_rounded,
+                              size: 14,
+                              color: p.accent,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _isSession ? 'START TIME' : 'TIME',
+                              style: TextStyle(
+                                color: p.text3,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           _formatTimeOfDay(_startTime),
                           style: TextStyle(
                             color: p.text,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -711,11 +858,11 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 12,
+                        vertical: 14,
                       ),
                       decoration: BoxDecoration(
                         color: p.surface2,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: p.border.withValues(alpha: 0.6),
                         ),
@@ -723,22 +870,36 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'END TIME',
-                            style: TextStyle(
-                              color: p.text3,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.schedule_rounded,
+                                size: 14,
+                                color: p.text3,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'END TIME',
+                                style: TextStyle(
+                                  color: p.text3,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             _formatTimeOfDay(_endTime),
                             style: TextStyle(
                               color: p.text,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
                             ),
                           ),
                         ],
@@ -749,6 +910,144 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ],
             ],
           ),
+
+          // Session duration pill
+          if (_isSession && sessionMinutes > 0) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.timelapse_rounded,
+                          size: 13,
+                          color: p.accent,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Duration: ${sessionMinutes ~/ 60 > 0 ? '${sessionMinutes ~/ 60}h ' : ''}${sessionMinutes % 60}m',
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // Goal Surplus / Completion Banner
+          if (_selectedGoal != null &&
+              goalProgress != null &&
+              _isSession &&
+              sessionMinutes > 0) ...[
+            if (isGoalCompleted)
+              Container(
+                margin: const EdgeInsets.only(top: spacing12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF34C759).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF34C759).withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: Color(0xFF34C759),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Goal Target Achieved! 🎉',
+                            style: TextStyle(
+                              color: Color(0xFF34C759),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            extraMinutes != null && extraMinutes > 0
+                                ? '+${(extraMinutes / 60).toStringAsFixed(1)} extra hours logged for ${_selectedGoal!.title}!'
+                                : 'This session completes your target of ${_selectedGoal!.targetHours}h!',
+                            style: TextStyle(
+                              color: p.text2,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                margin: const EdgeInsets.only(top: spacing12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: p.surface2,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: p.border.withValues(alpha: 0.6)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.flag_rounded, color: p.accent, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Target Progress: ${(((goalProgress.currentMinutes + sessionMinutes) / _selectedGoal!.targetMinutes) * 100).clamp(0, 100).toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              color: p.text,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${(((_selectedGoal!.targetMinutes - (goalProgress.currentMinutes + sessionMinutes)).clamp(0, double.infinity)) / 60).toStringAsFixed(1)}h remaining after this session',
+                            style: TextStyle(
+                              color: p.text3,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
 
           const SizedBox(height: spacing16),
 
@@ -914,9 +1213,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
 
           const SizedBox(height: spacing16),
 
-          // Note text input
+          // Interactive Apple HIG Note & Media Input (Tap opens NoteDialog)
           Text(
-            'NOTE & TAGS',
+            'NOTE & MEDIA',
             style: TextStyle(
               color: p.text3,
               fontSize: 11,
@@ -925,19 +1224,150 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
             ),
           ),
           const SizedBox(height: spacing8),
-          CupertinoTextField(
-            controller: _noteController,
-            focusNode: _focusNode,
-            maxLines: 3,
-            minLines: 2,
-            style: TextStyle(color: p.text, fontSize: 14),
-            placeholder: 'What happened during this period?',
-            placeholderStyle: TextStyle(color: p.text3, fontSize: 13.5),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: p.surface3,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: p.border.withValues(alpha: 0.6)),
+          PressableScale(
+            onTap: _openNoteComposer,
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: p.surface3,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: p.border.withValues(alpha: 0.6)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Icon(
+                          Icons.edit_note_rounded,
+                          size: 20,
+                          color: p.accent,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _noteController.text.trim().isEmpty
+                              ? 'Tap to write note, hashtags & media...'
+                              : _noteController.text.trim(),
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: _noteController.text.trim().isEmpty
+                                ? p.text3
+                                : p.text,
+                            fontSize: 14,
+                            fontWeight: _noteController.text.trim().isEmpty
+                                ? FontWeight.w500
+                                : FontWeight.w600,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: p.accent.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.edit_rounded,
+                          size: 14,
+                          color: p.accent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_imagePath != null || _voicePath != null) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        if (_imagePath != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.surface2,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: p.border.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Image.file(
+                                    File(_imagePath!),
+                                    width: 18,
+                                    height: 18,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Icon(
+                                      Icons.image_rounded,
+                                      size: 16,
+                                      color: p.accent,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Photo attached',
+                                  style: TextStyle(
+                                    color: p.text2,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (_voicePath != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.surface2,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: p.border.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.mic_rounded,
+                                  size: 14,
+                                  color: p.accent,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'Voice note (${(_voiceDurationMs ?? 0) ~/ 1000}s)',
+                                  style: TextStyle(
+                                    color: p.text2,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
 
@@ -960,11 +1390,13 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                               ? ''
                               : ' ';
                           final newText = '$text$spacer$tag ';
-                          _noteController.text = newText;
-                          _noteController.selection =
-                              TextSelection.fromPosition(
-                                TextPosition(offset: newText.length),
-                              );
+                          setState(() {
+                            _noteController.text = newText;
+                            _noteController.selection =
+                                TextSelection.fromPosition(
+                                  TextPosition(offset: newText.length),
+                                );
+                          });
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -1008,7 +1440,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
 
           const SizedBox(height: spacing20),
 
-          // Actions
+          // Actions (Apple HIG Capsule Buttons with 16dp radius)
           Row(
             children: [
               Expanded(
@@ -1024,7 +1456,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     decoration: BoxDecoration(
                       color: p.surface3,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: p.border.withValues(alpha: 0.6),
                       ),
@@ -1049,7 +1481,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     decoration: BoxDecoration(
                       color: p.accent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.center,
                     child: const Text(

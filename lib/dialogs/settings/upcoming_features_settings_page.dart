@@ -125,6 +125,39 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
               status: 'Shipped'.localized(context),
               statusColor: p.green,
             ),
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.photo_fill_on_rectangle_fill,
+              iconColor: const Color(0xFFFF2D55),
+              title: 'Photo & Receipt Logging'.localized(context),
+              subtitle:
+                  'Twitter-style image cards, Lightbox pinch-zoom & private storage'
+                      .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
+            ),
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.mic_fill,
+              iconColor: const Color(0xFF5856D6),
+              title: 'Hands-Free Voice Dictation'.localized(context),
+              subtitle:
+                  'Live microphone waveforms, Apple Voice Memos scrubber & playback'
+                      .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
+            ),
+            _FeatureRow(
+              p: p,
+              icon: CupertinoIcons.flag_fill,
+              iconColor: p.accent,
+              title: 'Targets & Goals Engine'.localized(context),
+              subtitle:
+                  'Apple HIG cards, daily pacing, live X countdown & header flag'
+                      .localized(context),
+              status: 'Shipped'.localized(context),
+              statusColor: p.green,
+            ),
           ],
         ),
 
@@ -155,8 +188,8 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
               subtitle:
                   'Glanceable 2x2 and 4x2 home screen widgets with live ticker'
                       .localized(context),
-              status: 'Planned'.localized(context),
-              statusColor: p.accent,
+              status: 'In Progress'.localized(context),
+              statusColor: p.orange,
             ),
             _FeatureRow(
               p: p,
@@ -168,28 +201,6 @@ class UpcomingFeaturesSettingsPage extends StatelessWidget {
                       .localized(context),
               status: 'In Progress'.localized(context),
               statusColor: p.orange,
-            ),
-            _FeatureRow(
-              p: p,
-              icon: CupertinoIcons.photo_fill_on_rectangle_fill,
-              iconColor: const Color(0xFFFF2D55),
-              title: 'Photo & Receipt Logging'.localized(context),
-              subtitle:
-                  'Private offline media attachments to ground moments with visuals'
-                      .localized(context),
-              status: 'Planned'.localized(context),
-              statusColor: p.accent,
-            ),
-            _FeatureRow(
-              p: p,
-              icon: CupertinoIcons.mic_fill,
-              iconColor: const Color(0xFF5856D6),
-              title: 'Hands-Free Voice Dictation'.localized(context),
-              subtitle:
-                  '100% on-device speech-to-text with auto hashtag parsing'
-                      .localized(context),
-              status: 'Planned'.localized(context),
-              statusColor: p.accent,
             ),
           ],
         ),

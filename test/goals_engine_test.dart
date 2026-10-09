@@ -168,7 +168,7 @@ void main() {
         );
 
         final moments = [
-          // Session logged yesterday before goal was created (must NOT be counted)
+          // Session logged yesterday retroactively (counted for all-time goals)
           Moment(
             id: 1,
             timestamp: yesterday.millisecondsSinceEpoch + 3600000,
@@ -183,7 +183,7 @@ void main() {
             category: 'Work',
             date: 'yesterday',
           ),
-          // Session logged today after creation day start (must be counted)
+          // Session logged today
           Moment(
             id: 3,
             timestamp: todayStart.millisecondsSinceEpoch + 7200000,
@@ -201,9 +201,9 @@ void main() {
         ];
 
         final progress = service.calculateProgress(goal, moments);
-        // Only the session from today (30m) should count
-        expect(progress.trackedMinutes, 30);
-        expect(progress.remainingMinutes, 90);
+        // Both sessions (30m + 30m = 60m) are counted for all-time
+        expect(progress.trackedMinutes, 60);
+        expect(progress.remainingMinutes, 60);
         expect(progress.isCompleted, isFalse);
       },
     );
@@ -230,5 +230,133 @@ void main() {
       expect(progress.dailyPaceFormatted, isNotEmpty);
       expect(progress.pacingDescription, contains('left this week'));
     });
+
+    test('Goal with dailyTargetMinutes roundtrip and copyWith', () {
+      final goal = Goal(
+        id: 'daily_alloc_1',
+        title: 'Daily Fit',
+        category: 'Gym',
+        targetMinutes: 1800, // 30 hours in month
+        dailyTargetMinutes: 60, // 1h / day
+        timeframe: GoalTimeframe.month,
+        createdAt: 1700000000000,
+      );
+
+      final json = goal.toJson();
+      expect(json['dailyTargetMinutes'], 60);
+
+      final revived = Goal.fromJson(json);
+      expect(revived.dailyTargetMinutes, 60);
+
+      final updated = revived.copyWith(dailyTargetMinutes: 90);
+      expect(updated.dailyTargetMinutes, 90);
+      expect(updated.targetMinutes, 1800);
+    });
+
+    test('GoalProgress surplus calculation and extra hours celebration', () {
+      final goal = Goal(
+        id: 'surplus_goal',
+        title: 'Sprint',
+        targetMinutes: 120, // 2h
+        timeframe: GoalTimeframe.week,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      // Tracked 180m against 120m target -> 60m surplus (1.0h extra)
+      final progress = GoalProgress(
+        goal: goal,
+        trackedMinutes: 180,
+        sessionCount: 2,
+        singleCount: 0,
+      );
+
+      expect(progress.isCompleted, isTrue);
+      expect(progress.surplusMinutes, 60);
+      expect(progress.surplusFormatted, '1h');
+      expect(
+        progress.pacingDescription,
+        contains('Target achieved! (+1h extra logged 🎉)'),
+      );
+    });
+
+    test('GoalsService matches moments by hashtag #category in tags', () {
+      final service = GoalsService.instance;
+      final now = DateTime.now();
+      final nowMs = now.millisecondsSinceEpoch;
+
+      final goal = Goal(
+        id: 'tag_match_goal',
+        title: 'Gym Goal',
+        category: 'Gym',
+        targetMinutes: 60,
+        timeframe: GoalTimeframe.none,
+        createdAt: nowMs,
+      );
+
+      // Moment with category General but with tag #gym
+      final moments = [
+        Moment(
+          id: 10,
+          timestamp: nowMs - 1800000,
+          type: 'in',
+          category: 'General',
+          tags: const ['gym', 'cardio'],
+          date: '2026-09-25',
+        ),
+        Moment(
+          id: 11,
+          timestamp: nowMs,
+          type: 'out',
+          category: 'General',
+          tags: const ['gym', 'cardio'],
+          date: '2026-09-25',
+        ),
+      ];
+
+      final progress = service.calculateProgress(goal, moments);
+      expect(progress.trackedMinutes, 30);
+      expect(progress.sessionCount, 1);
+    });
+
+    test(
+      'GoalsService includes moments logged before goal.createdAt for timeframe none',
+      () {
+        final service = GoalsService.instance;
+        final now = DateTime.now();
+        final nowMs = now.millisecondsSinceEpoch;
+
+        // Goal created today
+        final goal = Goal(
+          id: 'past_moments_goal',
+          title: 'Old Goal',
+          category: 'Study',
+          targetMinutes: 120,
+          timeframe: GoalTimeframe.none,
+          createdAt: nowMs,
+        );
+
+        // Moment logged yesterday (before goal.createdAt)
+        final moments = [
+          Moment(
+            id: 20,
+            timestamp: nowMs - (86400000 + 3600000),
+            type: 'in',
+            category: 'Study',
+            date: '2026-09-24',
+          ),
+          Moment(
+            id: 21,
+            timestamp: nowMs - 86400000,
+            type: 'out',
+            category: 'Study',
+            date: '2026-09-24',
+          ),
+        ];
+
+        final progress = service.calculateProgress(goal, moments);
+        expect(progress.trackedMinutes, 60);
+        expect(progress.sessionCount, 1);
+      },
+    );
   });
 }

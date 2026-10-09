@@ -145,23 +145,26 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // Minimal view mode icon button toggles between Timeline and List views
-        expect(find.byTooltip('Timeline view'), findsWidgets);
-        expect(find.byIcon(Icons.calendar_today_rounded), findsWidgets);
+        // Header now has the Targets & Goals flag button per swap requirement
+        expect(find.byTooltip('Targets & Goals'), findsWidgets);
+        expect(find.byIcon(Icons.flag_rounded), findsWidgets);
 
-        // Tap toggle button to switch to Timeline view
-        await tester.tap(find.byTooltip('Timeline view'));
+        // View mode toggle is now accessible from the 3-dots menu
+        expect(find.byTooltip('More Options'), findsOneWidget);
+        await tester.tap(find.byTooltip('More Options'));
         await tester.pumpAndSettle();
 
-        expect(find.byTooltip('List view'), findsWidgets);
-        expect(find.byIcon(Icons.format_list_bulleted_rounded), findsWidgets);
-
-        // Tap again to switch back to List view
-        await tester.tap(find.byTooltip('List view'));
+        expect(find.text('Calendar View'), findsOneWidget);
+        await tester.tap(find.text('Calendar View'));
         await tester.pumpAndSettle();
 
-        expect(find.byTooltip('Timeline view'), findsWidgets);
-        expect(find.byIcon(Icons.calendar_today_rounded), findsWidgets);
+        // Open 3-dots menu again and toggle back to Timeline View
+        await tester.tap(find.byTooltip('More Options'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Timeline View'), findsOneWidget);
+        await tester.tap(find.text('Timeline View'));
+        await tester.pumpAndSettle();
       },
     );
 

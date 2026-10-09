@@ -37,6 +37,7 @@ class Goal {
     this.category,
     this.mode,
     required this.targetMinutes,
+    this.dailyTargetMinutes,
     this.timeframe = GoalTimeframe.week,
     this.targetDate,
     required this.createdAt,
@@ -48,12 +49,14 @@ class Goal {
   final String? category; // null = all categories
   final String? mode; // 'two-way' or null = sessions
   final int targetMinutes;
+  final int? dailyTargetMinutes; // Optional daily pacing target for month/year
   final GoalTimeframe timeframe;
   final int? targetDate; // epoch ms for custom target deadline
   final int createdAt; // epoch ms
   final bool isArchived;
 
   Duration get targetDuration => Duration(minutes: targetMinutes);
+  int get targetHours => (targetMinutes / 60).round();
 
   Goal copyWith({
     String? id,
@@ -61,6 +64,7 @@ class Goal {
     String? category,
     String? mode,
     int? targetMinutes,
+    int? dailyTargetMinutes,
     GoalTimeframe? timeframe,
     int? targetDate,
     int? createdAt,
@@ -72,6 +76,7 @@ class Goal {
       category: category ?? this.category,
       mode: mode ?? this.mode,
       targetMinutes: targetMinutes ?? this.targetMinutes,
+      dailyTargetMinutes: dailyTargetMinutes ?? this.dailyTargetMinutes,
       timeframe: timeframe ?? this.timeframe,
       targetDate: targetDate ?? this.targetDate,
       createdAt: createdAt ?? this.createdAt,
@@ -85,6 +90,7 @@ class Goal {
     'category': category,
     'mode': mode,
     'targetMinutes': targetMinutes,
+    'dailyTargetMinutes': dailyTargetMinutes,
     'timeframe': timeframe.name,
     'targetDate': targetDate,
     'createdAt': createdAt,
@@ -98,6 +104,7 @@ class Goal {
       category: json['category'] as String?,
       mode: json['mode'] as String?,
       targetMinutes: (json['targetMinutes'] as num?)?.toInt() ?? 600,
+      dailyTargetMinutes: (json['dailyTargetMinutes'] as num?)?.toInt(),
       timeframe: GoalTimeframe.fromString(json['timeframe'] as String?),
       targetDate: (json['targetDate'] as num?)?.toInt(),
       createdAt:
@@ -128,17 +135,20 @@ class GoalProgress {
   final int sessionCount;
   final int singleCount;
 
+  int get currentMinutes => trackedMinutes;
   int get targetMinutes => goal.targetMinutes;
   double get ratio => targetMinutes <= 0
       ? 1.0
       : (trackedMinutes / targetMinutes).clamp(0.0, 1.0);
   int get remainingMinutes =>
       (targetMinutes - trackedMinutes).clamp(0, targetMinutes);
+  int get surplusMinutes => math.max(0, trackedMinutes - targetMinutes);
   bool get isCompleted => trackedMinutes >= targetMinutes;
 
   String get trackedFormatted => _formatMinutes(trackedMinutes);
   String get targetFormatted => _formatMinutes(targetMinutes);
   String get remainingFormatted => _formatMinutes(remainingMinutes);
+  String get surplusFormatted => _formatMinutes(surplusMinutes);
 
   /// Days remaining in the evaluation timeframe (inclusive of today).
   int get daysRemainingInTimeframe {
@@ -184,6 +194,9 @@ class GoalProgress {
   /// Narrative pacing description.
   String get pacingDescription {
     if (isCompleted) {
+      if (surplusMinutes > 0) {
+        return 'Target achieved! (+$surplusFormatted extra logged 🎉)';
+      }
       return 'Target achieved! 🎉';
     }
     final days = daysRemainingInTimeframe;

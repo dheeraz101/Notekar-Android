@@ -392,25 +392,31 @@ class TimelineSessionCard extends StatelessWidget {
                           if ((session.category != null &&
                                   session.category!.trim().isNotEmpty) ||
                               matchingGoal != null) ...[
-                            if (session.category != null &&
-                                session.category!.trim().isNotEmpty)
-                              _SessionCategoryBadge(
-                                p: p,
-                                category: session.category!,
-                                compact: compact,
-                              ),
-                            if (matchingGoal != null) ...[
-                              if (session.category != null &&
-                                  session.category!.trim().isNotEmpty)
-                                SizedBox(width: compact ? 4 : 5),
-                              _SessionGoalBadge(
-                                p: p,
-                                goalTitle: matchingGoal.title,
-                                durationStr: durationStr,
-                                compact: compact,
-                              ),
-                            ],
-                            SizedBox(width: compact ? 5 : 7),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (session.category != null &&
+                                    session.category!.trim().isNotEmpty)
+                                  _SessionCategoryBadge(
+                                    p: p,
+                                    category: session.category!,
+                                    compact: compact,
+                                  ),
+                                if (matchingGoal != null) ...[
+                                  if (session.category != null &&
+                                      session.category!.trim().isNotEmpty)
+                                    SizedBox(height: compact ? 2.5 : 4),
+                                  _SessionGoalBadge(
+                                    p: p,
+                                    goalTitle: matchingGoal.title,
+                                    durationStr: durationStr,
+                                    compact: compact,
+                                  ),
+                                ],
+                              ],
+                            ),
+                            SizedBox(width: compact ? 6 : 8),
                           ] else ...[
                             Padding(
                               padding: const EdgeInsets.only(top: 2),

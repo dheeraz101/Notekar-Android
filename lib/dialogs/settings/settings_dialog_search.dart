@@ -188,10 +188,63 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           'intentionality',
           'timeframe',
           'quota',
+          'pacing',
+          'daily target',
+          'flag',
         ],
         kind: 'nav',
         boolValue: null,
         onBoolChanged: null,
+      ),
+      item(
+        title: 'Show Images Always',
+        subtitle:
+            'Keep photos and receipt attachments expanded in history timeline',
+        category: 'History Controls',
+        icon: CupertinoIcons.photo,
+        keywords: [
+          'show images always',
+          'images',
+          'photos',
+          'receipts',
+          'collapse',
+          'expand',
+          'media',
+          'attachments',
+          'history images',
+          'twitter',
+        ],
+        kind: 'switch',
+        boolValue: _showImagesAlways,
+        onBoolChanged: (val) async {
+          update(() => _showImagesAlways = val);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('history_show_images_always', val);
+        },
+        status: null,
+      ),
+      item(
+        title: 'Multimodal Media & Attachments',
+        subtitle:
+            'Capture photos, receipts, and spoken voice recordings with offline privacy',
+        category: 'Workflow & Capture',
+        icon: CupertinoIcons.camera,
+        keywords: [
+          'multimodal',
+          'photo',
+          'camera',
+          'gallery',
+          'voice',
+          'audio',
+          'voice notes',
+          'mic',
+          'recording',
+          'attachments',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+        status: 'Active',
       ),
       item(
         title: 'Mode Glyph Icons',

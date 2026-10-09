@@ -5,6 +5,7 @@ import 'package:notekar/dialogs/day_detail_sheet.dart';
 import 'package:notekar/dialogs/note_preview_sheet.dart';
 import 'package:notekar/dialogs/search_dialogs.dart';
 import 'package:notekar/dialogs/timeline_filter_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -38,6 +39,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.onOpenGodModeSettings,
     this.isMomentImageCollapsed,
     this.onToggleMomentImageCollapse,
+    this.goals,
   });
 
   final Palette p;
@@ -59,6 +61,7 @@ class HistoryCalendarView extends StatefulWidget {
   final VoidCallback? onOpenGodModeSettings;
   final bool Function(int id)? isMomentImageCollapsed;
   final ValueChanged<int>? onToggleMomentImageCollapse;
+  final List<Goal>? goals;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -112,6 +115,29 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
         _showImagesAlways = prefs.getBool('history_show_images_always') ?? true;
       });
     }
+  }
+
+  Goal? _findMatchingGoal(TimelineItem item) {
+    final gList = widget.goals;
+    if (gList == null || gList.isEmpty) return null;
+    final cat = item.category;
+    if (cat != null && cat.trim().isNotEmpty) {
+      return gList
+          .where(
+            (g) =>
+                !g.isArchived &&
+                g.category != null &&
+                g.category!.toLowerCase() == cat.toLowerCase(),
+          )
+          .firstOrNull;
+    }
+    return gList
+        .where(
+          (g) =>
+              !g.isArchived &&
+              (g.category == null || g.category!.trim().isEmpty),
+        )
+        .firstOrNull;
   }
 
   static const int _daysRange = 60; // 60 days lookback
@@ -843,6 +869,50 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                             ],
                           ),
                         ),
+                        () {
+                          final matchingGoal = _findMatchingGoal(it);
+                          if (matchingGoal == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: widget.p.accent.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: widget.p.accent.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                  width: 0.6,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.flag_rounded,
+                                    size: 11,
+                                    color: widget.p.accent,
+                                  ),
+                                  const SizedBox(width: 3.5),
+                                  Text(
+                                    matchingGoal.title,
+                                    style: TextStyle(
+                                      color: widget.p.accent,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }(),
                         if (it.isOngoing &&
                             !_endingSessionIds.contains(it.inMoment.id)) ...[
                           const SizedBox(width: 8),
@@ -1204,7 +1274,49 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                               ],
                             ),
                     ),
-                    if (!isGodMode)
+                    if (!isGodMode) ...[
+                      () {
+                        final matchingGoal = _findMatchingGoal(it);
+                        if (matchingGoal == null) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.5,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.p.accent.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: widget.p.accent.withValues(alpha: 0.35),
+                                width: 0.6,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.flag_rounded,
+                                  size: 10,
+                                  color: widget.p.accent,
+                                ),
+                                const SizedBox(width: 3.5),
+                                Text(
+                                  matchingGoal.title,
+                                  style: TextStyle(
+                                    color: widget.p.accent,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }(),
                       Text(
                         it.type.toUpperCase(),
                         style: TextStyle(
@@ -1213,6 +1325,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),

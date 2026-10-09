@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
@@ -588,25 +588,58 @@ class GoalsContentViewState extends State<GoalsContentView>
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: (progress.isCompleted ? widget.p.green : accentCol)
-                      .withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${(progress.ratio * 100).toInt()}%',
-                  style: TextStyle(
-                    color: progress.isCompleted ? widget.p.green : accentCol,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (progress.surplusMinutes > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: widget.p.green.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: widget.p.green.withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        '+${progress.surplusFormatted} extra',
+                        style: TextStyle(
+                          color: widget.p.green,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                  ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (progress.isCompleted ? widget.p.green : accentCol)
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${(progress.ratio * 100).toInt()}%',
+                      style: TextStyle(
+                        color: progress.isCompleted
+                            ? widget.p.green
+                            : accentCol,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -639,60 +672,121 @@ class GoalsContentViewState extends State<GoalsContentView>
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
-          // Tracked vs Target metrics row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    size: 13,
-                    color: widget.p.text3,
+          // Apple HIG 3-Metric Stats Row
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: widget.p.surface3.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TRACKED'.localized(context),
+                        style: TextStyle(
+                          color: widget.p.text3,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        progress.trackedFormatted,
+                        style: TextStyle(
+                          color: widget.p.text,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    '${progress.trackedFormatted} of ${progress.targetFormatted}',
-                    style: TextStyle(
-                      color: widget.p.text2,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: widget.p.border.withValues(alpha: 0.5),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TARGET'.localized(context),
+                          style: TextStyle(
+                            color: widget.p.text3,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          progress.targetFormatted,
+                          style: TextStyle(
+                            color: widget.p.text,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 2.5,
                 ),
-                decoration: BoxDecoration(
-                  color: progress.isCompleted
-                      ? widget.p.green.withValues(alpha: 0.14)
-                      : widget.p.orange.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: widget.p.border.withValues(alpha: 0.5),
                 ),
-                child: Text(
-                  progress.isCompleted
-                      ? 'Goal Met 🎉'.localized(context)
-                      : '${progress.remainingFormatted} to go'.localized(
-                          context,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          progress.isCompleted
+                              ? 'STATUS'.localized(context)
+                              : 'REMAINING'.localized(context),
+                          style: TextStyle(
+                            color: widget.p.text3,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.4,
+                          ),
                         ),
-                  style: TextStyle(
-                    color: progress.isCompleted
-                        ? widget.p.green
-                        : widget.p.orange,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                        const SizedBox(height: 2),
+                        Text(
+                          progress.isCompleted
+                              ? (progress.surplusMinutes > 0
+                                    ? '+${progress.surplusFormatted}'
+                                    : 'Done 🎉')
+                              : progress.remainingFormatted,
+                          style: TextStyle(
+                            color: progress.isCompleted
+                                ? widget.p.green
+                                : widget.p.orange,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 10),
 
@@ -738,13 +832,33 @@ class GoalsContentViewState extends State<GoalsContentView>
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      '${progress.daysRemainingInTimeframe}d left',
-                      style: TextStyle(
-                        color: widget.p.text2,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (int i = 0; i < 4; i++)
+                          Container(
+                            width: 2.5,
+                            height: 6.0 + (i % 3) * 2.5,
+                            margin: const EdgeInsets.only(right: 2),
+                            decoration: BoxDecoration(
+                              color:
+                                  (progress.isCompleted
+                                          ? widget.p.green
+                                          : widget.p.orange)
+                                      .withValues(alpha: 0.4 + i * 0.15),
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${progress.daysRemainingInTimeframe}d left',
+                          style: TextStyle(
+                            color: widget.p.text2,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -795,13 +909,12 @@ class GoalsContentViewState extends State<GoalsContentView>
                             children: [
                               Icon(
                                 Icons.stop_rounded,
-                                size: 13,
+                                size: 14,
                                 color: widget.p.red,
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Stop Session (${goal.category ?? 'Active'})'
-                                    .localized(context),
+                                'Stop'.localized(context),
                                 style: TextStyle(
                                   color: widget.p.red,
                                   fontSize: 13,
@@ -920,7 +1033,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                       accentCol.withValues(alpha: 0.06),
                       widget.p.surface2,
                     ),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: glowColor, width: 1.5),
                     boxShadow: [
                       BoxShadow(
@@ -941,7 +1054,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                   accentCol.withValues(alpha: 0.04),
                   widget.p.surface2,
                 ),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: progress.isCompleted
                       ? widget.p.green.withValues(alpha: 0.5)
@@ -959,6 +1072,58 @@ class GoalsContentViewState extends State<GoalsContentView>
               child: cardBody,
             ),
     );
+  }
+}
+
+/// Twitter/X style circular countdown painter for character limits
+class _TwitterRingPainter extends CustomPainter {
+  const _TwitterRingPainter({
+    required this.progress,
+    required this.ringColor,
+    required this.trackColor,
+    this.strokeWidth = 2.5,
+  });
+
+  final double progress;
+  final Color ringColor;
+  final Color trackColor;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    if (progress > 0) {
+      final ringPaint = Paint()
+        ..color = ringColor
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = strokeWidth;
+
+      final sweepAngle = 2 * math.pi * progress.clamp(0.0, 1.0);
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2,
+        sweepAngle,
+        false,
+        ringPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TwitterRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.ringColor != ringColor ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
 
@@ -987,8 +1152,26 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
   late GoalTimeframe _timeframe;
   int? _targetDate;
   String? _category;
+  int? _dailyTargetMinutes;
 
   List<String> _availableCategories = [];
+
+  int _computeDefaultDailyMinutes(int targetHours, GoalTimeframe timeframe) {
+    if (timeframe == GoalTimeframe.month) {
+      return math.max(10, ((targetHours * 60) / 30).round());
+    } else if (timeframe == GoalTimeframe.year) {
+      return math.max(10, ((targetHours * 60) / 365).round());
+    }
+    return 60;
+  }
+
+  String _formatMinutesVal(int mins) {
+    final h = mins ~/ 60;
+    final m = mins % 60;
+    if (h > 0 && m > 0) return '${h}h ${m}m';
+    if (h > 0) return '${h}h';
+    return '${m}m';
+  }
 
   @override
   void initState() {
@@ -998,6 +1181,11 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
     _timeframe = widget.goal?.timeframe ?? GoalTimeframe.week;
     _targetDate = widget.goal?.targetDate;
     _category = widget.goal?.category;
+    _dailyTargetMinutes =
+        widget.goal?.dailyTargetMinutes ??
+        ((_timeframe == GoalTimeframe.month || _timeframe == GoalTimeframe.year)
+            ? _computeDefaultDailyMinutes(_targetHours, _timeframe)
+            : null);
 
     _loadCategories();
   }
@@ -1008,6 +1196,134 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       setState(() {
         _availableCategories = cats;
       });
+    }
+  }
+
+  Future<void> _showAddCategoryDialog() async {
+    HapticFeedback.lightImpact();
+    final textController = TextEditingController();
+    Color selectedColor = CategoryService.appleHigColors[0];
+
+    final created = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: widget.p.name == 'light'
+              ? Brightness.light
+              : Brightness.dark,
+          primaryColor: widget.p.accent,
+        ),
+        child: StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            return CupertinoAlertDialog(
+              title: Text('New Mode / Category'.localized(context)),
+              content: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CupertinoTextField(
+                      controller: textController,
+                      autofocus: true,
+                      placeholder: 'Category Name (e.g. Study, Gym)',
+                      placeholderStyle: TextStyle(color: widget.p.text3),
+                      textCapitalization: TextCapitalization.words,
+                      style: TextStyle(color: widget.p.text),
+                      decoration: BoxDecoration(
+                        color: widget.p.surface3,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: widget.p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (final col in CategoryService.appleHigColors) ...[
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setDialogState(() => selectedColor = col);
+                              },
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: col,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selectedColor == col
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: selectedColor == col
+                                      ? [
+                                          BoxShadow(
+                                            color: col.withValues(alpha: 0.5),
+                                            blurRadius: 6,
+                                            spreadRadius: 1,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: selectedColor == col
+                                    ? const Icon(
+                                        Icons.check_rounded,
+                                        size: 14,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                CupertinoDialogAction(
+                  child: Text('Cancel'.localized(context)),
+                  onPressed: () => Navigator.pop(ctx, false),
+                ),
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: Text('Add'.localized(context)),
+                  onPressed: () => Navigator.pop(ctx, true),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    if (created == true) {
+      final name = textController.text.trim();
+      if (name.isNotEmpty) {
+        final success = await CategoryService().addCategory(
+          name,
+          color: selectedColor,
+        );
+        if (success && mounted) {
+          HapticFeedback.mediumImpact();
+          setState(() {
+            if (!_availableCategories.contains(name)) {
+              _availableCategories.add(name);
+            }
+            _category = name;
+          });
+        }
+      }
     }
   }
 
@@ -1029,6 +1345,12 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       category: _category,
       mode: 'two-way',
       targetMinutes: math.max(1, _targetHours) * 60,
+      dailyTargetMinutes:
+          (_timeframe == GoalTimeframe.month ||
+              _timeframe == GoalTimeframe.year)
+          ? (_dailyTargetMinutes ??
+                _computeDefaultDailyMinutes(_targetHours, _timeframe))
+          : null,
       timeframe: _timeframe,
       targetDate: _timeframe == GoalTimeframe.custom ? _targetDate : null,
       createdAt:
@@ -1048,7 +1370,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Title Input (Apple HIG Inset Grouped)
+          // 1. Title Input (Apple HIG Inset Grouped with Twitter Live Countdown)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
@@ -1059,14 +1381,85 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Goal Title'.localized(context).toUpperCase(),
-                  style: TextStyle(
-                    color: widget.p.text3,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Goal Title'.localized(context).toUpperCase(),
+                      style: TextStyle(
+                        color: widget.p.text3,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _titleController,
+                      builder: (context, value, _) {
+                        final length = value.text.length;
+                        const maxLength = 9;
+                        final remaining = maxLength - length;
+                        final progress = length / maxLength;
+
+                        Color ringColor;
+                        if (length >= 8) {
+                          ringColor = widget.p.red;
+                        } else if (length >= 6) {
+                          ringColor = widget.p.orange;
+                        } else {
+                          ringColor = widget.p.accent;
+                        }
+
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CustomPaint(
+                              size: const Size(18, 18),
+                              painter: _TwitterRingPainter(
+                                progress: progress,
+                                ringColor: ringColor,
+                                trackColor: widget.p.border.withValues(
+                                  alpha: 0.4,
+                                ),
+                                strokeWidth: 2.2,
+                              ),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: Center(
+                                  child: length >= 6
+                                      ? Text(
+                                          '$remaining',
+                                          style: TextStyle(
+                                            color: ringColor,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w900,
+                                            fontFeatures: const [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              '$length/$maxLength',
+                              style: TextStyle(
+                                color: ringColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 CupertinoTextField(
@@ -1397,6 +1790,250 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
               ],
             ],
           ),
+
+          // Daily Target Allocation (Option visible ONLY for Month or Year goals)
+          if (_timeframe == GoalTimeframe.month ||
+              _timeframe == GoalTimeframe.year) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: widget.p.surface3,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: widget.p.accent.withValues(alpha: 0.35),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.today_rounded,
+                                size: 14,
+                                color: widget.p.accent,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                'DAILY ALLOCATION'.localized(context),
+                                style: TextStyle(
+                                  color: widget.p.accent,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _formatMinutesVal(
+                              _dailyTargetMinutes ??
+                                  _computeDefaultDailyMinutes(
+                                    _targetHours,
+                                    _timeframe,
+                                  ),
+                            ),
+                            style: TextStyle(
+                              color: widget.p.text,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Stepper for daily target (15m increments)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: widget.p.surface2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: widget.p.border.withValues(alpha: 0.7),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            PressableScale(
+                              onTap: () {
+                                final current =
+                                    _dailyTargetMinutes ??
+                                    _computeDefaultDailyMinutes(
+                                      _targetHours,
+                                      _timeframe,
+                                    );
+                                if (current > 15) {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    _dailyTargetMinutes = current - 15;
+                                  });
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                child: Icon(
+                                  Icons.remove_rounded,
+                                  size: 14,
+                                  color: widget.p.text,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 16,
+                              color: widget.p.border.withValues(alpha: 0.6),
+                            ),
+                            PressableScale(
+                              onTap: () {
+                                final current =
+                                    _dailyTargetMinutes ??
+                                    _computeDefaultDailyMinutes(
+                                      _targetHours,
+                                      _timeframe,
+                                    );
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _dailyTargetMinutes = current + 15;
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  size: 14,
+                                  color: widget.p.text,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Paced to hit $_targetHours hrs within ${_timeframe.label.toLowerCase()} (${((_targetHours * 60) / (_dailyTargetMinutes ?? _computeDefaultDailyMinutes(_targetHours, _timeframe))).ceil()} days required).'
+                        .localized(context),
+                    style: TextStyle(
+                      color: widget.p.text3,
+                      fontSize: 11,
+                      height: 1.25,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        () {
+                          final even = _computeDefaultDailyMinutes(
+                            _targetHours,
+                            _timeframe,
+                          );
+                          final isSel = (_dailyTargetMinutes ?? even) == even;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() => _dailyTargetMinutes = even);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSel
+                                      ? widget.p.accent
+                                      : widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Paced: ${_formatMinutesVal(even)}/d',
+                                  style: TextStyle(
+                                    color: isSel
+                                        ? Colors.white
+                                        : widget.p.text2,
+                                    fontSize: 11,
+                                    fontWeight: isSel
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }(),
+                        () {
+                          final fast =
+                              ((_computeDefaultDailyMinutes(
+                                            _targetHours,
+                                            _timeframe,
+                                          ) *
+                                          1.5) /
+                                      15)
+                                  .round() *
+                              15;
+                          final isSel = _dailyTargetMinutes == fast;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() => _dailyTargetMinutes = fast);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSel
+                                      ? widget.p.accent
+                                      : widget.p.surface2,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Sprint: ${_formatMinutesVal(fast)}/d',
+                                  style: TextStyle(
+                                    color: isSel
+                                        ? Colors.white
+                                        : widget.p.text2,
+                                    fontSize: 11,
+                                    fontWeight: isSel
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
 
           // 4. Category Scope (Apple HIG Pills)
@@ -1417,6 +2054,43 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
                 spacing: 6,
                 runSpacing: 6,
                 children: [
+                  // + Add Category Button
+                  PressableScale(
+                    onTap: _showAddCategoryDialog,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: widget.p.surface3,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: widget.p.accent.withValues(alpha: 0.6),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add_rounded,
+                            size: 13,
+                            color: widget.p.accent,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Add'.localized(context),
+                            style: TextStyle(
+                              color: widget.p.accent,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   PressableScale(
                     onTap: () {
                       HapticFeedback.selectionClick();

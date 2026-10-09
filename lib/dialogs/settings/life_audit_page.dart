@@ -56,7 +56,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     );
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: spacing8),
         SettingsPageDescription(
@@ -118,6 +118,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     final formattedWasted = todayRecord?.formattedWasted ?? '0m';
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -399,6 +400,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
       final horizonName = summary.timeframe.label.localized(context);
 
       return Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
           color: p.surface2,
@@ -647,6 +649,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
         : 'Half of your mortal window slipped by without a record or dedicated session.';
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -910,6 +913,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     final displayRecords = _showAllDays ? records : records.take(7).toList();
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -1107,6 +1111,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
 
   Widget _buildStoicColophonCard() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: p.surface2,
@@ -1167,6 +1172,7 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
     final voidYears = remainingYears - consciousYears;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: p.surface2,

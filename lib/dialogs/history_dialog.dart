@@ -5,8 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/app_date_picker_sheet.dart';
 import 'package:notekar/dialogs/app_sheet.dart';
-import 'package:notekar/dialogs/calendar_dialog.dart';
 import 'package:notekar/dialogs/day_detail_sheet.dart';
 import 'package:notekar/dialogs/goals_sheet.dart';
 import 'package:notekar/dialogs/manual_entry_dialog.dart';
@@ -135,6 +135,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
   final List<Moment> _selected = [];
   late List<Moment> _entries;
   late Set<String> _availableDateKeys;
+  Set<String> get availableDateKeys => _availableDateKeys;
   String? _notice;
   VoidCallback? _noticeUndo;
   Timer? _noticeTimer;
@@ -189,9 +190,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
   List<_TimelineRowItem> _timelineRows = [];
   Map<int, String> _singleNumberMap = {};
 
+  Goal? _manualInitialGoal;
+  bool _manualLockToSession = false;
+  late bool _isSessionRunning;
+
   @override
   void initState() {
     super.initState();
+    _isSessionRunning = widget.isSessionRunning;
     _inSheetView = widget.initialView;
     _compactRows = widget.compactRows;
     _entries = List<Moment>.from(widget.entries);
@@ -461,48 +467,29 @@ class _HistoryDialogState extends State<HistoryDialog> {
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Timeline / Calendar Switch
+                  // Targets & Goals Flag Button (Swapped with View Switcher)
                   Semantics(
                     button: true,
-                    label: _viewMode == 'list'
-                        ? 'Switch to Calendar'
-                        : 'Switch to Timeline',
+                    label: 'Targets & Goals'.localized(context),
                     child: Tooltip(
-                      message: _viewMode == 'list'
-                          ? 'Timeline view'
-                          : 'List view',
+                      message: 'Targets & Goals'.localized(context),
                       child: PressableScale(
                         onTap: () {
-                          final nextMode = _viewMode == 'list'
-                              ? 'calendar'
-                              : 'list';
-                          setState(() => _viewMode = nextMode);
-                          unawaited(
-                            SharedPreferences.getInstance().then(
-                              (prefs) => prefs.setString(
-                                'history_view_mode',
-                                nextMode,
-                              ),
-                            ),
-                          );
+                          HapticFeedback.selectionClick();
+                          setState(() => _inSheetView = 'goals');
                         },
                         child: Container(
                           width: 40,
                           height: 40,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: widget.p.surface3,
                             shape: BoxShape.circle,
                           ),
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: Icon(
-                              _viewMode == 'list'
-                                  ? Icons.calendar_today_rounded
-                                  : Icons.format_list_bulleted_rounded,
-                              key: ValueKey(_viewMode),
-                              size: 19,
-                              color: widget.p.text,
-                            ),
+                          child: Icon(
+                            Icons.flag_rounded,
+                            size: 19,
+                            color: widget.p.text,
                           ),
                         ),
                       ),
@@ -602,10 +589,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     return ManualEntryContent(
                       p: widget.p,
                       categories: cats,
-                      initialCategory: 'All',
+                      initialCategory: _manualInitialGoal?.category ?? 'All',
+                      initialGoal: _manualInitialGoal,
+                      moments: _entries,
                       prefilledStartTime: _manualPrefilledStartTime,
                       prefilledEndTime: _manualPrefilledEndTime,
-                      lockToSession: _manualPrefilledEndTime != null,
+                      lockToSession:
+                          _manualLockToSession ||
+                          _manualPrefilledEndTime != null,
                       onSubmit: (res) {
                         if (_manualPrefilledStartTime != null &&
                             _manualPrefilledEndTime != null) {
@@ -619,14 +610,20 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         _manualPrefilledStartTime = null;
                         _manualPrefilledEndTime = null;
                         _activeGapKey = null;
-                        _handleManualEntrySubmit(res);
+                        final fromGoals = _manualInitialGoal != null;
+                        _manualInitialGoal = null;
+                        _manualLockToSession = false;
+                        _handleManualEntrySubmit(res, returnToGoals: fromGoals);
                       },
                       onCancel: () {
                         setState(() {
                           _manualPrefilledStartTime = null;
                           _manualPrefilledEndTime = null;
                           _activeGapKey = null;
-                          _inSheetView = null;
+                          final fromGoals = _manualInitialGoal != null;
+                          _manualInitialGoal = null;
+                          _manualLockToSession = false;
+                          _inSheetView = fromGoals ? 'goals' : null;
                         });
                       },
                     );
@@ -637,12 +634,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   p: widget.p,
                   moments: _entries,
                   activeCategory: widget.activeCategory,
-                  isSessionRunning: widget.isSessionRunning,
-                  onStopSession:
-                      widget.onStopSession ??
-                      () {
-                        Navigator.pop(context, {'action': 'stop_goal_session'});
-                      },
+                  isSessionRunning: _isSessionRunning,
+                  onStopSession: _stopActiveSessionFromGoals,
+                  onManualEntry: (goal) {
+                    setState(() {
+                      _manualInitialGoal = goal;
+                      _manualLockToSession = true;
+                      _manualPrefilledStartTime = null;
+                      _manualPrefilledEndTime = null;
+                      _inSheetView = 'manual';
+                    });
+                  },
                   onAddGoal: () {
                     setState(() {
                       _editingGoal = null;
@@ -728,6 +730,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   p: widget.p,
                   sections: _daySections,
                   allEntries: _entries,
+                  goals: _goals,
                   initialDateKey: _selectedDateKey,
                   onEditNote: _openDirectNoteEditor,
                   onOpenManualEntry: _handleOpenManualEntry,
@@ -1597,7 +1600,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
     ); // History delete is an intentional success action
     setState(() {
       _entries = _entries.where((item) => item.id != entry.id).toList();
-      _availableDateKeys = _entries.map((item) => item.date).toSet();
       _selected.removeWhere((item) => item.id == entry.id);
       _rebuildMemoizedLists();
     });
@@ -1616,30 +1618,19 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final latest = _selectedDateKey == null
         ? DateTime.fromMillisecondsSinceEpoch(_entries.first.timestamp)
         : dateFromKey(_selectedDateKey!);
-    final picked = await showGeneralDialog<DateTime>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      barrierDismissible: true,
-      barrierLabel: 'Close calendar',
-      transitionDuration: const Duration(milliseconds: 160),
-      transitionBuilder: (ctx, anim, _, child) {
-        final curved = CurvedAnimation(
-          parent: anim,
-          curve: Curves.easeOutCubic,
-        );
-        return FadeTransition(
-          opacity: curved,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.95, end: 1.0).animate(curved),
-            child: child,
-          ),
-        );
-      },
-      pageBuilder: (_, _, _) => MomentCalendarDialog(
-        p: widget.p,
-        availableDateKeys: _availableDateKeys,
-        initialDate: latest,
-      ),
+    final now = DateTime.now();
+    final earliest = _entries.isNotEmpty
+        ? DateTime.fromMillisecondsSinceEpoch(_entries.last.timestamp)
+        : now.subtract(const Duration(days: 365));
+
+    final picked = await AppDatePickerSheet.show(
+      context,
+      p: widget.p,
+      title: 'Pick Specific Date'.localized(context),
+      initialDateTime: latest,
+      mode: CupertinoDatePickerMode.date,
+      minimumDate: DateTime(earliest.year, earliest.month, earliest.day),
+      maximumDate: DateTime(now.year, now.month, now.day, 23, 59, 59),
     );
     if (picked == null) return;
     setState(() {
@@ -1814,7 +1805,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
         setState(() {
           _entries = [...savedMoments, ..._entries]
             ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-          _availableDateKeys = _entries.map((item) => item.date).toSet();
           _rebuildMemoizedLists();
         });
 
@@ -1868,8 +1858,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
     });
   }
 
-  Future<void> _handleManualEntrySubmit(ManualEntryResult result) async {
-    setState(() => _inSheetView = null);
+  Future<void> _handleManualEntrySubmit(
+    ManualEntryResult result, {
+    bool returnToGoals = false,
+  }) async {
+    setState(() => _inSheetView = returnToGoals ? 'goals' : null);
 
     final List<Moment> addedMoments = [];
     final maxId = _entries.isEmpty
@@ -1898,6 +1891,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
         note: result.note,
         tags: result.tags,
         category: result.category,
+        imagePath: result.imagePath,
+        voicePath: result.voicePath,
+        voiceDurationMs: result.voiceDurationMs,
       );
       final outMoment = Moment(
         id: math.max(maxId + 2, endMs),
@@ -1920,6 +1916,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
         note: result.note,
         tags: result.tags,
         category: result.category,
+        imagePath: result.imagePath,
+        voicePath: result.voicePath,
+        voiceDurationMs: result.voiceDurationMs,
       );
       addedMoments.add(moment);
     }
@@ -1934,6 +1933,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
     for (final m in addedMoments) {
       await widget.onRestore(m);
     }
+    await _loadGoals();
 
     if (!mounted) return;
     final noticeText = result.isSession
@@ -1957,6 +1957,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         for (final m in addedMoments) {
           await widget.onDelete(m.id);
         }
+        await _loadGoals();
         if (mounted) {
           _showNotice('Moment reverted'.localized(context));
         }
@@ -2006,15 +2007,29 @@ class _HistoryDialogState extends State<HistoryDialog> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(ctx);
-              setState(() => _inSheetView = 'goals');
+              final nextMode = _viewMode == 'list' ? 'calendar' : 'list';
+              setState(() => _viewMode = nextMode);
+              unawaited(
+                SharedPreferences.getInstance().then(
+                  (prefs) => prefs.setString('history_view_mode', nextMode),
+                ),
+              );
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.flag_rounded, size: 20, color: widget.p.text),
+                Icon(
+                  _viewMode == 'list'
+                      ? Icons.calendar_today_rounded
+                      : Icons.format_list_bulleted_rounded,
+                  size: 20,
+                  color: widget.p.text,
+                ),
                 const SizedBox(width: 10),
                 Text(
-                  'Targets & Goals'.localized(context),
+                  _viewMode == 'list'
+                      ? 'Calendar View'.localized(context)
+                      : 'Timeline View'.localized(context),
                   style: TextStyle(
                     color: widget.p.text,
                     fontSize: 16,
@@ -2301,6 +2316,31 @@ class _HistoryDialogState extends State<HistoryDialog> {
       }
     } finally {
       _isEndingLiveSession = false;
+    }
+  }
+
+  Future<void> _stopActiveSessionFromGoals() async {
+    TimelineSessionItem? ongoingSession;
+    for (final sec in _daySections) {
+      for (final item in sec.items) {
+        if (item is TimelineSessionItem && item.isOngoing) {
+          ongoingSession = item;
+          break;
+        }
+      }
+      if (ongoingSession != null) break;
+    }
+
+    if (ongoingSession != null) {
+      await _endLiveSession(ongoingSession);
+    } else if (widget.onStopSession != null) {
+      widget.onStopSession!();
+    }
+    if (mounted) {
+      setState(() {
+        _isSessionRunning = false;
+      });
+      await _loadGoals();
     }
   }
 
