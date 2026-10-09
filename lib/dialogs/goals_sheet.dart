@@ -38,7 +38,7 @@ String _formatDateShort(DateTime dt) {
 /// Allows setting intentional target allocations across week, month, year, or all-time,
 /// tracking invested duration vs remaining deficit ("X hours to go"),
 /// with daily pacing breakdown and 1-tap direct session start.
-class GoalsSheet extends StatelessWidget {
+class GoalsSheet extends StatefulWidget {
   const GoalsSheet({
     super.key,
     required this.p,
@@ -85,36 +85,57 @@ class GoalsSheet extends StatelessWidget {
   }
 
   @override
+  State<GoalsSheet> createState() => _GoalsSheetState();
+}
+
+class _GoalsSheetState extends State<GoalsSheet> {
+  final contentKey = GlobalKey<GoalsContentViewState>();
+  bool _hasGoals = false;
+
+  @override
   Widget build(BuildContext context) {
-    final contentKey = GlobalKey<GoalsContentViewState>();
     return AppSheet(
-      p: p,
+      p: widget.p,
       title: 'Targets & Goals'.localized(context),
-      trailingAction: PressableScale(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          contentKey.currentState?.openCreateOrEditGoalDialog();
-        },
-        child: Container(
-          width: 36,
-          height: 36,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: p.surface3, shape: BoxShape.circle),
-          child: Icon(Icons.add_rounded, size: 18, color: p.accent),
-        ),
-      ),
+      trailingAction: _hasGoals
+          ? PressableScale(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                contentKey.currentState?.openCreateOrEditGoalDialog();
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: widget.p.surface3,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_rounded,
+                  size: 18,
+                  color: widget.p.accent,
+                ),
+              ),
+            )
+          : null,
       child: SizedBox(
         width: double.infinity,
         height: 580,
         child: GoalsContentView(
           key: contentKey,
-          p: p,
-          moments: moments,
-          activeCategory: activeCategory,
-          isSessionRunning: isSessionRunning,
-          onStartSession: onStartSession,
-          onStopSession: onStopSession,
-          onManualEntry: onManualEntry,
+          p: widget.p,
+          moments: widget.moments,
+          activeCategory: widget.activeCategory,
+          isSessionRunning: widget.isSessionRunning,
+          onStartSession: widget.onStartSession,
+          onStopSession: widget.onStopSession,
+          onManualEntry: widget.onManualEntry,
+          onGoalsCountChanged: (count) {
+            if (mounted && _hasGoals != (count > 0)) {
+              setState(() => _hasGoals = count > 0);
+            }
+          },
         ),
       ),
     );
@@ -133,6 +154,7 @@ class GoalsContentView extends StatefulWidget {
     this.onStartSession,
     this.onStopSession,
     this.onManualEntry,
+    this.onGoalsCountChanged,
     this.shrinkWrap = false,
     this.physics,
   });
@@ -146,6 +168,7 @@ class GoalsContentView extends StatefulWidget {
   final ValueChanged<Goal>? onStartSession;
   final VoidCallback? onStopSession;
   final ValueChanged<Goal>? onManualEntry;
+  final ValueChanged<int>? onGoalsCountChanged;
   final bool shrinkWrap;
   final ScrollPhysics? physics;
 
@@ -196,6 +219,7 @@ class GoalsContentViewState extends State<GoalsContentView>
         _goals = list;
         _isLoading = false;
       });
+      widget.onGoalsCountChanged?.call(list.length);
     }
   }
 

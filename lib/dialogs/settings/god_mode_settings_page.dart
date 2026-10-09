@@ -1,11 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:notekar/dialogs/pioneer_badge_dialog.dart';
 import 'package:notekar/models/palette.dart';
-import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class GodModeSettingsPage extends StatelessWidget {
@@ -17,6 +14,7 @@ class GodModeSettingsPage extends StatelessWidget {
     required this.totalMoments,
     required this.streakDays,
     required this.onRelockGodMode,
+    this.onOpenAppIcons,
   });
 
   final Palette p;
@@ -25,6 +23,7 @@ class GodModeSettingsPage extends StatelessWidget {
   final int totalMoments;
   final int streakDays;
   final VoidCallback onRelockGodMode;
+  final VoidCallback? onOpenAppIcons;
 
   Future<void> _confirmRevocation(BuildContext context) async {
     HapticFeedback.mediumImpact();
@@ -40,7 +39,7 @@ class GodModeSettingsPage extends StatelessWidget {
           content: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'This will deactivate secret themes, lock the VIP badge, and remove the God Mode card from history.'
+              'This will deactivate secret themes, lock the God Mode icon, and remove the God Mode card from history.'
                   .localized(ctx),
             ),
           ),
@@ -119,72 +118,116 @@ class GodModeSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing12),
 
-        // Interactive Lab Group
+        // Exclusive God Mode App Icon Group
         SettingsGroup(
           p: p,
-          title: 'Credentials'.localized(context).toUpperCase(),
+          title: 'Exclusive God Mode App Icon'.localized(context).toUpperCase(),
           children: [
-            SettingsRow(
-              p: p,
-              icon: CupertinoIcons.person_badge_plus,
-              title: 'VIP Pioneer Badge'.localized(context),
-              status: 'View'.localized(context),
-              color: const Color(0xFFFFD700),
-              onTap: () => PioneerBadgeDialog.show(
-                context,
-                p: p,
-                totalMoments: totalMoments,
-                streakDays: streakDays,
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C1A24),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFFFFD700).withValues(alpha: 0.6),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFFFFD700,
+                          ).withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'D',
+                      style: TextStyle(
+                        color: Color(0xFFFFD700),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'God Mode Icon'.localized(context),
+                              style: TextStyle(
+                                color: p.text,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFFFFD700,
+                                ).withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'UNLOCKED',
+                                style: TextStyle(
+                                  color: Color(0xFFFFD700),
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Handcrafted obsidian & gold icon unlocked in App Icons.'
+                              .localized(context),
+                          style: TextStyle(color: p.text2, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Cryptographic SHA-256 sovereign integrity credentials and telemetry.'
-                  .localized(context),
-        ),
-
-        const SizedBox(height: spacing12),
-
-        // Fault Isolation & Circuit Breakers Group
-        SettingsGroup(
-          p: p,
-          title: 'System Reliability & Fault Isolation'
-              .localized(context)
-              .toUpperCase(),
-          children: [
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.bolt_slash_fill,
-              title: 'Reset All Circuit Breakers'.localized(context),
-              subtitle: 'Clear tripped breakers and restore bypassed services'
-                  .localized(context),
-              status: 'Reset'.localized(context),
-              color: p.orange,
-              onTap: () async {
-                HapticFeedback.mediumImpact();
-                await CircuitBreakerService.instance.resetAll();
-                if (context.mounted) {
-                  showIosPillToast(
-                    context: context,
-                    p: p,
-                    message: 'All Circuit Breakers have been reset'.localized(
-                      context,
-                    ),
-                    icon: CupertinoIcons.checkmark_circle,
-                  );
-                }
+              icon: CupertinoIcons.sparkles,
+              title: 'Customize in App Icons'.localized(context),
+              subtitle: 'Select and activate this exclusive icon'.localized(
+                context,
+              ),
+              status: 'Open'.localized(context),
+              color: const Color(0xFFFFD700),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onOpenAppIcons?.call();
               },
             ),
           ],
         ),
         SettingsPageDescription(
           p: p,
-          text:
-              'Instantly restore all background circuits tripped by the failure isolation subsystem.'
-                  .localized(context),
+          text: 'This exclusive icon is now unlocked in your App Icons gallery.'
+              .localized(context),
         ),
 
         const SizedBox(height: spacing12),

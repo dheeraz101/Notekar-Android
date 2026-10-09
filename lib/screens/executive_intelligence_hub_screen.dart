@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:notekar/dialogs/personalization_setup_dialog.dart';
+import 'package:notekar/dialogs/app_sheet.dart';
+import 'package:notekar/dialogs/settings/personal_profile_settings_page.dart';
 import 'package:notekar/dialogs/sunday_dispatch_sheet.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
@@ -170,12 +171,23 @@ class _ExecutiveIntelligenceHubScreenState
                             entries: _moments,
                             timeframe: _selectedTimeframe,
                             onConfigure: () async {
-                              await PersonalizationSetupDialog.show(
-                                context,
-                                p: p,
-                                onSaved: () => setState(() {}),
+                              await showModalBottomSheet<void>(
+                                context: context,
+                                backgroundColor: Colors.transparent,
+                                isScrollControlled: true,
+                                useSafeArea: true,
+                                builder: (ctx) => AppSheet(
+                                  p: p,
+                                  title: 'Personal Profile'.localized(context),
+                                  child: PersonalProfileSettingsPage(
+                                    p: p,
+                                    onSaved: () {
+                                      if (mounted) setState(() {});
+                                    },
+                                  ),
+                                ),
                               );
-                              setState(() {});
+                              if (mounted) setState(() {});
                             },
                           ),
                         ],

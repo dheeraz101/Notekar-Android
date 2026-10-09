@@ -613,28 +613,22 @@ class _PersonalProfileSettingsPageState
                     maxVal,
                   );
 
-                  return SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: p.accent,
-                      inactiveTrackColor: p.surface3,
-                      thumbColor: p.accent,
-                      overlayColor: p.accent.withValues(alpha: 0.15),
-                      trackHeight: 5,
-                    ),
-                    child: Slider(
-                      value: sliderVal,
-                      min: minVal,
-                      max: maxVal,
-                      divisions: divisions,
-                      onChanged: (val) {
-                        setState(() {
-                          _mementoMoriYears = val.round().clamp(
-                            1,
-                            UserProfileService.maxMementoMoriYears,
-                          );
-                        });
-                      },
-                    ),
+                  return CupertinoSlider(
+                    value: sliderVal,
+                    min: minVal,
+                    max: maxVal,
+                    divisions: divisions,
+                    activeColor: p.accent,
+                    thumbColor: p.text,
+                    onChanged: (val) {
+                      NotekarHaptics.selection('soft');
+                      setState(() {
+                        _mementoMoriYears = val.round().clamp(
+                          1,
+                          UserProfileService.maxMementoMoriYears,
+                        );
+                      });
+                    },
                   );
                 },
               ),

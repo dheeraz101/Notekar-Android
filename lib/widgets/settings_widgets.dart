@@ -590,15 +590,15 @@ class _SettingsSwitchRowState extends State<SettingsSwitchRow>
                         duration: const Duration(milliseconds: 200),
                         opacity: !value ? 1.0 : 0.0,
                         child: Align(
-                          alignment: const Alignment(0.58, 0),
+                          alignment: const Alignment(0.72, 0),
                           child: Container(
-                            width: 8.5,
-                            height: 8.5,
+                            width: 8.0,
+                            height: 8.0,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: p.text3.withValues(alpha: 0.50),
-                                width: 1.6,
+                                width: 1.5,
                               ),
                             ),
                           ),

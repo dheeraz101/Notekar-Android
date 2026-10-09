@@ -324,7 +324,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isBeta) ...[
+                      if (isBeta && !isSelected) ...[
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -348,7 +348,17 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                             ),
                           ),
                         ),
-                        if (isSelected) const SizedBox(width: 8),
+                      ],
+                      if (isBeta && isSelected) ...[
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFCC00),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                       ],
                       if (isSelected)
                         Icon(
@@ -358,8 +368,36 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                         ),
                     ],
                   ),
-                  onTap: () {
+                  onTap: () async {
                     if (widget.currentLocale == lang.code) return;
+                    if (isBeta) {
+                      HapticFeedback.lightImpact();
+                      final confirmed = await showCupertinoDialog<bool>(
+                        context: context,
+                        builder: (ctx) => CupertinoAlertDialog(
+                          title: Text('Beta Language Notice'.localized(ctx)),
+                          content: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'The language "${lang.native}" is currently in beta and you may see inconsistencies throughout the app.'
+                                  .localized(ctx),
+                            ),
+                          ),
+                          actions: [
+                            CupertinoDialogAction(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: Text('Cancel'.localized(ctx)),
+                            ),
+                            CupertinoDialogAction(
+                              isDefaultAction: true,
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: Text('OK'.localized(ctx)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed != true) return;
+                    }
                     HapticFeedback.selectionClick();
                     widget.onLocaleChanged?.call(lang.code);
                   },

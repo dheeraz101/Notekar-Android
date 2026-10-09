@@ -4073,6 +4073,8 @@ $cleanStack
                                   );
                                 }
                               },
+                              onOpenAppIcons: () =>
+                                  _openCategory('App Icon', parent: 'God Mode'),
                             ),
                           ),
                       ],

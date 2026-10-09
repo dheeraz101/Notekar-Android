@@ -81,6 +81,14 @@ const List<AppIconData> kAppIconOptions = [
   ),
 ];
 
+const kGodModeIconOption = AppIconData(
+  key: 'godmode',
+  title: 'God Mode',
+  subtitle: 'Golden Sovereign',
+  asset: 'app_icons/gold.png',
+  themeColor: Color(0xFFFFD700),
+);
+
 class AppIconsSettingsPage extends StatelessWidget {
   const AppIconsSettingsPage({
     super.key,
@@ -97,12 +105,19 @@ class AppIconsSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentIcon = kAppIconOptions.firstWhere(
+    final availableIcons = [
+      ...kAppIconOptions,
+      if (godModeUnlocked) kGodModeIconOption,
+    ];
+
+    final currentIcon = availableIcons.firstWhere(
       (opt) => opt.key == appIconStyle,
-      orElse: () => kAppIconOptions.first,
+      orElse: () => availableIcons.first,
     );
 
-    final isVipGold = godModeUnlocked && currentIcon.key == 'gold';
+    final isVipGold =
+        godModeUnlocked &&
+        (currentIcon.key == 'gold' || currentIcon.key == 'godmode');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -209,115 +224,89 @@ class AppIconsSettingsPage extends StatelessWidget {
 
         const SizedBox(height: spacing16),
 
-        // 2. Adaptive Apple HIG Icon Choices Grid
+        // 2. Adaptive Apple HIG Icon Choices Grid (Icons only, transparent NK on selected)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: spacing16),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: kAppIconOptions.length,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 280,
-              mainAxisExtent: 84,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
+            itemCount: availableIcons.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              childAspectRatio: 1.0,
             ),
             itemBuilder: (context, index) {
-              final item = kAppIconOptions[index];
+              final item = availableIcons[index];
               final isSelected = appIconStyle == item.key;
 
-              return PressableScale(
-                onTap: () async {
-                  if (item.key == appIconStyle) return;
-                  NotekarHaptics.selection('standard');
-                  await onAppIconStyleChanged(item.key);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? p.accent.withValues(alpha: 0.12)
-                        : p.surface2,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? p.accent : p.border,
-                      width: isSelected ? 1.75 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+              return Tooltip(
+                key: ValueKey('app_icon_${item.key}'),
+                message: item.title.localized(context),
+                child: Semantics(
+                  label: item.title.localized(context),
+                  button: true,
+                  selected: isSelected,
+                  child: PressableScale(
+                    onTap: () async {
+                      if (item.key == appIconStyle) return;
+                      NotekarHaptics.selection('standard');
+                      await onAppIconStyleChanged(item.key);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.transparent : p.surface2,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: isSelected
+                              ? p.accent.withValues(alpha: 0.6)
+                              : p.border,
+                          width: isSelected ? 1.5 : 1,
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            item.asset,
-                            fit: BoxFit.cover,
-                            cacheWidth: 96,
-                            cacheHeight: 96,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color: p.surface3,
-                                  child: Icon(
-                                    CupertinoIcons.photo,
-                                    color: p.text3,
-                                    size: 18,
-                                  ),
+                        boxShadow: isSelected
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
                                 ),
-                          ),
-                        ),
+                              ],
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.title.localized(context),
+                      child: isSelected
+                          ? Center(
+                              child: Text(
+                                'NK',
                                 style: TextStyle(
-                                  color: p.text,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                                  color: p.accent.withValues(alpha: 0.65),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                item.subtitle.localized(context),
-                                style: TextStyle(color: p.text3, fontSize: 11),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(17),
+                              child: Image.asset(
+                                item.asset,
+                                fit: BoxFit.cover,
+                                cacheWidth: 128,
+                                cacheHeight: 128,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: p.surface3,
+                                      child: Icon(
+                                        CupertinoIcons.photo,
+                                        color: p.text3,
+                                        size: 20,
+                                      ),
+                                    ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        isSelected
-                            ? CupertinoIcons.checkmark_circle_fill
-                            : CupertinoIcons.circle,
-                        size: 18,
-                        color: isSelected ? p.accent : p.text3,
-                      ),
-                    ],
+                            ),
+                    ),
                   ),
                 ),
               );

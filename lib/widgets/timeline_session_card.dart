@@ -126,7 +126,10 @@ class TimelineSessionCard extends StatelessWidget {
                     : isOngoing
                     ? p.green.withValues(alpha: 0.4)
                     : (rainbowCards
-                          ? meta.color.withValues(alpha: 0.35)
+                          ? ((cat.toLowerCase() == 'rest' ||
+                                    cat.toLowerCase() == 'recovery')
+                                ? p.border.withValues(alpha: 0.6)
+                                : meta.color.withValues(alpha: 0.35))
                           : p.border.withValues(alpha: 0.6)),
                 width: isOngoing || selected ? 1.5 : 1.0,
               ),

@@ -44,8 +44,10 @@ class TimelineSingleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isGodMode =
+        moment.note.trim() == 'Access granted' ||
         moment.note.contains('God Mode Unlocked') ||
-        moment.note.contains('#godmode');
+        moment.note.contains('#godmode') ||
+        moment.note.toLowerCase().contains('sovereign access granted');
     final hasNote = moment.note.trim().isNotEmpty;
     final color = momentColor(p, moment.type);
     final cat = moment.category ?? 'Moment';
@@ -75,39 +77,54 @@ class TimelineSingleTile extends StatelessWidget {
                 ),
                 // Timeline Node (Solid opaque background, completely isolating from line)
                 Container(
-                  width: moment.type == 'single' && singleNumber != null
+                  width: isGodMode
                       ? (compact ? 18 : 22)
-                      : (compact ? 9 : 12),
-                  height: moment.type == 'single' && singleNumber != null
+                      : (moment.type == 'single' && singleNumber != null
+                            ? (compact ? 18 : 22)
+                            : (compact ? 9 : 12)),
+                  height: isGodMode
                       ? (compact ? 18 : 22)
-                      : (compact ? 9 : 12),
+                      : (moment.type == 'single' && singleNumber != null
+                            ? (compact ? 18 : 22)
+                            : (compact ? 9 : 12)),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isGodMode ? const Color(0xFFFF007A) : p.surface2,
+                    color: isGodMode ? const Color(0xFFFFD700) : p.surface2,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isGodMode ? Colors.white : color,
+                      color: isGodMode ? const Color(0xFFFFC107) : color,
                       width: compact ? 1.2 : 1.5,
                     ),
                   ),
-                  child: moment.type == 'single' && singleNumber != null
+                  child: isGodMode
                       ? Text(
-                          singleNumber!.localizedDigits(context),
+                          'D',
                           style: TextStyle(
-                            color: color,
-                            fontSize: compact ? 8.5 : 9.5,
+                            color: Colors.black,
+                            fontSize: compact ? 9.5 : 10.5,
                             fontWeight: FontWeight.w900,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         )
-                      : Container(
-                          width: compact ? 3.5 : 5,
-                          height: compact ? 3.5 : 5,
-                          decoration: BoxDecoration(
-                            color: isGodMode ? Colors.white : color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                      : (moment.type == 'single' && singleNumber != null
+                            ? Text(
+                                singleNumber!.localizedDigits(context),
+                                style: TextStyle(
+                                  color: color,
+                                  fontSize: compact ? 8.5 : 9.5,
+                                  fontWeight: FontWeight.w900,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              )
+                            : Container(
+                                width: compact ? 3.5 : 5,
+                                height: compact ? 3.5 : 5,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
+                              )),
                 ),
                 // Bottom rail segment (starts below the node)
                 Expanded(
@@ -168,169 +185,214 @@ class TimelineSingleTile extends StatelessWidget {
                                   : p.border.withValues(alpha: 0.55)),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Text(
-                          timeOnly(moment.timestamp),
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: compact ? 11.5 : 12.5,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                        SizedBox(width: compact ? 6 : 8),
-                        Text(
-                          '•',
-                          style: TextStyle(
-                            color: p.text3,
-                            fontSize: compact ? 10 : 12,
-                          ),
-                        ),
-                        SizedBox(width: compact ? 6 : 8),
-                        if (moment.category != null &&
-                            moment.category!.trim().isNotEmpty) ...[
-                          _SingleCategoryBadge(
-                            p: p,
-                            category: moment.category!,
-                            compact: compact,
-                          ),
-                          SizedBox(width: compact ? 5 : 7),
-                        ],
-                        Expanded(
-                          child: hasNote
-                              ? GestureDetector(
-                                  onTap: () {
-                                    NotePreviewSheet.show(
-                                      context,
-                                      p: p,
-                                      note: moment.note,
-                                      title: 'Moment Note',
-                                      category: moment.category,
-                                      onEdit: onEditNote,
-                                    );
-                                  },
-                                  onLongPress: onEditNote,
-                                  behavior: HitTestBehavior.opaque,
-                                  child: Builder(
-                                    builder: (ctx) {
-                                      final tags =
-                                          NoteTagExtractor.extractHashtags(
-                                            moment.note,
-                                          );
-                                      final clean =
-                                          NoteTagExtractor.cleanBodyText(
-                                            moment.note,
-                                          );
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          if (clean.isNotEmpty)
-                                            IosEmojiText(
-                                              clean,
-                                              maxLines: compact ? 1 : 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: p.text2,
-                                                fontSize: compact ? 11 : 12,
-                                              ),
-                                            ),
-                                          if (tags.isNotEmpty) ...[
-                                            if (clean.isNotEmpty)
-                                              const SizedBox(height: 3),
-                                            Wrap(
-                                              spacing: 4,
-                                              runSpacing: 4,
-                                              children: tags.map((t) {
-                                                final actTag = TagService
-                                                    .instance
-                                                    .findActivityTag(t);
-                                                return Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 5.5,
-                                                        vertical: 1.5,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: p.surface3,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          6,
-                                                        ),
-                                                    border: Border.all(
-                                                      color: p.border
-                                                          .withValues(
-                                                            alpha: 0.5,
-                                                          ),
-                                                      width: 0.7,
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Icon(
-                                                        actTag?.icon ??
-                                                            CupertinoIcons
-                                                                .tag_fill,
-                                                        size: 9.5,
-                                                        color: p.accent,
-                                                      ),
-                                                      const SizedBox(width: 3),
-                                                      Text(
-                                                        actTag?.label ??
-                                                            TagService.stripHash(
-                                                              t,
-                                                            ),
-                                                        style: TextStyle(
-                                                          color: p.text2,
-                                                          fontSize: 9.5,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ],
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                )
-                              : GestureDetector(
-                                  onTap: onEditNote,
-                                  child: Text(
-                                    'Tap to add quick note...'.localized(
-                                      context,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: p.text3.withValues(alpha: 0.8),
-                                      fontSize: compact ? 10.5 : 11.5,
-                                      fontStyle: FontStyle.italic,
-                                    ),
+                    child: isGodMode
+                        ? Row(
+                            children: [
+                              Text(
+                                datePretty(moment.timestamp),
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: compact ? 11.5 : 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: compact ? 6 : 8),
+                              Text(
+                                '•',
+                                style: TextStyle(
+                                  color: p.text3,
+                                  fontSize: compact ? 10 : 12,
+                                ),
+                              ),
+                              SizedBox(width: compact ? 6 : 8),
+                              Expanded(
+                                child: Text(
+                                  'Access granted',
+                                  style: TextStyle(
+                                    color: p.text,
+                                    fontSize: compact ? 11.5 : 12.5,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                        ),
-                        if (hasNote) ...[
-                          const SizedBox(width: 4),
-                          PressableScale(
-                            onTap: onEditNote,
-                            child: Icon(
-                              Icons.edit_rounded,
-                              size: compact ? 12 : 14,
-                              color: p.text3,
-                            ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Text(
+                                timeOnly(moment.timestamp),
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: compact ? 11.5 : 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: compact ? 6 : 8),
+                              Text(
+                                '•',
+                                style: TextStyle(
+                                  color: p.text3,
+                                  fontSize: compact ? 10 : 12,
+                                ),
+                              ),
+                              SizedBox(width: compact ? 6 : 8),
+                              if (moment.category != null &&
+                                  moment.category!.trim().isNotEmpty) ...[
+                                _SingleCategoryBadge(
+                                  p: p,
+                                  category: moment.category!,
+                                  compact: compact,
+                                ),
+                                SizedBox(width: compact ? 5 : 7),
+                              ],
+                              Expanded(
+                                child: hasNote
+                                    ? GestureDetector(
+                                        onTap: () {
+                                          NotePreviewSheet.show(
+                                            context,
+                                            p: p,
+                                            note: moment.note,
+                                            title: 'Moment Note',
+                                            category: moment.category,
+                                            onEdit: onEditNote,
+                                          );
+                                        },
+                                        onLongPress: onEditNote,
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Builder(
+                                          builder: (ctx) {
+                                            final tags =
+                                                NoteTagExtractor.extractHashtags(
+                                                  moment.note,
+                                                );
+                                            final clean =
+                                                NoteTagExtractor.cleanBodyText(
+                                                  moment.note,
+                                                );
+                                            return Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                if (clean.isNotEmpty)
+                                                  IosEmojiText(
+                                                    clean,
+                                                    maxLines: compact ? 1 : 3,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: p.text2,
+                                                      fontSize: compact
+                                                          ? 11
+                                                          : 12,
+                                                    ),
+                                                  ),
+                                                if (tags.isNotEmpty) ...[
+                                                  if (clean.isNotEmpty)
+                                                    const SizedBox(height: 3),
+                                                  Wrap(
+                                                    spacing: 4,
+                                                    runSpacing: 4,
+                                                    children: tags.map((t) {
+                                                      final actTag = TagService
+                                                          .instance
+                                                          .findActivityTag(t);
+                                                      return Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 5.5,
+                                                              vertical: 1.5,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: p.surface3,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
+                                                          border: Border.all(
+                                                            color: p.border
+                                                                .withValues(
+                                                                  alpha: 0.5,
+                                                                ),
+                                                            width: 0.7,
+                                                          ),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Icon(
+                                                              actTag?.icon ??
+                                                                  CupertinoIcons
+                                                                      .tag_fill,
+                                                              size: 9.5,
+                                                              color: p.accent,
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 3,
+                                                            ),
+                                                            Text(
+                                                              actTag?.label ??
+                                                                  TagService.stripHash(
+                                                                    t,
+                                                                  ),
+                                                              style: TextStyle(
+                                                                color: p.text2,
+                                                                fontSize: 9.5,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ],
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : GestureDetector(
+                                        onTap: onEditNote,
+                                        child: Text(
+                                          'Tap to add quick note...'.localized(
+                                            context,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: p.text3.withValues(
+                                              alpha: 0.8,
+                                            ),
+                                            fontSize: compact ? 10.5 : 11.5,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                              if (hasNote) ...[
+                                const SizedBox(width: 4),
+                                PressableScale(
+                                  onTap: onEditNote,
+                                  child: Icon(
+                                    Icons.edit_rounded,
+                                    size: compact ? 12 : 14,
+                                    color: p.text3,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
-                      ],
-                    ),
                   ),
                 ),
               ),

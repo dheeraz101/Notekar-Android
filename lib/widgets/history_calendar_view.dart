@@ -32,6 +32,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.onOpenInsights,
     this.onDelete,
     this.rainbowCards = false,
+    this.onOpenGodModeSettings,
   });
 
   final Palette p;
@@ -50,6 +51,7 @@ class HistoryCalendarView extends StatefulWidget {
   final ValueChanged<TimelineDaySection>? onOpenInsights;
   final ValueChanged<Moment>? onDelete;
   final bool rainbowCards;
+  final VoidCallback? onOpenGodModeSettings;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -511,25 +513,24 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
         if (_selectedMoments.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Center(
-              child: PressableScale(
-                onTap: () => setState(() => _selectedMoments.clear()),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.p.accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: widget.p.accent.withValues(alpha: 0.20),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
+            child: Row(
+              children: [
+                Expanded(
+                  child: PressableScale(
+                    onTap: () => setState(() => _selectedMoments.clear()),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 7,
+                        horizontal: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: widget.p.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: widget.p.accent.withValues(alpha: 0.20),
+                        ),
+                      ),
+                      child: Text(
                         'Selected ${_selectedMoments.length} of 2 for duration'
                             .localized(context),
                         textAlign: TextAlign.center,
@@ -539,24 +540,31 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 17,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color: widget.p.accent.withValues(alpha: 0.22),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close_rounded,
-                          size: 11,
-                          color: widget.p.accent,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                PressableScale(
+                  onTap: () => setState(() => _selectedMoments.clear()),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.p.accent.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: widget.p.accent.withValues(alpha: 0.22),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 16,
+                      color: widget.p.accent,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -732,14 +740,19 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         widget.p.surface2,
                       )
                     : widget.p.surface2);
+          final isOngoing =
+              it.isOngoing && !_endingSessionIds.contains(it.inMoment.id);
           final borderColor = isSelected
               ? widget.p.accent
-              : (it.isOngoing
+              : (isOngoing
                     ? widget.p.green.withValues(alpha: 0.45)
                     : (widget.rainbowCards
-                          ? meta.color.withValues(alpha: 0.45)
-                          : meta.color.withValues(alpha: 0.35)));
-          final borderWidth = (isSelected || it.isOngoing) ? 1.8 : 1.0;
+                          ? ((cat.toLowerCase() == 'rest' ||
+                                    cat.toLowerCase() == 'recovery')
+                                ? widget.p.border.withValues(alpha: 0.5)
+                                : meta.color.withValues(alpha: 0.45))
+                          : widget.p.border.withValues(alpha: 0.5)));
+          final borderWidth = (isSelected || isOngoing) ? 1.8 : 1.0;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -948,6 +961,11 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             ),
           );
         } else if (it is TimelineSingleItem) {
+          final isGodMode =
+              it.moment.note.trim() == 'Access granted' ||
+              it.moment.note.contains('God Mode Unlocked') ||
+              it.moment.note.contains('#godmode') ||
+              it.moment.note.toLowerCase().contains('sovereign access granted');
           final cat = it.category ?? 'Moment';
           final meta = getCategoryMeta(cat, widget.p);
           final isSelected = _selectedMoments.any((m) => m.id == it.moment.id);
@@ -970,7 +988,16 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             padding: const EdgeInsets.only(bottom: 8),
             child: GestureDetector(
               onTap: () => _handleCardTap(it.moment),
-              onLongPress: () => _showMomentContextMenu(it.moment),
+              onLongPress: isGodMode
+                  ? () {
+                      HapticFeedback.mediumImpact();
+                      if (widget.onOpenGodModeSettings != null) {
+                        widget.onOpenGodModeSettings!();
+                      } else {
+                        Navigator.of(context).pop('god_mode_settings');
+                      }
+                    }
+                  : () => _showMomentContextMenu(it.moment),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -980,72 +1007,125 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: widget.p.accent.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                    if (isGodMode)
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFD700),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'D',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: widget.p.accent.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          meta.icon,
+                          size: 16,
+                          color: widget.p.accent,
+                        ),
                       ),
-                      child: Icon(meta.icon, size: 16, color: widget.p.accent),
-                    ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            timeOnly(it.primaryTimestamp),
-                            style: TextStyle(
-                              color: widget.p.text,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
+                      child: isGodMode
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  timeOnly(it.primaryTimestamp),
+                                  style: TextStyle(
+                                    color: widget.p.text,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Access granted',
+                                  style: TextStyle(
+                                    color: widget.p.text2,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  timeOnly(it.primaryTimestamp),
+                                  style: TextStyle(
+                                    color: widget.p.text,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                                if (it.note.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  PressableScale(
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      NotePreviewSheet.show(
+                                        context,
+                                        p: widget.p,
+                                        note: it.note,
+                                        title:
+                                            it.category ??
+                                            'Moment Note'.localized(context),
+                                        category: it.category,
+                                        dateStr: datePretty(
+                                          it.primaryTimestamp,
+                                        ),
+                                        onEdit: widget.onEditNote != null
+                                            ? () =>
+                                                  widget.onEditNote!(it.moment)
+                                            : null,
+                                      );
+                                    },
+                                    child: IosEmojiText(
+                                      it.note,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: widget.p.text2,
+                                        fontSize: 11.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                          ),
-                          if (it.note.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            PressableScale(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                NotePreviewSheet.show(
-                                  context,
-                                  p: widget.p,
-                                  note: it.note,
-                                  title:
-                                      it.category ??
-                                      'Moment Note'.localized(context),
-                                  category: it.category,
-                                  dateStr: datePretty(it.primaryTimestamp),
-                                  onEdit: widget.onEditNote != null
-                                      ? () => widget.onEditNote!(it.moment)
-                                      : null,
-                                );
-                              },
-                              child: IosEmojiText(
-                                it.note,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: widget.p.text2,
-                                  fontSize: 11.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
                     ),
-                    Text(
-                      it.type.toUpperCase(),
-                      style: TextStyle(
-                        color: widget.p.text3,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
+                    if (!isGodMode)
+                      Text(
+                        it.type.toUpperCase(),
+                        style: TextStyle(
+                          color: widget.p.text3,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

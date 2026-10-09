@@ -166,7 +166,7 @@ void main() {
 
         expect(find.text('Matrix Phosphor Terminal'), findsOneWidget);
         expect(find.text('Kindle E-Ink Paperwhite'), findsOneWidget);
-        expect(find.text('VIP Pioneer Badge'), findsOneWidget);
+        expect(find.text('God Mode Icon'), findsOneWidget);
         expect(find.text('Revoke God Mode'), findsOneWidget);
       },
     );

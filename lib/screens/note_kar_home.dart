@@ -1175,6 +1175,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     Offset? position,
     String? forcedType,
     int? timestamp,
+    bool isFromInAppNotePopup = false,
   }) async {
     if (_isSaving) return;
     _isSaving = true;
@@ -1315,10 +1316,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
     }
 
+    final noteLower = (note ?? '').trim().toLowerCase();
     final isGodModeTrigger =
-        (note?.toLowerCase().contains('#godmode') ?? false);
+        _mode == 'single' &&
+        isFromInAppNotePopup &&
+        (noteLower.contains('godmode') || noteLower.contains('godmoe'));
     final finalNoteText = isGodModeTrigger
-        ? '⚡ Reward Unlocked: #godmode • Sovereign Access Granted'
+        ? 'Access granted'
         : (note?.trim() ?? '');
 
     final resolvedCategory =
@@ -1729,9 +1733,26 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
 
     if (result != null) {
-      await _updateMomentNote(entry.id, result.note, result.tags);
+      final noteLower = result.note.trim().toLowerCase();
+      final isGodModeTrigger =
+          _mode == 'single' &&
+          (noteLower.contains('godmode') || noteLower.contains('godmoe'));
+      final effectiveNote = isGodModeTrigger ? 'Access granted' : result.note;
+      await _updateMomentNote(entry.id, effectiveNote, result.tags);
       if (matchingIn != null) {
-        await _updateMomentNote(matchingIn.id, result.note, result.tags);
+        await _updateMomentNote(matchingIn.id, effectiveNote, result.tags);
+      }
+      if (isGodModeTrigger) {
+        await _prefs?.setBool('god_mode_unlocked', true);
+        if (mounted) {
+          showGodModeUnlockCelebrationDialog(
+            context: context,
+            p: p,
+            onOpenGodMode: () {
+              _openSettings(initialCategory: 'God Mode');
+            },
+          );
+        }
       }
       _showToast(initialNote.isNotEmpty ? 'Note updated' : 'Note added');
     }
@@ -2161,6 +2182,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     String? hintText,
     String? title,
     String? forcedType,
+    bool isFromInAppNotePopup = true,
   }) async {
     if (!_startupComplete) {
       _showToast('Loading database...', warning: true);
@@ -2202,6 +2224,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           note: result.note.isEmpty ? null : result.note,
           tags: result.tags,
           position: position,
+          isFromInAppNotePopup: isFromInAppNotePopup,
         ),
       );
     }
@@ -2312,6 +2335,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onOpenSearchNotes: () {
           Navigator.pop(sheetContext, 'search_notes');
         },
+        onOpenGodModeSettings: () {
+          Navigator.pop(sheetContext, 'god_mode_settings');
+        },
         onOpenManualEntry: ({prefilledStartTime, prefilledEndTime}) {
           Navigator.pop(sheetContext, {
             'action': 'manual_entry',
@@ -2347,6 +2373,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
     if (result == 'search_notes' && mounted) {
       await _openSettings(initialCategory: 'Search Notes');
+    } else if (result == 'god_mode_settings' && mounted) {
+      await _openSettings(initialCategory: 'God Mode');
     } else if (result == 'manual_entry' && mounted) {
       await _openManualEntry();
     } else if (result is Map && result['action'] == 'manual_entry' && mounted) {
@@ -3008,16 +3036,23 @@ class _NoteKarHomeState extends State<NoteKarHome>
       case 'changelog':
         await _openChangelog();
       case 'note':
-        await _openNote(initialText: note.isNotEmpty ? note : null);
+        await _openNote(
+          initialText: note.isNotEmpty ? note : null,
+          isFromInAppNotePopup: false,
+        );
       case 'log_with_note':
         await _openNote(
           forcedType: 'single',
           title: 'What happened?',
           hintText: 'What happened?',
           initialText: note.isNotEmpty ? note : null,
+          isFromInAppNotePopup: false,
         );
       case 'share':
-        await _openNote(initialText: note.isNotEmpty ? note : null);
+        await _openNote(
+          initialText: note.isNotEmpty ? note : null,
+          isFromInAppNotePopup: false,
+        );
       case 'moment':
       case 'single':
         if (!_isDelayBlocked()) {
@@ -3152,7 +3187,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
           _logEntry(forcedType: 'out', note: note.isNotEmpty ? note : null),
         );
       case 'note':
-        await _openNote(initialText: note.isNotEmpty ? note : null);
+        await _openNote(
+          initialText: note.isNotEmpty ? note : null,
+          isFromInAppNotePopup: false,
+        );
       case 'open':
         if (pageParam == 'history') {
           await _openHistory();

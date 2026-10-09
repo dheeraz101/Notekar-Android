@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -132,27 +131,19 @@ class CaptureSettingsPage extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        SliderTheme(
-                          data: SliderThemeData(
-                            activeTrackColor: p.accent,
-                            inactiveTrackColor: p.surface3,
-                            thumbColor: Colors.white,
-                            overlayColor: p.accent.withValues(alpha: 0.12),
-                            trackHeight: 5,
-                            tickMarkShape: SliderTickMarkShape.noTickMark,
-                          ),
-                          child: Slider(
-                            min: 0,
-                            max: 6,
-                            divisions: 6,
-                            value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
-                            onChanged: (value) {
-                              final next = delayValues[value.round()];
-                              if (next == tapDelay) return;
-                              NotekarHaptics.selection('standard');
-                              onTapDelayChanged(next);
-                            },
-                          ),
+                        CupertinoSlider(
+                          min: 0,
+                          max: 6,
+                          divisions: 6,
+                          value: (delayIndex < 0 ? 0 : delayIndex).toDouble(),
+                          activeColor: p.accent,
+                          thumbColor: p.text,
+                          onChanged: (value) {
+                            final next = delayValues[value.round()];
+                            if (next == tapDelay) return;
+                            NotekarHaptics.selection('soft');
+                            onTapDelayChanged(next);
+                          },
                         ),
                         Transform.translate(
                           offset: const Offset(0, -4),

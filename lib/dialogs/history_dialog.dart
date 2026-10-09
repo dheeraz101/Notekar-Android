@@ -26,7 +26,6 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
-import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
@@ -50,6 +49,7 @@ class HistoryDialog extends StatefulWidget {
     this.onOpenTrash,
     this.onClearAll,
     this.onOpenSearchNotes,
+    this.onOpenGodModeSettings,
     this.onOpenManualEntry,
     this.onClaimRest,
     this.onEndLiveSession,
@@ -78,6 +78,7 @@ class HistoryDialog extends StatefulWidget {
   final VoidCallback? onOpenTrash;
   final Future<void> Function()? onClearAll;
   final VoidCallback? onOpenSearchNotes;
+  final VoidCallback? onOpenGodModeSettings;
   final void Function({
     DateTime? prefilledStartTime,
     DateTime? prefilledEndTime,
@@ -503,31 +504,33 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 ],
               ),
         trailingAction: _inSheetView == 'goals'
-            ? Tooltip(
-                message: 'New Goal'.localized(context),
-                child: PressableScale(
-                  onTap: () {
-                    setState(() {
-                      _editingGoal = null;
-                      _inSheetView = 'create_goal';
-                    });
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: widget.p.accent.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add_rounded,
-                      color: widget.p.accent,
-                      size: 19,
-                    ),
-                  ),
-                ),
-              )
+            ? (_goals.isNotEmpty
+                  ? Tooltip(
+                      message: 'New Goal'.localized(context),
+                      child: PressableScale(
+                        onTap: () {
+                          setState(() {
+                            _editingGoal = null;
+                            _inSheetView = 'create_goal';
+                          });
+                        },
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: widget.p.accent.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add_rounded,
+                            color: widget.p.accent,
+                            size: 19,
+                          ),
+                        ),
+                      ),
+                    )
+                  : null)
             : (_inSheetView != null || _activeInsightsSection != null)
             ? null
             : Tooltip(
@@ -623,6 +626,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       'mode': g.mode ?? 'two-way',
                     });
                   },
+                  onGoalsCountChanged: (count) {
+                    _loadGoals();
+                  },
                 )
               : _inSheetView == 'create_goal'
               ? CreateOrEditGoalView(
@@ -697,6 +703,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   },
                   onDelete: _removeEntry,
                   rainbowCards: _rainbowCards,
+                  onOpenGodModeSettings: _openGodModeSettings,
                 )
               : Stack(
                   children: [
@@ -909,60 +916,81 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                       0,
                                                       0,
                                                     ),
-                                                child: PressableScale(
-                                                  onTap: () => setState(
-                                                    () => _selected.clear(),
-                                                  ),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          vertical: 7,
-                                                          horizontal: 14,
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: PressableScale(
+                                                        onTap: () => setState(
+                                                          () =>
+                                                              _selected.clear(),
                                                         ),
-                                                    decoration: BoxDecoration(
-                                                      color: widget.p.accent
-                                                          .withValues(
-                                                            alpha: 0.12,
-                                                          ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            999,
-                                                          ),
-                                                      border: Border.all(
-                                                        color: widget.p.accent
-                                                            .withValues(
-                                                              alpha: 0.20,
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                vertical: 7,
+                                                                horizontal: 14,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: widget
+                                                                .p
+                                                                .accent
+                                                                .withValues(
+                                                                  alpha: 0.12,
+                                                                ),
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  999,
+                                                                ),
+                                                            border: Border.all(
+                                                              color: widget
+                                                                  .p
+                                                                  .accent
+                                                                  .withValues(
+                                                                    alpha: 0.20,
+                                                                  ),
                                                             ),
+                                                          ),
+                                                          child: Text(
+                                                            'Selected ${_selected.length} of 2 for duration'
+                                                                .localized(
+                                                                  context,
+                                                                ),
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              color: widget
+                                                                  .p
+                                                                  .accent,
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w800,
+                                                            ),
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          'Selected ${_selected.length} of 2 for duration',
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
-                                                            color:
-                                                                widget.p.accent,
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight.w800,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        Container(
-                                                          width: 17,
-                                                          height: 17,
-                                                          decoration:
-                                                              BoxDecoration(
+                                                    const SizedBox(width: 8),
+                                                    PressableScale(
+                                                      onTap: () => setState(
+                                                        () => _selected.clear(),
+                                                      ),
+                                                      child: Container(
+                                                        width: 32,
+                                                        height: 32,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                              color: widget
+                                                                  .p
+                                                                  .accent
+                                                                  .withValues(
+                                                                    alpha: 0.14,
+                                                                  ),
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              border: Border.all(
                                                                 color: widget
                                                                     .p
                                                                     .accent
@@ -970,19 +998,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                                       alpha:
                                                                           0.22,
                                                                     ),
-                                                                shape: BoxShape
-                                                                    .circle,
                                                               ),
-                                                          child: Icon(
-                                                            Icons.close_rounded,
-                                                            size: 11,
-                                                            color:
-                                                                widget.p.accent,
-                                                          ),
+                                                            ),
+                                                        child: Icon(
+                                                          Icons.close_rounded,
+                                                          size: 16,
+                                                          color:
+                                                              widget.p.accent,
                                                         ),
-                                                      ],
+                                                      ),
                                                     ),
-                                                  ),
+                                                  ],
                                                 ),
                                               ),
                                       ),
@@ -1352,7 +1378,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                             selected: isSelected,
                                             compact: _compactRows,
                                             rainbowCards: _rainbowCards,
-                                            isOngoing: session.isOngoing,
+                                            isOngoing:
+                                                session.isOngoing &&
+                                                !_endingSessionIds.contains(
+                                                  session.inMoment.id,
+                                                ),
                                             goals: _goals,
                                             onEditNote: () =>
                                                 _openDirectNoteEditor(
@@ -1397,10 +1427,15 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                         (m) => m.id == moment.id,
                                       );
                                       final isGodMode =
+                                          moment.note.trim() ==
+                                              'Access granted' ||
                                           moment.note.contains(
                                             'God Mode Unlocked',
                                           ) ||
-                                          moment.note.contains('#godmode');
+                                          moment.note.contains('#godmode') ||
+                                          moment.note.toLowerCase().contains(
+                                            'sovereign access granted',
+                                          );
 
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
@@ -1434,11 +1469,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                         isSelected,
                                                       )),
                                           onLongPress: isGodMode
-                                              ? () =>
-                                                    showGodModeUnlockCelebrationDialog(
-                                                      context: context,
-                                                      p: widget.p,
-                                                    )
+                                              ? _openGodModeSettings
                                               : () =>
                                                     _showMomentDetails(moment),
                                         ),
@@ -1728,6 +1759,15 @@ class _HistoryDialogState extends State<HistoryDialog> {
       }
     } finally {
       _isClaimingRest = false;
+    }
+  }
+
+  void _openGodModeSettings() {
+    HapticFeedback.mediumImpact();
+    if (widget.onOpenGodModeSettings != null) {
+      widget.onOpenGodModeSettings!();
+    } else {
+      Navigator.of(context).pop('god_mode_settings');
     }
   }
 
@@ -2108,10 +2148,29 @@ class _HistoryDialogState extends State<HistoryDialog> {
           effectiveTimestamp = session.startTimestamp + 1;
         }
       } else {
-        effectiveTimestamp = math.max(
-          DateTime.now().millisecondsSinceEpoch,
-          session.startTimestamp + 1000,
+        final inDt = DateTime.fromMillisecondsSinceEpoch(
+          session.startTimestamp,
         );
+        final isToday = session.inMoment.date == dateKey(DateTime.now());
+        if (isToday) {
+          effectiveTimestamp = math.max(
+            DateTime.now().millisecondsSinceEpoch,
+            session.startTimestamp + 1000,
+          );
+        } else {
+          final endOfDay = DateTime(
+            inDt.year,
+            inDt.month,
+            inDt.day,
+            23,
+            59,
+            59,
+          ).millisecondsSinceEpoch;
+          effectiveTimestamp = math.min(
+            endOfDay,
+            session.startTimestamp + const Duration(hours: 1).inMilliseconds,
+          );
+        }
       }
 
       final maxId = _entries.isEmpty
@@ -2129,6 +2188,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         _entries = [outEntry, ..._entries]
           ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
         _availableDateKeys = _entries.map((item) => item.date).toSet();
+        _endingSessionIds.remove(session.inMoment.id);
         _rebuildMemoizedLists();
       });
       _showNotice(

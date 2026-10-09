@@ -71,13 +71,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Midnight'), findsOneWidget);
-    await tester.tap(find.text('Midnight'));
+    expect(find.byKey(const ValueKey('app_icon_black')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('app_icon_black')));
     await tester.pumpAndSettle();
 
     expect(selectedStyle, 'black');
-    await tester.ensureVisible(find.text('Crimson'));
-    await tester.tap(find.text('Crimson'));
+    await tester.ensureVisible(find.byKey(const ValueKey('app_icon_red')));
+    await tester.tap(find.byKey(const ValueKey('app_icon_red')));
     await tester.pumpAndSettle();
     expect(selectedStyle, 'black');
     expect(tester.takeException(), isNull);
