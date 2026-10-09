@@ -50,6 +50,13 @@ class TimelineSessionCard extends StatelessWidget {
   Goal? _findMatchingGoal() {
     final gList = goals;
     if (gList == null || gList.isEmpty) return null;
+    final gId = session.goalId;
+    if (gId != null && gId.isNotEmpty) {
+      final direct = gList
+          .where((g) => !g.isArchived && g.id == gId)
+          .firstOrNull;
+      if (direct != null) return direct;
+    }
     final cat = session.category;
     if (cat != null && cat.trim().isNotEmpty) {
       return gList

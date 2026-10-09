@@ -587,12 +587,12 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                       vertical: 11,
                     ),
                     decoration: BoxDecoration(
-                      color: p.name == 'light'
+                      color: !p.isDark
                           ? Colors.white.withValues(alpha: 0.96)
                           : (p.name == 'amoled' ? Colors.black : p.surface2),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: p.name == 'light'
+                        color: !p.isDark
                             ? p.border
                             : (p.name == 'amoled'
                                   ? p.border
@@ -604,7 +604,7 @@ class _IosPillToastWidgetState extends State<_IosPillToastWidget>
                           : [
                               BoxShadow(
                                 color: Colors.black.withValues(
-                                  alpha: p.name == 'light' ? 0.10 : 0.35,
+                                  alpha: !p.isDark ? 0.10 : 0.35,
                                 ),
                                 blurRadius: 18,
                                 offset: const Offset(0, 6),
@@ -929,7 +929,7 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
 
     return CupertinoTheme(
       data: CupertinoThemeData(
-        brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+        brightness: !p.isDark ? Brightness.light : Brightness.dark,
         primaryColor: p.accent,
       ),
       child: CupertinoAlertDialog(
@@ -952,9 +952,7 @@ class ExternalLinkConfirmSheet extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: p.name == 'amoled'
                       ? const Color(0xFF0F0F10)
-                      : (p.name == 'light'
-                            ? const Color(0xFFE5E5EA)
-                            : p.surface3),
+                      : (!p.isDark ? const Color(0xFFE5E5EA) : p.surface3),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: p.border.withValues(alpha: 0.4),

@@ -137,6 +137,35 @@ class _ExecutiveIntelligenceHubScreenState
                           ),
                           const SizedBox(height: 12),
 
+                          // 3. Cognitive Balance & Rest Recovery
+                          if (dashboardData.recoveryBalance != null ||
+                              dashboardData.restRecovery != null) ...[
+                            CognitiveBalanceRecoveryCard(
+                              p: p,
+                              balance: dashboardData.recoveryBalance,
+                              recovery: dashboardData.restRecovery,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          // 4. Flow State Quality Index
+                          if (dashboardData.flowQuality != null) ...[
+                            FlowStateQualityCard(
+                              p: p,
+                              data: dashboardData.flowQuality!,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          // 5. Dynamic Velocity & Burn-Down Pace
+                          if (dashboardData.dynamicPacing != null) ...[
+                            DynamicPacingCard(
+                              p: p,
+                              data: dashboardData.dynamicPacing!,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
                           // 3. Intelligent Time Slot Bias
                           IntelligentTimeSlotBiasCard(
                             p: p,

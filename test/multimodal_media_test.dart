@@ -126,11 +126,10 @@ void main() {
           ),
         );
 
-        expect(find.text('Photo attached'), findsOneWidget);
-        expect(find.text('Tap to expand'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.photo), findsOneWidget);
         expect(find.byIcon(CupertinoIcons.chevron_down), findsOneWidget);
 
-        await tester.tap(find.text('Photo attached'));
+        await tester.tap(find.byIcon(CupertinoIcons.chevron_down));
         await tester.pump();
 
         expect(toggleCalled, isTrue);
@@ -164,10 +163,9 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Collapse'), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.chevron_up), findsOneWidget);
 
-      await tester.tap(find.text('Collapse'));
+      await tester.tap(find.byIcon(CupertinoIcons.chevron_up));
       await tester.pump();
 
       expect(collapseCalled, isTrue);

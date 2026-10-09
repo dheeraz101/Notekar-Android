@@ -31,7 +31,7 @@ class TopFadeBlur extends StatelessWidget {
 
     final statusBarHeight = MediaQuery.paddingOf(context).top;
     final totalHeight = statusBarHeight + fadeHeight;
-    final isLight = p.name == 'light';
+    final isLight = !p.isDark;
     final scrimBase = isLight ? Colors.white : Colors.black;
 
     return IgnorePointer(

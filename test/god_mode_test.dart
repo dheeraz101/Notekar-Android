@@ -294,7 +294,7 @@ void main() {
 
         expect(find.text('EXCLUSIVE APP ICON'), findsOneWidget);
         expect(find.text('God Mode Icon'), findsOneWidget);
-        expect(find.text('Obsidian & Gold luxury edition'), findsOneWidget);
+        expect(find.text('Classic 2000s Aqua Gold Edition'), findsOneWidget);
         expect(find.text('Open'), findsOneWidget);
 
         await tester.tap(find.text('God Mode Icon'));

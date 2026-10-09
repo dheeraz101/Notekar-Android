@@ -128,12 +128,17 @@ class GoalProgress {
     required this.trackedMinutes,
     required this.sessionCount,
     required this.singleCount,
+    this.archivedMinutes = 0,
   });
 
   final Goal goal;
   final int trackedMinutes;
   final int sessionCount;
   final int singleCount;
+  final int archivedMinutes;
+
+  bool get hasArchivedProgress => archivedMinutes > 0;
+  String get archivedFormatted => _formatMinutes(archivedMinutes);
 
   int get currentMinutes => trackedMinutes;
   int get targetMinutes => goal.targetMinutes;

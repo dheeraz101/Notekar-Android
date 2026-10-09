@@ -38,6 +38,7 @@ class MainActivity : FlutterActivity() {
     private var pendingLaunchAction: String? = null
     private var pendingLaunchPayload: Map<String, Any?>? = null
     private var pendingNotificationResult: MethodChannel.Result? = null
+    private var pendingAudioResult: MethodChannel.Result? = null
     private var soundPool: SoundPool? = null
     private var clickSoundId: Int = 0
     private var shhhSoundId: Int = 0
@@ -138,6 +139,27 @@ class MainActivity : FlutterActivity() {
                 }
 
                 "appDataDir" -> result.success(applicationContext.filesDir.absolutePath)
+
+                "checkAudioPermission" -> {
+                    val granted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                    result.success(granted)
+                }
+
+                "requestAudioPermission" -> {
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        result.success(true)
+                        return@setMethodCallHandler
+                    }
+                    if (pendingAudioResult != null) {
+                        result.error("PERMISSION_BUSY", "An audio permission request is already pending", null)
+                        return@setMethodCallHandler
+                    }
+                    pendingAudioResult = result
+                    requestPermissions(
+                        arrayOf(Manifest.permission.RECORD_AUDIO),
+                        AUDIO_PERMISSION_REQUEST
+                    )
+                }
 
                 "startAudioRecording" -> {
                     try {
@@ -929,6 +951,18 @@ class MainActivity : FlutterActivity() {
             grantResults
         )
 
+        if (requestCode == AUDIO_PERMISSION_REQUEST) {
+            val result = pendingAudioResult
+            pendingAudioResult = null
+
+            val granted =
+                grantResults.isNotEmpty() &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED
+
+            result?.success(granted)
+            return
+        }
+
         if (requestCode != NOTIFICATION_PERMISSION_REQUEST) return
 
         val result = pendingNotificationResult
@@ -1481,6 +1515,7 @@ class MainActivity : FlutterActivity() {
         private const val OPEN_TEXT_FILE_REQUEST = 4021
         private const val NOTIFICATION_PERMISSION_REQUEST = 4022
         private const val PRIVACY_LOCK_REQUEST = 4023
+        private const val AUDIO_PERMISSION_REQUEST = 4024
         private const val UPDATE_NOTIFICATION_ID = 3100
         private const val PERSISTENT_NOTIFICATION_ID = 3105
         private const val UPDATE_CHANNEL_ID =

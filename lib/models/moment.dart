@@ -34,7 +34,14 @@ class Moment {
     this.imagePath,
     this.voicePath,
     this.voiceDurationMs,
-  });
+    this.goalId,
+  }) {
+    if (goalId != null &&
+        goalId!.isNotEmpty &&
+        !tags.contains('goal:$goalId')) {
+      tags = [...tags, 'goal:$goalId'];
+    }
+  }
 
   Id id;
   int timestamp;
@@ -46,6 +53,20 @@ class Moment {
   String? imagePath;
   String? voicePath;
   int? voiceDurationMs;
+
+  @ignore
+  String? goalId;
+
+  @ignore
+  String? get effectiveGoalId {
+    if (goalId != null && goalId!.trim().isNotEmpty) return goalId!.trim();
+    for (final t in tags) {
+      if (t.startsWith('goal:')) {
+        return t.substring(5).trim();
+      }
+    }
+    return null;
+  }
 
   factory Moment.fromJson(Map<String, dynamic> json) {
     final type = (json['type'] as String?) ?? 'single';
@@ -61,6 +82,16 @@ class Moment {
         ? rawCategory.trim()
         : extractHashtagCategory(note);
 
+    final tagsList =
+        (json['tags'] as List<dynamic>?)?.cast<String>() ?? const <String>[];
+    final rawGoalId = json['goalId'] as String?;
+    final tagGoalId = tagsList
+        .firstWhere((t) => t.startsWith('goal:'), orElse: () => '')
+        .trim();
+    final resolvedGoalId = (rawGoalId != null && rawGoalId.trim().isNotEmpty)
+        ? rawGoalId.trim()
+        : (tagGoalId.isNotEmpty ? tagGoalId.substring(5).trim() : null);
+
     return Moment(
       id: (json['id'] as num).toInt(),
       timestamp: timestamp,
@@ -69,10 +100,11 @@ class Moment {
       date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
       note: note,
       category: resolvedCategory,
-      tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
+      tags: tagsList,
       imagePath: json['imagePath'] as String?,
       voicePath: json['voicePath'] as String?,
       voiceDurationMs: (json['voiceDurationMs'] as num?)?.toInt(),
+      goalId: resolvedGoalId,
     );
   }
 
@@ -116,6 +148,7 @@ class Moment {
     String? voicePath,
     bool clearVoicePath = false,
     int? voiceDurationMs,
+    String? goalId,
   }) {
     return Moment(
       id: id ?? this.id,
@@ -130,6 +163,7 @@ class Moment {
       voiceDurationMs: clearVoicePath
           ? null
           : (voiceDurationMs ?? this.voiceDurationMs),
+      goalId: goalId ?? this.goalId,
     );
   }
 
@@ -146,6 +180,7 @@ class Moment {
     if (voicePath != null && voicePath!.isNotEmpty) 'voicePath': voicePath,
     if (voiceDurationMs != null && voiceDurationMs! > 0)
       'voiceDurationMs': voiceDurationMs,
+    if (effectiveGoalId != null) 'goalId': effectiveGoalId,
   };
 }
 

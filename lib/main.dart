@@ -196,7 +196,7 @@ class NoteKarAppState extends State<NoteKarApp> {
 
   ThemeData _buildThemeData(String theme, String accent, bool highContrast) {
     final p = paletteFor(theme, accentName: accent, highContrast: highContrast);
-    final isLight = theme == 'light';
+    final isLight = !p.isDark;
     final isAmoled = theme == 'amoled';
     final brightness = isLight ? Brightness.light : Brightness.dark;
 
@@ -226,7 +226,7 @@ class NoteKarAppState extends State<NoteKarApp> {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: p.accent,
-          foregroundColor: Colors.white,
+          foregroundColor: p.onAccent,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -235,7 +235,7 @@ class NoteKarAppState extends State<NoteKarApp> {
           side: BorderSide(color: p.border),
         ),
       ),
-      fontFamily: 'Inter',
+      fontFamily: theme == 'matrix' ? 'monospace' : 'Inter',
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: p.text,

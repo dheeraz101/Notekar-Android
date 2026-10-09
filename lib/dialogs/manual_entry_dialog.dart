@@ -257,9 +257,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       context: context,
       builder: (ctx) => CupertinoTheme(
         data: CupertinoThemeData(
-          brightness: widget.p.name == 'light'
-              ? Brightness.light
-              : Brightness.dark,
+          brightness: !widget.p.isDark ? Brightness.light : Brightness.dark,
           primaryColor: widget.p.accent,
         ),
         child: StatefulBuilder(
@@ -508,6 +506,13 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       );
     }
 
+    if (_selectedGoal != null) {
+      final goalTag = 'goal:${_selectedGoal!.id}';
+      if (!extractedTags.contains(goalTag)) {
+        extractedTags.add(goalTag);
+      }
+    }
+
     final result = ManualEntryResult(
       isSession: _isSession,
       startDateTime: startDt,
@@ -673,7 +678,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
                           color: !_isSession
-                              ? (p.name == 'light'
+                              ? (!p.isDark
                                     ? Colors.white
                                     : (p.name == 'amoled'
                                           ? const Color(0xFF28282C)
@@ -717,7 +722,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
                           color: _isSession
-                              ? (p.name == 'light'
+                              ? (!p.isDark
                                     ? Colors.white
                                     : (p.name == 'amoled'
                                           ? const Color(0xFF28282C)

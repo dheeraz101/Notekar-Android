@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/services/universal_interval_ledger.dart';
 import 'package:notekar/utils/app_utils.dart';
 
 enum DashboardTimeframe {
@@ -19,6 +20,66 @@ enum DashboardTimeframe {
     DashboardTimeframe.month => 'Month',
     DashboardTimeframe.all => 'All',
   };
+}
+
+/// Cognitive Work-to-Rest ratio and intentional recovery balance.
+class RecoveryBalanceData {
+  const RecoveryBalanceData({
+    required this.workDuration,
+    required this.restDuration,
+    required this.ratio,
+    required this.statusLabel,
+    required this.isOptimal,
+  });
+
+  final Duration workDuration;
+  final Duration restDuration;
+  final double ratio;
+  final String statusLabel;
+  final bool isOptimal;
+}
+
+/// Flow State Quality Index: deep focus vs micro-burst fragmentation.
+class FlowStateQualityData {
+  const FlowStateQualityData({
+    required this.deepFocusMinutes,
+    required this.flowBlockMinutes,
+    required this.fragmentedMinutes,
+    required this.deepFocusPercentage,
+  });
+
+  final int deepFocusMinutes;
+  final int flowBlockMinutes;
+  final int fragmentedMinutes;
+  final int deepFocusPercentage;
+}
+
+/// Rest Gap Recovery Rate: redeemed void vs unmonitored loss.
+class RestGapRecoveryData {
+  const RestGapRecoveryData({
+    required this.totalVoidMinutes,
+    required this.claimedRestMinutes,
+    required this.recoveryPercentage,
+  });
+
+  final int totalVoidMinutes;
+  final int claimedRestMinutes;
+  final int recoveryPercentage;
+}
+
+/// Dynamic velocity comparing actual completion rate against elapsed days.
+class DynamicPacingBurnDownData {
+  const DynamicPacingBurnDownData({
+    required this.velocityLabel,
+    required this.isAhead,
+    required this.dailyNeededMinutes,
+    required this.paceDescription,
+  });
+
+  final String velocityLabel;
+  final bool isAhead;
+  final int dailyNeededMinutes;
+  final String paceDescription;
 }
 
 class TimeSlotStat {
@@ -122,6 +183,10 @@ class ExecutiveDashboardData {
     required this.dailyRhythm,
     required this.focusBreakdown,
     required this.gridStats,
+    this.recoveryBalance,
+    this.flowStateQuality,
+    this.restGapRecovery,
+    this.dynamicPacing,
   });
 
   final DashboardTimeframe timeframe;
@@ -134,6 +199,13 @@ class ExecutiveDashboardData {
   final DailyRhythmData dailyRhythm;
   final FocusBreakdownData focusBreakdown;
   final ActivityGridStats gridStats;
+  final RecoveryBalanceData? recoveryBalance;
+  final FlowStateQualityData? flowStateQuality;
+  final RestGapRecoveryData? restGapRecovery;
+  final DynamicPacingBurnDownData? dynamicPacing;
+
+  RestGapRecoveryData? get restRecovery => restGapRecovery;
+  FlowStateQualityData? get flowQuality => flowStateQuality;
 
   String get formattedTotalTracked {
     final totalMinutes = totalTracked.inMinutes;
@@ -186,18 +258,42 @@ class DashboardMetricsService {
   }) {
     final now = DateTime.now();
 
-    // 1. Filter entries into current and previous comparison periods
-    final (currentEntries, previousEntries, prevPeriodLabel) =
-        _filterTimeframes(entries, timeframe, now);
+    // 1. Reconstruct canonical intervals and perform midnight slicing globally FIRST
+    final allSlices = UniversalIntervalLedger.reconstructAndSlice(
+      entries,
+      referenceNow: now,
+    );
 
-    // 2. Build TimelineDaySections to pair sessions & calculate accurate tracked durations
-    final currentSections = buildTimelineDaySections(currentEntries);
+    // 2. Filter slices into current period using dateKey and timestamp
+    final todayKey = dateKey(now);
+    final weekStartDt = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
+    final monthStartDt = DateTime(now.year, now.month, 1);
+
+    final currentSlices = allSlices.where((s) {
+      return switch (timeframe) {
+        DashboardTimeframe.today => s.dateKey == todayKey,
+        DashboardTimeframe.week =>
+          s.startMs >= weekStartDt.millisecondsSinceEpoch,
+        DashboardTimeframe.month =>
+          s.startMs >= monthStartDt.millisecondsSinceEpoch,
+        DashboardTimeframe.all => true,
+      };
+    }).toList();
 
     int currentTrackedMs = 0;
-    for (final s in currentSections) {
-      currentTrackedMs += s.totalTrackedDuration.inMilliseconds;
+    for (final s in currentSlices) {
+      if (s.isSession) {
+        currentTrackedMs += s.durationMs;
+      }
     }
     final totalTracked = Duration(milliseconds: currentTrackedMs);
+
+    final (currentEntries, previousEntries, prevPeriodLabel) =
+        _filterTimeframes(entries, timeframe, now);
 
     final totalMoments = currentEntries.length;
     final prevMoments = previousEntries.length;
@@ -230,6 +326,142 @@ class DashboardMetricsService {
     // 8. 90-Day Activity Grid & Streaks
     final gridStats = _computeGridStats(entries, now);
 
+    // 9. Cognitive Work-to-Rest Ratio
+    final workSlices = currentSlices.where(
+      (s) => s.isSession && s.category.toLowerCase() != 'rest',
+    );
+    final restSlices = currentSlices.where(
+      (s) => s.isSession && s.category.toLowerCase() == 'rest',
+    );
+    final workMs = workSlices.fold(0, (sum, s) => sum + s.durationMs);
+    final restMs = restSlices.fold(0, (sum, s) => sum + s.durationMs);
+    final workDuration = Duration(milliseconds: workMs);
+    final restDuration = Duration(milliseconds: restMs);
+
+    final double recRatio = restMs > 0
+        ? (workMs / restMs)
+        : (workMs > 0 ? 99.0 : 0.0);
+    final String recLabel;
+    final bool recOptimal;
+    if (workMs == 0 && restMs == 0) {
+      recLabel = 'No Activity Logged';
+      recOptimal = true;
+    } else if (restMs == 0 && workDuration.inHours >= 5) {
+      recLabel = 'Rest Deficit (${workDuration.inHours}h focus, 0m rest)';
+      recOptimal = false;
+    } else if (restMs > 0 && recRatio <= 4.5) {
+      recLabel = 'Balanced (1h rest per ${recRatio.toStringAsFixed(1)}h focus)';
+      recOptimal = true;
+    } else if (restMs > 0) {
+      recLabel =
+          'High Intensity (1h rest per ${recRatio.toStringAsFixed(1)}h focus)';
+      recOptimal = false;
+    } else {
+      recLabel = 'Restorative Balance';
+      recOptimal = true;
+    }
+
+    final recoveryBalance = RecoveryBalanceData(
+      workDuration: workDuration,
+      restDuration: restDuration,
+      ratio: recRatio,
+      statusLabel: recLabel,
+      isOptimal: recOptimal,
+    );
+
+    // 10. Flow State Quality Index
+    int deepFocusMs = 0;
+    int flowBlockMs = 0;
+    int fragmentedMs = 0;
+
+    for (final s in currentSlices.where((s) => s.isSession)) {
+      final mins = s.durationMs ~/ 60000;
+      if (mins >= 45) {
+        deepFocusMs += s.durationMs;
+      } else if (mins >= 20) {
+        flowBlockMs += s.durationMs;
+      } else {
+        fragmentedMs += s.durationMs;
+      }
+    }
+
+    final deepPct = currentTrackedMs > 0
+        ? ((deepFocusMs / currentTrackedMs) * 100).round()
+        : 0;
+
+    final flowStateQuality = FlowStateQualityData(
+      deepFocusMinutes: deepFocusMs ~/ 60000,
+      flowBlockMinutes: flowBlockMs ~/ 60000,
+      fragmentedMinutes: fragmentedMs ~/ 60000,
+      deepFocusPercentage: deepPct,
+    );
+
+    // 11. Rest Gap Recovery Rate
+    final consciousDays = switch (timeframe) {
+      DashboardTimeframe.today => 1,
+      DashboardTimeframe.week => 7,
+      DashboardTimeframe.month => 30,
+      DashboardTimeframe.all => math.max(30, entries.isNotEmpty ? 30 : 1),
+    };
+    final totalConsciousMins = consciousDays * 10 * 60;
+    final trackedMins = currentTrackedMs ~/ 60000;
+    final totalVoidMins = math.max(0, totalConsciousMins - trackedMins);
+    final claimedRestMins = restMs ~/ 60000;
+    final recPct = totalVoidMins > 0
+        ? ((claimedRestMins / (claimedRestMins + totalVoidMins)) * 100)
+              .round()
+              .clamp(0, 100)
+        : 100;
+
+    final restGapRecovery = RestGapRecoveryData(
+      totalVoidMinutes: totalVoidMins,
+      claimedRestMinutes: claimedRestMins,
+      recoveryPercentage: recPct,
+    );
+
+    // 12. Dynamic Pacing Burn-Down
+    final int targetExpectedMins = switch (timeframe) {
+      DashboardTimeframe.today => 360,
+      DashboardTimeframe.week => 2400,
+      DashboardTimeframe.month => 9600,
+      DashboardTimeframe.all => 3000,
+    };
+    final double elapsedFraction = switch (timeframe) {
+      DashboardTimeframe.today => (now.hour * 60 + now.minute) / (24 * 60),
+      DashboardTimeframe.week => now.weekday / 7.0,
+      DashboardTimeframe.month => now.day / 30.0,
+      DashboardTimeframe.all => 1.0,
+    };
+
+    final double expectedMinsNow = targetExpectedMins * elapsedFraction;
+    final double velocityDiff = trackedMins - expectedMinsNow;
+    final bool isAhead = velocityDiff >= 0;
+    final int pctDiff = expectedMinsNow > 0
+        ? ((velocityDiff.abs() / expectedMinsNow) * 100).round()
+        : 0;
+
+    final String velLabel = isAhead
+        ? (pctDiff > 0 ? '+$pctDiff% Ahead of Pace' : 'On Target Pace')
+        : '-$pctDiff% Behind Expected Pace';
+
+    final int daysRemaining = switch (timeframe) {
+      DashboardTimeframe.today => 1,
+      DashboardTimeframe.week => math.max(1, 7 - now.weekday + 1),
+      DashboardTimeframe.month => math.max(1, 30 - now.day + 1),
+      DashboardTimeframe.all => 30,
+    };
+    final int deficitMins = math.max(0, targetExpectedMins - trackedMins);
+    final int dailyNeeded = (deficitMins / daysRemaining).ceil();
+
+    final dynamicPacing = DynamicPacingBurnDownData(
+      velocityLabel: velLabel,
+      isAhead: isAhead,
+      dailyNeededMinutes: dailyNeeded,
+      paceDescription: isAhead
+          ? 'Strong momentum across $prevPeriodLabel'
+          : 'Need ${dailyNeeded ~/ 60}h ${dailyNeeded % 60}m/day to hit timeframe benchmark',
+    );
+
     return ExecutiveDashboardData(
       timeframe: timeframe,
       totalTracked: totalTracked,
@@ -241,6 +473,10 @@ class DashboardMetricsService {
       dailyRhythm: dailyRhythm,
       focusBreakdown: focusBreakdown,
       gridStats: gridStats,
+      recoveryBalance: recoveryBalance,
+      flowStateQuality: flowStateQuality,
+      restGapRecovery: restGapRecovery,
+      dynamicPacing: dynamicPacing,
     );
   }
 

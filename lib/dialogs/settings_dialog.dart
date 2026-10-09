@@ -562,8 +562,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
             (m) => '${m[1]},',
           );
-          subtitle =
-              'Age ${horizon.ageYears} • ${horizon.targetYears}y Horizon • $weeksStr wks left';
+          subtitle = 'Age ${horizon.ageYears} • $weeksStr wks left';
         } else {
           subtitle = 'Set up your profile, age & life horizon'.localized(
             context,
@@ -609,9 +608,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: p.text,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3,
+                            fontSize: 19.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
                           ),
                         ),
                         const SizedBox(height: 3),
@@ -1005,7 +1004,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     height: 200,
                     child: CupertinoTheme(
                       data: CupertinoThemeData(
-                        brightness: p.name == 'light'
+                        brightness: !p.isDark
                             ? Brightness.light
                             : Brightness.dark,
                         primaryColor: p.accent,
@@ -1127,7 +1126,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     height: 200,
                     child: CupertinoTheme(
                       data: CupertinoThemeData(
-                        brightness: p.name == 'light'
+                        brightness: !p.isDark
                             ? Brightness.light
                             : Brightness.dark,
                         primaryColor: p.accent,
@@ -1382,9 +1381,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         builder: (context, setDialogState) {
           return CupertinoTheme(
             data: CupertinoThemeData(
-              brightness: p.name == 'light'
-                  ? Brightness.light
-                  : Brightness.dark,
+              brightness: !p.isDark ? Brightness.light : Brightness.dark,
               primaryColor: p.accent,
             ),
             child: CupertinoAlertDialog(
@@ -1904,7 +1901,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     String cancelLabel = 'Close',
   }) {
     final cupertinoThemeData = CupertinoThemeData(
-      brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+      brightness: !p.isDark ? Brightness.light : Brightness.dark,
       primaryColor: p.accent,
     );
 

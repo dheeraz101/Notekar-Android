@@ -61,9 +61,7 @@ class SettingsGroup extends StatelessWidget {
             borderRadius: BorderRadius.circular(28), // Unified 28pt card radius
             border: Border.all(
               color: p.border.withValues(
-                alpha: p.name == 'amoled'
-                    ? 0.5
-                    : (p.name == 'light' ? 0.35 : 0.45),
+                alpha: p.name == 'amoled' ? 0.5 : (!p.isDark ? 0.35 : 0.45),
               ),
               width: 0.8,
             ),
@@ -370,7 +368,7 @@ class SegmentedSetting extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: active
-                            ? (p.name == 'light'
+                            ? (!p.isDark
                                   ? Colors.white
                                   : (p.name == 'amoled'
                                         ? const Color(0xFF28282C)

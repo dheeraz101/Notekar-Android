@@ -97,6 +97,9 @@ class TimelineSessionItem extends TimelineItem {
     return null;
   }
 
+  /// Goal ID bound to this session, if any.
+  String? get goalId => inMoment.effectiveGoalId ?? outMoment?.effectiveGoalId;
+
   /// Moment IDs associated with this session.
   List<int> get momentIds => [
     inMoment.id,
@@ -127,6 +130,8 @@ class TimelineSingleItem extends TimelineItem {
   int get id => moment.id;
 
   String get type => moment.type;
+
+  String? get goalId => moment.effectiveGoalId;
 }
 
 /// Represents an untracked gap between sessions or moments.
@@ -255,7 +260,10 @@ List<TimelineDaySection> buildTimelineDaySections(
   }
 
   final List<TimelineItem> allItems = [];
-  Moment? activeIn;
+  final Map<String, Moment> activeInTracks = {};
+
+  String trackKey(Moment m) =>
+      '${m.category?.trim().toLowerCase() ?? ''}|${m.effectiveGoalId ?? ''}';
 
   for (final entry in byTimestamp.entries) {
     final momentsAtT = entry.value;
@@ -270,46 +278,85 @@ List<TimelineDaySection> buildTimelineDaySections(
       allItems.add(TimelineSingleItem(moment: s));
     }
 
-    // 2. If a session is open from an earlier moment, an 'out' at timestamp T closes it
-    if (activeIn != null && outs.isNotEmpty) {
-      allItems.add(
-        TimelineSessionItem(inMoment: activeIn, outMoment: outs.removeAt(0)),
-      );
-      activeIn = null;
-    }
-
-    // 3. Pair remaining 'in' and 'out' moments at the same timestamp T
-    while (ins.isNotEmpty && outs.isNotEmpty) {
-      allItems.add(
-        TimelineSessionItem(
-          inMoment: ins.removeAt(0),
-          outMoment: outs.removeAt(0),
-        ),
-      );
-    }
-
-    // 4. Any leftover 'in' moments
-    if (ins.isNotEmpty) {
-      if (activeIn != null) {
-        allItems.add(TimelineSessionItem(inMoment: activeIn, outMoment: null));
-        activeIn = null;
-      }
-      while (ins.length > 1) {
+    // 2. Process OUT moments: match with matching category/track first, then category, then any active in
+    final remainingOuts = <Moment>[];
+    for (final outMoment in outs) {
+      final exactKey = trackKey(outMoment);
+      if (activeInTracks.containsKey(exactKey)) {
         allItems.add(
-          TimelineSessionItem(inMoment: ins.removeAt(0), outMoment: null),
+          TimelineSessionItem(
+            inMoment: activeInTracks.remove(exactKey)!,
+            outMoment: outMoment,
+          ),
+        );
+        continue;
+      }
+
+      // Check same category track
+      final cat = outMoment.category?.trim().toLowerCase() ?? '';
+      final matchingCatKey = activeInTracks.keys
+          .where((k) => k.startsWith('$cat|'))
+          .firstOrNull;
+      if (matchingCatKey != null) {
+        allItems.add(
+          TimelineSessionItem(
+            inMoment: activeInTracks.remove(matchingCatKey)!,
+            outMoment: outMoment,
+          ),
+        );
+        continue;
+      }
+
+      // Fallback: match any open session if only one track or general
+      if (activeInTracks.isNotEmpty) {
+        final oldestKey = activeInTracks.keys.first;
+        allItems.add(
+          TimelineSessionItem(
+            inMoment: activeInTracks.remove(oldestKey)!,
+            outMoment: outMoment,
+          ),
+        );
+        continue;
+      }
+
+      remainingOuts.add(outMoment);
+    }
+
+    // 3. Process IN moments
+    for (final inMoment in ins) {
+      // Check if there are leftover OUT moments at the same timestamp that can pair immediately
+      if (remainingOuts.isNotEmpty) {
+        allItems.add(
+          TimelineSessionItem(
+            inMoment: inMoment,
+            outMoment: remainingOuts.removeAt(0),
+          ),
+        );
+        continue;
+      }
+
+      final exactKey = trackKey(inMoment);
+      if (activeInTracks.containsKey(exactKey)) {
+        // Close previous unclosed session on the same track
+        allItems.add(
+          TimelineSessionItem(
+            inMoment: activeInTracks.remove(exactKey)!,
+            outMoment: null,
+          ),
         );
       }
-      activeIn = ins.removeAt(0);
+      activeInTracks[exactKey] = inMoment;
     }
 
-    // 5. Any leftover 'out' moments without matching 'in' are emitted as single items
-    while (outs.isNotEmpty) {
-      allItems.add(TimelineSingleItem(moment: outs.removeAt(0)));
+    // 4. Any leftover OUT moments become single items
+    for (final outMoment in remainingOuts) {
+      allItems.add(TimelineSingleItem(moment: outMoment));
     }
   }
 
-  if (activeIn != null) {
-    allItems.add(TimelineSessionItem(inMoment: activeIn, outMoment: null));
+  // 5. Any remaining active IN moments are genuinely ongoing live sessions
+  for (final inMoment in activeInTracks.values) {
+    allItems.add(TimelineSessionItem(inMoment: inMoment, outMoment: null));
   }
 
   // 2. Group timeline items by day based on the item's anchor date

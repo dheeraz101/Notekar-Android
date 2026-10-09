@@ -196,7 +196,7 @@ class _ClockFaceState extends State<ClockFace> {
               ? sessionColor
               : momentColor(widget.p, widget.pulseType));
     final clockColor = _bright
-        ? actionColor.withValues(alpha: widget.p.name == 'light' ? 0.70 : 0.58)
+        ? actionColor.withValues(alpha: !widget.p.isDark ? 0.70 : 0.58)
         : baseClockColor;
     final secondsColor = widget.highlightSeconds
         ? clockColor

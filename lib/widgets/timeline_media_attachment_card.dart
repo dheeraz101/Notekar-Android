@@ -36,71 +36,51 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
     final borderRadius = BorderRadius.circular(compact ? 12 : 16);
 
     if (isCollapsed) {
-      // Sleek 34dp collapsed horizontal preview strip
+      // Sleek icon-only collapsed horizontal preview strip
       return Padding(
         padding: const EdgeInsets.only(top: 8.0, bottom: 2.0),
-        child: PressableScale(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onToggleCollapse?.call();
-          },
-          child: Container(
-            height: compact ? 30 : 34,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: p.surface3.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(compact ? 8 : 10),
-              border: Border.all(
-                color: p.border.withValues(alpha: 0.5),
-                width: 0.8,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: PressableScale(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onToggleCollapse?.call();
+            },
+            child: Container(
+              height: compact ? 28 : 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: p.surface3.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(compact ? 8 : 10),
+                border: Border.all(
+                  color: p.border.withValues(alpha: 0.5),
+                  width: 0.8,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.photo,
-                  size: compact ? 13 : 14,
-                  color: p.accent,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Photo attached',
-                  style: TextStyle(
-                    color: p.text,
-                    fontSize: compact ? 11.5 : 12,
-                    fontWeight: FontWeight.w600,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CupertinoIcons.photo,
+                    size: compact ? 13 : 14,
+                    color: p.accent,
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '•',
-                  style: TextStyle(color: p.text3, fontSize: compact ? 10 : 11),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Tap to expand',
-                    style: TextStyle(
-                      color: p.text2,
-                      fontSize: compact ? 11 : 11.5,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 6),
+                  Icon(
+                    CupertinoIcons.chevron_down,
+                    size: compact ? 11 : 12,
+                    color: p.text3,
                   ),
-                ),
-                Icon(
-                  CupertinoIcons.chevron_down,
-                  size: compact ? 12 : 13,
-                  color: p.text3,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       );
     }
 
-    // Expanded Twitter/X Style Photo Card
-    final cardHeight = compact ? 130.0 : 190.0;
+    // Expanded Twitter/X Style Photo Card with generous height & full width
+    final cardHeight = compact ? 180.0 : 230.0;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
@@ -173,36 +153,21 @@ class TimelineMediaAttachmentCard extends StatelessWidget {
                       onToggleCollapse!();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      width: 26,
+                      height: 26,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(999),
+                        shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.25),
                           width: 0.8,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            CupertinoIcons.chevron_up,
-                            size: 11,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'Collapse',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      child: const Icon(
+                        CupertinoIcons.chevron_up,
+                        size: 13,
+                        color: Colors.white,
                       ),
                     ),
                   ),

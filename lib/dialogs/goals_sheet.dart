@@ -14,6 +14,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/utils/moment_repository.dart';
+import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
 String _formatDateShort(DateTime dt) {
@@ -121,7 +122,7 @@ class _GoalsSheetState extends State<GoalsSheet> {
           : null,
       child: SizedBox(
         width: double.infinity,
-        height: 580,
+        height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
         child: GoalsContentView(
           key: contentKey,
           p: widget.p,
@@ -253,6 +254,12 @@ class GoalsContentViewState extends State<GoalsContentView>
     final repo = MomentRepository();
     await repo.ensureInitialized();
     final startMs = result.startDateTime.millisecondsSinceEpoch;
+    final goalId = result.linkedGoal?.id ?? goal.id;
+    final goalTag = 'goal:$goalId';
+    final inTags = List<String>.from(result.tags);
+    if (!inTags.contains(goalTag)) {
+      inTags.add(goalTag);
+    }
 
     if (result.isSession && result.endDateTime != null) {
       var endMs = result.endDateTime!.millisecondsSinceEpoch;
@@ -267,8 +274,9 @@ class GoalsContentViewState extends State<GoalsContentView>
         type: 'in',
         date: dateKey(result.startDateTime),
         note: result.note,
-        tags: result.tags,
-        category: result.category,
+        tags: inTags,
+        category: result.category ?? goal.category,
+        goalId: goalId,
       );
       final outMoment = Moment(
         id: repo.getNextId(),
@@ -276,8 +284,9 @@ class GoalsContentViewState extends State<GoalsContentView>
         type: 'out',
         date: dateKey(endDt),
         note: '',
-        tags: const [],
-        category: result.category,
+        tags: [goalTag],
+        category: result.category ?? goal.category,
+        goalId: goalId,
       );
 
       await repo.saveMoment(inMoment);
@@ -294,8 +303,9 @@ class GoalsContentViewState extends State<GoalsContentView>
         type: 'single',
         date: dateKey(result.startDateTime),
         note: result.note,
-        tags: result.tags,
-        category: result.category,
+        tags: inTags,
+        category: result.category ?? goal.category,
+        goalId: goalId,
       );
 
       await repo.saveMoment(singleMoment);
@@ -303,6 +313,18 @@ class GoalsContentViewState extends State<GoalsContentView>
       setState(() {
         widget.moments.insert(0, singleMoment);
       });
+    }
+
+    final progress = GoalsService.instance.calculateProgress(
+      goal,
+      widget.moments,
+    );
+    if (progress.isCompleted && mounted) {
+      showGoalCompletionCelebrationDialog(
+        context: context,
+        p: widget.p,
+        goal: goal,
+      );
     }
   }
 
@@ -380,7 +402,7 @@ class GoalsContentViewState extends State<GoalsContentView>
     return ListView.builder(
       shrinkWrap: widget.shrinkWrap,
       physics: widget.physics,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 8),
       itemCount: _goals.length,
       itemBuilder: (ctx, idx) {
         final goal = _goals[idx];
@@ -517,6 +539,33 @@ class GoalsContentViewState extends State<GoalsContentView>
                   ),
                 ),
               ),
+              if (progress.hasArchivedProgress &&
+                  goal.timeframe == GoalTimeframe.week) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.p.surface3.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: widget.p.border.withValues(alpha: 0.4),
+                      width: 0.7,
+                    ),
+                  ),
+                  child: Text(
+                    '+${progress.archivedFormatted} past',
+                    style: TextStyle(
+                      color: widget.p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               // Icon-only Edit Action Button (38x38)
               Tooltip(
@@ -936,6 +985,7 @@ class GoalsContentViewState extends State<GoalsContentView>
                               'action': 'start_goal_session',
                               'category': goal.category,
                               'mode': goal.mode ?? 'two-way',
+                              'goalId': goal.id,
                             });
                           }
                         },
@@ -1056,10 +1106,8 @@ class GoalsContentViewState extends State<GoalsContentView>
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: progress.isCompleted
-                      ? widget.p.green.withValues(alpha: 0.5)
-                      : accentCol.withValues(alpha: 0.35),
-                  width: progress.isCompleted ? 1.4 : 1.0,
+                  color: widget.p.border.withValues(alpha: 0.6),
+                  width: 1.0,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -1208,9 +1256,7 @@ class _CreateOrEditGoalViewState extends State<CreateOrEditGoalView> {
       context: context,
       builder: (ctx) => CupertinoTheme(
         data: CupertinoThemeData(
-          brightness: widget.p.name == 'light'
-              ? Brightness.light
-              : Brightness.dark,
+          brightness: !widget.p.isDark ? Brightness.light : Brightness.dark,
           primaryColor: widget.p.accent,
         ),
         child: StatefulBuilder(

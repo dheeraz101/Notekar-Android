@@ -1613,3 +1613,515 @@ class MementoMoriLifeHorizonCard extends StatelessWidget {
     );
   }
 }
+
+/// Apple Health-style Cognitive Work-to-Rest and Rest Gap Recovery card
+class CognitiveBalanceRecoveryCard extends StatelessWidget {
+  const CognitiveBalanceRecoveryCard({
+    super.key,
+    required this.p,
+    required this.balance,
+    required this.recovery,
+  });
+
+  final Palette p;
+  final RecoveryBalanceData? balance;
+  final RestGapRecoveryData? recovery;
+
+  @override
+  Widget build(BuildContext context) {
+    if (balance == null && recovery == null) return const SizedBox.shrink();
+
+    final workHours = balance != null
+        ? (balance!.workDuration.inMinutes / 60.0).toStringAsFixed(1)
+        : '0.0';
+    final restHours = balance != null
+        ? (balance!.restDuration.inMinutes / 60.0).toStringAsFixed(1)
+        : '0.0';
+    final statusLabel = balance?.statusLabel ?? '🟢 Balanced';
+    final isOptimal = balance?.isOptimal ?? true;
+    final recoveryPct = recovery?.recoveryPercentage ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.self_improvement_rounded,
+                    size: 14,
+                    color: p.accent,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'COGNITIVE BALANCE & RECOVERY'.localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3.5,
+                ),
+                decoration: BoxDecoration(
+                  color: (isOptimal ? p.green : p.orange).withValues(
+                    alpha: 0.14,
+                  ),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: (isOptimal ? p.green : p.orange).withValues(
+                      alpha: 0.35,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    color: isOptimal ? p.green : p.orange,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'FOCUS WORK'.localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${workHours}h',
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tracked focus'.localized(context),
+                        style: TextStyle(color: p.text3, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: p.surface3.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.border.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'REST REDEEMED'.localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${restHours}h',
+                        style: TextStyle(
+                          color: p.green,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Conscious pause'.localized(context),
+                        style: TextStyle(color: p.text3, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (recovery != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              decoration: BoxDecoration(
+                color: p.surface3.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.bedtime_rounded, size: 14, color: p.green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Rest Recovery: $recoveryPct% of potential drift reclaimed as intentional renewal.'
+                          .localized(context),
+                      style: TextStyle(
+                        color: p.text2,
+                        fontSize: 11,
+                        height: 1.25,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Flow State Quality Index: deep focus vs flow blocks vs micro-burst fragmentation
+class FlowStateQualityCard extends StatelessWidget {
+  const FlowStateQualityCard({super.key, required this.p, required this.data});
+
+  final Palette p;
+  final FlowStateQualityData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final total =
+        data.deepFocusMinutes + data.flowBlockMinutes + data.fragmentedMinutes;
+    final deepRatio = total > 0
+        ? (data.deepFocusMinutes / total).clamp(0.0, 1.0)
+        : 0.0;
+    final flowRatio = total > 0
+        ? (data.flowBlockMinutes / total).clamp(0.0, 1.0)
+        : 0.0;
+    final fragRatio = total > 0
+        ? (data.fragmentedMinutes / total).clamp(0.0, 1.0)
+        : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.waves_rounded, size: 14, color: p.accent),
+                  const SizedBox(width: 6),
+                  Text(
+                    'FLOW STATE QUALITY INDEX'.localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3.5,
+                ),
+                decoration: BoxDecoration(
+                  color: p.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${data.deepFocusPercentage}% Deep Focus',
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Multi-segment proportional bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: SizedBox(
+              height: 10,
+              child: Row(
+                children: [
+                  if (deepRatio > 0)
+                    Expanded(
+                      flex: (deepRatio * 1000).toInt(),
+                      child: Container(color: p.accent),
+                    ),
+                  if (flowRatio > 0)
+                    Expanded(
+                      flex: (flowRatio * 1000).toInt(),
+                      child: Container(color: const Color(0xFFAF52DE)),
+                    ),
+                  if (fragRatio > 0)
+                    Expanded(
+                      flex: (fragRatio * 1000).toInt(),
+                      child: Container(color: p.orange.withValues(alpha: 0.7)),
+                    ),
+                  if (total == 0) Expanded(child: Container(color: p.surface3)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _buildFlowSegmentTile(
+                  context,
+                  label: 'DEEP (≥45m)',
+                  minutes: data.deepFocusMinutes,
+                  color: p.accent,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildFlowSegmentTile(
+                  context,
+                  label: 'FLOW (20-44m)',
+                  minutes: data.flowBlockMinutes,
+                  color: const Color(0xFFAF52DE),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildFlowSegmentTile(
+                  context,
+                  label: 'BURSTS (<20m)',
+                  minutes: data.fragmentedMinutes,
+                  color: p.orange,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlowSegmentTile(
+    BuildContext context, {
+    required String label,
+    required int minutes,
+    required Color color,
+  }) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    final timeStr = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: p.surface3.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: p.border.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            timeStr,
+            style: TextStyle(
+              color: p.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dynamic velocity comparing actual completion rate against elapsed days.
+class DynamicPacingCard extends StatelessWidget {
+  const DynamicPacingCard({super.key, required this.p, required this.data});
+
+  final Palette p;
+  final DynamicPacingBurnDownData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: p.surface2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.speed_rounded, size: 14, color: p.accent),
+                  const SizedBox(width: 6),
+                  Text(
+                    'PACING & BURN-DOWN VELOCITY'.localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3.5,
+                ),
+                decoration: BoxDecoration(
+                  color: (data.isAhead ? p.green : p.orange).withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: (data.isAhead ? p.green : p.orange).withValues(
+                      alpha: 0.35,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  data.velocityLabel,
+                  style: TextStyle(
+                    color: data.isAhead ? p.green : p.orange,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: p.surface3.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: p.border.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PACE CADENCE'.localized(context),
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${(data.dailyNeededMinutes / 60.0).toStringAsFixed(1)}h / day',
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    data.paceDescription,
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 11.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

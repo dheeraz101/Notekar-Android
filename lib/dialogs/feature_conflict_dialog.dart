@@ -19,7 +19,7 @@ Future<bool> showFeatureConflictDialog(
     builder: (BuildContext dialogContext) {
       return CupertinoTheme(
         data: CupertinoThemeData(
-          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          brightness: !p.isDark ? Brightness.light : Brightness.dark,
           primaryColor: p.accent,
         ),
         child: CupertinoAlertDialog(

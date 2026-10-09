@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notekar/dialogs/history_dialog.dart';
 import 'package:notekar/dialogs/note_dialog.dart';
@@ -324,9 +324,9 @@ void main() {
           ),
         );
 
-        expect(find.text('Tap to add quick note...'), findsOneWidget);
+        expect(find.byIcon(Icons.add_rounded), findsOneWidget);
 
-        await tester.tap(find.text('Tap to add quick note...'));
+        await tester.tap(find.byIcon(Icons.add_rounded));
         await tester.pump();
         expect(editNoteCalled, isTrue);
       },
@@ -711,7 +711,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap the tap-to-add-note area on the tile
-        await tester.tap(find.text('Tap to add quick note...'));
+        await tester.tap(find.byIcon(Icons.add_rounded));
         await tester.pumpAndSettle();
 
         expect(find.byType(NoteDialog), findsOneWidget);

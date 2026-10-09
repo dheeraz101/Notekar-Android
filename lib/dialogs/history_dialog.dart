@@ -26,6 +26,7 @@ import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/history_calendar_view.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
+import 'package:notekar/widgets/milestone_celebration_dialog.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/timeline_gap_card.dart';
 import 'package:notekar/widgets/timeline_session_card.dart';
@@ -662,6 +663,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       'action': 'start_goal_session',
                       'category': g.category,
                       'mode': g.mode ?? 'two-way',
+                      'goalId': g.id,
                     });
                   },
                   onGoalsCountChanged: (count) {
@@ -1878,6 +1880,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _activeGapKey = null;
     }
 
+    final goalId = result.linkedGoal?.id;
+    final goalTag = goalId != null ? 'goal:$goalId' : null;
+    final inTags = List<String>.from(result.tags);
+    if (goalTag != null && !inTags.contains(goalTag)) {
+      inTags.add(goalTag);
+    }
+    final outTags = goalTag != null ? [goalTag] : const <String>[];
+
     if (result.isSession && result.endDateTime != null) {
       final startMs = result.startDateTime.millisecondsSinceEpoch;
       var endMs = result.endDateTime!.millisecondsSinceEpoch;
@@ -1893,8 +1903,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
         type: 'in',
         date: dateKey(result.startDateTime),
         note: result.note,
-        tags: result.tags,
+        tags: inTags,
         category: result.category,
+        goalId: goalId,
         imagePath: result.imagePath,
         voicePath: result.voicePath,
         voiceDurationMs: result.voiceDurationMs,
@@ -1905,8 +1916,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
         type: 'out',
         date: dateKey(endDt),
         note: '',
-        tags: const [],
+        tags: outTags,
         category: result.category,
+        goalId: goalId,
       );
 
       addedMoments.addAll([inMoment, outMoment]);
@@ -1918,8 +1930,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
         type: 'single',
         date: dateKey(result.startDateTime),
         note: result.note,
-        tags: result.tags,
+        tags: inTags,
         category: result.category,
+        goalId: goalId,
         imagePath: result.imagePath,
         voicePath: result.voicePath,
         voiceDurationMs: result.voiceDurationMs,
@@ -1938,6 +1951,18 @@ class _HistoryDialogState extends State<HistoryDialog> {
       await widget.onRestore(m);
     }
     await _loadGoals();
+
+    if (result.linkedGoal != null) {
+      final goal = result.linkedGoal!;
+      final progress = GoalsService.instance.calculateProgress(goal, _entries);
+      if (progress.isCompleted && mounted) {
+        showGoalCompletionCelebrationDialog(
+          context: context,
+          p: widget.p,
+          goal: goal,
+        );
+      }
+    }
 
     if (!mounted) return;
     final noticeText = result.isSession
@@ -2223,13 +2248,20 @@ class _HistoryDialogState extends State<HistoryDialog> {
     try {
       NotekarHaptics.success('standard');
 
-      // Find any subsequent session boundaries (in or out) that occurred strictly after this session started
+      // Find subsequent session boundaries on the SAME category or goal
+      final sessionCat = session.category?.trim().toLowerCase() ?? '';
+      final sessionGoal = session.goalId;
       final laterSessionMoments =
           _entries
               .where(
                 (m) =>
                     m.timestamp > session.startTimestamp &&
-                    (m.type == 'in' || m.type == 'out'),
+                    (m.type == 'in' || m.type == 'out') &&
+                    ((sessionCat.isNotEmpty &&
+                            (m.category?.trim().toLowerCase() ?? '') ==
+                                sessionCat) ||
+                        (sessionGoal != null &&
+                            m.effectiveGoalId == sessionGoal)),
               )
               .toList()
             ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
@@ -2934,12 +2966,12 @@ class _HistoryNoticePillState extends State<_HistoryNoticePill>
       decoration: BoxDecoration(
         color: widget.p.name == 'amoled'
             ? Colors.black
-            : (widget.p.name == 'light'
+            : (!widget.p.isDark
                   ? Colors.white.withValues(alpha: 0.96)
                   : widget.p.surface2),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: widget.p.name == 'light'
+          color: !widget.p.isDark
               ? widget.p.border
               : (widget.p.name == 'amoled'
                     ? widget.p.border
@@ -2950,7 +2982,7 @@ class _HistoryNoticePillState extends State<_HistoryNoticePill>
             : [
                 BoxShadow(
                   color: Colors.black.withValues(
-                    alpha: widget.p.name == 'light' ? 0.08 : 0.18,
+                    alpha: !widget.p.isDark ? 0.08 : 0.18,
                   ),
                   blurRadius: 16,
                   offset: const Offset(0, 6),

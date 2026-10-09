@@ -105,8 +105,9 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
     return Padding(
       padding: const EdgeInsets.only(top: 6.0, bottom: 2.0),
       child: Container(
+        width: double.infinity,
         height: isCompact ? 38 : 44,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: p.surface3.withValues(alpha: 0.75),
           borderRadius: BorderRadius.circular(999),
@@ -138,7 +139,7 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
 
             // Waveform Scrubber
             Expanded(
@@ -176,16 +177,16 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                         ];
                         final h =
                             heights[index % heights.length] *
-                            (isCompact ? 0.7 : 0.85);
+                            (isCompact ? 0.72 : 0.88);
 
                         return Container(
-                          width: 2.2,
+                          width: 2.6,
                           height: h,
                           decoration: BoxDecoration(
                             color: isFilled
                                 ? p.accent
-                                : p.text3.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(2),
+                                : p.text3.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(999),
                           ),
                         );
                       }),
@@ -194,7 +195,7 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
 
             // Time indicator: 0:14 / 0:42
             Text(
@@ -206,13 +207,16 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
 
             // Speed multiplier pill
             PressableScale(
               onTap: _cycleSpeed,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2.5,
+                ),
                 decoration: BoxDecoration(
                   color: p.surface2,
                   borderRadius: BorderRadius.circular(6),

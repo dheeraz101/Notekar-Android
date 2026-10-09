@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/history_timeline_models.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
@@ -42,6 +43,9 @@ class DynamicHeaderCapsule extends StatefulWidget {
     this.bankedGraceDays = 0,
     this.isSessionOngoing = false,
     this.onOpenIntelligenceHub,
+    this.goals,
+    this.activeGoal,
+    this.onSelectGoal,
   });
 
   final Palette p;
@@ -63,6 +67,9 @@ class DynamicHeaderCapsule extends StatefulWidget {
   final int bankedGraceDays;
   final bool isSessionOngoing;
   final VoidCallback? onOpenIntelligenceHub;
+  final List<Goal>? goals;
+  final Goal? activeGoal;
+  final ValueChanged<Goal?>? onSelectGoal;
 
   @override
   State<DynamicHeaderCapsule> createState() => _DynamicHeaderCapsuleState();
@@ -242,10 +249,12 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
               ),
             ),
             const SizedBox(width: 7),
-            // Duration & Category
+            // Duration & Category (or Active Goal if selected)
             Flexible(
               child: Text(
-                '$durLabel ${meta.name}',
+                widget.activeGoal != null
+                    ? '$durLabel 🎯 ${widget.activeGoal!.title}'
+                    : '$durLabel ${meta.name}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -419,6 +428,48 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
             onManageCategories: widget.onManageCategories,
             onLongPressCategory: widget.onLongPressCategory,
           ),
+
+          if (widget.goals != null && widget.goals!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.flag_rounded, size: 11, color: p.accent),
+                const SizedBox(width: 5),
+                Text(
+                  'TARGET GOAL'.localized(context),
+                  style: TextStyle(
+                    color: p.text3,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildGoalChip(
+                    context,
+                    title: 'None'.localized(context),
+                    isSelected: widget.activeGoal == null,
+                    onTap: () => widget.onSelectGoal?.call(null),
+                  ),
+                  for (final g in widget.goals!) ...[
+                    const SizedBox(width: 6),
+                    _buildGoalChip(
+                      context,
+                      title: '🎯 ${g.title}',
+                      isSelected: widget.activeGoal?.id == g.id,
+                      onTap: () => widget.onSelectGoal?.call(g),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
 
           const SizedBox(height: 10),
 
@@ -658,6 +709,42 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
               fontSize: 9,
               fontWeight: FontWeight.w800,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGoalChip(
+    BuildContext context, {
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final p = widget.p;
+    return PressableScale(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? p.accent.withValues(alpha: 0.18) : p.surface3,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? p.accent.withValues(alpha: 0.5)
+                : p.border.withValues(alpha: 0.4),
+            width: 0.8,
+          ),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? p.accent : p.text2,
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
           ),
         ),
       ),

@@ -3,10 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/shareable_milestone_sheet.dart';
+import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/models/sobriety_milestones.dart';
+import 'package:notekar/utils/app_utils.dart';
+import 'package:notekar/utils/category_service.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/glass.dart';
+import 'package:notekar/widgets/pressable_scale.dart';
 
 /// Shows the Sobriety Milestone Unlock Celebration dialog with animated particles and haptics.
 Future<void> showGodModeUnlockCelebrationDialog({
@@ -154,6 +158,159 @@ Future<void> showGodModeUnlockCelebrationDialog({
                             ),
                           ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// Shows the Goal Completion Celebration dialog with animated confetti particles,
+/// sound, and haptics when a target goal is achieved.
+Future<void> showGoalCompletionCelebrationDialog({
+  required BuildContext context,
+  required Palette p,
+  required Goal goal,
+}) async {
+  HapticFeedback.heavyImpact();
+  AppSound.alert();
+
+  final meta = getCategoryMeta(goal.category ?? 'Target', p);
+  final accentCol = goal.category != null ? meta.color : p.accent;
+
+  await showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'Goal Celebration',
+    barrierColor: Colors.black.withValues(alpha: 0.78),
+    transitionDuration: const Duration(milliseconds: 240),
+    transitionBuilder: (context, anim1, anim2, child) {
+      final curved = Curves.easeOutBack.transform(anim1.value);
+      return Transform.scale(
+        scale: 0.88 + (curved * 0.12),
+        child: Opacity(opacity: anim1.value.clamp(0.0, 1.0), child: child),
+      );
+    },
+    pageBuilder: (context, animation1, animation2) {
+      return Stack(
+        children: [
+          const Positioned.fill(
+            child: IgnorePointer(child: ConfettiParticleOverlay()),
+          ),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Glass(
+                p: p,
+                radius: 28,
+                padding: const EdgeInsets.all(28),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              p.green,
+                              const Color(0xFF00E5FF),
+                              accentCol,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: p.green.withValues(alpha: 0.45),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.military_tech_rounded,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        '🎉 TARGET ACHIEVED!'.localized(context),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: p.green,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        goal.title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: p.text,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: p.surface3.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: p.border.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          'You have completed your intentional allocation for this goal. Consistency unlocks mastery.'
+                              .localized(context),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: p.text2,
+                            fontSize: 13,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      PressableScale(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context, rootNavigator: true).pop();
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: p.green,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            'Continue'.localized(context),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

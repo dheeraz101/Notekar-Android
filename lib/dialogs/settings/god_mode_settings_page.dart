@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/classic_2000_god_mode_icon.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class GodModeSettingsPage extends StatelessWidget {
@@ -31,7 +32,7 @@ class GodModeSettingsPage extends StatelessWidget {
       context: context,
       builder: (ctx) => CupertinoTheme(
         data: CupertinoThemeData(
-          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          brightness: !p.isDark ? Brightness.light : Brightness.dark,
           primaryColor: p.accent,
         ),
         child: CupertinoAlertDialog(
@@ -125,29 +126,9 @@ class GodModeSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              customIcon: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF14121B),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFFFFD700).withValues(alpha: 0.6),
-                    width: 1,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'D',
-                  style: TextStyle(
-                    color: Color(0xFFFFD700),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
+              customIcon: const Classic2000GodModeIcon(size: 32),
               title: 'God Mode Icon'.localized(context),
-              subtitle: 'Obsidian & Gold luxury edition'.localized(context),
+              subtitle: 'Classic 2000s Aqua Gold Edition'.localized(context),
               status: 'Open'.localized(context),
               color: const Color(0xFFFFD700),
               onTap: () {

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:notekar/models/goal.dart';
 import 'package:notekar/models/moment.dart';
+import 'package:notekar/services/universal_interval_ledger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service managing goal configuration and real-time progress calculations.
@@ -110,89 +111,75 @@ class GoalsService {
     final startMs = startWindow.millisecondsSinceEpoch;
     final endMs = endWindow.millisecondsSinceEpoch;
 
-    final chronoSorted = List<Moment>.from(moments)
-      ..sort((a, b) {
-        final cmp = a.timestamp.compareTo(b.timestamp);
-        if (cmp != 0) return cmp;
-        if (a.type == 'in' && b.type != 'in') return -1;
-        if (b.type == 'in' && a.type != 'in') return 1;
-        return a.id.compareTo(b.id);
-      });
+    // Filter moments relevant to THIS specific goal
+    final goalMoments = moments
+        .where((m) => _matchesCriteria(m, goal))
+        .toList();
+
+    // Reconstruct canonical intervals using UniversalIntervalLedger (handles multi-track state and midnight slicing)
+    final intervals = UniversalIntervalLedger.reconstructAndSlice(
+      goalMoments,
+      referenceNow: now,
+    );
 
     int trackedMs = 0;
+    int archivedMs = 0;
     int sessionCount = 0;
     int singleCount = 0;
 
-    Moment? currentIn;
-    for (final m in chronoSorted) {
-      if (m.type == 'in') {
-        if (currentIn != null &&
-            _matchesCriteria(currentIn, goal, isSession: true)) {
-          // Account for unclosed previous session interrupted by new IN
-          final sStart = currentIn.timestamp;
-          final sEnd = m.timestamp;
-          final overlapStart = math.max(startMs, sStart);
-          final overlapEnd = math.min(endMs, sEnd);
+    for (final it in intervals) {
+      if (it.isSession) {
+        if (it.startMs >= startMs && it.endMs <= endMs) {
+          trackedMs += it.durationMs;
+          sessionCount++;
+        } else {
+          // Bounded overlap with evaluation window
+          final overlapStart = math.max(startMs, it.startMs);
+          final overlapEnd = math.min(endMs, it.endMs);
           if (overlapEnd > overlapStart) {
             trackedMs += (overlapEnd - overlapStart);
             sessionCount++;
           }
-        }
-        currentIn = m;
-      } else if (m.type == 'out') {
-        if (currentIn != null) {
-          if (_matchesCriteria(currentIn, goal, isSession: true)) {
-            final sStart = currentIn.timestamp;
-            final sEnd = m.timestamp;
-            final overlapStart = math.max(startMs, sStart);
-            final overlapEnd = math.min(endMs, sEnd);
-            if (overlapEnd > overlapStart) {
-              trackedMs += (overlapEnd - overlapStart);
-              sessionCount++;
-            }
-          }
-          currentIn = null;
-        }
-      } else if (m.type == 'single') {
-        if (m.timestamp >= startMs && m.timestamp < endMs) {
-          if (_matchesCriteria(m, goal, isSession: false)) {
-            singleCount++;
+          if (it.endMs <= startMs) {
+            archivedMs += it.durationMs;
           }
         }
-      }
-    }
-
-    // Account for ongoing live session if active
-    if (currentIn != null &&
-        _matchesCriteria(currentIn, goal, isSession: true)) {
-      final sStart = currentIn.timestamp;
-      final sEnd = now.millisecondsSinceEpoch;
-      final overlapStart = math.max(startMs, sStart);
-      final overlapEnd = math.min(endMs, sEnd);
-      if (overlapEnd > overlapStart) {
-        trackedMs += (overlapEnd - overlapStart);
-        sessionCount++;
+      } else {
+        if (it.startMs >= startMs && it.startMs < endMs) {
+          singleCount++;
+        } else if (it.startMs < startMs) {
+          archivedMs += 15 * 60 * 1000;
+        }
       }
     }
 
     final trackedMinutes = (trackedMs / (1000 * 60)).round();
+    final archivedMinutes = (archivedMs / (1000 * 60)).round();
 
     return GoalProgress(
       goal: goal,
       trackedMinutes: trackedMinutes,
       sessionCount: sessionCount,
       singleCount: singleCount,
+      archivedMinutes: archivedMinutes,
     );
   }
 
-  bool _matchesCriteria(Moment m, Goal goal, {required bool isSession}) {
-    // Mode filter
-    if (goal.mode != null && goal.mode!.isNotEmpty) {
-      if (goal.mode == 'two-way' && !isSession) return false;
-      if (goal.mode == 'single' && isSession) return false;
+  /// Determines whether a moment attributes to this goal.
+  bool _matchesCriteria(Moment m, Goal goal) {
+    // 1. Strict explicit goal ID match
+    final mGoalId = m.effectiveGoalId;
+    if (mGoalId != null && mGoalId.isNotEmpty) {
+      return mGoalId == goal.id;
     }
 
-    // Category filter
+    // 2. Explicit tag match
+    if (m.tags.contains('goal:${goal.id}') ||
+        m.tags.contains('#goal_${goal.id}')) {
+      return true;
+    }
+
+    // 3. Category match fallback for existing un-tagged historical moments
     if (goal.category != null && goal.category!.isNotEmpty) {
       final targetCat = goal.category!.toLowerCase();
       final cat = m.category?.toLowerCase() ?? '';
@@ -207,6 +194,51 @@ class GoalsService {
     }
 
     return true;
+  }
+
+  /// One-time migration attributing historical moments to matching user goals.
+  Future<int> migrateHistoricalMomentsToGoals(
+    List<Moment> moments, {
+    Future<void> Function(Moment updated)? onSaveMoment,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    const migrationKey = 'notekar_goals_migrated_v2';
+    if (prefs.getBool(migrationKey) ?? false) {
+      return 0;
+    }
+
+    final goals = await getGoals();
+    if (goals.isEmpty || moments.isEmpty) {
+      await prefs.setBool(migrationKey, true);
+      return 0;
+    }
+
+    int migratedCount = 0;
+    for (final m in moments) {
+      if (m.effectiveGoalId != null) continue;
+      for (final g in goals) {
+        if (!g.isArchived && g.category != null && g.category!.isNotEmpty) {
+          final cat = g.category!.toLowerCase();
+          final mCat = m.category?.toLowerCase() ?? '';
+          if (cat == mCat ||
+              m.tags.any((t) => t.toLowerCase() == cat) ||
+              m.note.toLowerCase().contains('#$cat')) {
+            m.goalId = g.id;
+            if (!m.tags.contains('goal:${g.id}')) {
+              m.tags = [...m.tags, 'goal:${g.id}'];
+            }
+            if (onSaveMoment != null) {
+              await onSaveMoment(m);
+            }
+            migratedCount++;
+            break;
+          }
+        }
+      }
+    }
+
+    await prefs.setBool(migrationKey, true);
+    return migratedCount;
   }
 
   Future<void> _persistGoals(List<Goal> list) async {

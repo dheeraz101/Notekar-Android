@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
+import 'package:notekar/widgets/classic_2000_god_mode_icon.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -159,14 +160,16 @@ class AppIconsSettingsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: Image.asset(
-                    currentIcon.asset,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.medium,
-                  ),
-                ),
+                child: currentIcon.key == 'godmode'
+                    ? const Classic2000GodModeIcon(size: 68)
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Image.asset(
+                          currentIcon.asset,
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.medium,
+                        ),
+                      ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -276,36 +279,67 @@ class AppIconsSettingsPage extends StatelessWidget {
                                 ),
                               ],
                       ),
-                      child: isSelected
-                          ? Center(
-                              child: Text(
-                                'NK',
-                                style: TextStyle(
-                                  color: p.accent.withValues(alpha: 0.65),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.5,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: item.key == 'godmode'
+                                ? const Center(
+                                    child: Classic2000GodModeIcon(
+                                      size: 54,
+                                      showGlow: false,
+                                    ),
+                                  )
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(17),
+                                    child: Image.asset(
+                                      item.asset,
+                                      fit: BoxFit.cover,
+                                      cacheWidth: 128,
+                                      cacheHeight: 128,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                                color: p.surface3,
+                                                child: Icon(
+                                                  CupertinoIcons.photo,
+                                                  color: p.text3,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                    ),
+                                  ),
+                          ),
+                          if (isSelected)
+                            Positioned(
+                              top: 5,
+                              right: 5,
+                              child: Container(
+                                padding: const EdgeInsets.all(2.5),
+                                decoration: BoxDecoration(
+                                  color: p.accent,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.25,
+                                      ),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 11,
                                 ),
                               ),
-                            )
-                          : ClipRRect(
-                              borderRadius: BorderRadius.circular(17),
-                              child: Image.asset(
-                                item.asset,
-                                fit: BoxFit.cover,
-                                cacheWidth: 128,
-                                cacheHeight: 128,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Container(
-                                      color: p.surface3,
-                                      child: Icon(
-                                        CupertinoIcons.photo,
-                                        color: p.text3,
-                                        size: 20,
-                                      ),
-                                    ),
-                              ),
                             ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

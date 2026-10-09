@@ -206,8 +206,23 @@ class _NoteKarHomeState extends State<NoteKarHome>
   bool _horologyDetentFired = false;
 
   List<Goal> _cachedGoals = [];
+  String? _activeGoalId;
+
+  Goal? get _activeGoal {
+    if (_activeGoalId != null) {
+      final match = _cachedGoals
+          .where((g) => g.id == _activeGoalId)
+          .firstOrNull;
+      if (match != null) return match;
+    }
+    return null;
+  }
 
   String? get _activeGoalTitle {
+    if (_activeGoal != null) {
+      final t = _activeGoal!.title;
+      return t.length > 9 ? t.substring(0, 9) : t;
+    }
     if (_cachedGoals.isEmpty) return null;
     final match =
         _cachedGoals.where((g) => g.category == _activeCategory).firstOrNull ??
@@ -222,12 +237,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
   void _onNextGoal() {
     if (_cachedGoals.isEmpty) return;
     final currentIndex = _cachedGoals.indexWhere(
-      (g) => g.category == _activeCategory || g.title == _activeCategory,
+      (g) =>
+          g.id == _activeGoalId ||
+          g.category == _activeCategory ||
+          g.title == _activeCategory,
     );
     final nextIndex = currentIndex < 0
         ? 0
         : (currentIndex + 1) % _cachedGoals.length;
     final nextGoal = _cachedGoals[nextIndex];
+    _activeGoalId = nextGoal.id;
+    unawaited(_saveSetting('m-active-goal-id', nextGoal.id));
     unawaited(_setActiveCategory(nextGoal.category ?? nextGoal.title));
     _showToast(nextGoal.title, withHaptic: false);
   }
@@ -235,12 +255,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
   void _onPrevGoal() {
     if (_cachedGoals.isEmpty) return;
     final currentIndex = _cachedGoals.indexWhere(
-      (g) => g.category == _activeCategory || g.title == _activeCategory,
+      (g) =>
+          g.id == _activeGoalId ||
+          g.category == _activeCategory ||
+          g.title == _activeCategory,
     );
     final prevIndex = currentIndex < 0
         ? _cachedGoals.length - 1
         : (currentIndex - 1 + _cachedGoals.length) % _cachedGoals.length;
     final prevGoal = _cachedGoals[prevIndex];
+    _activeGoalId = prevGoal.id;
+    unawaited(_saveSetting('m-active-goal-id', prevGoal.id));
     unawaited(_setActiveCategory(prevGoal.category ?? prevGoal.title));
     _showToast(prevGoal.title, withHaptic: false);
   }
@@ -665,6 +690,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         }
       }
       _inout = prefs.getString('m-inout') ?? 'in';
+      _activeGoalId = prefs.getString('m-active-goal-id');
       _tapDelay = prefs.getInt('m-delay') ?? 0;
       _remoteNotices = prefs.getBool('m-remote-notices') ?? false;
       _reduceMotion = prefs.getBool('m-reduce-motion') ?? false;
@@ -762,7 +788,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       await TagMigrationService.migrateIfNeeded();
       await TagService.instance.load();
       final migrated = await _repository.migrateLegacyData();
-      final entries = _repository.getAllMoments();
+      var entries = _repository.getAllMoments();
       final trash = _repository.getTrashMoments();
       final nextId = _repository.getNextId();
 
@@ -798,6 +824,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       }
 
       final goals = await GoalsService.instance.getGoals();
+      final migratedGoalMoments = await GoalsService.instance
+          .migrateHistoricalMomentsToGoals(entries);
+      if (migratedGoalMoments > 0) {
+        entries = _repository.getAllMoments();
+      }
 
       setState(() {
         _entries = entries;
@@ -892,7 +923,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   void _executeShortcutAction(String shortcutType) {
-    if (shortcutType == 'quick_session') {
+    if (shortcutType.startsWith('goal_session_')) {
+      final goalId = shortcutType.substring('goal_session_'.length);
+      final goal = _cachedGoals.where((g) => g.id == goalId).firstOrNull;
+      if (goal != null) {
+        unawaited(
+          _startGoalSession(
+            category: goal.category,
+            mode: goal.mode ?? 'two-way',
+            goalId: goal.id,
+          ),
+        );
+      }
+    } else if (shortcutType == 'quick_session') {
       if (_mode != 'two-way') {
         _setMode('two-way');
       }
@@ -930,7 +973,19 @@ class _NoteKarHomeState extends State<NoteKarHome>
         );
       }
 
-      // Shortcut 2: Log Past Moment (Opens manual entry)
+      // Shortcut 2: Target Goal if defined
+      final primaryGoal = _activeGoal ?? _cachedGoals.firstOrNull;
+      if (primaryGoal != null) {
+        items.add(
+          ShortcutItem(
+            type: 'goal_session_${primaryGoal.id}',
+            localizedTitle: '🎯 ${primaryGoal.title}',
+            icon: 'ic_launcher',
+          ),
+        );
+      }
+
+      // Shortcut 3: Log Past Moment (Opens manual entry)
       items.add(
         const ShortcutItem(
           type: 'log_past_moment',
@@ -939,7 +994,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ),
       );
 
-      // Shortcut 3: Search (Opens History search)
+      // Shortcut 4: Search (Opens History search)
       items.add(
         const ShortcutItem(
           type: 'open_search',
@@ -1339,6 +1394,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ? _activeCategory.trim()
         : null;
 
+    final effectiveTags = List<String>.from(tags ?? const []);
+    if (_activeGoalId != null) {
+      final goalTag = 'goal:$_activeGoalId';
+      if (!effectiveTags.contains(goalTag)) {
+        effectiveTags.add(goalTag);
+      }
+    }
+
     final entry = Moment(
       id: _nextId,
       timestamp: effectiveNow.millisecondsSinceEpoch,
@@ -1346,7 +1409,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
       date: dateKey(effectiveNow),
       note: finalNoteText,
       category: resolvedCategory,
-      tags: tags ?? const [],
+      tags: effectiveTags,
+      goalId: _activeGoalId,
       imagePath: imagePath,
       voicePath: voicePath,
       voiceDurationMs: voiceDurationMs,
@@ -1423,6 +1487,26 @@ class _NoteKarHomeState extends State<NoteKarHome>
           final newShields = math.max(0, _streakShields - 1);
           await _prefs?.setInt('streak_shields', newShields);
           if (mounted) setState(() => _streakShields = newShields);
+        }
+      }
+
+      if (type == 'out' && _activeGoal != null) {
+        final completedGoal = _activeGoal!;
+        final progress = GoalsService.instance.calculateProgress(
+          completedGoal,
+          _entries,
+        );
+        if (progress.isCompleted && mounted) {
+          final p = paletteFor(
+            _theme,
+            highContrast: _highContrast,
+            accentName: _accentColor,
+          );
+          showGoalCompletionCelebrationDialog(
+            context: context,
+            p: p,
+            goal: completedGoal,
+          );
         }
       }
 
@@ -1544,7 +1628,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       context: context,
       builder: (ctx) => CupertinoTheme(
         data: CupertinoThemeData(
-          brightness: p.name == 'light' ? Brightness.light : Brightness.dark,
+          brightness: !p.isDark ? Brightness.light : Brightness.dark,
           primaryColor: p.accent,
         ),
         child: StatefulBuilder(
@@ -1566,7 +1650,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       inputFormatters: [LengthLimitingTextInputFormatter(15)],
                       style: TextStyle(color: p.text),
                       decoration: BoxDecoration(
-                        color: p.name == 'light'
+                        color: !p.isDark
                             ? const Color(0xFFE5E5EA)
                             : (p.name == 'amoled'
                                   ? const Color(0xFF161616)
@@ -2048,7 +2132,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
   Future<void> _startGoalSession({
     required String? category,
     String mode = 'two-way',
+    String? goalId,
   }) async {
+    _activeGoalId = goalId;
+    if (goalId != null) {
+      await _saveSetting('m-active-goal-id', goalId);
+    } else {
+      await _prefs?.remove('m-active-goal-id');
+    }
     if (category != null && category.isNotEmpty) {
       await _setActiveCategory(category);
     }
@@ -2075,6 +2166,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out')) {
       await _logEntry(forcedType: 'out');
     }
+    _activeGoalId = null;
+    await _prefs?.remove('m-active-goal-id');
+    if (mounted) setState(() {});
   }
 
   Future<void> _togglePauseResumeSession() async {
@@ -2440,7 +2534,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         mounted) {
       final targetCat = result['category'] as String?;
       final targetMode = result['mode'] as String? ?? 'two-way';
-      await _startGoalSession(category: targetCat, mode: targetMode);
+      final targetGoalId = result['goalId'] as String?;
+      await _startGoalSession(
+        category: targetCat,
+        mode: targetMode,
+        goalId: targetGoalId,
+      );
     } else if (result is Map &&
         result['action'] == 'stop_goal_session' &&
         mounted) {
@@ -2492,6 +2591,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     if (result == null || !mounted) return;
 
+    final goalId = result.linkedGoal?.id;
+    final goalTag = goalId != null ? 'goal:$goalId' : null;
+    final inTags = List<String>.from(result.tags);
+    if (goalTag != null && !inTags.contains(goalTag)) {
+      inTags.add(goalTag);
+    }
+    final outTags = goalTag != null ? [goalTag] : const <String>[];
+
     if (result.isSession && result.endDateTime != null) {
       final startMs = result.startDateTime.millisecondsSinceEpoch;
       var endMs = result.endDateTime!.millisecondsSinceEpoch;
@@ -2507,8 +2614,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         type: 'in',
         date: dateKey(result.startDateTime),
         note: result.note,
-        tags: result.tags,
+        tags: inTags,
         category: result.category,
+        goalId: goalId,
       );
       final outMoment = Moment(
         id: _nextId + 1,
@@ -2516,8 +2624,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         type: 'out',
         date: dateKey(endDt),
         note: '',
-        tags: const [],
+        tags: outTags,
         category: result.category,
+        goalId: goalId,
       );
 
       _nextId += 2;
@@ -2537,8 +2646,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
         type: 'single',
         date: dateKey(result.startDateTime),
         note: result.note,
-        tags: result.tags,
+        tags: inTags,
         category: result.category,
+        goalId: goalId,
       );
       _nextId++;
       await _repository.saveMoment(moment);
@@ -2551,6 +2661,18 @@ class _NoteKarHomeState extends State<NoteKarHome>
     }
 
     _cachedGoals = await GoalsService.instance.getGoals();
+    if (result.linkedGoal != null) {
+      final goal = result.linkedGoal!;
+      final progress = GoalsService.instance.calculateProgress(goal, _entries);
+      if (progress.isCompleted && mounted) {
+        final p = paletteFor(
+          _theme,
+          highContrast: _highContrast,
+          accentName: _accentColor,
+        );
+        showGoalCompletionCelebrationDialog(context: context, p: p, goal: goal);
+      }
+    }
     if (mounted) setState(() {});
     unawaited(_updateAndroidWidget());
   }
@@ -2999,7 +3121,12 @@ class _NoteKarHomeState extends State<NoteKarHome>
         mounted) {
       final targetCat = result['category'] as String?;
       final targetMode = result['mode'] as String? ?? 'two-way';
-      await _startGoalSession(category: targetCat, mode: targetMode);
+      final targetGoalId = result['goalId'] as String?;
+      await _startGoalSession(
+        category: targetCat,
+        mode: targetMode,
+        goalId: targetGoalId,
+      );
     } else if (result is Map &&
         result['action'] == 'stop_goal_session' &&
         mounted) {
@@ -4182,6 +4309,21 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       _mode == 'two-way' &&
                       (_sessionStart != null || _inout == 'out'),
                   onOpenIntelligenceHub: _openIntelligenceHub,
+                  goals: _cachedGoals,
+                  activeGoal: _activeGoal,
+                  onSelectGoal: (g) {
+                    setState(() {
+                      _activeGoalId = g?.id;
+                    });
+                    if (g?.id != null) {
+                      unawaited(_saveSetting('m-active-goal-id', g!.id));
+                      if (g.category != null && g.category!.isNotEmpty) {
+                        unawaited(_setActiveCategory(g.category!));
+                      }
+                    } else {
+                      unawaited(_prefs?.remove('m-active-goal-id'));
+                    }
+                  },
                 ),
               ],
             ),

@@ -412,7 +412,7 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
 }
 
 BoxDecoration _bottomNavDecoration(Palette p, bool blur) {
-  final isLight = p.name == 'light';
+  final isLight = !p.isDark;
   final isAmoled = p.name == 'amoled';
 
   final surfaceColor = isLight

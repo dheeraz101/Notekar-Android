@@ -43,10 +43,42 @@ class AudioService extends ChangeNotifier {
 
   Timer? _playbackPollTimer;
 
+  // --- Permissions ---
+
+  Future<bool> checkPermission() async {
+    try {
+      final granted = await _channel.invokeMethod<bool>('checkAudioPermission');
+      return granted ?? false;
+    } catch (_) {
+      // In headless/test or desktop environments, assume granted
+      return true;
+    }
+  }
+
+  Future<bool> requestPermission() async {
+    try {
+      final granted = await _channel.invokeMethod<bool>(
+        'requestAudioPermission',
+      );
+      return granted ?? false;
+    } catch (_) {
+      return true;
+    }
+  }
+
   // --- Recording Actions ---
 
   Future<Map<String, dynamic>?> startRecording() async {
     try {
+      final hasPerm = await checkPermission();
+      if (!hasPerm) {
+        final granted = await requestPermission();
+        if (!granted) {
+          _logger.warn('Audio recording permission denied by user');
+          return null;
+        }
+      }
+
       _stopPlaybackPoll();
       _isPlaying = false;
 
@@ -66,6 +98,10 @@ class AudioService extends ChangeNotifier {
       notifyListeners();
       return res != null ? Map<String, dynamic>.from(res) : null;
     } catch (e, stack) {
+      if (e is PlatformException && e.code == 'PERMISSION_DENIED') {
+        _logger.warn('Audio recording permission denied by platform', e, stack);
+        return null;
+      }
       _logger.warn(
         'Platform recording not available, running fallback simulation',
         e,

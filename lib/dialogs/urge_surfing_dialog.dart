@@ -159,7 +159,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: _mode == UrgeMode.boxBreathing
-                            ? (p.name == 'light'
+                            ? (!p.isDark
                                   ? Colors.white
                                   : (p.name == 'amoled'
                                         ? const Color(0xFF28282C)
@@ -200,7 +200,7 @@ class _UrgeSurfingDialogState extends State<UrgeSurfingDialog>
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: _mode == UrgeMode.grounding
-                            ? (p.name == 'light'
+                            ? (!p.isDark
                                   ? Colors.white
                                   : (p.name == 'amoled'
                                         ? const Color(0xFF28282C)
