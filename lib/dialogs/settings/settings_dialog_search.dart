@@ -2707,7 +2707,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Executive Intelligence Hub') {
-      _openCategory('Dashboard');
+      Navigator.of(context).push(ExecutiveIntelligenceHubScreen.route());
       return;
     }
     if (result.title == 'Targets & Goals') {

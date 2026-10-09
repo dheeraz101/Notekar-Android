@@ -4,34 +4,31 @@
 
 [![NoteKar Banner](screenshot/notekar_banner.png)](https://github.com/dheeraz101/Notekar-Android)
 
-### *The Sovereign Existential Compass & Chronometer Craft for Android*
+### *The Sovereign Time Instrument & Existential Compass for Android*
 
 **Daily 24h Conscious Accounting • The Cost of the Void • Seamless Focus • 100% Private & Offline**
 
 ---
 
-[![Version](https://img.shields.io/badge/version-7.5.7-blue.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Version](https://img.shields.io/badge/version-7.5.7-0070F3.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
 [![Build](https://img.shields.io/badge/build-26BR1004-7000FF.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android/releases)
-[![Release Cadence](https://img.shields.io/badge/cadence-weekly%20%2F%20bi--monthly-8A2BE2.svg?style=flat-square&logo=clock)](https://github.com/dheeraz101/Notekar-Android/releases)
+[![Android](https://img.shields.io/badge/Android-SDK%2021%2B-248A3D.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![Flutter](https://img.shields.io/badge/Flutter-%5E3.12.0-02569B.svg?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Android](https://img.shields.io/badge/Android-SDK%2021%2B-green.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Privacy](https://img.shields.io/badge/Privacy-Offline--First-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://notekarapp.vercel.app/privacy.html)
-[![Translations](https://img.shields.io/badge/l10n-7%20Live%20%7C%2050%2B%20Target-orange.svg?style=flat-square&logo=googletranslate&logoColor=white)](TRANSLATIONS.md)
-[![GitHub Stars](https://img.shields.io/github/stars/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/dheeraz101/Notekar-Android?style=flat-square&logo=github)](https://github.com/dheeraz101/Notekar-Android/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-EAB308.svg?style=flat-square)](LICENSE)
+[![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline-success.svg?style=flat-square&logo=ghostery&logoColor=white)](https://notekarapp.vercel.app/privacy.html)
+[![Telemetry](https://img.shields.io/badge/Telemetry-Zero%20Trackers-orange.svg?style=flat-square)](https://github.com/dheeraz101/Notekar-Android)
 
 <p align="center">
   <a href="https://github.com/dheeraz101/Notekar-Android/releases/latest">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.6-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-v7.5.7-248A3D?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
   </a>
   &nbsp;&nbsp;
   <a href="https://notekarapp.vercel.app/">
     <img src="https://img.shields.io/badge/🌐_Web_PWA_App-Launch-0070F3?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch Web App" />
   </a>
   &nbsp;&nbsp;
-  <a href="https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/">
-    <img src="https://raw.githubusercontent.com/dheeraz101/Yet-Another-Boring-Project/main/logo.png" width="28" height="28" alt="YABP Initiative" style="vertical-align: middle;" />
+  <a href="https://github.com/dheeraz101/Notekar-Android/releases">
+    <img src="https://img.shields.io/badge/📦_Release_Notes-View-7000FF?style=for-the-badge&logo=github&logoColor=white" alt="Releases" />
   </a>
 </p>
 
@@ -39,474 +36,164 @@
 
 ---
 
-> [!NOTE]
-> 📢 **Release & Maintenance Cadence**  
-> Due to developer schedule and commitments, updates and new builds are released **weekly or once to twice a month**. Bug fixes, security patches, and performance optimizations are continuously batched and rolled out on this cadence. Thank you for your support and patience!
-
 > [!IMPORTANT]
-> 🧭 **"NoteKar has revisioned itself."**
->
-> Moving beyond a minimalist clicker, NoteKar elevates into an existential compass: accounting for
-> finite human conscious hours, confronting the cost of the unaccounted void, and perfecting sensory
-> chronometer craft. Every second is accounted for; the void is revealed.
->
-> 📦 **Download Official APKs**: [GitHub Releases Page](https://github.com/dheeraz101/Notekar-Android/releases) • 🌐 **Companion Web App**: [notekarapp.vercel.app](https://notekarapp.vercel.app/) • [Web Source Repo](https://github.com/dheeraz101/Notekar)
+> **"NoteKar has revisioned itself."**  
+> Moving beyond a minimalist clicker, NoteKar elevates into an existential compass: accounting for finite human conscious hours, confronting the cost of the unaccounted void, and perfecting sensory chronometer craft. Every second is accounted for; the void is revealed.
 
 ---
 
-## 📦 Availability
+## 🛡️ Core Pillars of Trust & Data Sovereignty
 
-| Platform | Channel | Link |
-|:---------|:--------|:-----|
-| **Android** | Stable APK | [GitHub Releases](https://github.com/dheeraz101/Notekar-Android/releases/latest) |
-| **Android** | Source Code | [This Repository](https://github.com/dheeraz101/Notekar-Android) |
-| **Web PWA** | Live App | [notekarapp.vercel.app](https://notekarapp.vercel.app/) |
-| **Web PWA** | Source Code | [Notekar Web Repo](https://github.com/dheeraz101/Notekar) |
-
----
-
-## 🧭 Table of Contents
-
-- [📦 Availability](#-availability)
-- [✨ Why NoteKar?](#-why-notekar)
-- [📸 Visual UI Gallery](#-visual-ui-gallery)
-- [🌟 Core Features & Existential Engine](#-core-features--existential-engine)
-    - [⏳ 1. Life Audit & The Cost of the Void](#-1-life-audit--the-cost-of-the-void)
-    - [⏱️ 2. Spatial Chronometer & Authentic Bebas Neue Typography](#-2-spatial-chronometer--authentic-bebas-neue-typography)
-    - [⚡ 3. Instant Glass Logging & Seamless Continuity](#-3-instant-glass-logging--seamless-continuity)
-    - [✍️ 4. WhatsApp-Grade Zero-Lag Note Input](#-4-whatsapp-grade-zero-lag-note-input)
-    - [📜 5. Life Ledger Timeline (Redesigned History)](#-5-life-ledger-timeline-redesigned-history)
-    - [📊 6. Executive Intelligence Hub (Dashboard)](#-6-executive-intelligence-hub-dashboard)
-    - [🌱 7. Sobriety Companion & Milestone Map](#-7-sobriety-companion--milestone-map)
-    - [🧘 8. Hourly Time Reflection & Mindfulness](#-8-hourly-time-reflection--mindfulness)
-    - [📱 9. Android Home Screen Widget (2x2)](#-9-android-home-screen-widget-2x2)
-    - [👤 10. Personal Identity, 24h Life Clock & 100y Memento Mori](#-10-personal-identity-24h-life-clock--100y-memento-mori)
-    - [📥 11. Third-Party Data Migration (Loop & HabitKit)](#-11-third-party-data-migration-loop--habitkit)
-    - [⚡ 12. Device Health Diagnostics & 3-Tier Adaptive Engine](#-12-device-health-diagnostics--3-tier-adaptive-engine)
-    - [🎯 13. Flagship Goals & Intentional Target Engine](#-13-flagship-goals--intentional-target-engine)
-- [🌉 System Bridges & Automation](#-system-bridges--automation)
-- [🛡️ Privacy, Security & Hardware Protection](#️-privacy-security--hardware-protection)
-- [🌐 Multilingual & Global Community](#-multilingual--global-community)
-- [💡 The Story Behind the Name ("NoteKar")](#-the-story-behind-the-name-notekar)
-- [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
-- [🤖 Open Source & Clean Software Standards](#-open-source--clean-software-standards)
-- [💻 Building & Running Locally](#-building--running-locally)
-- [🔑 Release Signing & Keystore Setup](#-release-signing--keystore-setup)
-- [🤝 Contributing & Community](#-contributing--community)
-- [🚀 Product Roadmap & Upcoming Innovations](#-product-roadmap--upcoming-innovations)
-- [☕ Support & Community](#-support--community)
-- [❓ Frequently Asked Questions](#-frequently-asked-questions)
-- [⚖️ Legal Disclaimer & Trademark Notice](#️-legal-disclaimer--trademark-notice)
-- [📄 License & Attribution](#-license--attribution)
-- [⭐ Star History](#-star-history)
-
----
-
-## ✨ Why NoteKar?
-
-In an era of bloatware, mandatory logins, infinite algorithmic distraction, and cloud surveillance,
-**NoteKar** is engineered as an uncompromising, sovereign utility and existential mirror.
-
-```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  ⏳ LIFE AUDIT & THE VOID   │  24h conscious partitions confronting lost days.│
-│  ⏱️ SPATIAL CHRONOMETER     │  Optically centered Bebas Neue tall numerals.   │
-│  ⚡ ZERO-FRICTION CAPTURE   │  Tap anywhere on glass to log timestamps.       │
-│  🔄 UNBROKEN CONTINUITY     │  Live stopwatch preserved across mode toggles.  │
-│  ✍️ WHATSAPP-GRADE TYPING   │  Zero-lag note entry with auto-capitalization.  │
-│  📜 LIFE LEDGER TIMELINE    │  Apple HIG paired sessions & 1-tap live end.    │
-│  📊 EXECUTIVE INTELLIGENCE  │  Circadian rhythm & 90-day heatmap (on-device). │
-│  🛡️ OFFLINE-FIRST SOVEREIGN │  Local Isar engine. Zero telemetry.             │
-│  🌉 SYSTEM BRIDGES          │  Obsidian MD live export, .ICS calendar sync.   │
-│  🌱 SOBRIETY & MINDFULNESS  │  21 neuroscience milestones & lockscreen breath.│
-└──────────────────────────────────────────────────────────────────────────────┘
-```
+| 🔒 100% Offline-First | 🚫 Zero Telemetry | ⚡ Sensory Chronometer | 💾 True Data Sovereignty |
+| :--- | :--- | :--- | :--- |
+| Runs completely air-gapped on your device. Zero servers, zero account sign-ins, zero cloud round-trips. | Zero Google Analytics, zero Firebase, zero crash trackers, zero advertising SDKs. Completely verifiable. | Optically centered tall Bebas Neue numerals with responsive haptic feedback and instant glass tap. | Stored in an ACID-compliant local Isar database. 1-tap export to JSON, CSV, .ICS, and Obsidian Markdown. |
 
 ---
 
 ## 📸 Visual UI Gallery
 
-Designed with an obsession for Apple Human Interface Guidelines (HIG), dynamic tactile feedback,
-fluid transitions, and OLED-perfect pitch black surfaces.
+<div align="center">
 
-|                                            Welcome & Onboarding                                            |                                             VIP Sovereign Theme                                              |                                               Permissions Setup                                               |                                             Home Log Canvas                                             |                                            History & Timeline                                            |
-|:----------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
-| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="180" alt="Welcome Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="180" alt="Sovereign Themes"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="180" alt="Permissions Setup"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="180" alt="Home Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="180" alt="History View"> |
-|                                           _Zero-friction start_                                            |                                           _Champagne gold palette_                                           |                                        _Transparent privacy controls_                                         |                                          _Instant tap canvas_                                           |                                         _Rich moment telemetry_                                          |
+| Welcome & Onboarding | Sovereign Themes | Privacy Controls | Home Chronometer | Life Ledger History |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="180" alt="Welcome Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="180" alt="Sovereign Themes"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="180" alt="Privacy Controls"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="180" alt="Home Chronometer"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="180" alt="History Timeline"> |
+| _Zero-friction start_ | _OLED dark & themes_ | _Transparent security_ | _Instant tap canvas_ | _Connected moments_ |
 
-|                                               Settings Dashboard                                               |                                             Security & Biometrics                                             |                                             Knowledge & Guides                                              |                                            Analytics & Heatmaps                                            |                                               Proactive Reminders                                               |
-|:--------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|
-| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="180" alt="Settings Dashboard"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="180" alt="Security Settings"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="180" alt="Guides and Help"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="180" alt="Analytics View"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="180" alt="Reminder Scheduler"> |
-|                                               _24 modular tools_                                               |                                            _Biometric & PIN vault_                                            |                                          _Offline FAQs & manuals_                                           |                                         _Interactive habit trends_                                         |                                             _Doze-friendly alarms_                                              |
+| Settings Dashboard | Security & Biometrics | Offline Guides | Analytics & Trends | Proactive Alarms |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="180" alt="Settings Dashboard"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="180" alt="Security Settings"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="180" alt="Offline Guides"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="180" alt="Analytics View"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png" width="180" alt="Proactive Reminders"> |
+| _24 modular tools_ | _Biometric PIN vault_ | _Offline documentation_ | _Interactive trends_ | _Doze-friendly alarms_ |
+
+</div>
 
 ---
 
-## 🌟 Core Features & Existential Engine
+## 🌟 Flagship Features
 
-### ⏳ 1. Life Audit & The Cost of the Void
+### ⏱️ 1. Spatial Chronometer & One-Tap Glass Capture
+- **Optical Midpoint Centering**: Mathematically positioned at the display's optical midpoint, eliminating vertical bias.
+- **Authentic Bebas Neue Numerals**: Offline bundled tall typography (`assets/fonts/BebasNeue-Regular.ttf`) scaled to 144pt tabular figures.
+- **One-Tap Glass Capture**: Tap anywhere on glass to record timestamps with subtle tactile haptic pulses.
+- **Dual Operating Modes**: Single one-shot counters (`00`–`99`) or Two-Way (`IN` / `OUT`) interval tracking with unbroken continuity.
 
-*Existential Accounting Engine*: NoteKar's most transformative innovation: **confronting the finite nature of human conscious time**.
-If you are not logging your hours, time does not pause, it vanishes into the unaccounted void.
-NoteKar makes this friction visible with mathematical clarity:
-
-- **Daily 24-Hour Partition Architecture**:
-  Every day is rigorously partitioned into three fundamental temporal buckets:
-  $$\text{Total Day (24h)} = \text{Sleep} + \text{Logistics (Food, Travel, Routine)} + \text{Conscious Window}$$
-- **The Cost of the Void**:
-  Conscious hours not accounted for in deliberate focus sessions or intentional moments are
-  calculated as the **Void**:
+### ⏳ 2. Life Audit & The Cost of the Void
+- **24-Hour Conscious Accounting**: Partitions every solar day into:
+  $$\text{Total Day (24h)} = \text{Sleep} + \text{Logistics (Food, Transit)} + \text{Conscious Window}$$
+- **The Cost of the Void**: Automatically calculates unrecorded waking time lost to unintentional drift:
   $$\text{Unaccounted Void} = \text{Conscious Window} - \text{Logged Focus Sessions}$$
-- **Multi-Horizon Existential Ledger (6 Horizons)**:
-  Examine your time debt across six distinct temporal scopes:
-    - **Today**: 24-Hour immediate feedback.
-    - **Weekly (7d)**: 168-Hour work & rest review.
-    - **Monthly (30d)**: 720-Hour monthly cadence.
-    - **Half-Quarterly (6 Weeks / 45d)**: Habit formation and mid-quarter momentum check.
-    - **Half-Yearly (26 Weeks / 180d)**: Deep reflection on macro goals and seasonal shifts.
-    - **Planetary Yearly (365d)**: Comprehensive audit of conscious solar rotations.
-- **Visceral Mortality & Intentionality Metrics**:
-    - **Conscious Waking Days Lost**: How many waking days (e.g. 14h blocks) slipped away without a
-      trace.
-    - **Earth (24h) Days Lost**: Equivalent full planetary rotations consumed by unrecorded time.
-    - **Intentionality Ratio**: Visual percentage gauge of conscious time actively captured and
-      justified.
-- **Interactive Partition Sliders**: Real-time tactile adjustment for baseline sleep (e.g., 8-10h)
-  and food/travel logistics (e.g., 2-4h) with haptic resistance.
-- **Historical Ledger & Seneca Colophon**: Day-by-day audit chronicle paired with Seneca’s Stoic
-  reality reminder (*"Time is the only thing where it is a virtue to be greedy"*).
-- **Executive Dashboard Integration**: Dedicated Life Audit card with auto-scaling dynamic horizon
-  meters and collision-proof responsive typography.
+- **6 Temporal Horizons**: Inspect your intentionality ratio across **Today**, **Weekly (7d)**, **Monthly (30d)**, **Half-Quarterly (45d)**, **Half-Yearly (180d)**, and **Planetary Yearly (365d)**.
 
-### ⏱️ 2. Spatial Chronometer & Authentic Bebas Neue Typography
+### 📜 3. Life Ledger Timeline
+- **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into paired session cards with start/finish nodes and elapsed duration pills.
+- **1-Tap Live Session End**: Active sessions show a pulsing green `LIVE` badge and dedicated **End** button to seal sessions in real time.
+- **Undo Safety Bed**: Solid red swipe-to-delete backing with a 5-second Dynamic Island countdown undo pill.
+- **iOS-Style Calendar Sheet**: Fluid calendar sheet with solid iOS System Red selection rings, past-date jumps, and event dots.
 
-- **Usable Viewport Optical Centering**: The home chronometer face is mathematically positioned at
-  the exact optical midpoint of the usable canvas between the floating top insights pill and the
-  bottom tool navigation, eliminating artificial vertical bias.
-- **Authentic Bebas Neue Numerals**: Replaced artificial matrix transforms with genuine, bundled
-  open-source *Bebas Neue* tall typography (61KB offline OFL). Naturally tall, commanding numerals (
-  144pt scale) with tabular figures for both the main clock and active Two-Way countdown timers.
+### 📊 4. Executive Intelligence Hub
+- **Grounded Daily Rhythm**: Activity bars anchored flush to the baseline, dynamically ascending with volume.
+- **90-Day Heatmap**: Visual activity density grid tracking daily logging streaks with zero cloud processing.
+- **Circadian Time-of-Day Bias**: Real-time breakdown across Morning (06–12), Afternoon (12–18), Evening (18–22), and Night (22–06).
 
-### ⚡ 3. Instant Glass Logging & Seamless Continuity
-
-- **One-Tap Glass Capture**: Tap anywhere on the main screen to immediately capture exact timestamps
-  with custom tactile haptic pulses.
-- **Seamless Two-Way Session Continuity**: Switch dynamically between **Single** mode and **Two-Way** mode mid-flight without resetting the live stopwatch, losing elapsed intervals, or dropping draft notes.
-- **Dual Operating Modes**:
-    - **Single Mode**: Rapid one-shot timestamp counter (`00` to `99`) with automatic rollover,
-      optional daily reset, and "Count on Save" badges.
-    - **Two-Way Mode**: Track deep work, study, workouts, or shifts by recording distinct `IN` and
-      `OUT` interval pairs with duration computations.
-
-### ✍️ 4. WhatsApp-Grade Zero-Lag Note Input
-
-- **Typing on Glass**: Overhauled note input mechanics with sentence auto-capitalization,
-  composition truncation guards, and decoupled character state updates.
-- **Zero Input Lag**: Completely eliminates keystroke latency and dialog re-renders during
-  high-speed typing, delivering buttery-smooth text entry.
-
-### 📜 5. Life Ledger Timeline (Redesigned History)
-
-Designed strictly to Apple Human Interface Guidelines (HIG), the **Life Ledger Timeline** transforms
-raw log records into an elegant, unified chronicle of your day:
-
-- **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into
-  paired session cards featuring start/finish nodes, elapsed duration pills (e.g. `2h 15m`), and
-  in-line note previews.
-- **1-Tap Live Session End**: Ongoing sessions display a pulsing green `LIVE <duration>` badge
-  alongside a dedicated red **End** button (`stop_circle_rounded`). Tap **End** right on the card to
-  seal the active session in real time with an instant `OUT` moment.
-- **Sequential Single Numbering (`00`-`99`)**: Standalone moments feature high-contrast circular
-  rail badges displaying sequential 2-digit counters, with optional midnight daily resets.
-- **Physical Bed of Red Swipe-to-Delete**: Swipe gestures reveal a solid red backing bed matching
-  the card's exact corner radius (16pt sessions, 12pt singles), eliminating gap cutouts, paired with
-  a 5-second Dynamic Island countdown undo pill.
-- **Redesigned Compact History Mode**: Ultra-dense timeline layout presenting 2x-3x more moments
-  with scaled rail markers, micro duration badges, and automatic suppression of empty note
-  placeholder boxes.
-- **Unified Apple HIG Dialog Architecture**: All multi-choice confirmation prompts, external
-  navigation security alerts, and network warnings standardized to native `CupertinoAlertDialog`
-  with zero button truncation.
-- **Frictionless Filter Pills**: Seamlessly toggle between **All**, **Sessions**, **Singles**, and **With Notes** with instant responsive transitions and zero layout clipping.
-- **iOS-Style Calendar Picker**: A fluid monthly calendar sheet featuring solid iOS System Red
-  selection circles, past-date selection, and anchored event dots positioned with locked geometric
-  centering (zero vertical baseline shift).
-- **Trash Bin Safety**: Local soft-delete vault to restore or permanently purge removed records
-  anytime.
-
-### 📊 6. Executive Intelligence Hub (Dashboard)
-
-The **Executive Intelligence Hub** delivers deep behavioral analytics, habit rhythms, and circadian
-insights computed 100% on-device:
-
-- **Time-Scope Switching**: Toggle between **Today**, **Week**, **Month**, and **All Time** with
-  fluid, responsive pill controls.
-- **Grounded Daily Rhythm Chart**: Daily activity bars are anchored flush to the bottom baseline and
-  ascend upward dynamically, ensuring visual equilibrium and eliminating awkward middle-floating
-  bars on low-volume days.
-- **90-Day High-Density Activity Grid**: GitHub-style color intensity heatmap tracking logging
-  consistency across the last 90 days with dedicated streak counters and clear subtitles.
-- **Circadian Time-of-Day Bias**: Real-time breakdown of activity distribution across **Morning (
-  06-12)**, **Afternoon (12-18)**, **Evening (18-22)**, and **Night (22-06)** windows.
-- **Executive Focus Metrics**: Track total session focus hours, average session lengths, and peak
-  productivity intervals with local in-memory aggregation.
-
-### 🌱 7. Sobriety Companion & Milestone Map
-
-- **21 Neuroscience-Backed Milestones**: Track habits and clean streaks across 34 narrative themes (
-  Science, Warrior, Samurai, Anime, Cyberpunk, and more).
-- **Shareable Milestone Peak Cards**: Render high-resolution PNG celebratory milestone cards with
-  1-tap sharing via the native Android share sheet.
-- **Physics-Based Confetti**: 85-particle celebration engine with 3D paper flutter, gravity
-  dynamics, and low-end hardware fallbacks.
-- **Urge Surfing Breathing Companion**: Guided 4-7-8 breathing circle to conquer cravings and
-  practice nervous system regulation.
+### 🌱 5. Sobriety Companion & Mindfulness
+- **21 Neuroscience Milestones**: Track habits and clean streaks across 34 narrative themes (Science, Samurai, Cyberpunk, etc.).
+- **Urge Surfing Breathing Guide**: Guided 4-7-8 breathing circle to conquer cravings and regulate the nervous system.
 - **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
 
-### 🧘 8. Hourly Time Reflection & Mindfulness
-
-- **Standalone Lockscreen Breathing Alarms**: Full-screen breathing prompts that display directly
-  over the lockscreen without unlocking your device or exposing private logs.
-- **Active Hours & Sleep Protection**: Configure daily active windows (e.g. 09:00 AM - 10:00 PM)
-  with overnight rollover protection.
-- **Apple HIG Cupertino Wheel Time Picker**: Smooth wheel selector for scheduling reflection
-  reminders and check-in intervals.
-- **Customizable Affirmation Mantra**: Display a 60-character personal mantra directly on the
-  breathing aura display.
-
-### 📱 9. Android Home Screen Widget (2x2)
-
-- Fast, battery-efficient App Widget to log moments and check streak milestones directly from your
-  Android launcher without opening the app.
-
-### 👤 10. Personal Identity, 24h Life Clock & 100y Memento Mori
-
-- **Apple ID-Grade Identity Card**: Top-level Settings profile card featuring edge-to-edge circular avatar framing (`BoxFit.cover`), custom display names, bios, and real-time existential age telemetry (e.g. `25y · 75y Mori (75.0%)`).
-- **24-Hour Life Clock**: Maps human mortality onto an intuitive single 24-hour day. If your lifespan is calibrated to a 100-year ceiling, age 25 corresponds to `06:00 AM`, illuminating where you stand in the grand day of your life.
-- **Conscious Waking Horizon**: Dissects total mortal runway into conscious waking hours (subtracting 8 hours/day for baseline sleep), computing lived conscious years versus remaining conscious runway.
-- **1-Hour Daily Leverage Formula**: Demonstrates the compounding value of temporal discipline. Reclaiming just 1 unproductive hour each day yields:
-  $$\text{Reclaimed Runway} = \frac{365 \text{ hours/year} \times \text{Remaining Years}}{16 \text{ waking hours/day} \times 365 \text{ days/year}} \approx +5.4 \text{ Conscious Waking Years}$$
-- **100-Year Ceiling Memento Mori Matrix**: Visceral progress horizon capped strictly at 100 years, providing clear perspective without fatalism.
-- **Dedicated Bottom Date Wheel Selector**: Native iOS Cupertino wheel date picker presented as a reusable bottom sheet for selecting Date of Birth with smooth haptic detents.
-- **Social Intelligence & High-Res Share Cards**: Export your Sovereign ID card and Life Audit summaries as high-resolution PNG cards with local privacy watermarks for personal reflection or community sharing.
-
-### 📥 11. Third-Party Data Migration (Loop & HabitKit)
-
-- **Dedicated Migration Card**: Located in **Settings → Backup & Export → Third-Party Migration** with strict Apple HIG styling and zero subtitle clutter.
-- **Format Auto-Sniffing & Parsing**:
-  - **Loop Habit Tracker (`.csv`)**: Seamlessly imports habit check-in logs, maps habit titles to NoteKar categories, and parses historical timestamps.
-  - **HabitKit (`.json`)**: Recursively ingests habit completions, colors, and records into local storage.
-- **Zero Cloud & Air-Gapped**: All parsing and schema transformation runs purely on-device in memory, maintaining absolute data sovereignty.
-- **Extensible Architecture**: Engineered with a modular adapter pattern for upcoming migration from Obsidian, Logseq, and other time-tracking tools.
-
-### ⚡ 12. Device Health Diagnostics & 3-Tier Adaptive Engine
-
-- **Hardware Capability Profiling**: NoteKar's `AdaptiveEngine` automatically inspects device RAM and processor cores to assign one of three performance tiers:
-  - **High Performance / Pro**: smooth spring physics, full multi-pass Gaussian backdrop glass blur, live particle celebrations, and unthrottled background polling.
-  - **Balanced**: 60 FPS standard refresh, efficient single-pass glass blur, and balanced animations for mid-range chipsets.
-  - **Power Saver**: 30-60 FPS capped refresh, solid high-contrast opaque surfaces (blur disabled), reduced motion, and throttled background tasks to preserve battery life and eliminate thermal throttling.
-- **Hardware Diagnostics Telemetry**: Inspect system health, SoC cores, memory footprint (with resilient SELinux heap estimation), platform details, and target render capabilities in **Settings → Device Health**.
-- **18 Minimal Glyph Category Icons**: Customizable monochrome Apple HIG glyphs for active and custom modes, consistently rendered across the home capsule, history sheet, insights, and executive dashboard.
-
-### 🎯 13. Flagship Goals & Intentional Target Engine
-
-- **Apple HIG Target Allocation**: Move from passive tracking to intentional temporal design. Establish precise hourly targets (e.g. 20h deep work, 5h physical fitness) evaluated over flexible temporal horizons:
-  - **Weekly**: Evaluated Monday to Sunday with real-time countdown to weekly reset.
-  - **Monthly**: Calendar month pacing with projected completion rates.
-  - **Yearly & All-Time**: Long-term mastery milestones and open-ended focus goals.
-- **Real-Time Runway & Deficit Tracking**: Instantly displays invested hours versus remaining deficit (e.g., `14h 20m / 20h` with a clean `5h 40m to go` status pill or `Goal Met 🎉`).
-- **Category & Mode Binding**: Bind targets specifically to two-way focus sessions, single reflective moments, or specialized category scopes (e.g. Work, Study, Health).
-- **Dual Sovereign Access**: Accessible seamlessly via the top header flag icon in the **Life Ledger Timeline (`HistoryDialog`)** and from the **Executive Intelligence Hub (`SettingsDashboardPage`)**.
-- **100% Offline Persistence**: Encrypted local storage with zero cloud dependencies and immediate reactive recalculations upon every logged moment.
+### 🎯 6. Flagship Goals & Pacing Engine
+- **Intentional Pacing**: Set weekly, monthly, or all-time hourly focus targets (e.g., 20h Deep Work).
+- **Live Deficit Tracking**: Displays elapsed focus hours against remaining deficits (`14h 20m / 20h` • `5h 40m to go`).
 
 ---
 
-## 🌉 System Bridges & Automation
+## ⚖️ Why NoteKar vs. Traditional Trackers?
 
-NoteKar functions as an extensible bridge between your Android OS, note-taking vaults, calendars,
-and automation engines.
+| Dimension | Traditional Trackers (Toggl, Clockify) | NoteKar Android |
+| :--- | :--- | :--- |
+| **Privacy & Telemetry** | Cloud sync, tracking pixels, telemetry SDKs | **100% Offline-First, Zero Telemetry** |
+| **Account Requirement** | Mandatory email, phone, or Google sign-in | **Zero Accounts, Immediate Use** |
+| **Capture Latency** | Multi-screen forms, category pickers | **1-Tap Glass Instant Capture** |
+| **Conscious Accounting** | Passive duration totals | **Life Audit & Cost of the Void** |
+| **Data Storage** | Remote proprietary cloud database | **Local Isar DB + SharedPreferences** |
+| **Data Portability** | Rate-limited exports, vendor lock-in | **Full JSON, CSV, .ICS & Obsidian MD** |
+| **Cost & Freedom** | Tiered monthly subscriptions | **100% Free & Open Source (MIT)** |
+
+---
+
+## 🌉 System Bridges & Integrations
 
 ```mermaid
-graph TD
-    A[External Android Environment] -->|notekar:// URL Schemes| B(NoteKar Engine)
-    A -->|ACTION_PROCESS_TEXT Highlight| B
-    A -->|ACTION_SEND Share Sheet| B
-    A -->|Tasker Broadcast am broadcast| B
-    B -->|Export .md| C[Obsidian / Logseq / Notion Vault]
-    B -->|Export .ics| D[Google / Outlook / Apple Calendar]
-    B -->|Local Isar Engine| E[Local Private Storage]
+flowchart LR
+    External["External Environment<br/>(Tasker, NFC, Share Sheet)"] -->|notekar:// URL & am broadcast| App["⚡ NoteKar Engine<br/>(Local Isar DB)"]
+    App -->|Export .md| Obsidian["Obsidian / Logseq Vault"]
+    App -->|Export .ics| Calendar["Google / Apple / Outlook Calendar"]
+    App -->|Export .json / .csv| Backup["Air-Gapped Local Backups"]
 ```
 
-### 🔗 1. Deep Linking URL Schemes (`notekar://`)
+<details>
+<summary><b>🔗 Deep Linking URL Schemes (<code>notekar://</code>)</b></summary>
 
-Trigger actions from NFC tags, browser bookmarks, or home screen shortcuts:
+| Action | URL Scheme Pattern | Description |
+| :--- | :--- | :--- |
+| **Quick Log** | `notekar://log?type=single&note=Coffee` | Logs an instant single moment |
+| **Check-In** | `notekar://in?note=Focus%20Work` | Starts a Two-Way tracking interval |
+| **Check-Out** | `notekar://out?note=PR%20Merged` | Closes the active Two-Way interval |
+| **Draft Note** | `notekar://note?text=Quick%20Idea` | Opens composer prefilled with text |
+| **Open Screen** | `notekar://open?page=history` | Navigates directly to History, Stats, or Settings |
+| **Breathe** | `notekar://reflect` | Launches the Time Reflection breathing sheet |
 
-| Action          | URL Scheme Pattern                      | Description                                       |
-|:----------------|:----------------------------------------|:--------------------------------------------------|
-| **Quick Log**   | `notekar://log?type=single&note=Coffee` | Logs an instant single moment                     |
-| **Check-In**    | `notekar://in?note=Focus%20Work`        | Starts a Two-Way tracking interval                |
-| **Check-Out**   | `notekar://out?note=PR%20Merged`        | Closes the active Two-Way interval                |
-| **Draft Note**  | `notekar://note?text=Quick%20Idea`      | Opens composer prefilled with text                |
-| **Open Screen** | `notekar://open?page=history`           | Navigates directly to History, Stats, or Settings |
-| **Breathe**     | `notekar://reflect`                     | Launches the Time Reflection breathing sheet      |
+</details>
 
-### 📝 2. Global Text Selection Menu (`ACTION_PROCESS_TEXT`)
+<details>
+<summary><b>🤖 Tasker, MacroDroid & Termux Automation Broadcast API</b></summary>
 
-Highlight any snippet in **Chrome, WhatsApp, Twitter/X, Kindle, or Books** and select **"Log in
-NoteKar"** from the system popup menu to capture quotes instantly offline.
-
-### 📤 3. Native Share Target (`ACTION_SEND`)
-
-Send text, URLs, and articles from any app directly to NoteKar with automatic title parsing and
-timestamp attribution.
-
-### 📓 4. Obsidian & Logseq Markdown Live Export
-
-Generate clean Markdown journal files formatted with date grouping, session tables, and daily
-telemetry:
-
-```markdown
-# NoteKar Journal
-
-## 📅 Sunday, August 30, 2026
-
-| Time | Type | Details / Note |
-|---|---|---|
-| 09:00:15 AM | 🟢 **IN** | Deep Work: Rust Backend |
-| 11:30:20 AM | 🔴 **OUT** | Completed Compiler Architecture |
-| 02:15:00 PM | ⚡ **SINGLE** | Team sync & architecture review |
-```
-
-### 🗓️ 5. Calendar Session Exporter (RFC 5545 `.ics`)
-
-Convert tracked Two-Way intervals into standard `.ics` calendar files with 1-tap import into **Google Calendar, Outlook, Samsung Calendar, and Proton Calendar**.
-
-### 🤖 6. Tasker, MacroDroid & Termux Broadcast API
-
-Execute offline background logging via Android intent broadcasts:
+> [!NOTE]
+> The automation broadcast receiver requires explicit opt-in under **Settings → Integrations → Automation Broadcast API** and includes replay attack protection (`op_id`).
 
 ```bash
-# Log single moment via ADB or Tasker
-am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work"
+# Log a single moment via ADB or Tasker
+am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type single --es note "Deep Work" --es op_id "$(date +%s)"
 
-# Check-in Two-Way interval
-am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type in --es note "Study Session"
+# Check-in a Two-Way focus interval
+am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type in --es note "Study Session" --es op_id "$(date +%s)"
 
-# Check-out Two-Way interval
-am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type out --es note "Finished Chapter 4"
+# Check-out a Two-Way interval
+am broadcast -a app.notekar.notekar.ACTION_LOG_MOMENT --es type out --es note "Finished Chapter 4" --es op_id "$(date +%s)"
 ```
 
----
-
-## 🛡️ Privacy, Security & Hardware Protection
-
-NoteKar operates on a strict **Zero Knowledge / Sovereign Data** architecture:
-
-- 🔒 **Local-First Storage Engine**: All logs and timestamps are stored in a local Isar database and SharedPreferences on-device.
-- 🛡️ **Biometric & PIN Vault**: Protect app access with fingerprint/face unlock and SHA-256 salted
-  PIN codes.
-- 👁️ **Recent App Obfuscation**: Android `FLAG_SECURE` prevents screenshots and masks contents in
-  the app switcher.
-- 🚫 **Zero Analytics & Zero Network Calls**: No telemetry scripts, no third-party trackers, no
-  Firebase, and no account creation requirements.
-- 💾 **1-Tap Offline Data Portability**: Complete backup, restore, and JSON/CSV export without cloud
-  dependencies.
+</details>
 
 ---
 
-## 🌐 Multilingual & Global Community
+## 🛠️ Tech Stack & Directory Architecture
 
-NoteKar is committed to universal accessibility with full native offline localization:
-
-### 🌟 Officially Supported (7 Live Languages)
-
-| Flag | Language     | Native Name | Code |     Numbers      |   Status   |
-|:----:|:-------------|:------------|:----:|:----------------:|:----------:|
-| 🇬🇧 | **English**  | English     | `en` |     Standard     | ✅ Complete |
-| 🇫🇷 | **French**   | Français    | `fr` |     Standard     | ✅ Complete |
-| 🇪🇸 | **Spanish**  | Español     | `es` |     Standard     | ✅ Complete |
-| 🇮🇳 | **Hindi**    | हिन्दी      | `hi` | Devanagari (०-९) | ✅ Complete |
-| 🇩🇪 | **German**   | Deutsch     | `de` |     Standard     | ✅ Complete |
-| 🇯🇵 | **Japanese** | 日本語         | `ja` |     Standard     | ✅ Complete |
-| 🇷🇺 | **Russian**  | Русский     | `ru` |     Standard     | ✅ Complete |
-
-### 🚀 50+ Target Community Languages Initiative
-
-We welcome contributions for **Arabic, Portuguese, Italian, Chinese (Simplified/Traditional),
-Korean, Turkish, Dutch, Polish, Swedish, Indonesian, Vietnamese, Thai, Ukrainian, Greek, Bengali,
-Marathi, Telugu, Tamil, Gujarati, Urdu, Kannada, Malayalam, Punjabi, Swahili**, and more!
-
-👉 **[Read our 3-Step Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md)**
-
----
-
-## 💡 The Story Behind the Name ("NoteKar")
-
-The name is Hindi wordplay: **Note** (नोट, a record) + **Kar** (कर, "to do"). Literally: *"Make a note."*
-
-It's a call to action disguised as a name: every tap is an act of noting your existence in time.
-
-NoteKar started as **YABP** (Yet Another Boring Project), a boilerplate experiment that evolved into a sovereign time-accounting instrument. The "Kar" suffix also nods to the Marathi/Hindi word for "doer": *NoteKar is the one who notes.*
-
----
-
-## 🛠️ Tech Stack & Architecture
-
-| Layer                      | Technology                                                    | Details                                        |
-|:---------------------------|:--------------------------------------------------------------|:-----------------------------------------------|
-| **Language**               | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/) | Type-safe reactive codebase                    |
-| **Framework**              | [Flutter](https://flutter.dev/) (`^3.12.0`)                   | High-performance rendering             |
-| **Typography**             | [Bebas Neue](assets/fonts/BebasNeue-Regular.ttf) (OFL)        | Bundled offline tall chronometer font          |
-| **Local Storage**          | [Isar](https://isar.dev/)                         | Fast, ACID-compliant local database engine        |
-| **State Management**       | [Reactive Singletons & ValueNotifiers](https://flutter.dev/)  | Ultra-low memory overhead                      |
-| **Design System**          | Custom Apple HIG & iOS 26 High-Radius Style                   | Dynamic glass, haptics, and AMOLED dark mode   |
-| **Hardware Compatibility** | Android 5.0+ (API Level 21+)                                  | Doze-compliant, low-end device adaptive engine |
-
-### 📂 Directory Architecture
+| Layer | Technology | Details |
+| :--- | :--- | :--- |
+| **Language** | [Dart](https://dart.dev/) & [Kotlin](https://kotlinlang.org/) | Type-safe reactive codebase |
+| **Framework** | [Flutter](https://flutter.dev/) (`^3.12.0`) | High-performance 60-120 FPS rendering |
+| **Typography** | [Bebas Neue](assets/fonts/BebasNeue-Regular.ttf) (OFL) | Bundled offline tall chronometer font |
+| **Local Storage** | [Isar](https://isar.dev/) & SharedPreferences | Fast, ACID-compliant local database engine |
+| **Design System** | Custom Apple HIG & iOS 26 High-Radius Style | Dynamic glass, haptics, and AMOLED dark mode |
+| **Platform Target** | Android 5.0+ (API Level 21+) | Doze-compliant, 3-tier adaptive hardware engine |
 
 ```text
 Notekar - Flutter/
-├── .github/workflows/          # Enterprise CI/CD (Lint, Test Coverage, Release Builds)
-├── android/                    # Native Android platform layer & Alarm receivers
-│   └── app/src/main/kotlin/    # MainActivity.kt, NoteKarAppWidgetProvider.kt
+├── android/                    # Native Android layer, App Widgets & Broadcast Receivers
 ├── assets/fonts/               # Bundled authentic Bebas Neue tall chronometer font
-├── fastlane/metadata/          # Structured Play Store metadata and changelogs
+├── fastlane/metadata/          # Structured Play Store metadata & changelogs
 ├── lib/
-│   ├── dialogs/                # Apple HIG modal bottom sheets, Life Audit & changelog dialogs
-│   │   └── settings/           # 24 modular settings pages (Bridges, Backups, Icons, etc.)
-│   ├── l10n/                   # 7 offline locales (EN, HI, ES, FR, DE, JA, RU) & ARB files
-│   ├── models/                 # Domain models (Moment, Palette, SobrietyTheme, Backup)
-│   ├── screens/                # Core views (NoteKarHome, WelcomeScreen)
+│   ├── dialogs/                # Apple HIG modal bottom sheets, Life Audit & Goals
+│   ├── l10n/                   # 7 offline locales (EN, HI, ES, FR, DE, JA, RU)
+│   ├── models/                 # Domain models (Moment, Palette, SobrietyTheme)
+│   ├── screens/                # Core screens (NoteKarHome, WelcomeScreen)
 │   ├── services/               # Decoupled services (NotificationEngine, UpdateService)
-│   ├── utils/                  # Cryptography, time wastage engine, moment repository
 │   └── widgets/                # Reusable UI widgets (ClockFace, PressableScale, Glass)
-├── releases/                   # Signed release notes & distribution artifacts
-├── versions/                   # Structured JSON version archive (changelog.json)
+├── screenshot/                 # High-resolution showcase banner
 └── test/                       # 100% passing unit, widget & sensory test suites
 ```
 
 ---
 
-## 🤖 Open Source & Clean Software Standards?
-?
-NoteKar Android adheres to clean open-source software standards:
-
-- ✅ **100% Free & Open Source**: Licensed under the OSI-approved **MIT License**.
-- ✅ **No Proprietary Dependencies**: Zero Google Play Services, Firebase SDKs, or proprietary
-  binaries.
-- ✅ **Zero Telemetry**: No tracking libraries, analytics SDKs, or advertising code.
-- ✅ **Structured Fastlane Metadata**: Included in `fastlane/metadata/android/en-US/`.
-
----
-
 ## 💻 Building & Running Locally
-
-### Prerequisites
-
-1. [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.12.0` or higher).
-2. [Android Studio](https://developer.android.com/studio) with Android SDK (API 21+).
-3. Connected Android device with USB Debugging enabled or an active Android Emulator.
-
-### Setup & Run
 
 ```bash
 # 1. Clone the repository
@@ -516,203 +203,73 @@ cd "Notekar - Flutter"
 # 2. Install Flutter packages
 flutter pub get
 
-# 3. Verify static analysis and formatting
-flutter analyze
-dart format --output=none --set-exit-if-changed .
-
-# 4. Run the test suite
+# 3. Verify static analysis and test suite
+dart analyze lib test
 flutter test
 
-# 5. Launch on your connected device
+# 4. Launch on your connected device or emulator
 flutter run
 ```
 
-### 🪝 Automated Pre-Commit Checks (Lefthook)
+<details>
+<summary><b>🔑 Production Release Signing & Keystore Instructions</b></summary>
 
-This repository includes configured [Lefthook](https://github.com/evilmartians/lefthook) hooks to automatically format and analyze code before committing:
+Keystore secrets (`*.jks`, `key.properties`) are strictly excluded from Git. To build a signed release APK:
 
-```bash
-# Install Git pre-commit hooks
-lefthook install
-```
-
----
-
-## 🔑 Release Signing & Keystore Setup
-
-> [!NOTE]
-> Keystore secrets (`*.jks`, `key.properties`) are excluded from Git for security.
-
-To generate a signed release APK or App Bundle (`.aab`):
-
-1. **Generate a signing keystore**:
+1. Generate a keystore:
    ```bash
    keytool -genkey -v -keystore android/app/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
    ```
-
-2. **Create `android/key.properties`**:
+2. Create `android/key.properties`:
    ```properties
    storePassword=<your-store-password>
    keyPassword=<your-key-password>
    keyAlias=upload
    storeFile=upload-keystore.jks
    ```
-
-3. **Build the production release APK**:
+3. Build the APK:
    ```bash
    flutter build apk --release
    ```
-   *The generated APK will be output to `build/app/outputs/flutter-apk/app-release.apk`.*
+
+</details>
 
 ---
 
-## 🤝 Contributing & Community
+## 🌐 Multilingual & Global Community
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+NoteKar includes full native offline localization across 7 languages:
 
-1. 🐛 **Report Bugs & Suggest Features**: Open an issue on our [GitHub Issues](https://github.com/dheeraz101/Notekar-Android/issues) tracker.
-2. 🌐 **Localization & Translations**: Help us bring NoteKar to 50+ languages! Follow our [3-Step Translation Guide (TRANSLATIONS.md)](TRANSLATIONS.md).
-3. 🛠️ **Code Contributions & Design System**: Review [CONTRIBUTING.md](CONTRIBUTING.md) and our canonical [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for architecture, design tokens, and Apple HIG guidelines.
-4. 📜 **Code of Conduct**: Please read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
-5. 🛡️ **Security Inquiries**: Disclose security findings responsibly via [SECURITY.md](SECURITY.md).
+| Flag | Language | Code | Numbers | Status |
+| :---: | :--- | :---: | :---: | :---: |
+| 🇬🇧 | **English** | `en` | Standard | ✅ Complete |
+| 🇮🇳 | **Hindi** (हिन्दी) | `hi` | Devanagari (०-९) | ✅ Complete |
+| 🇪🇸 | **Spanish** (Español) | `es` | Standard | ✅ Complete |
+| 🇫🇷 | **French** (Français) | `fr` | Standard | ✅ Complete |
+| 🇩🇪 | **German** (Deutsch) | `de` | Standard | ✅ Complete |
+| 🇯🇵 | **Japanese** (日本語) | `ja` | Standard | ✅ Complete |
+| 🇷🇺 | **Russian** (Русский) | `ru` | Standard | ✅ Complete |
 
----
-
-## 🚀 Product Roadmap & Upcoming Innovations
-
-NoteKar's architectural evolution balances Apple HIG sensory minimalism, uncompromising offline sovereignty, and conscious temporal intelligence. The following innovations are exploratory, non-binding conceptual proposals under consideration:
-
-### 🎙️ 1. Multi-Language Hands-Free Voice Notes & Edge Whisper STT
-
-- **Sovereign On-Device Speech-to-Text**: Transcribe spontaneous thoughts directly into moments without cloud round-trips using quantized offline Whisper models.
-- **7-Language Native Support**: English, Hindi, Spanish, French, German, Japanese, and Russian.
-- **Autonomous Auto-Stop & Silence Detection**: Intelligent voice-activity detection (VAD) finishes and categorizes notes hands-free.
-
-### 🧠 2. AI Temporal Insights & Circadian Narrative Engine
-
-- **Local Micro-LLM / On-Device Embeddings**: High-fidelity contextual understanding running completely on silicon (zero telemetry, zero server egress).
-- **Circadian Velocity & Horizon Forecasting**: Actionable circadian rhythm analysis detecting deep focus peaks and drift hours.
-- **Contextual Retrospectives**: Daily, weekly, and monthly reflective narratives woven from your conscious logbook.
-
-### 🔔 3. Dynamic Live Activities & Interactive Lockscreen
-
-- **Apple HIG-Grade Live Island**: Real-time persistent elapsed ticker with mode-tinted ring and quick pause/resume controls.
-- **Lockscreen Quick Capture**: Directly log thoughts or switch modes without unlocking the device.
-- **Dynamic Color Harmony**: Lockscreen widget gracefully inherits the current active mode palette.
-
-### 🧩 4. Micro-Chrono Interactive Widgets (2x2 & 4x2)
-
-- **Compact Chronometer Capsule**: High-precision stopwatch readout directly on your home screen.
-- **1-Tap Quick Capture**: Log timestamps and quick tags directly from the Android home screen launcher.
-- **Circadian Progress Ring**: Visual 24-hour conscious timeline disc showing focus vs. void in real time.
-
-### 📅 5. Visual Day-Swipe Timeline
-
-- **Full-Screen Day-Swipe Navigation**: Chronological swipe-able day calendar view complementing the classic list ledger.
-- **Day-by-Day Temporal Density**: Quick visual overview of session distribution, notes, and conscious intervals across consecutive days.
-
-### 🎨 6. Adaptive Color Accents
-
-- **Mode-Specific Accents**: Dynamic accent overrides automatically tinting clock numerals and highlights based on active focus category.
-
-### 📡 7. Sovereign Peer-to-Peer Local LAN Sync
-
-- **AirDrop-Style Offline Mesh**: Encrypted local WiFi / Wi-Fi Direct synchronization across phones, tablets, and desktop workstations.
-- **Zero Third-Party Servers**: No centralized accounts, no cloud relays, no subscription fees.
-- **Conflict-Free Replicated Data Types (CRDTs)**: Mathematically proven deterministic merge guarantees across devices without data loss.
-
-### 🏷️ 8. Chrono-Tag Association Matrix & Visual Graph
-
-- **Interactive Force-Directed Node Graph**: Explore temporal connections between tags, modes, and life categories.
-- **Co-Occurrence Matrix**: Uncover hidden habit patterns (e.g., how "Late Night" correlates with "Deep Focus" or "Wasted Void").
-- **Multi-Dimensional Horizon Filtering**: Filter and inspect tag clusters across 7-day, 30-day, and 90-day timeframes.
+👉 **[Join our 50+ Target Community Languages Initiative (TRANSLATIONS.md)](TRANSLATIONS.md)**
 
 ---
 
 ## ☕ Support & Community
 
-If NoteKar brings calm and focus to your daily workflow, consider supporting its open-source
-journey:
+If NoteKar brings clarity and intentional focus to your daily existence, consider supporting its open-source journey:
 
 <p align="center">
   <a href="https://www.buymeacoffee.com/dheeraz">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="190" alt="Buy Me a Coffee" />
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="180" alt="Buy Me a Coffee" />
   </a>
   &nbsp;&nbsp;
   <a href="https://buymeachai.ezee.li/dheeraz">
-    <img src="https://buymeachai.ezee.li/assets/images/buymeachai-button.png" width="190" alt="Buy Me A Chai" />
+    <img src="https://buymeachai.ezee.li/assets/images/buymeachai-button.png" width="180" alt="Buy Me A Chai" />
   </a>
 </p>
 
-- 🛡️ **[Privacy Policy](https://notekarapp.vercel.app/privacy.html)**
-- 📜 **[Terms of Service](https://notekarapp.vercel.app/terms.html)**
-- 🐛 **[Report Issues & Feature Ideas](https://github.com/dheeraz101/Notekar-Android/issues)**
-- 📖 **[Version Changelog (CHANGELOG.md)](CHANGELOG.md)**
-
----
-
-## ❓ Frequently Asked Questions
-
-<details>
-<summary><b>Is NoteKar really 100% offline?</b></summary>
-
-Yes. NoteKar has zero network dependencies for core functionality. Your timestamps, notes, and activity data never leave your device: not to our servers (we don't have any), not to Google, not anywhere. The only network call is an optional update check against the public GitHub releases feed. The app works identically in airplane mode.
-</details>
-
-<details>
-<summary><b>Why timestamps? Why not a regular notes app?</b></summary>
-
-NoteKar isn't a notes app: it's a **time instrument**. Think of it as a personal flight recorder for your day. One tap captures the exact moment. Over time, these moments reveal patterns in how you spend your existence. The Life Audit and Executive Intelligence features turn raw timestamps into actionable insights about your conscious hours.
-</details>
-
-<details>
-<summary><b>Can I export my data?</b></summary>
-
-Yes. NoteKar supports **CSV** and **JSON** export. Your data, your format, your choice. Go to Settings → Export to download everything.
-</details>
-
-<details>
-<summary><b>Does NoteKar track me or show ads?</b></summary>
-
-No analytics. No ads. No telemetry. No crash reporters. NoteKar contains **zero tracking code**. No Firebase, no Google Analytics, no Sentry: nothing. Verify this yourself: the complete source code is right here in this repository.
-</details>
-
-<details>
-<summary><b>What's the companion web app?</b></summary>
-
-The [companion web app](https://notekarapp.vercel.app/) is a PWA that mirrors the core timestamp logging experience in your browser. It stores data in IndexedDB, still offline-first, still zero-cloud. Perfect for quick logging when your phone isn't nearby.
-</details>
-
-<details>
-<summary><b>What does the "Edition" name mean in releases?</b></summary>
-
-Each release carries an edition name (e.g., *"Sovereign Goals, Activity Tags & Sensory Precision"*) that reflects the theme of new features introduced. It's our way of marking each milestone with intention rather than just a version number.
-</details>
-
-<details>
-<summary><b>Is NoteKar available on the Play Store?</b></summary>
-
-NoteKar is distributed as a direct APK download from [GitHub Releases](https://github.com/dheeraz101/Notekar-Android/releases). This keeps the app free from Play Store restrictions and ensures you always get the latest version directly from the source. NoteKar is fully open-source under the MIT license.
-</details>
-
-<details>
-<summary><b>How is my data secured?</b></summary>
-
-NoteKar stores your moments and notes locally on your device using the fast Isar database engine and Android SharedPreferences. Combined with the offline-first architecture, your personal records remain under your physical control.
-</details>
-
----
-
-## ⚖️ Legal Disclaimer & Trademark Notice
-
-> [!IMPORTANT]
-> **Independent Open-Source Instrument**: NoteKar is an independent sovereign utility created under the **[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)** initiative. NoteKar is not affiliated with, authorized, maintained, sponsored, or endorsed by Google LLC, Apple Inc., or any of their affiliates or subsidiaries.
-> 
-> "Android", "Google Play", and "Google Drive" are registered trademarks of Google LLC. "Apple", "iOS", and "iPhone" are registered trademarks of Apple Inc. All other trademarks belong to their respective owners.
-> 
-> **Design Philosophy & Attribution**: NoteKar's spatial chronometer typography, dynamic tactile feedback, fluid transitions, and glassmorphic bottom sheets are inspired by the design principles of Apple Human Interface Guidelines (HIG) and iOS modern interfaces. NoteKar is a strictly independent craft built natively with Flutter, Dart, and Kotlin. It does not use, include, copy, or redistribute proprietary Apple or Google code, assets, or services.
-> 
-> **Data Sovereignty Guarantee**: All timestamp captures, conscious hour partitions, sobriety milestones, and existential reflections remain strictly offline on your physical hardware, stored safely on your physical hardware. NoteKar operates zero cloud relays, zero analytics telemetry, and zero third-party tracking SDKs.
+- 🛡️ **[Privacy Policy](https://notekarapp.vercel.app/privacy.html)** • 📜 **[Terms of Service](https://notekarapp.vercel.app/terms.html)**
+- 🐛 **[GitHub Issues & Ideas](https://github.com/dheeraz101/Notekar-Android/issues)** • 📖 **[Changelog](CHANGELOG.md)**
 
 ---
 
@@ -720,18 +277,5 @@ NoteKar stores your moments and notes locally on your device using the fast Isar
 
 - **License**: Distributed under the **[MIT License](LICENSE)**.
 - **Initiative**: Proudly created under the **[YABP (Yet Another Boring Project)](https://yabp.netlify.app/?verify=https://notekarapp.vercel.app/)** initiative.
-- **Developer**: [Dheeraz](https://github.com/dheeraz101)
+- **Developer**: [Dheeraz](https://github.com/dheeraz101)  
 - **Made with ❤️ in India.**
-
----
-
-## ⭐ Star History
-
-<a href="https://www.star-history.com/?repos=dheeraz101/Notekar-Android&type=Date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dheeraz101/Notekar-Android&type=Date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dheeraz101/Notekar-Android&type=Date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dheeraz101/Notekar-Android&type=Date&legend=top-left" />
- </picture>
-</a>
-

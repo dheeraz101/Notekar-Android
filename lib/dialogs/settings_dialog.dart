@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +49,7 @@ import 'package:notekar/models/app_notice.dart';
 import 'package:notekar/models/help_guide_data.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/screens/executive_intelligence_hub_screen.dart';
 import 'package:notekar/services/circuit_breaker_service.dart';
 import 'package:notekar/services/user_profile_service.dart';
 import 'package:notekar/utils/adaptive_engine.dart';
@@ -1232,10 +1232,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   AppUpdateInfo? updateInfo;
   bool checkingUpdates = false;
 
-  // Error handling caches
-  void Function(FlutterErrorDetails)? _oldOnError;
-  bool Function(Object, StackTrace)? _oldPlatformOnError;
-
   final TextEditingController _settingsSearchController =
       TextEditingController();
   final FocusNode _settingsSearchFocusNode = FocusNode();
@@ -1316,22 +1312,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
         _openCategory('Search');
       }
     });
-    _oldOnError = FlutterError.onError;
-    FlutterError.onError = (details) {
-      _oldOnError?.call(details);
-      if (mounted) {
-        _showErrorReporterDialog(details.exception, details.stack);
-      }
-    };
-
-    _oldPlatformOnError = PlatformDispatcher.instance.onError;
-    PlatformDispatcher.instance.onError = (error, stack) {
-      if (mounted) {
-        _showErrorReporterDialog(error, stack);
-        return true;
-      }
-      return _oldPlatformOnError?.call(error, stack) ?? false;
-    };
   }
 
   @override
@@ -1345,9 +1325,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _noteSearchFocusNode.dispose();
     _reminderMessageController.dispose();
     _reminderMessageFocusNode.dispose();
-
-    FlutterError.onError = _oldOnError;
-    PlatformDispatcher.instance.onError = _oldPlatformOnError;
 
     super.dispose();
   }
@@ -1787,11 +1764,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   String get _dataHealthStatus {
     final entries = this.entries;
-    if (entries.isEmpty) return 'No data';
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final last = widget.lastSavedAt ?? 0;
-    if (now - last < 1000 * 60 * 60 * 24) return 'Healthy';
-    return 'Action required';
+    if (entries.isEmpty) return 'No records';
+    return 'Intact';
   }
 
   Future<void> _confirmResetSettings() async {
@@ -2018,18 +1992,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void _submitAutoCrashReport(dynamic error, dynamic stackTrace, Palette p) {
     final engine = AdaptiveEngine();
     final appVer = '$appVersion ($kAppBuildNumber)';
-    final title = Uri.encodeComponent('[CRASH]: Automated Error Report');
+    final rawErr = error
+        .toString()
+        .split('\n')
+        .first
+        .replaceAll(
+          RegExp(r'[A-Za-z]:\\[^ \n]+|/[a-zA-Z0-9_\-./]+'),
+          '[local_path]',
+        );
+    final cleanError = rawErr.length > 100 ? rawErr.substring(0, 100) : rawErr;
+    final rawStack = (stackTrace?.toString() ?? '')
+        .replaceAll(
+          RegExp(r'[A-Za-z]:\\[^ \n]+|/[a-zA-Z0-9_\-./]+'),
+          '[local_path]',
+        )
+        .trim();
+    final cleanStack = rawStack.length > 500
+        ? rawStack.substring(0, 500)
+        : (rawStack.isEmpty ? 'No stack trace provided.' : rawStack);
+    final title = Uri.encodeComponent('[CRASH]: $cleanError');
     final body = Uri.encodeComponent('''
 ### Automated Crash Report
 
 **Error Details**
 ```
-$error
+$cleanError
 ```
 
 **Stack Trace**
 ```
-${stackTrace ?? 'No stack trace provided.'}
+$cleanStack
 ```
 
 <details>
@@ -2370,6 +2362,16 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     status: 'Docs',
                                     color: p.accent,
                                     onTap: () => _openCategory('About'),
+                                  ),
+                                  SettingsRow(
+                                    p: p,
+                                    icon: CupertinoIcons.link,
+                                    title: 'Integrations & Automation',
+                                    status: 'External',
+                                    color: p.accent,
+                                    onTap: () => _openCategory(
+                                      'Integrations & Automation',
+                                    ),
                                   ),
                                   SettingsRow(
                                     p: p,
@@ -4062,38 +4064,7 @@ ${stackTrace ?? 'No stack trace provided.'}
                                     false,
                                   );
                                 }
-                                final godModeEntries = entries
-                                    .where(
-                                      (e) =>
-                                          e.note.toLowerCase().contains(
-                                            'god mode unlocked',
-                                          ) ||
-                                          e.note.toLowerCase().contains(
-                                            '#godmode',
-                                          ),
-                                    )
-                                    .toList();
-                                if (godModeEntries.isNotEmpty) {
-                                  final updated = List<Moment>.from(entries)
-                                    ..removeWhere(
-                                      (e) =>
-                                          e.note.toLowerCase().contains(
-                                            'god mode unlocked',
-                                          ) ||
-                                          e.note.toLowerCase().contains(
-                                            '#godmode',
-                                          ),
-                                    );
-                                  widget.entriesNotifier.value = updated;
-                                  final repo = MomentRepository();
-                                  await repo.ensureInitialized();
-                                  for (final gm in godModeEntries) {
-                                    await repo.deleteMoment(gm.id);
-                                    await repo.permanentlyDeleteTrashMoment(
-                                      gm.id,
-                                    );
-                                  }
-                                }
+
                                 if (theme == 'matrix' || theme == 'eink') {
                                   setState(() => theme = 'dark');
                                   widget.onTheme('dark');

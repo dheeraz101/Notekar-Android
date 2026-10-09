@@ -49,7 +49,7 @@ class NoticeService {
       'channels': ['stable', 'beta'],
       'platforms': ['android'],
       'minVersion': '7.0.0',
-      'maxVersion': appVersion,
+      'maxVersion': '7.5.0',
       'maxShows': 5,
       'cooldownHours': 12,
     },
@@ -58,9 +58,7 @@ class NoticeService {
   HttpClient _createHttpClient({
     Duration timeout = const Duration(seconds: 6),
   }) {
-    return HttpClient()
-      ..connectionTimeout = timeout
-      ..badCertificateCallback = (cert, host, port) => true;
+    return HttpClient()..connectionTimeout = timeout;
   }
 
   /// Fetches latest notices from notificationFeed, caches them locally, and returns the filtered list.

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/utils/app_utils.dart';
 
@@ -13,12 +14,18 @@ sealed class TimelineItem {
 
 /// A connected Two-Way session interval (paired IN and OUT moments, or ongoing IN).
 class TimelineSessionItem extends TimelineItem {
-  TimelineSessionItem({required this.inMoment, this.outMoment});
+  TimelineSessionItem({required this.inMoment, this.outMoment, bool? isOngoing})
+    : _isOngoingOverride = isOngoing;
 
   final Moment inMoment;
   final Moment? outMoment;
+  final bool? _isOngoingOverride;
 
-  bool get isOngoing => outMoment == null;
+  bool get isOngoing {
+    final override = _isOngoingOverride;
+    if (override != null) return override;
+    return outMoment == null;
+  }
 
   @override
   int get primaryTimestamp => outMoment?.timestamp ?? inMoment.timestamp;
@@ -29,9 +36,15 @@ class TimelineSessionItem extends TimelineItem {
 
   Duration get duration {
     final start = inMoment.timestamp;
-    final end = outMoment?.timestamp ?? DateTime.now().millisecondsSinceEpoch;
-    final diff = end - start;
-    return Duration(milliseconds: diff > 0 ? diff : 0);
+    if (outMoment != null) {
+      final diff = outMoment!.timestamp - start;
+      return Duration(milliseconds: diff > 0 ? diff : 0);
+    }
+    if (isOngoing) {
+      final diff = DateTime.now().millisecondsSinceEpoch - start;
+      return Duration(milliseconds: diff > 0 ? diff : 0);
+    }
+    return Duration.zero;
   }
 
   @override
@@ -234,8 +247,9 @@ List<TimelineDaySection> buildTimelineDaySections(
 
   for (final entry in byTimestamp.entries) {
     final momentsAtT = entry.value;
-    final singles =
-        momentsAtT.where((m) => m.type != 'in' && m.type != 'out').toList();
+    final singles = momentsAtT
+        .where((m) => m.type != 'in' && m.type != 'out')
+        .toList();
     final outs = momentsAtT.where((m) => m.type == 'out').toList();
     final ins = momentsAtT.where((m) => m.type == 'in').toList();
 
@@ -255,11 +269,14 @@ List<TimelineDaySection> buildTimelineDaySections(
     // 3. Pair remaining 'in' and 'out' moments at the same timestamp T
     while (ins.isNotEmpty && outs.isNotEmpty) {
       allItems.add(
-        TimelineSessionItem(inMoment: ins.removeAt(0), outMoment: outs.removeAt(0)),
+        TimelineSessionItem(
+          inMoment: ins.removeAt(0),
+          outMoment: outs.removeAt(0),
+        ),
       );
     }
 
-    // 4. Any leftover 'in' moments: if an earlier active session was still unclosed, close it as ongoing
+    // 4. Any leftover 'in' moments
     if (ins.isNotEmpty) {
       if (activeIn != null) {
         allItems.add(TimelineSessionItem(inMoment: activeIn, outMoment: null));
@@ -322,7 +339,10 @@ List<TimelineDaySection> buildTimelineDaySections(
           final currentEnd = switch (current) {
             TimelineSessionItem s =>
               s.endTimestamp ??
-                  math.max(s.startTimestamp, DateTime.now().millisecondsSinceEpoch),
+                  math.max(
+                    s.startTimestamp,
+                    DateTime.now().millisecondsSinceEpoch,
+                  ),
             TimelineSingleItem s => s.moment.timestamp,
             TimelineGapItem g => g.endTimestamp,
           };
@@ -428,6 +448,7 @@ String _monthShort(int m) {
 class TimelineIsolateResult {
   final List<TimelineDaySection> sections;
   final Map<int, String> singleNumberMap;
+
   TimelineIsolateResult(this.sections, this.singleNumberMap);
 }
 

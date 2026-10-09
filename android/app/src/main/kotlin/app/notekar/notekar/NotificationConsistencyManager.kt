@@ -33,13 +33,13 @@ object NotificationConsistencyManager {
                 description = "Daily reminders and background syncs"
             }
 
-            // Channel 3 (Low): Daily Neuroscience Wisdom
+            // Channel 3 (Low): App Notices & Bulletins
             val lowChannel = NotificationChannel(
                 CHANNEL_LOW_WISDOM,
-                "Daily Wisdom",
+                "App Notices & Bulletins",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Neuroscience insights and tips"
+                description = "Official updates, advisories, and bulletin notices"
             }
 
             notificationManager?.createNotificationChannel(highChannel)

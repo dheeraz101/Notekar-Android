@@ -504,7 +504,15 @@ class ReminderReceiver : BroadcastReceiver() {
                 .setSound(soundUri)
                 .setPriority(if (isReflection) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
                 .setCategory(if (isReflection) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setPublicVersion(
+                    NotificationCompat.Builder(context, targetChannelId)
+                        .setSmallIcon(R.drawable.ic_stat_notekar)
+                        .setContentTitle("NoteKar Reminder")
+                        .setContentText("Tap to open NoteKar")
+                        .setPriority(if (isReflection) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+                        .build()
+                )
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
 
             if (isReflection) {

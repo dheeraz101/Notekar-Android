@@ -140,6 +140,7 @@ void main() {
         expect(find.text('Text Selection Menu'), findsOneWidget);
         expect(find.text('Share Target'), findsOneWidget);
         expect(find.text('AUTOMATION BROADCAST API'), findsOneWidget);
+        expect(find.text('Enable Broadcast API'), findsOneWidget);
         expect(find.text('Log Moment Intent'), findsOneWidget);
         expect(
           find.text(
@@ -149,6 +150,12 @@ void main() {
           findsOneWidget,
         );
 
+        // Toggle the broadcast API switch
+        await tester.ensureVisible(find.text('Enable Broadcast API'));
+        await tester.tap(find.text('Enable Broadcast API'));
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(find.text('Quick Log'));
         await tester.tap(find.text('Quick Log'));
         await tester.pump();
 

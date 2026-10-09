@@ -143,9 +143,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
   double _essentialsHours = 4.0;
   DateTime? _manualPrefilledStartTime;
   DateTime? _manualPrefilledEndTime;
+  String? _activeGapKey;
   bool _isClaimingRest = false;
   bool _isEndingLiveSession = false;
   final Set<String> _claimedGaps = {};
+  final Set<int> _endingSessionIds = {};
 
   // Memoized lists & number maps
   List<TimelineDaySection> _daySections = [];
@@ -222,7 +224,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final payload = TimelineIsolatePayload(
       entries: _entries,
       includeGaps: _showGapCards,
-      filter: _filter,
+      filter: _viewMode == 'calendar' ? 'all' : _filter,
       selectedDateKey: _selectedDateKey,
       today: dateKey(DateTime.now()),
       weekAgo: DateTime.now().subtract(const Duration(days: 7)),
@@ -572,14 +574,19 @@ class _HistoryDialogState extends State<HistoryDialog> {
                             '${_manualPrefilledStartTime!.millisecondsSinceEpoch}-${_manualPrefilledEndTime!.millisecondsSinceEpoch}',
                           );
                         }
+                        if (_activeGapKey != null) {
+                          _claimedGaps.add(_activeGapKey!);
+                        }
                         _manualPrefilledStartTime = null;
                         _manualPrefilledEndTime = null;
+                        _activeGapKey = null;
                         _handleManualEntrySubmit(res);
                       },
                       onCancel: () {
                         setState(() {
                           _manualPrefilledStartTime = null;
                           _manualPrefilledEndTime = null;
+                          _activeGapKey = null;
                           _inSheetView = null;
                         });
                       },
@@ -1303,6 +1310,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                             selected: isSelected,
                                             compact: _compactRows,
                                             rainbowCards: _rainbowCards,
+                                            isOngoing:
+                                                session.isOngoing &&
+                                                !_endingSessionIds.contains(
+                                                  session.inMoment.id,
+                                                ),
                                             goals: _goals,
                                             onEditNote: () =>
                                                 _openDirectNoteEditor(
@@ -1310,7 +1322,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                 ),
                                             onDeleteSession: () =>
                                                 _removeSession(session),
-                                            onEndSession: session.isOngoing
+                                            onEndSession:
+                                                (session.isOngoing &&
+                                                    !_endingSessionIds.contains(
+                                                      session.inMoment.id,
+                                                    ))
                                                 ? () => _endLiveSession(session)
                                                 : null,
                                             onTapCard: _selected.isNotEmpty
@@ -1684,6 +1700,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
     setState(() {
       _manualPrefilledStartTime = prefilledStartTime;
       _manualPrefilledEndTime = prefilledEndTime;
+      if (prefilledStartTime != null && prefilledEndTime != null) {
+        _activeGapKey =
+            '${prefilledStartTime.millisecondsSinceEpoch}-${prefilledEndTime.millisecondsSinceEpoch}';
+      } else {
+        _activeGapKey = null;
+      }
       _inSheetView = 'manual';
     });
   }
@@ -1695,6 +1717,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final maxId = _entries.isEmpty
         ? 0
         : _entries.map((e) => e.id).reduce(math.max);
+
+    if (_activeGapKey != null) {
+      _claimedGaps.add(_activeGapKey!);
+      _activeGapKey = null;
+    }
 
     if (result.isSession && result.endDateTime != null) {
       final startMs = result.startDateTime.millisecondsSinceEpoch;
@@ -2010,7 +2037,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _endLiveSession(TimelineSessionItem session) async {
-    if (_isEndingLiveSession) return;
+    if (_endingSessionIds.contains(session.inMoment.id) ||
+        _isEndingLiveSession) {
+      return;
+    }
+    _endingSessionIds.add(session.inMoment.id);
     _isEndingLiveSession = true;
     try {
       NotekarHaptics.success('standard');
@@ -2065,10 +2096,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _showNotice(
         'Session ended'.localized(context),
         onUndo: () async {
+          _endingSessionIds.remove(session.inMoment.id);
           _noticeTimer?.cancel();
           setState(() {
-            _entries =
-                _entries.where((item) => item.id != outEntry.id).toList();
+            _entries = _entries
+                .where((item) => item.id != outEntry.id)
+                .toList();
             _availableDateKeys = _entries.map((item) => item.date).toSet();
             _notice = null;
             _noticeUndo = null;

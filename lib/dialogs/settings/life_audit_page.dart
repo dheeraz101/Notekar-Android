@@ -414,8 +414,6 @@ class _LifeAuditPageState extends State<LifeAuditPage> {
                 Expanded(
                   child: Text(
                     'The Cost of the Void'.localized(context).toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: p.accent,
                       fontSize: 11,

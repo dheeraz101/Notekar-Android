@@ -7,6 +7,7 @@ import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IntegrationsSettingsPage extends StatefulWidget {
   const IntegrationsSettingsPage({
@@ -26,6 +27,30 @@ class IntegrationsSettingsPage extends StatefulWidget {
 }
 
 class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
+  bool _enableExternalAutomation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAutomationPref();
+  }
+
+  Future<void> _loadAutomationPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _enableExternalAutomation =
+            prefs.getBool('enable_external_automation') ?? false;
+      });
+    }
+  }
+
+  Future<void> _toggleAutomation(bool val) async {
+    setState(() => _enableExternalAutomation = val);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('enable_external_automation', val);
+  }
+
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.selectionClick();
@@ -157,8 +182,18 @@ class _IntegrationsSettingsPageState extends State<IntegrationsSettingsPage> {
         SettingsGroup(
           p: p,
           title: 'Automation Broadcast API'.localized(context).toUpperCase(),
-          insetDividers: false,
+          insetDividers: true,
           children: [
+            SettingsSwitchRow(
+              p: p,
+              icon: CupertinoIcons.antenna_radiowaves_left_right,
+              title: 'Enable Broadcast API'.localized(context),
+              subtitle: 'Allow external automation tools to log moments'
+                  .localized(context),
+              value: _enableExternalAutomation,
+              onChanged: _toggleAutomation,
+              color: p.accent,
+            ),
             SettingsRow(
               p: p,
               title: 'Log Moment Intent'.localized(context),

@@ -7,11 +7,18 @@ gradle-wrapper.jar
 **/local.properties
 GeneratedPluginRegistrant.java
 .cxx/
+/build
+.idea/
+*.iml
 
-# Remember to never publicly share your keystore or signing passwords.
+# Keystore & Signing Secrets (NEVER COMMIT)
 key.properties
 **/key.properties
 **/*.keystore
 **/*.jks
 **/*.pem
 **/*.p12
+**/*.crt
+**/*.cer
+**/*.der
+**/*.key

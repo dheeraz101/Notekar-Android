@@ -8,17 +8,11 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
       _lastDeletedPreview = null;
       _inout = 'in';
       _sessionStart = null;
-      _sobrietyCustomStart = null;
-      _streakShields = 1;
     });
 
     await _prefs?.remove('m-inout');
     await _prefs?.remove('m-ses');
-    await _prefs?.remove('sobriety_custom_start_ms');
-    await _prefs?.setInt('streak_shields', 1);
-    await _prefs?.setInt('last_shield_granted_threshold', 0);
     await _prefs?.remove('recent_note_searches');
-    await _prefs?.remove('notekar.categories_v1');
     await _prefs?.remove('m-last-backup-at');
     await _repository.clearAll();
     await _repository.clearTrash();
@@ -88,22 +82,21 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
     });
     _applySystemUiStyle();
 
-    // Stage 1: Prep (1s)
-    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    // Stage 1: Prep
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
     update(() {
       _factoryResetProgress = 0.20;
       _factoryResetText = 'Deleting Database Records...';
-      _factoryResetSubText =
-          'Securely clearing moments, notes, and trash data...';
+      _factoryResetSubText = 'Clearing moments, notes, and trash data...';
       _factoryResetIcon = Icons.delete_sweep_rounded;
     });
 
-    // Stage 2: Clear DB (1.2s)
+    // Stage 2: Clear DB
     await _repository.clearAll();
     await _repository.clearTrash();
     _trashNotifier.value = [];
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
     update(() {
       _factoryResetProgress = 0.55;
@@ -207,49 +200,86 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
         'time_audit_essentials_hours',
         'notekar.batteryOptimizationCardDismissed',
         'notekar.categories_v1',
+        'notekar.custom_categories',
+        'notekar.active_category',
+        'notekar.custom_category_colors',
+        'notekar.custom_category_icons',
+        'user_profile_name',
+        'user_profile_dob',
+        'user_profile_avatar_base64',
+        'user_profile_preset_avatar',
+        'user_memento_mori_years',
+        'user_profile_onboarding_done',
+        'notekar_goals_list_v1',
+        'notekar.auto_rolling_snapshot',
+        'notekar.last_auto_snapshot_ms',
+        'notekar_network_logs',
+        'notif_log_action',
+        'm-rainbow-cards',
+        'm-adaptive-color',
+        'm-clock-font',
+        'toolbar_appearance',
+        'm-largeControls',
         'god_mode_unlocked',
         'use_12h_format',
         'm-use-12h',
         'notekar.commits_cache',
         'notekar.commits_cache_time',
+        'enable_external_automation',
       ]) {
         await prefs.remove(key);
       }
     }
     await _setAppIconStyle('default', showToast: false);
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
     update(() {
       _factoryResetProgress = 0.85;
       _factoryResetText = 'Cancelling Scheduled Alarms...';
-      _factoryResetSubText = 'De-registering background broadcast receivers...';
+      _factoryResetSubText =
+          'De-registering background broadcast receivers and reminders...';
       _factoryResetIcon = Icons.alarm_off_rounded;
     });
 
-    // Stage 4: Wiping background alarms & notices (1.0s)
+    // Stage 4: Wiping background alarms & notices
     try {
       await _NoteKarHomeState._fileChannel.invokeMethod<void>(
         'configureRemoteNotices',
         {'enabled': false, 'feedUrl': notificationFeed},
       );
     } catch (_) {}
-    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    for (final reminderId in const [
+      'reminder_daily',
+      'reminder_reflection',
+      'reminder_reflection_test',
+      'reminder_inactivity',
+      'reminder_weekly',
+      'reminder_monthly',
+    ]) {
+      try {
+        await _NoteKarHomeState._fileChannel.invokeMethod<void>(
+          'cancelReminder',
+          {'id': reminderId},
+        );
+      } catch (_) {}
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
     update(() {
       _factoryResetProgress = 0.96;
       _factoryResetText = 'Finalizing System Recovery...';
       _factoryResetSubText =
-          'Wipe completed. Setting up system for a clean launch...';
+          'Reset completed. Setting up system for a clean launch...';
       _factoryResetIcon = Icons.published_with_changes_rounded;
     });
 
-    // Stage 5: Done (0.6s)
-    await Future<void>.delayed(const Duration(milliseconds: 600));
+    // Stage 5: Done
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     if (!mounted) return;
     update(() {
       _factoryResetProgress = 1.0;
       _factoryResetComplete = true;
-      _factoryResetText = 'Restore complete';
+      _factoryResetText = 'Reset complete';
       _factoryResetSubText = 'Click Start to begin new setup';
       _factoryResetIcon = Icons.check_circle_rounded;
     });
@@ -310,19 +340,14 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
       _locale = 'system';
       _enableSobrietyMode = false;
       _sobrietyResetType = 'any';
-      _sobrietyCustomStart = null;
       _sobrietyMilestoneTheme = 'science';
-      _streakShields = 0;
     });
     await _prefs?.setBool('enable_sobriety_mode', _enableSobrietyMode);
     await _prefs?.setString('sobriety_reset_type', _sobrietyResetType);
-    await _prefs?.remove('sobriety_custom_start_ms');
     await _prefs?.setString(
       'sobriety_milestone_theme',
       _sobrietyMilestoneTheme,
     );
-    await _prefs?.setInt('streak_shields', 0);
-    await _prefs?.setInt('last_shield_granted_threshold', 0);
     await _prefs?.remove('notekar.sobrietyWalkthroughSeen_v6');
     await _prefs?.remove('notekar.singleNumberingWalkthroughSeen_v7');
     await _prefs?.remove('notekar.appIconsWalkthroughSeen_v8');
@@ -346,7 +371,8 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
     await _prefs?.setBool('m-highlight-seconds', _highlightSeconds);
     await _prefs?.setBool('m-use-24-hour', _use24HourFormat);
     await _prefs?.setBool('m-button-labels', _buttonLabels);
-    await _prefs?.setBool('m-largeControls', _largeControls);
+    await _prefs?.remove('m-largeControls');
+    await _prefs?.setBool('m-large-controls', _largeControls);
     await _prefs?.setBool('m-home-menu-pill', _homeMenuPill);
     await _prefs?.setBool('m-home-menu-animations', _homeMenuAnimations);
     await _prefs?.setBool('m-show-history-text', _showHistoryText);
@@ -395,6 +421,7 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
     await _prefs?.remove('show_persistent_notification');
     await _prefs?.remove('use_12h_format');
     await _prefs?.remove('m-use-12h');
+    await _prefs?.remove('enable_external_automation');
     await _setAppIconStyle('default', showToast: false);
     if (mounted) {
       NoteKarApp.of(context)?.setLocale(_locale);
@@ -405,6 +432,21 @@ extension _HomeResetLifecycleExtension on _NoteKarHomeState {
         {'enabled': false, 'feedUrl': notificationFeed},
       );
     } catch (_) {}
+    for (final reminderId in const [
+      'reminder_daily',
+      'reminder_reflection',
+      'reminder_reflection_test',
+      'reminder_inactivity',
+      'reminder_weekly',
+      'reminder_monthly',
+    ]) {
+      try {
+        await _NoteKarHomeState._fileChannel.invokeMethod<void>(
+          'cancelReminder',
+          {'id': reminderId},
+        );
+      } catch (_) {}
+    }
     _applySystemUiStyle();
   }
 

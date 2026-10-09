@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # NoteKar Android (Flutter) Master .gitignore
-# Ensures ZERO sensitive keys, build outputs, or local metadata
-# are ever committed to GitHub.
+# Ensures ZERO sensitive keys, build outputs, local metadata, or
+# developer scratch files are ever committed to GitHub.
 # ----------------------------------------------------------------------
 
 # 🔑 Android Signing Secrets & Passwords (CRITICAL - NEVER COMMIT)
@@ -23,13 +23,6 @@
 **/upload-keystore.jks
 **/debug.keystore
 **/release-key.jks
-
-# Workspace Artifacts
-.artifacts/
-**/.artifacts/
-.artifacts
-.gemini/
-**/.gemini/
 
 # 🔐 API Secrets, Cloud Configs & Environment Files
 **/.env
@@ -55,6 +48,7 @@
 **/.packages
 **/.pub-cache/
 **/.pub/
+doc/api/
 
 # 🏗️ Build Artifacts, Cache & Generated Code
 build/
@@ -68,14 +62,18 @@ build/
 **/.kotlin/
 .cxx/
 **/.cxx/
+**/captures/
+**/*.hprof
+**/*.dex
+**/*.class
+**/GeneratedPluginRegistrant.java
 **/android/app/debug/
 **/android/app/profile/
 **/android/app/release/
 **/ios/Pods/
 **/ios/.symlinks/
 
-# 📱 Local Releases, APKs, Bundles & Version Archives
-# We ignore files inside release folders but allow the folder structures
+# 📱 Local Releases, APKs, Bundles & Binaries (CRITICAL: No Binaries in Git)
 releases/**/*
 !releases/**/
 versions/**/*
@@ -86,7 +84,6 @@ release/
 output/
 **/output/
 
-# 🚀 Global Binary & Checksum Block (CRITICAL: No Binaries in Git)
 **/*.apk
 **/*.aab
 **/*.idsig
@@ -95,6 +92,9 @@ output/
 **/*.dll
 **/*.so
 **/*.dylib
+**/*.exe
+isar.dll
+
 # 🚀 Un-ignore Release Documentation (MD and JSON files ONLY)
 !releases/**/*.md
 !versions/**/*.json
@@ -110,23 +110,56 @@ output/
 **/*.ipr
 *.iws
 **/*.iws
+out/
+**/out/
 .vscode/
 **/.vscode/
 .atom/
 .history
 .svn/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.buildpath
+*.swp
+*.swo
 
-# 📝 Personal Docs, Local Notes & Word Documents
+# 🤖 AI Assistants, Scratch & Agent Workspace Artifacts
+.artifacts/
+**/.artifacts/
+.artifacts
+.gemini/
+**/.gemini/
+.cursor/
+**/.cursor/
+.windsurf/
+**/.windsurf/
+.cline/
+**/.cline/
+scratch/
+**/scratch/
+tmp/
+**/tmp/
+
+# 📝 Personal Docs, Local Notes & Logs
 **/*.docx
 **/*.doc
+**/*.xlsx
+**/*.pdf
 **/*.log
+flutter_*.log
 **/*.tmp
 **/*.temp
 **/*.bak
 **/*.local
 **/*.private
+__pycache__/
+*.pyc
 
 # 🖥️ Operating System Metadata
+# macOS
 .DS_Store
 **/.DS_Store
 .DS_Store?
@@ -135,8 +168,23 @@ output/
 **/._*
 .Spotlight-V100
 .Trashes
+Icon?
+
+# Windows
 ehthumbs.db
 Thumbs.db
 **/Thumbs.db
 desktop.ini
 **/desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*

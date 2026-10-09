@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/dialogs/app_date_picker_sheet.dart';
@@ -474,35 +473,38 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Optional Header Badge: Filling Untracked Interval
+          // Mode Control: Locked to Session for Untracked Intervals vs Segmented Control
           if (widget.lockToSession || widget.prefilledEndTime != null) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: p.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: p.accent.withValues(alpha: 0.25)),
-              ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: spacing8),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.hourglass_top_rounded, size: 14, color: p.accent),
-                  const SizedBox(width: 6),
-                  Text(
-                    'FILLING UNTRACKED INTERVAL'.localized(context),
-                    style: TextStyle(
-                      color: p.accent,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.4,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'FILLING UNTRACKED INTERVAL',
+                      style: TextStyle(
+                        color: p.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ],
-
           // Segmented Control: Single vs Session
           Container(
             padding: const EdgeInsets.all(3),

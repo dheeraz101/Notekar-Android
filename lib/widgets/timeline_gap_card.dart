@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
@@ -42,7 +42,10 @@ class _TimelineGapCardState extends State<TimelineGapCard> {
   bool get _busy => widget.isProcessing || _localProcessing;
 
   Duration get duration => Duration(
-    milliseconds: (widget.endTimestamp - widget.startTimestamp).clamp(0, 86400000),
+    milliseconds: (widget.endTimestamp - widget.startTimestamp).clamp(
+      0,
+      86400000,
+    ),
   );
 
   String _formatDuration(Duration d) {
@@ -131,9 +134,12 @@ class _TimelineGapCardState extends State<TimelineGapCard> {
                     HapticFeedback.lightImpact();
                     widget.onClaimRest!();
                     _debounceTimer?.cancel();
-                    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-                      if (mounted) setState(() => _localProcessing = false);
-                    });
+                    _debounceTimer = Timer(
+                      const Duration(milliseconds: 300),
+                      () {
+                        if (mounted) setState(() => _localProcessing = false);
+                      },
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

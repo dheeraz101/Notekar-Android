@@ -139,6 +139,7 @@ class QuickNoteActivity : Activity() {
                 it.equals(configuredSelection, ignoreCase = true)
         } ?: categories.first()
         var selectedGoalTitle: String? = null
+        var selectedGoalId: String? = null
 
         // Title
         val title = TextView(this).apply {
@@ -256,7 +257,7 @@ class QuickNoteActivity : Activity() {
             card.addView(catScroll)
 
             // Goals / Target Selector Strip (if user configured any goals)
-            val goalsList = mutableListOf<String>()
+            val goalsList = mutableListOf<Triple<String, String, String>>() // id, title, category
             val rawGoals = flutterPrefs.getString("flutter.notekar_goals_list_v1", null)
             if (rawGoals != null && rawGoals.startsWith("[")) {
                 try {
@@ -264,9 +265,11 @@ class QuickNoteActivity : Activity() {
                     for (i in 0 until arr.length()) {
                         val g = arr.optJSONObject(i)
                         if (g != null && !g.optBoolean("isArchived", false)) {
+                            val gId = g.optString("id", "")
                             val gTitle = g.optString("title", "").trim()
+                            val gCat = g.optString("category", "").trim()
                             if (gTitle.isNotEmpty()) {
-                                goalsList.add(gTitle.take(9))
+                                goalsList.add(Triple(gId, gTitle, gCat))
                             }
                         }
                     }
@@ -311,8 +314,11 @@ class QuickNoteActivity : Activity() {
 
                 val goalViews = mutableListOf<TextView>()
                 for (goal in goalsList) {
+                    val gId = goal.first
+                    val gTitle = goal.second
+                    val displayTitle = if (gTitle.length > 15) gTitle.take(14) + "…" else gTitle
                     val goalChip = TextView(this).apply {
-                        text = "🎯 $goal"
+                        text = "🎯 $displayTitle"
                         textSize = 11.5f
                         gravity = Gravity.CENTER
                         val hPad = (10 * density).toInt()
@@ -345,18 +351,22 @@ class QuickNoteActivity : Activity() {
                         applyGoalStyle(false)
 
                         setOnClickListener {
-                            if (selectedGoalTitle == goal) {
+                            if (selectedGoalId == gId) {
                                 selectedGoalTitle = null
+                                selectedGoalId = null
                                 applyGoalStyle(false)
                             } else {
-                                selectedGoalTitle = goal
+                                selectedGoalTitle = gTitle
+                                selectedGoalId = gId
                                 for (v in goalViews) {
-                                    val isCurrent = (v.text.toString() == "🎯 $goal")
-                                    (v.tag as? ((Boolean) -> Unit))?.invoke(isCurrent)
+                                    @Suppress("UNCHECKED_CAST")
+                                    (v.tag as? Pair<String, (Boolean) -> Unit>)?.let { (id, callback) ->
+                                        callback(id == gId)
+                                    }
                                 }
                             }
                         }
-                        tag = { active: Boolean -> applyGoalStyle(active) }
+                        tag = Pair(gId, { active: Boolean -> applyGoalStyle(active) })
                     }
                     goalViews.add(goalChip)
                     goalRow.addView(goalChip)
@@ -639,7 +649,9 @@ class QuickNoteActivity : Activity() {
                 NoteKarWidgetProvider.performBackgroundLog(
                     this@QuickNoteActivity,
                     resolvedType,
-                    noteText
+                    noteText,
+                    category = selectedCategory,
+                    goalId = selectedGoalId
                 )
                 finish()
             }
@@ -673,7 +685,9 @@ class QuickNoteActivity : Activity() {
                     NoteKarWidgetProvider.performBackgroundLog(
                         this@QuickNoteActivity,
                         "note",
-                        noteText
+                        noteText,
+                        category = selectedCategory,
+                        goalId = selectedGoalId
                     )
                     finish()
                 }
@@ -708,7 +722,9 @@ class QuickNoteActivity : Activity() {
                     NoteKarWidgetProvider.performBackgroundLog(
                         this@QuickNoteActivity,
                         targetType,
-                        noteText
+                        noteText,
+                        category = selectedCategory,
+                        goalId = selectedGoalId
                     )
                     finish()
                 }

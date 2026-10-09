@@ -58,9 +58,7 @@ class UpdateService {
   HttpClient _createHttpClient({
     Duration timeout = const Duration(seconds: 10),
   }) {
-    return HttpClient()
-      ..connectionTimeout = timeout
-      ..badCertificateCallback = (cert, host, port) => true;
+    return HttpClient()..connectionTimeout = timeout;
   }
 
   Future<Map<String, dynamic>?> fetchCurrentVirusTotalInfo({

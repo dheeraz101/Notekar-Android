@@ -200,7 +200,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="app.notekar.notekar.ACTION_LOG_BG" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -213,7 +212,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="app.notekar.notekar.ACTION_LOG_BG" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -226,7 +224,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="app.notekar.notekar.ACTION_LOG_BG" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -236,7 +233,6 @@
             android:name=".RemoteNoticeReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="app.notekar.notekar.CHECK_REMOTE_NOTICES" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
@@ -314,7 +310,6 @@
 
         <receiver
             android:name=".AutomationBroadcastReceiver"
-            android:permission="app.notekar.notekar.permission.LOG_BROADCAST"
             android:exported="true">
             <intent-filter>
                 <action android:name="app.notekar.notekar.ACTION_LOG_MOMENT" />

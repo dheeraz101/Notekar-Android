@@ -64,6 +64,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   TimelineFilterCriteria _filterCriteria = const TimelineFilterCriteria();
   final List<Moment> _selectedMoments = [];
   final Set<String> _localClaimedGaps = {};
+  final Set<int> _endingSessionIds = {};
 
   static const int _daysRange = 60; // 60 days lookback
 
@@ -236,6 +237,10 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
   void didUpdateWidget(HistoryCalendarView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _sectionMap = {for (final s in widget.sections) s.dateKey: s};
+    if (oldWidget.sections != widget.sections ||
+        oldWidget.claimedGaps != widget.claimedGaps) {
+      setState(() {});
+    }
   }
 
   @override
@@ -713,8 +718,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
               : (it.isOngoing
                     ? widget.p.green.withValues(alpha: 0.45)
                     : (widget.rainbowCards
-                        ? meta.color.withValues(alpha: 0.45)
-                        : meta.color.withValues(alpha: 0.35)));
+                          ? meta.color.withValues(alpha: 0.45)
+                          : meta.color.withValues(alpha: 0.35)));
           final borderWidth = (isSelected || it.isOngoing) ? 1.8 : 1.0;
 
           return Padding(
@@ -759,7 +764,8 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                             ],
                           ),
                         ),
-                        if (it.isOngoing) ...[
+                        if (it.isOngoing &&
+                            !_endingSessionIds.contains(it.inMoment.id)) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -802,6 +808,9 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                             PressableScale(
                               onTap: () {
                                 HapticFeedback.mediumImpact();
+                                setState(() {
+                                  _endingSessionIds.add(it.inMoment.id);
+                                });
                                 widget.onEndLiveSession!(it);
                               },
                               child: Container(
@@ -1038,6 +1047,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
               endTimestamp: it.endTimestamp,
               isProcessing: isClaimed,
               onTap: () {
+                setState(() => _localClaimedGaps.add(gapKey));
                 widget.onOpenManualEntry?.call(
                   prefilledStartTime: DateTime.fromMillisecondsSinceEpoch(
                     it.startTimestamp,

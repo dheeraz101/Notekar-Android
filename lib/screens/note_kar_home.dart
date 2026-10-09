@@ -1881,22 +1881,50 @@ class _NoteKarHomeState extends State<NoteKarHome>
 
     for (int i = 0; i < pendingCount; i++) {
       final logStr = prefs.getString('log_$i');
-      if (logStr != null && logStr.contains('|')) {
-        final parts = logStr.split('|');
-        if (parts.length >= 2) {
-          final timestamp =
-              int.tryParse(parts[0]) ?? DateTime.now().millisecondsSinceEpoch;
-          final type = parts[1]; // 'in', 'out', or 'single'
-          final note = parts.length > 2 ? parts[2] : '';
+      if (logStr != null) {
+        if (logStr.startsWith('{')) {
+          try {
+            final json = jsonDecode(logStr) as Map<String, dynamic>;
+            final timestamp =
+                json['timestamp'] as int? ??
+                DateTime.now().millisecondsSinceEpoch;
+            final type = json['type'] as String? ?? 'single';
+            final note = json['note'] as String? ?? '';
+            final category = json['category'] as String?;
+            final entry = Moment(
+              id: nextId++,
+              timestamp: timestamp,
+              date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
+              type: type,
+              note: note,
+              category:
+                  (category != null &&
+                      category.trim().isNotEmpty &&
+                      category != 'All')
+                  ? category.trim()
+                  : null,
+            );
+            newEntries.add(entry);
+          } catch (e) {
+            _logger.warn('Failed to parse json background log: $logStr', e);
+          }
+        } else if (logStr.contains('|')) {
+          final parts = logStr.split('|');
+          if (parts.length >= 2) {
+            final timestamp =
+                int.tryParse(parts[0]) ?? DateTime.now().millisecondsSinceEpoch;
+            final type = parts[1]; // 'in', 'out', or 'single'
+            final note = parts.length > 2 ? parts.sublist(2).join('|') : '';
 
-          final entry = Moment(
-            id: nextId++,
-            timestamp: timestamp,
-            date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
-            type: type,
-            note: note,
-          );
-          newEntries.add(entry);
+            final entry = Moment(
+              id: nextId++,
+              timestamp: timestamp,
+              date: dateKey(DateTime.fromMillisecondsSinceEpoch(timestamp)),
+              type: type,
+              note: note,
+            );
+            newEntries.add(entry);
+          }
         }
       }
     }
@@ -2294,14 +2322,16 @@ class _NoteKarHomeState extends State<NoteKarHome>
         onClaimRest: _claimRestGap,
         onEndLiveSession: (inMomentId, outEntry) async {
           await _restoreEntry(outEntry);
-          if (_sessionStart != null) {
-            setState(() {
-              _inout = 'in';
-              _sessionStart = null;
-            });
-            await _prefs?.remove('m-ses');
-            await _saveSetting('m-inout', 'in');
-          }
+          setState(() {
+            _inout = 'in';
+            _sessionStart = null;
+            _isPaused = false;
+            _pausedAt = null;
+          });
+          await _prefs?.remove('m-ses');
+          await _prefs?.setBool('m-paused', false);
+          await _prefs?.remove('m-paused-at');
+          await _saveSetting('m-inout', 'in');
           unawaited(_updateAndroidWidget());
         },
         onRestoreLiveSession: (inMoment) async {
@@ -3040,9 +3070,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         } else if (pageParam == 'settings') {
           await _openSettings();
         } else if (pageParam == 'stats') {
-          await _openSettings(initialCategory: 'Stats');
+          if (mounted) {
+            await Navigator.of(
+              context,
+            ).push(ExecutiveIntelligenceHubScreen.route());
+          }
         } else if (pageParam == 'sobriety') {
-          await _openSettings(initialCategory: 'Sobriety Tracker');
+          await _openSettings(initialCategory: 'Sobriety Companion');
         } else if (pageParam == 'life-audit' ||
             pageParam == 'lifeaudit' ||
             pageParam == 'audit') {
@@ -3051,7 +3085,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await _openSettings(initialCategory: 'Integrations & Automation');
         }
       case 'sobriety':
-        await _openSettings(initialCategory: 'Sobriety Tracker');
+        await _openSettings(initialCategory: 'Sobriety Companion');
       case 'life-audit':
       case 'lifeaudit':
       case 'audit':
@@ -3125,9 +3159,13 @@ class _NoteKarHomeState extends State<NoteKarHome>
         } else if (pageParam == 'settings') {
           await _openSettings();
         } else if (pageParam == 'stats') {
-          await _openSettings(initialCategory: 'Stats');
+          if (mounted) {
+            await Navigator.of(
+              context,
+            ).push(ExecutiveIntelligenceHubScreen.route());
+          }
         } else if (pageParam == 'sobriety') {
-          await _openSettings(initialCategory: 'Sobriety Tracker');
+          await _openSettings(initialCategory: 'Sobriety Companion');
         } else if (pageParam == 'life-audit' ||
             pageParam == 'lifeaudit' ||
             pageParam == 'audit') {
@@ -3136,7 +3174,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await _openSettings(initialCategory: 'Integrations & Automation');
         }
       case 'sobriety':
-        await _openSettings(initialCategory: 'Sobriety Tracker');
+        await _openSettings(initialCategory: 'Sobriety Companion');
       case 'life-audit':
       case 'lifeaudit':
       case 'audit':
@@ -3149,7 +3187,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       case 'settings':
         await _openSettings();
       case 'stats':
-        await _openSettings(initialCategory: 'Stats');
+        if (mounted) {
+          await Navigator.of(
+            context,
+          ).push(ExecutiveIntelligenceHubScreen.route());
+        }
       default:
         _showToast('URL Scheme triggered: $action');
     }
@@ -3196,19 +3238,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
         return;
       }
     }
+    final previousValue = _remoteNotices;
     setState(() => _remoteNotices = value);
-    await _prefs?.setBool('m-remote-notices', value);
     try {
       await _fileChannel.invokeMethod<void>('configureRemoteNotices', {
         'enabled': value,
         'feedUrl': notificationFeed,
       });
+      await _prefs?.setBool('m-remote-notices', value);
       if (value) {
         await _fileChannel.invokeMethod<void>('checkRemoteNoticesNow');
       }
     } catch (e, stack) {
       _logger.error('Failed to configure remote notices', e, stack);
       if (mounted) {
+        setState(() => _remoteNotices = previousValue);
+        await _prefs?.setBool('m-remote-notices', previousValue);
         _showToast(
           value ? 'Could not turn on app notices' : 'App notices off',
           warning: value,

@@ -167,9 +167,28 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        fun performBackgroundLog(context: Context, type: String, note: String = "") {
+        fun performBackgroundLog(
+            context: Context,
+            type: String,
+            note: String = "",
+            category: String? = null,
+            goalId: String? = null
+        ) {
             val now = System.currentTimeMillis()
-            val logString = "$now|$type|$note"
+            val json = org.json.JSONObject().apply {
+                put("timestamp", now)
+                put("type", type)
+                put("note", note)
+                val cat = category ?: context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .getString(KEY_ACTIVE_CATEGORY, null)
+                if (!cat.isNullOrEmpty() && cat != "All") {
+                    put("category", cat)
+                }
+                if (!goalId.isNullOrEmpty()) {
+                    put("goalId", goalId)
+                }
+            }
+            val logString = json.toString()
 
             val bgPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
             val currentPendingCount = bgPrefs.getInt("flutter.pending_count", 0)

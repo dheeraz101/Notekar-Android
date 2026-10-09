@@ -24,6 +24,7 @@ class TimelineSessionCard extends StatelessWidget {
     this.selected = false,
     this.compact = false,
     this.rainbowCards = false,
+    this.isOngoing,
     this.goals,
   });
 
@@ -37,6 +38,7 @@ class TimelineSessionCard extends StatelessWidget {
   final bool selected;
   final bool compact;
   final bool rainbowCards;
+  final bool? isOngoing;
   final List<Goal>? goals;
 
   Goal? _findMatchingGoal() {
@@ -77,7 +79,7 @@ class TimelineSessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOngoing = session.isOngoing;
+    final isOngoing = this.isOngoing ?? session.isOngoing;
     final matchingGoal = _findMatchingGoal();
     final durationStr = _formatDuration(session.duration);
     final hasNote = session.note.isNotEmpty;

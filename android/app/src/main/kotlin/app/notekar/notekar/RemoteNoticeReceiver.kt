@@ -2,7 +2,6 @@ package app.notekar.notekar
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -31,6 +30,9 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
             }
             return
         }
+
+        if (action != ACTION_CHECK) return
+        if (intent.`package` != null && intent.`package` != context.packageName) return
 
         val pendingResult = goAsync()
 
@@ -341,8 +343,24 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
         }
 
         private fun canPostNotifications(context: Context): Boolean {
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                    ?: return false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !notificationManager.areNotificationsEnabled()) {
+                return false
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = notificationManager.getNotificationChannel(CHANNEL_ID)
+                if (channel != null && channel.importance == NotificationManager.IMPORTANCE_NONE) {
+                    return false
+                }
+            }
+            return true
         }
 
         private fun actionFromUrl(url: String): String {
@@ -445,7 +463,28 @@ class RemoteNoticeReceiver : BroadcastReceiver() {
             return null
         }
 
-        private fun prefs(context: Context) =
-            context.getSharedPreferences("notekar_low_wisdom", Context.MODE_PRIVATE)
+        const val PREFS_NAME = "notekar_remote_notices"
+
+        fun prefs(context: Context): android.content.SharedPreferences {
+            val p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val legacy = context.getSharedPreferences("notekar_low_wisdom", Context.MODE_PRIVATE)
+            val legacyAll = legacy.all
+            if (legacyAll.isNotEmpty()) {
+                val editor = p.edit()
+                for ((k, v) in legacyAll) {
+                    if (!p.contains(k)) {
+                        when (v) {
+                            is Boolean -> editor.putBoolean(k, v)
+                            is Int -> editor.putInt(k, v)
+                            is Long -> editor.putLong(k, v)
+                            is String -> editor.putString(k, v)
+                        }
+                    }
+                }
+                editor.apply()
+                legacy.edit().clear().apply()
+            }
+            return p
+        }
     }
 }

@@ -3,7 +3,6 @@ package app.notekar.notekar
 import android.Manifest
 import android.app.AlarmManager
 import android.app.KeyguardManager
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ClipData
@@ -167,8 +166,11 @@ class MainActivity : FlutterActivity() {
                 }
 
                 "getLaunchAction" -> {
-                    result.success(pendingLaunchAction)
+                    val act =
+                        pendingLaunchAction ?: (pendingLaunchPayload?.get("action") as? String)
+                    result.success(act)
                     pendingLaunchAction = null
+                    pendingLaunchPayload = null
                 }
 
                 "getLaunchPayload" -> {
@@ -678,7 +680,8 @@ class MainActivity : FlutterActivity() {
         try {
             soundPool?.release()
             soundPool = null
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         super.onDestroy()
     }
 
@@ -1247,8 +1250,10 @@ class MainActivity : FlutterActivity() {
         private const val PRIVACY_LOCK_REQUEST = 4023
         private const val UPDATE_NOTIFICATION_ID = 3100
         private const val PERSISTENT_NOTIFICATION_ID = 3105
-        private const val UPDATE_CHANNEL_ID = NotificationConsistencyManager.CHANNEL_DEFAULT_REMINDERS
-        private const val PERSISTENT_CHANNEL_ID = NotificationConsistencyManager.CHANNEL_HIGH_ONGOING
+        private const val UPDATE_CHANNEL_ID =
+            NotificationConsistencyManager.CHANNEL_DEFAULT_REMINDERS
+        private const val PERSISTENT_CHANNEL_ID =
+            NotificationConsistencyManager.CHANNEL_HIGH_ONGOING
         const val EXTRA_LAUNCH_ACTION = "app.notekar.notekar.extra.LAUNCH_ACTION"
         const val ACTION_NOTE = "app.notekar.notekar.ACTION_NOTE"
         const val ACTION_MOMENT = "app.notekar.notekar.ACTION_MOMENT"
@@ -1364,12 +1369,16 @@ class MainActivity : FlutterActivity() {
             val contentText = when {
                 isCurrentlyIn && isPaused ->
                     "Session Paused • Tap Resume to continue"
+
                 isCurrentlyIn && formattedTime.isNotEmpty() ->
                     "Active since $formattedTime • $auditSummary"
+
                 sobrietyEnabled && streakDays.isNotEmpty() ->
                     "Clean: $streakDays • $auditSummary"
+
                 todayCount > 0 || hasAuditData ->
                     auditSummary
+
                 else ->
                     "Ready to log • Tap actions below to record instantly"
             }
@@ -1412,7 +1421,15 @@ class MainActivity : FlutterActivity() {
                 .setContentIntent(mainPending)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setPublicVersion(
+                    NotificationCompat.Builder(context, CHANNEL_CONTROL_PANEL)
+                        .setSmallIcon(R.drawable.ic_stat_notekar)
+                        .setContentTitle("NoteKar")
+                        .setContentText("Tap to open NoteKar")
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .build()
+                )
 
             if (isCurrentlyIn && !isPaused && lastTimestamp > 0L) {
                 builder.setUsesChronometer(true)
@@ -1465,8 +1482,10 @@ class MainActivity : FlutterActivity() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            val notifLogBehavior = flutterPrefs.getString("flutter.notif_log_action", "popup") ?: "popup"
+            val flutterPrefs =
+                context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val notifLogBehavior =
+                flutterPrefs.getString("flutter.notif_log_action", "popup") ?: "popup"
             val singleLogActionPending = if (notifLogBehavior == "popup") {
                 val intent = Intent(context, QuickNoteActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -1497,15 +1516,21 @@ class MainActivity : FlutterActivity() {
             if (isTwoWay) {
                 if (isCurrentlyIn) {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log OUT", outPending)
-                    builder.addAction(R.drawable.ic_stat_notekar, if (isPaused) "▶ Resume" else "⏸ Pause", pausePending)
+                    builder.addAction(
+                        R.drawable.ic_stat_notekar,
+                        if (isPaused) "▶ Resume" else "⏸ Pause",
+                        pausePending
+                    )
                     builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
                 } else {
                     builder.addAction(R.drawable.ic_stat_notekar, "Log IN", sessionInPending)
                     builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
+                    builder.addAction(R.drawable.ic_stat_notekar, "⇄ Single", togglePending)
                 }
             } else {
                 builder.addAction(R.drawable.ic_stat_notekar, "⚡ Log", singleLogActionPending)
                 builder.addAction(R.drawable.ic_stat_notekar, "🏷️ Modes", modesPending)
+                builder.addAction(R.drawable.ic_stat_notekar, "⇄ 2-Way", togglePending)
             }
 
             manager.notify(PERSISTENT_NOTIFICATION_ID, builder.build())
