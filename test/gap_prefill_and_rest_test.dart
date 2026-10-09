@@ -403,6 +403,48 @@ void main() {
 
         expect(endedSession, isNotNull);
         expect(endedSession?.inMoment.id, 999);
+
+        // LIVE badge must disappear immediately upon ending
+        expect(find.text('LIVE'), findsNothing);
+      },
+    );
+
+    test(
+      'buildTimelineDaySections cleanly pairs ongoing session with newly generated outEntry',
+      () {
+        final tStart = DateTime(2026, 10, 8, 23, 50).millisecondsSinceEpoch;
+        final liveIn = Moment(
+          id: 501,
+          timestamp: tStart,
+          type: 'in',
+          date: '2026-10-08',
+          category: 'Rest',
+          note: 'Rest & Recovery',
+        );
+
+        // When closed, outEntry must have timestamp > tStart
+        final tEnd = tStart + 1000;
+        final outEntry = Moment(
+          id: 502,
+          timestamp: tEnd,
+          type: 'out',
+          date: '2026-10-08',
+          category: 'Rest',
+        );
+
+        final sections = buildTimelineDaySections([
+          outEntry,
+          liveIn,
+        ], includeGaps: false);
+
+        expect(sections.length, 1);
+        final sessions = sections.first.items
+            .whereType<TimelineSessionItem>()
+            .toList();
+        expect(sessions.length, 1);
+        expect(sessions.first.isOngoing, isFalse);
+        expect(sessions.first.endTimestamp, tEnd);
+        expect(sessions.first.duration, const Duration(seconds: 1));
       },
     );
   });

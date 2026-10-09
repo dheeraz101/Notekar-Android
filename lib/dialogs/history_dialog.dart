@@ -736,6 +736,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   onOpenManualEntry: _handleOpenManualEntry,
                   onClaimRest: _claimRest,
                   onEndLiveSession: _endLiveSession,
+                  endingSessionIds: _endingSessionIds,
                   claimedGaps: _claimedGaps,
                   onOpenInsights: (sec) {
                     setState(() => _activeInsightsSection = sec);
@@ -1750,8 +1751,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
   }
 
   Future<void> _claimRest(DateTime start, DateTime end) async {
+    final effectiveEnd = end.isAfter(start)
+        ? end
+        : start.add(const Duration(minutes: 15));
     final gapKey =
-        '${start.millisecondsSinceEpoch}-${end.millisecondsSinceEpoch}';
+        '${start.millisecondsSinceEpoch}-${effectiveEnd.millisecondsSinceEpoch}';
     if (_claimedGaps.contains(gapKey) || _isClaimingRest) return;
     _isClaimingRest = true;
     _claimedGaps.add(gapKey);
@@ -1760,7 +1764,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
     try {
       List<Moment> savedMoments = const [];
       if (widget.onClaimRest != null) {
-        savedMoments = await widget.onClaimRest!(start, end);
+        savedMoments = await widget.onClaimRest!(start, effectiveEnd);
       }
 
       if (savedMoments.isEmpty) {
@@ -1777,10 +1781,10 @@ class _HistoryDialogState extends State<HistoryDialog> {
           tags: const ['rest'],
         );
         final outMoment = Moment(
-          id: math.max(maxId + 2, end.millisecondsSinceEpoch),
-          timestamp: end.millisecondsSinceEpoch,
+          id: math.max(maxId + 2, effectiveEnd.millisecondsSinceEpoch),
+          timestamp: effectiveEnd.millisecondsSinceEpoch,
           type: 'out',
-          date: dateKey(end),
+          date: dateKey(effectiveEnd),
           note: 'Rest & Recovery',
           category: 'Rest',
           tags: const ['rest'],
@@ -2261,10 +2265,12 @@ class _HistoryDialogState extends State<HistoryDialog> {
             59,
             59,
           ).millisecondsSinceEpoch;
-          effectiveTimestamp = math.min(
-            endOfDay,
-            session.startTimestamp + const Duration(hours: 1).inMilliseconds,
-          );
+          final fallbackEnd =
+              session.startTimestamp + const Duration(hours: 1).inMilliseconds;
+          final targetEnd = math.min(endOfDay, fallbackEnd);
+          effectiveTimestamp = targetEnd > session.startTimestamp
+              ? targetEnd
+              : session.startTimestamp + 1000;
         }
       }
 
@@ -2283,7 +2289,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
         _entries = [outEntry, ..._entries]
           ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
         _availableDateKeys = _entries.map((item) => item.date).toSet();
-        _endingSessionIds.remove(session.inMoment.id);
+        _isSessionRunning = false;
         _rebuildMemoizedLists();
       });
       _showNotice(

@@ -40,6 +40,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.isMomentImageCollapsed,
     this.onToggleMomentImageCollapse,
     this.goals,
+    this.endingSessionIds,
   });
 
   final Palette p;
@@ -62,6 +63,7 @@ class HistoryCalendarView extends StatefulWidget {
   final bool Function(int id)? isMomentImageCollapsed;
   final ValueChanged<int>? onToggleMomentImageCollapse;
   final List<Goal>? goals;
+  final Set<int>? endingSessionIds;
 
   @override
   State<HistoryCalendarView> createState() => _HistoryCalendarViewState();
@@ -813,8 +815,10 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                         widget.p.surface2,
                       )
                     : widget.p.surface2);
-          final isOngoing =
-              it.isOngoing && !_endingSessionIds.contains(it.inMoment.id);
+          final isEnding =
+              _endingSessionIds.contains(it.inMoment.id) ||
+              (widget.endingSessionIds?.contains(it.inMoment.id) ?? false);
+          final isOngoing = it.isOngoing && !isEnding;
           final borderColor = isSelected
               ? widget.p.accent
               : (isOngoing
@@ -913,8 +917,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                             ),
                           );
                         }(),
-                        if (it.isOngoing &&
-                            !_endingSessionIds.contains(it.inMoment.id)) ...[
+                        if (it.isOngoing && !isEnding) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(

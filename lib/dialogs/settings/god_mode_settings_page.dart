@@ -121,100 +121,33 @@ class GodModeSettingsPage extends StatelessWidget {
         // Exclusive God Mode App Icon Group
         SettingsGroup(
           p: p,
-          title: 'Exclusive God Mode App Icon'.localized(context).toUpperCase(),
+          title: 'Exclusive App Icon'.localized(context),
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1C1A24),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: const Color(0xFFFFD700).withValues(alpha: 0.6),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(
-                            0xFFFFD700,
-                          ).withValues(alpha: 0.25),
-                          blurRadius: 12,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'D',
-                      style: TextStyle(
-                        color: Color(0xFFFFD700),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'God Mode Icon'.localized(context),
-                              style: TextStyle(
-                                color: p.text,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFFFD700,
-                                ).withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Text(
-                                'UNLOCKED',
-                                style: TextStyle(
-                                  color: Color(0xFFFFD700),
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Handcrafted obsidian & gold icon unlocked in App Icons.'
-                              .localized(context),
-                          style: TextStyle(color: p.text2, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             SettingsRow(
               p: p,
-              icon: CupertinoIcons.sparkles,
-              title: 'Customize in App Icons'.localized(context),
-              subtitle: 'Select and activate this exclusive icon'.localized(
-                context,
+              customIcon: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF14121B),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.6),
+                    width: 1,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'D',
+                  style: TextStyle(
+                    color: Color(0xFFFFD700),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
+              title: 'God Mode Icon'.localized(context),
+              subtitle: 'Obsidian & Gold luxury edition'.localized(context),
               status: 'Open'.localized(context),
               color: const Color(0xFFFFD700),
               onTap: () {
@@ -223,11 +156,6 @@ class GodModeSettingsPage extends StatelessWidget {
               },
             ),
           ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text: 'This exclusive icon is now unlocked in your App Icons gallery.'
-              .localized(context),
         ),
 
         const SizedBox(height: spacing12),

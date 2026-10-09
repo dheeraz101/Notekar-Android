@@ -265,5 +265,99 @@ void main() {
         expect(find.text('Unlocked'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'GodModeSettingsPage renders minimal Apple HIG exclusive icon card',
+      (tester) async {
+        final p = paletteFor('dark');
+        bool openedAppIcons = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: GodModeSettingsPage(
+                  p: p,
+                  currentTheme: 'dark',
+                  onThemeChanged: (_) {},
+                  totalMoments: 100,
+                  streakDays: 30,
+                  onRelockGodMode: () {},
+                  onOpenAppIcons: () {
+                    openedAppIcons = true;
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('EXCLUSIVE APP ICON'), findsOneWidget);
+        expect(find.text('God Mode Icon'), findsOneWidget);
+        expect(find.text('Obsidian & Gold luxury edition'), findsOneWidget);
+        expect(find.text('Open'), findsOneWidget);
+
+        await tester.tap(find.text('God Mode Icon'));
+        await tester.pumpAndSettle();
+        expect(openedAppIcons, isTrue);
+      },
+    );
+
+    testWidgets(
+      'AdvancedSettingsPage renders decluttered minimal Diagnostics & Safeguards',
+      (tester) async {
+        final p = paletteFor('dark');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AdvancedSettingsPage(
+                  p: p,
+                  subCategory: 'Advanced',
+                  currentLocale: 'en',
+                  hapticStyle: 'medium',
+                  reduceMotion: false,
+                  largeText: false,
+                  highContrast: false,
+                  healthStatus: 'Good',
+                  soundEffects: false,
+                  isGodModeUnlocked: false,
+                  onHapticStyleChanged: (_) {},
+                  onSoundEffectsChanged: (_) {},
+                  onReduceMotionChanged: (_) {},
+                  onLargeTextChanged: (_) {},
+                  onHighContrastChanged: (_) {},
+                  onLocaleChanged: (_) {},
+                  onResetSettings: () {},
+                  onResetAllData: () {},
+                  onFactoryReset: () {},
+                  onOpenCategory: (_, {required parent}) {},
+                  onExportCsv: () {},
+                  onExportJson: () {},
+                  onExportBackup: () {},
+                  onResetCircuitBreakers: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('DIAGNOSTICS & SAFEGUARDS'), findsOneWidget);
+        expect(find.text('Circuit Breakers'), findsOneWidget);
+        expect(find.text('Healthy'), findsOneWidget);
+        expect(find.text('Export Diagnostic Logs'), findsOneWidget);
+        expect(find.text('JSON'), findsOneWidget);
+        // Verbose cluttered subtitles must NOT be rendered
+        expect(
+          find.text('Auto-isolates failing background tasks'),
+          findsNothing,
+        );
+        expect(
+          find.text('Export system diagnostic events as JSON'),
+          findsNothing,
+        );
+      },
+    );
   });
 }

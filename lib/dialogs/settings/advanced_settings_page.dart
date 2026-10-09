@@ -190,10 +190,10 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
 
         const SizedBox(height: spacing12),
 
-        // Diagnostics & Safeguards (Moved to bottom with spinner feedback)
+        // Diagnostics & Safeguards (Minimal Apple HIG)
         SettingsGroup(
           p: p,
-          title: 'Diagnostics & Safeguards'.localized(context).toUpperCase(),
+          title: 'Diagnostics & Safeguards'.localized(context),
           insetDividers: true,
           children: [
             SettingsRow(
@@ -202,20 +202,13 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   ? CupertinoIcons.bolt_slash_fill
                   : CupertinoIcons.shield_fill,
               title: 'Circuit Breakers'.localized(context),
-              subtitle: 'Auto-isolates failing background tasks'.localized(
-                context,
-              ),
               status: widget.isCircuitBreakerTripped
                   ? 'Tripped'.localized(context)
                   : 'Healthy'.localized(context),
               color: widget.isCircuitBreakerTripped ? p.red : p.green,
               trailing: _isResettingCircuitBreakers
                   ? CupertinoActivityIndicator(radius: 8, color: p.accent)
-                  : Icon(
-                      CupertinoIcons.arrow_clockwise,
-                      size: 16,
-                      color: p.accent,
-                    ),
+                  : null,
               onTap: () async {
                 if (_isResettingCircuitBreakers) return;
                 setState(() => _isResettingCircuitBreakers = true);
@@ -228,18 +221,12 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
             SettingsRow(
               p: p,
               icon: CupertinoIcons.doc_text_fill,
-              title: 'Log Exporter'.localized(context),
-              subtitle: 'Export system diagnostic events as JSON'.localized(
-                context,
-              ),
+              title: 'Export Diagnostic Logs'.localized(context),
+              status: 'JSON'.localized(context),
               color: p.accent,
               trailing: _isExportingLogs
                   ? CupertinoActivityIndicator(radius: 8, color: p.accent)
-                  : Icon(
-                      CupertinoIcons.arrow_up_doc,
-                      size: 16,
-                      color: p.accent,
-                    ),
+                  : null,
               onTap: () async {
                 if (_isExportingLogs) return;
                 setState(() => _isExportingLogs = true);
@@ -253,9 +240,8 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
         ),
         SettingsPageDescription(
           p: p,
-          text:
-              'Self-healing circuit breakers and diagnostic logs for troubleshooting.'
-                  .localized(context),
+          text: 'Self-healing circuit breakers and diagnostic event exports.'
+              .localized(context),
         ),
         const SizedBox(height: spacing24),
       ],

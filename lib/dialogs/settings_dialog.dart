@@ -2166,7 +2166,13 @@ $cleanStack
     final today = dateKey(DateTime.now());
     final todayCount = entries.where((e) => e.date == today).length;
     final engine = AdaptiveEngine();
-    bool show(String name) => category == name;
+    bool show(String name) {
+      if (category == name) return true;
+      if (name == 'App Icons' && category == 'App Icon') return true;
+      if (name == 'App Icon' && category == 'App Icons') return true;
+      return false;
+    }
+
     final sheet = PopScope(
       canPop: category == null && _categoryStack.isEmpty,
       onPopInvokedWithResult: (didPop, _) {
@@ -2374,15 +2380,6 @@ $cleanStack
                                     color: p.orange,
                                     onTap: () => _openCategory('Advanced'),
                                   ),
-                                  if (_isGodModeUnlocked)
-                                    SettingsRow(
-                                      p: p,
-                                      icon: CupertinoIcons.sparkles,
-                                      title: 'God Mode',
-                                      status: 'Unlocked',
-                                      color: const Color(0xFFFFD700),
-                                      onTap: () => _openCategory('God Mode'),
-                                    ),
                                 ],
                               ),
                               SettingsPageDescription(
@@ -4086,8 +4083,10 @@ $cleanStack
                                   );
                                 }
                               },
-                              onOpenAppIcons: () =>
-                                  _openCategory('App Icon', parent: 'God Mode'),
+                              onOpenAppIcons: () => _openCategory(
+                                'App Icons',
+                                parent: 'God Mode',
+                              ),
                             ),
                           ),
                       ],

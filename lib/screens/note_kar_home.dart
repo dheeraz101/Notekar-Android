@@ -2556,6 +2556,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
   }
 
   Future<List<Moment>> _claimRestGap(DateTime start, DateTime end) async {
+    final effectiveEnd = end.isAfter(start)
+        ? end
+        : start.add(const Duration(minutes: 15));
     final startMoment = Moment(
       id: _nextId++,
       timestamp: start.millisecondsSinceEpoch,
@@ -2567,9 +2570,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
     );
     final endMoment = Moment(
       id: _nextId++,
-      timestamp: end.millisecondsSinceEpoch,
+      timestamp: effectiveEnd.millisecondsSinceEpoch,
       type: 'out',
-      date: dateKey(end),
+      date: dateKey(effectiveEnd),
       note: 'Rest & Recovery',
       category: 'Rest',
       tags: const ['rest'],
