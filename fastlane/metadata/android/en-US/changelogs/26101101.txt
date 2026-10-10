@@ -1,0 +1,42 @@
+Update to 7.5.8 (build 26BR1011):
+- New: Polish settings UI, update center, profile lightbox, and swipe deletion
+- New: 3D Angry Birds avatars, telemetry visualizer, and system refinements
+- New: Polish timeline media filter, 3D avatars, diagnostics animations, and system resilience
+- New: Apple emoji avatars, mid-session goal celebrations, wallet pass, and timeline parity
+- New: Polish timeline rail alignment, search edit affordance, documentation & repo hygiene
+- New: Overhaul rest recovery state machine, multimodal hierarchy, and theme contrast
+- New: Overhaul targets & goals engine, apple hig cards, and multimodal logging
+- New: Add Twitter-style image attachments and direct voice notes
+- New: Refine Apple HIG controls, app icons grid, God Mode flow, and timeline sessions
+- New: Complete Apple HIG settings overhaul and timeline selection polish
+- New: Resolve full audit matrix, harden gitignore, and streamline README
+- New: Route dashboard goals to history, add beta backup warning popup, and clarify background safeguards
+- New: Replicate 0c1851b1 classic single-group settings architecture while preserving modern engine capabilities
+- New: Surgical merge of c05c8b09 Apple HIG sheets with modern engine capabilities
+- New: Intelligence Hub offloading, Icon Standardization, and History Settings Refactor
+- New: Widget IPC Redesign & WorkManager Initialization
+- New: Static App Shortcuts manifest
+- New: Implement native FTS Indexing for UI search
+- New: Isolate offloading for intelligence hub and massive timeline filtering
+- New: Notification consistency channels and remove widget state desync
+- New: Restructure settings into Domain Model and integrate pause system into toolbar
+- Apple HIG minimalist splash screen redesign and startup performance overhaul
+- Updated \main.dart\ startup routines to initialize the Isar core.
+- Storage Engine Evolution to Isar
+- Unified Notification Consistency System
+- Domain-driven Settings redesign, God Mode Hub, and Material Icon standardization
+- Fix: Omit ndkVersion pin to prevent runner download crash and untrack gitignored files
+- Fix: Ensure Isar Linux binary in CI, resilient in
+- Fix: Resolve untracked gap conflict error and lock interval editing
+- Fix: Preserve isOngoing state for unclosed sessions across multiple in moments
+- Fix: Restore isOngoing calculation and resolve mock date test failures
+- Fix: Overhaul session ending & rest pipeline, polish god mode and settings
+- Fix: Prevent null check crash when ending live rest session
+- Fix: Format activity_tag and resolve persistent notification channel in MainActivity
+- Fix: Resolve untracked gap consumption, lock gap logging to sessions, and fix live session lifecycle
+- Fix: Improve configured notification modes, atomic rest-gap logging, launcher icon selection, reminder fallbacks, and settings previews
+- Fix: Implement antigravity repair plan across gap logging, rest authority, calendar parity, life audit, and quick composer
+- Fix: Hide God Mode until unlocked and ensure robust revocation persistence
+- Fix: Resolve isar compileSdk and AAPT shortcut string reference errors
+- Fix: Ensure Isar desktop core initialization and test directory isolation
+- Fix: Resolve isolate unsendable context exception and optimize timeline rendering

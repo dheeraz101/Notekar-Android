@@ -6,6 +6,93 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.8] - 2026-10-11 (versionCode 26BR1011) [BR]
+
+> *Multimodal Life Ledger, Native Isar DB & Apple HIG Precision.*
+
+### What's New
+
+- **Native Isar Storage Engine Evolution**:
+    - Complete migration of database engine from Hive to compiled native Isar database (`@collection`, `moment.g.dart`).
+    - Lightning-fast indexed queries: O(1) instantaneous ID lookups, typed queries, and binary date slicing replacing linear table scans.
+    - Resilient in-memory database fallback ensuring flawless operations across testing, desktop, and CI environments.
+    - Background isolate offloading for timeline calculations and Intelligence Hub analytics (`analyzeAsync`), maintaining 120 FPS UI scrolling.
+
+- **Multimodal Life Ledger (Photos, Voice Notes & Lightbox)**:
+    - Added Twitter/X style photo attachments (`TimelineMediaAttachmentCard`) directly to moments and sessions.
+    - Integrated interactive pinch-to-zoom full-screen lightbox (`PhotoLightboxDialog`) for crystal-clear image previews.
+    - Embedded high-fidelity voice notes with native audio recorder/player, interactive waveform scrubbers, and 1.0x / 1.5x / 2.0x playback speed toggles.
+    - Sandboxed relative media storage (`MediaStorageService`) with automatic lifecycle file purges and zero data leakage.
+    - Added ephemeral in-session photo collapse overrides and dedicated "Media" moment filter in the history calendar view.
+
+- **Targets & Goals Engine Overhaul**:
+    - Added Twitter/X style live character countdown ring (0–9 chars) with dynamic state transitions (accent -> amber -> red) for goal titles.
+    - Dynamic daily target pacing allocation for Month and Year goals synchronized with total target hours.
+    - Mid-session milestone celebrations: triggers instant confetti animation and audio celebrations when a goal target is reached during an active session.
+    - Session timespan mode for retroactive goal logging with surplus hours celebration and attribution badges.
+    - Redesigned 20dp Apple HIG goal cards with 3-metric statistics grid and pacing histogram.
+
+- **Apple HIG Startup Acceleration & Performance Overhaul**:
+    - Re-architected splash screen (`ZenDoodleSplash`) to Apple HIG minimalism with a 350ms duration, smooth cubic ease-out fade, and theme-adaptive canvas.
+    - Purged 1.1MB of heavy unused doodle wallpaper assets from the binary bundle.
+    - Instant cold boot: `runApp()` mounts immediately without blocking preloads.
+    - 98% memory reduction on avatar raster decodes via strict `cacheWidth` and `cacheHeight` constraints.
+    - Gated 20px blur shader behind `AdaptiveEngine().supportsBlur` to guarantee buttery-smooth 60–120 FPS on all hardware tiers.
+    - Deferred search index building (`SearchIndexService.buildIndex`) to idle microtasks.
+
+- **Personal Profile, 3D Avatars & Holographic Pass**:
+    - Introduced 12 curated 3D Angry Birds character portraits (Red, Chuck, Bomb, Stella, Pig, Blues, Terence, Matilda) and 16 Apple emoji presets on vibrant system gradients.
+    - Added full-screen interactive photo lightbox when tapping user profile avatars.
+    - Support for gapless animated GIF profile avatars.
+    - Introduced Apple Wallet-style holographic Memento Mori Pass card export with metallic sheen and one-tap save.
+    - Dynamic collapsible settings header animating the user avatar smoothly into the top navigation bar on scroll.
+    - Exclusive "Member" badge text pill displayed for users who have unlocked God Mode.
+
+- **History, Timeline & Rest Sovereignty**:
+    - Sovereign untracked gap claiming: eliminates false-positive time conflicts and minute-boundary collisions when filling gaps.
+    - Fixed interval editing lock for untracked gaps to preserve chronological ledger fidelity.
+    - Enforced native Cupertino confirmation dialog on swipe-to-delete actions to prevent accidental data loss.
+    - Multi-track interval reconstruction preserving active `isOngoing` session status across multiple moments.
+    - Feature parity across History and Calendar views, including live session termination directly from calendar cards.
+
+- **System Diagnostics & Apple HIG Controls**:
+    - Redesigned Update Center with iOS-style single-pass progress indicator, stage percentage, and clean copy.
+    - Overhauled Device Health Adaptive Performance card with frame-budget gauge, 24-bar hardware frequency visualizer, and authentic Apple HIG copy.
+    - Transparent zero-telemetry disclosures and live activity line in Network Monitor.
+    - 1:1 aligned tap delay slider width constraints to match indicator tick lines.
+    - Beta languages marked with refined yellow underline indicator beneath checkmark.
+    - Unified Notification Consistency System with canonical priority channels (`High`, `Default`, `Low`).
+    - Static long-press app shortcuts manifest (`shortcuts.xml`) for instant launcher access before Dart initialization.
+
+### Improvements
+
+- **Domain-Driven Settings Architecture**:
+    - Streamlined settings hierarchy with native Material and Cupertino icons.
+    - Direct root-level toggles for Reduce Motion, Haptics, and 24-Hour Format.
+    - Relocated advanced diagnostic tools, circuit breakers, and JSON log exporters into dedicated safeguard hubs.
+- **Android System Hardening & IPC**:
+    - Unified NotificationConsistencyManager eliminating conflicting channels across Android 8+.
+    - Ephemeral intent queue widget IPC eliminating SharedPreferences desynchronization.
+    - Daily midnight analytics backup via WorkManager triggered during idle/unmetered states.
+    - Comprehensive repository hygiene and streamlined documentation.
+
+### Bug Fixes
+
+- **Ledger & Time Tracking**:
+    - Resolved untracked gap false-positive conflict errors and millisecond collisions.
+    - Prevented null check crash when terminating live rest sessions.
+    - Preserved `isOngoing` session status across multiple sequential in-moments.
+    - Fixed live session in-memory update lag and 0m tracking bounds.
+- **UI & Interaction**:
+    - Fixed pull-to-refresh sliver in Commits page with ClipRect and holding delay to eliminate spinner bleed.
+    - Fixed sticky undo toast pill dismissal on home screen.
+    - Prevented premature goal completion for all-category bounded targets.
+    - Fixed tap delay slider tick mark misalignments.
+- **System & Engine**:
+    - Resolved Isar desktop core initialization and test directory isolation issues.
+    - Resolved isolate unsendable context exceptions during background timeline rendering.
+    - Fixed CI runner NDK version pin crash and ensured Linux Isar binaries in automated workflows.
+
 ## [7.5.7] - 2026-10-04 (Build tag 26BR1004) [BR]
 
 > *High-Performance Engine, Concurrency & Fault Isolation.*

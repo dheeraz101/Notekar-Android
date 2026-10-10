@@ -27,65 +27,73 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.7',
-    date: 'October 04, 2026',
-    edition: 'High-Performance Engine & Fault Isolation',
+    version: '7.5.8',
+    date: 'October 11, 2026',
+    edition: 'Multimodal Ledger, Isar DB & Apple HIG Precision',
     badgeColor: Color(0xFFFF9F0A),
     highlights: [
       (
-        title: 'Concurrency Engine (Isolates)',
+        title: 'Native Isar Storage Engine',
         desc:
-            'Offloads Life Audit and Executive Dashboard heavy calculations to background isolates via Isolate.run for fluid, jank-free UI scrolling.',
-        icon: Icons.bolt_rounded,
+            'Migrated from Hive to compiled Isar DB with O(1) indices, binary range slicing, and background isolate processing for locked 120 FPS scrolling.',
+        icon: Icons.storage_rounded,
         tag: 'Engine',
       ),
       (
-        title: 'High-Performance Search',
+        title: 'Multimodal Life Ledger',
         desc:
-            'Sub-millisecond inverted token index engine with O(K) hashtag autocomplete, category matching, and candidate relevance ranking.',
-        icon: Icons.search_rounded,
-        tag: 'Search',
+            'Twitter-style photo attachments with full-screen pinch-to-zoom lightbox, plus native voice notes with waveform scrubbers and variable speeds.',
+        icon: Icons.photo_library_rounded,
+        tag: 'Media',
       ),
       (
-        title: 'Circuit Breaker Fault Isolation',
+        title: 'Targets & Goals Overhaul',
         desc:
-            'Automated 3-strike circuit breaker protecting Digital Wellbeing and third-party integrations from cascading crashes.',
-        icon: Icons.offline_bolt_rounded,
-        tag: 'Resilience',
+            'Twitter-style title countdown ring, dynamic daily pacing allocations, retroactive session logging, and mid-session confetti celebrations.',
+        icon: Icons.track_changes_rounded,
+        tag: 'Goals',
       ),
       (
-        title: 'Secondary Indices & Binary Range Slices',
+        title: 'Apple HIG Startup & Performance',
         desc:
-            'MomentRepository equipped with secondary ID index and O(log N) binary range slicing for instant queries.',
-        icon: Icons.layers_rounded,
-        tag: 'Storage',
+            'Ultra-fast 350ms minimalist splash screen, instant cold boot, 1.1MB asset purge, 98% avatar RAM reduction, and adaptive blur shader gating.',
+        icon: Icons.bolt_rounded,
+        tag: 'Performance',
       ),
       (
-        title: 'Daily Maintenance Scheduler',
+        title: '3D Avatars & Holographic Pass',
         desc:
-            'Guaranteed OS-level Android AlarmManager midnight maintenance for rolling snapshots, trash auto-purging, and storage compaction.',
-        icon: Icons.schedule_rounded,
-        tag: 'Maintenance',
+            '12 3D Angry Birds character portraits, Apple emoji presets, full-screen profile lightbox, collapsible header avatar, and Apple Wallet Memento Mori Pass.',
+        icon: Icons.face_rounded,
+        tag: 'Identity',
       ),
       (
-        title: 'Life Audit Ledger in History',
+        title: 'Sovereign Gap Claiming & History Parity',
         desc:
-            'Life Audit & Horizon directly accessible from History actions with infinite scroll position preservation.',
-        icon: Icons.auto_graph_rounded,
-        tag: 'Ledger',
+            'One-tap untracked gap claiming without time conflicts, swipe-to-delete confirmation protection, and full Calendar view parity.',
+        icon: Icons.history_rounded,
+        tag: 'History',
+      ),
+      (
+        title: 'Update Center & Diagnostics',
+        desc:
+            'iOS-style single-pass update verification, 24-bar Adaptive Governor hardware visualizer, and transparent zero-telemetry disclosures.',
+        icon: Icons.system_update_rounded,
+        tag: 'Diagnostics',
       ),
     ],
     items: [
-      'Concurrency engine, inverted search indexing, circuit breaker fault isolation, and secondary indices.',
-      '+ Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates',
-      '+ High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService',
-      '+ Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository',
-      '+ Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & Advanced Settings',
-      '+ History & Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation',
-      '+ Guaranteed OS Maintenance: Android AlarmManager midnight maintenance trigger (ACTION_DAILY_MAINTENANCE)',
-      '+ State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state',
-      '+ Settings Search Indexing: Indexed routing for Fault Isolation, Floating Timer Pill, and Acoustic Feedback',
-      '* All 243 automated unit and widget test suites passing with zero lints and 100% offline privacy',
+      'Native Isar database engine, multimodal photo & audio notes, goals pacing overhaul, Apple HIG startup acceleration, and 3D avatar identity.',
+      '+ Storage Engine Evolution: Migrated from Hive to native compiled Isar DB with O(1) indices and O(log N) binary range slicing',
+      '+ Multimodal Media: Twitter-style photo attachments, full-screen lightbox zoom, and native voice notes with waveform playback',
+      '+ Targets & Goals Engine: Character countdown ring, dynamic daily pacing, retroactive logging, and mid-session confetti celebrations',
+      '+ Startup Acceleration: Minimalist Apple HIG splash screen, instant runApp mount, 1.1MB asset purge, and 98% avatar RAM reduction',
+      '+ Personal Profile: 12 3D Angry Birds avatar presets, animated GIF support, collapsible header avatar, and Apple Wallet Memento Mori Pass',
+      '+ History & Integrity: Untracked gap claiming without conflict collisions, swipe-to-delete confirmation dialogs, and Calendar view parity',
+      '+ Diagnostics & Controls: Single-pass Update Center, 24-bar Adaptive Governor visualizer, and telemetry transparency monitor',
+      '+ Apple HIG Polish: 1:1 aligned tap delay slider, beta language underline indicators, and God Mode Member badge',
+      '+ System IPC: Notification Consistency Manager, ephemeral Intent Queue widget IPC, and daily WorkManager maintenance',
+      '* All 279 automated unit and widget tests passing with 0 lint warnings and 100% offline privacy',
     ],
   );
 

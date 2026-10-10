@@ -1,14 +1,78 @@
 [
     {
+        "version":  "7.5.8",
+        "buildNumber":  "26BR1011",
+        "releaseDate":  "2026-10-11",
+        "channel":  "beta",
+        "channelTag":  "[Beta]",
+        "isBeta":  true,
+        "edition":  "Multimodal Ledger, Isar DB & Apple HIG Precision",
+        "badgeColor":  "#FF9F0A",
+        "isLatest":  true,
+        "highlights":  [
+                           {
+                               "title":  "Native Isar Storage Engine",
+                               "description":  "Database migration to compiled Isar DB with O(1) secondary indices, binary range slicing, and background isolate processing for locked 120 FPS scrolling.",
+                               "icon":  "storage_rounded"
+                           },
+                           {
+                               "title":  "Multimodal Life Ledger",
+                               "description":  "Twitter/X style photo attachments with pinch-to-zoom full-screen lightboxes, plus high-fidelity voice notes with interactive waveform scrubbers and variable speeds.",
+                               "icon":  "photo_library_rounded"
+                           },
+                           {
+                               "title":  "Targets & Goals Overhaul",
+                               "description":  "Character countdown rings, dynamic daily pacing allocations, retroactive session timespan logging, and instant mid-session milestone confetti celebrations.",
+                               "icon":  "track_changes_rounded"
+                           },
+                           {
+                               "title":  "Apple HIG Startup & Performance",
+                               "description":  "Minimalist 350ms splash screen, instant cold boot runApp mount, 1.1MB wallpaper asset purge, 98% avatar RAM reduction, and adaptive GPU blur shader gating.",
+                               "icon":  "bolt_rounded"
+                           },
+                           {
+                               "title":  "3D Avatars & Holographic Pass",
+                               "description":  "12 3D Angry Birds character portraits, 16 Apple emoji presets, full-screen profile lightbox, collapsible header avatar, and exportable Apple Wallet Memento Mori Pass.",
+                               "icon":  "face_rounded"
+                           },
+                           {
+                               "title":  "Sovereign Gap Claiming & History Parity",
+                               "description":  "Conflict-free untracked gap claiming, native Cupertino swipe-to-delete confirmation dialogs, and full Calendar view parity with live session controls.",
+                               "icon":  "history_rounded"
+                           },
+                           {
+                               "title":  "System Diagnostics & Apple HIG Controls",
+                               "description":  "Single-pass iOS Update Center, 24-bar Adaptive Governor hardware visualizer, transparent telemetry disclosures, and 1:1 aligned tap delay slider.",
+                               "icon":  "system_update_rounded"
+                           }
+                       ],
+        "fullChangelog":  [
+                              "Storage Engine Evolution: Migrated from Hive to native compiled Isar DB with O(1) indices and O(log N) binary date range queries",
+                              "Multimodal Media: Twitter/X style photo attachments, full-screen lightbox zoom, and native voice notes with waveform playback",
+                              "Targets & Goals Engine: Character countdown ring, dynamic daily pacing, retroactive logging, and mid-session confetti celebrations",
+                              "Startup Acceleration: Minimalist Apple HIG splash screen, instant runApp mount, 1.1MB asset purge, and 98% avatar RAM reduction",
+                              "Personal Profile & Pass: 12 3D Angry Birds avatar presets, animated GIF support, collapsible header avatar, and Apple Wallet Memento Mori Pass",
+                              "History & Ledger Integrity: Untracked gap claiming without conflict collisions, swipe-to-delete confirmation dialogs, and Calendar view parity",
+                              "Diagnostics & Device Health: Single-pass Update Center, 24-bar Adaptive Governor hardware visualizer, and telemetry transparency monitor",
+                              "Apple HIG Refinements: 1:1 aligned tap delay slider, beta language underline indicators, and God Mode Member badge",
+                              "System Architecture: Notification Consistency Manager, ephemeral Intent Queue widget IPC, and daily WorkManager maintenance",
+                              "Quality & Resilience: 279 automated unit and widget tests passing with 0 lint warnings and offline-first data protection"
+                          ],
+        "downloads":  {
+                          "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.8/NoteKar-v7.5.8-universal-release.apk",
+                          "arm64Apk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.8/NoteKar-v7.5.8-arm64-v8a-release.apk"
+                      }
+    },
+    {
         "version":  "7.5.7",
         "buildNumber":  "26BR1004",
         "releaseDate":  "2026-10-04",
         "channel":  "beta",
         "channelTag":  "[Beta]",
         "isBeta":  true,
-        "edition":  "High-Performance Engine & Fault Isolation",
+        "edition":  "High-Performance Engine \u0026 Fault Isolation",
         "badgeColor":  "#FF9F0A",
-        "isLatest":  true,
+        "isLatest":  false,
         "highlights":  [
                            {
                                "title":  "Concurrency Engine (Isolates)",
@@ -26,7 +90,7 @@
                                "icon":  "offline_bolt_rounded"
                            },
                            {
-                               "title":  "Secondary Indices & Binary Range Slices",
+                               "title":  "Secondary Indices \u0026 Binary Range Slices",
                                "description":  "In-memory secondary ID index for O(1) lookups and O(log N) binary range slicing for instant date queries in MomentRepository.",
                                "icon":  "layers_rounded"
                            },
@@ -45,9 +109,9 @@
                               "Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates via Isolate.run",
                               "High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService",
                               "Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository",
-                              "Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics & God Mode",
+                              "Circuit Breaker Service: 3-strike failure isolation with manual resets in Diagnostics \u0026 God Mode",
                               "Guaranteed OS Maintenance: Android AlarmManager midnight maintenance trigger (ACTION_DAILY_MAINTENANCE)",
-                              "History & Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation",
+                              "History \u0026 Life Audit: Direct Life Audit action sheet route and PageStorageKey scroll preservation",
                               "State Decoupling: Native SettingsController migration and synchronized Android Kotlin-Flutter pause state",
                               "Settings Search Indexing: Indexed routing for Fault Isolation, Floating Timer Pill, and Acoustic Feedback",
                               "Apple HIG Polish: Unified 28pt continuous squircle cards, expanded history layout, and refined typography",
@@ -1079,7 +1143,7 @@
                                "icon":  "route_rounded"
                            },
                            {
-                               "title":  "Hardware Privacy & App Lock",
+                               "title":  "Hardware Privacy \u0026 App Lock",
                                "description":  "Device app lock and screen content obfuscation for local privacy.",
                                "icon":  "security_rounded"
                            }
@@ -1291,7 +1355,7 @@
         "channel":  "beta",
         "channelTag":  "[Beta]",
         "isBeta":  true,
-        "edition":  "Hardware Privacy & App Lock \u0026 QS Tile",
+        "edition":  "Hardware Privacy \u0026 App Lock \u0026 QS Tile",
         "badgeColor":  "#FF9F0A",
         "isLatest":  false,
         "highlights":  [
