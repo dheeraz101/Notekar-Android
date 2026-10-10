@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/classic_2000_god_mode_icon.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
 class GodModeSettingsPage extends StatelessWidget {
@@ -126,7 +125,15 @@ class GodModeSettingsPage extends StatelessWidget {
           children: [
             SettingsRow(
               p: p,
-              customIcon: const Classic2000GodModeIcon(size: 32),
+              customIcon: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'app_icons/g.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.cover,
+                ),
+              ),
               title: 'God Mode Icon'.localized(context),
               subtitle: 'Classic 2000s Aqua Gold Edition'.localized(context),
               status: 'Open'.localized(context),

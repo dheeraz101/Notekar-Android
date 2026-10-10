@@ -17,6 +17,7 @@ import 'package:notekar/utils/moment_repository.dart';
 import 'package:notekar/utils/tag_service.dart';
 import 'package:notekar/widgets/home_category_pills.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/settings_widgets.dart';
 
 class ManualEntryResult {
   const ManualEntryResult({
@@ -408,6 +409,20 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     return timeOnly(dt.millisecondsSinceEpoch);
   }
 
+  bool _hasTimeConflict(DateTime dt) {
+    for (final m in _allMoments) {
+      final mDt = DateTime.fromMillisecondsSinceEpoch(m.timestamp);
+      if (mDt.year == dt.year &&
+          mDt.month == dt.month &&
+          mDt.day == dt.day &&
+          mDt.hour == dt.hour &&
+          mDt.minute == dt.minute) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> _selectDate() async {
     HapticFeedback.selectionClick();
     final now = DateTime.now();
@@ -478,6 +493,14 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       return;
     }
 
+    if (_hasTimeConflict(startDt)) {
+      setState(
+        () => _errorMessage =
+            'Start time (${_formatTimeOfDay(_startTime)}) is already allocated to a past moment.',
+      );
+      return;
+    }
+
     DateTime? endDt;
     if (_isSession) {
       endDt = _combine(_selectedDate, _endTime);
@@ -488,6 +511,13 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       }
       if (endDt.isAfter(now.add(const Duration(minutes: 5)))) {
         setState(() => _errorMessage = 'End time cannot be in the future.');
+        return;
+      }
+      if (_hasTimeConflict(endDt)) {
+        setState(
+          () => _errorMessage =
+              'End time (${_formatTimeOfDay(_endTime)}) is already allocated to a past moment.',
+        );
         return;
       }
     }
@@ -558,6 +588,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     final startDt = _combine(_selectedDate, _startTime);
     final endDt = _combine(_selectedDate, _endTime);
     final sessionMinutes = endDt.difference(startDt).inMinutes;
+    final startConflict = _hasTimeConflict(startDt);
+    final endConflict = _isSession && _hasTimeConflict(endDt);
+    final hasConflict = startConflict || endConflict;
 
     GoalProgress? goalProgress;
     int? extraMinutes;
@@ -814,7 +847,10 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                       color: p.surface2,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: p.border.withValues(alpha: 0.6),
+                        color: startConflict
+                            ? p.red.withValues(alpha: 0.7)
+                            : p.border.withValues(alpha: 0.6),
+                        width: startConflict ? 1.4 : 1.0,
                       ),
                     ),
                     child: Column(
@@ -825,25 +861,47 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                             Icon(
                               Icons.schedule_rounded,
                               size: 14,
-                              color: p.accent,
+                              color: startConflict ? p.red : p.accent,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               _isSession ? 'START TIME' : 'TIME',
                               style: TextStyle(
-                                color: p.text3,
+                                color: startConflict ? p.red : p.text3,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.6,
                               ),
                             ),
+                            if (startConflict) ...[
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: p.red.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: Text(
+                                  'USED',
+                                  style: TextStyle(
+                                    color: p.red,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 6),
                         Text(
                           _formatTimeOfDay(_startTime),
                           style: TextStyle(
-                            color: p.text,
+                            color: startConflict ? p.red : p.text,
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.5,
@@ -869,7 +927,10 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                         color: p.surface2,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: p.border.withValues(alpha: 0.6),
+                          color: endConflict
+                              ? p.red.withValues(alpha: 0.7)
+                              : p.border.withValues(alpha: 0.6),
+                          width: endConflict ? 1.4 : 1.0,
                         ),
                       ),
                       child: Column(
@@ -880,25 +941,47 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                               Icon(
                                 Icons.schedule_rounded,
                                 size: 14,
-                                color: p.text3,
+                                color: endConflict ? p.red : p.text3,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 'END TIME',
                                 style: TextStyle(
-                                  color: p.text3,
+                                  color: endConflict ? p.red : p.text3,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.6,
                                 ),
                               ),
+                              if (endConflict) ...[
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.red.withValues(alpha: 0.14),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Text(
+                                    'USED',
+                                    style: TextStyle(
+                                      color: p.red,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 6),
                           Text(
                             _formatTimeOfDay(_endTime),
                             style: TextStyle(
-                              color: p.text,
+                              color: endConflict ? p.red : p.text,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.5,
@@ -915,6 +998,38 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ],
             ],
           ),
+
+          if (hasConflict) ...[
+            const SizedBox(height: spacing12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: p.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: p.red.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 16, color: p.red),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      startConflict && endConflict
+                          ? 'Both start & end times are already allocated to past moments.'
+                          : (startConflict
+                                ? 'Start time (${_formatTimeOfDay(_startTime)}) is already allocated to a past moment.'
+                                : 'End time (${_formatTimeOfDay(_endTime)}) is already allocated to a past moment.'),
+                      style: TextStyle(
+                        color: p.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Session duration pill
           if (_isSession && sessionMinutes > 0) ...[
@@ -1481,20 +1596,26 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               const SizedBox(width: 12),
               Expanded(
                 child: PressableScale(
-                  onTap: _submit,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    decoration: BoxDecoration(
-                      color: p.accent,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Save Log',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                  onTap: hasConflict ? null : _submit,
+                  child: Opacity(
+                    opacity: hasConflict ? 0.45 : 1.0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        color: hasConflict ? p.surface3 : p.accent,
+                        borderRadius: BorderRadius.circular(16),
+                        border: hasConflict
+                            ? Border.all(color: p.border.withValues(alpha: 0.6))
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        hasConflict ? 'Time Taken' : 'Save Log',
+                        style: TextStyle(
+                          color: hasConflict ? p.text3 : Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ),
@@ -1502,6 +1623,15 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ),
             ],
           ),
+          const SizedBox(height: spacing20),
+          SettingsBetaNote(
+            p: p,
+            text: 'Logging past moments is a beta feature.',
+            onLearnMore: () {
+              showBetaInfoPopup(context, p);
+            },
+          ),
+          const SizedBox(height: spacing32),
         ],
       ),
     );

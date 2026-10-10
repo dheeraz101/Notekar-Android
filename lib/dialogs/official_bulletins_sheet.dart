@@ -378,13 +378,13 @@ class _OfficialBulletinsContentState extends State<OfficialBulletinsContent> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: p.green.withValues(alpha: 0.12),
+                    color: p.accent.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.check_circle_outline_rounded,
-                    color: p.green,
-                    size: 28,
+                    CupertinoIcons.news_solid,
+                    color: p.accent,
+                    size: 26,
                   ),
                 ),
                 const SizedBox(height: 14),

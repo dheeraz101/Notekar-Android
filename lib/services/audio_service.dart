@@ -251,13 +251,13 @@ class AudioService extends ChangeNotifier {
   }
 
   Future<void> stop() async {
-    try {
-      await _channel.invokeMethod('stopAudio');
-    } catch (_) {}
     _isPlaying = false;
     _currentPosition = Duration.zero;
     _stopPlaybackPoll();
     notifyListeners();
+    try {
+      await _channel.invokeMethod('stopAudio');
+    } catch (_) {}
   }
 
   Future<void> seek(Duration position) async {
@@ -288,7 +288,7 @@ class AudioService extends ChangeNotifier {
 
   void _startPlaybackPoll() {
     _playbackPollTimer?.cancel();
-    _playbackPollTimer = Timer.periodic(const Duration(milliseconds: 250), (
+    _playbackPollTimer = Timer.periodic(const Duration(milliseconds: 60), (
       _,
     ) async {
       try {
@@ -300,16 +300,22 @@ class AudioService extends ChangeNotifier {
           final posMs = (state['positionMs'] as num?)?.toInt() ?? 0;
           final durMs = (state['durationMs'] as num?)?.toInt() ?? 0;
 
+          if (!isPlayingNow) {
+            _isPlaying = false;
+            _currentPosition = Duration.zero;
+            _stopPlaybackPoll();
+            notifyListeners();
+            return;
+          }
+
           _isPlaying = isPlayingNow;
           _currentPosition = Duration(milliseconds: posMs);
           if (durMs > 0) {
             _totalDuration = Duration(milliseconds: durMs);
           }
 
-          if (!_isPlaying &&
-              _currentPosition >= _totalDuration &&
-              _totalDuration > Duration.zero) {
-            // Finished playing
+          if (posMs >= durMs && durMs > 0) {
+            _isPlaying = false;
             _currentPosition = Duration.zero;
             _stopPlaybackPoll();
           }
@@ -320,7 +326,7 @@ class AudioService extends ChangeNotifier {
 
       // In simulation mode (e.g. tests or unsupported platform)
       if (_isPlaying) {
-        final stepMs = (250 * _playbackSpeed).toInt();
+        final stepMs = (60 * _playbackSpeed).toInt();
         final newPos = _currentPosition + Duration(milliseconds: stepMs);
         if (newPos >= _totalDuration) {
           _isPlaying = false;

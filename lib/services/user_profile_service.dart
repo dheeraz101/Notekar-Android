@@ -98,103 +98,79 @@ class UserProfileService extends ChangeNotifier {
   static const int maxMementoMoriYears = 100;
   static const int defaultMementoMoriYears = 80;
 
-  /// Curated Apple HIG emoji presets on vibrant system gradients
+  /// Curated 3D-styled Angry Birds collection on vibrant Apple HIG gradients
   static const List<PresetAvatarOption> curatedPresetAvatars = [
     PresetAvatarOption(
-      id: 'emoji_fox',
-      label: 'Focus',
-      emoji: '🦊',
-      gradientColors: [Color(0xFFFF9500), Color(0xFFFF5E3A)],
+      id: 'angry_red',
+      label: 'Red',
+      emoji: '🔴',
+      gradientColors: [Color(0xFFFF3B30), Color(0xFFC41C16)],
     ),
     PresetAvatarOption(
-      id: 'emoji_bolt',
-      label: 'Energy',
+      id: 'angry_chuck',
+      label: 'Chuck',
       emoji: '⚡',
-      gradientColors: [Color(0xFF007AFF), Color(0xFF00C7BE)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_rocket',
-      label: 'Pioneer',
-      emoji: '🚀',
-      gradientColors: [Color(0xFF5856D6), Color(0xFFAF52DE)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_lion',
-      label: 'Courage',
-      emoji: '🦁',
       gradientColors: [Color(0xFFFFCC00), Color(0xFFFF9500)],
     ),
     PresetAvatarOption(
-      id: 'emoji_owl',
-      label: 'Wisdom',
-      emoji: '🦉',
-      gradientColors: [Color(0xFF2C3E50), Color(0xFF5856D6)],
+      id: 'angry_bomb',
+      label: 'Bomb',
+      emoji: '💣',
+      gradientColors: [Color(0xFF3A3A3C), Color(0xFF1C1C1E)],
     ),
     PresetAvatarOption(
-      id: 'emoji_sprout',
-      label: 'Growth',
-      emoji: '🌿',
+      id: 'angry_stella',
+      label: 'Stella',
+      emoji: '🌸',
+      gradientColors: [Color(0xFFFF2D55), Color(0xFFFF375F)],
+    ),
+    PresetAvatarOption(
+      id: 'angry_blues',
+      label: 'The Blues',
+      emoji: '💎',
+      gradientColors: [Color(0xFF007AFF), Color(0xFF5AC8FA)],
+    ),
+    PresetAvatarOption(
+      id: 'angry_terence',
+      label: 'Terence',
+      emoji: '🗿',
+      gradientColors: [Color(0xFF8B0000), Color(0xFF4A0000)],
+    ),
+    PresetAvatarOption(
+      id: 'angry_matilda',
+      label: 'Matilda',
+      emoji: '🥚',
+      gradientColors: [Color(0xFFF2F2F7), Color(0xFFC7C7CC)],
+    ),
+    PresetAvatarOption(
+      id: 'angry_king_pig',
+      label: 'King Pig',
+      emoji: '👑',
       gradientColors: [Color(0xFF34C759), Color(0xFF30D158)],
     ),
     PresetAvatarOption(
-      id: 'emoji_gem',
-      label: 'Clarity',
-      emoji: '💎',
-      gradientColors: [Color(0xFF5AC8FA), Color(0xFF007AFF)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_target',
-      label: 'Precision',
-      emoji: '🎯',
-      gradientColors: [Color(0xFFFF3B30), Color(0xFFFF2D55)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_zen',
-      label: 'Serenity',
-      emoji: '🧘',
-      gradientColors: [Color(0xFF30B0C7), Color(0xFF6750A4)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_star',
-      label: 'Luminary',
-      emoji: '🌟',
-      gradientColors: [Color(0xFFFFD60A), Color(0xFFFF9F0A)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_palette',
-      label: 'Creative',
-      emoji: '🎨',
-      gradientColors: [Color(0xFFFF2D55), Color(0xFFAF52DE)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_coffee',
-      label: 'Momentum',
-      emoji: '☕',
-      gradientColors: [Color(0xFF8B5A2B), Color(0xFFA0522D)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_wave',
-      label: 'Flow',
-      emoji: '🌊',
-      gradientColors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
-    ),
-    PresetAvatarOption(
-      id: 'emoji_eagle',
-      label: 'Horizon',
+      id: 'angry_mighty_eagle',
+      label: 'Mighty Eagle',
       emoji: '🦅',
-      gradientColors: [Color(0xFFE65C00), Color(0xFFF9D423)],
+      gradientColors: [Color(0xFF1D2A44), Color(0xFFD4AF37)],
     ),
     PresetAvatarOption(
-      id: 'emoji_mountain',
-      label: 'Summit',
-      emoji: '🏔️',
-      gradientColors: [Color(0xFF4B6CB7), Color(0xFF182848)],
+      id: 'angry_hal',
+      label: 'Hal',
+      emoji: '🪃',
+      gradientColors: [Color(0xFF30D158), Color(0xFF1B6B2F)],
     ),
     PresetAvatarOption(
-      id: 'emoji_spark',
-      label: 'Spark',
-      emoji: '💡',
-      gradientColors: [Color(0xFFFFB300), Color(0xFFF57C00)],
+      id: 'angry_bubbles',
+      label: 'Bubbles',
+      emoji: '🎈',
+      gradientColors: [Color(0xFFFF9500), Color(0xFFFF3B30)],
+    ),
+    PresetAvatarOption(
+      id: 'angry_silver',
+      label: 'Silver',
+      emoji: '🌪️',
+      gradientColors: [Color(0xFF8E8E93), Color(0xFF636366)],
     ),
   ];
 
@@ -486,6 +462,7 @@ class UserProfileService extends ChangeNotifier {
         key: ValueKey(_avatarBytes.hashCode),
         fit: BoxFit.cover,
         alignment: Alignment.center,
+        gaplessPlayback: true,
         errorBuilder: (context, error, stackTrace) =>
             _buildFallbackMonogram(p, size),
       );
@@ -501,11 +478,45 @@ class UserProfileService extends ChangeNotifier {
             end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: Text(
-            preset.emoji,
-            style: TextStyle(fontSize: size * 0.52, height: 1.0),
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 3D Apple HIG Gloss Specular Arc
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: size * 0.44,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.35),
+                      Colors.white.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: Text(
+                preset.emoji,
+                style: TextStyle(
+                  fontSize: size * 0.52,
+                  height: 1.0,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.38),
+                      offset: const Offset(0, 1.5),
+                      blurRadius: 3.5,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       );
     } else if (_name.trim().isNotEmpty) {

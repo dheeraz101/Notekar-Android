@@ -143,7 +143,16 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           'identity',
           'name',
           'avatar',
+          'angry birds',
+          '3d avatar',
           'photo',
+          'gif',
+          'animated gif',
+          'apple wallet',
+          'holographic card',
+          'identity pass',
+          'pass export',
+          'qr code',
           'dob',
           'birth date',
           'picture',
@@ -1208,28 +1217,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         },
         status: null,
       ),
-      item(
-        title: 'Extended Duration',
-        subtitle: 'Show days, months, and years in time between moments',
-        category: 'Moments',
-        icon: CupertinoIcons.timer,
-        keywords: [
-          'time',
-          'duration',
-          'years',
-          'months',
-          'days',
-          'long intervals',
-          'history',
-        ],
-        kind: 'switch',
-        boolValue: extendedDuration,
-        onBoolChanged: (bool value) {
-          update(() => extendedDuration = value);
-          widget.onExtendedDuration(value);
-        },
-        status: null,
-      ),
+
       item(
         title: 'Time Difference Comparison',
         subtitle:
@@ -1244,6 +1232,27 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           'between moments',
           'difference',
           'duration',
+        ],
+        kind: 'nav',
+        boolValue: null,
+        onBoolChanged: null,
+      ),
+      item(
+        title: 'Media Moments Filter',
+        subtitle:
+            'Filter timeline by moments with voice memos or captured photos',
+        category: 'Moments',
+        icon: CupertinoIcons.photo_on_rectangle,
+        keywords: [
+          'media',
+          'filter',
+          'photos',
+          'voice notes',
+          'voice memos',
+          'audio',
+          'images',
+          'multimedia',
+          'timeline',
         ],
         kind: 'nav',
         boolValue: null,
@@ -1894,6 +1903,11 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
           'system blur',
           'live animations',
           'tuning',
+          'hardware governor',
+          'live diagnostics',
+          'thermal',
+          'frame budget',
+          'safeguards',
         ],
         kind: 'nav',
         boolValue: null,
@@ -2717,6 +2731,10 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     }
     if (result.title == 'Official Bulletins') {
       _openCategory('Official Bulletins', parent: 'Updates & Notices');
+      return;
+    }
+    if (result.title == 'Media Moments Filter') {
+      _openCategory('Moments');
       return;
     }
     if (result.title == 'Commits') {

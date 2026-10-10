@@ -582,7 +582,7 @@ void showTimeDifferenceDialog(
   required Moment b,
   bool largeText = false,
   bool blur = false,
-  bool extended = false,
+  bool extended = true,
 }) {
   final start = math.min(a.timestamp, b.timestamp);
   final end = math.max(a.timestamp, b.timestamp);
@@ -614,6 +614,17 @@ void showTimeDifferenceDialog(
               fontWeight: FontWeight.w700,
             ),
           ),
+          if (duration.inHours >= 24) ...[
+            const SizedBox(height: 4),
+            Text(
+              '(${duration.inHours}h ${duration.inMinutes.remainder(60)}m total)',
+              style: TextStyle(
+                color: p.text3,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           FilledButton(
             onPressed: () => Navigator.pop(context),

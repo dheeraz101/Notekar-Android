@@ -573,26 +573,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         : (isInstalledBeta ? 'beta' : 'stable');
 
     if (widget.checkingUpdates) {
-      return Glass(
-        p: p,
-        radius: 24,
-        blur: blurEnabled,
-        padding: const EdgeInsets.all(24),
-        child: SizedBox(
-          height: 154,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CupertinoActivityIndicator(radius: 16, color: p.accent),
-              const SizedBox(height: 16),
-              Text(
-                'Checking for updates...'.localized(context),
-                style: TextStyle(color: p.text2, fontSize: 14),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _AnimatedUpdateCheckCard(p: p, blur: blurEnabled);
     }
 
     if (widget.updateInfo == null) {
@@ -990,10 +971,8 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           Row(
             children: [
               Icon(
-                hasCache
-                    ? CupertinoIcons.sparkles
-                    : CupertinoIcons.checkmark_circle,
-                color: hasCache ? p.orange : p.green,
+                hasCache ? CupertinoIcons.sparkles : CupertinoIcons.archivebox,
+                color: hasCache ? p.orange : p.accent,
                 size: 20,
               ),
               const SizedBox(width: 12),
@@ -1304,6 +1283,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
             if (remoteNotices)
               SettingsRow(
                 p: p,
+                icon: CupertinoIcons.news,
                 title: 'Official Bulletins',
                 color: p.accent,
                 status: null,
@@ -1375,6 +1355,180 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
         SettingsBetaNote(p: p, onLearnMore: onLearnMoreBeta),
         const SizedBox(height: spacing48),
       ],
+    );
+  }
+}
+
+class _AnimatedUpdateCheckCard extends StatefulWidget {
+  const _AnimatedUpdateCheckCard({required this.p, required this.blur});
+
+  final Palette p;
+  final bool blur;
+
+  @override
+  State<_AnimatedUpdateCheckCard> createState() =>
+      _AnimatedUpdateCheckCardState();
+}
+
+class _AnimatedUpdateCheckCardState extends State<_AnimatedUpdateCheckCard>
+    with SingleTickerProviderStateMixin {
+  late final Timer _timer;
+  int _stage = 0;
+  late final AnimationController _pulseController;
+
+  static const _stages = [
+    (
+      title: 'Connecting to GitHub...',
+      subtitle: 'Securing encrypted HTTPS connection to api.github.com',
+      icon: CupertinoIcons.globe,
+    ),
+    (
+      title: 'Querying Release Tags...',
+      subtitle: 'Inspecting latest production and beta release manifests',
+      icon: CupertinoIcons.tag,
+    ),
+    (
+      title: 'Comparing Build Deltas...',
+      subtitle: 'Validating build signatures against installed version',
+      icon: CupertinoIcons.arrow_2_circlepath,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _timer = Timer.periodic(const Duration(milliseconds: 900), (_) {
+      if (mounted) {
+        setState(() {
+          _stage = (_stage + 1) % _stages.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.p;
+    final current = _stages[_stage];
+
+    return Glass(
+      p: p,
+      radius: 24,
+      blur: widget.blur,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (ctx, child) {
+              final pulse = _pulseController.value;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 56 + 10 * pulse,
+                    height: 56 + 10 * pulse,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: p.accent.withValues(alpha: 0.12 * (1.0 - pulse)),
+                    ),
+                  ),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: p.accent.withValues(alpha: 0.14),
+                      border: Border.all(
+                        color: p.accent.withValues(alpha: 0.35 + 0.25 * pulse),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(current.icon, size: 22, color: p.accent),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Checking for updates...'.localized(context),
+            style: TextStyle(
+              color: p.text,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 240),
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.15),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
+              ),
+            ),
+            child: Column(
+              key: ValueKey<int>(_stage),
+              children: [
+                Text(
+                  current.title.localized(context),
+                  style: TextStyle(
+                    color: p.accent,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  current.subtitle.localized(context),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: p.text3, fontSize: 12, height: 1.35),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (int i = 0; i < _stages.length; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  width: _stage == i ? 18 : 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: _stage == i
+                        ? p.accent
+                        : p.text3.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

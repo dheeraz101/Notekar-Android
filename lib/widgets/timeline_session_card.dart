@@ -443,10 +443,24 @@ class TimelineSessionCard extends StatelessWidget {
                             child: (hasNote || hasMedia)
                                 ? Builder(
                                     builder: (ctx) {
-                                      final tags =
+                                      final rawTags =
                                           NoteTagExtractor.extractHashtags(
                                             session.note,
                                           );
+                                      final sessionCat =
+                                          (session.category ?? '')
+                                              .toLowerCase()
+                                              .trim();
+                                      final tags = rawTags
+                                          .where((t) {
+                                            final cleanT = t
+                                                .toLowerCase()
+                                                .replaceAll('#', '')
+                                                .trim();
+                                            return cleanT != sessionCat;
+                                          })
+                                          .toSet()
+                                          .toList();
                                       final clean =
                                           NoteTagExtractor.cleanBodyText(
                                             session.note,

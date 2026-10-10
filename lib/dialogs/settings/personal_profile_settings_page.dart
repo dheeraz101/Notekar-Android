@@ -65,12 +65,7 @@ class _PersonalProfileSettingsPageState
     HapticFeedback.lightImpact();
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 85,
-      );
+      final picked = await picker.pickImage(source: ImageSource.gallery);
       if (picked != null) {
         final bytes = await picked.readAsBytes();
         setState(() {
@@ -278,6 +273,7 @@ class _PersonalProfileSettingsPageState
                                       ),
                                       fit: BoxFit.cover,
                                       alignment: Alignment.center,
+                                      gaplessPlayback: true,
                                     )
                                   : (_presetIndex != null &&
                                             _presetIndex! >= 0 &&
@@ -296,14 +292,62 @@ class _PersonalProfileSettingsPageState
                                                   end: Alignment.bottomRight,
                                                 ),
                                               ),
-                                              child: Center(
-                                                child: Text(
-                                                  preset.emoji,
-                                                  style: const TextStyle(
-                                                    fontSize: 66,
-                                                    height: 1.0,
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Positioned(
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: 132 * 0.44,
+                                                    child: DecoratedBox(
+                                                      decoration: BoxDecoration(
+                                                        gradient:
+                                                            LinearGradient(
+                                                              begin: Alignment
+                                                                  .topCenter,
+                                                              end: Alignment
+                                                                  .bottomCenter,
+                                                              colors: [
+                                                                Colors.white
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.35,
+                                                                    ),
+                                                                Colors.white
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.0,
+                                                                    ),
+                                                              ],
+                                                            ),
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
+                                                  Center(
+                                                    child: Text(
+                                                      preset.emoji,
+                                                      style: TextStyle(
+                                                        fontSize: 66,
+                                                        height: 1.0,
+                                                        shadows: [
+                                                          Shadow(
+                                                            color: Colors.black
+                                                                .withValues(
+                                                                  alpha: 0.38,
+                                                                ),
+                                                            offset:
+                                                                const Offset(
+                                                                  0,
+                                                                  2,
+                                                                ),
+                                                            blurRadius: 4,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             );
                                           }()
@@ -441,6 +485,13 @@ class _PersonalProfileSettingsPageState
                                     child: Text(
                                       preset.emoji,
                                       style: const TextStyle(
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black38,
+                                            offset: Offset(0, 1),
+                                            blurRadius: 2,
+                                          ),
+                                        ],
                                         fontSize: 24,
                                         height: 1.0,
                                       ),
@@ -868,7 +919,7 @@ class _PersonalProfileSettingsPageState
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
-                              'PREDICTIVE LIFE INTELLIGENCE'.localized(context),
+                              'LIFE INTELLIGENCE'.localized(context),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

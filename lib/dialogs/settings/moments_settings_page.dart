@@ -14,7 +14,7 @@ class MomentsSettingsPage extends StatelessWidget {
     required this.trash,
     this.historyDensity = 'comfortable',
     required this.confirmDelete,
-    required this.extendedDuration,
+    this.extendedDuration = true,
     required this.minimalMomentOptions,
     required this.notesCount,
     this.useNumbersInSingle = false,
@@ -25,7 +25,7 @@ class MomentsSettingsPage extends StatelessWidget {
     required this.onHistoryDensityChanged,
     required this.onConfirmDeleteChanged,
     this.onShowImagesAlwaysChanged,
-    required this.onExtendedDurationChanged,
+    this.onExtendedDurationChanged,
     required this.onMinimalMomentOptionsChanged,
     required this.onUseNumbersInSingleChanged,
     required this.onResetSingleDailyChanged,
@@ -49,7 +49,7 @@ class MomentsSettingsPage extends StatelessWidget {
   final ValueChanged<String> onHistoryDensityChanged;
   final ValueChanged<bool> onConfirmDeleteChanged;
   final ValueChanged<bool>? onShowImagesAlwaysChanged;
-  final ValueChanged<bool> onExtendedDurationChanged;
+  final ValueChanged<bool>? onExtendedDurationChanged;
   final ValueChanged<bool> onMinimalMomentOptionsChanged;
   final ValueChanged<bool> onUseNumbersInSingleChanged;
   final ValueChanged<bool> onResetSingleDailyChanged;
@@ -140,25 +140,6 @@ class MomentsSettingsPage extends StatelessWidget {
           p: p,
           text:
               '00 is the starting point. Moments count up to 99 and then restart at 00. If Reset Daily is enabled, today\'s single count restarts from 00 the next day while preserving all past history. If disabled, counting continues across days until 99 and then restarts from 00.'
-                  .localized(context),
-        ),
-
-        SettingsGroup(
-          p: p,
-          children: [
-            SettingsSwitchRow(
-              p: p,
-              title: 'Extended Duration',
-              color: p.accent,
-              value: extendedDuration,
-              onChanged: onExtendedDurationChanged,
-            ),
-          ],
-        ),
-        SettingsPageDescription(
-          p: p,
-          text:
-              'Includes years, months, and days breakdown for long time intervals between moments.'
                   .localized(context),
         ),
 

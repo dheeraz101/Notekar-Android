@@ -3724,12 +3724,22 @@ $cleanStack
                                   ],
                                 ),
                               ),
-                            if (show('Commits'))
+                            if (show('Commits')) ...[
+                              CupertinoSliverRefreshControl(
+                                onRefresh: () async {
+                                  HapticFeedback.lightImpact();
+                                  await CommitsSettingsPage
+                                      .commitsKey
+                                      .currentState
+                                      ?.refresh();
+                                },
+                              ),
                               SliverToBoxAdapter(
                                 child: Column(
                                   children: [
                                     const SizedBox(height: spacing8),
                                     CommitsSettingsPage(
+                                      key: CommitsSettingsPage.commitsKey,
                                       p: p,
                                       enableTranslucency: enableTranslucency,
                                       reduceMotion: reduceMotion,
@@ -3738,6 +3748,7 @@ $cleanStack
                                   ],
                                 ),
                               ),
+                            ],
                             if (show('Updates & Notices'))
                               SliverToBoxAdapter(
                                 child: UpdatesNoticesSettingsPage(
@@ -4211,6 +4222,10 @@ $cleanStack
                                     if (theme == 'matrix' || theme == 'eink') {
                                       setState(() => theme = 'dark');
                                       widget.onTheme('dark');
+                                    }
+                                    if (appIconStyle == 'godmode') {
+                                      setState(() => appIconStyle = 'default');
+                                      widget.onAppIconStyle('default');
                                     }
                                     setState(() {
                                       category = null;

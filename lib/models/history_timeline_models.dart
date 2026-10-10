@@ -704,6 +704,39 @@ TimelineIsolateResult buildTimelineDataInIsolate(
         )
         .where((s) => s.items.isNotEmpty)
         .toList();
+  } else if (payload.filter == 'media') {
+    sections = sections
+        .map(
+          (s) => TimelineDaySection(
+            dateKey: s.dateKey,
+            date: s.date,
+            displayTitle: s.displayTitle,
+            totalTrackedDuration: s.totalTrackedDuration,
+            totalLogs: s.totalLogs,
+            items: s.items.where((it) {
+              if (it is TimelineSingleItem) {
+                final m = it.moment;
+                return (m.imagePath != null && m.imagePath!.isNotEmpty) ||
+                    (m.voicePath != null && m.voicePath!.isNotEmpty);
+              }
+              if (it is TimelineSessionItem) {
+                final inM = it.inMoment;
+                final outM = it.outMoment;
+                final hasInMedia =
+                    (inM.imagePath != null && inM.imagePath!.isNotEmpty) ||
+                    (inM.voicePath != null && inM.voicePath!.isNotEmpty);
+                final hasOutMedia =
+                    outM != null &&
+                    ((outM.imagePath != null && outM.imagePath!.isNotEmpty) ||
+                        (outM.voicePath != null && outM.voicePath!.isNotEmpty));
+                return hasInMedia || hasOutMedia;
+              }
+              return false;
+            }).toList(),
+          ),
+        )
+        .where((s) => s.items.isNotEmpty)
+        .toList();
   }
 
   return TimelineIsolateResult(sections, map);

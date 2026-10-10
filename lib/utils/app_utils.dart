@@ -306,7 +306,7 @@ String historySectionLabel(int timestamp) {
   return 'Earlier';
 }
 
-String durationLabel(Duration d, {bool extended = false}) {
+String durationLabel(Duration d, {bool extended = true}) {
   if (extended) {
     if (d.inDays >= 365) {
       final years = (d.inDays / 365).floor();

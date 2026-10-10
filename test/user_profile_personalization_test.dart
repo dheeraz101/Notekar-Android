@@ -486,7 +486,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Marcus Aurelius'), findsOneWidget);
-      expect(find.text('NoteKar ID'), findsOneWidget);
+      expect(find.text('NoteKar'), findsOneWidget);
       expect(find.text('Share Identity Card'), findsNWidgets(2));
     });
 

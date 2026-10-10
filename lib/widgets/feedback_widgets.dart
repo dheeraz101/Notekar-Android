@@ -1,5 +1,5 @@
-import 'package:notekar/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:notekar/l10n/app_localizations.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
@@ -79,6 +79,7 @@ class UndoToast extends StatefulWidget {
     this.message,
     this.onAddNote,
     this.noteLabel,
+    this.onDismiss,
   });
 
   final Palette p;
@@ -87,6 +88,7 @@ class UndoToast extends StatefulWidget {
   final String? message;
   final VoidCallback? onAddNote;
   final String? noteLabel;
+  final VoidCallback? onDismiss;
 
   @override
   State<UndoToast> createState() => _UndoToastState();
@@ -99,10 +101,17 @@ class _UndoToastState extends State<UndoToast>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 4500),
-    )..forward();
+    _controller =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 4500),
+          )
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              widget.onDismiss?.call();
+            }
+          })
+          ..forward();
   }
 
   @override

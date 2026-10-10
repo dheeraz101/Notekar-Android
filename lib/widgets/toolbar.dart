@@ -134,7 +134,6 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final p = widget.p;
     final isGoalActive =
-        widget.isSessionActive &&
         widget.enableGoalSwitcher &&
         widget.activeGoalTitle != null &&
         widget.activeGoalTitle!.trim().isNotEmpty;
@@ -162,19 +161,17 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
               const SizedBox(width: 6),
               Expanded(
                 child: GestureDetector(
-                  onHorizontalDragEnd: isGoalActive
-                      ? (details) {
-                          if (details.primaryVelocity != null) {
-                            if (details.primaryVelocity! < -100) {
-                              HapticFeedback.selectionClick();
-                              widget.onNextGoal?.call();
-                            } else if (details.primaryVelocity! > 100) {
-                              HapticFeedback.selectionClick();
-                              widget.onPrevGoal?.call();
-                            }
-                          }
-                        }
-                      : null,
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity != null) {
+                      if (details.primaryVelocity! > 80) {
+                        HapticFeedback.selectionClick();
+                        widget.onNextGoal?.call();
+                      } else if (details.primaryVelocity! < -80) {
+                        HapticFeedback.selectionClick();
+                        widget.onPrevGoal?.call();
+                      }
+                    }
+                  },
                   child: AnimatedBuilder(
                     animation: _bounceAnimation,
                     builder: (context, child) => Transform.translate(
@@ -246,19 +243,17 @@ class _ToolbarState extends State<Toolbar> with SingleTickerProviderStateMixin {
           ),
           const SizedBox(width: spacing8),
           GestureDetector(
-            onHorizontalDragEnd: isGoalActive
-                ? (details) {
-                    if (details.primaryVelocity != null) {
-                      if (details.primaryVelocity! < -100) {
-                        HapticFeedback.selectionClick();
-                        widget.onNextGoal?.call();
-                      } else if (details.primaryVelocity! > 100) {
-                        HapticFeedback.selectionClick();
-                        widget.onPrevGoal?.call();
-                      }
-                    }
-                  }
-                : null,
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity != null) {
+                if (details.primaryVelocity! > 80) {
+                  HapticFeedback.selectionClick();
+                  widget.onNextGoal?.call();
+                } else if (details.primaryVelocity! < -80) {
+                  HapticFeedback.selectionClick();
+                  widget.onPrevGoal?.call();
+                }
+              }
+            },
             child: AnimatedBuilder(
               animation: _bounceAnimation,
               builder: (context, child) => Transform.translate(

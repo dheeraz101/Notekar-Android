@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/app_utils.dart';
 import 'package:notekar/utils/l10n_utils.dart';
-import 'package:notekar/widgets/classic_2000_god_mode_icon.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 import 'package:notekar/widgets/settings_widgets.dart';
 
@@ -160,16 +159,14 @@ class AppIconsSettingsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: currentIcon.key == 'godmode'
-                    ? const Classic2000GodModeIcon(size: 68)
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Image.asset(
-                          currentIcon.asset,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.medium,
-                        ),
-                      ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset(
+                    currentIcon.asset,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -283,32 +280,24 @@ class AppIconsSettingsPage extends StatelessWidget {
                         clipBehavior: Clip.none,
                         children: [
                           Positioned.fill(
-                            child: item.key == 'godmode'
-                                ? const Center(
-                                    child: Classic2000GodModeIcon(
-                                      size: 54,
-                                      showGlow: false,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(17),
+                              child: Image.asset(
+                                item.asset,
+                                fit: BoxFit.cover,
+                                cacheWidth: 128,
+                                cacheHeight: 128,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: p.surface3,
+                                      child: Icon(
+                                        CupertinoIcons.photo,
+                                        color: p.text3,
+                                        size: 20,
+                                      ),
                                     ),
-                                  )
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(17),
-                                    child: Image.asset(
-                                      item.asset,
-                                      fit: BoxFit.cover,
-                                      cacheWidth: 128,
-                                      cacheHeight: 128,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Container(
-                                                color: p.surface3,
-                                                child: Icon(
-                                                  CupertinoIcons.photo,
-                                                  color: p.text3,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                    ),
-                                  ),
+                              ),
+                            ),
                           ),
                           if (isSelected)
                             Positioned(

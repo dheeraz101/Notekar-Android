@@ -172,9 +172,9 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: List.generate(barCount, (index) {
-                          final barThreshold = index / barCount;
+                          final barThreshold = (index + 0.8) / barCount;
                           final isFilled =
-                              progress > 0.0 &&
+                              progress > 0.01 &&
                               (progress >= barThreshold ||
                                   (index == barCount - 1 && progress >= 0.95));
                           final heights = [

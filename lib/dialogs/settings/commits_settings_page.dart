@@ -23,11 +23,14 @@ class CommitsSettingsPage extends StatefulWidget {
   final bool enableTranslucency;
   final bool reduceMotion;
 
+  static final GlobalKey<CommitsSettingsPageState> commitsKey =
+      GlobalKey<CommitsSettingsPageState>();
+
   @override
-  State<CommitsSettingsPage> createState() => _CommitsSettingsPageState();
+  State<CommitsSettingsPage> createState() => CommitsSettingsPageState();
 }
 
-class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
+class CommitsSettingsPageState extends State<CommitsSettingsPage> {
   final _updateService = UpdateService();
   List<Map<String, dynamic>>? _commits;
   bool _loadingCommits = false;
@@ -153,11 +156,15 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
     }
   }
 
-  void _onRefresh() {
+  Future<void> refresh() async {
     setState(() {
       _visibleCount = 10;
     });
-    _fetchCommits(isManualRefresh: true);
+    await _fetchCommits(isManualRefresh: true);
+  }
+
+  void _onRefresh() {
+    refresh();
   }
 
   @override
@@ -259,53 +266,6 @@ class _CommitsSettingsPageState extends State<CommitsSettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.center,
-          child: PressableScale(
-            onTap: _loadingCommits ? null : _onRefresh,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-              decoration: BoxDecoration(
-                color: p.accent,
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: p.accent.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_loadingCommits)
-                    const CupertinoActivityIndicator(
-                      color: Colors.white,
-                      radius: 8,
-                    )
-                  else
-                    const Icon(
-                      CupertinoIcons.arrow_2_circlepath,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Refresh Activity'.localized(context),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
         if (_commitsError != null)
           Container(
             margin: const EdgeInsets.only(bottom: 16),

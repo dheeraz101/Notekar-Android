@@ -959,6 +959,31 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
       if (_filterCriteria.mode == 'two-way' && it is! TimelineSessionItem) {
         return false;
       }
+      if (_filterCriteria.mode == 'media') {
+        if (it is TimelineSingleItem) {
+          final m = it.moment;
+          final hasMedia =
+              (m.imagePath != null && m.imagePath!.isNotEmpty) ||
+              (m.voicePath != null && m.voicePath!.isNotEmpty);
+          if (!hasMedia) {
+            return false;
+          }
+        } else if (it is TimelineSessionItem) {
+          final inM = it.inMoment;
+          final outM = it.outMoment;
+          final hasMedia =
+              (inM.imagePath != null && inM.imagePath!.isNotEmpty) ||
+              (inM.voicePath != null && inM.voicePath!.isNotEmpty) ||
+              (outM != null &&
+                  ((outM.imagePath != null && outM.imagePath!.isNotEmpty) ||
+                      (outM.voicePath != null && outM.voicePath!.isNotEmpty)));
+          if (!hasMedia) {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
 
       if (_filterCriteria.category != null &&
           _filterCriteria.category!.isNotEmpty) {

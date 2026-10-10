@@ -55,7 +55,12 @@ class NotePreviewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cleanNote = note.trim();
-    final tags = NoteTagExtractor.extractHashtags(cleanNote);
+    final rawTags = NoteTagExtractor.extractHashtags(cleanNote);
+    final catLower = (category ?? '').toLowerCase().trim();
+    final tags = rawTags
+        .where((t) => t.toLowerCase().replaceAll('#', '').trim() != catLower)
+        .toSet()
+        .toList();
     final cleanBody = NoteTagExtractor.cleanBodyText(cleanNote);
     final displayText = cleanBody.isNotEmpty
         ? cleanBody

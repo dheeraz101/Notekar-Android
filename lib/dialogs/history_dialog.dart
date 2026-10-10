@@ -223,6 +223,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
       final savedRainbow = prefs.getBool('m-rainbow-cards') ?? false;
       final savedShowImagesAlways =
           prefs.getBool('history_show_images_always') ?? true;
+      final savedClaimedGaps =
+          prefs.getStringList('history_claimed_gaps') ?? [];
+      if (savedClaimedGaps.isNotEmpty) {
+        _claimedGaps.addAll(savedClaimedGaps);
+      }
       setState(() {
         _enableNoteOnClick = prefs.getBool('enable_note_on_click') ?? false;
         _viewMode = savedViewMode;
@@ -235,6 +240,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
       });
       _rebuildMemoizedLists();
     }
+  }
+
+  Future<void> _persistClaimedGaps() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('history_claimed_gaps', _claimedGaps.toList());
   }
 
   bool _isProcessingTimeline = false;
@@ -338,6 +348,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'out' => Icons.logout_rounded,
       'single' => Icons.radio_button_checked_rounded,
       'notes' => Icons.speaker_notes_off_rounded,
+      'media' => Icons.perm_media_rounded,
       _ => Icons.history_toggle_off_rounded,
     };
   }
@@ -352,6 +363,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'out' => 'No OUT Moments',
       'single' => 'No Single Logs',
       'notes' => 'No Notes Found',
+      'media' => 'No Media Moments',
       _ => 'No History',
     };
   }
@@ -368,6 +380,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
       'single' => 'Single logs are standalone timestamps for one-shot events.',
       'notes' =>
         'Moments with text notes will be listed here for quick review.',
+      'media' =>
+        'Moments with voice notes or attached images will appear here.',
       _ => 'Start capturing moments by tapping the clock on the home screen.',
     };
   }
@@ -443,6 +457,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
                   onTap: () {
                     if (_inSheetView == 'create_goal') {
                       setState(() => _inSheetView = 'goals');
+                    } else if (_inSheetView == 'manual') {
+                      final fromGoals = _manualInitialGoal != null;
+                      setState(() {
+                        _manualPrefilledStartTime = null;
+                        _manualPrefilledEndTime = null;
+                        _activeGapKey = null;
+                        _manualInitialGoal = null;
+                        _manualLockToSession = false;
+                        _inSheetView = fromGoals ? 'goals' : null;
+                      });
                     } else if (_inSheetView != null) {
                       setState(() => _inSheetView = null);
                     } else if (_activeInsightsSection != null) {
@@ -608,6 +632,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                         if (_activeGapKey != null) {
                           _claimedGaps.add(_activeGapKey!);
                         }
+                        unawaited(_persistClaimedGaps());
                         _manualPrefilledStartTime = null;
                         _manualPrefilledEndTime = null;
                         _activeGapKey = null;
@@ -829,6 +854,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                     'sessions',
                                                     'single',
                                                     'notes',
+                                                    'media',
                                                     'date',
                                                   ])
                                                     Padding(
@@ -867,6 +893,11 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                                                       ),
                                                                 'notes' =>
                                                                   'With Notes'
+                                                                      .localized(
+                                                                        context,
+                                                                      ),
+                                                                'media' =>
+                                                                  'Media'
                                                                       .localized(
                                                                         context,
                                                                       ),
@@ -1498,7 +1529,9 @@ class _HistoryDialogState extends State<HistoryDialog> {
                                           p: widget.p,
                                           moment: moment,
                                           singleNumber:
-                                              _singleNumberMap[moment.id],
+                                              widget.useNumbersInSingle
+                                              ? _singleNumberMap[moment.id]
+                                              : null,
                                           selected: isSelected,
                                           compact: _compactRows,
                                           rainbowCards: _rainbowCards,
@@ -1814,11 +1847,13 @@ class _HistoryDialogState extends State<HistoryDialog> {
             ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
           _rebuildMemoizedLists();
         });
+        unawaited(_persistClaimedGaps());
 
         _showNotice(
           '🌿 Rest & Recovery accounted in Life Audit',
           onUndo: () {
             _claimedGaps.remove(gapKey);
+            unawaited(_persistClaimedGaps());
             _removeSession(
               TimelineSessionItem(inMoment: inMoment, outMoment: outMoment),
             );
@@ -1827,6 +1862,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       }
     } catch (error, stackTrace) {
       _claimedGaps.remove(gapKey);
+      unawaited(_persistClaimedGaps());
       debugPrint('Could not save claimed rest interval: $error\n$stackTrace');
       if (mounted) {
         _showNotice(
@@ -1947,6 +1983,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       _availableDateKeys = _entries.map((item) => item.date).toSet();
       _rebuildMemoizedLists();
     });
+    unawaited(_persistClaimedGaps());
 
     for (final m in addedMoments) {
       await widget.onRestore(m);
@@ -2094,27 +2131,28 @@ class _HistoryDialogState extends State<HistoryDialog> {
               ],
             ),
           ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _openFilterSheet();
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.tune_rounded, size: 20, color: widget.p.text),
-                const SizedBox(width: 10),
-                Text(
-                  'Filter Timeline'.localized(context),
-                  style: TextStyle(
-                    color: widget.p.text,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+          if (_viewMode == 'calendar')
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openFilterSheet();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.tune_rounded, size: 20, color: widget.p.text),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Filter Timeline'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.text,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           if (widget.onClearAll != null && _entries.isNotEmpty)
             CupertinoActionSheetAction(
               isDestructiveAction: true,
@@ -2178,6 +2216,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
             'sessions',
             'single',
             'notes',
+            'media',
             'date',
           ])
             CupertinoActionSheetAction(
@@ -2212,6 +2251,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                       'sessions' => 'Sessions (In/Out)'.localized(context),
                       'single' => 'Single Logs'.localized(context),
                       'notes' => 'With Notes'.localized(context),
+                      'media' => 'Media (Voice/Images)'.localized(context),
                       'date' => 'Pick Specific Date...'.localized(context),
                       _ => f,
                     },

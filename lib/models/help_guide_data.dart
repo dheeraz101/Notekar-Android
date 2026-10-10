@@ -1172,6 +1172,109 @@ const List<HelpGuideItem> allHelpFaqItems = [
       'capsule icons',
     ],
   ),
+  HelpGuideItem(
+    title: 'Media Moments & Multimedia Filter',
+    content:
+        'Quickly filter your timeline to view moments containing attached voice memos or captured photos. Accessible directly via the Media filter chip in the Timeline and Calendar view.',
+    isFaq: false,
+    keywords: [
+      'media',
+      'media filter',
+      'photos',
+      'voice memos',
+      'audio',
+      'images',
+      'multimedia',
+      'timeline filter',
+    ],
+  ),
+  HelpGuideItem(
+    title: '3D Angry Birds Avatars & Animated GIF Profiles',
+    content:
+        'Personalize your sovereign profile with curated 3D Angry Birds character avatars on Apple HIG aesthetic gradient badges, or choose an animated GIF photo from your gallery for a lively profile avatar.',
+    isFaq: false,
+    keywords: [
+      'angry birds',
+      'avatar',
+      'animated gif',
+      'gif',
+      'profile picture',
+      'apple hig',
+      'photo',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Apple Wallet Holographic Identity Pass',
+    content:
+        'Export your personal NoteKar profile as a sleek, Apple Wallet-style holographic card featuring a dynamic sheen, personalized sovereign QR code, and offline identity details.',
+    isFaq: false,
+    keywords: [
+      'apple wallet',
+      'holographic card',
+      'identity pass',
+      'share identity',
+      'pass export',
+      'qr code',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Hardware Governor & Live Device Diagnostics',
+    content:
+        'Live hardware governor monitors device health, thermal load, and frame budget in real-time, automatically applying adaptive mitigations on low-end hardware to ensure buttery-smooth 60/120Hz performance.',
+    isFaq: false,
+    keywords: [
+      'hardware governor',
+      'device health',
+      'frame budget',
+      'fps',
+      'low-end',
+      'diagnostics',
+      'performance',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Live Network Visualizer & Offline Sovereignty',
+    content:
+        'Inspect your live network connection state with real-time animated wave diagnostics during traffic, serene idle indicators, or clear offline sovereign status when fully air-gapped.',
+    isFaq: false,
+    keywords: [
+      'network health',
+      'network visualizer',
+      'offline sovereignty',
+      'connectivity',
+      'air-gapped',
+      'diagnostics',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Bidirectional Mode Swiping on Home Screen',
+    content:
+        'Swipe left or right across the bottom navigation toolbar to effortlessly cycle between All and custom categories. When in All mode, the central toolbar displays the current clock.',
+    isFaq: false,
+    keywords: [
+      'swipe modes',
+      'horizontal swipe',
+      'bottom bar',
+      'mode switcher',
+      'all mode',
+      'clock display',
+      'gestures',
+    ],
+  ),
+  HelpGuideItem(
+    title: 'Log Past Moments Conflict Protection',
+    content:
+        'When manually logging past moments or sessions, NoteKar detects time collisions with existing moments on that day, marking conflicting slots as "USED" and preventing unintentional overlapping logs.',
+    isFaq: false,
+    keywords: [
+      'log past moments',
+      'collision',
+      'time conflict',
+      'used time',
+      'manual entry',
+      'duplicate check',
+    ],
+  ),
 ];
 
 /// Combined catalog for unified search

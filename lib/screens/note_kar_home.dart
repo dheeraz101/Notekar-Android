@@ -180,6 +180,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _lastUpdateCheckedAt;
   int? _lastNoticeOpenCheckAt;
   int _lastTapTime = 0;
+  bool _hasSwipedMode = false;
   bool _isSaving = false;
   int? _lastId;
   int _nextId = 1;
@@ -220,56 +221,52 @@ class _NoteKarHomeState extends State<NoteKarHome>
     return null;
   }
 
-  String? get _activeGoalTitle {
-    if (_activeGoal != null) {
-      final t = _activeGoal!.title;
-      return t.length > 9 ? t.substring(0, 9) : t;
+  List<String> get _allModesList {
+    final list = <String>['All'];
+    for (final c in _categories) {
+      if (!list.contains(c)) {
+        list.add(c);
+      }
     }
-    if (_cachedGoals.isEmpty) return null;
-    final match =
-        _cachedGoals.where((g) => g.category == _activeCategory).firstOrNull ??
-        _cachedGoals.where((g) => g.title == _activeCategory).firstOrNull;
-    if (match != null) {
-      return match.title.length > 9 ? match.title.substring(0, 9) : match.title;
-    }
-    final first = _cachedGoals.first;
-    return first.title.length > 9 ? first.title.substring(0, 9) : first.title;
+    return list;
   }
 
   void _onNextGoal() {
-    if (_cachedGoals.isEmpty) return;
-    final currentIndex = _cachedGoals.indexWhere(
-      (g) =>
-          g.id == _activeGoalId ||
-          g.category == _activeCategory ||
-          g.title == _activeCategory,
-    );
-    final nextIndex = currentIndex < 0
-        ? 0
-        : (currentIndex + 1) % _cachedGoals.length;
-    final nextGoal = _cachedGoals[nextIndex];
-    _activeGoalId = nextGoal.id;
-    unawaited(_saveSetting('m-active-goal-id', nextGoal.id));
-    unawaited(_setActiveCategory(nextGoal.category ?? nextGoal.title));
-    _showToast(nextGoal.title, withHaptic: false);
+    _hasSwipedMode = true;
+    final modes = _allModesList;
+    if (modes.isEmpty) return;
+    final currentIndex = modes.indexOf(_activeCategory);
+    final nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % modes.length;
+    final nextMode = modes[nextIndex];
+    unawaited(_setActiveCategory(nextMode));
+    if (nextMode == 'All') {
+      _showToast(
+        formatTimeShort(DateTime.now().millisecondsSinceEpoch),
+        withHaptic: false,
+      );
+    } else {
+      _showToast(nextMode, withHaptic: false);
+    }
   }
 
   void _onPrevGoal() {
-    if (_cachedGoals.isEmpty) return;
-    final currentIndex = _cachedGoals.indexWhere(
-      (g) =>
-          g.id == _activeGoalId ||
-          g.category == _activeCategory ||
-          g.title == _activeCategory,
-    );
+    _hasSwipedMode = true;
+    final modes = _allModesList;
+    if (modes.isEmpty) return;
+    final currentIndex = modes.indexOf(_activeCategory);
     final prevIndex = currentIndex < 0
-        ? _cachedGoals.length - 1
-        : (currentIndex - 1 + _cachedGoals.length) % _cachedGoals.length;
-    final prevGoal = _cachedGoals[prevIndex];
-    _activeGoalId = prevGoal.id;
-    unawaited(_saveSetting('m-active-goal-id', prevGoal.id));
-    unawaited(_setActiveCategory(prevGoal.category ?? prevGoal.title));
-    _showToast(prevGoal.title, withHaptic: false);
+        ? modes.length - 1
+        : (currentIndex - 1 + modes.length) % modes.length;
+    final prevMode = modes[prevIndex];
+    unawaited(_setActiveCategory(prevMode));
+    if (prevMode == 'All') {
+      _showToast(
+        formatTimeShort(DateTime.now().millisecondsSinceEpoch),
+        withHaptic: false,
+      );
+    } else {
+      _showToast(prevMode, withHaptic: false);
+    }
   }
 
   StreamSubscription<AccelerometerEvent>? _motionSub;
@@ -2789,6 +2786,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
       _lastId = endMoment.id;
     });
+    _showUndo();
     unawaited(_updateAndroidWidget());
     if (mounted) {
       _showToast('🌿 Rest & Recovery logged');
@@ -4171,13 +4169,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
             ),
             const SizedBox(height: 10),
             Text(
-              durationLabel(duration, extended: _extendedDuration),
+              durationLabel(duration, extended: true),
               style: TextStyle(
                 color: p.text,
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
               ),
             ),
+            if (duration.inHours >= 24) ...[
+              const SizedBox(height: 4),
+              Text(
+                '(${duration.inHours}h ${duration.inMinutes.remainder(60)}m total)',
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.pop(context),
@@ -4455,6 +4464,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
                     message: message,
                     onAddNote: _openNoteForLastCapture,
                     noteLabel: noteLabel,
+                    onDismiss: () {
+                      if (mounted) {
+                        setState(() => _lastId = null);
+                      }
+                    },
                   );
                 },
               ),
@@ -4477,19 +4491,25 @@ class _NoteKarHomeState extends State<NoteKarHome>
                   animateIcons: _homeMenuAnimations && !_reduceMotion,
                   motionNotifier: _motion,
                   showHistoryText: _showHistoryText,
-                  lastTimestamp: _mode == 'two-way' && _sessionStart != null
-                      ? formatTimeShort(DateTime.now().millisecondsSinceEpoch)
-                      : (_entries.isNotEmpty
-                            ? formatTimeShort(_entries.first.timestamp)
-                            : null),
+                  lastTimestamp: _activeCategory != 'All'
+                      ? _activeCategory
+                      : (_hasSwipedMode
+                            ? formatTimeShort(
+                                DateTime.now().millisecondsSinceEpoch,
+                              )
+                            : (_lastTapTime == 0
+                                  ? 'History'
+                                  : formatTimeShort(_lastTapTime))),
                   blur:
                       _enableTranslucency &&
                       AdaptiveEngine().supportsBlur &&
                       !_reduceMotion,
                   isSessionActive: _mode == 'two-way' && _sessionStart != null,
-                  activeGoalTitle: _activeGoalTitle,
-                  onNextGoal: _cachedGoals.isNotEmpty ? _onNextGoal : null,
-                  onPrevGoal: _cachedGoals.isNotEmpty ? _onPrevGoal : null,
+                  activeGoalTitle: _activeCategory != 'All'
+                      ? _activeCategory
+                      : null,
+                  onNextGoal: _onNextGoal,
+                  onPrevGoal: _onPrevGoal,
                   enableGoalSwitcher: true,
                 ),
               ),

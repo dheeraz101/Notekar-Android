@@ -270,8 +270,22 @@ class MainActivity : FlutterActivity() {
                             release()
                         }
                         val player = MediaPlayer()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            player.setAudioAttributes(
+                                AudioAttributes.Builder()
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                                    .build()
+                            )
+                        }
                         player.setDataSource(resolvedFile.absolutePath)
                         player.prepare()
+                        player.setVolume(1.0f, 1.0f)
+                        player.setOnCompletionListener {
+                            try {
+                                it.seekTo(0)
+                            } catch (_: Exception) {}
+                        }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             try {
                                 player.playbackParams = player.playbackParams.setSpeed(speedArg.toFloat())
@@ -1229,7 +1243,8 @@ class MainActivity : FlutterActivity() {
             "green" to "app.notekar.notekar.IconGreenAlias",
             "orange" to "app.notekar.notekar.IconOrangeAlias",
             "red" to "app.notekar.notekar.IconRedAlias",
-            "purple" to "app.notekar.notekar.IconPurpleAlias"
+            "purple" to "app.notekar.notekar.IconPurpleAlias",
+            "godmode" to "app.notekar.notekar.IconGodModeAlias"
         )
         val selected = aliases[style] ?: aliases.getValue("default")
         aliases.values.forEach { aliasName ->

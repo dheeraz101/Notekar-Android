@@ -294,10 +294,23 @@ class TimelineSingleTile extends StatelessWidget {
                                   behavior: HitTestBehavior.opaque,
                                   child: Builder(
                                     builder: (ctx) {
-                                      final tags =
+                                      final rawTags =
                                           NoteTagExtractor.extractHashtags(
                                             moment.note,
                                           );
+                                      final momentCat = (moment.category ?? '')
+                                          .toLowerCase()
+                                          .trim();
+                                      final tags = rawTags
+                                          .where((t) {
+                                            final cleanT = t
+                                                .toLowerCase()
+                                                .replaceAll('#', '')
+                                                .trim();
+                                            return cleanT != momentCat;
+                                          })
+                                          .toSet()
+                                          .toList();
                                       final clean =
                                           NoteTagExtractor.cleanBodyText(
                                             moment.note,

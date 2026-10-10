@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/models/palette.dart';
 import 'package:notekar/utils/category_service.dart';
-import 'package:notekar/dialogs/app_sheet.dart';
 import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
 
@@ -14,7 +14,7 @@ class TimelineFilterCriteria {
     this.hashtag,
   });
 
-  final String mode; // 'all' | 'single' | 'two-way'
+  final String mode; // 'all' | 'single' | 'two-way' | 'media'
   final String? category;
   final String? hashtag;
 
@@ -180,6 +180,20 @@ class _TimelineFilterSheetState extends State<TimelineFilterSheet> {
                   'Two-Way'.localized(context),
                   style: TextStyle(
                     color: _mode == 'two-way' ? p.accent : p.text,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              'media': Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                child: Text(
+                  'Media'.localized(context),
+                  style: TextStyle(
+                    color: _mode == 'media' ? p.accent : p.text,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
