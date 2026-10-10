@@ -21,12 +21,7 @@ class TimelineSessionItem extends TimelineItem {
   final Moment? outMoment;
   final bool? _isOngoingOverride;
 
-  bool get isOngoing {
-    final override = _isOngoingOverride;
-    if (override != null) return override;
-    if (outMoment != null) return false;
-    return inMoment.date == dateKey(DateTime.now());
-  }
+  bool get isOngoing => _isOngoingOverride ?? (outMoment == null);
 
   @override
   int get primaryTimestamp => outMoment?.timestamp ?? inMoment.timestamp;
@@ -416,17 +411,9 @@ List<TimelineDaySection> buildTimelineDaySections(
     }
   }
 
-  // 5. Any remaining active IN moments: only mark ongoing if logged today
-  final todayStr = dateKey(DateTime.now());
+  // 5. Any remaining active IN moments
   for (final inMoment in activeInTracks.values) {
-    final isActuallyToday = inMoment.date == todayStr;
-    allItems.add(
-      TimelineSessionItem(
-        inMoment: inMoment,
-        outMoment: null,
-        isOngoing: isActuallyToday,
-      ),
-    );
+    allItems.add(TimelineSessionItem(inMoment: inMoment, outMoment: null));
   }
 
   // 2. Group timeline items by day based on the item's anchor date
