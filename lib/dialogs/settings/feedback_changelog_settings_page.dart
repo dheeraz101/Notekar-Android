@@ -23,101 +23,88 @@ class FeedbackChangelogSettingsPage extends StatelessWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.8',
+    version: '7.5.9',
     date: 'October 11, 2026',
-    edition: 'Multimodal Ledger, Isar DB & Apple HIG Precision',
-    badgeColor: Color(0xFFFF9F0A),
+    edition: 'Emergency Hotfix: Data Recovery & Update Lifecycle',
+    badgeColor: Color(0xFFFF3B30),
     innovations: [
       (
-        title: 'Native Isar Storage Engine',
-        category: 'STORAGE & CONCURRENCY',
-        headline: 'Compiled Database Engine. O(1) Secondary Indices.',
+        title: 'Emergency Hive-to-Isar Data Recovery',
+        category: 'DATA RECOVERY & SAFETY',
+        headline: 'Automated Database Bridge. Zero Data Loss.',
         desc:
-            'Migrated the entire database from Hive to native compiled Isar DB with secondary indexing and binary date range slicing. Heavy timeline computations and analytics are offloaded to background isolates via Isolate.run, keeping high-refresh displays at 120 FPS.',
-        icon: CupertinoIcons.square_stack_3d_up,
+            'Introduced a fail-safe data migration bridge in MomentRepository.initialize() that automatically scans for legacy Hive boxes, secure encryption keys, trash storage, and rolling backups, safely importing all records into Isar on upgrade.',
+        icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
+        badgeColor: Color(0xFFFF3B30),
+        specs:
+            'Legacy Box Recovery · AES Key Handshake · Auto-Rolling Snapshot Bridge · Transaction Safety',
+      ),
+      (
+        title: 'Update Ready Notifications & Reminders',
+        category: 'UPDATES & NOTICES',
+        headline: 'Apple HIG Update Alerts. 24-Hour Remind Later.',
+        desc:
+            'Interactive native Cupertino dialog prompts users when updates are downloaded and verified, featuring immediate one-tap routing to Update Center and a 24-hour reminder suppression delay.',
+        icon: CupertinoIcons.bell_circle_fill,
         badgeColor: Color(0xFF0A84FF),
         specs:
-            'Isar Database Engine · Secondary ID Indices · Binary Range Slicing · Background Isolates',
+            'Update Ready Alert · 24-Hour Reminder Delay · Settings Dialog Direct Routing · Delete Update Action',
       ),
       (
-        title: 'Multimodal Life Ledger',
-        category: 'MULTIMODAL NOTES',
-        headline: 'Twitter-Style Photos. High-Fidelity Voice Notes.',
+        title: 'Auto-Download & Package Management',
+        category: 'UPDATE LIFECYCLE',
+        headline: 'Background Downloader. Direct Package Deletion.',
         desc:
-            'Moments now support photo attachments with interactive pinch-to-zoom full-screen lightboxes, alongside native audio recording and playback with interactive waveform scrubbing, variable speeds (1.0x/1.5x/2.0x), and sandboxed relative storage.',
-        icon: CupertinoIcons.photo,
+            'Background update downloader automatically downloads and verifies SHA-256 integrity when updates are detected. Users can also manually delete downloaded packages or have obsolete builds automatically purged on new releases.',
+        icon: CupertinoIcons.cloud_download_fill,
         badgeColor: Color(0xFF34C759),
         specs:
-            'TimelineMediaAttachmentCard · PhotoLightboxDialog · Waveform Scrubber · AudioService',
+            'Background Auto-Download · SHA-256 Verification · Delete Downloaded Update · Obsolete APK Purge',
       ),
       (
-        title: 'Targets & Goals Overhaul',
-        category: 'GOALS & RHYTHM',
-        headline: 'Live Character Rings. Mid-Session Milestone Confetti.',
+        title: 'Widget & Notification Modes Restored',
+        category: 'WIDGETS & SYSTEM IPC',
+        headline: 'Dynamic Mode Parsing. All Mode Support.',
         desc:
-            'Introduced Twitter/X style character countdown rings with dynamic color transitions for goal titles, dynamic daily pacing for month/year goals, retroactive timespan logging, and instant mid-session confetti audio celebrations.',
-        icon: CupertinoIcons.flag,
-        badgeColor: Color(0xFFFF2D55),
-        specs:
-            'Countdown Ring (0-9) · Daily Pacing Allocations · Milestone Confetti · 20dp Apple HIG Cards',
-      ),
-      (
-        title: 'Apple HIG Startup & Performance',
-        category: 'PERFORMANCE & LIFECYCLE',
-        headline: '350ms Minimalist Splash. Instant runApp Mount.',
-        desc:
-            'Completely overhauled splash screen to authentic Apple HIG minimalism, purged 1.1MB of heavy wallpaper assets, mounted runApp() instantly without blocking preloads, bounded avatar raster decoding by 98%, and gated blur shaders behind adaptive GPU checks.',
-        icon: CupertinoIcons.bolt_fill,
+            'Resolved a ClassCastException when reading SharedPreferences string lists from Kotlin, ensuring QuickNoteActivity and app widgets load all user modes dynamically with "All" mode at index 0.',
+        icon: CupertinoIcons.square_grid_2x2_fill,
         badgeColor: Color(0xFFAF52DE),
         specs:
-            'ZenDoodleSplash (350ms) · Instant runApp · cacheWidth/Height · Adaptive GPU Shaders',
+            'StringSet Deserialization · QuickNoteActivity Modes · Widget Intent Parity · "All" Mode Default',
       ),
       (
-        title: '3D Avatars & Holographic Wallet Pass',
-        category: 'IDENTITY & SENSORY',
-        headline: '3D Character Presets. Exportable Memento Mori Pass.',
+        title: 'Reset to Default Mode on App Close',
+        category: 'MODE BEHAVIOR',
+        headline: 'Smart App Reopen. Active Session Protection.',
         desc:
-            'Features 12 3D Angry Birds character presets and 16 Apple emoji presets, full-screen profile photo lightboxes, animated GIF support, collapsible header avatars on scroll, and exportable Apple Wallet-style holographic cards.',
-        icon: CupertinoIcons.person_crop_circle,
+            'Added an opt-in toggle in Modes Settings that automatically resets the active category to "All" whenever the app is closed and reopened, strictly guarded so active recording sessions are never interrupted.',
+        icon: CupertinoIcons.arrow_counterclockwise_circle_fill,
         badgeColor: Color(0xFFFF9500),
         specs:
-            '3D Angry Birds Presets · Full-Screen Lightbox · Collapsible Header Avatar · Holographic Pass',
+            'App Lifecycle Listener · Active Session Guard · Automatic Mode Reset · Mode Behavior Settings',
       ),
       (
-        title: 'Sovereign Gap Claiming & History Parity',
-        category: 'TIMELINE INTEGRITY',
-        headline: 'Conflict-Free Gap Filling. Swipe Deletion Protection.',
+        title: 'Settings Trash Bin Relocation & Title Alignment',
+        category: 'SETTINGS ORGANIZATION',
+        headline: 'Permanent Logging Placement. Centered Headers.',
         desc:
-            'Untracked time gaps can now be logged with a single tap bypassing false-positive conflict checks. Swipe-to-delete now requires native Cupertino confirmation, and Calendar view enjoys full parity with live session controls and media filters.',
-        icon: CupertinoIcons.clock,
+            'Relocated Trash Bin directly into the Logging Controls card below Backup & Export with permanent visibility and count indicators, fixed Settings search routing, and aligned dialog header titles cleanly at the top.',
+        icon: CupertinoIcons.trash_circle_fill,
         badgeColor: Color(0xFF5856D6),
         specs:
-            'Sovereign Gap Claims · Cupertino Delete Dialog · Calendar Feature Parity · Media Moment Filter',
-      ),
-      (
-        title: 'System Diagnostics & Apple HIG Controls',
-        category: 'SYSTEM FOUNDATION',
-        headline: 'Single-Pass Update Center. 24-Bar Hardware Visualizer.',
-        desc:
-            'Redesigned Update Center with iOS-style single-pass progress indicators, overhauled Device Health with 24-bar hardware frequency visualizers and Apple HIG copy, added transparent telemetry disclosures, and aligned tap delay sliders 1:1.',
-        icon: CupertinoIcons.speedometer,
-        badgeColor: Color(0xFF007AFF),
-        specs:
-            'iOS Update Center · 24-Bar Adaptive Governor · Zero-Telemetry Monitor · 1:1 Slider Alignment',
+            'Logging Controls Placement · Permanent Empty State · Direct Search Route · Fixed Title Header',
       ),
     ],
     items: [
-      '• Native Isar database engine, multimodal photo & audio notes, goals pacing overhaul, Apple HIG startup acceleration, and 3D avatar identity.',
-      '+ Storage Engine Evolution: Migrated from Hive to native compiled Isar DB with O(1) indices and O(log N) binary range slicing',
-      '+ Multimodal Media: Twitter-style photo attachments, full-screen lightbox zoom, and native voice notes with waveform playback',
-      '+ Targets & Goals Engine: Character countdown ring, dynamic daily pacing, retroactive logging, and mid-session confetti celebrations',
-      '+ Startup Acceleration: Minimalist Apple HIG splash screen, instant runApp mount, 1.1MB asset purge, and 98% avatar RAM reduction',
-      '+ Personal Profile: 12 3D Angry Birds avatar presets, animated GIF support, collapsible header avatar, and Apple Wallet Memento Mori Pass',
-      '+ History & Integrity: Untracked gap claiming without conflict collisions, swipe-to-delete confirmation dialogs, and Calendar view parity',
-      '+ Diagnostics & Controls: Single-pass Update Center, 24-bar Adaptive Governor visualizer, and telemetry transparency monitor',
-      '+ Apple HIG Polish: 1:1 aligned tap delay slider, beta language underline indicators, and God Mode Member badge',
-      '+ System IPC: Notification Consistency Manager, ephemeral Intent Queue widget IPC, and daily WorkManager maintenance',
-      '* All 279 automated unit and widget tests passing with 0 lint warnings and 100% offline privacy',
+      '• Emergency hotfix restoring legacy user data from Hive to Isar, adding background update lifecycle controls, and resolving critical widget mode bugs.',
+      '! Critical Data Recovery: Automated migration bridge restores .hive boxes, encryption keys, and auto-rolling snapshot backups into Isar',
+      '+ Update Notifications: Apple HIG update ready dialog with direct Update Center navigation and 24-hour Remind Later delay',
+      '+ Update Package Controls: Auto-download background toggle, manual deletion of downloaded packages, and auto-purge of obsolete APKs',
+      '+ Widget Mode Integrity: Fixed QuickNoteActivity and app widgets to load all dynamic categories correctly from StringSet/JSON',
+      '+ Mode Behavior: Added setting to reset to default All mode on app close strictly when no session is active',
+      '+ Settings Organization: Placed Trash Bin permanently in Logging Controls card below Backup & Export with item count / empty indicator',
+      '+ Dialog Polish: Fixed RecentlyDeletedDialog title header alignment and ensured seamless Settings search navigation',
+      '* All unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
     ],
   );
 

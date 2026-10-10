@@ -27,73 +27,64 @@ class ChangelogDialog extends StatefulWidget {
       'https://notekarapp.vercel.app/changelog.html';
 
   static const latestRelease = (
-    version: '7.5.8',
+    version: '7.5.9',
     date: 'October 11, 2026',
-    edition: 'Multimodal Ledger, Isar DB & Apple HIG Precision',
-    badgeColor: Color(0xFFFF9F0A),
+    edition: 'Emergency Hotfix: Data Recovery & Update Lifecycle',
+    badgeColor: Color(0xFFFF3B30),
     highlights: [
       (
-        title: 'Native Isar Storage Engine',
+        title: 'Emergency Hive-to-Isar Data Recovery',
         desc:
-            'Migrated from Hive to compiled Isar DB with O(1) indices, binary range slicing, and background isolate processing for locked 120 FPS scrolling.',
-        icon: Icons.storage_rounded,
-        tag: 'Engine',
+            'Automatic legacy database migration bridge restores existing user moments, trash entries, and rolling backups from Hive into Isar without data loss.',
+        icon: Icons.restore_rounded,
+        tag: 'Hotfix',
       ),
       (
-        title: 'Multimodal Life Ledger',
+        title: 'Update Ready Notifications & Reminders',
         desc:
-            'Twitter-style photo attachments with full-screen pinch-to-zoom lightbox, plus native voice notes with waveform scrubbers and variable speeds.',
-        icon: Icons.photo_library_rounded,
-        tag: 'Media',
-      ),
-      (
-        title: 'Targets & Goals Overhaul',
-        desc:
-            'Twitter-style title countdown ring, dynamic daily pacing allocations, retroactive session logging, and mid-session confetti celebrations.',
-        icon: Icons.track_changes_rounded,
-        tag: 'Goals',
-      ),
-      (
-        title: 'Apple HIG Startup & Performance',
-        desc:
-            'Ultra-fast 350ms minimalist splash screen, instant cold boot, 1.1MB asset purge, 98% avatar RAM reduction, and adaptive blur shader gating.',
-        icon: Icons.bolt_rounded,
-        tag: 'Performance',
-      ),
-      (
-        title: '3D Avatars & Holographic Pass',
-        desc:
-            '12 3D Angry Birds character portraits, Apple emoji presets, full-screen profile lightbox, collapsible header avatar, and Apple Wallet Memento Mori Pass.',
-        icon: Icons.face_rounded,
-        tag: 'Identity',
-      ),
-      (
-        title: 'Sovereign Gap Claiming & History Parity',
-        desc:
-            'One-tap untracked gap claiming without time conflicts, swipe-to-delete confirmation protection, and full Calendar view parity.',
-        icon: Icons.history_rounded,
-        tag: 'History',
-      ),
-      (
-        title: 'Update Center & Diagnostics',
-        desc:
-            'iOS-style single-pass update verification, 24-bar Adaptive Governor hardware visualizer, and transparent zero-telemetry disclosures.',
+            'Interactive Apple HIG alert notifies when updates are downloaded and ready to install, with one-tap Update Center navigation and 24-hour remind later delay.',
         icon: Icons.system_update_rounded,
-        tag: 'Diagnostics',
+        tag: 'Updates',
+      ),
+      (
+        title: 'Auto-Download & Package Management',
+        desc:
+            'Background automatic package downloader with SHA-256 verification, direct manual deletion of downloaded APKs, and obsolete package purging.',
+        icon: Icons.cloud_download_rounded,
+        tag: 'Updates',
+      ),
+      (
+        title: 'Widget & Notification Modes Restored',
+        desc:
+            'Fixed quick note popup and home screen widget category lists to display all custom modes with "All" mode at index 0.',
+        icon: Icons.widgets_rounded,
+        tag: 'Widgets',
+      ),
+      (
+        title: 'Reset to Default Mode on App Close',
+        desc:
+            'New opt-in setting in Modes automatically resets active category to "All" on app close and reopen when no active live session is running.',
+        icon: Icons.refresh_rounded,
+        tag: 'Modes',
+      ),
+      (
+        title: 'Settings Trash Bin Relocation',
+        desc:
+            'Relocated Trash Bin directly into the Logging Controls card below Backup & Export, ensured permanent visibility, and centered header titles.',
+        icon: Icons.delete_outline_rounded,
+        tag: 'Settings',
       ),
     ],
     items: [
-      'Native Isar database engine, multimodal photo & audio notes, goals pacing overhaul, Apple HIG startup acceleration, and 3D avatar identity.',
-      '+ Storage Engine Evolution: Migrated from Hive to native compiled Isar DB with O(1) indices and O(log N) binary range slicing',
-      '+ Multimodal Media: Twitter-style photo attachments, full-screen lightbox zoom, and native voice notes with waveform playback',
-      '+ Targets & Goals Engine: Character countdown ring, dynamic daily pacing, retroactive logging, and mid-session confetti celebrations',
-      '+ Startup Acceleration: Minimalist Apple HIG splash screen, instant runApp mount, 1.1MB asset purge, and 98% avatar RAM reduction',
-      '+ Personal Profile: 12 3D Angry Birds avatar presets, animated GIF support, collapsible header avatar, and Apple Wallet Memento Mori Pass',
-      '+ History & Integrity: Untracked gap claiming without conflict collisions, swipe-to-delete confirmation dialogs, and Calendar view parity',
-      '+ Diagnostics & Controls: Single-pass Update Center, 24-bar Adaptive Governor visualizer, and telemetry transparency monitor',
-      '+ Apple HIG Polish: 1:1 aligned tap delay slider, beta language underline indicators, and God Mode Member badge',
-      '+ System IPC: Notification Consistency Manager, ephemeral Intent Queue widget IPC, and daily WorkManager maintenance',
-      '* All 279 automated unit and widget tests passing with 0 lint warnings and 100% offline privacy',
+      'Emergency hotfix restoring legacy user data from Hive to Isar, adding background update lifecycle controls, and resolving critical widget mode bugs.',
+      '! Critical Data Recovery: Automated migration bridge restores .hive boxes, encryption keys, and auto-rolling snapshot backups into Isar',
+      '+ Update Notifications: Apple HIG update ready dialog with direct Update Center navigation and 24-hour Remind Later delay',
+      '+ Update Package Controls: Auto-download background toggle, manual deletion of downloaded packages, and auto-purge of obsolete APKs',
+      '+ Widget Mode Integrity: Fixed QuickNoteActivity and app widgets to load all dynamic categories correctly from StringSet/JSON',
+      '+ Mode Behavior: Added setting to reset to default All mode on app close strictly when no session is active',
+      '+ Settings Organization: Placed Trash Bin permanently in Logging Controls card below Backup & Export with item count / empty indicator',
+      '+ Dialog Polish: Fixed RecentlyDeletedDialog title header alignment and ensured seamless Settings search navigation',
+      '* All unit and widget tests passing with 0 lint warnings and 100% offline privacy preservation',
     ],
   );
 

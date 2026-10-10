@@ -1,0 +1,7 @@
+Update to 7.5.9 (build 26BR1011a):
+- Critical: Emergency Hive-to-Isar data recovery bridge restoring legacy user moments, trash, and backups
+- New: Update ready notification alert with 24-hour remind later and direct Update Center navigation
+- New: Background auto-download updates toggle and manual downloaded package deletion in Update Center
+- Fix: Quick note popup and widget category lists now dynamically display all custom modes
+- New: Option to reset active category to 'All' on app close when no session is running
+- Polish: Relocate Trash Bin into Logging Controls card with live count and centered header title

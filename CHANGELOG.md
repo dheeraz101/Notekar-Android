@@ -6,6 +6,41 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [7.5.9] - 2026-10-11 (versionCode 26BR1011a) [BR]
+
+> *Emergency Hotfix: Data Recovery Bridge, Update Lifecycle Controls & Widget Integrity.*
+
+### What's New
+
+- **Emergency Hive-to-Isar Data Recovery Bridge**:
+    - Automated legacy database migration bridge in `MomentRepository.initialize()` that safely scans for legacy Hive boxes (`moments`, `moments_backup`, `trash_moments`), secure AES encryption keys, and auto-rolling snapshot backups.
+    - Seamlessly imports all historical moments, active sessions, and soft-deleted trash items into Isar without data loss or corruption on upgrade.
+    - Non-destructive migration preserving existing Hive binary boxes alongside Isar for redundant rollback safety.
+    - Guaranteed zero-data-loss transition for all users updating from legacy Hive builds.
+
+- **Update Lifecycle Controls & Package Management**:
+    - Added "Auto-Download Updates" background switch with SHA-256 integrity verification.
+    - Interactive Apple HIG "Update Ready" notification dialog prompting users when an update package is downloaded and ready to install.
+    - One-tap direct routing to the Update Center dialog and a 24-hour "Remind Later" snooze mechanism.
+    - Added manual "Delete Downloaded Update" button in the Update Center allowing users to delete downloaded APKs directly without installing.
+    - Automatic purging of obsolete or mismatched APK files whenever a newer update release is detected.
+
+- **Home Screen Widget & Notification Quick Note Modes Restored**:
+    - Fixed Android Kotlin `QuickNoteActivity` and `NoteKarWidgetProvider` mode parsing.
+    - Replaced rigid hardcoded two-mode fallback with resilient dynamic parsing of SharedPreferences `custom_modes` (`Set<String>` and JSON string list).
+    - Guaranteed `"All"` mode is positioned at index 0 followed by all user-configured custom modes.
+
+- **Smart Mode Reset on App Close**:
+    - Added an opt-in toggle in Modes Settings: "Reset to All Mode on App Close".
+    - Automatically resets the active category to `"All"` when the app closes and reopens.
+    - Strictly guarded by `_sessionStart == null` to ensure running or active recording sessions are never interrupted or reset.
+
+- **Settings Polish & Trash Bin Relocation**:
+    - Relocated the Trash Bin permanently into the "Logging Controls" card in Logging Settings directly below "Backup & Export".
+    - Added permanent state indicator displaying active item count or "Empty".
+    - Fixed title header alignment in `RecentlyDeletedDialog` (`showLargeTitle: false`).
+    - Configured Settings search to route Trash Bin queries directly into the Logging Settings page.
+
 ## [7.5.8] - 2026-10-11 (versionCode 26BR1011) [BR]
 
 > *Multimodal Life Ledger, Native Isar DB & Apple HIG Precision.*

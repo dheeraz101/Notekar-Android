@@ -1,14 +1,71 @@
 [
     {
+        "version":  "7.5.9",
+        "buildNumber":  "26BR1011a",
+        "releaseDate":  "2026-10-11",
+        "channel":  "beta",
+        "channelTag":  "[Beta]",
+        "isBeta":  true,
+        "edition":  "Emergency Hotfix: Data Recovery & Update Lifecycle",
+        "badgeColor":  "#FF3B30",
+        "isLatest":  true,
+        "highlights":  [
+                           {
+                               "title":  "Emergency Hive-to-Isar Data Recovery",
+                               "description":  "Automated legacy database migration bridge in MomentRepository.initialize() safely restores existing moments, trash entries, and rolling backups from Hive into Isar without data loss.",
+                               "icon":  "restore_rounded"
+                           },
+                           {
+                               "title":  "Update Ready Notifications & Reminders",
+                               "description":  "Interactive Apple HIG alert prompts when updates are downloaded and verified, featuring immediate routing to Update Center and a 24-hour Remind Later delay.",
+                               "icon":  "system_update_rounded"
+                           },
+                           {
+                               "title":  "Auto-Download & Package Management",
+                               "description":  "Background update downloader with SHA-256 verification, direct manual deletion of downloaded packages, and auto-purging of obsolete APKs on newer releases.",
+                               "icon":  "cloud_download_rounded"
+                           },
+                           {
+                               "title":  "Widget & Notification Modes Restored",
+                               "description":  "Fixed QuickNoteActivity and app widgets to load all user modes dynamically from StringSet/JSON with 'All' mode at index 0.",
+                               "icon":  "widgets_rounded"
+                           },
+                           {
+                               "title":  "Reset to Default Mode on App Close",
+                               "description":  "Added an opt-in toggle in Modes Settings that automatically resets active category to 'All' on app close and reopen when no active live session is running.",
+                               "icon":  "refresh_rounded"
+                           },
+                           {
+                               "title":  "Settings Trash Bin Relocation",
+                               "description":  "Relocated Trash Bin directly into the Logging Controls card below Backup & Export with permanent visibility, direct search routing, and centered title headers.",
+                               "icon":  "delete_outline_rounded"
+                           }
+                       ],
+        "fullChangelog":  [
+                              "Critical Data Recovery: Automated migration bridge restores .hive boxes, encryption keys, and auto-rolling snapshot backups into Isar",
+                              "Update Notifications: Apple HIG update ready dialog with direct Update Center navigation and 24-hour Remind Later delay",
+                              "Update Package Controls: Auto-download background toggle, manual deletion of downloaded packages, and auto-purge of obsolete APKs",
+                              "Widget Mode Integrity: Fixed QuickNoteActivity and app widgets to load all dynamic categories correctly from StringSet/JSON",
+                              "Mode Behavior: Added setting to reset to default All mode on app close strictly when no session is active",
+                              "Settings Organization: Placed Trash Bin permanently in Logging Controls card below Backup & Export with item count / empty indicator",
+                              "Dialog Polish: Fixed RecentlyDeletedDialog title header alignment and ensured seamless Settings search navigation",
+                              "Security & Privacy: Enforced SHA-256 integrity verification on all downloaded installer packages with zero user tracking"
+                          ],
+        "downloads":  {
+                          "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.9/NoteKar-v7.5.9-universal-release.apk",
+                          "arm64Apk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.9/NoteKar-v7.5.9-arm64-v8a-release.apk"
+                      }
+    },
+    {
         "version":  "7.5.8",
         "buildNumber":  "26BR1011",
         "releaseDate":  "2026-10-11",
         "channel":  "beta",
         "channelTag":  "[Beta]",
         "isBeta":  true,
-        "edition":  "Multimodal Ledger, Isar DB & Apple HIG Precision",
+        "edition":  "Multimodal Ledger, Isar DB \u0026 Apple HIG Precision",
         "badgeColor":  "#FF9F0A",
-        "isLatest":  true,
+        "isLatest":  false,
         "highlights":  [
                            {
                                "title":  "Native Isar Storage Engine",
@@ -21,27 +78,27 @@
                                "icon":  "photo_library_rounded"
                            },
                            {
-                               "title":  "Targets & Goals Overhaul",
+                               "title":  "Targets \u0026 Goals Overhaul",
                                "description":  "Character countdown rings, dynamic daily pacing allocations, retroactive session timespan logging, and instant mid-session milestone confetti celebrations.",
                                "icon":  "track_changes_rounded"
                            },
                            {
-                               "title":  "Apple HIG Startup & Performance",
+                               "title":  "Apple HIG Startup \u0026 Performance",
                                "description":  "Minimalist 350ms splash screen, instant cold boot runApp mount, 1.1MB wallpaper asset purge, 98% avatar RAM reduction, and adaptive GPU blur shader gating.",
                                "icon":  "bolt_rounded"
                            },
                            {
-                               "title":  "3D Avatars & Holographic Pass",
+                               "title":  "3D Avatars \u0026 Holographic Pass",
                                "description":  "12 3D Angry Birds character portraits, 16 Apple emoji presets, full-screen profile lightbox, collapsible header avatar, and exportable Apple Wallet Memento Mori Pass.",
                                "icon":  "face_rounded"
                            },
                            {
-                               "title":  "Sovereign Gap Claiming & History Parity",
+                               "title":  "Sovereign Gap Claiming \u0026 History Parity",
                                "description":  "Conflict-free untracked gap claiming, native Cupertino swipe-to-delete confirmation dialogs, and full Calendar view parity with live session controls.",
                                "icon":  "history_rounded"
                            },
                            {
-                               "title":  "System Diagnostics & Apple HIG Controls",
+                               "title":  "System Diagnostics \u0026 Apple HIG Controls",
                                "description":  "Single-pass iOS Update Center, 24-bar Adaptive Governor hardware visualizer, transparent telemetry disclosures, and 1:1 aligned tap delay slider.",
                                "icon":  "system_update_rounded"
                            }
@@ -49,14 +106,14 @@
         "fullChangelog":  [
                               "Storage Engine Evolution: Migrated from Hive to native compiled Isar DB with O(1) indices and O(log N) binary date range queries",
                               "Multimodal Media: Twitter/X style photo attachments, full-screen lightbox zoom, and native voice notes with waveform playback",
-                              "Targets & Goals Engine: Character countdown ring, dynamic daily pacing, retroactive logging, and mid-session confetti celebrations",
+                              "Targets \u0026 Goals Engine: Character countdown ring, dynamic daily pacing, retroactive logging, and mid-session confetti celebrations",
                               "Startup Acceleration: Minimalist Apple HIG splash screen, instant runApp mount, 1.1MB asset purge, and 98% avatar RAM reduction",
-                              "Personal Profile & Pass: 12 3D Angry Birds avatar presets, animated GIF support, collapsible header avatar, and Apple Wallet Memento Mori Pass",
-                              "History & Ledger Integrity: Untracked gap claiming without conflict collisions, swipe-to-delete confirmation dialogs, and Calendar view parity",
-                              "Diagnostics & Device Health: Single-pass Update Center, 24-bar Adaptive Governor hardware visualizer, and telemetry transparency monitor",
+                              "Personal Profile \u0026 Pass: 12 3D Angry Birds avatar presets, animated GIF support, collapsible header avatar, and Apple Wallet Memento Mori Pass",
+                              "History \u0026 Ledger Integrity: Untracked gap claiming without conflict collisions, swipe-to-delete confirmation dialogs, and Calendar view parity",
+                              "Diagnostics \u0026 Device Health: Single-pass Update Center, 24-bar Adaptive Governor hardware visualizer, and telemetry transparency monitor",
                               "Apple HIG Refinements: 1:1 aligned tap delay slider, beta language underline indicators, and God Mode Member badge",
                               "System Architecture: Notification Consistency Manager, ephemeral Intent Queue widget IPC, and daily WorkManager maintenance",
-                              "Quality & Resilience: 279 automated unit and widget tests passing with 0 lint warnings and offline-first data protection"
+                              "Quality \u0026 Resilience: 279 automated unit and widget tests passing with 0 lint warnings and offline-first data protection"
                           ],
         "downloads":  {
                           "universalApk":  "https://github.com/dheeraz101/Notekar-Android/releases/download/v7.5.8/NoteKar-v7.5.8-universal-release.apk",

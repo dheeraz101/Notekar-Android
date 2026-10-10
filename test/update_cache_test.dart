@@ -131,8 +131,8 @@ void main() {
 
       expect(find.text('Rm -rf Cache'), findsOneWidget);
       expect(
-        find.text(
-          'Automatically deletes update packages upon installation to prevent installer cache build-up.',
+        find.textContaining(
+          'Rm -rf deletes update packages upon installation to prevent cache build-up.',
         ),
         findsOneWidget,
       );
