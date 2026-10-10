@@ -400,6 +400,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
     super.dispose();
   }
 
+  bool get _isUntrackedGap =>
+      widget.prefilledStartTime != null && widget.prefilledEndTime != null;
+
   DateTime _combine(DateTime date, TimeOfDay time) {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
@@ -410,6 +413,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   }
 
   bool _hasTimeConflict(DateTime dt) {
+    if (_isUntrackedGap) return false;
     for (final m in _allMoments) {
       final mDt = DateTime.fromMillisecondsSinceEpoch(m.timestamp);
       if (mDt.year == dt.year &&
@@ -424,6 +428,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   }
 
   Future<void> _selectDate() async {
+    if (_isUntrackedGap) return;
     HapticFeedback.selectionClick();
     final now = DateTime.now();
     final earliest = now.subtract(const Duration(days: 30));
@@ -449,6 +454,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   }
 
   Future<void> _selectTime({required bool isStart}) async {
+    if (_isUntrackedGap) return;
     HapticFeedback.selectionClick();
     final current = isStart ? _startTime : _endTime;
     final initialDt = DateTime(
@@ -481,19 +487,24 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
   }
 
   void _submit() {
-    final isGapLocked = widget.lockToSession || widget.prefilledEndTime != null;
+    final isGapLocked =
+        widget.lockToSession ||
+        widget.prefilledEndTime != null ||
+        _isUntrackedGap;
     if (isGapLocked) {
       _isSession = true;
     }
-    final startDt = _combine(_selectedDate, _startTime);
+    final startDt = _isUntrackedGap
+        ? widget.prefilledStartTime!
+        : _combine(_selectedDate, _startTime);
     final now = DateTime.now();
 
-    if (startDt.isAfter(now)) {
+    if (!_isUntrackedGap && startDt.isAfter(now)) {
       setState(() => _errorMessage = 'Start time cannot be in the future.');
       return;
     }
 
-    if (_hasTimeConflict(startDt)) {
+    if (!_isUntrackedGap && _hasTimeConflict(startDt)) {
       setState(
         () => _errorMessage =
             'Start time (${_formatTimeOfDay(_startTime)}) is already allocated to a past moment.',
@@ -503,17 +514,20 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
 
     DateTime? endDt;
     if (_isSession) {
-      endDt = _combine(_selectedDate, _endTime);
+      endDt = _isUntrackedGap
+          ? widget.prefilledEndTime!
+          : _combine(_selectedDate, _endTime);
       if (!endDt.isAfter(startDt)) {
         // End time must be strictly after start time
         setState(() => _errorMessage = 'End time must be after start time.');
         return;
       }
-      if (endDt.isAfter(now.add(const Duration(minutes: 5)))) {
+      if (!_isUntrackedGap &&
+          endDt.isAfter(now.add(const Duration(minutes: 5)))) {
         setState(() => _errorMessage = 'End time cannot be in the future.');
         return;
       }
-      if (_hasTimeConflict(endDt)) {
+      if (!_isUntrackedGap && _hasTimeConflict(endDt)) {
         setState(
           () => _errorMessage =
               'End time (${_formatTimeOfDay(_endTime)}) is already allocated to a past moment.',
@@ -585,11 +599,16 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
       _isSession = true;
     }
 
-    final startDt = _combine(_selectedDate, _startTime);
-    final endDt = _combine(_selectedDate, _endTime);
+    final startDt = _isUntrackedGap
+        ? widget.prefilledStartTime!
+        : _combine(_selectedDate, _startTime);
+    final endDt = _isUntrackedGap
+        ? widget.prefilledEndTime!
+        : _combine(_selectedDate, _endTime);
     final sessionMinutes = endDt.difference(startDt).inMinutes;
-    final startConflict = _hasTimeConflict(startDt);
-    final endConflict = _isSession && _hasTimeConflict(endDt);
+    final startConflict = !_isUntrackedGap && _hasTimeConflict(startDt);
+    final endConflict =
+        !_isUntrackedGap && _isSession && _hasTimeConflict(endDt);
     final hasConflict = startConflict || endConflict;
 
     GoalProgress? goalProgress;
@@ -647,7 +666,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ),
             ),
           ] else ...[
-            if (widget.lockToSession) ...[
+            if (widget.lockToSession || _isUntrackedGap) ...[
               Padding(
                 padding: const EdgeInsets.only(bottom: spacing12),
                 child: Container(
@@ -694,7 +713,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     child: PressableScale(
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        if (widget.lockToSession) {
+                        if (widget.lockToSession || _isUntrackedGap) {
                           setState(() {
                             _errorMessage =
                                 'Untracked interval must be logged as a completed session.';
@@ -794,7 +813,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
 
           // Date Selector Card
           PressableScale(
-            onTap: _selectDate,
+            onTap: _isUntrackedGap ? null : _selectDate,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
@@ -804,7 +823,13 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded, size: 18, color: p.accent),
+                  Icon(
+                    _isUntrackedGap
+                        ? Icons.lock_outline_rounded
+                        : Icons.calendar_today_rounded,
+                    size: 18,
+                    color: p.accent,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     'Date',
@@ -824,7 +849,20 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.chevron_right_rounded, size: 14, color: p.text3),
+                  if (!_isUntrackedGap)
+                    Icon(Icons.chevron_right_rounded, size: 14, color: p.text3)
+                  else
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Text(
+                        '(Locked)',
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -837,7 +875,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
             children: [
               Expanded(
                 child: PressableScale(
-                  onTap: () => _selectTime(isStart: true),
+                  onTap: _isUntrackedGap
+                      ? null
+                      : () => _selectTime(isStart: true),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -859,7 +899,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                         Row(
                           children: [
                             Icon(
-                              Icons.schedule_rounded,
+                              _isUntrackedGap
+                                  ? Icons.lock_outline_rounded
+                                  : Icons.schedule_rounded,
                               size: 14,
                               color: startConflict ? p.red : p.accent,
                             ),
@@ -917,7 +959,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: PressableScale(
-                    onTap: () => _selectTime(isStart: false),
+                    onTap: _isUntrackedGap
+                        ? null
+                        : () => _selectTime(isStart: false),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -939,7 +983,9 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                           Row(
                             children: [
                               Icon(
-                                Icons.schedule_rounded,
+                                _isUntrackedGap
+                                    ? Icons.lock_outline_rounded
+                                    : Icons.schedule_rounded,
                                 size: 14,
                                 color: endConflict ? p.red : p.text3,
                               ),
@@ -998,6 +1044,20 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
               ],
             ],
           ),
+
+          if (_isUntrackedGap) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                'Timeline gap interval is locked. Categorize or note below to claim it.',
+                style: TextStyle(
+                  color: p.text3,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
 
           if (hasConflict) ...[
             const SizedBox(height: spacing12),
@@ -1610,7 +1670,11 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        hasConflict ? 'Time Taken' : 'Save Log',
+                        hasConflict
+                            ? 'Time Taken'
+                            : (_isUntrackedGap
+                                  ? 'Log Untracked Time'
+                                  : 'Save Log'),
                         style: TextStyle(
                           color: hasConflict ? p.text3 : Colors.white,
                           fontWeight: FontWeight.w700,

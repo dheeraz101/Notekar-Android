@@ -1926,19 +1926,32 @@ class _HistoryDialogState extends State<HistoryDialog> {
     final outTags = goalTag != null ? [goalTag] : const <String>[];
 
     if (result.isSession && result.endDateTime != null) {
-      final startMs = result.startDateTime.millisecondsSinceEpoch;
-      var endMs = result.endDateTime!.millisecondsSinceEpoch;
+      final origStartMs = result.startDateTime.millisecondsSinceEpoch;
+      final origEndMs = result.endDateTime!.millisecondsSinceEpoch;
+      var startMs = origStartMs;
+      var endMs = origEndMs;
       if (endMs <= startMs) {
         endMs = startMs + 60000;
       }
+      if (_entries.any((m) => m.timestamp == startMs)) {
+        if (startMs + 1000 < endMs) {
+          startMs += 1000;
+        }
+      }
+      if (_entries.any((m) => m.timestamp == endMs)) {
+        if (endMs - 1000 > startMs) {
+          endMs -= 1000;
+        }
+      }
+      final startDt = DateTime.fromMillisecondsSinceEpoch(startMs);
       final endDt = DateTime.fromMillisecondsSinceEpoch(endMs);
-      _claimedGaps.add('$startMs-$endMs');
+      _claimedGaps.addAll(['$origStartMs-$origEndMs', '$startMs-$endMs']);
 
       final inMoment = Moment(
         id: math.max(maxId + 1, startMs),
         timestamp: startMs,
         type: 'in',
-        date: dateKey(result.startDateTime),
+        date: dateKey(startDt),
         note: result.note,
         tags: inTags,
         category: result.category,
@@ -1960,12 +1973,16 @@ class _HistoryDialogState extends State<HistoryDialog> {
 
       addedMoments.addAll([inMoment, outMoment]);
     } else {
-      final startMs = result.startDateTime.millisecondsSinceEpoch;
+      var startMs = result.startDateTime.millisecondsSinceEpoch;
+      if (_entries.any((m) => m.timestamp == startMs)) {
+        startMs += 1000;
+      }
+      final startDt = DateTime.fromMillisecondsSinceEpoch(startMs);
       final moment = Moment(
         id: math.max(maxId + 1, startMs),
         timestamp: startMs,
         type: 'single',
-        date: dateKey(result.startDateTime),
+        date: dateKey(startDt),
         note: result.note,
         tags: inTags,
         category: result.category,

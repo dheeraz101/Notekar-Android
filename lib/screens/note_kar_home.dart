@@ -2680,11 +2680,24 @@ class _NoteKarHomeState extends State<NoteKarHome>
     final outTags = goalTag != null ? [goalTag] : const <String>[];
 
     if (result.isSession && result.endDateTime != null) {
-      final startMs = result.startDateTime.millisecondsSinceEpoch;
-      var endMs = result.endDateTime!.millisecondsSinceEpoch;
+      final origStartMs = result.startDateTime.millisecondsSinceEpoch;
+      final origEndMs = result.endDateTime!.millisecondsSinceEpoch;
+      var startMs = origStartMs;
+      var endMs = origEndMs;
       if (endMs <= startMs) {
         endMs = startMs + 60000;
       }
+      if (_entries.any((m) => m.timestamp == startMs)) {
+        if (startMs + 1000 < endMs) {
+          startMs += 1000;
+        }
+      }
+      if (_entries.any((m) => m.timestamp == endMs)) {
+        if (endMs - 1000 > startMs) {
+          endMs -= 1000;
+        }
+      }
+      final startDt = DateTime.fromMillisecondsSinceEpoch(startMs);
       final endDt = DateTime.fromMillisecondsSinceEpoch(endMs);
 
       // Create IN and OUT moments for the session
@@ -2692,7 +2705,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
         id: _nextId,
         timestamp: startMs,
         type: 'in',
-        date: dateKey(result.startDateTime),
+        date: dateKey(startDt),
         note: result.note,
         tags: inTags,
         category: result.category,
@@ -2719,12 +2732,17 @@ class _NoteKarHomeState extends State<NoteKarHome>
       });
       _showToast('Session logged manually');
     } else {
+      var startMs = result.startDateTime.millisecondsSinceEpoch;
+      if (_entries.any((m) => m.timestamp == startMs)) {
+        startMs += 1000;
+      }
+      final startDt = DateTime.fromMillisecondsSinceEpoch(startMs);
       // Single moment
       final moment = Moment(
         id: _nextId,
-        timestamp: result.startDateTime.millisecondsSinceEpoch,
+        timestamp: startMs,
         type: 'single',
-        date: dateKey(result.startDateTime),
+        date: dateKey(startDt),
         note: result.note,
         tags: inTags,
         category: result.category,
