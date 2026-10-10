@@ -31,6 +31,7 @@ class ModesCategoriesSettingsPage extends StatefulWidget {
     this.onOpenCategory,
     this.onLearnMoreBeta,
     this.onAdaptiveColorChanged,
+    this.onResetModeOnCloseChanged,
   });
 
   final Palette p;
@@ -39,6 +40,7 @@ class ModesCategoriesSettingsPage extends StatefulWidget {
   final void Function(String category, {String? parent})? onOpenCategory;
   final VoidCallback? onLearnMoreBeta;
   final ValueChanged<bool>? onAdaptiveColorChanged;
+  final ValueChanged<bool>? onResetModeOnCloseChanged;
 
   @override
   State<ModesCategoriesSettingsPage> createState() =>
@@ -51,6 +53,7 @@ class _ModesCategoriesSettingsPageState
   List<String> _categories = ['Work', 'Deep Focus'];
   bool _loading = true;
   bool _adaptiveColor = false;
+  bool _resetModeOnClose = false;
 
   @override
   void initState() {
@@ -67,6 +70,7 @@ class _ModesCategoriesSettingsPageState
             prefs.getBool('m-adaptive-color') ??
             prefs.getBool('adaptive_mode_color') ??
             false;
+        _resetModeOnClose = prefs.getBool('m-reset-mode-on-close') ?? false;
       });
     }
   }
@@ -421,6 +425,24 @@ class _ModesCategoriesSettingsPageState
                   await prefs.setBool('m-adaptive-color', val);
                   await prefs.setBool('adaptive_mode_color', val);
                   widget.onAdaptiveColorChanged?.call(val);
+                },
+              ),
+            ),
+            SettingsRow(
+              p: widget.p,
+              title: 'Default Mode on App Close'.localized(context),
+              subtitle:
+                  'Return to All mode on exit when no active session is running'
+                      .localized(context),
+              trailing: CupertinoSwitch(
+                value: _resetModeOnClose,
+                activeTrackColor: widget.p.accent,
+                onChanged: (val) async {
+                  HapticFeedback.selectionClick();
+                  setState(() => _resetModeOnClose = val);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('m-reset-mode-on-close', val);
+                  widget.onResetModeOnCloseChanged?.call(val);
                 },
               ),
             ),

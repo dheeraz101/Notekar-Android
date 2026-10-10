@@ -163,31 +163,59 @@ class QuickNoteActivity : Activity() {
                 ?: flutterPrefs.getString("flutter.notekar.active_category", null)
                 ?: flutterPrefs.getString("flutter.active_category", null)
                 ?: "All"
-        // Match CategoryService.getCategories(): built-in modes plus the
-        // configured user modes. Never expose unrelated hard-coded suggestions.
-        val categories = mutableListOf("Work", "Deep Focus")
-        val customCatsJson = flutterPrefs.getString("flutter.notekar.custom_categories", null)
-            ?: flutterPrefs.getString("flutter.custom_categories", null)
-        if (customCatsJson != null && customCatsJson.startsWith("[")) {
+        // Dynamically load all available modes in NoteKar, including "All" and user custom modes.
+        val categories = mutableListOf<String>()
+        val availableCatsJson = widgetPrefs.getString(NoteKarWidgetProvider.KEY_AVAILABLE_CATEGORIES, null)
+        if (!availableCatsJson.isNullOrEmpty() && availableCatsJson.startsWith("[")) {
             try {
-                val arr = JSONArray(customCatsJson)
+                val arr = JSONArray(availableCatsJson)
                 for (i in 0 until arr.length()) {
-                    val category = arr.optString(i)?.trim()
-                    if (!category.isNullOrEmpty() &&
-                        !category.equals("All", ignoreCase = true) &&
-                        categories.none { it.equals(category, ignoreCase = true) }
-                    ) {
-                        categories.add(category)
+                    val cat = arr.optString(i)?.trim()
+                    if (!cat.isNullOrEmpty() && categories.none { it.equals(cat, ignoreCase = true) }) {
+                        categories.add(cat)
                     }
                 }
             } catch (_: Exception) {
             }
         }
-        val configuredSelection = requestedCategory
-            .takeUnless { it.equals("All", ignoreCase = true) }
+
+        if (categories.isEmpty()) {
+            categories.add("All")
+            categories.add("Work")
+            categories.add("Deep Focus")
+            val set = flutterPrefs.getStringSet("flutter.notekar.custom_categories", null)
+                ?: flutterPrefs.getStringSet("flutter.custom_categories", null)
+            if (set != null && set.isNotEmpty()) {
+                for (cat in set) {
+                    val clean = cat.trim()
+                    if (clean.isNotEmpty() && categories.none { it.equals(clean, ignoreCase = true) }) {
+                        categories.add(clean)
+                    }
+                }
+            } else {
+                val customCatsJson = flutterPrefs.getString("flutter.notekar.custom_categories", null)
+                    ?: flutterPrefs.getString("flutter.custom_categories", null)
+                if (customCatsJson != null && customCatsJson.startsWith("[")) {
+                    try {
+                        val arr = JSONArray(customCatsJson)
+                        for (i in 0 until arr.length()) {
+                            val cat = arr.optString(i)?.trim()
+                            if (!cat.isNullOrEmpty() && categories.none { it.equals(cat, ignoreCase = true) }) {
+                                categories.add(cat)
+                            }
+                        }
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+        } else {
+            if (!categories.any { it.equals("All", ignoreCase = true) }) {
+                categories.add(0, "All")
+            }
+        }
+
         var selectedCategory = categories.firstOrNull {
-            configuredSelection != null &&
-                    it.equals(configuredSelection, ignoreCase = true)
+            it.equals(requestedCategory, ignoreCase = true)
         } ?: categories.first()
         var selectedGoalTitle: String? = null
         var selectedGoalId: String? = null

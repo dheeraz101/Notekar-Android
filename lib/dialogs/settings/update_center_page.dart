@@ -99,6 +99,15 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
           }
         });
       }
+      final prefs = widget.prefs ?? await SharedPreferences.getInstance();
+      final autoDownload = prefs.getBool('m-auto-download-updates') ?? false;
+      if (autoDownload &&
+          widget.updateInfo != null &&
+          currentPath == null &&
+          !_downloading &&
+          mounted) {
+        unawaited(_startDownload());
+      }
     } catch (_) {}
   }
 
@@ -260,6 +269,7 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
 
   Future<void> _startDownload() async {
     if (widget.updateInfo == null) return;
+    await _updateService.clearCachedBuilds();
     setState(() {
       _downloading = true;
       _downloadProgress = 0.0;
@@ -459,6 +469,50 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
         _verificationStatus = 'idle';
         _cacheSizeMb = 0.0;
       });
+    }
+  }
+
+  Future<void> _deleteDownloadedApk() async {
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text('Delete Downloaded Update?'.localized(context)),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'This will delete the downloaded package from your device.'
+                .localized(context),
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'.localized(context)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Delete'.localized(context)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _updateService.clearCachedBuilds();
+      if (mounted) {
+        setState(() {
+          _downloadedApkPath = null;
+          _verificationStatus = 'idle';
+          _cacheSizeMb = 0.0;
+        });
+        showIosPillToast(
+          context: context,
+          p: widget.p,
+          message: 'Downloaded update deleted'.localized(context),
+          icon: CupertinoIcons.trash,
+        );
+      }
     }
   }
 
@@ -869,6 +923,23 @@ class _UpdateCenterViewState extends State<UpdateCenterView> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: p.red.withValues(alpha: 0.12),
+                    foregroundColor: p.red,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.trash, size: 18),
+                  label: Text(
+                    'Delete Downloaded Update'.localized(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: _deleteDownloadedApk,
+                ),
+                const SizedBox(height: 8),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: p.surface3,
@@ -1171,6 +1242,8 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
     this.onOpenLink,
     this.autoDeleteUpdateCache = false,
     this.onAutoDeleteUpdateCacheChanged,
+    this.autoDownloadUpdates = false,
+    this.onAutoDownloadUpdatesChanged,
   });
 
   final Palette p;
@@ -1184,6 +1257,8 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
   final void Function(String url)? onOpenLink;
   final bool autoDeleteUpdateCache;
   final ValueChanged<bool>? onAutoDeleteUpdateCacheChanged;
+  final bool autoDownloadUpdates;
+  final ValueChanged<bool>? onAutoDownloadUpdatesChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1252,6 +1327,15 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
               onTap: () =>
                   onOpenCategory('Build Choose', parent: 'Updates & Notices'),
             ),
+            if (onAutoDownloadUpdatesChanged != null)
+              SettingsSwitchRow(
+                p: p,
+                icon: CupertinoIcons.arrow_down_circle,
+                title: 'Auto-Download Updates',
+                color: p.accent,
+                value: autoDownloadUpdates,
+                onChanged: onAutoDownloadUpdatesChanged!,
+              ),
             if (onAutoDeleteUpdateCacheChanged != null)
               SettingsSwitchRow(
                 p: p,
@@ -1266,7 +1350,7 @@ class UpdatesNoticesSettingsPage extends StatelessWidget {
         SettingsPageDescription(
           p: p,
           text:
-              'Automatically deletes update packages upon installation to prevent installer cache build-up.'
+              'Auto-download downloads update packages in the background so updates are immediately ready to install. Rm -rf deletes update packages upon installation to prevent cache build-up.'
                   .localized(context),
         ),
         SettingsGroup(

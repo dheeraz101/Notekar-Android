@@ -181,6 +181,8 @@ class SettingsDialog extends StatefulWidget {
     this.initialCategory,
     this.onTriggerUrlScheme,
     this.onAdaptiveColorChanged,
+    this.onResetModeOnCloseChanged,
+    this.onAutoDownloadUpdatesChanged,
     this.soundEffects = true,
     this.onSoundEffects,
     this.activeCategory,
@@ -196,6 +198,8 @@ class SettingsDialog extends StatefulWidget {
   final bool soundEffects;
   final ValueChanged<bool>? onSoundEffects;
   final ValueChanged<bool>? onAdaptiveColorChanged;
+  final ValueChanged<bool>? onResetModeOnCloseChanged;
+  final ValueChanged<bool>? onAutoDownloadUpdatesChanged;
   final ValueChanged<String>? onTriggerUrlScheme;
   final String currentLocale;
   final ValueChanged<String> onLocaleChanged;
@@ -396,6 +400,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   bool _betaTrack = false;
   bool _autoDeleteUpdateCache = false;
+  bool _autoDownloadUpdates = false;
   bool obfuscateInRecents = false;
   bool showPersistentNotification = false;
   String notifLogAction = 'popup';
@@ -721,6 +726,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       _betaTrack = _prefs?.getBool('m-update-track-beta') ?? false;
       _autoDeleteUpdateCache =
           _prefs?.getBool('auto_delete_update_cache') ?? false;
+      _autoDownloadUpdates =
+          _prefs?.getBool('m-auto-download-updates') ?? false;
       obfuscateInRecents = _prefs?.getBool('obfuscate_in_recents') ?? false;
       showPersistentNotification =
           _prefs?.getBool('show_persistent_notification') ?? false;
@@ -1638,6 +1645,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
         icon: CupertinoIcons.sparkles,
       );
     }
+  }
+
+  Future<void> _handleAutoDownloadUpdates(bool value) async {
+    setState(() => _autoDownloadUpdates = value);
+    await _prefs?.setBool('m-auto-download-updates', value);
+    widget.onAutoDownloadUpdatesChanged?.call(value);
   }
 
   @override
@@ -3602,6 +3615,8 @@ $cleanStack
                                   },
                                   onAdaptiveColorChanged:
                                       widget.onAdaptiveColorChanged,
+                                  onResetModeOnCloseChanged:
+                                      widget.onResetModeOnCloseChanged,
                                   onLearnMoreBeta: () => _showBetaInfoPopup(p),
                                 ),
                               ),
@@ -3895,6 +3910,9 @@ $cleanStack
                                   autoDeleteUpdateCache: _autoDeleteUpdateCache,
                                   onAutoDeleteUpdateCacheChanged: (value) =>
                                       _handleAutoDeleteUpdateCache(value, p),
+                                  autoDownloadUpdates: _autoDownloadUpdates,
+                                  onAutoDownloadUpdatesChanged:
+                                      _handleAutoDownloadUpdates,
                                 ),
                               ),
                             if (show('Official Bulletins'))

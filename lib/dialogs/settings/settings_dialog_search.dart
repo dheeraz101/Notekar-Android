@@ -2704,11 +2704,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
       return;
     }
     if (result.title == 'Recently Deleted' || result.title == 'Trash Bin') {
-      if (widget.onOpenTrash != null) {
-        widget.onOpenTrash!();
-      } else {
-        _openCategory('Trash Bin', parent: 'Logging');
-      }
+      _openCategory('Trash Bin', parent: 'Logging');
       return;
     }
 

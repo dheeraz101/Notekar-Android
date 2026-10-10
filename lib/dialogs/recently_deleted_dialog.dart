@@ -98,7 +98,7 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
       docked: true,
       onBack: () => Navigator.pop(context),
       controller: _scrollController,
-      showLargeTitle: true,
+      showLargeTitle: false,
       removeBottomPadding: true,
       child: SizedBox(
         width: 410,
@@ -107,17 +107,6 @@ class _RecentlyDeletedDialogState extends State<RecentlyDeletedDialog> {
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: spacing4),
-                child: AppSheetLargeTitle(
-                  p: p,
-                  title: 'Trash Bin'.localized(context),
-                  scrollController: _scrollController,
-                ),
-              ),
-            ),
-
             if (_trash.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(

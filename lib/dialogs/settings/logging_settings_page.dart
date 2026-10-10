@@ -129,36 +129,24 @@ class LoggingSettingsPage extends StatelessWidget {
               color: p.green,
               onTap: () => onOpenCategory('Backup & Export', parent: 'Logging'),
             ),
+            SettingsRow(
+              p: p,
+              icon: CupertinoIcons.trash,
+              title: 'Trash Bin'.localized(context),
+              status: trash.isEmpty
+                  ? 'Empty'.localized(context)
+                  : '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
+              color: p.orange,
+              onTap: () => onOpenCategory('Trash Bin', parent: 'Logging'),
+            ),
           ],
         ),
         SettingsPageDescription(
           p: p,
           text:
-              'These settings define how moments are recorded and prepared for export.'
+              'These settings define how moments are recorded, restored from trash, and prepared for export.'
                   .localized(context),
         ),
-        if (showTrashBin && trash.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          SettingsGroup(
-            p: p,
-            children: [
-              SettingsRow(
-                p: p,
-                icon: CupertinoIcons.trash,
-                title: 'Trash Bin'.localized(context),
-                status:
-                    '${trash.length} ${(trash.length == 1 ? "item" : "items").localized(context)}',
-                color: p.orange,
-                onTap: () => onOpenCategory('Trash Bin', parent: 'Logging'),
-              ),
-            ],
-          ),
-          SettingsPageDescription(
-            p: p,
-            text: 'View and restore moments deleted within the last 30 days.'
-                .localized(context),
-          ),
-        ],
         const SizedBox(height: 12),
         SettingsGroup(
           p: p,

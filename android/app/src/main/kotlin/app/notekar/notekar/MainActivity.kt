@@ -471,6 +471,8 @@ class MainActivity : FlutterActivity() {
                         val focusRatio = call.argument<Int>("focusRatio") ?: 0
                         val totalTracked = call.argument<String>("totalTracked") ?: "0m"
                         val totalWasted = call.argument<String>("totalWasted") ?: "0m"
+                        val categoriesList = call.argument<List<String>>("categories") ?: emptyList()
+                        val categoriesJson = org.json.JSONArray(categoriesList).toString()
 
                         val prefs = getSharedPreferences(
                             NoteKarWidgetProvider.PREFS_NAME,
@@ -495,6 +497,7 @@ class MainActivity : FlutterActivity() {
                             .putInt(NoteKarWidgetProvider.KEY_FOCUS_RATIO, focusRatio)
                             .putString(NoteKarWidgetProvider.KEY_TOTAL_TRACKED, totalTracked)
                             .putString(NoteKarWidgetProvider.KEY_TOTAL_WASTED, totalWasted)
+                            .putString(NoteKarWidgetProvider.KEY_AVAILABLE_CATEGORIES, categoriesJson)
                             .apply()
 
                         NoteKarWidgetProvider.updateAllWidgets(this)

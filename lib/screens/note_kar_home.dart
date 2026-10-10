@@ -133,6 +133,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   int? _lastBackupAt;
   bool _largeText = false;
   bool _highContrast = false;
+  bool _resetModeOnClose = false;
+  bool _autoDownloadUpdates = false;
 
   bool _confirmDelete = false;
   bool _showSeconds = true;
@@ -570,9 +572,23 @@ class _NoteKarHomeState extends State<NoteKarHome>
         if (_privacyAuthInFlight) return;
       }
 
-      if (_privacyAuthInFlight) return;
+      if ((_prefs?.getBool('m-reset-mode-on-close') ?? false) &&
+          _sessionStart == null) {
+        if (mounted) {
+          setState(() => _activeCategory = 'All');
+        } else {
+          _activeCategory = 'All';
+        }
+        unawaited(_categoryService.setActiveCategory('All', prefs: _prefs));
+      }
 
       _privacyPausedAt ??= DateTime.now();
+    } else if (state == AppLifecycleState.detached) {
+      if ((_prefs?.getBool('m-reset-mode-on-close') ?? false) &&
+          _sessionStart == null) {
+        _activeCategory = 'All';
+        unawaited(_categoryService.setActiveCategory('All', prefs: _prefs));
+      }
     }
   }
 
@@ -673,6 +689,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _theme = prefs.getString('m-theme') ?? 'dark';
       _defaultMode = prefs.getString('m-default-mode') ?? 'two-way';
       _sessionStart = prefs.getInt('m-ses');
+      _resetModeOnClose = prefs.getBool('m-reset-mode-on-close') ?? false;
+      if (_resetModeOnClose && _sessionStart == null) {
+        _activeCategory = 'All';
+        unawaited(_categoryService.setActiveCategory('All', prefs: prefs));
+      }
       _isPaused = prefs.getBool('m-paused') ?? false;
       _pausedAt = prefs.getInt('m-paused-at');
       if (_sessionStart != null) {
@@ -743,6 +764,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
       _privacyLockDelayMinutes = prefs.getInt('m-privacy-lock-delay') ?? 0;
       _updateStatus = prefs.getString('m-update-status') ?? _updateStatus;
       _lastUpdateCheckedAt = prefs.getInt('m-last-update-check');
+      _autoDownloadUpdates = prefs.getBool('m-auto-download-updates') ?? false;
       final savedInfo = prefs.getString('m-latest-update-info');
       if (savedInfo != null) {
         try {
@@ -751,6 +773,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
           );
           if (_updateService.isUpdateAvailable(info.version, appVersion)) {
             _latestUpdateInfo = info;
+            if (_autoDownloadUpdates) {
+              unawaited(_autoDownloadUpdate(info));
+            } else {
+              unawaited(_checkAndPromptDownloadedUpdate(info));
+            }
           } else {
             prefs.remove('m-latest-update-info');
             _updateStatus = 'v$appVersion - Check for available updates';
@@ -2023,6 +2050,10 @@ class _NoteKarHomeState extends State<NoteKarHome>
         'focusRatio': todayAudit.intentionalityRatio.round().clamp(0, 100),
         'totalTracked': todayAudit.formattedTotalTracked,
         'totalWasted': todayAudit.formattedTotalWasted,
+        'categories': [
+          'All',
+          ...await _categoryService.getCategories(prefs: _prefs),
+        ],
       });
     } catch (_) {
       // Widget updates must never affect logging.
@@ -2988,6 +3019,14 @@ class _NoteKarHomeState extends State<NoteKarHome>
           setState(() => _adaptiveModeColor = value);
           _saveSetting('m-adaptive-color', value);
         },
+        onResetModeOnCloseChanged: (value) {
+          setState(() => _resetModeOnClose = value);
+          _saveSetting('m-reset-mode-on-close', value);
+        },
+        onAutoDownloadUpdatesChanged: (value) {
+          setState(() => _autoDownloadUpdates = value);
+          _saveSetting('m-auto-download-updates', value);
+        },
         onAppIconStyle: (value) async {
           final applied = await _setAppIconStyle(value);
           if (!applied || !mounted) return false;
@@ -3652,6 +3691,11 @@ class _NoteKarHomeState extends State<NoteKarHome>
           jsonEncode(latest.toJson()),
         );
         _setUpdateStatus(status);
+
+        if (_autoDownloadUpdates) {
+          unawaited(_autoDownloadUpdate(latest));
+        }
+
         return (status: status, info: latest);
       } else if (mounted) {
         final status = 'You are up to date';
@@ -3673,6 +3717,98 @@ class _NoteKarHomeState extends State<NoteKarHome>
       if (mounted) setState(() => _checkingUpdates = false);
     }
     return (status: _updateStatus, info: _latestUpdateInfo);
+  }
+
+  Future<void> _autoDownloadUpdate(AppUpdateInfo info) async {
+    try {
+      final cached = await _updateService.getCachedApkPath(info.version);
+      if (cached != null) {
+        final valid = await _updateService.verifyApkHash(info, cached);
+        if (valid) {
+          unawaited(_showUpdateReadyDialog(info));
+          return;
+        }
+      }
+      // Clean up older obsolete builds before downloading the new package
+      await _updateService.clearCachedBuilds();
+      final path = await _updateService.downloadApk(info, (_) {});
+      if (path != null) {
+        final valid = await _updateService.verifyApkHash(info, path);
+        if (valid) {
+          unawaited(_showUpdateReadyDialog(info));
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _checkAndPromptDownloadedUpdate(AppUpdateInfo info) async {
+    try {
+      final cached = await _updateService.getCachedApkPath(info.version);
+      if (cached != null) {
+        final valid = await _updateService.verifyApkHash(info, cached);
+        if (valid) {
+          unawaited(_showUpdateReadyDialog(info));
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showUpdateReadyDialog(AppUpdateInfo info) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final remindTime = _prefs?.getInt('m-update-remind-later-time') ?? 0;
+      if (DateTime.now().millisecondsSinceEpoch < remindTime) return;
+
+      await showCupertinoDialog<void>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text('Update Ready to Install'.localized(context)),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'NoteKar v${info.version} has been downloaded and verified. It is ready to be installed.'
+                  .localized(context),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, height: 1.35),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final nextDay = DateTime.now()
+                    .add(const Duration(days: 1))
+                    .millisecondsSinceEpoch;
+                await _prefs?.setInt('m-update-remind-later-time', nextDay);
+                if (mounted) {
+                  _showToast('We will remind you tomorrow'.localized(context));
+                }
+              },
+              child: Text('Remind Later'.localized(context)),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await _updateService.clearCachedBuilds();
+                if (mounted) {
+                  _showToast('Downloaded update deleted'.localized(context));
+                }
+              },
+              child: Text('Delete Update'.localized(context)),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openSettings(initialCategory: 'Update Center');
+              },
+              child: Text('Update Center'.localized(context)),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void _setUpdateStatus(String value) {

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 import 'package:isar/isar.dart';
 import 'package:notekar/models/moment.dart';
 import 'package:notekar/services/media_storage_service.dart';
@@ -98,6 +100,13 @@ class MomentRepository {
       _trashIsar = null;
     }
 
+    final existingCount = _isar?.moments.countSync() ?? 0;
+    final migratedFlag =
+        _prefs.getBool('notekar.hive_to_isar_migrated_v2') ?? false;
+    if (existingCount == 0 || !migratedFlag) {
+      await _attemptLegacyDataMigration(dataDirPath);
+    }
+
     _isInitialized = true;
 
     unawaited(
@@ -113,6 +122,256 @@ class MomentRepository {
         triggerAutoSnapshotIfNeeded();
       }),
     );
+  }
+
+  Future<void> _attemptLegacyDataMigration(String dataDirPath) async {
+    try {
+      _logger.info(
+        'Checking for legacy Hive boxes and rolling snapshots to migrate...',
+      );
+      final List<Moment> recoveredMoments = [];
+      final List<Moment> recoveredTrashMoments = [];
+
+      // 1. Try recovering from Hive boxes
+      try {
+        Hive.init(dataDirPath);
+        final encryptionKey = await _getLegacyHiveEncryptionKey();
+
+        // Try entries box
+        final entriesBox = await _safeOpenHiveBox(
+          'notekar_entries_v1',
+          dataDirPath,
+          encryptionKey,
+        );
+        if (entriesBox != null) {
+          for (final key in entriesBox.keys) {
+            try {
+              final val = entriesBox.get(key);
+              if (val is Map) {
+                recoveredMoments.add(
+                  Moment.fromJson(Map<String, dynamic>.from(val)),
+                );
+              } else if (val is String && val.trim().startsWith('{')) {
+                recoveredMoments.add(
+                  Moment.fromJson(
+                    Map<String, dynamic>.from(
+                      jsonDecode(val) as Map<String, dynamic>,
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              _logger.warn('Failed parsing individual Hive entry key $key: $e');
+            }
+          }
+          await entriesBox.close();
+          _logger.info(
+            'Recovered ${recoveredMoments.length} moments from legacy Hive entry box',
+          );
+        }
+
+        // Try trash box
+        final trashBox = await _safeOpenHiveBox(
+          'notekar_trash_v1',
+          dataDirPath,
+          encryptionKey,
+        );
+        if (trashBox != null) {
+          for (final key in trashBox.keys) {
+            try {
+              final val = trashBox.get(key);
+              if (val is Map) {
+                recoveredTrashMoments.add(
+                  Moment.fromJson(Map<String, dynamic>.from(val)),
+                );
+              } else if (val is String && val.trim().startsWith('{')) {
+                recoveredTrashMoments.add(
+                  Moment.fromJson(
+                    Map<String, dynamic>.from(
+                      jsonDecode(val) as Map<String, dynamic>,
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              _logger.warn('Failed parsing individual Hive trash key $key: $e');
+            }
+          }
+          await trashBox.close();
+          _logger.info(
+            'Recovered ${recoveredTrashMoments.length} moments from legacy Hive trash box',
+          );
+        }
+      } catch (e, stack) {
+        _logger.warn(
+          'Hive recovery attempt encountered error ($e), continuing with snapshot fallback',
+          e,
+          stack,
+        );
+      }
+
+      // 2. If recoveredMoments is still empty, check the rolling snapshot
+      if (recoveredMoments.isEmpty) {
+        final snapshotRaw = _prefs.getString(_autoSnapshotKey);
+        if (snapshotRaw != null && snapshotRaw.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(snapshotRaw);
+            if (decoded is List) {
+              for (final item in decoded) {
+                if (item is Map) {
+                  recoveredMoments.add(
+                    Moment.fromJson(Map<String, dynamic>.from(item)),
+                  );
+                }
+              }
+              _logger.info(
+                'Recovered ${recoveredMoments.length} moments from rolling snapshot',
+              );
+            }
+          } catch (e) {
+            _logger.warn('Failed parsing rolling snapshot: $e');
+          }
+        }
+      }
+
+      // 3. If still empty, check legacy SharedPreferences entries
+      if (recoveredMoments.isEmpty) {
+        final legacyRaw = _prefs.getString(_legacyEntriesKey);
+        if (legacyRaw != null && legacyRaw.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(legacyRaw);
+            if (decoded is List) {
+              for (final item in decoded) {
+                if (item is Map) {
+                  recoveredMoments.add(
+                    Moment.fromJson(Map<String, dynamic>.from(item)),
+                  );
+                }
+              }
+              _logger.info(
+                'Recovered ${recoveredMoments.length} moments from legacy SharedPreferences entries',
+              );
+            }
+          } catch (e) {
+            _logger.warn('Failed parsing legacy entries key: $e');
+          }
+        }
+      }
+
+      // 4. Save recovered moments into Isar if available, or populate cache
+      if (recoveredMoments.isNotEmpty || recoveredTrashMoments.isNotEmpty) {
+        final Map<int, Moment> uniqueMoments = {
+          for (final m in recoveredMoments) m.id: m,
+        };
+        final Map<int, Moment> uniqueTrash = {
+          for (final m in recoveredTrashMoments) m.id: m,
+        };
+
+        if (_isar != null && _isar!.isOpen) {
+          await _isar!.writeTxn(() async {
+            await _isar!.moments.putAll(uniqueMoments.values.toList());
+          });
+        }
+        if (_trashIsar != null && _trashIsar!.isOpen) {
+          await _trashIsar!.writeTxn(() async {
+            await _trashIsar!.moments.putAll(uniqueTrash.values.toList());
+          });
+        }
+
+        // Ensure nextId in SharedPreferences is past highest ID
+        int maxId = 0;
+        for (final m in uniqueMoments.values) {
+          if (m.id > maxId) maxId = m.id;
+        }
+        for (final m in uniqueTrash.values) {
+          if (m.id > maxId) maxId = m.id;
+        }
+        final currentNextId = _prefs.getInt(_nextIdKey) ?? 0;
+        if (maxId >= currentNextId) {
+          await _prefs.setInt(_nextIdKey, maxId + 1);
+        }
+
+        // Invalidate in-memory caches and rebuild indices
+        _cachedMoments = null;
+        _cachedTrashMoments = null;
+        _momentIdIndex = null;
+        final all = getAllMoments();
+        getTrashMoments();
+        SearchIndexService.instance.buildIndex(all);
+        await triggerAutoSnapshotIfNeeded(force: true);
+        _logger.info(
+          'Legacy data migration completed successfully with ${uniqueMoments.length} moments and ${uniqueTrash.length} trash moments restored!',
+        );
+      }
+
+      await _prefs.setBool('notekar.hive_to_isar_migrated_v2', true);
+    } catch (e, stack) {
+      _logger.error('Failed executing legacy data migration', e, stack);
+    }
+  }
+
+  Future<List<int>?> _getLegacyHiveEncryptionKey() async {
+    const secureStorage = FlutterSecureStorage(
+      aOptions: AndroidOptions(resetOnError: true),
+    );
+    try {
+      final base64Key = await secureStorage.read(key: 'hive_secure_key');
+      if (base64Key != null) {
+        return base64.decode(base64Key);
+      }
+    } catch (_) {}
+
+    final fallbackBase64 = _prefs.getString('hive_fallback_key');
+    if (fallbackBase64 != null) {
+      try {
+        return base64.decode(fallbackBase64);
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  Future<Box<dynamic>?> _safeOpenHiveBox(
+    String boxName,
+    String path,
+    List<int>? key,
+  ) async {
+    final file = File('$path${Platform.pathSeparator}$boxName.hive');
+    if (!file.existsSync()) {
+      return null;
+    }
+
+    if (key != null) {
+      try {
+        return await Hive.openBox<dynamic>(
+          boxName,
+          path: path,
+          encryptionCipher: HiveAesCipher(key),
+        );
+      } catch (e) {
+        _logger.warn('Failed opening Hive box $boxName with primary key: $e');
+      }
+    }
+
+    final fallbackBase64 = _prefs.getString('hive_fallback_key');
+    if (fallbackBase64 != null) {
+      try {
+        final fallbackKey = base64.decode(fallbackBase64);
+        return await Hive.openBox<dynamic>(
+          boxName,
+          path: path,
+          encryptionCipher: HiveAesCipher(fallbackKey),
+        );
+      } catch (e) {
+        _logger.warn('Failed opening Hive box $boxName with fallback key: $e');
+      }
+    }
+
+    try {
+      return await Hive.openBox<dynamic>(boxName, path: path);
+    } catch (e) {
+      _logger.warn('Failed opening unencrypted Hive box $boxName: $e');
+    }
+    return null;
   }
 
   Future<void> close() async {

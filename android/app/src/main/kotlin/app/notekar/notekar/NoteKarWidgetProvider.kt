@@ -87,6 +87,7 @@ class NoteKarWidgetProvider : AppWidgetProvider() {
         const val KEY_TOTAL_WASTED = "total_wasted"
         const val KEY_IS_PAUSED = "is_paused"
         const val KEY_PAUSED_AT = "paused_at"
+        const val KEY_AVAILABLE_CATEGORIES = "available_categories"
 
         fun launchIntent(
             context: Context,
