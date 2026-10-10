@@ -290,6 +290,8 @@ class _PersonalProfileSettingsPageState
                                                 fit: BoxFit.cover,
                                                 width: 132,
                                                 height: 132,
+                                                cacheWidth: 264,
+                                                cacheHeight: 264,
                                                 errorBuilder: (_, _, _) =>
                                                     DecoratedBox(
                                                       decoration: BoxDecoration(
@@ -451,6 +453,8 @@ class _PersonalProfileSettingsPageState
                                   fit: BoxFit.cover,
                                   width: 46,
                                   height: 46,
+                                  cacheWidth: 100,
+                                  cacheHeight: 100,
                                   errorBuilder: (_, _, _) => DecoratedBox(
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(

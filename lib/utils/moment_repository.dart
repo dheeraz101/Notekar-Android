@@ -209,7 +209,11 @@ class MomentRepository {
             .findAllSync();
         _cachedMoments = moments;
         _momentIdIndex = {for (final m in moments) m.id: m};
-        SearchIndexService.instance.buildIndex(moments);
+        Future.microtask(() {
+          if (!SearchIndexService.instance.isIndexed) {
+            SearchIndexService.instance.buildIndex(moments);
+          }
+        });
         return moments;
       } catch (e, stack) {
         _logger.error('Failed to load moments from Isar', e, stack);
@@ -224,7 +228,11 @@ class MomentRepository {
         list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
         _cachedMoments = list;
         _momentIdIndex = {for (final m in list) m.id: m};
-        SearchIndexService.instance.buildIndex(list);
+        Future.microtask(() {
+          if (!SearchIndexService.instance.isIndexed) {
+            SearchIndexService.instance.buildIndex(list);
+          }
+        });
         return list;
       } catch (_) {}
     }

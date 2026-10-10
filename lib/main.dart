@@ -101,12 +101,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupErrorHandling();
 
-  final sharedPrefsFuture = SharedPreferences.getInstance();
-  final isarPreloadFuture = _initIsarPreload();
-
-  final results = await Future.wait([sharedPrefsFuture, isarPreloadFuture]);
-
-  final prefs = results[0] as SharedPreferences;
+  final prefs = await SharedPreferences.getInstance();
   CircuitBreakerService.instance.init(prefs);
   unawaited(AdaptiveEngine().initialize(prefs: prefs));
   unawaited(
@@ -128,12 +123,6 @@ void main() async {
       child: NoteKarApp(prefs: prefs),
     ),
   );
-}
-
-Future<void> _initIsarPreload() async {
-  try {
-    await MomentRepository().ensureInitialized();
-  } catch (_) {}
 }
 
 class NoteKarApp extends StatefulWidget {

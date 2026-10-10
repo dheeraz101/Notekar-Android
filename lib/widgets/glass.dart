@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:notekar/models/palette.dart';
+import 'package:notekar/utils/adaptive_engine.dart';
 
 /// An Apple Liquid Glass-inspired surface container.
 ///
@@ -32,6 +33,7 @@ class Glass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveBlur = blur && AdaptiveEngine().supportsBlur;
     final resolvedRadius = borderRadius ?? BorderRadius.circular(radius);
     final isLight = !p.isDark;
     final isAmoled = p.name == 'amoled';
@@ -39,7 +41,7 @@ class Glass extends StatelessWidget {
     // Base surface tint tuned for physical translucency
     final baseSurface = isLight ? const Color(0xFFFFFFFF) : p.surface;
 
-    final effectiveAlpha = blur ? (isLight ? 0.72 : 0.68) : 1.0;
+    final effectiveAlpha = effectiveBlur ? (isLight ? 0.72 : 0.68) : 1.0;
     final surfaceColor = baseSurface.withValues(
       alpha: (opacity * effectiveAlpha).clamp(0.0, 1.0),
     );
@@ -55,7 +57,7 @@ class Glass extends StatelessWidget {
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: resolvedRadius,
-        gradient: (blur && showSpecularHighlight)
+        gradient: (effectiveBlur && showSpecularHighlight)
             ? LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -76,12 +78,12 @@ class Glass extends StatelessWidget {
               )
             : null,
         border: Border.all(
-          color: (blur && showSpecularHighlight)
+          color: (effectiveBlur && showSpecularHighlight)
               ? topHighlightColor
               : p.border.withValues(alpha: opacity * p.border.a),
           width: 0.6,
         ),
-        boxShadow: (isAmoled && !blur)
+        boxShadow: (isAmoled && !effectiveBlur)
             ? null
             : [
                 // Soft diffuse ambient depth shadow
@@ -89,11 +91,11 @@ class Glass extends StatelessWidget {
                   color: Colors.black.withValues(
                     alpha: isLight ? 0.06 : (isAmoled ? 0.25 : 0.35),
                   ),
-                  blurRadius: blur ? 28 : 20,
-                  spreadRadius: blur ? -3 : -2,
+                  blurRadius: effectiveBlur ? 28 : 20,
+                  spreadRadius: effectiveBlur ? -3 : -2,
                   offset: const Offset(0, 8),
                 ),
-                if (!isLight && blur)
+                if (!isLight && effectiveBlur)
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.18),
                     blurRadius: 10,
@@ -108,7 +110,7 @@ class Glass extends StatelessWidget {
       ),
     );
 
-    if (blur) {
+    if (effectiveBlur) {
       content = ClipRRect(
         borderRadius: resolvedRadius,
         child: BackdropFilter(

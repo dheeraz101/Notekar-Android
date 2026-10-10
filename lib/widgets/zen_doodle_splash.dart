@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:notekar/models/palette.dart';
 
-/// Instant, elegant single-screen splash for NoteKar with WhatsApp-style doodle background
-/// and the official NoteKar logo. Instant dismiss on tap or after display duration.
+/// Minimalist, Apple HIG-style launch splash for NoteKar.
+/// Displays a serene adaptive canvas, iconic squircle emblem, and brand typography
+/// with immediate tap-to-dismiss and a silky smooth micro-fade transition.
 class ZenDoodleSplash extends StatefulWidget {
   const ZenDoodleSplash({
     super.key,
     required this.p,
     required this.onComplete,
-    this.displayDuration = const Duration(milliseconds: 900),
+    this.displayDuration = const Duration(milliseconds: 350),
   });
 
   final Palette p;
@@ -25,7 +26,10 @@ class ZenDoodleSplash extends StatefulWidget {
   State<ZenDoodleSplash> createState() => _ZenDoodleSplashState();
 }
 
-class _ZenDoodleSplashState extends State<ZenDoodleSplash> {
+class _ZenDoodleSplashState extends State<ZenDoodleSplash>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeController;
+  late final Animation<double> _opacityAnimation;
   Timer? _timer;
   bool _isExiting = false;
 
@@ -34,27 +38,40 @@ class _ZenDoodleSplashState extends State<ZenDoodleSplash> {
     super.initState();
     ZenDoodleSplash.hasShownThisSession = true;
 
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+    );
+
     _timer = Timer(widget.displayDuration, _finish);
   }
 
-  void _finish() {
+  void _finish({bool immediate = false}) {
     if (_isExiting) return;
     _isExiting = true;
     _timer?.cancel();
-    if (mounted) {
-      widget.onComplete();
+    if (immediate) {
+      if (mounted) widget.onComplete();
+    } else {
+      _fadeController.forward().then((_) {
+        if (mounted) widget.onComplete();
+      });
     }
   }
 
   void _skipInstantly() {
     if (_isExiting) return;
     HapticFeedback.selectionClick();
-    _finish();
+    _finish(immediate: true);
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -65,148 +82,92 @@ class _ZenDoodleSplashState extends State<ZenDoodleSplash> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _skipInstantly,
-      child: ColoredBox(
-        color: const Color(0xFF0C0F14), // Dark WhatsApp-style charcoal base
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // WhatsApp-style Doodle Pattern Background Wallpaper
-            Image.asset(
-              'assets/images/whatsapp_doodle_wallpaper.jpg',
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const SizedBox.shrink(),
-            ),
-
-            // Subtle radial vignette overlay to gently soften the background behind center logo
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.center,
-                  radius: 0.85,
-                  colors: [
-                    const Color(0xFF0C0F14).withValues(alpha: 0.40),
-                    const Color(0xFF0C0F14).withValues(alpha: 0.85),
-                  ],
-                ),
-              ),
-            ),
-
-            // Center: Authentic NoteKar Logo Badge and Brand Typography
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Official NoteKar Squircle Badge with Ambient Glow
-                  Container(
-                    width: 92,
-                    height: 92,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF161A22),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 28,
-                          offset: const Offset(0, 10),
-                        ),
-                        BoxShadow(
-                          color: p.accent.withValues(alpha: 0.20),
-                          blurRadius: 36,
-                          spreadRadius: 2,
-                        ),
-                      ],
+      child: FadeTransition(
+        opacity: _opacityAnimation,
+        child: ColoredBox(
+          color: p.bg,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Clean Apple HIG Squircle Emblem
+                Container(
+                  width: 68,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    color: p.surface2,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: p.border.withValues(alpha: p.isDark ? 0.35 : 0.6),
+                      width: 0.8,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(23),
-                      child: Image.asset(
-                        'app_icons/black.png',
-                        width: 92,
-                        height: 92,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => ClipRRect(
-                          borderRadius: BorderRadius.circular(23),
-                          child: Image.asset(
-                            'icon-maskable-512.png',
-                            width: 92,
-                            height: 92,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Icon(
-                              Icons.hourglass_empty_rounded,
-                              size: 48,
-                              color: p.text,
-                            ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: p.isDark ? 0.30 : 0.07,
+                        ),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(17),
+                    child: Image.asset(
+                      'app_icons/black.png',
+                      width: 68,
+                      height: 68,
+                      cacheWidth: 136,
+                      cacheHeight: 136,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => ClipRRect(
+                        borderRadius: BorderRadius.circular(17),
+                        child: Image.asset(
+                          'icon-maskable-512.png',
+                          width: 68,
+                          height: 68,
+                          cacheWidth: 136,
+                          cacheHeight: 136,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Icon(
+                            Icons.hourglass_empty_rounded,
+                            size: 34,
+                            color: p.text,
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 22),
+                ),
+                const SizedBox(height: 18),
 
-                  // NoteKar Brand Name
-                  const Text(
-                    'NoteKar',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.6,
-                    ),
+                // NoteKar Brand Name
+                Text(
+                  'NoteKar',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: p.text,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.5,
                   ),
-                  const SizedBox(height: 5),
+                ),
+                const SizedBox(height: 5),
 
-                  // Intentionality Subtitle
-                  Text(
-                    'Every moment intentional.',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white.withValues(alpha: 0.65),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.2,
-                    ),
+                // Intentionality Subtitle
+                Text(
+                  'Every moment intentional.',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: p.text3,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.2,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            // Bottom Brand Anchor (WhatsApp / Meta style)
-            Positioned(
-              bottom: 32 + MediaQuery.paddingOf(context).bottom,
-              left: 0,
-              right: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'from',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white.withValues(alpha: 0.40),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'DIGITALSURAKSHA',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

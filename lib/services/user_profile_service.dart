@@ -442,11 +442,16 @@ class UserProfileService extends ChangeNotifier {
     bool showBorder = true,
   }) {
     Widget content;
+    final pixelSize = (size * 2.5).round().clamp(48, 512);
     if (_avatarBytes != null && _avatarBytes!.isNotEmpty) {
       content = Image.memory(
         _avatarBytes!,
         key: ValueKey(_avatarBytes.hashCode),
         fit: BoxFit.cover,
+        width: size,
+        height: size,
+        cacheWidth: pixelSize,
+        cacheHeight: pixelSize,
         alignment: Alignment.center,
         gaplessPlayback: true,
         errorBuilder: (context, error, stackTrace) =>
@@ -462,6 +467,8 @@ class UserProfileService extends ChangeNotifier {
           fit: BoxFit.cover,
           width: size,
           height: size,
+          cacheWidth: pixelSize,
+          cacheHeight: pixelSize,
           errorBuilder: (_, _, _) => DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(

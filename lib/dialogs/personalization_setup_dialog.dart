@@ -197,6 +197,8 @@ class _PersonalizationSetupDialogState
                                               fit: BoxFit.cover,
                                               width: 72,
                                               height: 72,
+                                              cacheWidth: 150,
+                                              cacheHeight: 150,
                                             ),
                                           )
                                         : Center(
@@ -306,6 +308,8 @@ class _PersonalizationSetupDialogState
                               fit: BoxFit.cover,
                               width: 34,
                               height: 34,
+                              cacheWidth: 72,
+                              cacheHeight: 72,
                             ),
                           ),
                         ),

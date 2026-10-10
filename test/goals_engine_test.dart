@@ -281,8 +281,8 @@ void main() {
 
     test('GoalsService matches moments by hashtag #category in tags', () {
       final service = GoalsService.instance;
-      final now = DateTime.now();
-      final nowMs = now.millisecondsSinceEpoch;
+      final refTime = DateTime(2026, 9, 25, 14, 0);
+      final refMs = refTime.millisecondsSinceEpoch;
 
       final goal = Goal(
         id: 'tag_match_goal',
@@ -290,14 +290,14 @@ void main() {
         category: 'Gym',
         targetMinutes: 60,
         timeframe: GoalTimeframe.none,
-        createdAt: nowMs,
+        createdAt: refMs,
       );
 
       // Moment with category General but with tag #gym
       final moments = [
         Moment(
           id: 10,
-          timestamp: nowMs - 1800000,
+          timestamp: refMs - 1800000,
           type: 'in',
           category: 'General',
           tags: const ['gym', 'cardio'],
@@ -305,7 +305,7 @@ void main() {
         ),
         Moment(
           id: 11,
-          timestamp: nowMs,
+          timestamp: refMs,
           type: 'out',
           category: 'General',
           tags: const ['gym', 'cardio'],
@@ -322,8 +322,8 @@ void main() {
       'GoalsService includes moments logged before goal.createdAt for timeframe none',
       () {
         final service = GoalsService.instance;
-        final now = DateTime.now();
-        final nowMs = now.millisecondsSinceEpoch;
+        final refTime = DateTime(2026, 9, 25, 14, 0);
+        final refMs = refTime.millisecondsSinceEpoch;
 
         // Goal created today
         final goal = Goal(
@@ -332,21 +332,21 @@ void main() {
           category: 'Study',
           targetMinutes: 120,
           timeframe: GoalTimeframe.none,
-          createdAt: nowMs,
+          createdAt: refMs,
         );
 
         // Moment logged yesterday (before goal.createdAt)
         final moments = [
           Moment(
             id: 20,
-            timestamp: nowMs - (86400000 + 3600000),
+            timestamp: refMs - (86400000 + 3600000),
             type: 'in',
             category: 'Study',
             date: '2026-09-24',
           ),
           Moment(
             id: 21,
-            timestamp: nowMs - 86400000,
+            timestamp: refMs - 86400000,
             type: 'out',
             category: 'Study',
             date: '2026-09-24',
