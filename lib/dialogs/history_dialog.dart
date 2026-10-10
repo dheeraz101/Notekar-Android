@@ -2248,8 +2248,17 @@ class _HistoryDialogState extends State<HistoryDialog> {
     try {
       NotekarHaptics.success('standard');
 
+      final isRest =
+          (session.category?.toLowerCase() == 'rest' ||
+          session.category?.toLowerCase() == 'recovery' ||
+          session.category?.toLowerCase() == 'rest & recovery' ||
+          session.inMoment.note.toLowerCase().contains('rest') ||
+          session.inMoment.tags.any((t) => t.toLowerCase() == 'rest'));
+
       // Find subsequent session boundaries on the SAME category or goal
-      final sessionCat = session.category?.trim().toLowerCase() ?? '';
+      final sessionCat = isRest
+          ? 'rest'
+          : (session.category?.trim().toLowerCase() ?? '');
       final sessionGoal = session.goalId;
       final laterSessionMoments =
           _entries
@@ -2257,7 +2266,14 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 (m) =>
                     m.timestamp > session.startTimestamp &&
                     (m.type == 'in' || m.type == 'out') &&
-                    ((sessionCat.isNotEmpty &&
+                    ((isRest &&
+                            ((m.category?.toLowerCase() == 'rest') ||
+                                (m.category?.toLowerCase() == 'recovery') ||
+                                m.note.toLowerCase().contains('rest') ||
+                                m.tags.any(
+                                  (t) => t.toLowerCase() == 'rest',
+                                ))) ||
+                        (sessionCat.isNotEmpty &&
                             (m.category?.trim().toLowerCase() ?? '') ==
                                 sessionCat) ||
                         (sessionGoal != null &&
@@ -2309,13 +2325,18 @@ class _HistoryDialogState extends State<HistoryDialog> {
       final maxId = _entries.isEmpty
           ? 0
           : _entries.map((e) => e.id).reduce(math.max);
+      final effectiveCategory = isRest
+          ? 'Rest'
+          : (session.category ?? session.inMoment.category);
       final outEntry = Moment(
         id: math.max(maxId + 1, effectiveTimestamp),
         timestamp: effectiveTimestamp,
         type: 'out',
         date: dateKey(DateTime.fromMillisecondsSinceEpoch(effectiveTimestamp)),
-        note: '',
-        category: session.category,
+        note: isRest ? 'Rest & Recovery' : '',
+        category: effectiveCategory,
+        tags: isRest ? const ['rest'] : session.inMoment.tags,
+        goalId: session.goalId,
       );
       setState(() {
         _entries = [outEntry, ..._entries]

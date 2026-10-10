@@ -25,6 +25,9 @@ class AudioService extends ChangeNotifier {
   Duration _recordingDuration = Duration.zero;
   Duration get recordingDuration => _recordingDuration;
 
+  double _currentRecordingAmplitude = 0.0;
+  double get currentRecordingAmplitude => _currentRecordingAmplitude;
+
   // --- Playback State ---
   String? _currentPlayingPath;
   String? get currentPlayingPath => _currentPlayingPath;
@@ -88,10 +91,30 @@ class AudioService extends ChangeNotifier {
       _isRecording = true;
       _recordingStartTime = DateTime.now();
       _recordingDuration = Duration.zero;
+      _currentRecordingAmplitude = 0.15;
       _recordingTimer?.cancel();
-      _recordingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      _recordingTimer = Timer.periodic(const Duration(milliseconds: 100), (
+        _,
+      ) async {
         if (_recordingStartTime != null) {
           _recordingDuration = DateTime.now().difference(_recordingStartTime!);
+          try {
+            final amp = await _channel.invokeMethod<int>(
+              'getRecordingAmplitude',
+            );
+            if (amp != null && amp > 0) {
+              _currentRecordingAmplitude = (amp / 32767.0 * 2.5).clamp(
+                0.08,
+                1.0,
+              );
+            } else {
+              _currentRecordingAmplitude = (_currentRecordingAmplitude * 0.75)
+                  .clamp(0.06, 1.0);
+            }
+          } catch (_) {
+            final ms = DateTime.now().millisecondsSinceEpoch;
+            _currentRecordingAmplitude = 0.2 + 0.6 * (((ms ~/ 120) % 5) / 5.0);
+          }
           notifyListeners();
         }
       });
@@ -111,10 +134,13 @@ class AudioService extends ChangeNotifier {
       _isRecording = true;
       _recordingStartTime = DateTime.now();
       _recordingDuration = Duration.zero;
+      _currentRecordingAmplitude = 0.25;
       _recordingTimer?.cancel();
-      _recordingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      _recordingTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
         if (_recordingStartTime != null) {
           _recordingDuration = DateTime.now().difference(_recordingStartTime!);
+          final ms = DateTime.now().millisecondsSinceEpoch;
+          _currentRecordingAmplitude = 0.2 + 0.6 * (((ms ~/ 120) % 5) / 5.0);
           notifyListeners();
         }
       });
@@ -130,6 +156,7 @@ class AudioService extends ChangeNotifier {
     _recordingTimer?.cancel();
     _recordingTimer = null;
     _isRecording = false;
+    _currentRecordingAmplitude = 0.0;
 
     try {
       final res = await _channel.invokeMethod<Map<dynamic, dynamic>>(
@@ -157,6 +184,7 @@ class AudioService extends ChangeNotifier {
     _recordingTimer = null;
     _isRecording = false;
     _recordingDuration = Duration.zero;
+    _currentRecordingAmplitude = 0.0;
     try {
       await _channel.invokeMethod('cancelAudioRecording');
     } catch (_) {}

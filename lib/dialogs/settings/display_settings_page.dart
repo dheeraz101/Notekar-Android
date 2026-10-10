@@ -26,6 +26,8 @@ class DisplaySettingsPage extends StatelessWidget {
     required this.homeMenuAnimations,
     required this.enableTranslucency,
     required this.showLastSavedHint,
+    this.showImagesAlways = true,
+    this.onShowImagesAlwaysChanged,
     required this.onThemeChanged,
     required this.onShowSecondsChanged,
     required this.onHighlightSecondsChanged,
@@ -55,6 +57,8 @@ class DisplaySettingsPage extends StatelessWidget {
   final bool homeMenuAnimations;
   final bool enableTranslucency;
   final bool showLastSavedHint;
+  final bool showImagesAlways;
+  final ValueChanged<bool>? onShowImagesAlwaysChanged;
 
   final ValueChanged<String> onThemeChanged;
   final ValueChanged<bool> onShowSecondsChanged;
@@ -438,6 +442,29 @@ class DisplaySettingsPage extends StatelessWidget {
           p: p,
           text:
               'Show descriptive text labels on the primary navigation and action buttons.'
+                  .localized(context),
+        ),
+
+        SettingsGroup(
+          p: p,
+          title: 'Timeline & Media'.localized(context),
+          children: [
+            SettingsSwitchRow(
+              p: p,
+              title: 'Show Images Always'.localized(context),
+              subtitle:
+                  'Keep timeline photos and receipts expanded by default. When disabled, photos appear as compact bars.'
+                      .localized(context),
+              color: p.accent,
+              value: showImagesAlways,
+              onChanged: onShowImagesAlwaysChanged ?? (_) {},
+            ),
+          ],
+        ),
+        SettingsPageDescription(
+          p: p,
+          text:
+              'Configure how images and media attachments appear in the history timeline.'
                   .localized(context),
         ),
 

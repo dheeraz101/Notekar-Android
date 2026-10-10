@@ -126,7 +126,7 @@ out/
 *.swp
 *.swo
 
-# 🤖 AI Assistants, Scratch & Agent Workspace Artifacts
+# 🤖 AI Assistants, Agent Rules, Prompts & Scratch Artifacts
 .artifacts/
 **/.artifacts/
 .artifacts
@@ -134,14 +134,73 @@ out/
 **/.gemini/
 .cursor/
 **/.cursor/
+.cursorrules
+**/.cursorrules
 .windsurf/
 **/.windsurf/
+.windsurfrules
+**/.windsurfrules
 .cline/
 **/.cline/
+.clinerules
+**/.clinerules
+.roo/
+**/.roo/
+.roorules
+**/.roorules
+.continue/
+**/.continue/
+.aider*
+**/.aider*
+.antigravity/
+**/.antigravity/
+.cortex/
+**/.cortex/
+.system_generated/
+**/.system_generated/
+.github/copilot-instructions.md
+**/.github/copilot-instructions.md
+.github/prompts/
+**/.github/prompts/
+agent_notes/
+**/agent_notes/
+agent_workspace/
+**/agent_workspace/
+chat_history/
+**/chat_history/
 scratch/
 **/scratch/
 tmp/
 **/tmp/
+temp/
+**/temp/
+
+# 🔍 Internal Audit, UX Testing & Scratchpad Dumps (Not for Public Distribution)
+BUG_AND_UX_AUDIT_REPORT.md
+**/BUG_AND_UX_AUDIT_REPORT.md
+*AUDIT_REPORT*.md
+**/*AUDIT_REPORT*.md
+*AUDIT*.md
+**/*AUDIT*.md
+*UX_AUDIT*.md
+**/*UX_AUDIT*.md
+*BUG_REPORT*.md
+**/*BUG_REPORT*.md
+*QA_REPORT*.md
+**/*QA_REPORT*.md
+*TEST_REPORT*.md
+**/*TEST_REPORT*.md
+*PERF_REPORT*.md
+**/*PERF_REPORT*.md
+*BENCHMARK*.md
+**/*BENCHMARK*.md
+SCRATCHPAD*.md
+**/SCRATCHPAD*.md
+TODO_INTERNAL*.md
+**/TODO_INTERNAL*.md
+NOTES_INTERNAL*.md
+**/NOTES_INTERNAL*.md
+
 
 # 📝 Personal Docs, Local Notes & Logs
 **/*.docx

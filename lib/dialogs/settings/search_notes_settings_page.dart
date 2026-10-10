@@ -15,6 +15,8 @@ import 'package:notekar/utils/l10n_utils.dart';
 import 'package:notekar/widgets/common_elements.dart';
 import 'package:notekar/widgets/ios_emoji_text.dart';
 import 'package:notekar/widgets/pressable_scale.dart';
+import 'package:notekar/widgets/timeline_media_attachment_card.dart';
+import 'package:notekar/widgets/timeline_voice_player_pill.dart';
 
 class SearchNotesSettingsPage {
   static List<Widget> buildSlivers({
@@ -70,7 +72,9 @@ class SearchNotesSettingsPage {
         )
         .where(
           (e) =>
-              e.note.trim().isNotEmpty &&
+              (e.note.trim().isNotEmpty ||
+                  e.imagePath != null ||
+                  e.voicePath != null) &&
               !e.note.contains('God Mode Unlocked') &&
               !e.note.contains('#godmode'),
         )
@@ -312,55 +316,24 @@ class SearchNotesSettingsPage {
               if (index >= notes.length) return null;
               final entry = notes[index];
               final session = sessionLookup[entry.id];
-              final isTwoWay =
-                  entry.type == 'in' || entry.type == 'out' || session != null;
-
               final startTs = session != null
                   ? session.startTimestamp
                   : (entry.type == 'in' ? entry.timestamp : null);
-              final endTs = session != null
-                  ? session.outMoment?.timestamp
-                  : (entry.type == 'out' ? entry.timestamp : null);
-              final isOngoing = session != null
-                  ? session.isOngoing
-                  : (entry.type == 'in');
-              final duration = session != null
-                  ? session.duration
-                  : (startTs != null
-                        ? Duration(
-                            milliseconds:
-                                DateTime.now().millisecondsSinceEpoch - startTs,
-                          )
-                        : Duration.zero);
-
               final isSelected = selectedMoments.any((m) => m.id == entry.id);
-              final meta = getCategoryMeta(
-                entry.category ?? (isTwoWay ? 'two-way' : 'single'),
-                p,
-              );
-              final Color? catColor = entry.category != null
-                  ? meta.color
-                  : null;
-              final Color cardBg = (rainbowCards && catColor != null)
-                  ? Color.alphaBlend(
-                      catColor.withValues(alpha: 0.12),
-                      p.surface2,
-                    )
-                  : p.surface2;
-              final Color cardBorder = isSelected
-                  ? p.accent
-                  : (rainbowCards && catColor != null)
-                  ? Color.alphaBlend(
-                      catColor.withValues(alpha: 0.35),
-                      p.border.withValues(alpha: 0.6),
-                    )
-                  : p.border.withValues(alpha: 0.6);
 
               return Padding(
                 padding: EdgeInsets.only(
                   bottom: historyDensity == 'compact' ? 10 : 14,
                 ),
-                child: PressableScale(
+                child: _SearchNoteCard(
+                  key: ValueKey('search-note-${entry.id}'),
+                  entry: entry,
+                  session: session,
+                  p: p,
+                  q: q,
+                  historyDensity: historyDensity,
+                  rainbowCards: rainbowCards,
+                  isSelected: isSelected,
                   onTap: () {
                     if (selectedMoments.isNotEmpty) {
                       onToggleSelectMoment?.call(entry);
@@ -384,311 +357,8 @@ class SearchNotesSettingsPage {
                     HapticFeedback.heavyImpact();
                     onToggleSelectMoment?.call(entry);
                   },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(spacing16),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: cardBorder,
-                        width: isSelected ? 1.5 : 0.8,
-                      ),
-                      boxShadow: p.name == 'amoled'
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.04),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 20% Top Metadata Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Mode Pill
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3.5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        (isTwoWay
-                                                ? p.accent
-                                                : momentColor(p, 'single'))
-                                            .withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color:
-                                          (isTwoWay
-                                                  ? p.accent
-                                                  : momentColor(p, 'single'))
-                                              .withValues(alpha: 0.25),
-                                      width: 0.7,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        isTwoWay
-                                            ? CupertinoIcons.arrow_2_circlepath
-                                            : CupertinoIcons
-                                                  .hand_point_right_fill,
-                                        size: 11,
-                                        color: isTwoWay
-                                            ? p.accent
-                                            : momentColor(p, 'single'),
-                                      ),
-                                      const SizedBox(width: 4.5),
-                                      Text(
-                                        isTwoWay ? '2-WAY' : 'SINGLE',
-                                        style: TextStyle(
-                                          color: isTwoWay
-                                              ? p.accent
-                                              : momentColor(p, 'single'),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.6,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (entry.note.length > 500) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                      vertical: 3.5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: p.accent.withValues(alpha: 0.10),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: p.accent.withValues(alpha: 0.25),
-                                        width: 0.7,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          CupertinoIcons.doc_text_fill,
-                                          size: 10,
-                                          color: p.accent,
-                                        ),
-                                        const SizedBox(width: 3.5),
-                                        Text(
-                                          '${entry.note.trim().split(RegExp(r'\s+')).length} words',
-                                          style: TextStyle(
-                                            color: p.accent,
-                                            fontSize: 9.5,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                            // Date & Compare Action
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (onEditNote != null)
-                                  PressableScale(
-                                    onTap: () {
-                                      HapticFeedback.lightImpact();
-                                      onEditNote(entry);
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: Icon(
-                                        CupertinoIcons.pencil,
-                                        size: 15,
-                                        color: p.accent,
-                                      ),
-                                    ),
-                                  ),
-                                PressableScale(
-                                  onTap: () {
-                                    HapticFeedback.selectionClick();
-                                    onToggleSelectMoment?.call(entry);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 6),
-                                    child: Icon(
-                                      isSelected
-                                          ? CupertinoIcons.checkmark_circle_fill
-                                          : CupertinoIcons
-                                                .arrow_right_arrow_left,
-                                      size: 16,
-                                      color: isSelected ? p.accent : p.text3,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  datePretty(startTs ?? entry.timestamp),
-                                  style: TextStyle(
-                                    color: p.text3,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Sub-row: Times & Counter / Duration
-                        if (isTwoWay) ...[
-                          Row(
-                            children: [
-                              // IN node
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: p.green,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                startTs != null
-                                    ? 'IN ${timeOnly(startTs)}'
-                                    : 'IN —',
-                                style: TextStyle(
-                                  color: p.text2,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                CupertinoIcons.arrow_right,
-                                size: 11,
-                                color: p.text3,
-                              ),
-                              const SizedBox(width: 8),
-                              // OUT node
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: isOngoing ? p.green : p.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                isOngoing
-                                    ? 'ONGOING'.localized(context)
-                                    : (endTs != null
-                                          ? 'OUT ${timeOnly(endTs)}'
-                                          : 'OUT —'),
-                                style: TextStyle(
-                                  color: isOngoing ? p.green : p.text2,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                              const Spacer(),
-                              // Duration count pill
-                              if (duration > Duration.zero || isOngoing)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 2.5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: (isOngoing ? p.green : p.accent)
-                                        .withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    _formatDuration(duration),
-                                    style: TextStyle(
-                                      color: isOngoing ? p.green : p.accent,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ] else ...[
-                          Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: momentColor(p, 'single'),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                timeOnly(entry.timestamp),
-                                style: TextStyle(
-                                  color: p.text2,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-
-                        const SizedBox(height: 10),
-                        Container(
-                          height: 0.6,
-                          color: p.border.withValues(alpha: 0.35),
-                        ),
-                        const SizedBox(height: 10),
-
-                        // 80% Hero Content: Full Note
-                        IosEmojiText(
-                          entry.note,
-                          style: TextStyle(
-                            color: p.text,
-                            fontSize: 15,
-                            height: 1.45,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  onEditNote: onEditNote,
+                  onToggleSelectMoment: onToggleSelectMoment,
                 ),
               );
             }, childCount: notes.length),
@@ -710,5 +380,409 @@ class SearchNotesSettingsPage {
     } else {
       return '${mins}m';
     }
+  }
+}
+
+class _SearchNoteCard extends StatefulWidget {
+  const _SearchNoteCard({
+    super.key,
+    required this.entry,
+    required this.session,
+    required this.p,
+    required this.q,
+    required this.historyDensity,
+    required this.rainbowCards,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
+    this.onEditNote,
+    this.onToggleSelectMoment,
+  });
+
+  final Moment entry;
+  final TimelineSessionItem? session;
+  final Palette p;
+  final String q;
+  final String historyDensity;
+  final bool rainbowCards;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  final ValueChanged<Moment>? onEditNote;
+  final ValueChanged<Moment>? onToggleSelectMoment;
+
+  @override
+  State<_SearchNoteCard> createState() => _SearchNoteCardState();
+}
+
+class _SearchNoteCardState extends State<_SearchNoteCard> {
+  bool _isImageCollapsed = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final entry = widget.entry;
+    final session = widget.session;
+    final p = widget.p;
+    final isTwoWay =
+        entry.type == 'in' || entry.type == 'out' || session != null;
+
+    final startTs = session != null
+        ? session.startTimestamp
+        : (entry.type == 'in' ? entry.timestamp : null);
+    final endTs = session != null
+        ? session.outMoment?.timestamp
+        : (entry.type == 'out' ? entry.timestamp : null);
+    final isOngoing = session != null
+        ? session.isOngoing
+        : (entry.type == 'in');
+    final duration = session != null
+        ? session.duration
+        : (startTs != null
+              ? Duration(
+                  milliseconds: DateTime.now().millisecondsSinceEpoch - startTs,
+                )
+              : Duration.zero);
+
+    final meta = getCategoryMeta(
+      entry.category ?? (isTwoWay ? 'two-way' : 'single'),
+      p,
+    );
+    final Color? catColor = entry.category != null ? meta.color : null;
+    final Color cardBg = (widget.rainbowCards && catColor != null)
+        ? Color.alphaBlend(catColor.withValues(alpha: 0.12), p.surface2)
+        : p.surface2;
+    final Color cardBorder = widget.isSelected
+        ? p.accent
+        : (widget.rainbowCards && catColor != null)
+        ? Color.alphaBlend(
+            catColor.withValues(alpha: 0.35),
+            p.border.withValues(alpha: 0.6),
+          )
+        : p.border.withValues(alpha: 0.6);
+
+    final effectiveVoicePath = entry.voicePath ?? session?.voicePath;
+    final effectiveVoiceDuration =
+        entry.voiceDurationMs ?? session?.voiceDurationMs;
+    final effectiveImagePath = entry.imagePath ?? session?.imagePath;
+
+    return PressableScale(
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(spacing16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: cardBorder,
+            width: widget.isSelected ? 1.5 : 0.8,
+          ),
+          boxShadow: p.name == 'amoled'
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Metadata Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Mode Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (isTwoWay ? p.accent : momentColor(p, 'single'))
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color:
+                              (isTwoWay ? p.accent : momentColor(p, 'single'))
+                                  .withValues(alpha: 0.25),
+                          width: 0.7,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isTwoWay
+                                ? CupertinoIcons.arrow_2_circlepath
+                                : CupertinoIcons.hand_point_right_fill,
+                            size: 11,
+                            color: isTwoWay
+                                ? p.accent
+                                : momentColor(p, 'single'),
+                          ),
+                          const SizedBox(width: 4.5),
+                          Text(
+                            isTwoWay ? '2-WAY' : 'SINGLE',
+                            style: TextStyle(
+                              color: isTwoWay
+                                  ? p.accent
+                                  : momentColor(p, 'single'),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (entry.note.length > 500) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.accent.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: p.accent.withValues(alpha: 0.25),
+                            width: 0.7,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.doc_text_fill,
+                              size: 10,
+                              color: p.accent,
+                            ),
+                            const SizedBox(width: 3.5),
+                            Text(
+                              '${entry.note.trim().split(RegExp(r'\s+')).length} words',
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                // Date & Compare Action
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.onEditNote != null)
+                      PressableScale(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          widget.onEditNote!(entry);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: p.accent.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: p.accent.withValues(alpha: 0.3),
+                              width: 0.7,
+                            ),
+                          ),
+                          child: Text(
+                            'Edit'.localized(context),
+                            style: TextStyle(
+                              color: p.accent,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        widget.onToggleSelectMoment?.call(entry);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Icon(
+                          widget.isSelected
+                              ? CupertinoIcons.checkmark_circle_fill
+                              : CupertinoIcons.arrow_right_arrow_left,
+                          size: 16,
+                          color: widget.isSelected ? p.accent : p.text3,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      datePretty(startTs ?? entry.timestamp),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Sub-row: Times & Counter / Duration
+            if (isTwoWay) ...[
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: p.green,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    startTs != null ? 'IN ${timeOnly(startTs)}' : 'IN —',
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(CupertinoIcons.arrow_right, size: 11, color: p.text3),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: isOngoing ? p.green : p.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    isOngoing
+                        ? 'ONGOING'.localized(context)
+                        : (endTs != null ? 'OUT ${timeOnly(endTs)}' : 'OUT —'),
+                    style: TextStyle(
+                      color: isOngoing ? p.green : p.text2,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  const Spacer(),
+                  if (duration > Duration.zero || isOngoing)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (isOngoing ? p.green : p.accent).withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        SearchNotesSettingsPage._formatDuration(duration),
+                        style: TextStyle(
+                          color: isOngoing ? p.green : p.accent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ] else ...[
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: momentColor(p, 'single'),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    timeOnly(entry.timestamp),
+                    style: TextStyle(
+                      color: p.text2,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            if (entry.note.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(height: 0.6, color: p.border.withValues(alpha: 0.35)),
+              const SizedBox(height: 10),
+              IosEmojiText(
+                entry.note,
+                style: TextStyle(
+                  color: p.text,
+                  fontSize: 15,
+                  height: 1.45,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
+
+            // Dedicated Full-Width Voice Player Pill
+            if (effectiveVoicePath != null) ...[
+              const SizedBox(height: 8),
+              TimelineVoicePlayerPill(
+                p: p,
+                voicePath: effectiveVoicePath,
+                durationMs: effectiveVoiceDuration ?? 0,
+              ),
+            ],
+
+            // Dedicated Full-Width Media Attachment Card (Collapsed by default)
+            if (effectiveImagePath != null) ...[
+              const SizedBox(height: 8),
+              TimelineMediaAttachmentCard(
+                p: p,
+                imagePath: effectiveImagePath,
+                isCollapsed: _isImageCollapsed,
+                onToggleCollapse: () =>
+                    setState(() => _isImageCollapsed = !_isImageCollapsed),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

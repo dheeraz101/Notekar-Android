@@ -242,6 +242,15 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "getRecordingAmplitude" -> {
+                    try {
+                        val amp = activeMediaRecorder?.maxAmplitude ?: 0
+                        result.success(amp)
+                    } catch (e: Exception) {
+                        result.success(0)
+                    }
+                }
+
                 "playAudio" -> {
                     try {
                         val pathArg = call.argument<String>("path") ?: ""
@@ -328,8 +337,12 @@ class MainActivity : FlutterActivity() {
                     try {
                         val speedArg = call.argument<Double>("speed") ?: 1.0
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            activeMediaPlayer?.let {
-                                it.playbackParams = it.playbackParams.setSpeed(speedArg.toFloat())
+                            activeMediaPlayer?.let { player ->
+                                val wasPlaying = try { player.isPlaying } catch (_: Exception) { false }
+                                player.playbackParams = player.playbackParams.setSpeed(speedArg.toFloat())
+                                if (!wasPlaying) {
+                                    try { player.pause() } catch (_: Exception) {}
+                                }
                             }
                         }
                         result.success(true)

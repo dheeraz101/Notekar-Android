@@ -2625,6 +2625,16 @@ $cleanStack
                                 setState(() => showLastSavedHint = val);
                                 widget.onShowLastSavedHint(val);
                               },
+                              showImagesAlways: _showImagesAlways,
+                              onShowImagesAlwaysChanged: (val) async {
+                                setState(() => _showImagesAlways = val);
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setBool(
+                                  'history_show_images_always',
+                                  val,
+                                );
+                              },
                             ),
                           ),
                         if (show('Accent Color'))

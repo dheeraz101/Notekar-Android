@@ -200,7 +200,7 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
         title: 'Show Images Always',
         subtitle:
             'Keep photos and receipt attachments expanded in history timeline',
-        category: 'History Controls',
+        category: 'Display',
         icon: CupertinoIcons.photo,
         keywords: [
           'show images always',
@@ -2769,6 +2769,10 @@ extension _SettingsDialogSearchExtension on _SettingsDialogState {
     }
     if (result.title == 'Life Audit') {
       _openCategory('Life Audit', parent: 'Dashboard');
+      return;
+    }
+    if (result.title == 'Show Images Always') {
+      _openCategory('Display', parent: 'Personalization');
       return;
     }
     if (result.title == 'Backup & Export' ||

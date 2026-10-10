@@ -113,6 +113,18 @@ class SearchIndexService {
         _tokenInvertedIndex.putIfAbsent(clean, () => <int>{}).add(id);
       }
     }
+
+    // 5. Index multimodal tokens if voice or photo is present
+    if (moment.voicePath != null) {
+      for (final t in ['voice', 'audio', 'memo', 'recording']) {
+        _tokenInvertedIndex.putIfAbsent(t, () => <int>{}).add(id);
+      }
+    }
+    if (moment.imagePath != null) {
+      for (final t in ['photo', 'image', 'picture', 'attachment']) {
+        _tokenInvertedIndex.putIfAbsent(t, () => <int>{}).add(id);
+      }
+    }
   }
 
   /// Unindex a single moment (e.g. on deletion or before updating).

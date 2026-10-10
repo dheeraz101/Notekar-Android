@@ -526,26 +526,6 @@ class TimelineSessionCard extends StatelessWidget {
                                               }).toList(),
                                             ),
                                           ],
-                                          if (noteMoment.voicePath != null) ...[
-                                            const SizedBox(height: 4),
-                                            TimelineVoicePlayerPill(
-                                              p: p,
-                                              voicePath: noteMoment.voicePath!,
-                                              durationMs:
-                                                  noteMoment.voiceDurationMs ??
-                                                  0,
-                                            ),
-                                          ],
-                                          if (noteMoment.imagePath != null) ...[
-                                            const SizedBox(height: 5),
-                                            TimelineMediaAttachmentCard(
-                                              p: p,
-                                              imagePath: noteMoment.imagePath!,
-                                              isCollapsed: isImageCollapsed,
-                                              onToggleCollapse:
-                                                  onToggleImageCollapse,
-                                            ),
-                                          ],
                                         ],
                                       );
                                     },
@@ -574,6 +554,29 @@ class TimelineSessionCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                  ),
+                ],
+
+                // Dedicated Full-Width Voice Notes Player
+                if (noteMoment.voicePath != null) ...[
+                  SizedBox(height: compact ? 5 : 7),
+                  TimelineVoicePlayerPill(
+                    p: p,
+                    voicePath: noteMoment.voicePath!,
+                    durationMs: noteMoment.voiceDurationMs ?? 0,
+                    compact: compact,
+                  ),
+                ],
+
+                // Dedicated Full-Width Photo Attachment Card
+                if (noteMoment.imagePath != null) ...[
+                  SizedBox(height: compact ? 5 : 7),
+                  TimelineMediaAttachmentCard(
+                    p: p,
+                    imagePath: noteMoment.imagePath!,
+                    isCollapsed: isImageCollapsed,
+                    onToggleCollapse: onToggleImageCollapse,
+                    compact: compact,
                   ),
                 ],
               ],

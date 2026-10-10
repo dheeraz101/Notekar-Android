@@ -11,12 +11,12 @@ a high-performance **Dynamic Translation Dictionary Engine** (`lib/utils/l10n_ut
 | Language      | Locale Code | Native Name | Status |
 |:--------------|:-----------:|:------------|:------:|
 | 🇬🇧 English  |    `en`     | English     | ✅ Live |
-| 🇫🇷 French   |    `fr`     | Français    | ✅ Live |
-| 🇪🇸 Spanish  |    `es`     | Español     | ✅ Live |
-| 🇮🇳 Hindi    |    `hi`     | हिन्दी      | ✅ Live |
-| 🇩🇪 German   |    `de`     | Deutsch     | ✅ Live |
-| 🇯🇵 Japanese |    `ja`     | 日本語         | ✅ Live |
-| 🇷🇺 Russian  |    `ru`     | Русский     | ✅ Live |
+| 🇫🇷 French   |    `fr`     | Français    | 🟡 Updating |
+| 🇪🇸 Spanish  |    `es`     | Español     | 🟡 Updating |
+| 🇮🇳 Hindi    |    `hi`     | हिन्दी      | 🟡 Updating |
+| 🇩🇪 German   |    `de`     | Deutsch     | 🟡 Updating |
+| 🇯🇵 Japanese |    `ja`     | 日本語         | 🟡 Updating |
+| 🇷🇺 Russian  |    `ru`     | Русский     | 🟡 Updating |
 
 ---
 

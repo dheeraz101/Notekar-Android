@@ -24,7 +24,8 @@ class TimelineSessionItem extends TimelineItem {
   bool get isOngoing {
     final override = _isOngoingOverride;
     if (override != null) return override;
-    return outMoment == null;
+    if (outMoment != null) return false;
+    return inMoment.date == dateKey(DateTime.now());
   }
 
   @override
@@ -44,7 +45,20 @@ class TimelineSessionItem extends TimelineItem {
       final diff = DateTime.now().millisecondsSinceEpoch - start;
       return Duration(milliseconds: diff > 0 ? diff : 0);
     }
-    return Duration.zero;
+    final inDt = DateTime.fromMillisecondsSinceEpoch(start);
+    final endOfDay = DateTime(
+      inDt.year,
+      inDt.month,
+      inDt.day,
+      23,
+      59,
+      59,
+    ).millisecondsSinceEpoch;
+    final capped = math.min(
+      endOfDay - start,
+      const Duration(hours: 2).inMilliseconds,
+    );
+    return Duration(milliseconds: capped > 0 ? capped : 0);
   }
 
   @override
@@ -82,17 +96,32 @@ class TimelineSessionItem extends TimelineItem {
   @override
   String? get category {
     if (inMoment.category != null && inMoment.category!.trim().isNotEmpty) {
-      return inMoment.category!.trim();
+      final c = inMoment.category!.trim();
+      if (c.toLowerCase() == 'rest & recovery' ||
+          c.toLowerCase() == 'recovery') {
+        return 'Rest';
+      }
+      return c;
     }
     if (outMoment != null &&
         outMoment!.category != null &&
         outMoment!.category!.trim().isNotEmpty) {
-      return outMoment!.category!.trim();
+      final c = outMoment!.category!.trim();
+      if (c.toLowerCase() == 'rest & recovery' ||
+          c.toLowerCase() == 'recovery') {
+        return 'Rest';
+      }
+      return c;
     }
     final inTag = extractHashtagCategory(inMoment.note);
     if (inTag != null) return inTag;
     if (outMoment != null) {
-      return extractHashtagCategory(outMoment!.note);
+      final outTag = extractHashtagCategory(outMoment!.note);
+      if (outTag != null) return outTag;
+    }
+    if (inMoment.note.toLowerCase().contains('rest & recovery') ||
+        inMoment.tags.contains('rest')) {
+      return 'Rest';
     }
     return null;
   }
@@ -262,8 +291,32 @@ List<TimelineDaySection> buildTimelineDaySections(
   final List<TimelineItem> allItems = [];
   final Map<String, Moment> activeInTracks = {};
 
+  String canonicalCategory(Moment m) {
+    final cat = m.category?.trim().toLowerCase() ?? '';
+    if (cat == 'rest' ||
+        cat == 'recovery' ||
+        cat == 'rest & recovery' ||
+        cat.contains('rest & recovery')) {
+      return 'rest';
+    }
+    if (m.tags.any((t) {
+      final lower = t.toLowerCase();
+      return lower == 'rest' || lower == '#rest' || lower == 'recovery';
+    })) {
+      return 'rest';
+    }
+    final note = m.note.trim().toLowerCase();
+    if (note.contains('rest & recovery') || note == 'rest' || note == '#rest') {
+      return 'rest';
+    }
+    if (cat.isNotEmpty) return cat;
+    final tagCat = extractHashtagCategory(m.note);
+    if (tagCat != null) return tagCat.trim().toLowerCase();
+    return '';
+  }
+
   String trackKey(Moment m) =>
-      '${m.category?.trim().toLowerCase() ?? ''}|${m.effectiveGoalId ?? ''}';
+      '${canonicalCategory(m)}|${m.effectiveGoalId ?? ''}';
 
   for (final entry in byTimestamp.entries) {
     final momentsAtT = entry.value;
@@ -287,21 +340,27 @@ List<TimelineDaySection> buildTimelineDaySections(
           TimelineSessionItem(
             inMoment: activeInTracks.remove(exactKey)!,
             outMoment: outMoment,
+            isOngoing: false,
           ),
         );
         continue;
       }
 
       // Check same category track
-      final cat = outMoment.category?.trim().toLowerCase() ?? '';
+      final cat = canonicalCategory(outMoment);
       final matchingCatKey = activeInTracks.keys
-          .where((k) => k.startsWith('$cat|'))
+          .where(
+            (k) =>
+                k.startsWith('$cat|') ||
+                (cat.isNotEmpty && k.split('|').first == cat),
+          )
           .firstOrNull;
       if (matchingCatKey != null) {
         allItems.add(
           TimelineSessionItem(
             inMoment: activeInTracks.remove(matchingCatKey)!,
             outMoment: outMoment,
+            isOngoing: false,
           ),
         );
         continue;
@@ -314,6 +373,7 @@ List<TimelineDaySection> buildTimelineDaySections(
           TimelineSessionItem(
             inMoment: activeInTracks.remove(oldestKey)!,
             outMoment: outMoment,
+            isOngoing: false,
           ),
         );
         continue;
@@ -330,6 +390,7 @@ List<TimelineDaySection> buildTimelineDaySections(
           TimelineSessionItem(
             inMoment: inMoment,
             outMoment: remainingOuts.removeAt(0),
+            isOngoing: false,
           ),
         );
         continue;
@@ -342,6 +403,7 @@ List<TimelineDaySection> buildTimelineDaySections(
           TimelineSessionItem(
             inMoment: activeInTracks.remove(exactKey)!,
             outMoment: null,
+            isOngoing: false,
           ),
         );
       }
@@ -354,9 +416,17 @@ List<TimelineDaySection> buildTimelineDaySections(
     }
   }
 
-  // 5. Any remaining active IN moments are genuinely ongoing live sessions
+  // 5. Any remaining active IN moments: only mark ongoing if logged today
+  final todayStr = dateKey(DateTime.now());
   for (final inMoment in activeInTracks.values) {
-    allItems.add(TimelineSessionItem(inMoment: inMoment, outMoment: null));
+    final isActuallyToday = inMoment.date == todayStr;
+    allItems.add(
+      TimelineSessionItem(
+        inMoment: inMoment,
+        outMoment: null,
+        isOngoing: isActuallyToday,
+      ),
+    );
   }
 
   // 2. Group timeline items by day based on the item's anchor date

@@ -1143,190 +1143,198 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: borderColor, width: borderWidth),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isGodMode)
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFD700),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'D',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
+                    Row(
+                      children: [
+                        if (isGodMode)
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFD700),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              'D',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          )
+                        else
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: widget.p.accent.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              meta.icon,
+                              size: 16,
+                              color: widget.p.accent,
+                            ),
                           ),
-                        ),
-                      )
-                    else
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: widget.p.accent.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          meta.icon,
-                          size: 16,
-                          color: widget.p.accent,
-                        ),
-                      ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: isGodMode
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  timeOnly(it.primaryTimestamp),
-                                  style: TextStyle(
-                                    color: widget.p.text,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Access granted',
-                                  style: TextStyle(
-                                    color: widget.p.text2,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  timeOnly(it.primaryTimestamp),
-                                  style: TextStyle(
-                                    color: widget.p.text,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                                if (it.note.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  PressableScale(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      NotePreviewSheet.show(
-                                        context,
-                                        p: widget.p,
-                                        note: it.note,
-                                        title:
-                                            it.category ??
-                                            'Moment Note'.localized(context),
-                                        category: it.category,
-                                        dateStr: datePretty(
-                                          it.primaryTimestamp,
-                                        ),
-                                        onEdit: widget.onEditNote != null
-                                            ? () =>
-                                                  widget.onEditNote!(it.moment)
-                                            : null,
-                                      );
-                                    },
-                                    child: IosEmojiText(
-                                      it.note,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: isGodMode
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      timeOnly(it.primaryTimestamp),
+                                      style: TextStyle(
+                                        color: widget.p.text,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Access granted',
                                       style: TextStyle(
                                         color: widget.p.text2,
                                         fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  ),
-                                ],
-                                if (it.moment.voicePath != null) ...[
-                                  const SizedBox(height: 4),
-                                  TimelineVoicePlayerPill(
-                                    p: widget.p,
-                                    voicePath: it.moment.voicePath!,
-                                    durationMs: it.moment.voiceDurationMs ?? 0,
-                                  ),
-                                ],
-                                if (it.moment.imagePath != null) ...[
-                                  const SizedBox(height: 5),
-                                  TimelineMediaAttachmentCard(
-                                    p: widget.p,
-                                    imagePath: it.moment.imagePath!,
-                                    isCollapsed: _isMomentImageCollapsed(
-                                      it.moment.id,
+                                  ],
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      timeOnly(it.primaryTimestamp),
+                                      style: TextStyle(
+                                        color: widget.p.text,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
                                     ),
-                                    onToggleCollapse: () =>
-                                        _toggleMomentImageCollapse(
-                                          it.moment.id,
+                                    if (it.note.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      PressableScale(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          NotePreviewSheet.show(
+                                            context,
+                                            p: widget.p,
+                                            note: it.note,
+                                            title:
+                                                it.category ??
+                                                'Moment Note'.localized(
+                                                  context,
+                                                ),
+                                            category: it.category,
+                                            dateStr: datePretty(
+                                              it.primaryTimestamp,
+                                            ),
+                                            onEdit: widget.onEditNote != null
+                                                ? () => widget.onEditNote!(
+                                                    it.moment,
+                                                  )
+                                                : null,
+                                          );
+                                        },
+                                        child: IosEmojiText(
+                                          it.note,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: widget.p.text2,
+                                            fontSize: 11.5,
+                                          ),
                                         ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                        ),
+                        if (!isGodMode) ...[
+                          () {
+                            final matchingGoal = _findMatchingGoal(it);
+                            if (matchingGoal == null) {
+                              return const SizedBox.shrink();
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6.5,
+                                  vertical: 2.5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.p.accent.withValues(
+                                    alpha: 0.14,
                                   ),
-                                ],
-                              ],
-                            ),
-                    ),
-                    if (!isGodMode) ...[
-                      () {
-                        final matchingGoal = _findMatchingGoal(it);
-                        if (matchingGoal == null) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6.5,
-                              vertical: 2.5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.p.accent.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: widget.p.accent.withValues(alpha: 0.35),
-                                width: 0.6,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: widget.p.accent.withValues(
+                                      alpha: 0.35,
+                                    ),
+                                    width: 0.6,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.flag_rounded,
+                                      size: 10,
+                                      color: widget.p.accent,
+                                    ),
+                                    const SizedBox(width: 3.5),
+                                    Text(
+                                      matchingGoal.title,
+                                      style: TextStyle(
+                                        color: widget.p.accent,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.flag_rounded,
-                                  size: 10,
-                                  color: widget.p.accent,
-                                ),
-                                const SizedBox(width: 3.5),
-                                Text(
-                                  matchingGoal.title,
-                                  style: TextStyle(
-                                    color: widget.p.accent,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
+                            );
+                          }(),
+                          Text(
+                            it.type.toUpperCase(),
+                            style: TextStyle(
+                              color: widget.p.text3,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        );
-                      }(),
-                      Text(
-                        it.type.toUpperCase(),
-                        style: TextStyle(
-                          color: widget.p.text3,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        ],
+                      ],
+                    ),
+                    if (it.moment.voicePath != null) ...[
+                      const SizedBox(height: 6),
+                      TimelineVoicePlayerPill(
+                        p: widget.p,
+                        voicePath: it.moment.voicePath!,
+                        durationMs: it.moment.voiceDurationMs ?? 0,
+                      ),
+                    ],
+                    if (it.moment.imagePath != null) ...[
+                      const SizedBox(height: 6),
+                      TimelineMediaAttachmentCard(
+                        p: widget.p,
+                        imagePath: it.moment.imagePath!,
+                        isCollapsed: _isMomentImageCollapsed(it.moment.id),
+                        onToggleCollapse: () =>
+                            _toggleMomentImageCollapse(it.moment.id),
                       ),
                     ],
                   ],

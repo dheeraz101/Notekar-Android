@@ -134,7 +134,7 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
                         ? CupertinoIcons.pause_fill
                         : CupertinoIcons.play_fill,
                     size: isCompact ? 13 : 15,
-                    color: Colors.white,
+                    color: p.onAccent,
                   ),
                 ),
               ),
@@ -143,56 +143,71 @@ class _TimelineVoicePlayerPillState extends State<TimelineVoicePlayerPill> {
 
             // Waveform Scrubber
             Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragUpdate: (details) {
-                  final box = context.findRenderObject() as RenderBox?;
-                  if (box != null && total > Duration.zero) {
-                    final localX = details.localPosition.dx;
-                    final ratio = (localX / box.size.width).clamp(0.0, 1.0);
-                    final targetMs = (ratio * total.inMilliseconds).toInt();
-                    _audioService.seek(Duration(milliseconds: targetMs));
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final waveformWidth = constraints.maxWidth;
+                  void seekTo(Offset localPosition) {
+                    if (waveformWidth > 0 && total > Duration.zero) {
+                      final ratio = (localPosition.dx / waveformWidth).clamp(
+                        0.0,
+                        1.0,
+                      );
+                      final targetMs = (ratio * total.inMilliseconds).toInt();
+                      _audioService.seek(Duration(milliseconds: targetMs));
+                    }
                   }
-                },
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    const barCount = 20;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: List.generate(barCount, (index) {
-                        final barRatio = (index + 1) / barCount;
-                        final isFilled = barRatio <= progress;
-                        final heights = [
-                          10.0,
-                          16.0,
-                          22.0,
-                          14.0,
-                          18.0,
-                          24.0,
-                          12.0,
-                          20.0,
-                          16.0,
-                          22.0,
-                        ];
-                        final h =
-                            heights[index % heights.length] *
-                            (isCompact ? 0.72 : 0.88);
 
-                        return Container(
-                          width: 2.6,
-                          height: h,
-                          decoration: BoxDecoration(
-                            color: isFilled
-                                ? p.accent
-                                : p.text3.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        );
-                      }),
-                    );
-                  },
-                ),
+                  const barCount = 20;
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: (details) => seekTo(details.localPosition),
+                    onHorizontalDragStart: (details) =>
+                        seekTo(details.localPosition),
+                    onHorizontalDragUpdate: (details) =>
+                        seekTo(details.localPosition),
+                    child: Container(
+                      color: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: List.generate(barCount, (index) {
+                          final barThreshold = index / barCount;
+                          final isFilled =
+                              progress > 0.0 &&
+                              (progress >= barThreshold ||
+                                  (index == barCount - 1 && progress >= 0.95));
+                          final heights = [
+                            10.0,
+                            16.0,
+                            22.0,
+                            14.0,
+                            18.0,
+                            24.0,
+                            12.0,
+                            20.0,
+                            16.0,
+                            22.0,
+                          ];
+                          final h =
+                              heights[index % heights.length] *
+                              (isCompact ? 0.72 : 0.88);
+
+                          return Container(
+                            width: 2.6,
+                            height: h,
+                            decoration: BoxDecoration(
+                              color: isFilled
+                                  ? p.accent
+                                  : p.text3.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),

@@ -61,6 +61,14 @@ class TimelineSingleTile extends StatelessWidget {
 
     final tileRadius = BorderRadius.circular(compact ? 12 : 20);
 
+    final nodeSize = isGodMode
+        ? (compact ? 18.0 : 22.0)
+        : (moment.type == 'single' && singleNumber != null
+              ? (compact ? 18.0 : 22.0)
+              : (compact ? 9.0 : 12.0));
+    final topHeaderCenter = compact ? 14.5 : 20.0;
+    final topRailHeight = (topHeaderCenter - (nodeSize / 2)).clamp(0.0, 50.0);
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,8 +78,9 @@ class TimelineSingleTile extends StatelessWidget {
             width: compact ? 20 : 28,
             child: Column(
               children: [
-                // Top rail segment (connects flush to top edge)
-                Expanded(
+                // Top rail segment (connects flush to top edge, fixed height to align node with card header)
+                SizedBox(
+                  height: topRailHeight,
                   child: isFirst
                       ? const SizedBox()
                       : Center(
@@ -83,16 +92,8 @@ class TimelineSingleTile extends StatelessWidget {
                 ),
                 // Timeline Node (Solid opaque background, completely isolating from line)
                 Container(
-                  width: isGodMode
-                      ? (compact ? 18 : 22)
-                      : (moment.type == 'single' && singleNumber != null
-                            ? (compact ? 18 : 22)
-                            : (compact ? 9 : 12)),
-                  height: isGodMode
-                      ? (compact ? 18 : 22)
-                      : (moment.type == 'single' && singleNumber != null
-                            ? (compact ? 18 : 22)
-                            : (compact ? 9 : 12)),
+                  width: nodeSize,
+                  height: nodeSize,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isGodMode ? const Color(0xFFFFD700) : p.surface2,
@@ -132,7 +133,7 @@ class TimelineSingleTile extends StatelessWidget {
                                 ),
                               )),
                 ),
-                // Bottom rail segment (starts below the node)
+                // Bottom rail segment (starts below node and stretches to bottom of card)
                 Expanded(
                   child: isLast
                       ? const SizedBox()

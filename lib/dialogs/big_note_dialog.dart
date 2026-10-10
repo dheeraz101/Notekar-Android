@@ -604,6 +604,44 @@ class _BigNoteDialogState extends State<BigNoteDialog> {
                               ],
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          // Dynamic Amplitude Waveform Bars
+                          AnimatedBuilder(
+                            animation: AudioService.instance,
+                            builder: (context, _) {
+                              final amp = AudioService
+                                  .instance
+                                  .currentRecordingAmplitude;
+                              const barCount = 7;
+                              final factors = [
+                                0.35,
+                                0.7,
+                                1.0,
+                                0.85,
+                                1.0,
+                                0.65,
+                                0.4,
+                              ];
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(barCount, (i) {
+                                  final h = (4.0 + 16.0 * amp * factors[i])
+                                      .clamp(4.0, 18.0);
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 1.5,
+                                    ),
+                                    width: 2.5,
+                                    height: h,
+                                    decoration: BoxDecoration(
+                                      color: widget.p.red,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                  );
+                                }),
+                              );
+                            },
+                          ),
                           const Spacer(),
                           PressableScale(
                             onTap: _cancelVoiceRecording,

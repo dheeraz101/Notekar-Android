@@ -70,38 +70,55 @@
 
 ## 🌟 Flagship Features
 
-### ⏱️ 1. Spatial Chronometer & One-Tap Glass Capture
-- **Optical Midpoint Centering**: Mathematically positioned at the display's optical midpoint, eliminating vertical bias.
+### ⏱️ 1. Spatial Chronometer & Classic Sovereign Design
+- **Optical Midpoint Centering**: Mathematically positioned at the display's optical midpoint, eliminating vertical optical bias.
 - **Authentic Bebas Neue Numerals**: Offline bundled tall typography (`assets/fonts/BebasNeue-Regular.ttf`) scaled to 144pt tabular figures.
-- **One-Tap Glass Capture**: Tap anywhere on glass to record timestamps with subtle tactile haptic pulses.
+- **One-Tap Glass Capture**: Tap anywhere on glass to record timestamps with responsive tactile haptic pulses.
 - **Dual Operating Modes**: Single one-shot counters (`00`–`99`) or Two-Way (`IN` / `OUT`) interval tracking with unbroken continuity.
+- **Classic 2000s Sovereign Craft**: Classic tactile God Mode insignia, Matrix Phosphor Terminal, Kindle E-Ink Paperwhite, and AMOLED Pitch Black themes.
 
-### ⏳ 2. Life Audit & The Cost of the Void
+### ⏳ 2. Universal Interval Ledger (UIL) & Life Audit
+- **Multi-Track Category Interval Reconstruction**: Independent multi-track state machine prevents cursor collisions across overlapping categories (`Deep Work`, `Rest & Recovery`, `Study`).
+- **Midnight Slicing (Zero Orphan Endpoints)**: Intelligently slices intervals crossing midnight at 23:59:59.999 so each day receives exact proportional conscious hours with zero severed endpoints.
+- **$O(N \log N)$ Interval Union**: Merges concurrent claims, giving conscious Rest & Recovery precedence over unmonitored background voids.
 - **24-Hour Conscious Accounting**: Partitions every solar day into:
-  $$\text{Total Day (24h)} = \text{Sleep} + \text{Logistics (Food, Transit)} + \text{Conscious Window}$$
-- **The Cost of the Void**: Automatically calculates unrecorded waking time lost to unintentional drift:
+  $$\text{Total Day (24h)} = \text{Sleep} + \text{Logistics} + \text{Conscious Window}$$
+- **The Cost of the Void**: Quantifies unrecorded waking time lost to unintentional drift:
   $$\text{Unaccounted Void} = \text{Conscious Window} - \text{Logged Focus Sessions}$$
 - **6 Temporal Horizons**: Inspect your intentionality ratio across **Today**, **Weekly (7d)**, **Monthly (30d)**, **Half-Quarterly (45d)**, **Half-Yearly (180d)**, and **Planetary Yearly (365d)**.
 
-### 📜 3. Life Ledger Timeline
-- **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into paired session cards with start/finish nodes and elapsed duration pills.
-- **1-Tap Live Session End**: Active sessions show a pulsing green `LIVE` badge and dedicated **End** button to seal sessions in real time.
+### 🎙️ 3. Multimodal Voice Memos & Photo Attachments
+- **Dynamic Amplitude Waveform Visualizer**: Real-time microphone amplitude metering bar animation while recording voice notes, confirming active voice input.
+- **Full-Width Voice Notes Player**: Interactive audio player pill spanning 100% card width with 1:1 finger waveform scrubbing, 20-bar completion lighting, and 1x / 1.5x / 2x speed cycling with zero paused-state playback leakage.
+- **Full-Width Photo Attachments**: High-resolution camera and gallery attachments rendered full-width with collapsible previews and persistent thumbnail caching.
+
+### 📜 4. Life Ledger Timeline & Rest Lifecycle
+- **Top-Aligned Continuous Rail Nodes**: Single-entry number circles mathematically aligned with card headers, ensuring pristine vertical continuity even on tall cards with media and long notes.
+- **Connected Session Pairing**: Automatically connects chronological `IN` and `OUT` moments into fluid session cards with duration pills.
+- **Robust Rest & Recovery Lifecycle**: Strict active-day bounding ensures historical logs never persist as zombie live sessions while preserving instant 1-tap live termination.
 - **Undo Safety Bed**: Solid red swipe-to-delete backing with a 5-second Dynamic Island countdown undo pill.
 - **iOS-Style Calendar Sheet**: Fluid calendar sheet with solid iOS System Red selection rings, past-date jumps, and event dots.
 
-### 📊 4. Executive Intelligence Hub
-- **Grounded Daily Rhythm**: Activity bars anchored flush to the baseline, dynamically ascending with volume.
-- **90-Day Heatmap**: Visual activity density grid tracking daily logging streaks with zero cloud processing.
-- **Circadian Time-of-Day Bias**: Real-time breakdown across Morning (06–12), Afternoon (12–18), Evening (18–22), and Night (22–06).
+### 📊 5. Executive Intelligence Hub & Health Balance
+- **Cognitive Work-to-Rest Ratio**: Tracks focus hours against restorative intervals with Apple Health-style balance indicators (🟢 Balanced, 🟡 High Intensity, 🔴 Rest Deficit).
+- **Dynamic Burn-Down Velocity**: Compares actual completion rate against elapsed days with real-time status pills (🟢 +18% Ahead of Pace, 🟡 On Pace, 🔴 Deficit Rising).
+- **Flow State Quality Index**: Analyzes focus session distribution: Deep Focus ($\ge 45\text{m}$), Flow Blocks ($20\text{–}44\text{m}$), and Fragmented Bursts ($<20\text{m}$).
+- **Rest Gap Recovery Rate**: Measures conscious voids redeemed via Rest & Recovery vs. unmonitored loss.
+- **90-Day Streaks Heatmap & Circadian Bias**: Visual activity density grid and circadian hourly breakdown across Morning, Afternoon, Evening, and Night.
 
-### 🌱 5. Sobriety Companion & Mindfulness
+### 🎯 6. Target & Goals Engine with Screen-Wide Confetti
+- **Active Goal Selection**: Dedicated Target & Goals selector directly inside persistent notifications, home screen widgets, and target cards.
+- **Intentional Pacing & Live Deficit**: Real-time burn-down tracking displaying elapsed focus hours against remaining deficits (`14h 20m / 20h` • `5h 40m to go`).
+- **Screen-Wide Confetti & Audio Fanfare**: Full-screen confetti explosion and celebratory audio fanfare whenever a goal target is reached.
+
+### 🔎 7. Search Notes Full-Text & Multimodal Index
+- **Unified Multimodal Search**: High-performance full-text search indexing text notes, voice memos, photo attachments, and single/2-way moments.
+- **Direct Inline Playback & Tap-to-Edit**: Play voice memos, preview photo attachments, and tap the prominent `Edit` button for instant note refinement.
+
+### 🌱 8. Sobriety Companion & Mindfulness
 - **21 Neuroscience Milestones**: Track habits and clean streaks across 34 narrative themes (Science, Samurai, Cyberpunk, etc.).
 - **Urge Surfing Breathing Guide**: Guided 4-7-8 breathing circle to conquer cravings and regulate the nervous system.
 - **Streak Shields**: Emergency protection mechanics preventing accidental streak resets.
-
-### 🎯 6. Flagship Goals & Pacing Engine
-- **Intentional Pacing**: Set weekly, monthly, or all-time hourly focus targets (e.g., 20h Deep Work).
-- **Live Deficit Tracking**: Displays elapsed focus hours against remaining deficits (`14h 20m / 20h` • `5h 40m to go`).
 
 ---
 
@@ -243,12 +260,12 @@ NoteKar includes full native offline localization across 7 languages:
 | Flag | Language | Code | Numbers | Status |
 | :---: | :--- | :---: | :---: | :---: |
 | 🇬🇧 | **English** | `en` | Standard | ✅ Complete |
-| 🇮🇳 | **Hindi** (हिन्दी) | `hi` | Devanagari (०-९) | ✅ Complete |
-| 🇪🇸 | **Spanish** (Español) | `es` | Standard | ✅ Complete |
-| 🇫🇷 | **French** (Français) | `fr` | Standard | ✅ Complete |
-| 🇩🇪 | **German** (Deutsch) | `de` | Standard | ✅ Complete |
-| 🇯🇵 | **Japanese** (日本語) | `ja` | Standard | ✅ Complete |
-| 🇷🇺 | **Russian** (Русский) | `ru` | Standard | ✅ Complete |
+| 🇮🇳 | **Hindi** (हिन्दी) | `hi` | Devanagari (०-९) | 🟡 Updating |
+| 🇪🇸 | **Spanish** (Español) | `es` | Standard | 🟡 Updating |
+| 🇫🇷 | **French** (Français) | `fr` | Standard | 🟡 Updating |
+| 🇩🇪 | **German** (Deutsch) | `de` | Standard | 🟡 Updating |
+| 🇯🇵 | **Japanese** (日本語) | `ja` | Standard | 🟡 Updating |
+| 🇷🇺 | **Russian** (Русский) | `ru` | Standard | 🟡 Updating |
 
 👉 **[Join our 50+ Target Community Languages Initiative (TRANSLATIONS.md)](TRANSLATIONS.md)**
 
