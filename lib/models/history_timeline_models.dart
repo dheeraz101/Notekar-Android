@@ -21,7 +21,19 @@ class TimelineSessionItem extends TimelineItem {
   final Moment? outMoment;
   final bool? _isOngoingOverride;
 
-  bool get isOngoing => _isOngoingOverride ?? (outMoment == null);
+  bool get isOngoing {
+    if (outMoment != null) return false;
+    final cat = (category ?? '').toLowerCase();
+    if (cat == 'rest' ||
+        cat == 'recovery' ||
+        cat.contains('rest & recovery') ||
+        inMoment.tags.contains('rest') ||
+        inMoment.note.toLowerCase().contains('rest & recovery')) {
+      return false;
+    }
+    if (_isOngoingOverride != null) return _isOngoingOverride;
+    return true;
+  }
 
   @override
   int get primaryTimestamp => outMoment?.timestamp ?? inMoment.timestamp;
@@ -393,11 +405,14 @@ List<TimelineDaySection> buildTimelineDaySections(
 
       final exactKey = trackKey(inMoment);
       if (activeInTracks.containsKey(exactKey)) {
-        // Close previous unclosed session on the same track
+        final prevIn = activeInTracks.remove(exactKey)!;
+        final cat = canonicalCategory(prevIn);
+        final isRest = cat == 'rest';
         allItems.add(
           TimelineSessionItem(
-            inMoment: activeInTracks.remove(exactKey)!,
+            inMoment: prevIn,
             outMoment: null,
+            isOngoing: !isRest,
           ),
         );
       }
@@ -411,8 +426,18 @@ List<TimelineDaySection> buildTimelineDaySections(
   }
 
   // 5. Any remaining active IN moments
+  final now = DateTime.now();
+  final todayKey = dateKey(now);
   for (final inMoment in activeInTracks.values) {
-    allItems.add(TimelineSessionItem(inMoment: inMoment, outMoment: null));
+    final cat = canonicalCategory(inMoment);
+    final isRest = cat == 'rest';
+    allItems.add(
+      TimelineSessionItem(
+        inMoment: inMoment,
+        outMoment: null,
+        isOngoing: !isRest,
+      ),
+    );
   }
 
   // 2. Group timeline items by day based on the item's anchor date
@@ -430,8 +455,6 @@ List<TimelineDaySection> buildTimelineDaySections(
     groupedByDate.putIfAbsent(dKey, () => []).add(item);
   }
 
-  final now = DateTime.now();
-  final todayKey = dateKey(now);
   final yesterdayKey = dateKey(now.subtract(const Duration(days: 1)));
 
   // Sort dates descending (newest date first)

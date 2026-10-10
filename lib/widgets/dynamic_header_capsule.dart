@@ -46,6 +46,7 @@ class DynamicHeaderCapsule extends StatefulWidget {
     this.goals,
     this.activeGoal,
     this.onSelectGoal,
+    this.onAddGoal,
   });
 
   final Palette p;
@@ -70,6 +71,7 @@ class DynamicHeaderCapsule extends StatefulWidget {
   final List<Goal>? goals;
   final Goal? activeGoal;
   final ValueChanged<Goal?>? onSelectGoal;
+  final VoidCallback? onAddGoal;
 
   @override
   State<DynamicHeaderCapsule> createState() => _DynamicHeaderCapsuleState();
@@ -432,16 +434,53 @@ class _DynamicHeaderCapsuleState extends State<DynamicHeaderCapsule>
           if (widget.goals != null && widget.goals!.isNotEmpty) ...[
             const SizedBox(height: 10),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(Icons.flag_rounded, size: 11, color: p.accent),
-                const SizedBox(width: 5),
-                Text(
-                  'TARGET GOAL'.localized(context),
-                  style: TextStyle(
-                    color: p.text3,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flag_rounded, size: 11, color: p.accent),
+                    const SizedBox(width: 5),
+                    Text(
+                      'TARGET GOAL'.localized(context),
+                      style: TextStyle(
+                        color: p.text3,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                PressableScale(
+                  onTap: () {
+                    _toggleExpanded();
+                    widget.onAddGoal?.call();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add_rounded, size: 11, color: p.accent),
+                        const SizedBox(width: 3),
+                        Text(
+                          'ADD'.localized(context),
+                          style: TextStyle(
+                            color: p.accent,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -104,6 +104,8 @@ class _NoteKarHomeState extends State<NoteKarHome>
   Timer? _undoTimer;
 
   Timer? _updateStatusResetTimer;
+  Timer? _midSessionGoalCelebrationTimer;
+  final Set<String> _celebratedGoalIds = {};
 
   String _theme = 'dark';
   String _defaultMode = 'two-way';
@@ -360,6 +362,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
     _motionSub?.cancel();
     _motion.dispose();
     _updateStatusResetTimer?.cancel();
+    _midSessionGoalCelebrationTimer?.cancel();
     _entriesNotifier.removeListener(_updateStreakShields);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -839,6 +842,9 @@ class _NoteKarHomeState extends State<NoteKarHome>
       });
       unawaited(_updateStreakShields());
       unawaited(_evaluateStreakGuardian(entries));
+      if (_mode == 'two-way' && (_sessionStart != null || _inout == 'out')) {
+        _startGoalCelebrationWatcher();
+      }
 
       final wasCorrupted =
           prefs.getBool(MomentRepository.keyCorruptedFlag) ?? false;
@@ -1490,13 +1496,22 @@ class _NoteKarHomeState extends State<NoteKarHome>
         }
       }
 
+      if (_mode == 'two-way' && type == 'in') {
+        _startGoalCelebrationWatcher();
+      } else if (_mode == 'two-way' && type == 'out') {
+        _stopGoalCelebrationWatcher();
+      }
+
       if (type == 'out' && _activeGoal != null) {
         final completedGoal = _activeGoal!;
         final progress = GoalsService.instance.calculateProgress(
           completedGoal,
           _entries,
         );
-        if (progress.isCompleted && mounted) {
+        if (progress.isCompleted &&
+            mounted &&
+            !_celebratedGoalIds.contains(completedGoal.id)) {
+          _celebratedGoalIds.add(completedGoal.id);
           final p = paletteFor(
             _theme,
             highContrast: _highContrast,
@@ -2171,6 +2186,72 @@ class _NoteKarHomeState extends State<NoteKarHome>
     if (mounted) setState(() {});
   }
 
+  void _startGoalCelebrationWatcher() {
+    _midSessionGoalCelebrationTimer?.cancel();
+    _celebratedGoalIds.clear();
+
+    // Identify goals that were ALREADY completed at the start of this session so we don't prematurely celebrate
+    final startRef = _sessionStart != null
+        ? DateTime.fromMillisecondsSinceEpoch(_sessionStart!)
+        : DateTime.now();
+    for (final goal in _cachedGoals) {
+      final p = GoalsService.instance.calculateProgress(
+        goal,
+        _entries,
+        referenceNow: startRef,
+      );
+      if (p.isCompleted) {
+        _celebratedGoalIds.add(goal.id);
+      }
+    }
+
+    _midSessionGoalCelebrationTimer = Timer.periodic(
+      const Duration(seconds: 4),
+      (_) {
+        _checkMidSessionGoalCompletion();
+      },
+    );
+  }
+
+  void _stopGoalCelebrationWatcher() {
+    _midSessionGoalCelebrationTimer?.cancel();
+    _midSessionGoalCelebrationTimer = null;
+  }
+
+  Future<void> _checkMidSessionGoalCompletion() async {
+    if (!mounted) return;
+    if (_mode != 'two-way' || _sessionStart == null || _inout != 'out') return;
+    if (_cachedGoals.isEmpty) return;
+
+    for (final goal in _cachedGoals) {
+      if (_celebratedGoalIds.contains(goal.id)) continue;
+      if (_activeGoalId != null && goal.id != _activeGoalId) continue;
+
+      final progress = GoalsService.instance.calculateProgress(
+        goal,
+        _entries,
+        referenceNow: DateTime.now(),
+      );
+
+      if (progress.isCompleted) {
+        _celebratedGoalIds.add(goal.id);
+        if (mounted) {
+          final p = paletteFor(
+            _theme,
+            highContrast: _highContrast,
+            accentName: _accentColor,
+          );
+          await showGoalCompletionCelebrationDialog(
+            context: context,
+            p: p,
+            goal: goal,
+          );
+        }
+        break;
+      }
+    }
+  }
+
   Future<void> _togglePauseResumeSession() async {
     if (_mode != 'two-way' || _sessionStart == null || _inout != 'out') return;
     final nowMs = DateTime.now().millisecondsSinceEpoch;
@@ -2505,6 +2586,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           await _prefs?.setBool('m-paused', false);
           await _prefs?.remove('m-paused-at');
           await _saveSetting('m-inout', 'in');
+          _stopGoalCelebrationWatcher();
           unawaited(_updateAndroidWidget());
         },
         onRestoreLiveSession: (inMoment) async {
@@ -2514,6 +2596,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
           });
           await _saveSetting('m-ses', _sessionStart!);
           await _saveSetting('m-inout', 'out');
+          _startGoalCelebrationWatcher();
           unawaited(_updateAndroidWidget());
         },
       ),
@@ -4324,6 +4407,7 @@ class _NoteKarHomeState extends State<NoteKarHome>
                       unawaited(_prefs?.remove('m-active-goal-id'));
                     }
                   },
+                  onAddGoal: () => _openHistory(initialView: 'create_goal'),
                 ),
               ],
             ),

@@ -90,9 +90,9 @@ void callbackDispatcher() {
         // Enqueue from Android Widget
         // Handle background log
       }
-      return Future.value(true);
+      return true;
     } catch (e) {
-      return Future.value(false);
+      return false;
     }
   });
 }

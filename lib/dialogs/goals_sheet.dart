@@ -1033,10 +1033,16 @@ class GoalsContentViewState extends State<GoalsContentView>
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: widget.p.surface3,
+                    color: Color.alphaBlend(
+                      accentCol.withValues(alpha: 0.08),
+                      widget.p.surface3,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: widget.p.border.withValues(alpha: 0.6),
+                      color: Color.alphaBlend(
+                        accentCol.withValues(alpha: 0.25),
+                        widget.p.border,
+                      ),
                     ),
                   ),
                   alignment: Alignment.center,
@@ -1080,14 +1086,14 @@ class GoalsContentViewState extends State<GoalsContentView>
                 return Container(
                   decoration: BoxDecoration(
                     color: Color.alphaBlend(
-                      accentCol.withValues(alpha: 0.06),
+                      accentCol.withValues(alpha: 0.08),
                       widget.p.surface2,
                     ),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: glowColor, width: 1.5),
+                    border: Border.all(color: glowColor, width: 1.6),
                     boxShadow: [
                       BoxShadow(
-                        color: accentCol.withValues(alpha: 0.15 * pulse),
+                        color: accentCol.withValues(alpha: 0.18 * pulse),
                         blurRadius: 12 * pulse + 4,
                         offset: const Offset(0, 2),
                       ),
@@ -1101,13 +1107,16 @@ class GoalsContentViewState extends State<GoalsContentView>
           : Container(
               decoration: BoxDecoration(
                 color: Color.alphaBlend(
-                  accentCol.withValues(alpha: 0.04),
+                  accentCol.withValues(alpha: 0.05),
                   widget.p.surface2,
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: widget.p.border.withValues(alpha: 0.6),
-                  width: 1.0,
+                  color: Color.alphaBlend(
+                    accentCol.withValues(alpha: 0.22),
+                    widget.p.border,
+                  ),
+                  width: 1.1,
                 ),
                 boxShadow: [
                   BoxShadow(

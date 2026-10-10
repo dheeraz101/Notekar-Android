@@ -32,6 +32,7 @@ class HistoryCalendarView extends StatefulWidget {
     this.onOpenManualEntry,
     this.onClaimRest,
     this.onEndLiveSession,
+    this.onDeleteSession,
     this.claimedGaps,
     this.onOpenInsights,
     this.onDelete,
@@ -55,6 +56,7 @@ class HistoryCalendarView extends StatefulWidget {
   onOpenManualEntry;
   final void Function(DateTime start, DateTime end)? onClaimRest;
   final ValueChanged<TimelineSessionItem>? onEndLiveSession;
+  final ValueChanged<TimelineSessionItem>? onDeleteSession;
   final Set<String>? claimedGaps;
   final ValueChanged<TimelineDaySection>? onOpenInsights;
   final ValueChanged<Moment>? onDelete;
@@ -276,6 +278,181 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     );
   }
 
+  void _showSessionContextMenu(TimelineSessionItem session) {
+    HapticFeedback.mediumImpact();
+    final noteMoment = session.noteMoment;
+    final hasNote = session.note.isNotEmpty;
+    final cat = session.category ?? 'Session';
+
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(
+          hasNote
+              ? (session.note.length > 36
+                    ? '${session.note.substring(0, 36)}...'
+                    : session.note)
+              : '$cat • ${_formatDuration(session.duration)}',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: widget.p.text,
+          ),
+        ),
+        message: Text(
+          '${datePretty(session.startTimestamp)} at ${timeOnly(session.startTimestamp)}'
+          '${session.endTimestamp != null ? ' - ${timeOnly(session.endTimestamp!)}' : (session.isOngoing ? ' (Live)' : '')}',
+          style: TextStyle(fontSize: 12, color: widget.p.text3),
+        ),
+        actions: [
+          if (widget.onEditNote != null)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                widget.onEditNote!(noteMoment);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    hasNote ? Icons.edit_rounded : Icons.add_comment_rounded,
+                    size: 19,
+                    color: widget.p.accent,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    (hasNote ? 'Edit Note' : 'Add Note').localized(context),
+                    style: TextStyle(
+                      color: widget.p.accent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (session.isOngoing && widget.onEndLiveSession != null)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                HapticFeedback.heavyImpact();
+                setState(() {
+                  _endingSessionIds.add(session.inMoment.id);
+                });
+                widget.onEndLiveSession!(session);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.stop_circle_rounded,
+                    size: 19,
+                    color: widget.p.red,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Stop Live Session'.localized(context),
+                    style: TextStyle(
+                      color: widget.p.red,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (widget.onDeleteSession != null)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(ctx);
+                _confirmDeleteSession(session);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.delete_sweep_rounded,
+                    size: 19,
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Delete Entire Session'.localized(context),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (widget.onDelete != null)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(ctx);
+                _confirmDeleteMoment(noteMoment);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.delete_outline_rounded,
+                    size: 19,
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Delete Moment Only'.localized(context),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(
+            'Cancel'.localized(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteSession(TimelineSessionItem session) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text('Delete Entire Session?'.localized(context)),
+        content: Text(
+          'Are you sure you want to delete this complete session (${_formatDuration(session.duration)})? All paired moments will be removed.'
+              .localized(context),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel'.localized(context)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.onDeleteSession?.call(session);
+            },
+            child: Text('Delete Session'.localized(context)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -397,6 +574,10 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
     final selectedDate = _daysList[_currentIndex];
     final selectedKey = dateKey(selectedDate);
     final currentSection = _sectionMap[selectedKey];
+    final ongoingSession = currentSection?.items
+        .whereType<TimelineSessionItem>()
+        .where((s) => s.isOngoing && !_endingSessionIds.contains(s.inMoment.id))
+        .firstOrNull;
 
     return Column(
       children: [
@@ -548,6 +729,52 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
                       ],
                     ),
                   ),
+                  if (ongoingSession != null &&
+                      widget.onEndLiveSession != null) ...[
+                    PressableScale(
+                      onTap: () {
+                        HapticFeedback.heavyImpact();
+                        setState(() {
+                          _endingSessionIds.add(ongoingSession.inMoment.id);
+                        });
+                        widget.onEndLiveSession!(ongoingSession);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: widget.p.red.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: widget.p.red.withValues(alpha: 0.4),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.stop_circle_rounded,
+                              size: 13,
+                              color: widget.p.red,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Stop Live'.localized(context),
+                              style: TextStyle(
+                                color: widget.p.red,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   if (currentSection != null) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -835,7 +1062,7 @@ class _HistoryCalendarViewState extends State<HistoryCalendarView> {
             padding: const EdgeInsets.only(bottom: 8),
             child: GestureDetector(
               onTap: () => _handleCardTap(it.noteMoment),
-              onLongPress: () => _showMomentContextMenu(it.noteMoment),
+              onLongPress: () => _showSessionContextMenu(it),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(

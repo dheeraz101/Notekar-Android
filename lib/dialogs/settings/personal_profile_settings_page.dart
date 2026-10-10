@@ -252,12 +252,13 @@ class _PersonalProfileSettingsPageState
           child: Column(
             children: [
               Stack(
+                clipBehavior: Clip.none,
                 children: [
                   GestureDetector(
                     onTap: _pickImage,
                     child: SizedBox(
-                      width: 96,
-                      height: 96,
+                      width: 132,
+                      height: 132,
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
@@ -282,17 +283,30 @@ class _PersonalProfileSettingsPageState
                                             _presetIndex! >= 0 &&
                                             _presetIndex! <
                                                 UserProfileService
-                                                    .presetAvatars
+                                                    .curatedPresetAvatars
                                                     .length
-                                        ? Center(
-                                            child: Text(
-                                              UserProfileService
-                                                  .presetAvatars[_presetIndex!],
-                                              style: const TextStyle(
-                                                fontSize: 46,
+                                        ? () {
+                                            final preset = UserProfileService
+                                                .curatedPresetAvatars[_presetIndex!];
+                                            return DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: preset.gradientColors,
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
                                               ),
-                                            ),
-                                          )
+                                              child: Center(
+                                                child: Text(
+                                                  preset.emoji,
+                                                  style: const TextStyle(
+                                                    fontSize: 66,
+                                                    height: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }()
                                         : Center(
                                             child:
                                                 _nameController.text
@@ -304,14 +318,14 @@ class _PersonalProfileSettingsPageState
                                                         .toUpperCase(),
                                                     style: TextStyle(
                                                       color: p.accent,
-                                                      fontSize: 40,
+                                                      fontSize: 54,
                                                       fontWeight:
                                                           FontWeight.w900,
                                                     ),
                                                   )
                                                 : Icon(
                                                     CupertinoIcons.person_fill,
-                                                    size: 46,
+                                                    size: 60,
                                                     color: p.accent,
                                                   ),
                                           )),
@@ -322,7 +336,7 @@ class _PersonalProfileSettingsPageState
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: p.accent.withValues(alpha: 0.45),
-                                width: 2,
+                                width: 2.5,
                               ),
                             ),
                           ),
@@ -331,82 +345,113 @@ class _PersonalProfileSettingsPageState
                     ),
                   ),
                   Positioned(
-                    bottom: 0,
-                    right: 0,
+                    bottom: 2,
+                    right: 2,
                     child: GestureDetector(
                       onTap: _pickImage,
                       child: Container(
-                        padding: const EdgeInsets.all(7),
+                        padding: const EdgeInsets.all(9),
                         decoration: BoxDecoration(
                           color: p.accent,
                           shape: BoxShape.circle,
-                          border: Border.all(color: p.surface, width: 2.2),
+                          border: Border.all(color: p.surface, width: 2.5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 6,
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 8,
                             ),
                           ],
                         ),
                         child: const Icon(
                           CupertinoIcons.camera_fill,
                           color: Colors.white,
-                          size: 14,
+                          size: 16,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
-              // Preset Avatars Row
+              // Curated Humane Apple HIG Presets Carousel
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (
                       int i = 0;
-                      i < UserProfileService.presetAvatars.length;
+                      i < UserProfileService.curatedPresetAvatars.length;
                       i++
                     ) ...[
-                      GestureDetector(
-                        onTap: () async {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            _presetIndex = i;
-                            _customAvatarBytes = null;
-                          });
-                          await UserProfileService().updateAvatar(
-                            presetIndex: i,
-                          );
-                          widget.onSaved?.call();
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: _presetIndex == i
-                                ? p.accent.withValues(alpha: 0.22)
-                                : p.surface2,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _presetIndex == i
-                                  ? p.accent
-                                  : Colors.transparent,
-                              width: 1.8,
+                      () {
+                        final preset =
+                            UserProfileService.curatedPresetAvatars[i];
+                        final isSelected = _presetIndex == i;
+                        return GestureDetector(
+                          onTap: () async {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              _presetIndex = i;
+                              _customAvatarBytes = null;
+                            });
+                            await UserProfileService().updateAvatar(
+                              presetIndex: i,
+                            );
+                            widget.onSaved?.call();
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? p.accent
+                                    : Colors.transparent,
+                                width: 2.5,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: p.accent.withValues(alpha: 0.35),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: ClipOval(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: preset.gradientColors,
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      preset.emoji,
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                          child: Center(
-                            child: Text(
-                              UserProfileService.presetAvatars[i],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ),
-                      ),
+                        );
+                      }(),
                     ],
                   ],
                 ),
@@ -424,14 +469,30 @@ class _PersonalProfileSettingsPageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'YOUR NAME'.localized(context),
-                style: TextStyle(
-                  color: p.text3,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'YOUR NAME'.localized(context),
+                    style: TextStyle(
+                      color: p.text3,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  Text(
+                    '${_nameController.text.length}/20',
+                    style: TextStyle(
+                      color: _nameController.text.length >= 20
+                          ? p.orange
+                          : p.text3,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Container(
@@ -444,6 +505,9 @@ class _PersonalProfileSettingsPageState
                   controller: _nameController,
                   placeholder: 'e.g. Steve Jobs',
                   placeholderStyle: TextStyle(color: p.text3),
+                  maxLength: 20,
+                  inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                  scrollPadding: const EdgeInsets.only(bottom: 140),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 13,
@@ -765,7 +829,7 @@ class _PersonalProfileSettingsPageState
         ),
         const SizedBox(height: 16),
 
-        // 4. The Magician Predictive Insights Card (Point 10)
+        // 4. Predictive Life Intelligence Card (65% Visual / 35% Text)
         if (_dob != null)
           Container(
             padding: const EdgeInsets.all(20),
@@ -782,128 +846,252 @@ class _PersonalProfileSettingsPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: 26,
-                      height: 26,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: p.accent.withValues(alpha: 0.16),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        CupertinoIcons.sparkles,
-                        size: 14,
-                        color: p.accent,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'PREDICTIVE LIFE INTELLIGENCE'.localized(context),
-                      style: TextStyle(
-                        color: p.accent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // 24-Hour Life Clock Insight
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: p.accent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        CupertinoIcons.clock,
-                        size: 18,
-                        color: p.accent,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            'The 24-Hour Life Clock',
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                          Container(
+                            width: 26,
+                            height: 26,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: p.accent.withValues(alpha: 0.16),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              CupertinoIcons.sparkles,
+                              size: 14,
+                              color: p.accent,
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'If your entire life were a 24-hour day, it is currently $lifeClockFormatted ($lifeClockTimeOfDay). You have $remainingConsciousWeeks conscious waking weeks remaining.',
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 12.5,
-                              height: 1.4,
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'PREDICTIVE LIFE INTELLIGENCE'.localized(context),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.1,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.surface3,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: p.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        '$lifeClockTimeOfDay Phase',
+                        style: TextStyle(
+                          color: p.accent,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
+
+                // Visual 1: 24-Hour Horizon Sun Arc Gauge
+                Center(
+                  child: SizedBox(
+                    width: 240,
+                    height: 125,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(240, 125),
+                          painter: _LifeClockArcPainter(
+                            fraction: lifeFraction,
+                            accentColor: p.accent,
+                            surfaceColor: p.surface3,
+                            sunColor: p.orange,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                lifeClockFormatted,
+                                style: TextStyle(
+                                  color: p.text,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.8,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '$remainingConsciousWeeks conscious wks left',
+                                style: TextStyle(
+                                  color: p.text3,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Horizon Labels (Dawn -> Noon -> Dusk)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '06:00 Dawn',
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        '12:00 Midday',
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        '18:00 Dusk',
+                        style: TextStyle(
+                          color: p.text3,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+
                 Divider(
                   height: 1,
                   thickness: 0.5,
                   color: p.border.withValues(alpha: 0.4),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
 
-                // 1-Hour Daily Leverage Formula
+                // Visual 2: 1-Hour Daily Leverage Growth Multiplier
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: p.green.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        CupertinoIcons.bolt_fill,
-                        size: 18,
-                        color: p.green,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.bolt_fill,
+                          size: 14,
+                          color: p.green,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '1-HOUR DAILY LEVERAGE',
+                          style: TextStyle(
+                            color: p.text,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '1-Hour Daily Leverage Formula',
-                            style: TextStyle(
-                              color: p.text,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Reclaiming just 1 hour of untracked drift per day expands your active lifetime by +${leverageYears.toStringAsFixed(1)} conscious years.',
-                            style: TextStyle(
-                              color: p.text2,
-                              fontSize: 12.5,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.green.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '+${leverageYears.toStringAsFixed(1)} yrs expansion',
+                        style: TextStyle(
+                          color: p.green,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 10),
+
+                // Visual Multiplier Bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    height: 10,
+                    color: p.surface3,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final baseRatio = math.min(
+                          0.72,
+                          remainingYears / 100.0,
+                        );
+                        final expansionRatio = math.min(
+                          0.28,
+                          leverageYears / 100.0,
+                        );
+                        return Row(
+                          children: [
+                            Container(
+                              width: constraints.maxWidth * baseRatio,
+                              decoration: BoxDecoration(
+                                color: p.accent.withValues(alpha: 0.7),
+                              ),
+                            ),
+                            Container(
+                              width: constraints.maxWidth * expansionRatio,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [p.green, p.accent],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Concise Grounded Summary (35% Text)
+                Text(
+                  'If your life were a 24-hour day, you are at $lifeClockFormatted ($lifeClockTimeOfDay). Reclaiming 1 hour daily of drift compounds into +${leverageYears.toStringAsFixed(1)} active conscious years ahead.',
+                  style: TextStyle(color: p.text2, fontSize: 12, height: 1.4),
                 ),
               ],
             ),
@@ -942,4 +1130,90 @@ class _PersonalProfileSettingsPageState
       ],
     );
   }
+}
+
+class _LifeClockArcPainter extends CustomPainter {
+  const _LifeClockArcPainter({
+    required this.fraction,
+    required this.accentColor,
+    required this.surfaceColor,
+    required this.sunColor,
+  });
+
+  final double fraction;
+  final Color accentColor;
+  final Color surfaceColor;
+  final Color sunColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height * 0.90);
+    final radius = size.width * 0.42;
+
+    const startAngle = math.pi;
+    const sweepAngle = math.pi;
+
+    // Background Arc
+    final bgPaint = Paint()
+      ..color = surfaceColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 9.0
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      bgPaint,
+    );
+
+    // Active Gradient Arc
+    final activeSweep = sweepAngle * fraction.clamp(0.01, 1.0);
+    final arcPaint = Paint()
+      ..shader = SweepGradient(
+        startAngle: startAngle,
+        endAngle: startAngle + sweepAngle,
+        colors: [accentColor, const Color(0xFFFF9F0A), const Color(0xFFFF453A)],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 9.0
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      activeSweep,
+      false,
+      arcPaint,
+    );
+
+    // Illuminated Sun / Moon Horizon Beacon
+    final sunAngle = startAngle + activeSweep;
+    final sunCenter = Offset(
+      center.dx + radius * math.cos(sunAngle),
+      center.dy + radius * math.sin(sunAngle),
+    );
+
+    final glowPaint = Paint()
+      ..color = sunColor.withValues(alpha: 0.4)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    canvas.drawCircle(sunCenter, 8.5, glowPaint);
+
+    final sunDotPaint = Paint()
+      ..color = sunColor
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(sunCenter, 5.0, sunDotPaint);
+
+    final sunCorePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(sunCenter, 2.2, sunCorePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _LifeClockArcPainter oldDelegate) =>
+      oldDelegate.fraction != fraction ||
+      oldDelegate.accentColor != accentColor ||
+      oldDelegate.sunColor != sunColor;
 }

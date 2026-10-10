@@ -1247,7 +1247,7 @@ class _ManualEntryContentState extends State<ManualEntryContent> {
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Icon(
-                          Icons.edit_note_rounded,
+                          CupertinoIcons.doc_text_fill,
                           size: 20,
                           color: p.accent,
                         ),

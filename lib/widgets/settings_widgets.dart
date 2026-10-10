@@ -912,9 +912,9 @@ class _AccentPreview extends StatelessWidget {
           Text(
             'Live preview'.localized(context),
             style: TextStyle(
-              color: p.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+              color: p.text2,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 12),

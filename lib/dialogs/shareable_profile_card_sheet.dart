@@ -112,235 +112,163 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
         children: [
           RepaintBoundary(
             key: _repaintKey,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [const Color(0xFF14171F), const Color(0xFF0A0C10)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  width: 1.0,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 28,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Stack(
                 children: [
-                  // Top Brand Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: p.accent.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: p.accent.withValues(alpha: 0.4),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                  // Base Pass Body
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF161922), Color(0xFF0C0E14)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          blurRadius: 30,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Apple Wallet Pass Top Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
                               children: [
-                                Icon(
-                                  Icons.hourglass_bottom_rounded,
-                                  color: p.accent,
-                                  size: 12,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'MEMENTO MORI',
-                                  style: TextStyle(
-                                    color: p.accent,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.1,
-                                    decoration: TextDecoration.none,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: p.accent.withValues(alpha: 0.22),
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                      color: p.accent.withValues(alpha: 0.45),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.hourglass_bottom_rounded,
+                                        color: p.accent,
+                                        size: 12,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        'MEMENTO MORI PASS',
+                                        style: TextStyle(
+                                          color: p.accent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.1,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          'NoteKar ID',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Avatar & Name Card
-                  Row(
-                    children: [
-                      profile.buildAvatarWidget(p: p, size: 68),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              displayName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                                decoration: TextDecoration.none,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              horizon.hasDob
-                                  ? 'Age ${horizon.ageYears} • ${horizon.targetYears}y Life Horizon'
-                                  : '${horizon.targetYears}y Life Horizon',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.65),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.none,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.10),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                  width: 0.5,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-
-                  // Hero Numbers Grid
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    '24-HOUR LIFE CLOCK',
-                                    style: TextStyle(
-                                      color: p.accent,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.8,
-                                      decoration: TextDecoration.none,
-                                    ),
+                                  const Icon(
+                                    Icons.credit_card_rounded,
+                                    size: 11,
+                                    color: Colors.white70,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    horizon.lifeClockFormatted,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.w900,
-                                      fontFeatures: [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                  Text(
-                                    horizon.lifeClockTimeOfDay,
+                                    'NoteKar ID',
                                     style: TextStyle(
                                       color: Colors.white.withValues(
-                                        alpha: 0.6,
+                                        alpha: 0.85,
                                       ),
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.6,
                                       decoration: TextDecoration.none,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            Container(
-                              width: 1,
-                              height: 52,
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 22),
+
+                        // Avatar & Cardholder Information
+                        Row(
+                          children: [
+                            profile.buildAvatarWidget(p: p, size: 68),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'CONSCIOUS WEEKS AHEAD',
-                                    style: TextStyle(
-                                      color: p.orange,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.8,
-                                      decoration: TextDecoration.none,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: -0.5,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Icon(
+                                        Icons.verified_rounded,
+                                        color: p.accent,
+                                        size: 16,
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${horizon.remainingWeeks}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.w900,
-                                      fontFeatures: [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${(horizon.remainingYears).toStringAsFixed(1)} years left',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    horizon.hasDob
+                                        ? 'Age ${horizon.ageYears} • ${horizon.targetYears}y Life Horizon'
+                                        : '${horizon.targetYears}y Life Horizon',
                                     style: TextStyle(
                                       color: Colors.white.withValues(
-                                        alpha: 0.6,
+                                        alpha: 0.7,
                                       ),
-                                      fontSize: 11.5,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                       decoration: TextDecoration.none,
                                     ),
@@ -350,85 +278,264 @@ class _ShareableProfileCardSheetState extends State<ShareableProfileCardSheet> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
-                        // Sleek Horizon Bar
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(999),
-                          child: Container(
-                            height: 6,
-                            color: Colors.white.withValues(alpha: 0.1),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Row(
-                                  children: [
-                                    Container(
-                                      width:
-                                          constraints.maxWidth *
-                                          horizon.livedPercentage,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [p.accent, p.orange],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
+                        const SizedBox(height: 20),
+
+                        // Wallet Field Grid (Life Clock & Waking Weeks)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.08),
                             ),
                           ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '24-HOUR LIFE CLOCK',
+                                          style: TextStyle(
+                                            color: p.accent,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          horizon.lifeClockFormatted,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w900,
+                                            fontFeatures: [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        Text(
+                                          horizon.lifeClockTimeOfDay,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.65,
+                                            ),
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w600,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 52,
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'WAKING WEEKS AHEAD',
+                                          style: TextStyle(
+                                            color: p.orange,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${horizon.remainingWeeks}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w900,
+                                            fontFeatures: [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${(horizon.remainingYears).toStringAsFixed(1)} yrs left',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.65,
+                                            ),
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w600,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              // Horizon Bar
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(999),
+                                child: Container(
+                                  height: 6,
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      return Row(
+                                        children: [
+                                          Container(
+                                            width:
+                                                constraints.maxWidth *
+                                                horizon.livedPercentage,
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [p.accent, p.orange],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Perforated Seam Divider
+                        Row(
+                          children: [
+                            for (int i = 0; i < 28; i++) ...[
+                              Expanded(
+                                child: Container(
+                                  height: 1.2,
+                                  color: i.isEven
+                                      ? Colors.white.withValues(alpha: 0.18)
+                                      : Colors.transparent,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Barcode & Cryptographic Sovereign Footer
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Minimalist Apple Wallet style Barcode Glyph
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  for (int i = 0; i < 18; i++)
+                                    Container(
+                                      width: (i % 3 == 0) ? 2.5 : 1.2,
+                                      height: 22,
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 1.0,
+                                      ),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.75,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '100% PRIVATE • LOCAL REPOSITORY',
+                                    style: TextStyle(
+                                      color: p.green,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.7,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '"We waste a lot of life." — Seneca',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      fontSize: 10.5,
+                                      fontStyle: FontStyle.italic,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              'NoteKar',
+                              style: TextStyle(
+                                color: p.accent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 18),
 
-                  // Seneca Quote
-                  Text(
-                    '"It is not that we have a short time to live, but that we waste a lot of it." — Seneca',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 11,
-                      fontStyle: FontStyle.italic,
-                      height: 1.35,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Bottom Branding Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.security_rounded,
-                            size: 13,
-                            color: p.green,
+                  // Sleek Prismatic Holographic Foil Sheen Overlay
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          gradient: LinearGradient(
+                            begin: const Alignment(-1.2, -0.9),
+                            end: const Alignment(1.2, 0.9),
+                            colors: [
+                              Colors.cyan.withValues(alpha: 0.07),
+                              Colors.transparent,
+                              Colors.purpleAccent.withValues(alpha: 0.09),
+                              Colors.transparent,
+                              Colors.amberAccent.withValues(alpha: 0.08),
+                              Colors.tealAccent.withValues(alpha: 0.06),
+                            ],
+                            stops: const [0.0, 0.28, 0.50, 0.72, 0.88, 1.0],
                           ),
-                          const SizedBox(width: 5),
-                          Text(
-                            '100% Private • Local-Only',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'NoteKar',
-                        style: TextStyle(
-                          color: p.accent,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                          decoration: TextDecoration.none,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

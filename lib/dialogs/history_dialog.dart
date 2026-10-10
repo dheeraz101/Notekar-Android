@@ -690,7 +690,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                 )
               : _inSheetView == 'life_audit'
               ? SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
                   child: LifeAuditPage(
                     p: widget.p,
                     entries: _entries,
@@ -744,6 +744,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     setState(() => _activeInsightsSection = sec);
                   },
                   onDelete: _removeEntry,
+                  onDeleteSession: _removeSession,
                   rainbowCards: _rainbowCards,
                   onOpenGodModeSettings: _openGodModeSettings,
                   isMomentImageCollapsed: _isMomentImageCollapsed,

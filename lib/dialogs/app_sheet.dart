@@ -228,8 +228,14 @@ class _AppSheetState extends State<AppSheet> {
     }
 
     if (widget.docked) {
-      return Padding(
-        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + 10),
+      final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+      return AnimatedPadding(
+        padding: EdgeInsets.only(
+          top: MediaQuery.paddingOf(context).top + 10,
+          bottom: bottomInset,
+        ),
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
         child: content,
       );
     }

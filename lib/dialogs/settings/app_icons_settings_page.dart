@@ -86,7 +86,7 @@ const kGodModeIconOption = AppIconData(
   key: 'godmode',
   title: 'God Mode',
   subtitle: 'Golden Sovereign',
-  asset: 'app_icons/gold.png',
+  asset: 'app_icons/g.png',
   themeColor: Color(0xFFFFD700),
 );
 
@@ -280,6 +280,7 @@ class AppIconsSettingsPage extends StatelessWidget {
                               ],
                       ),
                       child: Stack(
+                        clipBehavior: Clip.none,
                         children: [
                           Positioned.fill(
                             child: item.key == 'godmode'
@@ -311,23 +312,24 @@ class AppIconsSettingsPage extends StatelessWidget {
                           ),
                           if (isSelected)
                             Positioned(
-                              top: 5,
-                              right: 5,
+                              bottom: -5,
+                              right: -5,
                               child: Container(
-                                padding: const EdgeInsets.all(2.5),
+                                padding: const EdgeInsets.all(3.5),
                                 decoration: BoxDecoration(
                                   color: p.accent,
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: Colors.white,
-                                    width: 1.5,
+                                    width: 2.0,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withValues(
-                                        alpha: 0.25,
+                                        alpha: 0.35,
                                       ),
-                                      blurRadius: 4,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 1),
                                     ),
                                   ],
                                 ),

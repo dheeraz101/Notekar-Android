@@ -2195,1911 +2195,2049 @@ $cleanStack
         controller: category == null ? _activeController : null,
         showLargeTitle: category == null,
         removeBottomPadding: true,
-        child: SizedBox(
-          width: 410,
-          height: math.min(MediaQuery.sizeOf(context).height * 0.75, 680),
-          child: AnimatedSwitcher(
-            duration: Duration(milliseconds: engine.isLowEnd ? 120 : 180),
-            reverseDuration: Duration(
-              milliseconds: engine.isLowEnd ? 100 : 140,
-            ),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              if (engine.isLowEnd) {
-                return FadeTransition(opacity: animation, child: child);
-              }
-              final forward = _categoryStack.length >= _prevStackLength;
-              final begin = Offset(forward ? 0.25 : -0.25, 0.0);
-              final slide = Tween<Offset>(
-                begin: begin,
-                end: Offset.zero,
-              ).animate(animation);
-              final fade = CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              );
+        child: Builder(
+          builder: (ctx) {
+            final mediaQuery = MediaQuery.of(ctx);
+            final viewInsetsBottom = mediaQuery.viewInsets.bottom;
+            final screenHeight = mediaQuery.size.height;
+            final availableHeight =
+                screenHeight - viewInsetsBottom - mediaQuery.padding.top - 80;
+            final targetHeight = math.min(
+              viewInsetsBottom > 0 ? availableHeight : screenHeight * 0.75,
+              680.0,
+            );
+            return SizedBox(
+              width: 410,
+              height: math.max(260.0, targetHeight),
+              child: AnimatedSwitcher(
+                duration: Duration(milliseconds: engine.isLowEnd ? 120 : 180),
+                reverseDuration: Duration(
+                  milliseconds: engine.isLowEnd ? 100 : 140,
+                ),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  if (engine.isLowEnd) {
+                    return FadeTransition(opacity: animation, child: child);
+                  }
+                  final forward = _categoryStack.length >= _prevStackLength;
+                  final begin = Offset(forward ? 0.25 : -0.25, 0.0);
+                  final slide = Tween<Offset>(
+                    begin: begin,
+                    end: Offset.zero,
+                  ).animate(animation);
+                  final fade = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOut,
+                  );
 
-              return FadeTransition(
-                opacity: fade,
-                child: SlideTransition(position: slide, child: child),
-              );
-            },
-            child: RepaintBoundary(
-              key: ValueKey('container-${category ?? 'root'}'),
-              child: category == 'Reminder Message'
-                  ? ReminderMessagePage(
-                      p: p,
-                      editingReminderType: _editingReminderType ?? 'daily',
-                      currentValue: _editingReminderType == 'daily'
-                          ? _dailyReminderBody
-                          : (_editingReminderType == 'weekly'
-                                ? _weeklyReminderBody
-                                : _monthlyReminderBody),
-                      recents:
-                          _prefs?.getStringList(
-                            '${_editingReminderType == 'daily' ? 'reminder_daily_body' : (_editingReminderType == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body')}_recents',
-                          ) ??
-                          <String>[],
-                      onSave: (type, newText) async {
-                        setState(() {
-                          if (type == 'daily') _dailyReminderBody = newText;
-                          if (type == 'weekly') _weeklyReminderBody = newText;
-                          if (type == 'monthly') _monthlyReminderBody = newText;
-                        });
-                        await _prefs?.setString(
-                          type == 'daily'
-                              ? 'reminder_daily_body'
-                              : (type == 'weekly'
-                                    ? 'reminder_weekly_body'
-                                    : 'reminder_monthly_body'),
-                          newText,
-                        );
-                        await _syncReminder(type);
-                      },
-                      onPop: _popCategory,
-                    )
-                  : CustomScrollView(
-                      key: ValueKey('scroll-${category ?? 'root'}'),
-                      controller: category == null ? _activeController : null,
-                      physics: const BouncingScrollPhysics(
-                        parent: AlwaysScrollableScrollPhysics(),
-                      ),
-                      slivers: [
-                        if (category == null) ...[
-                          SliverToBoxAdapter(
-                            child: AppSheetLargeTitle(
-                              p: p,
-                              title: 'Settings',
-                              scrollController: _activeController,
-                            ),
+                  return FadeTransition(
+                    opacity: fade,
+                    child: SlideTransition(position: slide, child: child),
+                  );
+                },
+                child: RepaintBoundary(
+                  key: ValueKey('container-${category ?? 'root'}'),
+                  child: category == 'Reminder Message'
+                      ? ReminderMessagePage(
+                          p: p,
+                          editingReminderType: _editingReminderType ?? 'daily',
+                          currentValue: _editingReminderType == 'daily'
+                              ? _dailyReminderBody
+                              : (_editingReminderType == 'weekly'
+                                    ? _weeklyReminderBody
+                                    : _monthlyReminderBody),
+                          recents:
+                              _prefs?.getStringList(
+                                '${_editingReminderType == 'daily' ? 'reminder_daily_body' : (_editingReminderType == 'weekly' ? 'reminder_weekly_body' : 'reminder_monthly_body')}_recents',
+                              ) ??
+                              <String>[],
+                          onSave: (type, newText) async {
+                            setState(() {
+                              if (type == 'daily') {
+                                _dailyReminderBody = newText;
+                              } else if (type == 'weekly') {
+                                _weeklyReminderBody = newText;
+                              } else if (type == 'monthly') {
+                                _monthlyReminderBody = newText;
+                              }
+                            });
+                            await _prefs?.setString(
+                              type == 'daily'
+                                  ? 'reminder_daily_body'
+                                  : (type == 'weekly'
+                                        ? 'reminder_weekly_body'
+                                        : 'reminder_monthly_body'),
+                              newText,
+                            );
+                            await _syncReminder(type);
+                          },
+                          onPop: _popCategory,
+                        )
+                      : CustomScrollView(
+                          key: ValueKey('scroll-${category ?? 'root'}'),
+                          controller: category == null
+                              ? _activeController
+                              : null,
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
                           ),
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: SliverStickyHeaderDelegate(
-                              height: 64,
-                              child: Container(
-                                color: p.surface.withValues(
-                                  alpha:
-                                      !reduceMotion &&
-                                          enableTranslucency &&
-                                          AdaptiveEngine().supportsBlur
-                                      ? 0.65
-                                      : 1.0,
-                                ),
-                                padding: const EdgeInsets.only(
-                                  bottom: spacing8,
-                                ),
-                                child: SettingsSearchBox(
+                          slivers: [
+                            if (category == null) ...[
+                              SliverToBoxAdapter(
+                                child: AppSheetLargeTitle(
                                   p: p,
-                                  controller: _settingsSearchController,
-                                  readOnly: true,
-                                  onTap: () => _openCategory('Search'),
-                                  onChanged: (value) {
-                                    setState(() => _settingsQuery = value);
-                                    if (_activeController.hasClients) {
-                                      _activeController.jumpTo(0.0);
-                                    }
-                                  },
-                                  onClear: () {
-                                    setState(() {
-                                      _settingsQuery = '';
-                                      _settingsSearchController.clear();
-                                    });
-                                    if (_activeController.hasClients) {
-                                      _activeController.jumpTo(0.0);
-                                    }
-                                  },
+                                  title: 'Settings',
+                                  scrollController: _activeController,
                                 ),
                               ),
-                            ),
-                          ),
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              if (_criticalNotice != null)
-                                _buildCriticalAdvisoryBanner(p),
-                              _buildAppleIdProfileCard(p),
-
-                              SettingsGroup(
-                                p: p,
-                                insetDividers: true,
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.paintbrush,
-                                    title: 'Appearance',
-                                    status:
-                                        theme[0].toUpperCase() +
-                                        theme.substring(1),
-                                    color: p.accent,
-                                    onTap: () =>
-                                        _openCategory('Personalization'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.bolt,
-                                    title: 'Logging',
-                                    status: defaultModeLabel(defaultMode),
-                                    color: p.green,
-                                    onTap: () => _openCategory('Logging'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.shield,
-                                    title: 'Privacy & Security',
-                                    status: privacyLock ? 'On' : 'Off',
-                                    color: p.green,
-                                    onTap: () =>
-                                        _openCategory('Privacy & Security'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.arrow_2_circlepath,
-                                    title: 'Updates & Notices',
-                                    status: _betaTrack ? 'Beta' : 'Stable',
-                                    color: p.accent,
-                                    onTap: () =>
-                                        _openCategory('Updates & Notices'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.book,
-                                    title: 'About',
-                                    status: 'Docs',
-                                    color: p.accent,
-                                    onTap: () => _openCategory('About'),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.slider_horizontal_3,
-                                    title: 'Advanced',
-                                    status: 'Tools',
-                                    color: p.orange,
-                                    onTap: () => _openCategory('Advanced'),
-                                  ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'Personalize and configure NoteKar to fit your specific workflow.',
-                              ),
-                              const SizedBox(height: spacing16),
-                              SettingsGroup(
-                                p: p,
-                                insetDividers: true,
-                                title: 'Support & Community',
-                                children: [
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.gift,
-                                    title: 'Buy Me a Coffee',
-                                    color: const Color(0xFFFFDD00),
-                                    rowKind: 'link',
-                                    onTap: () => widget.onOpenLink(coffeeLink),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon:
-                                        CupertinoIcons.bubble_left_bubble_right,
-                                    title: 'Feedback',
-                                    color: p.green,
-                                    rowKind: 'popup',
-                                    onTap: _openFeedback,
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    icon: CupertinoIcons.mail,
-                                    title: 'Email Support',
-                                    color: p.accent,
-                                    rowKind: 'link',
-                                    onTap: () =>
-                                        widget.onOpenLink(supportEmail),
-                                  ),
-                                  SettingsRow(
-                                    p: p,
-                                    customIcon: GithubIcon(
-                                      size: 16,
-                                      color: p.text,
-                                    ),
-                                    title: 'GitHub',
-                                    color: p.text,
-                                    rowKind: 'link',
-                                    onTap: () => widget.onOpenLink(githubRepo),
-                                  ),
-                                ],
-                              ),
-                              if (_updateAvailable) ...[
-                                const SizedBox(height: spacing16),
-                                PressableScale(
-                                  onTap: () => _openCategory('Update Center'),
+                              SliverPersistentHeader(
+                                pinned: true,
+                                delegate: SliverStickyHeaderDelegate(
+                                  height: 64,
                                   child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 4,
+                                    color: p.surface.withValues(
+                                      alpha:
+                                          !reduceMotion &&
+                                              enableTranslucency &&
+                                              AdaptiveEngine().supportsBlur
+                                          ? 0.65
+                                          : 1.0,
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
+                                    padding: const EdgeInsets.only(
+                                      bottom: spacing8,
                                     ),
-                                    decoration: BoxDecoration(
-                                      color: p.surface3,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: p.border,
-                                        width: 1.0,
+                                    child: SettingsSearchBox(
+                                      p: p,
+                                      controller: _settingsSearchController,
+                                      readOnly: true,
+                                      onTap: () => _openCategory('Search'),
+                                      onChanged: (value) {
+                                        setState(() => _settingsQuery = value);
+                                        if (_activeController.hasClients) {
+                                          _activeController.jumpTo(0.0);
+                                        }
+                                      },
+                                      onClear: () {
+                                        setState(() {
+                                          _settingsQuery = '';
+                                          _settingsSearchController.clear();
+                                        });
+                                        if (_activeController.hasClients) {
+                                          _activeController.jumpTo(0.0);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SliverList(
+                                delegate: SliverChildListDelegate([
+                                  if (_criticalNotice != null)
+                                    _buildCriticalAdvisoryBanner(p),
+                                  _buildAppleIdProfileCard(p),
+
+                                  SettingsGroup(
+                                    p: p,
+                                    insetDividers: true,
+                                    children: [
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.paintbrush,
+                                        title: 'Appearance',
+                                        status:
+                                            theme[0].toUpperCase() +
+                                            theme.substring(1),
+                                        color: p.accent,
+                                        onTap: () =>
+                                            _openCategory('Personalization'),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.bolt,
+                                        title: 'Logging',
+                                        status: defaultModeLabel(defaultMode),
+                                        color: p.green,
+                                        onTap: () => _openCategory('Logging'),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.shield,
+                                        title: 'Privacy & Security',
+                                        status: privacyLock ? 'On' : 'Off',
+                                        color: p.green,
+                                        onTap: () =>
+                                            _openCategory('Privacy & Security'),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.arrow_2_circlepath,
+                                        title: 'Updates & Notices',
+                                        status: _betaTrack ? 'Beta' : 'Stable',
+                                        color: p.accent,
+                                        onTap: () =>
+                                            _openCategory('Updates & Notices'),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.book,
+                                        title: 'About',
+                                        status: 'Docs',
+                                        color: p.accent,
+                                        onTap: () => _openCategory('About'),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon:
+                                            CupertinoIcons.slider_horizontal_3,
+                                        title: 'Advanced',
+                                        status: 'Tools',
+                                        color: p.orange,
+                                        onTap: () => _openCategory('Advanced'),
+                                      ),
+                                    ],
+                                  ),
+                                  SettingsPageDescription(
+                                    p: p,
+                                    text:
+                                        'Personalize and configure NoteKar to fit your specific workflow.',
+                                  ),
+                                  const SizedBox(height: spacing16),
+                                  SettingsGroup(
+                                    p: p,
+                                    insetDividers: true,
+                                    title: 'Support & Community',
+                                    children: [
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.gift,
+                                        title: 'Buy Me a Coffee',
+                                        color: const Color(0xFFFFDD00),
+                                        rowKind: 'link',
+                                        onTap: () =>
+                                            widget.onOpenLink(coffeeLink),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons
+                                            .bubble_left_bubble_right,
+                                        title: 'Feedback',
+                                        color: p.green,
+                                        rowKind: 'popup',
+                                        onTap: _openFeedback,
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        icon: CupertinoIcons.mail,
+                                        title: 'Email Support',
+                                        color: p.accent,
+                                        rowKind: 'link',
+                                        onTap: () =>
+                                            widget.onOpenLink(supportEmail),
+                                      ),
+                                      SettingsRow(
+                                        p: p,
+                                        customIcon: GithubIcon(
+                                          size: 16,
+                                          color: p.text,
+                                        ),
+                                        title: 'GitHub',
+                                        color: p.text,
+                                        rowKind: 'link',
+                                        onTap: () =>
+                                            widget.onOpenLink(githubRepo),
+                                      ),
+                                    ],
+                                  ),
+                                  if (_updateAvailable) ...[
+                                    const SizedBox(height: spacing16),
+                                    PressableScale(
+                                      onTap: () =>
+                                          _openCategory('Update Center'),
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: p.surface3,
+                                          borderRadius: BorderRadius.circular(
+                                            999,
+                                          ),
+                                          border: Border.all(
+                                            color: p.border,
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 30,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: p.surface2,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                CupertinoIcons
+                                                    .arrow_2_circlepath_circle_fill,
+                                                color: p.text,
+                                                size: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      updateStatus,
+                                                      style: TextStyle(
+                                                        color: p.text,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  () {
+                                                    final date =
+                                                        updateInfo?.date;
+                                                    final isVeryOld =
+                                                        date != null &&
+                                                        DateTime.now()
+                                                                .difference(
+                                                                  date,
+                                                                )
+                                                                .inDays >
+                                                            7;
+                                                    final isUrgent =
+                                                        isVeryOld ||
+                                                        (updateInfo
+                                                                ?.isImportant ??
+                                                            false);
+                                                    return Container(
+                                                      width: 8,
+                                                      height: 8,
+                                                      decoration: BoxDecoration(
+                                                        color: isUrgent
+                                                            ? p.red
+                                                            : p.orange,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                    );
+                                                  }(),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Icon(
+                                              CupertinoIcons.chevron_forward,
+                                              color: p.text3,
+                                              size: 20,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 30,
-                                          height: 30,
-                                          decoration: BoxDecoration(
-                                            color: p.surface2,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            CupertinoIcons
-                                                .arrow_2_circlepath_circle_fill,
-                                            color: p.text,
-                                            size: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  updateStatus,
-                                                  style: TextStyle(
-                                                    color: p.text,
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              () {
-                                                final date = updateInfo?.date;
-                                                final isVeryOld =
-                                                    date != null &&
-                                                    DateTime.now()
-                                                            .difference(date)
-                                                            .inDays >
-                                                        7;
-                                                final isUrgent =
-                                                    isVeryOld ||
-                                                    (updateInfo?.isImportant ??
-                                                        false);
-                                                return Container(
-                                                  width: 8,
-                                                  height: 8,
-                                                  decoration: BoxDecoration(
-                                                    color: isUrgent
-                                                        ? p.red
-                                                        : p.orange,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                );
-                                              }(),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          CupertinoIcons.chevron_forward,
-                                          color: p.text3,
-                                          size: 20,
-                                        ),
-                                      ],
-                                    ),
+                                  ],
+                                  const SizedBox(height: spacing24),
+                                  SettingsAboutBlock(
+                                    p: p,
+                                    onOpenLink: widget.onOpenLink,
                                   ),
-                                ),
-                              ],
-                              const SizedBox(height: spacing24),
-                              SettingsAboutBlock(
-                                p: p,
-                                onOpenLink: widget.onOpenLink,
+                                  const SizedBox(height: spacing48),
+                                ]),
                               ),
-                              const SizedBox(height: spacing48),
-                            ]),
-                          ),
-                        ],
-                        if (show('Search')) ..._buildSearchSlivers(p),
-                        if (show('Personal Profile'))
-                          SliverToBoxAdapter(
-                            child: PersonalProfileSettingsPage(
-                              p: p,
-                              onSaved: () => setState(() {}),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Personalization'))
-                          SliverToBoxAdapter(
-                            child: PersonalizationSettingsPage(
-                              p: p,
-                              subCategory: 'Personalization',
-                              theme: theme,
-                              accentColor: accentColor,
-                              appIconStyle: appIconStyle,
-                              currentLocale: currentLocale,
-                              reduceMotion: reduceMotion,
-                              enableTranslucency: enableTranslucency,
-                              onLocaleChanged: (value) {
-                                setState(() => currentLocale = value);
-                                widget.onLocaleChanged(value);
-                              },
-                              onAccentColorChanged: (value) {
-                                setState(() => accentColor = value);
-                                widget.onAccentColor(value);
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Display'))
-                          SliverToBoxAdapter(
-                            child: DisplaySettingsPage(
-                              p: p,
-                              theme: theme,
-                              showSeconds: showSeconds,
-                              highlightSeconds: highlightSeconds,
-                              use24HourFormat: use24Hour,
-                              clockFont: clockFont,
-                              buttonLabels: buttonLabels,
-                              showHistoryText: showHistoryText,
-                              largeControls: largeControls,
-                              homeMenuPill: homeMenuPill,
-                              reduceMotion: reduceMotion,
-                              homeMenuAnimations: homeMenuAnimations,
-                              enableTranslucency: enableTranslucency,
-                              showLastSavedHint: showLastSavedHint,
-                              onThemeChanged: (val) {
-                                setState(() => theme = val);
-                                widget.onTheme(val);
-                              },
-                              onShowSecondsChanged: (val) {
-                                setState(() => showSeconds = val);
-                                widget.onShowSeconds(val);
-                              },
-                              onHighlightSecondsChanged: (val) {
-                                setState(() => highlightSeconds = val);
-                                widget.onHighlightSeconds(val);
-                              },
-                              onUse24HourFormatChanged: (val) {
-                                setState(() => use24Hour = val);
-                                widget.onUse24Hour?.call(val);
-                              },
-                              onClockFontChanged: (val) {
-                                setState(() => clockFont = val);
-                                widget.onClockFontChanged?.call(val);
-                              },
-                              onFeedback: widget.onFeedback,
-                              onButtonLabelsChanged: (val) {
-                                setState(() => buttonLabels = val);
-                                widget.onButtonLabels(val);
-                              },
-                              onShowHistoryTextChanged: (val) {
-                                setState(() => showHistoryText = val);
-                                widget.onShowHistoryText(val);
-                              },
-                              onLargeControlsChanged: (val) {
-                                setState(() => largeControls = val);
-                                widget.onLargeControls(val);
-                              },
-                              onHomeMenuPillChanged: (val) {
-                                setState(() => homeMenuPill = val);
-                                widget.onHomeMenuPill(val);
-                              },
-                              onHomeMenuAnimations: widget.onHomeMenuAnimations,
-                              onHomeMenuAnimationsChanged: (val) {
-                                setState(() => homeMenuAnimations = val);
-                              },
-                              onTranslucencyChanged: (val) {
-                                setState(() => enableTranslucency = val);
-                                widget.onTranslucency(val);
-                              },
-                              onShowLastSavedHintChanged: (val) {
-                                setState(() => showLastSavedHint = val);
-                                widget.onShowLastSavedHint(val);
-                              },
-                              showImagesAlways: _showImagesAlways,
-                              onShowImagesAlwaysChanged: (val) async {
-                                setState(() => _showImagesAlways = val);
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setBool(
-                                  'history_show_images_always',
-                                  val,
-                                );
-                              },
-                            ),
-                          ),
-                        if (show('Accent Color'))
-                          SliverToBoxAdapter(
-                            child: PersonalizationSettingsPage(
-                              p: p,
-                              subCategory: 'Accent Color',
-                              theme: theme,
-                              accentColor: accentColor,
-                              appIconStyle: appIconStyle,
-                              currentLocale: currentLocale,
-                              reduceMotion: reduceMotion,
-                              enableTranslucency: enableTranslucency,
-                              onLocaleChanged: (value) {
-                                setState(() => currentLocale = value);
-                                widget.onLocaleChanged(value);
-                              },
-                              onAccentColorChanged: (value) {
-                                setState(() => accentColor = value);
-                                widget.onAccentColor(value);
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('App Icons'))
-                          SliverToBoxAdapter(
-                            child: AppIconsSettingsPage(
-                              p: p,
-                              appIconStyle: appIconStyle,
-                              godModeUnlocked: _isGodModeUnlocked,
-                              onAppIconStyleChanged: (value) async {
-                                final applied = await widget.onAppIconStyle(
-                                  value,
-                                );
-                                if (applied && mounted) {
-                                  setState(() => appIconStyle = value);
-                                  return true;
-                                }
-                                return false;
-                              },
-                            ),
-                          ),
-                        if (show('Logging'))
-                          SliverToBoxAdapter(
-                            child: LoggingSettingsPage(
-                              p: p,
-                              defaultMode: defaultMode,
-                              entriesCount: entries.length,
-                              notesCount: entries
-                                  .where((e) => e.note.isNotEmpty)
-                                  .length,
-                              remindersStatus: _getRemindersStatus(),
-                              enableSobrietyMode: enableSobrietyMode,
-                              showPersistentNotification:
-                                  showPersistentNotification,
-                              notifLogAction: notifLogAction,
-                              onNotifLogActionChanged: (val) async {
-                                final mode = val ? 'popup' : 'silent';
-                                setState(() => notifLogAction = mode);
-                                await _prefs?.setString(
-                                  'notif_log_action',
-                                  mode,
-                                );
-                              },
-                              showTrashBin: widget.onOpenTrash != null,
-                              trash: _trash,
-                              rainbowCards: _rainbowCards,
-                              onRainbowCardsChanged: (val) async {
-                                setState(() => _rainbowCards = val);
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setBool('m-rainbow-cards', val);
-                              },
-                              onShowPersistentNotificationChanged:
-                                  (value) async {
+                            ],
+                            if (show('Search')) ..._buildSearchSlivers(p),
+                            if (show('Personal Profile'))
+                              SliverToBoxAdapter(
+                                child: PersonalProfileSettingsPage(
+                                  p: p,
+                                  onSaved: () => setState(() {}),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Personalization'))
+                              SliverToBoxAdapter(
+                                child: PersonalizationSettingsPage(
+                                  p: p,
+                                  subCategory: 'Personalization',
+                                  theme: theme,
+                                  accentColor: accentColor,
+                                  appIconStyle: appIconStyle,
+                                  currentLocale: currentLocale,
+                                  reduceMotion: reduceMotion,
+                                  enableTranslucency: enableTranslucency,
+                                  onLocaleChanged: (value) {
+                                    setState(() => currentLocale = value);
+                                    widget.onLocaleChanged(value);
+                                  },
+                                  onAccentColorChanged: (value) {
+                                    setState(() => accentColor = value);
+                                    widget.onAccentColor(value);
+                                  },
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Display'))
+                              SliverToBoxAdapter(
+                                child: DisplaySettingsPage(
+                                  p: p,
+                                  theme: theme,
+                                  showSeconds: showSeconds,
+                                  highlightSeconds: highlightSeconds,
+                                  use24HourFormat: use24Hour,
+                                  clockFont: clockFont,
+                                  buttonLabels: buttonLabels,
+                                  showHistoryText: showHistoryText,
+                                  largeControls: largeControls,
+                                  homeMenuPill: homeMenuPill,
+                                  reduceMotion: reduceMotion,
+                                  homeMenuAnimations: homeMenuAnimations,
+                                  enableTranslucency: enableTranslucency,
+                                  showLastSavedHint: showLastSavedHint,
+                                  onThemeChanged: (val) {
+                                    setState(() => theme = val);
+                                    widget.onTheme(val);
+                                  },
+                                  onShowSecondsChanged: (val) {
+                                    setState(() => showSeconds = val);
+                                    widget.onShowSeconds(val);
+                                  },
+                                  onHighlightSecondsChanged: (val) {
+                                    setState(() => highlightSeconds = val);
+                                    widget.onHighlightSeconds(val);
+                                  },
+                                  onUse24HourFormatChanged: (val) {
+                                    setState(() => use24Hour = val);
+                                    widget.onUse24Hour?.call(val);
+                                  },
+                                  onClockFontChanged: (val) {
+                                    setState(() => clockFont = val);
+                                    widget.onClockFontChanged?.call(val);
+                                  },
+                                  onFeedback: widget.onFeedback,
+                                  onButtonLabelsChanged: (val) {
+                                    setState(() => buttonLabels = val);
+                                    widget.onButtonLabels(val);
+                                  },
+                                  onShowHistoryTextChanged: (val) {
+                                    setState(() => showHistoryText = val);
+                                    widget.onShowHistoryText(val);
+                                  },
+                                  onLargeControlsChanged: (val) {
+                                    setState(() => largeControls = val);
+                                    widget.onLargeControls(val);
+                                  },
+                                  onHomeMenuPillChanged: (val) {
+                                    setState(() => homeMenuPill = val);
+                                    widget.onHomeMenuPill(val);
+                                  },
+                                  onHomeMenuAnimations:
+                                      widget.onHomeMenuAnimations,
+                                  onHomeMenuAnimationsChanged: (val) {
+                                    setState(() => homeMenuAnimations = val);
+                                  },
+                                  onTranslucencyChanged: (val) {
+                                    setState(() => enableTranslucency = val);
+                                    widget.onTranslucency(val);
+                                  },
+                                  onShowLastSavedHintChanged: (val) {
+                                    setState(() => showLastSavedHint = val);
+                                    widget.onShowLastSavedHint(val);
+                                  },
+                                  showImagesAlways: _showImagesAlways,
+                                  onShowImagesAlwaysChanged: (val) async {
+                                    setState(() => _showImagesAlways = val);
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setBool(
+                                      'history_show_images_always',
+                                      val,
+                                    );
+                                  },
+                                ),
+                              ),
+                            if (show('Accent Color'))
+                              SliverToBoxAdapter(
+                                child: PersonalizationSettingsPage(
+                                  p: p,
+                                  subCategory: 'Accent Color',
+                                  theme: theme,
+                                  accentColor: accentColor,
+                                  appIconStyle: appIconStyle,
+                                  currentLocale: currentLocale,
+                                  reduceMotion: reduceMotion,
+                                  enableTranslucency: enableTranslucency,
+                                  onLocaleChanged: (value) {
+                                    setState(() => currentLocale = value);
+                                    widget.onLocaleChanged(value);
+                                  },
+                                  onAccentColorChanged: (value) {
+                                    setState(() => accentColor = value);
+                                    widget.onAccentColor(value);
+                                  },
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('App Icons'))
+                              SliverToBoxAdapter(
+                                child: AppIconsSettingsPage(
+                                  p: p,
+                                  appIconStyle: appIconStyle,
+                                  godModeUnlocked: _isGodModeUnlocked,
+                                  onAppIconStyleChanged: (value) async {
+                                    final applied = await widget.onAppIconStyle(
+                                      value,
+                                    );
+                                    if (applied && mounted) {
+                                      setState(() => appIconStyle = value);
+                                      return true;
+                                    }
+                                    return false;
+                                  },
+                                ),
+                              ),
+                            if (show('Logging'))
+                              SliverToBoxAdapter(
+                                child: LoggingSettingsPage(
+                                  p: p,
+                                  defaultMode: defaultMode,
+                                  entriesCount: entries.length,
+                                  notesCount: entries
+                                      .where((e) => e.note.isNotEmpty)
+                                      .length,
+                                  remindersStatus: _getRemindersStatus(),
+                                  enableSobrietyMode: enableSobrietyMode,
+                                  showPersistentNotification:
+                                      showPersistentNotification,
+                                  notifLogAction: notifLogAction,
+                                  onNotifLogActionChanged: (val) async {
+                                    final mode = val ? 'popup' : 'silent';
+                                    setState(() => notifLogAction = mode);
+                                    await _prefs?.setString(
+                                      'notif_log_action',
+                                      mode,
+                                    );
+                                  },
+                                  showTrashBin: widget.onOpenTrash != null,
+                                  trash: _trash,
+                                  rainbowCards: _rainbowCards,
+                                  onRainbowCardsChanged: (val) async {
+                                    setState(() => _rainbowCards = val);
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setBool('m-rainbow-cards', val);
+                                  },
+                                  onShowPersistentNotificationChanged:
+                                      (value) async {
+                                        if (_prefs != null) {
+                                          await _prefs!.setBool(
+                                            'show_persistent_notification',
+                                            value,
+                                          );
+                                        }
+                                        setState(
+                                          () => showPersistentNotification =
+                                              value,
+                                        );
+                                        try {
+                                          await const MethodChannel(
+                                            'notekar/files',
+                                          ).invokeMethod<void>(
+                                            'setPersistentControlPanel',
+                                            {'enabled': value},
+                                          );
+                                        } catch (_) {}
+                                      },
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                ),
+                              ),
+                            if (show('Dashboard'))
+                              SliverToBoxAdapter(
+                                child: SettingsDashboardPage(
+                                  p: p,
+                                  entries: entries,
+                                  enableSobrietyMode: enableSobrietyMode,
+                                  onLogNow: () =>
+                                      Navigator.of(context).pop('log'),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                  onOpenLifeAudit: () => _openCategory(
+                                    'Life Audit',
+                                    parent: 'Dashboard',
+                                  ),
+                                  onOpenGoals: () {
+                                    Navigator.of(
+                                      context,
+                                    ).pop('open_history_goals');
+                                  },
+                                ),
+                              ),
+                            if (show('Life Audit'))
+                              SliverToBoxAdapter(
+                                child: LifeAuditPage(
+                                  p: p,
+                                  entries: entries,
+                                  sleepHours: _timeAuditSleepHours,
+                                  essentialsHours: _timeAuditEssentialsHours,
+                                  onOpenPersonalProfile: () =>
+                                      _openCategory('Personal Profile'),
+                                  onSleepHoursChanged: (val) async {
+                                    setState(() => _timeAuditSleepHours = val);
+                                    await _prefs?.setDouble(
+                                      'time_audit_sleep_hours',
+                                      val,
+                                    );
+                                  },
+                                  onEssentialsHoursChanged: (val) async {
+                                    setState(
+                                      () => _timeAuditEssentialsHours = val,
+                                    );
+                                    await _prefs?.setDouble(
+                                      'time_audit_essentials_hours',
+                                      val,
+                                    );
+                                  },
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Capture'))
+                              SliverToBoxAdapter(
+                                child: CaptureSettingsPage(
+                                  p: p,
+                                  defaultMode: defaultMode,
+                                  tapDelay: tapDelay,
+                                  enableNoteOnClick: enableNoteOnClick,
+                                  onDefaultModeChanged: (value) {
+                                    setState(() => defaultMode = value);
+                                    widget.onDefaultMode(value);
+                                  },
+                                  onTapDelayChanged: (value) {
+                                    setState(() => tapDelay = value);
+                                    widget.onDelay(value);
+                                  },
+                                  onEnableNoteOnClickChanged: (value) async {
                                     if (_prefs != null) {
                                       await _prefs!.setBool(
-                                        'show_persistent_notification',
+                                        'enable_note_on_click',
                                         value,
                                       );
                                     }
+                                    setState(() => enableNoteOnClick = value);
+                                  },
+                                ),
+                              ),
+                            if (show('Reminders'))
+                              SliverToBoxAdapter(
+                                child: RemindersSettingsPage(
+                                  p: p,
+                                  hasExactAlarmPermission:
+                                      _hasExactAlarmPermission,
+                                  ignoresBatteryOptimizations:
+                                      _ignoresBatteryOptimizations,
+                                  autoStartCardDismissed:
+                                      _autoStartCardDismissed,
+                                  reflectionReminderEnabled:
+                                      _reflectionReminderEnabled,
+                                  reflectionReminderIntervalMins:
+                                      _reflectionReminderIntervalMins,
+                                  onOpenTimeReflection: () => _openCategory(
+                                    'Time Reflection',
+                                    parent: 'Reminders',
+                                  ),
+                                  dailyReminderEnabled: _dailyReminderEnabled,
+                                  dailyReminderTime: _dailyReminderTime,
+                                  dailyReminderBody: _dailyReminderBody,
+                                  inactivityReminderEnabled:
+                                      _inactivityReminderEnabled,
+                                  inactivityIntervalMins:
+                                      _inactivityIntervalMins,
+                                  weeklyReminderEnabled: _weeklyReminderEnabled,
+                                  weeklyReminderDays: _weeklyReminderDays,
+                                  weeklyReminderTime: _weeklyReminderTime,
+                                  weeklyReminderBody: _weeklyReminderBody,
+                                  monthlyReminderEnabled:
+                                      _monthlyReminderEnabled,
+                                  monthlyReminderDay: _monthlyReminderDay,
+                                  monthlyReminderTime: _monthlyReminderTime,
+                                  monthlyReminderBody: _monthlyReminderBody,
+                                  onRequestExactAlarmPermission: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    final success =
+                                        await _fileChannel.invokeMethod<bool>(
+                                          'requestExactAlarmPermission',
+                                        ) ??
+                                        false;
+                                    if (success) {
+                                      final granted =
+                                          await _fileChannel.invokeMethod<bool>(
+                                            'canScheduleExactAlarms',
+                                          ) ??
+                                          true;
+                                      setState(
+                                        () =>
+                                            _hasExactAlarmPermission = granted,
+                                      );
+                                    }
+                                  },
+                                  onRequestIgnoreBatteryOptimizations:
+                                      (value) async {
+                                        HapticFeedback.selectionClick();
+                                        final success =
+                                            await _fileChannel.invokeMethod<
+                                              bool
+                                            >(
+                                              'requestIgnoreBatteryOptimizations',
+                                            ) ??
+                                            false;
+                                        if (success) {
+                                          final ignores =
+                                              await _fileChannel.invokeMethod<
+                                                bool
+                                              >(
+                                                'isIgnoringBatteryOptimizations',
+                                              ) ??
+                                              true;
+                                          setState(
+                                            () => _ignoresBatteryOptimizations =
+                                                ignores,
+                                          );
+                                        }
+                                      },
+                                  batteryOptimizationCardDismissed:
+                                      _batteryOptimizationCardDismissed,
+                                  onDismissBatteryOptimizationCard: () async {
                                     setState(
-                                      () => showPersistentNotification = value,
+                                      () => _batteryOptimizationCardDismissed =
+                                          true,
                                     );
+                                    await _prefs?.setBool(
+                                      'notekar.batteryOptimizationCardDismissed',
+                                      true,
+                                    );
+                                  },
+                                  onDismissAutoStartCard: () async {
+                                    setState(
+                                      () => _autoStartCardDismissed = true,
+                                    );
+                                    await _prefs?.setBool(
+                                      'notekar.autoStartCardDismissed',
+                                      true,
+                                    );
+                                  },
+                                  onOpenAutoStartSettings: () async {
+                                    HapticFeedback.selectionClick();
+                                    await _fileChannel.invokeMethod(
+                                      'openAutoStartSettings',
+                                    );
+                                  },
+                                  onToggleDailyReminder: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    if (value) {
+                                      final granted =
+                                          await _fileChannel.invokeMethod<bool>(
+                                            'requestNotificationPermission',
+                                          ) ??
+                                          true;
+                                      if (!context.mounted) return;
+                                      if (!granted) {
+                                        showIosPillToast(
+                                          context: context,
+                                          p: p,
+                                          message:
+                                              'Notification permission needed'
+                                                  .localized(context),
+                                          icon: CupertinoIcons.bell_slash,
+                                        );
+                                        return;
+                                      }
+                                    }
+                                    setState(
+                                      () => _dailyReminderEnabled = value,
+                                    );
+                                    await _prefs?.setBool(
+                                      'reminder_daily_enabled',
+                                      value,
+                                    );
+                                    await _syncReminder('daily');
+                                  },
+                                  onTapDailyTime: () async {
+                                    HapticFeedback.selectionClick();
+                                    final time = await _showIOSTimePicker(
+                                      context,
+                                      _dailyReminderTime,
+                                    );
+                                    if (time != null) {
+                                      setState(() => _dailyReminderTime = time);
+                                      await _prefs?.setInt(
+                                        'reminder_daily_hour',
+                                        time.hour,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_daily_minute',
+                                        time.minute,
+                                      );
+                                      await _syncReminder('daily');
+                                    }
+                                  },
+                                  onTapDailyMessage: () =>
+                                      _openReminderMessageEditor('daily'),
+                                  onToggleInactivityReminder: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    if (value) {
+                                      final granted =
+                                          await _fileChannel.invokeMethod<bool>(
+                                            'requestNotificationPermission',
+                                          ) ??
+                                          true;
+                                      if (!context.mounted) return;
+                                      if (!granted) {
+                                        showIosPillToast(
+                                          context: context,
+                                          p: p,
+                                          message:
+                                              'Notification permission needed'
+                                                  .localized(context),
+                                          icon: CupertinoIcons.bell_slash,
+                                        );
+                                        return;
+                                      }
+                                    }
+                                    setState(
+                                      () => _inactivityReminderEnabled = value,
+                                    );
+                                    await _prefs?.setBool(
+                                      'reminder_inactivity_enabled',
+                                      value,
+                                    );
+                                    await _syncReminder('inactivity');
+                                  },
+                                  onTapInactivityInterval: (selected) async {
+                                    setState(
+                                      () => _inactivityIntervalMins = selected,
+                                    );
+                                    await _prefs?.setInt(
+                                      'reminder_inactivity_interval_mins',
+                                      selected,
+                                    );
+                                    await _syncReminder('inactivity');
+                                  },
+                                  onToggleWeeklyReminder: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    if (value) {
+                                      final granted =
+                                          await _fileChannel.invokeMethod<bool>(
+                                            'requestNotificationPermission',
+                                          ) ??
+                                          true;
+                                      if (!context.mounted) return;
+                                      if (!granted) {
+                                        showIosPillToast(
+                                          context: context,
+                                          p: p,
+                                          message:
+                                              'Notification permission needed'
+                                                  .localized(context),
+                                          icon: CupertinoIcons.bell_slash,
+                                        );
+                                        return;
+                                      }
+                                    }
+                                    setState(
+                                      () => _weeklyReminderEnabled = value,
+                                    );
+                                    await _prefs?.setBool(
+                                      'reminder_weekly_enabled',
+                                      value,
+                                    );
+                                    await _syncReminder('weekly');
+                                  },
+                                  onTapWeeklyDays: (updated) async {
+                                    setState(
+                                      () =>
+                                          _weeklyReminderDays = updated..sort(),
+                                    );
+                                    await _prefs?.setStringList(
+                                      'reminder_weekly_days',
+                                      updated.map((e) => e.toString()).toList(),
+                                    );
+                                    await _syncReminder('weekly');
+                                  },
+                                  onTapWeeklyTime: () async {
+                                    HapticFeedback.selectionClick();
+                                    final time = await _showIOSTimePicker(
+                                      context,
+                                      _weeklyReminderTime,
+                                    );
+                                    if (time != null) {
+                                      setState(
+                                        () => _weeklyReminderTime = time,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_weekly_hour',
+                                        time.hour,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_weekly_minute',
+                                        time.minute,
+                                      );
+                                      await _syncReminder('weekly');
+                                    }
+                                  },
+                                  onTapWeeklyMessage: () =>
+                                      _openReminderMessageEditor('weekly'),
+                                  onToggleMonthlyReminder: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    if (value) {
+                                      final granted =
+                                          await _fileChannel.invokeMethod<bool>(
+                                            'requestNotificationPermission',
+                                          ) ??
+                                          true;
+                                      if (!context.mounted) return;
+                                      if (!granted) {
+                                        showIosPillToast(
+                                          context: context,
+                                          p: p,
+                                          message:
+                                              'Notification permission needed'
+                                                  .localized(context),
+                                          icon: CupertinoIcons.bell_slash,
+                                        );
+                                        return;
+                                      }
+                                    }
+                                    setState(
+                                      () => _monthlyReminderEnabled = value,
+                                    );
+                                    await _prefs?.setBool(
+                                      'reminder_monthly_enabled',
+                                      value,
+                                    );
+                                    await _syncReminder('monthly');
+                                  },
+                                  onTapMonthlyDay: (selected) async {
+                                    setState(
+                                      () => _monthlyReminderDay = selected,
+                                    );
+                                    await _prefs?.setInt(
+                                      'reminder_monthly_day',
+                                      selected,
+                                    );
+                                    await _syncReminder('monthly');
+                                  },
+                                  onTapMonthlyTime: () async {
+                                    HapticFeedback.selectionClick();
+                                    final time = await _showIOSTimePicker(
+                                      context,
+                                      _monthlyReminderTime,
+                                    );
+                                    if (time != null) {
+                                      setState(
+                                        () => _monthlyReminderTime = time,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_monthly_hour',
+                                        time.hour,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_monthly_minute',
+                                        time.minute,
+                                      );
+                                      await _syncReminder('monthly');
+                                    }
+                                  },
+                                  onTapMonthlyMessage: () =>
+                                      _openReminderMessageEditor('monthly'),
+                                ),
+                              ),
+                            if (show('Time Reflection'))
+                              SliverToBoxAdapter(
+                                child: TimeReflectionSettingsPage(
+                                  p: p,
+                                  reflectionReminderEnabled:
+                                      _reflectionReminderEnabled,
+                                  reflectionReminderIntervalMins:
+                                      _reflectionReminderIntervalMins,
+                                  reflectionReminderSound:
+                                      _reflectionReminderSound,
+                                  reflectionReminderMessage:
+                                      _reflectionReminderBody,
+                                  onToggleReflectionReminder: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    if (value) {
+                                      final granted =
+                                          await _fileChannel.invokeMethod<bool>(
+                                            'requestNotificationPermission',
+                                          ) ??
+                                          true;
+                                      if (!context.mounted) return;
+                                      if (!granted) {
+                                        showIosPillToast(
+                                          context: context,
+                                          p: p,
+                                          message:
+                                              'Notification permission needed'
+                                                  .localized(context),
+                                          icon: CupertinoIcons.bell_slash,
+                                        );
+                                        return;
+                                      }
+                                    }
+                                    setState(
+                                      () => _reflectionReminderEnabled = value,
+                                    );
+                                    await _prefs?.setBool(
+                                      'reminder_reflection_enabled',
+                                      value,
+                                    );
+                                    await _syncReminder('reflection');
+                                  },
+                                  onTapReflectionInterval: (value) async {
+                                    setState(
+                                      () => _reflectionReminderIntervalMins =
+                                          value,
+                                    );
+                                    await _prefs?.setInt(
+                                      'reminder_reflection_interval_mins',
+                                      value,
+                                    );
+                                    if (_reflectionReminderEnabled) {
+                                      await _syncReminder('reflection');
+                                    }
+                                  },
+                                  onToggleReflectionSound: (value) async {
+                                    HapticFeedback.selectionClick();
+                                    setState(
+                                      () => _reflectionReminderSound = value,
+                                    );
+                                    await _prefs?.setBool(
+                                      'reminder_reflection_sound',
+                                      value,
+                                    );
+                                  },
+                                  onUpdateReflectionMessage: (value) async {
+                                    setState(
+                                      () => _reflectionReminderBody = value,
+                                    );
+                                    await _prefs?.setString(
+                                      'reminder_reflection_body',
+                                      value,
+                                    );
+                                    if (_reflectionReminderEnabled) {
+                                      await _syncReminder('reflection');
+                                    }
+                                  },
+                                  reflectionStartTime: _reflectionStartTime,
+                                  reflectionEndTime: _reflectionEndTime,
+                                  onTapStartTime: () async {
+                                    HapticFeedback.selectionClick();
+                                    final time = await _showIOSTimePicker(
+                                      context,
+                                      _reflectionStartTime,
+                                    );
+                                    if (time != null) {
+                                      setState(
+                                        () => _reflectionStartTime = time,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_reflection_start_hour',
+                                        time.hour,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_reflection_start_minute',
+                                        time.minute,
+                                      );
+                                      if (_reflectionReminderEnabled) {
+                                        await _syncReminder('reflection');
+                                      }
+                                    }
+                                  },
+                                  onTapEndTime: () async {
+                                    HapticFeedback.selectionClick();
+                                    final time = await _showIOSTimePicker(
+                                      context,
+                                      _reflectionEndTime,
+                                    );
+                                    if (time != null) {
+                                      setState(() => _reflectionEndTime = time);
+                                      await _prefs?.setInt(
+                                        'reminder_reflection_end_hour',
+                                        time.hour,
+                                      );
+                                      await _prefs?.setInt(
+                                        'reminder_reflection_end_minute',
+                                        time.minute,
+                                      );
+                                      if (_reflectionReminderEnabled) {
+                                        await _syncReminder('reflection');
+                                      }
+                                    }
+                                  },
+                                  onPreviewReflectionSheet: () async {
+                                    HapticFeedback.heavyImpact();
+                                    if (!context.mounted) return;
+                                    showIosPillToast(
+                                      context: context,
+                                      p: p,
+                                      message:
+                                          'Test alarm scheduled in 3 seconds! Lock phone or exit app.'
+                                              .localized(context),
+                                      icon: CupertinoIcons.alarm,
+                                      duration: const Duration(seconds: 3),
+                                    );
+                                    try {
+                                      await _fileChannel.invokeMethod<
+                                        void
+                                      >('scheduleReminder', {
+                                        'id': 'reminder_reflection_test',
+                                        'type': 'reflection',
+                                        'delaySeconds': 3,
+                                        'intervalMinutes': 0,
+                                        'title': 'Mindfulness',
+                                        'body':
+                                            _reflectionReminderBody
+                                                .trim()
+                                                .isNotEmpty
+                                            ? _reflectionReminderBody.trim()
+                                            : 'Pause. Breathe. Be present in this moment.',
+                                      });
+                                    } catch (_) {}
+                                    await Future<void>.delayed(
+                                      const Duration(seconds: 3),
+                                    );
+                                    if (context.mounted) {
+                                      TimeReflectionSheet.show(
+                                        context,
+                                        p: p,
+                                        intervalMinutes:
+                                            _reflectionReminderIntervalMins,
+                                        customMessage: _reflectionReminderBody,
+                                      );
+                                    }
+                                  },
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Moments'))
+                              SliverToBoxAdapter(
+                                child: MomentsSettingsPage(
+                                  p: p,
+                                  showTrashBin: widget.onOpenTrash != null,
+                                  trash: _trash,
+
+                                  confirmDelete: confirmDelete,
+                                  showImagesAlways: _showImagesAlways,
+                                  extendedDuration: extendedDuration,
+                                  minimalMomentOptions: minimalMomentOptions,
+                                  useNumbersInSingle: useNumbersInSingle,
+                                  resetSingleDaily: resetSingleDaily,
+                                  countOnSave: countOnSave,
+                                  notesCount: entries
+                                      .where((e) => e.note.isNotEmpty)
+                                      .length,
+
+                                  onHistoryDensityChanged: (value) {
+                                    setState(() => historyDensity = value);
+                                    widget.onHistoryDensity(value);
+                                  },
+                                  onConfirmDeleteChanged: (value) {
+                                    setState(() => confirmDelete = value);
+                                    widget.onConfirmDelete(value);
+                                  },
+                                  onShowImagesAlwaysChanged: (value) async {
+                                    setState(() => _showImagesAlways = value);
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setBool(
+                                      'history_show_images_always',
+                                      value,
+                                    );
+                                  },
+                                  onExtendedDurationChanged: (value) {
+                                    setState(() => extendedDuration = value);
+                                    widget.onExtendedDuration(value);
+                                  },
+                                  onMinimalMomentOptionsChanged: (value) {
+                                    setState(
+                                      () => minimalMomentOptions = value,
+                                    );
+                                    widget.onMinimalMomentOptions(value);
+                                  },
+                                  onUseNumbersInSingleChanged: (value) {
+                                    setState(() => useNumbersInSingle = value);
+                                    widget.onUseNumbersInSingle?.call(value);
+                                  },
+                                  onResetSingleDailyChanged: (value) {
+                                    setState(() => resetSingleDaily = value);
+                                    widget.onResetSingleDaily?.call(value);
+                                  },
+                                  onCountOnSaveChanged: (value) {
+                                    setState(() => countOnSave = value);
+                                    widget.onCountOnSave?.call(value);
+                                  },
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                ),
+                              ),
+                            if (show('Sobriety Companion') || show('Sobriety'))
+                              SliverToBoxAdapter(
+                                child: SobrietyCompanionSettingsPage(
+                                  p: p,
+                                  enableSobrietyMode: enableSobrietyMode,
+                                  sobrietyResetType: sobrietyResetType,
+                                  sobrietyCustomStartMs: sobrietyCustomStartMs,
+                                  sobrietyMilestoneTheme:
+                                      sobrietyMilestoneTheme,
+                                  onEnableSobrietyModeChanged: (value) async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setBool(
+                                        'enable_sobriety_mode',
+                                        value,
+                                      );
+                                    }
+                                    setState(() => enableSobrietyMode = value);
+                                    widget.onSobrietyModeChanged?.call(value);
+                                  },
+                                  onSobrietyResetTypeChanged: (value) async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setString(
+                                        'sobriety_reset_type',
+                                        value,
+                                      );
+                                    }
+                                    setState(() => sobrietyResetType = value);
+                                  },
+                                  onSobrietyCustomStartMsChanged:
+                                      (value) async {
+                                        if (value == null) {
+                                          await _prefs?.remove(
+                                            'sobriety_custom_start_ms',
+                                          );
+                                        } else {
+                                          await _prefs?.setInt(
+                                            'sobriety_custom_start_ms',
+                                            value,
+                                          );
+                                        }
+                                        setState(
+                                          () => sobrietyCustomStartMs = value,
+                                        );
+                                      },
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                  onSelectStartDate: (context, initial) =>
+                                      _showIOSDateTimePicker(context, initial),
+                                ),
+                              ),
+                            if (show('Trigger Analysis'))
+                              SliverToBoxAdapter(
+                                child: TriggerAnalysisPage(
+                                  p: p,
+                                  entries: entries,
+                                ),
+                              ),
+                            if (show('Milestone Theme'))
+                              SliverToBoxAdapter(
+                                child: MilestoneThemePage(
+                                  p: p,
+                                  sobrietyMilestoneTheme:
+                                      sobrietyMilestoneTheme,
+                                  onThemeChanged: (themeId) async {
+                                    await _prefs?.setString(
+                                      'sobriety_milestone_theme',
+                                      themeId,
+                                    );
+                                    setState(
+                                      () => sobrietyMilestoneTheme = themeId,
+                                    );
+                                  },
+                                ),
+                              ),
+                            if (show('Milestones'))
+                              SliverToBoxAdapter(
+                                child: MilestonesPage(
+                                  p: p,
+                                  sobrietyMilestoneTheme:
+                                      sobrietyMilestoneTheme,
+                                  entries: entries,
+                                  sobrietyCustomStartMs: sobrietyCustomStartMs,
+                                  sobrietyResetType: sobrietyResetType,
+                                ),
+                              ),
+                            if (show('Modes') || show('Modes & Categories'))
+                              SliverToBoxAdapter(
+                                child: ModesCategoriesSettingsPage(
+                                  p: p,
+                                  entries: entries,
+                                  onOpenCategory: (cat, {parent}) =>
+                                      _openCategory(cat, parent: parent),
+                                  onCategoriesChanged: () {
+                                    setState(() {});
+                                  },
+                                  onAdaptiveColorChanged:
+                                      widget.onAdaptiveColorChanged,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Activity Tags') ||
+                                show('Tags') ||
+                                show('Quick Tags'))
+                              SliverToBoxAdapter(
+                                child: ActivityTagsSettingsPage(
+                                  p: p,
+                                  onTagsChanged: () => setState(() {}),
+                                ),
+                              ),
+                            if (category != null &&
+                                category!.startsWith('Mode: '))
+                              SliverToBoxAdapter(
+                                child: ModeDetailSettingsPage(
+                                  p: p,
+                                  category: category!.substring(6),
+                                  entries: entries,
+                                  onDelete: () {
+                                    _popCategory();
+                                    setState(() {});
+                                  },
+                                  onCategoriesChanged: () {
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            if (show('Search Notes'))
+                              ...SearchNotesSettingsPage.buildSlivers(
+                                context: context,
+                                p: p,
+                                entries: entries,
+                                settingsQuery: _noteQuery,
+                                onQueryChanged: (value) =>
+                                    setState(() => _noteQuery = value),
+                                onClearQuery: () => setState(() {
+                                  _noteSearchController.clear();
+                                  _noteQuery = '';
+                                }),
+                                settingsSearchController: _noteSearchController,
+                                settingsSearchFocusNode: _noteSearchFocusNode,
+                                historyDensity: historyDensity,
+
+                                reduceMotion: reduceMotion,
+                                enableTranslucency: enableTranslucency,
+                                recentSearches: _recentNoteSearches,
+                                onSaveRecentSearch: _saveRecentNoteSearch,
+                                onClearRecentSearches: () async {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.remove('recent_note_searches');
+                                  setState(() => _recentNoteSearches = []);
+                                },
+                                filterCriteria: _searchNotesFilterCriteria,
+                                onFilterCriteriaChanged: (crit) => setState(
+                                  () => _searchNotesFilterCriteria = crit,
+                                ),
+                                selectedMoments: _searchNotesSelectedMoments,
+                                onToggleSelectMoment: (entry) =>
+                                    _toggleSelectSearchNoteMoment(entry, p),
+                                onClearSelection: () => setState(
+                                  () => _searchNotesSelectedMoments.clear(),
+                                ),
+                                rainbowCards: _rainbowCards,
+                                onEditNote: _editNoteInSearch,
+                              ),
+                            if (show('Guides'))
+                              SliverList(
+                                delegate: SliverChildListDelegate([
+                                  const SizedBox(height: spacing8),
+                                  SettingsGroup(
+                                    p: p,
+                                    showDividers: true,
+                                    children: [
+                                      for (final g in allGuideItems)
+                                        GuideRow(
+                                          p: p,
+                                          icon:
+                                              g.icon ??
+                                              CupertinoIcons.question_circle,
+                                          title: g.title,
+                                          text: g.content,
+                                        ),
+                                    ],
+                                  ),
+                                  SettingsPageDescription(
+                                    p: p,
+                                    text:
+                                        'NoteKar stores moments privately on this device. Backups are files you control.',
+                                  ),
+                                  const SizedBox(height: spacing48),
+                                ]),
+                              ),
+                            if (show('Help'))
+                              SliverList(
+                                delegate: SliverChildListDelegate([
+                                  const SizedBox(height: spacing8),
+                                  SettingsGroup(
+                                    p: p,
+                                    showDividers: true,
+                                    children: [
+                                      for (final h in allHelpFaqItems)
+                                        HelpRow(
+                                          p: p,
+                                          question: h.title,
+                                          answer: h.content,
+                                        ),
+                                    ],
+                                  ),
+                                  SettingsPageDescription(
+                                    p: p,
+                                    text:
+                                        'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.',
+                                  ),
+                                  const SizedBox(height: spacing48),
+                                ]),
+                              ),
+                            if (show('Update Center'))
+                              SliverToBoxAdapter(
+                                child: UpdateCenterView(
+                                  p: p,
+                                  appVersion: appVersion,
+                                  enableTranslucency: enableTranslucency,
+                                  reduceMotion: reduceMotion,
+                                  onOpenLink: widget.onOpenLink,
+                                  prefs: _prefs,
+                                  onCheckUpdates: _runCheckUpdates,
+                                  updateInfo: updateInfo,
+                                  checkingUpdates: checkingUpdates,
+                                  updateStatus: updateStatus,
+                                  currentBuildChannel: _currentBuildChannel,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Build Choose'))
+                              SliverToBoxAdapter(
+                                child: BuildTrackSelectPage(
+                                  p: p,
+                                  betaTrack: _betaTrack,
+                                  onSaveTrackPreference: _saveTrackPreference,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Developer Options'))
+                              SliverToBoxAdapter(
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: spacing8),
+                                    SettingsGroup(
+                                      p: p,
+                                      insetDividers: true,
+                                      children: [
+                                        SettingsRow(
+                                          p: p,
+                                          icon: CupertinoIcons.ant,
+                                          title: 'Diagnostics'.localized(
+                                            context,
+                                          ),
+                                          status: 'View'.localized(context),
+                                          color: p.accent,
+                                          onTap: () => _openCategory(
+                                            'Diagnostics',
+                                            parent: 'Developer Options',
+                                          ),
+                                        ),
+                                        SettingsRow(
+                                          p: p,
+                                          icon: CupertinoIcons.gauge,
+                                          title: 'Device Health'.localized(
+                                            context,
+                                          ),
+                                          status: AdaptiveEngine().healthStatus
+                                              .localized(context),
+                                          color: p.accent,
+                                          onTap: () => _openCategory(
+                                            'Device Health',
+                                            parent: 'Developer Options',
+                                          ),
+                                        ),
+                                        SettingsRow(
+                                          p: p,
+                                          icon: CupertinoIcons.wifi,
+                                          title: 'Network Monitor'.localized(
+                                            context,
+                                          ),
+                                          status: 'View'.localized(context),
+                                          color: p.accent,
+                                          onTap: () => _openCategory(
+                                            'Network Monitor',
+                                            parent: 'Developer Options',
+                                          ),
+                                        ),
+                                        SettingsRow(
+                                          p: p,
+                                          icon: CupertinoIcons.clock_fill,
+                                          title: 'Commits'.localized(context),
+                                          status: 'Activity'.localized(context),
+                                          color: p.accent,
+                                          onTap: () => _openCategory(
+                                            'Commits',
+                                            parent: 'Developer Options',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SettingsPageDescription(
+                                      p: p,
+                                      text:
+                                          'Developer tools and system debugging utilities.'
+                                              .localized(context),
+                                    ),
+                                    const SizedBox(height: spacing48),
+                                  ],
+                                ),
+                              ),
+                            if (show('Commits'))
+                              SliverToBoxAdapter(
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: spacing8),
+                                    CommitsSettingsPage(
+                                      p: p,
+                                      enableTranslucency: enableTranslucency,
+                                      reduceMotion: reduceMotion,
+                                    ),
+                                    const SizedBox(height: spacing48),
+                                  ],
+                                ),
+                              ),
+                            if (show('Updates & Notices'))
+                              SliverToBoxAdapter(
+                                child: UpdatesNoticesSettingsPage(
+                                  p: p,
+                                  checkingUpdates: checkingUpdates,
+                                  updateInfo: updateInfo,
+                                  betaTrack: _betaTrack,
+                                  remoteNotices: remoteNotices,
+                                  onRemoteNoticesChanged: (value) {
+                                    setState(() => remoteNotices = value);
+                                    widget.onRemoteNotices(value);
+                                    if (value) {
+                                      _loadCriticalNotice();
+                                    }
+                                  },
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                  onOpenLink: widget.onOpenLink,
+                                  autoDeleteUpdateCache: _autoDeleteUpdateCache,
+                                  onAutoDeleteUpdateCacheChanged: (value) =>
+                                      _handleAutoDeleteUpdateCache(value, p),
+                                ),
+                              ),
+                            if (show('Official Bulletins'))
+                              SliverToBoxAdapter(
+                                child: OfficialBulletinsContent(
+                                  p: p,
+                                  onOpenLink: widget.onOpenLink,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Data & Backup') ||
+                                show('Backup & Export') ||
+                                show('Backup Status'))
+                              SliverToBoxAdapter(
+                                child: DataBackupSettingsPage(
+                                  p: p,
+                                  subCategory: category ?? 'Data & Backup',
+                                  entriesCount: entries.length,
+                                  dataHealthStatus: _dataHealthStatus,
+                                  backupReminderDays: backupReminderDays,
+                                  onBackupReminderDaysChanged: (value) {
+                                    setState(() => backupReminderDays = value);
+                                    widget.onBackupReminderDays(value);
+                                  },
+                                  onExportCsv: () => unawaited(
+                                    _runExport('CSV', widget.onExportCsv),
+                                  ),
+                                  onExportRecentCsv: () => unawaited(
+                                    _runExport(
+                                      'Recent CSV',
+                                      widget.onExportRecentCsv,
+                                    ),
+                                  ),
+                                  onExportJson: () => unawaited(
+                                    _runExport('JSON', widget.onExportJson),
+                                  ),
+                                  onExportMarkdown: () => unawaited(
+                                    _runExport('Markdown', _exportMarkdown),
+                                  ),
+                                  onExportCalendar: () => unawaited(
+                                    _runExport('Calendar', _exportCalendar),
+                                  ),
+                                  onExportBackup: () => unawaited(
+                                    _runExport('Backup', widget.onExportBackup),
+                                  ),
+                                  onImportBackup: () => unawaited(_runImport()),
+                                  onRestoreBackupFromString:
+                                      widget.onRestoreBackupFromString,
+                                  onSaveQuickBackup: widget.onSaveQuickBackup,
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('Local Backups'))
+                              SliverToBoxAdapter(
+                                child: LocalBackupsPage(
+                                  p: p,
+                                  onRestore: widget.onRestoreBackupFromString,
+                                  onCreateQuickBackup: widget.onSaveQuickBackup,
+                                ),
+                              ),
+                            if (show('Privacy & Security'))
+                              SliverToBoxAdapter(
+                                child: PrivacySecuritySettingsPage(
+                                  p: p,
+                                  vtRatio: _vtRatio,
+                                  vtStatus: _vtStatus,
+                                  vtScanDate: _vtScanDate,
+                                  vtUrl: _vtUrl,
+                                  privacyLock: privacyLock,
+                                  obfuscateInRecents: obfuscateInRecents,
+                                  onObfuscateInRecentsChanged: (value) async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setBool(
+                                        'obfuscate_in_recents',
+                                        value,
+                                      );
+                                    }
+                                    setState(() => obfuscateInRecents = value);
                                     try {
                                       await const MethodChannel(
                                         'notekar/files',
                                       ).invokeMethod<void>(
-                                        'setPersistentControlPanel',
+                                        'setObfuscateInRecents',
                                         {'enabled': value},
                                       );
                                     } catch (_) {}
                                   },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                            ),
-                          ),
-                        if (show('Dashboard'))
-                          SliverToBoxAdapter(
-                            child: SettingsDashboardPage(
-                              p: p,
-                              entries: entries,
-                              enableSobrietyMode: enableSobrietyMode,
-                              onLogNow: () => Navigator.of(context).pop('log'),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                              onOpenLifeAudit: () => _openCategory(
-                                'Life Audit',
-                                parent: 'Dashboard',
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
                               ),
-                              onOpenGoals: () {
-                                Navigator.of(context).pop('open_history_goals');
-                              },
-                            ),
-                          ),
-                        if (show('Life Audit'))
-                          SliverToBoxAdapter(
-                            child: LifeAuditPage(
-                              p: p,
-                              entries: entries,
-                              sleepHours: _timeAuditSleepHours,
-                              essentialsHours: _timeAuditEssentialsHours,
-                              onOpenPersonalProfile: () =>
-                                  _openCategory('Personal Profile'),
-                              onSleepHoursChanged: (val) async {
-                                setState(() => _timeAuditSleepHours = val);
-                                await _prefs?.setDouble(
-                                  'time_audit_sleep_hours',
-                                  val,
-                                );
-                              },
-                              onEssentialsHoursChanged: (val) async {
-                                setState(() => _timeAuditEssentialsHours = val);
-                                await _prefs?.setDouble(
-                                  'time_audit_essentials_hours',
-                                  val,
-                                );
-                              },
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Capture'))
-                          SliverToBoxAdapter(
-                            child: CaptureSettingsPage(
-                              p: p,
-                              defaultMode: defaultMode,
-                              tapDelay: tapDelay,
-                              enableNoteOnClick: enableNoteOnClick,
-                              onDefaultModeChanged: (value) {
-                                setState(() => defaultMode = value);
-                                widget.onDefaultMode(value);
-                              },
-                              onTapDelayChanged: (value) {
-                                setState(() => tapDelay = value);
-                                widget.onDelay(value);
-                              },
-                              onEnableNoteOnClickChanged: (value) async {
-                                if (_prefs != null) {
-                                  await _prefs!.setBool(
-                                    'enable_note_on_click',
-                                    value,
-                                  );
-                                }
-                                setState(() => enableNoteOnClick = value);
-                              },
-                            ),
-                          ),
-                        if (show('Reminders'))
-                          SliverToBoxAdapter(
-                            child: RemindersSettingsPage(
-                              p: p,
-                              hasExactAlarmPermission: _hasExactAlarmPermission,
-                              ignoresBatteryOptimizations:
-                                  _ignoresBatteryOptimizations,
-                              autoStartCardDismissed: _autoStartCardDismissed,
-                              reflectionReminderEnabled:
-                                  _reflectionReminderEnabled,
-                              reflectionReminderIntervalMins:
-                                  _reflectionReminderIntervalMins,
-                              onOpenTimeReflection: () => _openCategory(
-                                'Time Reflection',
-                                parent: 'Reminders',
+                            if (show('App Lock'))
+                              SliverToBoxAdapter(
+                                child: AppLockSettingsPage(
+                                  p: p,
+                                  subCategory: 'App Lock',
+                                  privacyLock: privacyLock,
+                                  isSystemLockAvailable:
+                                      widget.isSystemLockAvailable,
+                                  privacyLockType: privacyLockType,
+                                  privacyLockDelayMinutes:
+                                      privacyLockDelayMinutes,
+                                  onPrivacyLockChanged: (value) async {
+                                    if (!value) {
+                                      await widget.onPrivacyLock(false);
+                                      if (mounted) {
+                                        setState(() => privacyLock = false);
+                                      }
+                                      return;
+                                    }
+                                    final changed = await widget.onPrivacyLock(
+                                      true,
+                                    );
+                                    if (changed && mounted) {
+                                      setState(() => privacyLock = true);
+                                    }
+                                  },
+                                  onResetPrivacyPin: () async {
+                                    await widget.onResetPrivacyPin();
+                                  },
+                                  onPrivacyLockTypeChanged: (value) async {
+                                    if (privacyLockType == value) {
+                                      return;
+                                    }
+                                    final success = await widget
+                                        .onPrivacyLockTypeChanged(value);
+                                    if (success && mounted) {
+                                      setState(() {
+                                        privacyLockType = value;
+                                      });
+                                      _popCategory();
+                                    }
+                                  },
+                                  onPrivacyLockDelayChanged: (value) {
+                                    setState(
+                                      () => privacyLockDelayMinutes = value,
+                                    );
+                                    widget.onPrivacyLockDelay(value);
+                                  },
+                                  onOpenCategory: _openCategory,
+                                  onPopCategory: _popCategory,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
                               ),
-                              dailyReminderEnabled: _dailyReminderEnabled,
-                              dailyReminderTime: _dailyReminderTime,
-                              dailyReminderBody: _dailyReminderBody,
-                              inactivityReminderEnabled:
-                                  _inactivityReminderEnabled,
-                              inactivityIntervalMins: _inactivityIntervalMins,
-                              weeklyReminderEnabled: _weeklyReminderEnabled,
-                              weeklyReminderDays: _weeklyReminderDays,
-                              weeklyReminderTime: _weeklyReminderTime,
-                              weeklyReminderBody: _weeklyReminderBody,
-                              monthlyReminderEnabled: _monthlyReminderEnabled,
-                              monthlyReminderDay: _monthlyReminderDay,
-                              monthlyReminderTime: _monthlyReminderTime,
-                              monthlyReminderBody: _monthlyReminderBody,
-                              onRequestExactAlarmPermission: (value) async {
-                                HapticFeedback.selectionClick();
-                                final success =
-                                    await _fileChannel.invokeMethod<bool>(
-                                      'requestExactAlarmPermission',
-                                    ) ??
-                                    false;
-                                if (success) {
-                                  final granted =
-                                      await _fileChannel.invokeMethod<bool>(
-                                        'canScheduleExactAlarms',
-                                      ) ??
-                                      true;
-                                  setState(
-                                    () => _hasExactAlarmPermission = granted,
-                                  );
-                                }
-                              },
-                              onRequestIgnoreBatteryOptimizations:
-                                  (value) async {
-                                    HapticFeedback.selectionClick();
-                                    final success =
-                                        await _fileChannel.invokeMethod<bool>(
-                                          'requestIgnoreBatteryOptimizations',
-                                        ) ??
-                                        false;
-                                    if (success) {
-                                      final ignores =
-                                          await _fileChannel.invokeMethod<bool>(
-                                            'isIgnoringBatteryOptimizations',
-                                          ) ??
-                                          true;
-                                      setState(
-                                        () => _ignoresBatteryOptimizations =
-                                            ignores,
+                            if (show('Configure Lock'))
+                              SliverToBoxAdapter(
+                                child: AppLockSettingsPage(
+                                  p: p,
+                                  subCategory: 'Configure Lock',
+                                  privacyLock: privacyLock,
+                                  isSystemLockAvailable:
+                                      widget.isSystemLockAvailable,
+                                  privacyLockType: privacyLockType,
+                                  privacyLockDelayMinutes:
+                                      privacyLockDelayMinutes,
+                                  onPrivacyLockChanged: (value) async {
+                                    if (!value) {
+                                      await widget.onPrivacyLock(false);
+                                      if (mounted) {
+                                        setState(() => privacyLock = false);
+                                      }
+                                      return;
+                                    }
+                                    final changed = await widget.onPrivacyLock(
+                                      true,
+                                    );
+                                    if (changed && mounted) {
+                                      setState(() => privacyLock = true);
+                                    }
+                                  },
+                                  onResetPrivacyPin: () async {
+                                    await widget.onResetPrivacyPin();
+                                  },
+                                  onPrivacyLockTypeChanged: (value) async {
+                                    if (privacyLockType == value) {
+                                      return;
+                                    }
+                                    final success = await widget
+                                        .onPrivacyLockTypeChanged(value);
+                                    if (success && mounted) {
+                                      setState(() {
+                                        privacyLockType = value;
+                                      });
+                                      _popCategory();
+                                    }
+                                  },
+                                  onPrivacyLockDelayChanged: (value) {
+                                    setState(
+                                      () => privacyLockDelayMinutes = value,
+                                    );
+                                    widget.onPrivacyLockDelay(value);
+                                  },
+                                  onOpenCategory: _openCategory,
+                                  onPopCategory: _popCategory,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                ),
+                              ),
+                            if (show('About') || show('Help & Guides'))
+                              SliverToBoxAdapter(
+                                child: HelpGuidesSettingsPage(
+                                  p: p,
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
+                                ),
+                              ),
+                            if (show('App Philosophy'))
+                              SliverToBoxAdapter(
+                                child: AppPhilosophySettingsPage(
+                                  p: p,
+                                  appVersion: appVersion,
+                                ),
+                              ),
+                            if (show('Upcoming Features'))
+                              SliverToBoxAdapter(
+                                child: UpcomingFeaturesSettingsPage(p: p),
+                              ),
+                            if (show('Advanced') ||
+                                show('Language') ||
+                                show('Accessibility') ||
+                                show('Reset'))
+                              SliverToBoxAdapter(
+                                child: AdvancedSettingsPage(
+                                  p: p,
+                                  subCategory: category ?? 'Advanced',
+                                  isGodModeUnlocked: _isGodModeUnlocked,
+                                  currentLocale: currentLocale,
+                                  onLocaleChanged: (value) {
+                                    setState(() => currentLocale = value);
+                                    widget.onLocaleChanged(value);
+                                  },
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
+                                  hapticStyle: hapticStyle,
+                                  soundEffects: soundEffects,
+                                  onSoundEffectsChanged: (value) async {
+                                    setState(() => soundEffects = value);
+                                    widget.onSoundEffects?.call(value);
+                                    AppSound.setEnabled(value);
+                                    if (value) AppSound.click();
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setBool(
+                                      'm-acoustic-feedback',
+                                      value,
+                                    );
+                                  },
+                                  reduceMotion: reduceMotion,
+                                  largeText: largeText,
+                                  highContrast: highContrast,
+                                  healthStatus: AdaptiveEngine().healthStatus,
+                                  onHapticStyleChanged: (value) {
+                                    setState(() => hapticStyle = value);
+                                    widget.onHapticStyle(value);
+                                  },
+                                  onReduceMotionChanged: (value) {
+                                    setState(() {
+                                      reduceMotion = value;
+                                      if (value) homeMenuAnimations = false;
+                                    });
+                                    widget.onReduceMotion(value);
+                                  },
+                                  onLargeTextChanged: (value) {
+                                    setState(() => largeText = value);
+                                    widget.onLargeText(value);
+                                  },
+                                  onHighContrastChanged: (value) {
+                                    setState(() => highContrast = value);
+                                    widget.onHighContrast(value);
+                                  },
+                                  onResetSettings: () =>
+                                      unawaited(_confirmResetSettings()),
+                                  onResetAllData: () =>
+                                      unawaited(_confirmResetAll(p)),
+                                  onFactoryReset: () =>
+                                      unawaited(_confirmFactoryReset(p)),
+                                  onExportCsv: () => unawaited(
+                                    _runExport('CSV', widget.onExportCsv),
+                                  ),
+                                  onExportJson: () => unawaited(
+                                    _runExport('JSON', widget.onExportJson),
+                                  ),
+                                  onExportBackup: () => unawaited(
+                                    _runExport('Backup', widget.onExportBackup),
+                                  ),
+                                  isCircuitBreakerTripped: CircuitBreakerService
+                                      .instance
+                                      .hasAnyTripped(),
+                                  onResetCircuitBreakers: () async {
+                                    HapticFeedback.mediumImpact();
+                                    final wasTripped = CircuitBreakerService
+                                        .instance
+                                        .hasAnyTripped();
+                                    await CircuitBreakerService.instance
+                                        .resetAll();
+                                    setState(() {});
+                                    if (context.mounted) {
+                                      showIosPillToast(
+                                        context: context,
+                                        p: p,
+                                        message: wasTripped
+                                            ? 'Safeguards reset. All background services restored.'
+                                                  .localized(context)
+                                            : 'All background services are healthy. Safeguards refreshed.'
+                                                  .localized(context),
+                                        icon: wasTripped
+                                            ? CupertinoIcons
+                                                  .arrow_counterclockwise_circle_fill
+                                            : CupertinoIcons
+                                                  .checkmark_seal_fill,
                                       );
                                     }
                                   },
-                              batteryOptimizationCardDismissed:
-                                  _batteryOptimizationCardDismissed,
-                              onDismissBatteryOptimizationCard: () async {
-                                setState(
-                                  () =>
-                                      _batteryOptimizationCardDismissed = true,
-                                );
-                                await _prefs?.setBool(
-                                  'notekar.batteryOptimizationCardDismissed',
-                                  true,
-                                );
-                              },
-                              onDismissAutoStartCard: () async {
-                                setState(() => _autoStartCardDismissed = true);
-                                await _prefs?.setBool(
-                                  'notekar.autoStartCardDismissed',
-                                  true,
-                                );
-                              },
-                              onOpenAutoStartSettings: () async {
-                                HapticFeedback.selectionClick();
-                                await _fileChannel.invokeMethod(
-                                  'openAutoStartSettings',
-                                );
-                              },
-                              onToggleDailyReminder: (value) async {
-                                HapticFeedback.selectionClick();
-                                if (value) {
-                                  final granted =
-                                      await _fileChannel.invokeMethod<bool>(
-                                        'requestNotificationPermission',
-                                      ) ??
-                                      true;
-                                  if (!context.mounted) return;
-                                  if (!granted) {
-                                    showIosPillToast(
-                                      context: context,
-                                      p: p,
-                                      message: 'Notification permission needed'
-                                          .localized(context),
-                                      icon: CupertinoIcons.bell_slash,
-                                    );
-                                    return;
-                                  }
-                                }
-                                setState(() => _dailyReminderEnabled = value);
-                                await _prefs?.setBool(
-                                  'reminder_daily_enabled',
-                                  value,
-                                );
-                                await _syncReminder('daily');
-                              },
-                              onTapDailyTime: () async {
-                                HapticFeedback.selectionClick();
-                                final time = await _showIOSTimePicker(
-                                  context,
-                                  _dailyReminderTime,
-                                );
-                                if (time != null) {
-                                  setState(() => _dailyReminderTime = time);
-                                  await _prefs?.setInt(
-                                    'reminder_daily_hour',
-                                    time.hour,
-                                  );
-                                  await _prefs?.setInt(
-                                    'reminder_daily_minute',
-                                    time.minute,
-                                  );
-                                  await _syncReminder('daily');
-                                }
-                              },
-                              onTapDailyMessage: () =>
-                                  _openReminderMessageEditor('daily'),
-                              onToggleInactivityReminder: (value) async {
-                                HapticFeedback.selectionClick();
-                                if (value) {
-                                  final granted =
-                                      await _fileChannel.invokeMethod<bool>(
-                                        'requestNotificationPermission',
-                                      ) ??
-                                      true;
-                                  if (!context.mounted) return;
-                                  if (!granted) {
-                                    showIosPillToast(
-                                      context: context,
-                                      p: p,
-                                      message: 'Notification permission needed'
-                                          .localized(context),
-                                      icon: CupertinoIcons.bell_slash,
-                                    );
-                                    return;
-                                  }
-                                }
-                                setState(
-                                  () => _inactivityReminderEnabled = value,
-                                );
-                                await _prefs?.setBool(
-                                  'reminder_inactivity_enabled',
-                                  value,
-                                );
-                                await _syncReminder('inactivity');
-                              },
-                              onTapInactivityInterval: (selected) async {
-                                setState(
-                                  () => _inactivityIntervalMins = selected,
-                                );
-                                await _prefs?.setInt(
-                                  'reminder_inactivity_interval_mins',
-                                  selected,
-                                );
-                                await _syncReminder('inactivity');
-                              },
-                              onToggleWeeklyReminder: (value) async {
-                                HapticFeedback.selectionClick();
-                                if (value) {
-                                  final granted =
-                                      await _fileChannel.invokeMethod<bool>(
-                                        'requestNotificationPermission',
-                                      ) ??
-                                      true;
-                                  if (!context.mounted) return;
-                                  if (!granted) {
-                                    showIosPillToast(
-                                      context: context,
-                                      p: p,
-                                      message: 'Notification permission needed'
-                                          .localized(context),
-                                      icon: CupertinoIcons.bell_slash,
-                                    );
-                                    return;
-                                  }
-                                }
-                                setState(() => _weeklyReminderEnabled = value);
-                                await _prefs?.setBool(
-                                  'reminder_weekly_enabled',
-                                  value,
-                                );
-                                await _syncReminder('weekly');
-                              },
-                              onTapWeeklyDays: (updated) async {
-                                setState(
-                                  () => _weeklyReminderDays = updated..sort(),
-                                );
-                                await _prefs?.setStringList(
-                                  'reminder_weekly_days',
-                                  updated.map((e) => e.toString()).toList(),
-                                );
-                                await _syncReminder('weekly');
-                              },
-                              onTapWeeklyTime: () async {
-                                HapticFeedback.selectionClick();
-                                final time = await _showIOSTimePicker(
-                                  context,
-                                  _weeklyReminderTime,
-                                );
-                                if (time != null) {
-                                  setState(() => _weeklyReminderTime = time);
-                                  await _prefs?.setInt(
-                                    'reminder_weekly_hour',
-                                    time.hour,
-                                  );
-                                  await _prefs?.setInt(
-                                    'reminder_weekly_minute',
-                                    time.minute,
-                                  );
-                                  await _syncReminder('weekly');
-                                }
-                              },
-                              onTapWeeklyMessage: () =>
-                                  _openReminderMessageEditor('weekly'),
-                              onToggleMonthlyReminder: (value) async {
-                                HapticFeedback.selectionClick();
-                                if (value) {
-                                  final granted =
-                                      await _fileChannel.invokeMethod<bool>(
-                                        'requestNotificationPermission',
-                                      ) ??
-                                      true;
-                                  if (!context.mounted) return;
-                                  if (!granted) {
-                                    showIosPillToast(
-                                      context: context,
-                                      p: p,
-                                      message: 'Notification permission needed'
-                                          .localized(context),
-                                      icon: CupertinoIcons.bell_slash,
-                                    );
-                                    return;
-                                  }
-                                }
-                                setState(() => _monthlyReminderEnabled = value);
-                                await _prefs?.setBool(
-                                  'reminder_monthly_enabled',
-                                  value,
-                                );
-                                await _syncReminder('monthly');
-                              },
-                              onTapMonthlyDay: (selected) async {
-                                setState(() => _monthlyReminderDay = selected);
-                                await _prefs?.setInt(
-                                  'reminder_monthly_day',
-                                  selected,
-                                );
-                                await _syncReminder('monthly');
-                              },
-                              onTapMonthlyTime: () async {
-                                HapticFeedback.selectionClick();
-                                final time = await _showIOSTimePicker(
-                                  context,
-                                  _monthlyReminderTime,
-                                );
-                                if (time != null) {
-                                  setState(() => _monthlyReminderTime = time);
-                                  await _prefs?.setInt(
-                                    'reminder_monthly_hour',
-                                    time.hour,
-                                  );
-                                  await _prefs?.setInt(
-                                    'reminder_monthly_minute',
-                                    time.minute,
-                                  );
-                                  await _syncReminder('monthly');
-                                }
-                              },
-                              onTapMonthlyMessage: () =>
-                                  _openReminderMessageEditor('monthly'),
-                            ),
-                          ),
-                        if (show('Time Reflection'))
-                          SliverToBoxAdapter(
-                            child: TimeReflectionSettingsPage(
-                              p: p,
-                              reflectionReminderEnabled:
-                                  _reflectionReminderEnabled,
-                              reflectionReminderIntervalMins:
-                                  _reflectionReminderIntervalMins,
-                              reflectionReminderSound: _reflectionReminderSound,
-                              reflectionReminderMessage:
-                                  _reflectionReminderBody,
-                              onToggleReflectionReminder: (value) async {
-                                HapticFeedback.selectionClick();
-                                if (value) {
-                                  final granted =
-                                      await _fileChannel.invokeMethod<bool>(
-                                        'requestNotificationPermission',
-                                      ) ??
-                                      true;
-                                  if (!context.mounted) return;
-                                  if (!granted) {
-                                    showIosPillToast(
-                                      context: context,
-                                      p: p,
-                                      message: 'Notification permission needed'
-                                          .localized(context),
-                                      icon: CupertinoIcons.bell_slash,
-                                    );
-                                    return;
-                                  }
-                                }
-                                setState(
-                                  () => _reflectionReminderEnabled = value,
-                                );
-                                await _prefs?.setBool(
-                                  'reminder_reflection_enabled',
-                                  value,
-                                );
-                                await _syncReminder('reflection');
-                              },
-                              onTapReflectionInterval: (value) async {
-                                setState(
-                                  () => _reflectionReminderIntervalMins = value,
-                                );
-                                await _prefs?.setInt(
-                                  'reminder_reflection_interval_mins',
-                                  value,
-                                );
-                                if (_reflectionReminderEnabled) {
-                                  await _syncReminder('reflection');
-                                }
-                              },
-                              onToggleReflectionSound: (value) async {
-                                HapticFeedback.selectionClick();
-                                setState(
-                                  () => _reflectionReminderSound = value,
-                                );
-                                await _prefs?.setBool(
-                                  'reminder_reflection_sound',
-                                  value,
-                                );
-                              },
-                              onUpdateReflectionMessage: (value) async {
-                                setState(() => _reflectionReminderBody = value);
-                                await _prefs?.setString(
-                                  'reminder_reflection_body',
-                                  value,
-                                );
-                                if (_reflectionReminderEnabled) {
-                                  await _syncReminder('reflection');
-                                }
-                              },
-                              reflectionStartTime: _reflectionStartTime,
-                              reflectionEndTime: _reflectionEndTime,
-                              onTapStartTime: () async {
-                                HapticFeedback.selectionClick();
-                                final time = await _showIOSTimePicker(
-                                  context,
-                                  _reflectionStartTime,
-                                );
-                                if (time != null) {
-                                  setState(() => _reflectionStartTime = time);
-                                  await _prefs?.setInt(
-                                    'reminder_reflection_start_hour',
-                                    time.hour,
-                                  );
-                                  await _prefs?.setInt(
-                                    'reminder_reflection_start_minute',
-                                    time.minute,
-                                  );
-                                  if (_reflectionReminderEnabled) {
-                                    await _syncReminder('reflection');
-                                  }
-                                }
-                              },
-                              onTapEndTime: () async {
-                                HapticFeedback.selectionClick();
-                                final time = await _showIOSTimePicker(
-                                  context,
-                                  _reflectionEndTime,
-                                );
-                                if (time != null) {
-                                  setState(() => _reflectionEndTime = time);
-                                  await _prefs?.setInt(
-                                    'reminder_reflection_end_hour',
-                                    time.hour,
-                                  );
-                                  await _prefs?.setInt(
-                                    'reminder_reflection_end_minute',
-                                    time.minute,
-                                  );
-                                  if (_reflectionReminderEnabled) {
-                                    await _syncReminder('reflection');
-                                  }
-                                }
-                              },
-                              onPreviewReflectionSheet: () async {
-                                HapticFeedback.heavyImpact();
-                                if (!context.mounted) return;
-                                showIosPillToast(
-                                  context: context,
-                                  p: p,
-                                  message:
-                                      'Test alarm scheduled in 3 seconds! Lock phone or exit app.'
-                                          .localized(context),
-                                  icon: CupertinoIcons.alarm,
-                                  duration: const Duration(seconds: 3),
-                                );
-                                try {
-                                  await _fileChannel.invokeMethod<
-                                    void
-                                  >('scheduleReminder', {
-                                    'id': 'reminder_reflection_test',
-                                    'type': 'reflection',
-                                    'delaySeconds': 3,
-                                    'intervalMinutes': 0,
-                                    'title': 'Mindfulness',
-                                    'body':
-                                        _reflectionReminderBody
-                                            .trim()
-                                            .isNotEmpty
-                                        ? _reflectionReminderBody.trim()
-                                        : 'Pause. Breathe. Be present in this moment.',
-                                  });
-                                } catch (_) {}
-                                await Future<void>.delayed(
-                                  const Duration(seconds: 3),
-                                );
-                                if (context.mounted) {
-                                  TimeReflectionSheet.show(
-                                    context,
-                                    p: p,
-                                    intervalMinutes:
-                                        _reflectionReminderIntervalMins,
-                                    customMessage: _reflectionReminderBody,
-                                  );
-                                }
-                              },
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Moments'))
-                          SliverToBoxAdapter(
-                            child: MomentsSettingsPage(
-                              p: p,
-                              showTrashBin: widget.onOpenTrash != null,
-                              trash: _trash,
 
-                              confirmDelete: confirmDelete,
-                              showImagesAlways: _showImagesAlways,
-                              extendedDuration: extendedDuration,
-                              minimalMomentOptions: minimalMomentOptions,
-                              useNumbersInSingle: useNumbersInSingle,
-                              resetSingleDaily: resetSingleDaily,
-                              countOnSave: countOnSave,
-                              notesCount: entries
-                                  .where((e) => e.note.isNotEmpty)
-                                  .length,
-
-                              onHistoryDensityChanged: (value) {
-                                setState(() => historyDensity = value);
-                                widget.onHistoryDensity(value);
-                              },
-                              onConfirmDeleteChanged: (value) {
-                                setState(() => confirmDelete = value);
-                                widget.onConfirmDelete(value);
-                              },
-                              onShowImagesAlwaysChanged: (value) async {
-                                setState(() => _showImagesAlways = value);
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setBool(
-                                  'history_show_images_always',
-                                  value,
-                                );
-                              },
-                              onExtendedDurationChanged: (value) {
-                                setState(() => extendedDuration = value);
-                                widget.onExtendedDuration(value);
-                              },
-                              onMinimalMomentOptionsChanged: (value) {
-                                setState(() => minimalMomentOptions = value);
-                                widget.onMinimalMomentOptions(value);
-                              },
-                              onUseNumbersInSingleChanged: (value) {
-                                setState(() => useNumbersInSingle = value);
-                                widget.onUseNumbersInSingle?.call(value);
-                              },
-                              onResetSingleDailyChanged: (value) {
-                                setState(() => resetSingleDaily = value);
-                                widget.onResetSingleDaily?.call(value);
-                              },
-                              onCountOnSaveChanged: (value) {
-                                setState(() => countOnSave = value);
-                                widget.onCountOnSave?.call(value);
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                            ),
-                          ),
-                        if (show('Sobriety Companion') || show('Sobriety'))
-                          SliverToBoxAdapter(
-                            child: SobrietyCompanionSettingsPage(
-                              p: p,
-                              enableSobrietyMode: enableSobrietyMode,
-                              sobrietyResetType: sobrietyResetType,
-                              sobrietyCustomStartMs: sobrietyCustomStartMs,
-                              sobrietyMilestoneTheme: sobrietyMilestoneTheme,
-                              onEnableSobrietyModeChanged: (value) async {
-                                if (_prefs != null) {
-                                  await _prefs!.setBool(
-                                    'enable_sobriety_mode',
-                                    value,
-                                  );
-                                }
-                                setState(() => enableSobrietyMode = value);
-                                widget.onSobrietyModeChanged?.call(value);
-                              },
-                              onSobrietyResetTypeChanged: (value) async {
-                                if (_prefs != null) {
-                                  await _prefs!.setString(
-                                    'sobriety_reset_type',
-                                    value,
-                                  );
-                                }
-                                setState(() => sobrietyResetType = value);
-                              },
-                              onSobrietyCustomStartMsChanged: (value) async {
-                                if (value == null) {
-                                  await _prefs?.remove(
-                                    'sobriety_custom_start_ms',
-                                  );
-                                } else {
-                                  await _prefs?.setInt(
-                                    'sobriety_custom_start_ms',
-                                    value,
-                                  );
-                                }
-                                setState(() => sobrietyCustomStartMs = value);
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onSelectStartDate: (context, initial) =>
-                                  _showIOSDateTimePicker(context, initial),
-                            ),
-                          ),
-                        if (show('Trigger Analysis'))
-                          SliverToBoxAdapter(
-                            child: TriggerAnalysisPage(p: p, entries: entries),
-                          ),
-                        if (show('Milestone Theme'))
-                          SliverToBoxAdapter(
-                            child: MilestoneThemePage(
-                              p: p,
-                              sobrietyMilestoneTheme: sobrietyMilestoneTheme,
-                              onThemeChanged: (themeId) async {
-                                await _prefs?.setString(
-                                  'sobriety_milestone_theme',
-                                  themeId,
-                                );
-                                setState(
-                                  () => sobrietyMilestoneTheme = themeId,
-                                );
-                              },
-                            ),
-                          ),
-                        if (show('Milestones'))
-                          SliverToBoxAdapter(
-                            child: MilestonesPage(
-                              p: p,
-                              sobrietyMilestoneTheme: sobrietyMilestoneTheme,
-                              entries: entries,
-                              sobrietyCustomStartMs: sobrietyCustomStartMs,
-                              sobrietyResetType: sobrietyResetType,
-                            ),
-                          ),
-                        if (show('Modes') || show('Modes & Categories'))
-                          SliverToBoxAdapter(
-                            child: ModesCategoriesSettingsPage(
-                              p: p,
-                              entries: entries,
-                              onOpenCategory: (cat, {parent}) =>
-                                  _openCategory(cat, parent: parent),
-                              onCategoriesChanged: () {
-                                setState(() {});
-                              },
-                              onAdaptiveColorChanged:
-                                  widget.onAdaptiveColorChanged,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Activity Tags') ||
-                            show('Tags') ||
-                            show('Quick Tags'))
-                          SliverToBoxAdapter(
-                            child: ActivityTagsSettingsPage(
-                              p: p,
-                              onTagsChanged: () => setState(() {}),
-                            ),
-                          ),
-                        if (category != null && category!.startsWith('Mode: '))
-                          SliverToBoxAdapter(
-                            child: ModeDetailSettingsPage(
-                              p: p,
-                              category: category!.substring(6),
-                              entries: entries,
-                              onDelete: () {
-                                _popCategory();
-                                setState(() {});
-                              },
-                              onCategoriesChanged: () {
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                        if (show('Search Notes'))
-                          ...SearchNotesSettingsPage.buildSlivers(
-                            context: context,
-                            p: p,
-                            entries: entries,
-                            settingsQuery: _noteQuery,
-                            onQueryChanged: (value) =>
-                                setState(() => _noteQuery = value),
-                            onClearQuery: () => setState(() {
-                              _noteSearchController.clear();
-                              _noteQuery = '';
-                            }),
-                            settingsSearchController: _noteSearchController,
-                            settingsSearchFocusNode: _noteSearchFocusNode,
-                            historyDensity: historyDensity,
-
-                            reduceMotion: reduceMotion,
-                            enableTranslucency: enableTranslucency,
-                            recentSearches: _recentNoteSearches,
-                            onSaveRecentSearch: _saveRecentNoteSearch,
-                            onClearRecentSearches: () async {
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.remove('recent_note_searches');
-                              setState(() => _recentNoteSearches = []);
-                            },
-                            filterCriteria: _searchNotesFilterCriteria,
-                            onFilterCriteriaChanged: (crit) => setState(
-                              () => _searchNotesFilterCriteria = crit,
-                            ),
-                            selectedMoments: _searchNotesSelectedMoments,
-                            onToggleSelectMoment: (entry) =>
-                                _toggleSelectSearchNoteMoment(entry, p),
-                            onClearSelection: () => setState(
-                              () => _searchNotesSelectedMoments.clear(),
-                            ),
-                            rainbowCards: _rainbowCards,
-                            onEditNote: _editNoteInSearch,
-                          ),
-                        if (show('Guides'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                showDividers: true,
-                                children: [
-                                  for (final g in allGuideItems)
-                                    GuideRow(
-                                      p: p,
-                                      icon:
-                                          g.icon ??
-                                          CupertinoIcons.question_circle,
-                                      title: g.title,
-                                      text: g.content,
-                                    ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'NoteKar stores moments privately on this device. Backups are files you control.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
-                          ),
-                        if (show('Help'))
-                          SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: spacing8),
-                              SettingsGroup(
-                                p: p,
-                                showDividers: true,
-                                children: [
-                                  for (final h in allHelpFaqItems)
-                                    HelpRow(
-                                      p: p,
-                                      question: h.title,
-                                      answer: h.content,
-                                    ),
-                                ],
-                              ),
-                              SettingsPageDescription(
-                                p: p,
-                                text:
-                                    'NoteKar is offline-first. Internet-related failures should never block logging or access to saved history.',
-                              ),
-                              const SizedBox(height: spacing48),
-                            ]),
-                          ),
-                        if (show('Update Center'))
-                          SliverToBoxAdapter(
-                            child: UpdateCenterView(
-                              p: p,
-                              appVersion: appVersion,
-                              enableTranslucency: enableTranslucency,
-                              reduceMotion: reduceMotion,
-                              onOpenLink: widget.onOpenLink,
-                              prefs: _prefs,
-                              onCheckUpdates: _runCheckUpdates,
-                              updateInfo: updateInfo,
-                              checkingUpdates: checkingUpdates,
-                              updateStatus: updateStatus,
-                              currentBuildChannel: _currentBuildChannel,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Build Choose'))
-                          SliverToBoxAdapter(
-                            child: BuildTrackSelectPage(
-                              p: p,
-                              betaTrack: _betaTrack,
-                              onSaveTrackPreference: _saveTrackPreference,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Developer Options'))
-                          SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                SettingsGroup(
-                                  p: p,
-                                  insetDividers: true,
-                                  children: [
-                                    SettingsRow(
-                                      p: p,
-                                      icon: CupertinoIcons.ant,
-                                      title: 'Diagnostics'.localized(context),
-                                      status: 'View'.localized(context),
-                                      color: p.accent,
-                                      onTap: () => _openCategory(
-                                        'Diagnostics',
-                                        parent: 'Developer Options',
-                                      ),
-                                    ),
-                                    SettingsRow(
-                                      p: p,
-                                      icon: CupertinoIcons.gauge,
-                                      title: 'Device Health'.localized(context),
-                                      status: AdaptiveEngine().healthStatus
-                                          .localized(context),
-                                      color: p.accent,
-                                      onTap: () => _openCategory(
-                                        'Device Health',
-                                        parent: 'Developer Options',
-                                      ),
-                                    ),
-                                    SettingsRow(
-                                      p: p,
-                                      icon: CupertinoIcons.wifi,
-                                      title: 'Network Monitor'.localized(
-                                        context,
-                                      ),
-                                      status: 'View'.localized(context),
-                                      color: p.accent,
-                                      onTap: () => _openCategory(
-                                        'Network Monitor',
-                                        parent: 'Developer Options',
-                                      ),
-                                    ),
-                                    SettingsRow(
-                                      p: p,
-                                      icon: CupertinoIcons.clock_fill,
-                                      title: 'Commits'.localized(context),
-                                      status: 'Activity'.localized(context),
-                                      color: p.accent,
-                                      onTap: () => _openCategory(
-                                        'Commits',
-                                        parent: 'Developer Options',
-                                      ),
-                                    ),
-                                  ],
+                                  onOpenCategory:
+                                      (category, {required parent}) =>
+                                          _openCategory(
+                                            category,
+                                            parent: parent,
+                                          ),
                                 ),
-                                SettingsPageDescription(
+                              ),
+                            if (show('Diagnostics') ||
+                                show('Device Health') ||
+                                show('Network Monitor'))
+                              SliverToBoxAdapter(
+                                child: DiagnosticsSettingsPage(
                                   p: p,
-                                  text:
-                                      'Developer tools and system debugging utilities.'
-                                          .localized(context),
-                                ),
-                                const SizedBox(height: spacing48),
-                              ],
-                            ),
-                          ),
-                        if (show('Commits'))
-                          SliverToBoxAdapter(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: spacing8),
-                                CommitsSettingsPage(
-                                  p: p,
-                                  enableTranslucency: enableTranslucency,
+                                  subCategory: category ?? 'Diagnostics',
+                                  entries: entries,
+                                  todayCount: todayCount,
+                                  appVersion: appVersion,
+                                  appBuildNumber: kAppBuildNumber,
+                                  appBuildDate: appBuildDate,
+                                  updateSubtitle: _updateSubtitle,
+                                  lastUpdateCheckedAt:
+                                      widget.lastUpdateCheckedAt,
+                                  remoteNotices: remoteNotices,
+                                  onCopyDiagnosticsFeedback: (msg) {
+                                    widget.onFeedback(msg);
+                                  },
                                   reduceMotion: reduceMotion,
-                                ),
-                                const SizedBox(height: spacing48),
-                              ],
-                            ),
-                          ),
-                        if (show('Updates & Notices'))
-                          SliverToBoxAdapter(
-                            child: UpdatesNoticesSettingsPage(
-                              p: p,
-                              checkingUpdates: checkingUpdates,
-                              updateInfo: updateInfo,
-                              betaTrack: _betaTrack,
-                              remoteNotices: remoteNotices,
-                              onRemoteNoticesChanged: (value) {
-                                setState(() => remoteNotices = value);
-                                widget.onRemoteNotices(value);
-                                if (value) {
-                                  _loadCriticalNotice();
-                                }
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                              onOpenLink: widget.onOpenLink,
-                              autoDeleteUpdateCache: _autoDeleteUpdateCache,
-                              onAutoDeleteUpdateCacheChanged: (value) =>
-                                  _handleAutoDeleteUpdateCache(value, p),
-                            ),
-                          ),
-                        if (show('Official Bulletins'))
-                          SliverToBoxAdapter(
-                            child: OfficialBulletinsContent(
-                              p: p,
-                              onOpenLink: widget.onOpenLink,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Data & Backup') ||
-                            show('Backup & Export') ||
-                            show('Backup Status'))
-                          SliverToBoxAdapter(
-                            child: DataBackupSettingsPage(
-                              p: p,
-                              subCategory: category ?? 'Data & Backup',
-                              entriesCount: entries.length,
-                              dataHealthStatus: _dataHealthStatus,
-                              backupReminderDays: backupReminderDays,
-                              onBackupReminderDaysChanged: (value) {
-                                setState(() => backupReminderDays = value);
-                                widget.onBackupReminderDays(value);
-                              },
-                              onExportCsv: () => unawaited(
-                                _runExport('CSV', widget.onExportCsv),
-                              ),
-                              onExportRecentCsv: () => unawaited(
-                                _runExport(
-                                  'Recent CSV',
-                                  widget.onExportRecentCsv,
+                                  enableTranslucency: enableTranslucency,
+                                  networkLogs: _networkLogs,
+                                  loadingNetworkLogs: _loadingNetworkLogs,
+                                  onClearNetworkLogs: _clearNetworkLogs,
+                                  onLearnMoreBeta: () => _showBetaInfoPopup(p),
                                 ),
                               ),
-                              onExportJson: () => unawaited(
-                                _runExport('JSON', widget.onExportJson),
+                            if (show('Privacy Policy') ||
+                                show('Terms of Use') ||
+                                show('Licenses'))
+                              SliverToBoxAdapter(
+                                child: LegalAboutSettingsPage(
+                                  p: p,
+                                  subCategory: category ?? 'Privacy Policy',
+                                  appVersion: appVersion,
+                                  privacyPolicyUrl: privacyPolicyUrl,
+                                  termsUrl: termsUrl,
+                                  onOpenLink: widget.onOpenLink,
+                                ),
                               ),
-                              onExportMarkdown: () => unawaited(
-                                _runExport('Markdown', _exportMarkdown),
+                            if (show('Feedback') ||
+                                show("What's New") ||
+                                show('Changelog'))
+                              SliverToBoxAdapter(
+                                child: FeedbackChangelogSettingsPage(
+                                  p: p,
+                                  subCategory: category ?? 'Feedback',
+                                  onOpenGithubIssue: _openGithubIssue,
+                                ),
                               ),
-                              onExportCalendar: () => unawaited(
-                                _runExport('Calendar', _exportCalendar),
+                            if (show('Trash Bin')) ...[
+                              ...TrashBinSettingsPage.buildSlivers(
+                                context: context,
+                                p: p,
+                                trash: _trash,
+                                onRestoreAllTrash: () async {
+                                  await widget.onRestoreAllTrash();
+                                  if (mounted) setState(() {});
+                                },
+                                onClearTrash: () async {
+                                  await widget.onClearTrash();
+                                  if (mounted) setState(() {});
+                                },
+                                onRestoreTrashMoment: (id) async {
+                                  await widget.onRestoreTrashMoment(id);
+                                  if (mounted) setState(() {});
+                                },
+                                onDeleteTrashPermanent: (id) async {
+                                  await widget.onDeleteTrashPermanent(id);
+                                  if (mounted) setState(() {});
+                                },
                               ),
-                              onExportBackup: () => unawaited(
-                                _runExport('Backup', widget.onExportBackup),
-                              ),
-                              onImportBackup: () => unawaited(_runImport()),
-                              onRestoreBackupFromString:
-                                  widget.onRestoreBackupFromString,
-                              onSaveQuickBackup: widget.onSaveQuickBackup,
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Local Backups'))
-                          SliverToBoxAdapter(
-                            child: LocalBackupsPage(
-                              p: p,
-                              onRestore: widget.onRestoreBackupFromString,
-                              onCreateQuickBackup: widget.onSaveQuickBackup,
-                            ),
-                          ),
-                        if (show('Privacy & Security'))
-                          SliverToBoxAdapter(
-                            child: PrivacySecuritySettingsPage(
-                              p: p,
-                              vtRatio: _vtRatio,
-                              vtStatus: _vtStatus,
-                              vtScanDate: _vtScanDate,
-                              vtUrl: _vtUrl,
-                              privacyLock: privacyLock,
-                              obfuscateInRecents: obfuscateInRecents,
-                              onObfuscateInRecentsChanged: (value) async {
-                                if (_prefs != null) {
-                                  await _prefs!.setBool(
-                                    'obfuscate_in_recents',
-                                    value,
-                                  );
-                                }
-                                setState(() => obfuscateInRecents = value);
-                                try {
-                                  await const MethodChannel(
-                                    'notekar/files',
-                                  ).invokeMethod<void>(
-                                    'setObfuscateInRecents',
-                                    {'enabled': value},
-                                  );
-                                } catch (_) {}
-                              },
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('App Lock'))
-                          SliverToBoxAdapter(
-                            child: AppLockSettingsPage(
-                              p: p,
-                              subCategory: 'App Lock',
-                              privacyLock: privacyLock,
-                              isSystemLockAvailable:
-                                  widget.isSystemLockAvailable,
-                              privacyLockType: privacyLockType,
-                              privacyLockDelayMinutes: privacyLockDelayMinutes,
-                              onPrivacyLockChanged: (value) async {
-                                if (!value) {
-                                  await widget.onPrivacyLock(false);
-                                  if (mounted) {
-                                    setState(() => privacyLock = false);
-                                  }
-                                  return;
-                                }
-                                final changed = await widget.onPrivacyLock(
-                                  true,
-                                );
-                                if (changed && mounted) {
-                                  setState(() => privacyLock = true);
-                                }
-                              },
-                              onResetPrivacyPin: () async {
-                                await widget.onResetPrivacyPin();
-                              },
-                              onPrivacyLockTypeChanged: (value) async {
-                                if (privacyLockType == value) {
-                                  return;
-                                }
-                                final success = await widget
-                                    .onPrivacyLockTypeChanged(value);
-                                if (success && mounted) {
-                                  setState(() {
-                                    privacyLockType = value;
-                                  });
-                                  _popCategory();
-                                }
-                              },
-                              onPrivacyLockDelayChanged: (value) {
-                                setState(() => privacyLockDelayMinutes = value);
-                                widget.onPrivacyLockDelay(value);
-                              },
-                              onOpenCategory: _openCategory,
-                              onPopCategory: _popCategory,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Configure Lock'))
-                          SliverToBoxAdapter(
-                            child: AppLockSettingsPage(
-                              p: p,
-                              subCategory: 'Configure Lock',
-                              privacyLock: privacyLock,
-                              isSystemLockAvailable:
-                                  widget.isSystemLockAvailable,
-                              privacyLockType: privacyLockType,
-                              privacyLockDelayMinutes: privacyLockDelayMinutes,
-                              onPrivacyLockChanged: (value) async {
-                                if (!value) {
-                                  await widget.onPrivacyLock(false);
-                                  if (mounted) {
-                                    setState(() => privacyLock = false);
-                                  }
-                                  return;
-                                }
-                                final changed = await widget.onPrivacyLock(
-                                  true,
-                                );
-                                if (changed && mounted) {
-                                  setState(() => privacyLock = true);
-                                }
-                              },
-                              onResetPrivacyPin: () async {
-                                await widget.onResetPrivacyPin();
-                              },
-                              onPrivacyLockTypeChanged: (value) async {
-                                if (privacyLockType == value) {
-                                  return;
-                                }
-                                final success = await widget
-                                    .onPrivacyLockTypeChanged(value);
-                                if (success && mounted) {
-                                  setState(() {
-                                    privacyLockType = value;
-                                  });
-                                  _popCategory();
-                                }
-                              },
-                              onPrivacyLockDelayChanged: (value) {
-                                setState(() => privacyLockDelayMinutes = value);
-                                widget.onPrivacyLockDelay(value);
-                              },
-                              onOpenCategory: _openCategory,
-                              onPopCategory: _popCategory,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('About') || show('Help & Guides'))
-                          SliverToBoxAdapter(
-                            child: HelpGuidesSettingsPage(
-                              p: p,
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                            ),
-                          ),
-                        if (show('App Philosophy'))
-                          SliverToBoxAdapter(
-                            child: AppPhilosophySettingsPage(
-                              p: p,
-                              appVersion: appVersion,
-                            ),
-                          ),
-                        if (show('Upcoming Features'))
-                          SliverToBoxAdapter(
-                            child: UpcomingFeaturesSettingsPage(p: p),
-                          ),
-                        if (show('Advanced') ||
-                            show('Language') ||
-                            show('Accessibility') ||
-                            show('Reset'))
-                          SliverToBoxAdapter(
-                            child: AdvancedSettingsPage(
-                              p: p,
-                              subCategory: category ?? 'Advanced',
-                              isGodModeUnlocked: _isGodModeUnlocked,
-                              currentLocale: currentLocale,
-                              onLocaleChanged: (value) {
-                                setState(() => currentLocale = value);
-                                widget.onLocaleChanged(value);
-                              },
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                              hapticStyle: hapticStyle,
-                              soundEffects: soundEffects,
-                              onSoundEffectsChanged: (value) async {
-                                setState(() => soundEffects = value);
-                                widget.onSoundEffects?.call(value);
-                                AppSound.setEnabled(value);
-                                if (value) AppSound.click();
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setBool(
-                                  'm-acoustic-feedback',
-                                  value,
-                                );
-                              },
-                              reduceMotion: reduceMotion,
-                              largeText: largeText,
-                              highContrast: highContrast,
-                              healthStatus: AdaptiveEngine().healthStatus,
-                              onHapticStyleChanged: (value) {
-                                setState(() => hapticStyle = value);
-                                widget.onHapticStyle(value);
-                              },
-                              onReduceMotionChanged: (value) {
-                                setState(() {
-                                  reduceMotion = value;
-                                  if (value) homeMenuAnimations = false;
-                                });
-                                widget.onReduceMotion(value);
-                              },
-                              onLargeTextChanged: (value) {
-                                setState(() => largeText = value);
-                                widget.onLargeText(value);
-                              },
-                              onHighContrastChanged: (value) {
-                                setState(() => highContrast = value);
-                                widget.onHighContrast(value);
-                              },
-                              onResetSettings: () =>
-                                  unawaited(_confirmResetSettings()),
-                              onResetAllData: () =>
-                                  unawaited(_confirmResetAll(p)),
-                              onFactoryReset: () =>
-                                  unawaited(_confirmFactoryReset(p)),
-                              onExportCsv: () => unawaited(
-                                _runExport('CSV', widget.onExportCsv),
-                              ),
-                              onExportJson: () => unawaited(
-                                _runExport('JSON', widget.onExportJson),
-                              ),
-                              onExportBackup: () => unawaited(
-                                _runExport('Backup', widget.onExportBackup),
-                              ),
-                              isCircuitBreakerTripped: CircuitBreakerService
-                                  .instance
-                                  .hasAnyTripped(),
-                              onResetCircuitBreakers: () async {
-                                HapticFeedback.mediumImpact();
-                                final wasTripped = CircuitBreakerService
-                                    .instance
-                                    .hasAnyTripped();
-                                await CircuitBreakerService.instance.resetAll();
-                                setState(() {});
-                                if (context.mounted) {
-                                  showIosPillToast(
-                                    context: context,
-                                    p: p,
-                                    message: wasTripped
-                                        ? 'Safeguards reset. All background services restored.'
-                                              .localized(context)
-                                        : 'All background services are healthy. Safeguards refreshed.'
-                                              .localized(context),
-                                    icon: wasTripped
-                                        ? CupertinoIcons
-                                              .arrow_counterclockwise_circle_fill
-                                        : CupertinoIcons.checkmark_seal_fill,
-                                  );
-                                }
-                              },
+                            ],
 
-                              onOpenCategory: (category, {required parent}) =>
-                                  _openCategory(category, parent: parent),
-                            ),
-                          ),
-                        if (show('Diagnostics') ||
-                            show('Device Health') ||
-                            show('Network Monitor'))
-                          SliverToBoxAdapter(
-                            child: DiagnosticsSettingsPage(
-                              p: p,
-                              subCategory: category ?? 'Diagnostics',
-                              entries: entries,
-                              todayCount: todayCount,
-                              appVersion: appVersion,
-                              appBuildNumber: kAppBuildNumber,
-                              appBuildDate: appBuildDate,
-                              updateSubtitle: _updateSubtitle,
-                              lastUpdateCheckedAt: widget.lastUpdateCheckedAt,
-                              remoteNotices: remoteNotices,
-                              onCopyDiagnosticsFeedback: (msg) {
-                                widget.onFeedback(msg);
-                              },
-                              reduceMotion: reduceMotion,
-                              enableTranslucency: enableTranslucency,
-                              networkLogs: _networkLogs,
-                              loadingNetworkLogs: _loadingNetworkLogs,
-                              onClearNetworkLogs: _clearNetworkLogs,
-                              onLearnMoreBeta: () => _showBetaInfoPopup(p),
-                            ),
-                          ),
-                        if (show('Privacy Policy') ||
-                            show('Terms of Use') ||
-                            show('Licenses'))
-                          SliverToBoxAdapter(
-                            child: LegalAboutSettingsPage(
-                              p: p,
-                              subCategory: category ?? 'Privacy Policy',
-                              appVersion: appVersion,
-                              privacyPolicyUrl: privacyPolicyUrl,
-                              termsUrl: termsUrl,
-                              onOpenLink: widget.onOpenLink,
-                            ),
-                          ),
-                        if (show('Feedback') ||
-                            show("What's New") ||
-                            show('Changelog'))
-                          SliverToBoxAdapter(
-                            child: FeedbackChangelogSettingsPage(
-                              p: p,
-                              subCategory: category ?? 'Feedback',
-                              onOpenGithubIssue: _openGithubIssue,
-                            ),
-                          ),
-                        if (show('Trash Bin')) ...[
-                          ...TrashBinSettingsPage.buildSlivers(
-                            context: context,
-                            p: p,
-                            trash: _trash,
-                            onRestoreAllTrash: () async {
-                              await widget.onRestoreAllTrash();
-                              if (mounted) setState(() {});
-                            },
-                            onClearTrash: () async {
-                              await widget.onClearTrash();
-                              if (mounted) setState(() {});
-                            },
-                            onRestoreTrashMoment: (id) async {
-                              await widget.onRestoreTrashMoment(id);
-                              if (mounted) setState(() {});
-                            },
-                            onDeleteTrashPermanent: (id) async {
-                              await widget.onDeleteTrashPermanent(id);
-                              if (mounted) setState(() {});
-                            },
-                          ),
-                        ],
-
-                        if (show('Integrations & Automation'))
-                          SliverToBoxAdapter(
-                            child: IntegrationsSettingsPage(
-                              p: p,
-                              entriesNotifier: widget.entriesNotifier,
-                              onTriggerUrlScheme: (url) {
-                                _popCategory();
-                                widget.onTriggerUrlScheme?.call(url);
-                              },
-                            ),
-                          ),
-                        if (show('God Mode'))
-                          SliverToBoxAdapter(
-                            child: GodModeSettingsPage(
-                              p: p,
-                              currentTheme: theme,
-                              onThemeChanged: (val) {
-                                setState(() => theme = val);
-                                widget.onTheme(val);
-                              },
-                              totalMoments: entries.length,
-                              streakDays: _prefs?.getInt('streak_days') ?? 0,
-                              onRelockGodMode: () async {
-                                if (_prefs != null) {
-                                  await _prefs!.setBool(
-                                    'god_mode_unlocked',
-                                    false,
-                                  );
-                                  await _prefs!.setBool(
-                                    'god_mode_game_enabled',
-                                    false,
-                                  );
-                                }
-
-                                if (theme == 'matrix' || theme == 'eink') {
-                                  setState(() => theme = 'dark');
-                                  widget.onTheme('dark');
-                                }
-                                setState(() {
-                                  category = null;
-                                  _categoryStack.clear();
-                                });
-                                if (context.mounted) {
-                                  showIosPillToast(
-                                    context: context,
-                                    p: p,
-                                    message: 'God Mode has been revoked.'
-                                        .localized(context),
-                                    icon: CupertinoIcons.shield,
-                                  );
-                                }
-                              },
-                              onOpenAppIcons: () => _openCategory(
-                                'App Icons',
-                                parent: 'God Mode',
+                            if (show('Integrations & Automation'))
+                              SliverToBoxAdapter(
+                                child: IntegrationsSettingsPage(
+                                  p: p,
+                                  entriesNotifier: widget.entriesNotifier,
+                                  onTriggerUrlScheme: (url) {
+                                    _popCategory();
+                                    widget.onTriggerUrlScheme?.call(url);
+                                  },
+                                ),
                               ),
-                            ),
-                          ),
-                      ],
-                    ),
-            ),
-          ),
+                            if (show('God Mode'))
+                              SliverToBoxAdapter(
+                                child: GodModeSettingsPage(
+                                  p: p,
+                                  currentTheme: theme,
+                                  onThemeChanged: (val) {
+                                    setState(() => theme = val);
+                                    widget.onTheme(val);
+                                  },
+                                  totalMoments: entries.length,
+                                  streakDays:
+                                      _prefs?.getInt('streak_days') ?? 0,
+                                  onRelockGodMode: () async {
+                                    if (_prefs != null) {
+                                      await _prefs!.setBool(
+                                        'god_mode_unlocked',
+                                        false,
+                                      );
+                                      await _prefs!.setBool(
+                                        'god_mode_game_enabled',
+                                        false,
+                                      );
+                                    }
+
+                                    if (theme == 'matrix' || theme == 'eink') {
+                                      setState(() => theme = 'dark');
+                                      widget.onTheme('dark');
+                                    }
+                                    setState(() {
+                                      category = null;
+                                      _categoryStack.clear();
+                                    });
+                                    if (context.mounted) {
+                                      showIosPillToast(
+                                        context: context,
+                                        p: p,
+                                        message: 'God Mode has been revoked.'
+                                            .localized(context),
+                                        icon: CupertinoIcons.shield,
+                                      );
+                                    }
+                                  },
+                                  onOpenAppIcons: () => _openCategory(
+                                    'App Icons',
+                                    parent: 'God Mode',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

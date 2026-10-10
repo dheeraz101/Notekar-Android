@@ -76,7 +76,7 @@ class ChangelogDialog extends StatefulWidget {
       ),
     ],
     items: [
-      '• Concurrency engine, inverted search indexing, circuit breaker fault isolation, and secondary indices.',
+      'Concurrency engine, inverted search indexing, circuit breaker fault isolation, and secondary indices.',
       '+ Concurrency Engine: LifeAuditService and DashboardMetricsService computeAsync offloaded to background isolates',
       '+ High-Performance Search: Inverted token index and O(K) hashtag autocomplete in SearchIndexService',
       '+ Storage Engine Evolution: O(1) ID lookups and O(log N) binary range queries in MomentRepository',
@@ -289,7 +289,10 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
   }
 
   Widget _buildChangelogItem(BuildContext context, Palette p, String item) {
-    final trimmed = item.trim();
+    var trimmed = item.trim();
+    if (trimmed.startsWith('•')) {
+      trimmed = trimmed.substring(1).trim();
+    }
     String text = trimmed;
     IconData iconData = Icons.circle;
     double iconSize = 6;

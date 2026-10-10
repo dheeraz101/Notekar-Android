@@ -65,8 +65,12 @@ class GoalsService {
   }
 
   /// Computes real-time progress and remaining deficit against logged moments.
-  GoalProgress calculateProgress(Goal goal, List<Moment> moments) {
-    final now = DateTime.now();
+  GoalProgress calculateProgress(
+    Goal goal,
+    List<Moment> moments, {
+    DateTime? referenceNow,
+  }) {
+    final now = referenceNow ?? DateTime.now();
     final DateTime startWindow;
     final DateTime endWindow;
 
@@ -167,33 +171,62 @@ class GoalsService {
 
   /// Determines whether a moment attributes to this goal.
   bool _matchesCriteria(Moment m, Goal goal) {
-    // 1. Strict explicit goal ID match
+    // 1. If moment explicitly has a goalId, it only matches that exact goal
     final mGoalId = m.effectiveGoalId;
     if (mGoalId != null && mGoalId.isNotEmpty) {
       return mGoalId == goal.id;
     }
 
-    // 2. Explicit tag match
+    // 2. Explicit tag for another goal
+    final otherGoalTag = m.tags.any(
+      (t) => t.startsWith('goal:') && t != 'goal:${goal.id}',
+    );
+    if (otherGoalTag) {
+      return false;
+    }
+
+    // 3. Explicit tag for this goal
     if (m.tags.contains('goal:${goal.id}') ||
         m.tags.contains('#goal_${goal.id}')) {
       return true;
     }
 
-    // 3. Category match fallback for existing un-tagged historical moments
-    if (goal.category != null && goal.category!.isNotEmpty) {
-      final targetCat = goal.category!.toLowerCase();
-      final cat = m.category?.toLowerCase() ?? '';
-      final note = m.note.toLowerCase();
-      final inTags = m.tags.any((t) {
-        final tl = t.toLowerCase();
-        return tl == targetCat || tl == '#$targetCat';
-      });
-      final matches =
-          cat == targetCat || note.contains('#$targetCat') || inTags;
-      if (!matches) return false;
+    // 4. For time-bounded goals (week, month, etc.) with "All Categories",
+    // only sessions explicitly started for this goal count (handled above).
+    // This prevents a newly created weekly/monthly goal from instantly completing.
+    final isAllCategories =
+        goal.category == null ||
+        goal.category!.trim().isEmpty ||
+        goal.category!.toLowerCase() == 'all';
+
+    if (goal.timeframe != GoalTimeframe.none && isAllCategories) {
+      return false;
     }
 
-    return true;
+    // 5. For time-bounded goals with a specific category, moments created before
+    // the goal was created must not count towards the goal.
+    if (goal.timeframe != GoalTimeframe.none && m.timestamp < goal.createdAt) {
+      return false;
+    }
+
+    // 6. If goal has no category and timeframe is none (all-time), all moments count
+    if (isAllCategories) {
+      return true;
+    }
+
+    // 7. Match by specific category, tag, or hashtag note
+    final cat = goal.category!.trim().toLowerCase();
+    final mCat = (m.category ?? '').trim().toLowerCase();
+    if (mCat == cat) return true;
+    if (m.tags.any((t) {
+      final tl = t.trim().toLowerCase();
+      return tl == cat || tl == '#$cat';
+    })) {
+      return true;
+    }
+    if (m.note.toLowerCase().contains('#$cat')) return true;
+
+    return false;
   }
 
   /// One-time migration attributing historical moments to matching user goals.

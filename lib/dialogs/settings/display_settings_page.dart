@@ -624,20 +624,20 @@ class _DisplayLivePreview extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.12),
+                  color: p.surface3.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(CupertinoIcons.eye_fill, size: 11, color: p.accent),
-                    const SizedBox(width: 5),
+                    Icon(CupertinoIcons.eye_fill, size: 10, color: p.text3),
+                    const SizedBox(width: 4),
                     Text(
                       'Live Display Preview'.localized(context),
                       style: TextStyle(
-                        color: p.accent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        color: p.text2,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
