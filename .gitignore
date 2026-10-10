@@ -201,6 +201,12 @@ TODO_INTERNAL*.md
 NOTES_INTERNAL*.md
 **/NOTES_INTERNAL*.md
 
+# 🛡️ Whitelist GitHub Community Issue & PR Templates
+!.github/ISSUE_TEMPLATE/
+!.github/ISSUE_TEMPLATE/**
+!.github/PULL_REQUEST_TEMPLATE/
+!.github/PULL_REQUEST_TEMPLATE/**
+
 
 # 📝 Personal Docs, Local Notes & Logs
 **/*.docx

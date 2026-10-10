@@ -51,6 +51,11 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
+
+      - name: Setup Gradle Cache
+        if: matrix.language == 'java-kotlin'
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Install Flutter dependencies
         if: matrix.language == 'java-kotlin'
@@ -70,7 +75,7 @@ jobs:
       ####################################################
       - name: Build Android project
         if: matrix.language == 'java-kotlin'
-        run: flutter build apk --debug
+        run: flutter build apk --debug --no-pub
 
       ####################################################
       # Analyze

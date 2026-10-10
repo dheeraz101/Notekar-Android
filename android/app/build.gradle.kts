@@ -16,7 +16,9 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "app.notekar.notekar"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    // ndkVersion: Omitted to prevent AGP from triggering a brittle 1.2GB dynamic download
+    // of NDK 28 in CI environments where NDK 28 was removed from runner images.
+    // AGP automatically detects any host-installed NDK when native compilation is needed.
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
